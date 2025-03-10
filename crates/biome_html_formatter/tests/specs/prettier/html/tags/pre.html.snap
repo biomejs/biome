@@ -119,33 +119,22 @@ ___________________________
  <pre>
       Foo     Bar
  </pre>
--<pre>
--Foo     Bar
 +<pre>Foo     Bar
- </pre>
++</pre>
+ <pre>
+-Foo     Bar
+-</pre>
 -<pre>     Foo     Bar</pre>
-+<pre>
 +     Foo     Bar</pre>
  <figure role="img" aria-labelledby="cow-caption">
    <pre>
  ___________________________
-@@ -100,12 +100,14 @@
- 
- <!-- #6028 -->
- <pre><br></pre>
--<pre><HR></pre>
-+<PRE><HR></PRE>
- <pre><br/></pre>
--<pre><HR/></pre>
-+<PRE><HR/></PRE>
- <pre><br /></pre>
--<pre><HR /></pre>
-+<PRE><HR /></PRE>
+@@ -107,5 +107,7 @@
+ <pre><HR /></pre>
  <pre><span></span></pre>
--<pre><DIV></DIV></pre>
+ <pre><DIV></DIV></pre>
 -<pre><br/>long long long text long long long text long long long text long long long text <br></pre>
 -<pre><br>long long long text long long long text long long long text long long long text <BR/></pre>
-+<PRE><DIV></DIV></PRE>
 +<pre
 +><br/>long long long text long long long text long long long text long long long text <br></pre>
 +<pre
@@ -257,13 +246,13 @@ ___________________________
 
 <!-- #6028 -->
 <pre><br></pre>
-<PRE><HR></PRE>
+<pre><HR></pre>
 <pre><br/></pre>
-<PRE><HR/></PRE>
+<pre><HR/></pre>
 <pre><br /></pre>
-<PRE><HR /></PRE>
+<pre><HR /></pre>
 <pre><span></span></pre>
-<PRE><DIV></DIV></PRE>
+<pre><DIV></DIV></pre>
 <pre
 ><br/>long long long text long long long text long long long text long long long text <br></pre>
 <pre

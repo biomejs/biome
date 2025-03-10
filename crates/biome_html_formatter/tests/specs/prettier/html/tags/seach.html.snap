@@ -55,15 +55,6 @@ info: html/tags/seach.html
        ...
        <search>
          <form action="search.php">
-@@ -18,7 +20,7 @@
-         </form>
-       </search>
- 
--      <search></search>
-+      <SEARCH></SEARCH>
-     </header>
-   </body>
- </html>
 ```
 
 # Output
@@ -91,7 +82,7 @@ info: html/tags/seach.html
         </form>
       </search>
 
-      <SEARCH></SEARCH>
+      <search></search>
     </header>
   </body>
 </html>
