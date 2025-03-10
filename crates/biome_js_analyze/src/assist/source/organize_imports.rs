@@ -149,9 +149,9 @@ declare_source_rule! {
     ///
     /// ```json title="settings.json"
     /// {
-    /// 	"editor.codeActionsOnSave":{
-    /// 		"source.organizeImports.biome": "explicit"
-    /// 	}
+    ///   "editor.codeActionsOnSave":{
+    ///     "source.organizeImports.biome": "explicit"
+    ///   }
     /// }
     /// ```
     pub OrganizeImports {
