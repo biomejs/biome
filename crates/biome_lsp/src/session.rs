@@ -720,9 +720,9 @@ impl Session {
         self.insert_and_scan_project(project_key, path.into());
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
-            error!("Failed to load plugins: {:?}", error);
+            error!("Failed to load plugins: {error:?}");
             self.client
-                .log_message(MessageType::ERROR, format!("{:?}", error))
+                .log_message(MessageType::ERROR, format!("{error:?}"))
                 .await;
             ConfigurationStatus::PluginError
         } else if let Err(error) = result {
