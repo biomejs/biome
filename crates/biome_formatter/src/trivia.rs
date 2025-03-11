@@ -530,6 +530,8 @@ impl<L: Language> FormatSkippedTokenTrivia<'_, L> {
     where
         Context: CstFormatContext<Language = L>,
     {
+        dbg!("FormatSkippedTokenTrivia");
+
         // Lines/spaces before the next token/comment
         let (mut lines, mut spaces) = match self.token.prev_token() {
             Some(token) => {
