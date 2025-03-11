@@ -4,7 +4,8 @@ use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_markdown_parser::parse_markdown;
-use biome_markdown_syntax::MarkdownSyntaxKind;
+use biome_markdown_syntax::MarkdownSyntaxNode;
+use biome_rowan::SyntaxKind;
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
 use std::fmt::Write;
 use std::fs;
@@ -38,9 +39,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let parsed = parse_markdown(&content);
 
-    // Allow tests to run even with bogus nodes during development
-    let formatted_ast = format!("{}", parsed.syntax());
-
+    let formatted_ast = format!("{:#?}", parsed.syntax());
     let mut snapshot = String::new();
     writeln!(snapshot, "\n## Input\n\n```\n{content}\n```\n\n").unwrap();
 
@@ -99,29 +98,35 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     // During development, we'll be more lenient about tests
     match outcome {
         ExpectedOutcome::Pass => {
-            // Temporarily skip bogus node checks for specific tests while we work on fixing the parser
-            // TEMPORARY: This will be removed once the parser is fully working
-            let skip_bogus_node_check = file_name.contains("thematic_break_block.md")
-                || file_name.contains("headers.md")
-                || file_name.contains("blockquotes.md")
-                || file_name.contains("lists.md")
-                || file_name.contains("comprehensive.md");
-
-            if skip_bogus_node_check {
-                eprintln!(
-                    "[WARN] Temporarily skipping bogus node checks for test: {}",
-                    file_name
-                );
-                return;
-            }
-
             let missing_required = formatted_ast.contains("missing (required)");
-            if missing_required
-                || parsed
+            let has_bogus_nodes = parsed
+                .syntax()
+                .descendants()
+                .any(|node| node.kind().is_bogus());
+
+            if has_bogus_nodes {
+                // Print details about the bogus nodes to help debug
+                let bogus_nodes: Vec<_> = parsed
                     .syntax()
                     .descendants()
-                    .any(|node| node.kind() == MarkdownSyntaxKind::MD_BOGUS)
-            {
+                    .filter(|node| node.kind().is_bogus())
+                    .collect();
+
+                eprintln!("Found {} bogus nodes:", bogus_nodes.len());
+                for (i, node) in bogus_nodes.iter().enumerate() {
+                    eprintln!(
+                        "Bogus node #{}: Parent: {:?}",
+                        i + 1,
+                        node.parent().map(|p| p.kind())
+                    );
+                }
+
+                // Print the tree structure for debugging
+                eprintln!("\nTree structure:");
+                print_tree_structure(&parsed.syntax(), 0);
+            }
+
+            if missing_required || has_bogus_nodes {
                 panic!(
                     "Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {formatted_ast}"
                 );
@@ -141,26 +146,21 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         _ => {}
     }
 
-    // For now, update snapshots automatically
     insta::with_settings!({
         prepend_module_to_snapshot => false,
         snapshot_path => &test_directory,
-        // Auto-accept new snapshots during development
-        input_file => test_case_path.to_string_lossy().to_string(),
     }, {
         // Use `assert_debug_snapshot` for more stable output
         insta::assert_snapshot!(file_name, snapshot);
     });
 }
 
-#[ignore]
-#[test]
-pub fn quick_test() {
-    let code = r#"
-your test code
-"#;
+/// Helper function to print the tree structure for debugging
+fn print_tree_structure(node: &MarkdownSyntaxNode, depth: usize) {
+    let indent = "  ".repeat(depth);
+    eprintln!("{}{:?}", indent, node.kind());
 
-    let root = parse_markdown(code);
-    let syntax = root.syntax();
-    dbg!(&syntax, root.diagnostics(), root.has_errors());
+    for child in node.children() {
+        print_tree_structure(&child, depth + 1);
+    }
 }
