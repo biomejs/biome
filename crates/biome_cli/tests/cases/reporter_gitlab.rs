@@ -1,10 +1,9 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const MAIN_1: &str = r#"import { z} from "z"
 import { z, b , a} from "lodash"
@@ -51,22 +50,22 @@ fn reports_diagnostics_gitlab_check_command() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("main.ts");
+    let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
-    let file_path2 = Path::new("index.ts");
+    let file_path2 = Utf8Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -88,22 +87,22 @@ fn reports_diagnostics_gitlab_ci_command() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("main.ts");
+    let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
-    let file_path2 = Path::new("index.ts");
+    let file_path2 = Utf8Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("ci"),
+                "ci",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -125,22 +124,22 @@ fn reports_diagnostics_gitlab_lint_command() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("main.ts");
+    let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
-    let file_path2 = Path::new("index.ts");
+    let file_path2 = Utf8Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -162,22 +161,22 @@ fn reports_diagnostics_gitlab_format_command() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("main.ts");
+    let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
-    let file_path2 = Path::new("index.ts");
+    let file_path2 = Utf8Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
+                "format",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),

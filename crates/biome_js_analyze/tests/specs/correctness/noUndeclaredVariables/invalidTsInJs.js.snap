@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTsInJs.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 ArrayLike;
 PromiseLike;
 
@@ -13,7 +14,7 @@ PromiseLike;
 ```
 invalidTsInJs.js:1:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ArrayLike variable is undeclared.
+  i The ArrayLike variable is undeclared.
   
   > 1 │ ArrayLike;
       │ ^^^^^^^^^
@@ -29,7 +30,7 @@ invalidTsInJs.js:1:1 lint/correctness/noUndeclaredVariables ━━━━━━�
 ```
 invalidTsInJs.js:2:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The PromiseLike variable is undeclared.
+  i The PromiseLike variable is undeclared.
   
     1 │ ArrayLike;
   > 2 │ PromiseLike;

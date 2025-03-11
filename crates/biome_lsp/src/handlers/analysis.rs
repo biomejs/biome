@@ -2,26 +2,29 @@ use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
 use anyhow::{Context, Result};
-use biome_analyze::{ActionCategory, RuleCategoriesBuilder, SourceActionKind};
-use biome_diagnostics::Applicability;
+use biome_analyze::{
+    ActionCategory, RuleCategoriesBuilder, SUPPRESSION_INLINE_ACTION_CATEGORY,
+    SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY, SourceActionKind,
+};
+use biome_configuration::analyzer::RuleSelector;
+use biome_diagnostics::{Applicability, Error};
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
 use biome_lsp_converters::line_index::LineIndex;
 use biome_rowan::{TextRange, TextSize};
+use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams, PullActionsParams,
-    SupportsFeatureParams,
+    CheckFileSizeParams, FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams,
+    IsPathIgnoredParams, PullActionsParams, SupportsFeatureParams,
 };
-use biome_service::WorkspaceError;
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::ffi::OsStr;
 use std::ops::Sub;
 use tower_lsp::lsp_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse,
 };
-use tracing::{debug, info, trace};
+use tracing::{debug, info};
 
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
 
@@ -35,29 +38,40 @@ fn fix_all_kind() -> CodeActionKind {
 /// Queries the [`AnalysisServer`] for code actions of the file matching its path
 ///
 /// If the AnalysisServer has no matching file, results in error.
-#[tracing::instrument(level = "trace", skip_all, fields(uri = display(& params.text_document.uri), range = debug(params.range), only = debug(& params.context.only), diagnostics = debug(& params.context.diagnostics)), err)]
+#[tracing::instrument(level = "debug", skip_all, fields(uri = display(& params.text_document.uri), range = debug(params.range), only = debug(& params.context.only), diagnostics = debug(& params.context.diagnostics)), err)]
 pub(crate) fn code_actions(
     session: &Session,
     params: CodeActionParams,
 ) -> Result<Option<CodeActionResponse>, LspError> {
     let url = params.text_document.uri.clone();
-    let biome_path = session.file_path(&url)?;
+    let path = session.file_path(&url)?;
+    let doc = session.document(&url)?;
 
+    let features = FeaturesBuilder::new().with_linter().with_assist().build();
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
-        path: biome_path,
-        features: FeaturesBuilder::new()
-            .with_linter()
-            .with_assists()
-            .with_organize_imports()
-            .build(),
+        project_key: doc.project_key,
+        path: path.clone(),
+        features,
     })?;
 
-    if !file_features.supports_lint()
-        && !file_features.supports_organize_imports()
-        && !file_features.supports_assists()
-    {
-        info!("Linter, assists and organize imports are disabled");
+    if !file_features.supports_lint() && !file_features.supports_assist() {
+        info!("Linter and assist are disabled.");
         return Ok(Some(Vec::new()));
+    }
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(Some(Vec::new()));
+    }
+
+    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+        project_key: doc.project_key,
+        path: path.clone(),
+    })?;
+    if size_limit_result.is_too_large() {
+        return Ok(None);
     }
 
     let mut has_fix_all = false;
@@ -68,7 +82,7 @@ pub(crate) fn code_actions(
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
                 has_fix_all = true;
-            } else if "quickfix.biome" == kind {
+            } else if ActionCategory::QuickFix(Cow::Borrowed("")).to_str() == kind {
                 // The action is a on-save quick-fixes
                 has_quick_fix = true;
             }
@@ -76,19 +90,17 @@ pub(crate) fn code_actions(
         }
     }
 
-    let url = params.text_document.uri.clone();
-    let biome_path = session.file_path(&url)?;
-    let doc = session.document(&url)?;
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
     let content = session.workspace.get_file_content(GetFileContentParams {
-        path: biome_path.clone(),
+        project_key: doc.project_key,
+        path: path.clone(),
     })?;
-    let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
-        Some(b"vue") => VueFileHandler::start(content.as_str()),
-        Some(b"astro") => AstroFileHandler::start(content.as_str()),
-        Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
+    let offset = match path.extension() {
+        Some("vue") => VueFileHandler::start(content.as_str()),
+        Some("astro") => AstroFileHandler::start(content.as_str()),
+        Some("svelte") => SvelteFileHandler::start(content.as_str()),
         _ => None,
     };
     let cursor_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
@@ -113,12 +125,17 @@ pub(crate) fn code_actions(
 
     debug!("Cursor range {:?}", &cursor_range);
     let result = match session.workspace.pull_actions(PullActionsParams {
-        path: biome_path.clone(),
+        project_key: doc.project_key,
+        path: path.clone(),
         range: Some(cursor_range),
         // TODO: compute skip and only based on configuration
         skip: vec![],
         only: vec![],
         suppression_reason: None,
+        enabled_rules: filters
+            .iter()
+            .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
+            .collect(),
     }) {
         Ok(result) => result,
         Err(err) => {
@@ -130,21 +147,13 @@ pub(crate) fn code_actions(
         }
     };
 
-    trace!("Pull actions result: {:?}", result);
-    trace!("Filters: {:?}", &filters);
+    debug!("Filters: {:?}", &filters);
 
     // Generate an additional code action to apply all safe fixes on the
     // document if the action category "source.fixAll" was explicitly requested
     // by the language client
     let fix_all = if has_fix_all {
-        fix_all(
-            session,
-            &url,
-            biome_path.clone(),
-            &doc.line_index,
-            &diagnostics,
-            offset,
-        )?
+        fix_all(session, &url, path, &doc.line_index, &diagnostics, offset)?
     } else {
         None
     };
@@ -155,14 +164,14 @@ pub(crate) fn code_actions(
         .actions
         .into_iter()
         .filter_map(|action| {
-            trace!("Processing action: {:?}", &action);
+            debug!("Action: {:?}", &action.category);
             // Don't apply unsafe fixes when the code action is on-save quick-fixes
             if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
                 return None;
             }
-            // Filter out source.organizeImports.biome action when organize imports is not supported.
+            // Filter out source.organizeImports.biome action when assist is not supported.
             if action.category.matches("source.organizeImports.biome")
-                && !file_features.supports_organize_imports()
+                && !file_features.supports_assist()
             {
                 return None;
             }
@@ -171,20 +180,34 @@ pub(crate) fn code_actions(
                 return None;
             }
 
-            // Filter out the refactor.* actions when assists are disabled
-            if action.category.matches("source") && !file_features.supports_assists() {
+            // Filter out suppressions if the linter isn't supported
+            if (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
+                || action
+                    .category
+                    .matches(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY))
+                && !file_features.supports_lint()
+            {
+                return None;
+            }
+
+            // Filter out the suppressions if the client is requesting a fix all signal.
+            // Fix all should apply only the safe changes.
+            if has_fix_all
+                && (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
+                    || action
+                        .category
+                        .matches(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY))
+            {
+                return None;
+            }
+
+            if action.category.matches("source.biome") && !file_features.supports_assist() {
                 return None;
             }
             // Remove actions that do not match the categories requested by the
             // language client
-            let matches_filters = filters.iter().any(|filter| {
-                trace!(
-                    "Filter {:?}, category {:?}",
-                    filter,
-                    action.category.to_str()
-                );
-                action.category.matches(filter)
-            });
+            let matches_filters = filters.iter().any(|filter| action.category.matches(filter));
+
             if !filters.is_empty() && !matches_filters {
                 return None;
             }
@@ -202,7 +225,6 @@ pub(crate) fn code_actions(
             has_fixes |= action.diagnostics.is_some();
             Some(CodeActionOrCommand::CodeAction(action))
         })
-        .rev()
         .chain(fix_all)
         .collect();
 
@@ -218,39 +240,71 @@ pub(crate) fn code_actions(
         });
     }
 
-    debug!("Suggested actions: \n{:?}", &actions);
+    for action in &actions {
+        match action {
+            CodeActionOrCommand::Command(cmd) => {
+                debug!("Suggested command: {}", cmd.title)
+            }
+            CodeActionOrCommand::CodeAction(action) => {
+                debug!("Suggested action: {}", &action.title);
+            }
+        }
+    }
 
     Ok(Some(actions))
 }
 
 /// Generate a "fix all" code action for the given document
-#[tracing::instrument(level = "debug", skip(session), err)]
+#[tracing::instrument(level = "debug", skip(session))]
 fn fix_all(
     session: &Session,
     url: &lsp::Url,
-    biome_path: BiomePath,
+    path: BiomePath,
     line_index: &LineIndex,
     diagnostics: &[lsp::Diagnostic],
     offset: Option<u32>,
-) -> Result<Option<CodeActionOrCommand>, WorkspaceError> {
+) -> Result<Option<CodeActionOrCommand>, Error> {
+    let doc = session.document(url)?;
+
     let should_format = session
         .workspace
         .file_features(SupportsFeatureParams {
-            path: biome_path.clone(),
+            project_key: doc.project_key,
+            path: path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
         })?
         .supports_format();
+
+    let features = FeaturesBuilder::new().with_linter().with_assist().build();
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(None);
+    }
+
+    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+        project_key: doc.project_key,
+        path: path.clone(),
+    })?;
+    if size_limit_result.is_too_large() {
+        return Ok(None);
+    }
+
     let fixed = session.workspace.fix_file(FixFileParams {
-        path: biome_path,
+        project_key: doc.project_key,
+        path,
         fix_file_mode: FixFileMode::SafeFixes,
         should_format,
         only: vec![],
         skip: vec![],
+        enabled_rules: vec![],
         suppression_reason: None,
         rule_categories: RuleCategoriesBuilder::default()
             .with_syntax()
             .with_lint()
-            .with_action()
+            .with_assist()
             .build(),
     })?;
 

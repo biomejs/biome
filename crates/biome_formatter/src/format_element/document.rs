@@ -3,11 +3,11 @@ use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;
 use crate::prelude::*;
-use crate::{format, write, AttributePosition, BracketSpacing};
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
     IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, TransformSourceMap,
 };
+use crate::{format, write};
 use biome_rowan::TextSize;
 use rustc_hash::FxHashMap;
 use std::ops::Deref;
@@ -200,22 +200,12 @@ impl FormatOptions for IrFormatOptions {
         LineEnding::Lf
     }
 
-    fn attribute_position(&self) -> AttributePosition {
-        AttributePosition::default()
-    }
-
-    fn bracket_spacing(&self) -> BracketSpacing {
-        BracketSpacing::default()
-    }
-
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions {
             indent_width: self.indent_width(),
             print_width: self.line_width().into(),
             line_ending: LineEnding::Lf,
             indent_style: IndentStyle::Space,
-            attribute_position: self.attribute_position(),
-            bracket_spacing: self.bracket_spacing(),
         }
     }
 }
@@ -288,7 +278,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         _ => unreachable!(),
                     }
 
-                    let is_next_text = iter.peek().map_or(false, |e| e.is_text() || e.is_space());
+                    let is_next_text = iter.peek().is_some_and(|e| e.is_text() || e.is_space());
 
                     if !is_next_text {
                         write!(f, [text("\"")])?;
@@ -683,7 +673,7 @@ impl FormatElements for [FormatElement] {
 
     fn has_label(&self, expected: LabelId) -> bool {
         self.first()
-            .map_or(false, |element| element.has_label(expected))
+            .is_some_and(|element| element.has_label(expected))
     }
 
     fn start_tag(&self, kind: TagKind) -> Option<&Tag> {
@@ -748,8 +738,8 @@ mod tests {
     use biome_js_syntax::JsSyntaxToken;
     use biome_rowan::TextSize;
 
-    use crate::prelude::*;
     use crate::SimpleFormatContext;
+    use crate::prelude::*;
     use crate::{format, format_args, write};
 
     #[test]

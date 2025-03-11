@@ -1,7 +1,9 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::lint;
+//! Generated file, do not edit by hand, see `xtask/codegen`
 
+use crate::assist;
+use crate::lint;
 pub type NoDescendingSpecificity = < lint :: nursery :: no_descending_specificity :: NoDescendingSpecificity as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateAtImportRules = < lint :: suspicious :: no_duplicate_at_import_rules :: NoDuplicateAtImportRules as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateCustomProperties = < lint :: nursery :: no_duplicate_custom_properties :: NoDuplicateCustomProperties as biome_analyze :: Rule > :: Options ;
@@ -35,7 +37,10 @@ pub type NoUnknownTypeSelector = < lint :: nursery :: no_unknown_type_selector :
 pub type NoUnknownUnit =
     <lint::correctness::no_unknown_unit::NoUnknownUnit as biome_analyze::Rule>::Options;
 pub type NoUnmatchableAnbSelector = < lint :: correctness :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelector as biome_analyze :: Rule > :: Options ;
+pub type NoUselessEscapeInString = < lint :: nursery :: no_useless_escape_in_string :: NoUselessEscapeInString as biome_analyze :: Rule > :: Options ;
 pub type NoValueAtRule =
     <lint::nursery::no_value_at_rule::NoValueAtRule as biome_analyze::Rule>::Options;
 pub type UseGenericFontNames =
     <lint::a11y::use_generic_font_names::UseGenericFontNames as biome_analyze::Rule>::Options;
+pub type UseSortedProperties =
+    <assist::source::use_sorted_properties::UseSortedProperties as biome_analyze::Rule>::Options;

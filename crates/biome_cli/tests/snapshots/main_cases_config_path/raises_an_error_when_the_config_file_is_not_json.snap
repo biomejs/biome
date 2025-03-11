@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `biome.yml`
+
+```yml
+blah: foo
+```
+
+# Termination Message
+
+```block
+biome.yml configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid configuration file. Expected JSON or JSONC file, but got biome.yml.
+  
+
+
+```

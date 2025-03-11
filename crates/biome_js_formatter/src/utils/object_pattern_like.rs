@@ -1,6 +1,6 @@
-use crate::js::bindings::parameters::{should_hug_function_parameters, FormatAnyJsParameters};
-use crate::prelude::*;
 use crate::JsFormatContext;
+use crate::js::bindings::parameters::{FormatAnyJsParameters, should_hug_function_parameters};
+use crate::prelude::*;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, JsObjectAssignmentPattern,
     JsObjectBindingPattern, JsSyntaxKind, JsSyntaxToken,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxResult, declare_node_union};
 
 declare_node_union! {
     pub (crate) JsObjectPatternLike = JsObjectAssignmentPattern | JsObjectBindingPattern
@@ -129,7 +129,7 @@ impl JsObjectPatternLike {
                 .parent::<AnyJsFormalParameter>()
                 .and_then(|parameter| parameter.syntax().grand_parent())
                 .and_then(FormatAnyJsParameters::cast)
-                .map_or(false, |parameters| {
+                .is_some_and(|parameters| {
                     should_hug_function_parameters(&parameters, comments, false).unwrap_or(false)
                 }),
         }

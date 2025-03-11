@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var foo = new Symbol("foo");
 function bar() {
 	return function Symbol() {};
@@ -22,7 +23,7 @@ var baz = new BigInt(9007199254740991);
 ```
 invalid.js:1:11 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Symbol cannot be called as a constructor.
+  i Symbol cannot be called as a constructor.
   
   > 1 │ var foo = new Symbol("foo");
       │           ^^^^^^^^^^^^^^^^^
@@ -41,7 +42,7 @@ invalid.js:1:11 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━�
 ```
 invalid.js:5:11 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Symbol cannot be called as a constructor.
+  i Symbol cannot be called as a constructor.
   
     3 │ 	return function Symbol() {};
     4 │ }
@@ -62,7 +63,7 @@ invalid.js:5:11 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━�
 ```
 invalid.js:7:11 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! BigInt cannot be called as a constructor.
+  i BigInt cannot be called as a constructor.
   
     5 │ var baz = new Symbol("baz");
     6 │ 
@@ -83,7 +84,7 @@ invalid.js:7:11 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━�
 ```
 invalid.js:11:11 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! BigInt cannot be called as a constructor.
+  i BigInt cannot be called as a constructor.
   
      9 │ 	return function BigInt() {};
     10 │ }
@@ -99,5 +100,3 @@ invalid.js:11:11 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━�
        │           ----                         
 
 ```
-
-

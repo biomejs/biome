@@ -9,9 +9,9 @@ contact_links:
   - name: 🧩 IntelliJ extension issues
     url: https://github.com/biomejs/biome-intellij
     about: File an issue in the biome-intellij repository
-  - name: ✅ Linter rule requests
-    url: https://github.com/biomejs/biome/discussions/3
-    about: Please add a comment to the discussion named "Linter rules from other sources"
+  - name: ✅ Linter rule suggestions
+    url: https://github.com/biomejs/biome/discussions/new?category=rule-suggestion
+    about: Please create a discussion for rule suggestions
   - name: 💡 Feature requests
     url: https://github.com/biomejs/biome/discussions/new
     about: Please use a new Github discussion to propose ideas of feature requests

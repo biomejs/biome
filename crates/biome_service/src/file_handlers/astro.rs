@@ -1,16 +1,14 @@
-use crate::file_handlers::{
-    javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities,
-};
-use crate::settings::{Settings, WorkspaceSettingsHandle};
-use crate::workspace::{
-    DocumentFileSource, FixFileResult, OrganizeImportsResult, PullActionsResult,
-};
 use crate::WorkspaceError;
+use crate::file_handlers::{
+    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    ParserCapabilities, javascript,
+};
+use crate::settings::WorkspaceSettingsHandle;
+use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{parse_js_with_cache, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
@@ -70,6 +68,13 @@ impl AstroFileHandler {
 impl ExtensionHandler for AstroFileHandler {
     fn capabilities(&self) -> Capabilities {
         Capabilities {
+            enabled_for_path: EnabledForPath {
+                formatter: Some(javascript::formatter_enabled),
+                search: Some(javascript::search_enabled),
+                assist: Some(javascript::assist_enabled),
+                linter: Some(javascript::linter_enabled),
+            },
+
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
                 debug_syntax_tree: None,
@@ -81,7 +86,6 @@ impl ExtensionHandler for AstroFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
-                organize_imports: Some(organize_imports),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -98,7 +102,7 @@ fn parse(
     _rome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: Option<&Settings>,
+    _settings: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let frontmatter = AstroFileHandler::input(text);
@@ -117,7 +121,7 @@ fn parse(
     }
 }
 
-#[tracing::instrument(level = "trace", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -156,8 +160,4 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     javascript::fix_all(params)
-}
-
-fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
-    javascript::organize_imports(parse)
 }

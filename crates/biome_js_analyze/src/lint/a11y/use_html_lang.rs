@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, TextRange};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{TextRange, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -60,6 +61,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("html-has-lang")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -77,7 +79,7 @@ impl Rule for UseHtmlLang {
             if let Some(lang_attribute) = element.find_attribute_by_name("lang") {
                 if !lang_attribute
                     .as_static_value()
-                    .map_or(true, |attribute| attribute.is_not_string_constant(""))
+                    .is_none_or(|attribute| attribute.is_not_string_constant(""))
                     && !element.has_trailing_spread_prop(&lang_attribute)
                 {
                     return Some(element.syntax().text_trimmed_range());

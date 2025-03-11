@@ -45,16 +45,18 @@ impl VariableLocations {
 /// the variable contents.
 pub(crate) struct VarRegistry<'a>(VarRegistryVector<'a>);
 
-impl<'a> VarRegistry<'a> {
+impl VarRegistry<'_> {
     pub(crate) fn from_locations(locations: &VariableLocations) -> Self {
         let vector = locations
             .0
             .iter()
             .map(|scope| {
-                vec![scope
-                    .iter()
-                    .map(|s| Box::new(VariableContent::new(s.name().to_owned())))
-                    .collect()]
+                vec![
+                    scope
+                        .iter()
+                        .map(|s| Box::new(VariableContent::new(s.name().to_owned())))
+                        .collect(),
+                ]
             })
             .collect();
 

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/smoke.json
 ---
-
 # Input
 
 ```json
@@ -29,6 +28,8 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Trailing commas: None
+Expand: Auto
+Bracket spacing: true
 -----
 
 ```json
@@ -40,4 +41,3 @@ Trailing commas: None
 	"e": false
 }
 ```
-

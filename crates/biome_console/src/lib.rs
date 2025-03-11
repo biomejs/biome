@@ -167,7 +167,7 @@ impl Console for EnvConsole {
     fn read(&mut self) -> Option<String> {
         // Here we check if stdin is redirected. If not, we bail.
         //
-        // Doing this check allows us to pipe stdin to rome, without expecting
+        // Doing this check allows us to pipe stdin to biome, without expecting
         // user content when we call `read_to_string`
         if io::stdin().is_terminal() {
             return None;
@@ -176,11 +176,7 @@ impl Console for EnvConsole {
         let mut buffer = String::new();
         let result = handle.read_to_string(&mut buffer);
         // Skipping the error for now
-        if result.is_ok() {
-            Some(buffer)
-        } else {
-            None
-        }
+        if result.is_ok() { Some(buffer) } else { None }
     }
 }
 

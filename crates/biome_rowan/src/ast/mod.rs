@@ -209,7 +209,11 @@ pub trait AstNode: Clone {
     }
 
     /// Returns the string representation of this node without the leading and trailing trivia
-    fn text(&self) -> std::string::String {
+    ///
+    /// ## Warning
+    ///
+    /// This function allocates a [String]
+    fn to_trimmed_string(&self) -> std::string::String {
         self.syntax().text_trimmed().to_string()
     }
 
@@ -648,20 +652,22 @@ impl<L: Language, N: AstNode<Language = L>> Iterator for AstSeparatedListElement
 
         let node = match slot {
             // The node for this element is missing if the next child is a token instead of a node.
-            SyntaxSlot::Token(token) => panic!("Malformed list, node expected but found token {token:?} instead. You must add missing markers for missing elements."),
+            SyntaxSlot::Token(token) => panic!(
+                "Malformed list, node expected but found token {token:?} instead. You must add missing markers for missing elements."
+            ),
             // Missing element
             SyntaxSlot::Empty { .. } => Err(SyntaxError::MissingRequiredChild),
-            SyntaxSlot::Node(node) => Ok(N::unwrap_cast(node))
+            SyntaxSlot::Node(node) => Ok(N::unwrap_cast(node)),
         };
 
         let separator = match self.slots.next() {
-            Some(SyntaxSlot::Empty { .. }) => Err(
-                SyntaxError::MissingRequiredChild,
-            ),
+            Some(SyntaxSlot::Empty { .. }) => Err(SyntaxError::MissingRequiredChild),
             Some(SyntaxSlot::Token(token)) => Ok(Some(token)),
             // End of list, no trailing separator
             None => Ok(None),
-            Some(SyntaxSlot::Node(node)) => panic!("Malformed separated list, separator expected but found node {node:?} instead. You must add missing markers for missing separators."),
+            Some(SyntaxSlot::Node(node)) => panic!(
+                "Malformed separated list, separator expected but found node {node:?} instead. You must add missing markers for missing separators."
+            ),
         };
 
         Some(AstSeparatedElement {
@@ -698,11 +704,11 @@ impl<L: Language, N: AstNode<Language = L>> DoubleEndedIterator
 
         let node = match self.slots.next_back() {
             None => panic!("Malformed separated list, expected a node but found none"),
-            Some(SyntaxSlot::Empty{ .. }) => Err(SyntaxError::MissingRequiredChild),
-            Some(SyntaxSlot::Token(token)) => panic!("Malformed list, node expected but found token {token:?} instead. You must add missing markers for missing elements."),
-            Some(SyntaxSlot::Node(node)) => {
-                Ok(N::unwrap_cast(node))
-            }
+            Some(SyntaxSlot::Empty { .. }) => Err(SyntaxError::MissingRequiredChild),
+            Some(SyntaxSlot::Token(token)) => panic!(
+                "Malformed list, node expected but found token {token:?} instead. You must add missing markers for missing elements."
+            ),
+            Some(SyntaxSlot::Node(node)) => Ok(N::unwrap_cast(node)),
         };
 
         Some(AstSeparatedElement {
@@ -743,6 +749,9 @@ pub enum SyntaxError {
     /// Error thrown when a mandatory node is not found
     MissingRequiredChild,
 
+    /// Error thrown when a bogus node is encountered in an unexpected position
+    UnexpectedBogusNode,
+
     /// Error thrown when a metavariable node is found in an unexpected context
     UnexpectedMetavariable,
 }
@@ -751,7 +760,8 @@ impl Display for SyntaxError {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         match self {
             SyntaxError::MissingRequiredChild => fmt.write_str("missing required child"),
-            SyntaxError::UnexpectedMetavariable => fmt.write_str("unexpectedd metavariable node"),
+            SyntaxError::UnexpectedBogusNode => fmt.write_str("unexpected bogus node"),
+            SyntaxError::UnexpectedMetavariable => fmt.write_str("unexpected metavariable node"),
         }
     }
 }
@@ -762,8 +772,8 @@ pub mod support {
     use super::{AstNode, SyntaxNode, SyntaxToken};
 
     use super::{Language, SyntaxError, SyntaxResult};
-    use crate::syntax::SyntaxSlot;
     use crate::SyntaxElementChildren;
+    use crate::syntax::SyntaxSlot;
     use std::fmt::{Debug, Formatter};
 
     pub fn node<L: Language, N: AstNode<Language = L>>(
@@ -824,6 +834,7 @@ pub mod support {
             match &self.0 {
                 Ok(node) => std::fmt::Debug::fmt(node, f),
                 Err(SyntaxError::MissingRequiredChild) => f.write_str("missing (required)"),
+                Err(SyntaxError::UnexpectedBogusNode) => f.write_str("bogus node"),
                 Err(SyntaxError::UnexpectedMetavariable) => f.write_str("metavariable"),
             }
         }
@@ -895,7 +906,10 @@ mod tests {
             .into_iter()
             .map(|element| {
                 (
-                    element.node.ok().map(|n| n.text().parse::<f64>().unwrap()),
+                    element
+                        .node
+                        .ok()
+                        .map(|n| n.to_trimmed_string().parse::<f64>().unwrap()),
                     element
                         .trailing_separator
                         .ok()
@@ -937,7 +951,7 @@ mod tests {
     ) {
         assert_eq!(
             actual
-                .map(|literal| literal.unwrap().text().parse::<f64>().unwrap())
+                .map(|literal| literal.unwrap().to_trimmed_string().parse::<f64>().unwrap())
                 .collect::<Vec<_>>(),
             expected.into_iter().collect::<Vec<_>>()
         );
@@ -1004,14 +1018,14 @@ mod tests {
         let mut iter = list.elements();
 
         let element = iter.next().unwrap();
-        assert_eq!(element.node().unwrap().text(), "1");
+        assert_eq!(element.node().unwrap().to_trimmed_string(), "1");
         let element = iter.next_back().unwrap();
-        assert_eq!(element.node().unwrap().text(), "4");
+        assert_eq!(element.node().unwrap().to_trimmed_string(), "4");
 
         let element = iter.next().unwrap();
-        assert_eq!(element.node().unwrap().text(), "2");
+        assert_eq!(element.node().unwrap().to_trimmed_string(), "2");
         let element = iter.next_back().unwrap();
-        assert_eq!(element.node().unwrap().text(), "3");
+        assert_eq!(element.node().unwrap().to_trimmed_string(), "3");
 
         assert!(iter.next().is_none());
         assert!(iter.next_back().is_none());

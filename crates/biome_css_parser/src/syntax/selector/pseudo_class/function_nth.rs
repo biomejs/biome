@@ -2,7 +2,7 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{expected_any_pseudo_class_nth, expected_number};
 use crate::syntax::selector::{
-    eat_or_recover_selector_function_close_token, recover_selector_function_parameter, SelectorList,
+    SelectorList, eat_or_recover_selector_function_close_token, recover_selector_function_parameter,
 };
 use crate::syntax::{parse_number, parse_regular_number};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -15,7 +15,7 @@ use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 const PSEUDO_CLASS_FUNCTION_NTH_SET: TokenSet<CssSyntaxKind> = token_set![
     T![nth_child],

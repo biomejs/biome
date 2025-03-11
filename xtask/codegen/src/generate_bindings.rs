@@ -5,12 +5,13 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsExpression, AnyJsFormalParameter, AnyJsImportClause,
     AnyJsLiteralExpression, AnyJsModuleItem, AnyJsName, AnyJsNamedImportSpecifier,
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsStatement, AnyTsName,
-    AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource, TriviaPieceKind, T,
+    AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource, T, TriviaPieceKind,
 };
 use biome_rowan::AstNode;
-use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
+use biome_service::workspace_types::{ModuleQueue, generate_type, methods};
 use biome_string_case::Case;
-use xtask::{project_root, Mode, Result};
+use schemars::r#gen::{SchemaGenerator, SchemaSettings};
+use xtask::{Mode, Result, project_root};
 use xtask_codegen::update;
 
 pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
@@ -153,6 +154,17 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
             .build(),
         ));
     }
+    // HACK: these types doesn't get picked up in the loop above, so we add it manually
+    let support_kind_schema = SchemaGenerator::from(SchemaSettings::openapi3())
+        .root_schema_for::<biome_service::workspace::SupportKind>();
+    generate_type(&mut declarations, &mut queue, &support_kind_schema);
+    let rule_domain_schema = SchemaGenerator::from(SchemaSettings::openapi3())
+        .root_schema_for::<biome_analyze::RuleDomain>();
+    generate_type(&mut declarations, &mut queue, &rule_domain_schema);
+    let rule_domain_value_schema = SchemaGenerator::from(SchemaSettings::openapi3())
+        .root_schema_for::<biome_configuration::analyzer::RuleDomainValue>(
+    );
+    generate_type(&mut declarations, &mut queue, &rule_domain_value_schema);
 
     let leading_comment = [
         (
@@ -308,26 +320,6 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
         )
         .build(),
     ));
-
-    // Export `PartialConfiguration` as `Configuration` for backwards compatibility.
-    items.push(AnyJsModuleItem::JsExport(make::js_export(
-        make::js_decorator_list([]),
-        make::token(T![export]),
-        AnyJsExportClause::AnyJsDeclarationClause(AnyJsDeclarationClause::TsTypeAliasDeclaration(
-            make::ts_type_alias_declaration(
-                make::token(T![type]),
-                make::ts_identifier_binding(make::ident("Configuration")).into(),
-                make::token(T![=]),
-                AnyTsType::TsReferenceType(
-                    make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
-                        make::js_reference_identifier(make::ident("PartialConfiguration")),
-                    ))
-                    .build(),
-                ),
-            )
-            .build(),
-        )),
-    )));
 
     items.push(AnyJsModuleItem::JsExport(make::js_export(
         make::js_decorator_list([]),

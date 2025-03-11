@@ -1,8 +1,8 @@
 use crate::context::{JsFormatOptions, QuoteProperties};
 use crate::prelude::*;
-use biome_formatter::token::string::normalize_string;
 use biome_formatter::QuoteStyle;
-use biome_js_syntax::JsSyntaxKind::{JSX_STRING_LITERAL, JS_STRING_LITERAL};
+use biome_formatter::token::string::normalize_string;
+use biome_js_syntax::JsSyntaxKind::{JS_STRING_LITERAL, JSX_STRING_LITERAL};
 use biome_js_syntax::{JsFileSource, JsSyntaxToken};
 use biome_unicode_table::is_js_ident;
 use std::borrow::Cow;
@@ -104,7 +104,9 @@ impl Format<JsFormatContext> for FormatLiteralStringToken<'_> {
 /// Data structure of convenience to store some information about the
 /// string that has been processed
 struct StringInformation {
-    /// This is the quote that the is calculated and eventually used inside the string.
+    /// Currently used quote
+    current_quote: QuoteStyle,
+    /// This is the quote that is calculated and eventually used inside the string.
     /// It could be different from the one inside the formatter options
     preferred_quote: QuoteStyle,
     /// It flags if the raw content has quotes (single or double). The raw content is the
@@ -173,7 +175,14 @@ impl FormatLiteralStringToken<'_> {
             },
         );
 
+        let current_quote = literal
+            .bytes()
+            .next()
+            .and_then(QuoteStyle::from_byte)
+            .unwrap_or_default();
+
         StringInformation {
+            current_quote,
             preferred_quote: if chosen_quote_count > alternate_quote_count {
                 alternate_quote
             } else {
@@ -246,13 +255,12 @@ impl<'token> LiteralStringNormaliser<'token> {
         &mut self,
         string_information: StringInformation,
     ) -> Cow<'token, str> {
-        let normalised = self.normalise_string_literal(string_information);
-        let quoteless = &normalised[1..normalised.len() - 1];
+        let quoteless = self.raw_content();
         let can_remove_quotes = !self.is_preserve_quote_properties() && is_js_ident(quoteless);
         if can_remove_quotes {
             Cow::Owned(quoteless.to_string())
         } else {
-            normalised
+            self.normalise_string_literal(string_information)
         }
     }
 
@@ -283,7 +291,7 @@ impl<'token> LiteralStringNormaliser<'token> {
         if text_to_check
             .bytes()
             .next()
-            .map_or(false, |b| b.is_ascii_digit())
+            .is_some_and(|b| b.is_ascii_digit())
         {
             if let Ok(parsed) = text_to_check.parse::<f64>() {
                 // In TypeScript, numbers like members have different meaning from numbers.
@@ -306,20 +314,23 @@ impl<'token> LiteralStringNormaliser<'token> {
         string_information: StringInformation,
         file_source: SourceFileKind,
     ) -> Cow<'token, str> {
-        let normalised = self.normalise_string_literal(string_information);
-        let quoteless = &normalised[1..normalised.len() - 1];
+        let quoteless = self.raw_content();
         let can_remove_quotes = !self.is_preserve_quote_properties()
             && (self.can_remove_number_quotes_by_file_type(file_source) || is_js_ident(quoteless));
         if can_remove_quotes {
             Cow::Owned(quoteless.to_string())
         } else {
-            normalised
+            self.normalise_string_literal(string_information)
         }
     }
 
     fn normalise_string_literal(&self, string_information: StringInformation) -> Cow<'token, str> {
         let preferred_quote = string_information.preferred_quote;
-        let polished_raw_content = self.normalize_string(&string_information);
+        let polished_raw_content = normalize_string(
+            self.raw_content(),
+            string_information.preferred_quote.into(),
+            string_information.current_quote != string_information.preferred_quote,
+        );
 
         match polished_raw_content {
             Cow::Borrowed(raw_content) => self.swap_quotes(raw_content, &string_information),
@@ -331,15 +342,6 @@ impl<'token> LiteralStringNormaliser<'token> {
                 Cow::Owned(s)
             }
         }
-    }
-
-    fn normalize_string(&self, string_information: &StringInformation) -> Cow<'token, str> {
-        let is_escape_preserved = self.token.token.kind() == JSX_STRING_LITERAL;
-        normalize_string(
-            self.raw_content(),
-            string_information.preferred_quote.into(),
-            is_escape_preserved,
-        )
     }
 
     /// Returns the string without its quotes.
@@ -466,11 +468,8 @@ mod tests {
         let quote = QuoteStyle::Double;
         let quote_properties = QuoteProperties::AsNeeded;
         let inputs = [
-            (r#"" content '' \"\"\" ""#, r#"' content \'\' """ '"#),
             (r#"" content \"\"\"\" '' ""#, r#"' content """" \'\' '"#),
             (r#"" content ''''' \" ""#, r#"" content ''''' \" ""#),
-            (r#"" content \'\' \" ""#, r#"" content '' \" ""#),
-            (r#"" content \\' \" ""#, r#"" content \\' \" ""#),
             (r#""\"''""#, r#""\"''""#),
         ];
         for (input, output) in inputs {

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 test3: do {
 	if (i < 2) {
 		continue test3;
@@ -83,7 +84,7 @@ function f(xs) {
 ```
 valid.js:53:3 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary continue statement
+  × Unnecessary continue statement
   
     51 │ 	if (x) {
     52 │ 		// before

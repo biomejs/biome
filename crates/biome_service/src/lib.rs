@@ -1,14 +1,10 @@
-use biome_console::Console;
-use biome_fs::{FileSystem, OsFileSystem};
-use serde::{Deserialize, Serialize};
-use std::ops::{Deref, DerefMut};
-
 pub mod documentation;
 pub mod file_handlers;
 
-pub mod matcher;
+pub mod projects;
 pub mod settings;
 pub mod workspace;
+mod workspace_watcher;
 
 pub mod configuration;
 pub mod diagnostics;
@@ -16,18 +12,25 @@ pub mod dome;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
-pub use crate::matcher::Matcher;
+use camino::Utf8Path;
+use serde::{Deserialize, Serialize};
+use std::ops::Deref;
 
-pub use crate::diagnostics::{TransportError, WorkspaceError};
-/// Exports only for this crate
-pub use crate::file_handlers::JsFormatterSettings;
-pub use crate::workspace::Workspace;
-pub use diagnostics::extension_error;
+use biome_console::Console;
+use biome_fs::{FileSystem, OsFileSystem};
+
+pub use diagnostics::{TransportError, WorkspaceError, extension_error};
+pub use file_handlers::JsFormatterSettings;
+pub use workspace::{Workspace, WorkspaceServer};
+pub use workspace_watcher::{WatcherInstruction, WorkspaceWatcher};
+
+/// Path entries that should be ignored in the workspace, even by the scanner.
+///
+/// These cannot (yet) be configured.
+const IGNORE_ENTRIES: &[&[u8]] = &[b".git", b".timestamp", b".DS_Store"];
 
 /// This is the main entrypoint of the application.
 pub struct App<'app> {
-    /// A reference to the internal virtual file system
-    pub fs: DynRef<'app, dyn FileSystem>,
     /// A reference to the internal workspace
     pub workspace: WorkspaceRef<'app>,
     /// A reference to the internal console, where its buffer will be used to write messages and
@@ -37,28 +40,20 @@ pub struct App<'app> {
 
 impl<'app> App<'app> {
     pub fn with_console(console: &'app mut dyn Console) -> Self {
-        Self::with_filesystem_and_console(DynRef::Owned(Box::<OsFileSystem>::default()), console)
+        Self::with_filesystem_and_console(Box::new(OsFileSystem::default()), console)
     }
 
     /// Create a new instance of the app using the specified [FileSystem] and [Console] implementation
     pub fn with_filesystem_and_console(
-        fs: DynRef<'app, dyn FileSystem>,
+        fs: Box<dyn FileSystem>,
         console: &'app mut dyn Console,
     ) -> Self {
-        Self::new(fs, console, WorkspaceRef::Owned(workspace::server()))
+        Self::new(console, WorkspaceRef::Owned(workspace::server(fs)))
     }
 
     /// Create a new instance of the app using the specified [FileSystem], [Console] and [Workspace] implementation
-    pub fn new(
-        fs: DynRef<'app, dyn FileSystem>,
-        console: &'app mut dyn Console,
-        workspace: WorkspaceRef<'app>,
-    ) -> Self {
-        Self {
-            fs,
-            console,
-            workspace,
-        }
+    pub fn new(console: &'app mut dyn Console, workspace: WorkspaceRef<'app>) -> Self {
+        Self { console, workspace }
     }
 }
 
@@ -78,30 +73,8 @@ impl<'app> Deref for WorkspaceRef<'app> {
     }
 }
 
-/// Clone of [std::borrow::Cow] specialized for storing a trait object and
-/// holding a mutable reference in the `Borrowed` variant instead of requiring
-/// the inner type to implement [std::borrow::ToOwned]
-pub enum DynRef<'app, T: ?Sized + 'app> {
-    Owned(Box<T>),
-    Borrowed(&'app mut T),
-}
-
-impl<'app, T: ?Sized + 'app> Deref for DynRef<'app, T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        match self {
-            DynRef::Owned(inner) => inner,
-            DynRef::Borrowed(inner) => inner,
-        }
-    }
-}
-
-impl<'app, T: ?Sized + 'app> DerefMut for DynRef<'app, T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        match self {
-            DynRef::Owned(inner) => inner,
-            DynRef::Borrowed(inner) => inner,
-        }
-    }
+/// Returns `true` if `path` is a directory or
+/// if it is a symlink that resolves to a directory.
+fn is_dir(path: &Utf8Path) -> bool {
+    path.is_dir() || (path.is_symlink() && path.read_link_utf8().is_ok_and(|path| path.is_dir()))
 }

@@ -1,13 +1,14 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{self};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsCallExpression, JsSyntaxKind,
-    TextRange, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsCallExpression, JsSyntaxKind, T,
+    TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 
@@ -60,6 +61,7 @@ declare_lint_rule! {
             RuleSource::Eslint("prefer-object-has-own")
         ],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }
@@ -210,7 +212,7 @@ fn is_global_object(semantic: &SemanticModel) -> bool {
     semantic
         .scopes()
         .find(|s| s.get_binding("Object").is_some())
-        .map_or(true, |s| s.is_global_scope())
+        .is_none_or(|s| s.is_global_scope())
 }
 
 /// Checks if the given node is considered to be an access to a property of `Object.prototype`.
@@ -239,7 +241,7 @@ fn has_left_hand_object(member_expr: &AnyJsMemberExpression) -> Option<bool> {
     };
 
     if let AnyJsExpression::JsIdentifierExpression(id_expr) = &node {
-        if id_expr.name().ok()?.text() == "Object" {
+        if id_expr.name().ok()?.syntax().text_trimmed() == "Object" {
             return Some(true);
         }
     }

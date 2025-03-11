@@ -1,9 +1,9 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{
-    global_identifier, JsCallExpression, JsReferenceIdentifier, JsStaticMemberAssignment,
+    JsCallExpression, JsReferenceIdentifier, JsStaticMemberAssignment, global_identifier,
 };
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{AstNode, declare_node_union};
 
 use crate::services::semantic::Semantic;
 
@@ -70,7 +70,7 @@ impl Rule for NoCommonJs {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let file_ext = ctx.file_path().extension();
         // cjs and cts files can only use CommonJs modules
-        if file_ext.is_some_and(|file_ext| matches!(file_ext.as_encoded_bytes(), b"cjs" | b"cts")) {
+        if file_ext.is_some_and(|file_ext| matches!(file_ext.as_bytes(), b"cjs" | b"cts")) {
             return None;
         }
 

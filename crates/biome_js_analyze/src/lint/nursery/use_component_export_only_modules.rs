@@ -1,12 +1,12 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
-    export_ext::{AnyJsExported, ExportedItem},
     AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, AnyJsModuleItem, AnyJsStatement,
     JsModule,
+    export_ext::{AnyJsExported, ExportedItem},
 };
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::Case;
@@ -141,7 +141,7 @@ impl Rule for UseComponentExportOnlyModules {
     type Options = UseComponentExportOnlyModulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if let Some(file_name) = ctx.file_path().file_name().and_then(|x| x.to_str()) {
+        if let Some(file_name) = ctx.file_path().file_name() {
             if !JSX_FILE_EXT.iter().any(|ext| file_name.ends_with(ext)) {
                 return Vec::new().into_boxed_slice();
             }
@@ -208,7 +208,7 @@ impl Rule for UseComponentExportOnlyModules {
         }
 
         let local_component_ids = local_declaration_ids.iter().filter_map(|id| {
-            if Case::identify(&id.text(), false) == Case::Pascal {
+            if Case::identify(&id.to_trimmed_string(), false) == Case::Pascal {
                 Some(id.range())
             } else {
                 None
@@ -292,7 +292,7 @@ fn is_exported_react_component(any_exported_item: &ExportedItem) -> bool {
         any_exported_item.exported.clone()
     {
         if let Ok(AnyJsExpression::JsIdentifierExpression(fn_name)) = f.callee() {
-            if !REACT_HOOKS.contains(&fn_name.text().as_str()) {
+            if !REACT_HOOKS.contains(&fn_name.to_trimmed_string().as_str()) {
                 return false;
             }
             let Ok(args) = f.arguments() else {
@@ -314,13 +314,13 @@ fn is_exported_react_component(any_exported_item: &ExportedItem) -> bool {
             let Ok(arg_name) = arg.name() else {
                 return false;
             };
-            return Case::identify(&arg_name.text(), false) == Case::Pascal;
+            return Case::identify(&arg_name.to_trimmed_string(), false) == Case::Pascal;
         }
     }
     let Some(exported_item_id) = any_exported_item.identifier.clone() else {
         return false;
     };
-    Case::identify(&exported_item_id.text(), false) == Case::Pascal
+    Case::identify(&exported_item_id.to_trimmed_string(), false) == Case::Pascal
         && match any_exported_item.exported.clone() {
             Some(exported) => !matches!(exported, AnyJsExported::TsEnumDeclaration(_)),
             None => true,

@@ -1,5 +1,5 @@
 use crate::lexer::{JsLexContext, JsLexer, JsReLexContext, TextRange};
-use crate::{prelude::*, JsParserOptions};
+use crate::{JsParserOptions, prelude::*};
 use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsSyntaxKind::EOF;
 use biome_parser::lexer::BufferedLexer;
@@ -140,7 +140,7 @@ impl<'source> TokenSource for JsTokenSource<'source> {
     }
 }
 
-impl<'source> BumpWithContext for JsTokenSource<'source> {
+impl BumpWithContext for JsTokenSource<'_> {
     type Context = JsLexContext;
 
     #[inline(always)]

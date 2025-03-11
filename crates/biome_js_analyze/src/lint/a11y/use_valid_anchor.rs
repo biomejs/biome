@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
-use biome_console::{markup, MarkupBuf};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_console::{MarkupBuf, markup};
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
 
@@ -77,6 +78,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("anchor-is-valid")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -160,7 +162,7 @@ impl Rule for UseValidAnchor {
                     }
 
                     let static_value = anchor_attribute.as_static_value()?;
-                    if static_value.as_string_constant().map_or(true, |const_str| {
+                    if static_value.as_string_constant().is_none_or(|const_str| {
                         const_str.is_empty()
                             || const_str.contains('#')
                             || const_str.contains("javascript:")
@@ -174,7 +176,7 @@ impl Rule for UseValidAnchor {
                     }
 
                     let static_value = anchor_attribute.as_static_value()?;
-                    if static_value.as_string_constant().map_or(true, |const_str| {
+                    if static_value.as_string_constant().is_none_or(|const_str| {
                         const_str.is_empty()
                             || const_str == "#"
                             || const_str.contains("javascript:")
@@ -185,7 +187,7 @@ impl Rule for UseValidAnchor {
                 (None, Some(on_click_attribute)) => {
                     return Some(UseValidAnchorState::CantBeAnchor(
                         on_click_attribute.range(),
-                    ))
+                    ));
                 }
                 (None, None) => {
                     if !node.has_spread_prop() {

@@ -75,6 +75,82 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeInitializ
         FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: attribute_initializer_clause :: FormatHtmlAttributeInitializerClause :: default ())
     }
 }
+impl FormatRule<biome_html_syntax::HtmlAttributeName>
+    for crate::html::auxiliary::attribute_name::FormatHtmlAttributeName
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlAttributeName,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlAttributeName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlAttributeName,
+        crate::html::auxiliary::attribute_name::FormatHtmlAttributeName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::attribute_name::FormatHtmlAttributeName::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeName {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlAttributeName,
+        crate::html::auxiliary::attribute_name::FormatHtmlAttributeName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::attribute_name::FormatHtmlAttributeName::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::HtmlCdataSection>
+    for crate::html::auxiliary::cdata_section::FormatHtmlCdataSection
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlCdataSection,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlCdataSection>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlCdataSection {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlCdataSection,
+        crate::html::auxiliary::cdata_section::FormatHtmlCdataSection,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::cdata_section::FormatHtmlCdataSection::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlCdataSection {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlCdataSection,
+        crate::html::auxiliary::cdata_section::FormatHtmlCdataSection,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::cdata_section::FormatHtmlCdataSection::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlClosingElement>
     for crate::html::auxiliary::closing_element::FormatHtmlClosingElement
 {
@@ -265,38 +341,6 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlElement {
         )
     }
 }
-impl FormatRule<biome_html_syntax::HtmlName> for crate::html::auxiliary::name::FormatHtmlName {
-    type Context = HtmlFormatContext;
-    #[inline(always)]
-    fn fmt(&self, node: &biome_html_syntax::HtmlName, f: &mut HtmlFormatter) -> FormatResult<()> {
-        FormatNodeRule::<biome_html_syntax::HtmlName>::fmt(self, node, f)
-    }
-}
-impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlName {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_html_syntax::HtmlName,
-        crate::html::auxiliary::name::FormatHtmlName,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::html::auxiliary::name::FormatHtmlName::default(),
-        )
-    }
-}
-impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlName {
-    type Format = FormatOwnedWithRule<
-        biome_html_syntax::HtmlName,
-        crate::html::auxiliary::name::FormatHtmlName,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::html::auxiliary::name::FormatHtmlName::default(),
-        )
-    }
-}
 impl FormatRule<biome_html_syntax::HtmlOpeningElement>
     for crate::html::auxiliary::opening_element::FormatHtmlOpeningElement
 {
@@ -436,6 +480,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlString {
         FormatOwnedWithRule::new(
             self,
             crate::html::auxiliary::string::FormatHtmlString::default(),
+        )
+    }
+}
+impl FormatRule<biome_html_syntax::HtmlTagName>
+    for crate::html::auxiliary::tag_name::FormatHtmlTagName
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlTagName,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlTagName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlTagName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlTagName,
+        crate::html::auxiliary::tag_name::FormatHtmlTagName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::tag_name::FormatHtmlTagName::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlTagName {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlTagName,
+        crate::html::auxiliary::tag_name::FormatHtmlTagName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::tag_name::FormatHtmlTagName::default(),
         )
     }
 }

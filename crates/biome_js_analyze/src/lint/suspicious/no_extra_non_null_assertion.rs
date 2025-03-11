@@ -1,11 +1,12 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsExpression, JsSyntaxKind, TsNonNullAssertionAssignment,
     TsNonNullAssertionExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 
 use crate::JsRuleAction;
 
@@ -51,6 +52,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-extra-non-null-assertion")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }

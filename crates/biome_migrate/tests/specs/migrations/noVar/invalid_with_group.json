@@ -1,0 +1,13 @@
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "foo": "bar"
+      },
+      "style": {
+        "lorem": "ipsum",
+        "noVar": "error"
+      }
+    }
+  }
+}

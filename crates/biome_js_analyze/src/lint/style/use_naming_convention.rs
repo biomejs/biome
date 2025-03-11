@@ -1,32 +1,34 @@
 use std::ops::{Deref, Range};
 
 use crate::{
+    JsRuleAction,
     services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
     utils::{
         rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
         restricted_regex::RestrictedRegex,
     },
-    JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
+};
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsClassMember, AnyJsObjectMember,
-    AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource, JsIdentifierBinding,
-    JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList, JsModuleItemList,
-    JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind, JsSyntaxToken,
-    JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
-    TsIndexSignatureModifierList, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
-    TsPropertySignatureModifierList, TsTypeParameterName,
+    AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
+    JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList,
+    JsModuleItemList, JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind,
+    JsSyntaxToken, JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule,
+    TsIdentifierBinding, TsIndexSignatureModifierList, TsLiteralEnumMemberName,
+    TsMethodSignatureModifierList, TsPropertySignatureModifierList, TsTypeParameterName,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize,
+    AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize, declare_node_union,
 };
 use biome_string_case::{Case, Cases};
 use biome_unicode_table::is_js_ident;
@@ -305,7 +307,7 @@ declare_lint_rule! {
     ///       // ...
     ///       "overrides": [
     ///         {
-    ///           "include": ["typings/*.d.ts"],
+    ///           "includes": ["typings/*.d.ts"],
     ///           "linter": {
     ///             "rules": {
     ///               "style": {
@@ -336,8 +338,7 @@ declare_lint_rule! {
     /// {
     ///     "options": {
     ///         "strictCase": false,
-    ///         "requireAscii": true,
-    ///         "enumMemberCase": "CONSTANT_CASE",
+    ///         "requireAscii": false,
     ///         "conventions": [
     ///             {
     ///                 "selector": {
@@ -398,20 +399,7 @@ declare_lint_rule! {
     /// When `requireAscii` is set to `false`, names may include non-ASCII characters.
     /// For example, `café` and `안녕하세요` would be considered valid then.
     ///
-    /// **Default:** `false`
-    ///
-    /// **This option will be turned on by default in Biome 2.0.**
-    ///
-    /// ### enumMemberCase
-    ///
-    /// By default, the rule enforces the naming convention followed by the [TypeScript Compiler team](https://www.typescriptlang.org/docs/handbook/enums.html):
-    /// an `enum` member is in [`PascalCase`].
-    ///
-    /// You can enforce another convention by setting `enumMemberCase` option.
-    /// The supported cases are: [`PascalCase`], [`CONSTANT_CASE`], and [`camelCase`].
-    ///
-    /// **This option will be deprecated in the future.**
-    /// **Use the [`conventions`](#conventions-since-v180) option instead.**
+    /// **Default:** `true`
     ///
     /// ### conventions (Since v1.8.0)
     ///
@@ -445,6 +433,7 @@ declare_lint_rule! {
     ///   - `typeLike`: classes, enums, type aliases, and interfaces
     ///   - `class`
     ///   - `enum`
+    ///   - `enumMember`
     ///   - `interface`
     ///   - `typeAlias`
     ///   - `function`: named function declarations and expressions
@@ -504,8 +493,9 @@ declare_lint_rule! {
     ///
     /// In the following example, we check the following conventions:
     ///
-    /// - A private property starts with `_` and consists of at least two characters
+    /// - A private property starts with `_` and consists of at least two characters.
     /// - The captured name (the name without the leading `_`) is in [`camelCase`].
+    /// - An enum member is in [`PascalCase`] or [`CONSTANT_CASE`].
     ///
     /// ```json,options
     /// {
@@ -518,6 +508,12 @@ declare_lint_rule! {
     ///                 },
     ///                 "match": "_(.+)",
     ///                 "formats": ["camelCase"]
+    ///             },
+    ///             {
+    ///                 "selector": {
+    ///                     "kind": "enumMember"
+    ///                 },
+    ///                 "formats": ["PascalCase", "CONSTANT_CASE"]
     ///             }
     ///         ]
     ///     }
@@ -667,7 +663,9 @@ declare_lint_rule! {
     /// - Non-capturing groups `(?:)`
     /// - Case-insensitive groups `(?i:)` and case-sensitive groups `(?-i:)`
     /// - A limited set of escaped characters including all special characters
-    ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`
+    ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`.
+    ///   Note that you can also escape special characters using character classes.
+    ///   For example, `\$` and `[$]` are two valid patterns that escape `$`.
     ///
     /// [case]: https://en.wikipedia.org/wiki/Naming_convention_(programming)#Examples_of_multiple-word_identifier_formats
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
@@ -763,7 +761,7 @@ impl Rule for UseNamingConvention {
                 });
             }
         }
-        let default_convention = node_selector.default_convention(options);
+        let default_convention = node_selector.default_convention();
         // We only tim the name if it was not trimmed yet
         if is_not_trimmed {
             let (prefix_len, trimmed_name) = trim_underscore_dollar(name);
@@ -854,7 +852,7 @@ impl Rule for UseNamingConvention {
                         "This "<Emphasis>{format_args!("{convention_selector}")}</Emphasis>" name"{trimmed_info}" should be in "<Emphasis>{expected_case_names}</Emphasis>"."
                     },
                 ))
-            },
+            }
         }
     }
 
@@ -895,7 +893,16 @@ impl Rule for UseNamingConvention {
             // This assertion hold because only identifiers are renamable.
             debug_assert!(name_token.kind() != JsSyntaxKind::JS_STRING_LITERAL);
             let name = name_token.text_trimmed();
-            let preferred_case = expected_cases.into_iter().next()?;
+            let is_name_capitalized = name.chars().next().is_some_and(|c| c.is_uppercase());
+            let preferred_case = if is_name_capitalized {
+                // Try to preserve the capitalization by preferring cases starting with a capital letter
+                expected_cases
+                    .into_iter()
+                    .find(|&case| Cases::from(case).contains(Case::NumberableCapital))
+                    .unwrap_or(expected_cases.into_iter().next()?)
+            } else {
+                expected_cases.into_iter().next()?
+            };
             let new_name_part =
                 preferred_case.convert(&name[(name_range.start as _)..(name_range.end as _)]);
             let mut new_name =
@@ -912,7 +919,7 @@ impl Rule for UseNamingConvention {
                 return Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
-                     markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
+                    markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
                     mutation,
                 ));
             }
@@ -1018,24 +1025,19 @@ pub struct NamingConventionOptions {
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default, skip_serializing_if = "is_default")]
+    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
     pub require_ascii: bool,
 
     /// Custom conventions.
     #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
     pub conventions: Box<[Convention]>,
-
-    /// Allowed cases for _TypeScript_ `enum` member names.
-    #[serde(default, skip_serializing_if = "is_default")]
-    pub enum_member_case: Format,
 }
 impl Default for NamingConventionOptions {
     fn default() -> Self {
         Self {
             strict_case: true,
-            require_ascii: false,
+            require_ascii: true,
             conventions: Vec::new().into_boxed_slice(),
-            enum_member_case: Format::default(),
         }
     }
 }
@@ -1070,14 +1072,14 @@ pub struct Convention {
 impl DeserializableValidator for Convention {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if self.formats.is_empty() && self.matching.is_none() {
-            diagnostics.push(
+            ctx.report(
                 DeserializationDiagnostic::new(
-                    "At least one field among `format` and `match` must be set.",
+                    "At least one field among `formats` and `match` must be set.",
                 )
                 .with_range(range),
             );
@@ -1208,13 +1210,12 @@ impl Selector {
 impl DeserializableValidator for Selector {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if let Err(error) = self.check() {
-            diagnostics
-                .push(DeserializationDiagnostic::new(format_args!("{error}")).with_range(range));
+            ctx.report(DeserializationDiagnostic::new(format_args!("{error}")).with_range(range));
             return false;
         }
         true
@@ -1373,7 +1374,7 @@ impl Selector {
                 } else {
                     Some(Kind::IndexParameter.into())
                 }
-            },
+            }
             AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportNamespace, Scope::Global)),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
@@ -1489,7 +1490,7 @@ impl Selector {
 
     /// Returns the list of default [Case] for `self`.
     /// The preferred case comes first in the list.
-    fn default_convention(self, options: &NamingConventionOptions) -> Convention {
+    fn default_convention(self) -> Convention {
         let kind = self.kind;
         match kind {
             Kind::TypeProperty if self.modifiers.contains(Modifier::Readonly) => Convention {
@@ -1562,7 +1563,7 @@ impl Selector {
             Kind::EnumMember => Convention {
                 selector: kind.into(),
                 matching: None,
-                formats: Formats(Case::from(options.enum_member_case).into()),
+                formats: Formats(Case::Pascal.into()),
             },
             Kind::Variable | Kind::Const | Kind::Var | Kind::Let => Convention {
                 selector: kind.into(),
@@ -1853,8 +1854,8 @@ impl JsonSchema for Modifiers {
         "Modifiers".to_string()
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<RestrictedModifier>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<RestrictedModifier>>::json_schema(generator)
     }
 }
 impl From<JsMethodModifierList> for Modifiers {
@@ -2048,8 +2049,8 @@ impl JsonSchema for Formats {
     fn schema_name() -> String {
         "Formats".to_string()
     }
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<Format>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<Format>>::json_schema(generator)
     }
 }
 

@@ -1,5 +1,5 @@
 #![expect(clippy::mutable_key_type)]
-use super::{write, Arguments, FormatElement};
+use super::{Arguments, FormatElement, write};
 use crate::format_element::Interned;
 use crate::prelude::tag::Condition;
 use crate::prelude::{LineMode, PrintMode, Tag};
@@ -401,7 +401,7 @@ impl<'inner, Context, Inspector> Inspect<'inner, Context, Inspector> {
     }
 }
 
-impl<'inner, Context, Inspector> Buffer for Inspect<'inner, Context, Inspector>
+impl<Context, Inspector> Buffer for Inspect<'_, Context, Inspector>
 where
     Inspector: FnMut(&FormatElement),
 {
@@ -584,7 +584,7 @@ fn clean_interned(
                                 .last()
                                 .is_some_and(|condition| condition.mode == PrintMode::Expanded) =>
                             {
-                                continue
+                                continue;
                             }
 
                             FormatElement::Line(LineMode::Soft) => continue,

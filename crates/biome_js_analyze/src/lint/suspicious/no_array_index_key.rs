@@ -1,15 +1,16 @@
-use crate::react::{is_react_call_api, ReactLibrary};
+use crate::react::{ReactLibrary, is_react_call_api};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsTemplateElement,
     JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter,
     JsObjectExpression, JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember,
     JsReferenceIdentifier, JsxAttribute,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Discourage the usage of Array index in keys.
@@ -69,6 +70,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("no-array-index-key")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

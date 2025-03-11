@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: createElementBindingValid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import React, { createElement } from "noReact";
 
 React.createElement('div', {
@@ -14,5 +15,3 @@ createElement('div', {
     dangerouslySetInnerHTML: { __html: 'child' }
 });
 ```
-
-

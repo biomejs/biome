@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 {
 	let a;
 	(a += 1) + 2;
@@ -98,7 +99,7 @@ res.onAborted(() => /*0*/(/*1*/(/*2*/a/*3*/./*4*/b/*5*/)/*6*/ /*7*/ = /*8*/ /*9*
 ```
 invalid.js:3:3 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     1 │ {
     2 │ 	let a;
@@ -116,7 +117,7 @@ invalid.js:3:3 lint/suspicious/noAssignInExpressions ━━━━━━━━━
 ```
 invalid.js:8:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
      6 │ {
      7 │ 	let a, b;
@@ -134,7 +135,7 @@ invalid.js:8:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━
 ```
 invalid.js:13:8 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     11 │ {
     12 │ 	let a, b;
@@ -152,7 +153,7 @@ invalid.js:13:8 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:18:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     16 │ {
     17 │ 	let a, b;
@@ -170,7 +171,7 @@ invalid.js:18:7 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:18:14 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     16 │ {
     17 │ 	let a, b;
@@ -188,7 +189,7 @@ invalid.js:18:14 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:23:17 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     21 │ {
     22 │ 	let a, b;
@@ -206,7 +207,7 @@ invalid.js:23:17 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:28:13 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     26 │ {
     27 │ 	let a;
@@ -224,7 +225,7 @@ invalid.js:28:13 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:33:18 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     31 │ {
     32 │ 	let a, b;
@@ -242,7 +243,7 @@ invalid.js:33:18 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:37:10 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     36 │ function f(a) {
   > 37 │ 	return (a = 5 + 1);
@@ -259,7 +260,7 @@ invalid.js:37:10 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:40:5 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     38 │ }
     39 │ 
@@ -277,7 +278,7 @@ invalid.js:40:5 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:43:11 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     41 │ }
     42 │ 
@@ -295,7 +296,7 @@ invalid.js:43:11 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:46:5 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     44 │ }
     45 │ 
@@ -313,7 +314,7 @@ invalid.js:46:5 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:49:9 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     47 │ }
     48 │ 
@@ -331,7 +332,7 @@ invalid.js:49:9 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:51:8 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     49 │ while ((a = 0)) {}
     50 │ 
@@ -349,7 +350,7 @@ invalid.js:51:8 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:53:15 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     51 │ while (a *= b) {}
     52 │ 
@@ -367,7 +368,7 @@ invalid.js:53:15 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:55:16 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     53 │ do {} while ((a = a + 1));
     54 │ 
@@ -385,7 +386,7 @@ invalid.js:55:16 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:57:16 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     55 │ do {} while (((a -= 1), a));
     56 │ 
@@ -403,7 +404,7 @@ invalid.js:57:16 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:59:20 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     57 │ do {} while (((a = a + 1), a));
     58 │ 
@@ -421,7 +422,7 @@ invalid.js:59:20 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:61:18 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     59 │ do {} while (a || (a = b));
     60 │ 
@@ -439,7 +440,7 @@ invalid.js:61:18 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:63:18 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     61 │ for (let a = 5; (a = 0); i--) {}
     62 │ 
@@ -457,7 +458,7 @@ invalid.js:63:18 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:65:41 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     63 │ for (let x = 0; (x += 1); ) {}
     64 │ 
@@ -475,7 +476,7 @@ invalid.js:65:41 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:67:9 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     65 │ for (let l; typeof l === "undefined" ? (l = 0) : l; i++) {}
     66 │ 
@@ -493,7 +494,7 @@ invalid.js:67:9 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:69:15 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     67 │ for (; (a = y); ) {}
     68 │ 
@@ -511,7 +512,7 @@ invalid.js:69:15 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:72:8 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     71 │ switch (foo) {
   > 72 │ 	case (a = b):
@@ -528,7 +529,7 @@ invalid.js:72:8 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:77:14 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     76 │ switch (foo) {
   > 77 │ 	case baz + (a = b):
@@ -545,7 +546,7 @@ invalid.js:77:14 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:81:2 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     79 │ }
     80 │ 
@@ -563,7 +564,7 @@ invalid.js:81:2 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:83:32 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     81 │ ((3496.29/*1*/)/*2*/.bkufyydt/*3*/ = /*4*/2e308/*5*/)/*6*/ ? foo : bar;
     82 │ 
@@ -580,7 +581,7 @@ invalid.js:83:32 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:86:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
   > 86 │ (/*1*/[/*2*/a/*3*/,/*4*/b/*5*/, /*6*/c/*7*/]/*8*//*9*/=/*10*/ 2e308) ? foo : bar;
        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -596,7 +597,7 @@ invalid.js:86:7 lint/suspicious/noAssignInExpressions ━━━━━━━━�
 ```
 invalid.js:87:7 lint/suspicious/noAssignInExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     86 │ (/*1*/[/*2*/a/*3*/,/*4*/b/*5*/, /*6*/c/*7*/]/*8*//*9*/=/*10*/ 2e308) ? foo : bar;
   > 87 │ (/*1*/{/*2*/a/*3*/,/*4*/b/*5*/, /*6*/c/*7*/}/*8*//*9*/=/*10*/ 2e308) ? foo : bar;
@@ -608,5 +609,3 @@ invalid.js:87:7 lint/suspicious/noAssignInExpressions ━━━━━━━━�
   
 
 ```
-
-

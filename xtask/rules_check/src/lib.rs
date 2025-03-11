@@ -2,38 +2,60 @@
 //!
 //!
 use anyhow::{bail, ensure};
-use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
     RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
-use biome_configuration::PartialConfiguration;
-use biome_console::{markup, Console};
+use biome_configuration::Configuration;
+use biome_console::{Console, markup};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
+use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_rowan::AstNode;
-use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
+use biome_service::projects::{ProjectKey, Projects};
+use biome_service::settings::ServiceLanguage;
 use biome_service::workspace::DocumentFileSource;
+use camino::Utf8PathBuf;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 use std::collections::BTreeMap;
-use std::fmt::Write;
-use std::path::PathBuf;
+use std::fmt::{Display, Formatter, Write};
 use std::slice;
 use std::str::FromStr;
+
+#[derive(Debug)]
+struct NoStyleRuleError(String);
+
+impl NoStyleRuleError {
+    fn new(rule_name: impl Display) -> Self {
+        Self(format!(
+            "The rule '{}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",
+            rule_name
+        ))
+    }
+}
+
+impl Display for NoStyleRuleError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.0.as_str())
+    }
+}
+
+impl std::error::Error for NoStyleRuleError {}
 
 pub fn check_rules() -> anyhow::Result<()> {
     #[derive(Default)]
     struct LintRulesVisitor {
         groups: BTreeMap<(&'static str, &'static str), BTreeMap<&'static str, RuleMetadata>>,
+        errors: Vec<NoStyleRuleError>,
     }
 
     impl LintRulesVisitor {
@@ -41,10 +63,14 @@ pub fn check_rules() -> anyhow::Result<()> {
         where
             R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         {
-            self.groups
-                .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))
-                .or_default()
-                .insert(R::METADATA.name, R::METADATA);
+            if R::Group::NAME == "style" && R::METADATA.severity == Severity::Error {
+                self.errors.push(NoStyleRuleError::new(R::METADATA.name))
+            } else {
+                self.groups
+                    .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))
+                    .or_default()
+                    .insert(R::METADATA.name, R::METADATA);
+            }
         }
     }
 
@@ -118,7 +144,13 @@ pub fn check_rules() -> anyhow::Result<()> {
     biome_css_analyze::visit_registry(&mut visitor);
     biome_graphql_analyze::visit_registry(&mut visitor);
 
-    let LintRulesVisitor { groups } = visitor;
+    let LintRulesVisitor { groups, errors } = visitor;
+    if !errors.is_empty() {
+        for error in errors {
+            eprintln!("{error}");
+        }
+        bail!("There are some rules that have errors.")
+    }
 
     for ((group, _), rules) in groups {
         for (_, meta) in rules {
@@ -247,13 +279,17 @@ impl<'a> DiagnosticWriter<'a> {
             if self.all_diagnostics.len() > 1 {
                 self.print_all_diagnostics();
                 self.has_error = true;
-                bail!("Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}");
+                bail!(
+                    "Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}"
+                );
             }
         } else {
             // ...or if the analysis returns a diagnostic when it is expected to not report one.
             self.print_all_diagnostics();
             self.has_error = true;
-            bail!("Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}");
+            bail!(
+                "Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}"
+            );
         }
         self.diagnostic_count += 1;
         Ok(())
@@ -289,29 +325,30 @@ impl<'a> DiagnosticWriter<'a> {
 }
 
 fn create_analyzer_options<L>(
-    workspace_settings: &WorkspaceSettings,
+    workspace_settings: &Projects,
+    project_key: ProjectKey,
     file_path: &String,
     test: &CodeBlockTest,
 ) -> AnalyzerOptions
 where
     L: ServiceLanguage,
 {
-    let path = BiomePath::new(PathBuf::from(&file_path));
+    let path = BiomePath::new(Utf8PathBuf::from(&file_path));
     let file_source = &test.document_file_source();
     let supression_reason = None;
 
-    let settings = workspace_settings.get_current_settings();
-    let linter = settings.map(|s| &s.linter);
-    let overrides = settings.map(|s| &s.override_settings);
+    let settings = workspace_settings.get_settings(project_key);
     let language_settings = settings
+        .as_ref()
         .map(|s| L::lookup_settings(&s.languages))
         .map(|result| &result.linter);
 
+    let environment = L::resolve_environment(settings.as_ref());
+
     L::resolve_analyzer_options(
-        settings,
-        linter,
-        overrides,
+        settings.as_ref(),
         language_settings,
+        environment,
         &path,
         file_source,
         supression_reason,
@@ -326,7 +363,7 @@ fn assert_lint(
     rule: &'static str,
     test: &CodeBlockTest,
     code: &str,
-    config: &Option<PartialConfiguration>,
+    config: &Option<Configuration>,
 ) -> anyhow::Result<()> {
     let file_path = format!("code-block.{}", test.tag);
 
@@ -339,19 +376,21 @@ fn assert_lint(
     let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
 
     // Create a synthetic workspace configuration
-    let mut settings = WorkspaceSettings::default();
-    let key = settings.insert_project(PathBuf::new());
-    settings.register_current_project(key);
+    let workspace_settings = Projects::default();
+    let project_key = workspace_settings.insert_project(Utf8PathBuf::new());
 
     // Load settings from the preceding `json,options` block if requested
     if test.use_options {
         let Some(partial_config) = config else {
-            bail!("Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block.");
+            bail!(
+                "Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block."
+            );
         };
 
-        settings
-            .get_current_settings_mut()
-            .merge_with_configuration(partial_config.clone(), None, None, &[])?;
+        if let Some(mut settings) = workspace_settings.get_settings(project_key) {
+            settings.merge_with_configuration(partial_config.clone(), None)?;
+            workspace_settings.set_settings(project_key, settings);
+        }
     }
 
     match test.document_file_source() {
@@ -389,29 +428,25 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = {
-                    let mut o = create_analyzer_options::<JsLanguage>(&settings, &file_path, test);
-                    o.configuration.jsx_runtime = Some(JsxRuntime::default());
-                    o
-                };
+                let options = create_analyzer_options::<JsLanguage>(
+                    &workspace_settings,
+                    project_key,
+                    &file_path,
+                    test,
+                );
 
-                biome_js_analyze::analyze(&root, filter, &options, file_source, None, |signal| {
+                let services =
+                    JsAnalyzerServices::from((Default::default(), Default::default(), file_source));
+
+                biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                                "If you see this error, it means you need to run cargo codegen-configuration",
-                            );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -442,25 +477,22 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+                let options = create_analyzer_options::<JsonLanguage>(
+                    &workspace_settings,
+                    project_key,
+                    &file_path,
+                    test,
+                );
 
                 biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                                "If you see this error, it means you need to run cargo codegen-configuration",
-                            );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -491,25 +523,22 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+                let options = create_analyzer_options::<JsonLanguage>(
+                    &workspace_settings,
+                    project_key,
+                    &file_path,
+                    test,
+                );
 
-                biome_css_analyze::analyze(&root, filter, &options, |signal| {
+                biome_css_analyze::analyze(&root, filter, &options, &[], |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                                "If you see this error, it means you need to run cargo codegen-configuration",
-                            );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -540,25 +569,22 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+                let options = create_analyzer_options::<JsonLanguage>(
+                    &workspace_settings,
+                    project_key,
+                    &file_path,
+                    test,
+                );
 
                 biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                            "If you see this error, it means you need to run cargo codegen-configuration",
-                        );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -576,7 +602,7 @@ fn assert_lint(
         DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
 
         // Unknown code blocks should be ignored by tests
-        DocumentFileSource::Unknown => {}
+        DocumentFileSource::Unknown | DocumentFileSource::Ignore => {}
     }
 
     if test.expect_diagnostic {
@@ -588,7 +614,9 @@ fn assert_lint(
     }
 
     if diagnostics.has_error {
-        bail!("A code snippet must emit one single diagnostic, but it seems multiple diagnostics were emitted. Make sure that all the snippets inside the code block 'expect_diagnostic' emit only one diagnostic.")
+        bail!(
+            "A code snippet must emit one single diagnostic, but it seems multiple diagnostics were emitted. Make sure that all the snippets inside the code block 'expect_diagnostic' emit only one diagnostic."
+        )
     }
 
     Ok(())
@@ -636,7 +664,7 @@ fn parse_rule_options(
     rule: &'static str,
     test: &CodeBlockTest,
     code: &str,
-) -> anyhow::Result<Option<PartialConfiguration>> {
+) -> anyhow::Result<Option<Configuration>> {
     let file_path = format!("code-block.{}", test.tag);
 
     // Record the diagnostics emitted during configuration parsing to later check
@@ -746,7 +774,7 @@ fn parse_rule_options(
 
             // Deserialize the configuration from the partially-synthetic AST,
             // and report any errors encountered during deserialization.
-            let deserialized = deserialize_from_json_ast::<PartialConfiguration>(&root, "");
+            let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
             let (partial_configuration, deserialize_diagnostics) = deserialized.consume();
 
             if !deserialize_diagnostics.is_empty() {
@@ -759,14 +787,18 @@ fn parse_rule_options(
             }
 
             let Some(result) = partial_configuration else {
-                bail!("Failed to deserialize configuration options for '{group}/{rule}' from the following code block due to unknown error.\n\n{code}");
+                bail!(
+                    "Failed to deserialize configuration options for '{group}/{rule}' from the following code block due to unknown error.\n\n{code}"
+                );
             };
 
             Ok(Some(result))
         }
         _ => {
             // Only JSON code blocks can contain configuration options
-            bail!("The following non-JSON code block for '{group}/{rule}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}");
+            bail!(
+                "The following non-JSON code block for '{group}/{rule}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}"
+            );
         }
     }
 }
@@ -780,7 +812,7 @@ fn parse_documentation(
     let parser = Parser::new(docs);
 
     // Track the last configuration options block that was encountered
-    let mut last_options: Option<PartialConfiguration> = None;
+    let mut last_options: Option<Configuration> = None;
 
     // Tracks the content of the current code block if it's using a
     // language supported for analysis

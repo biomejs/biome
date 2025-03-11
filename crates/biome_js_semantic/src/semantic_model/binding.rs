@@ -1,5 +1,5 @@
 use super::*;
-use biome_js_syntax::{binding_ext::AnyJsIdentifierBinding, TextRange, TsTypeParameterName};
+use biome_js_syntax::{TextRange, TsTypeParameterName, binding_ext::AnyJsIdentifierBinding};
 
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]

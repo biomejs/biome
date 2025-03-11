@@ -4,7 +4,7 @@ use biome_js_syntax::{
     JsStringLiteralExpression, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression,
     JsxAttribute, JsxString,
 };
-use biome_rowan::{declare_node_union, AstNode, TokenText};
+use biome_rowan::{AstNode, TokenText, declare_node_union};
 
 fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
     call_expression
@@ -107,7 +107,7 @@ impl AnyClassStringLike {
                         if let Some(AnyJsExpression::JsStaticMemberExpression(tag)) =
                             template_expression.tag()
                         {
-                            if options.match_function(tag.text().as_ref()) {
+                            if options.match_function(tag.to_string().as_ref()) {
                                 return Some(true);
                             }
                         }

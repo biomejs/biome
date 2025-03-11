@@ -1,8 +1,8 @@
 //! A set of traits useful to parse various types of lists
 
+use crate::ParserProgress;
 use crate::parse_recovery::RecoveryResult;
 use crate::prelude::*;
-use crate::ParserProgress;
 use biome_rowan::SyntaxKind;
 
 /// Use this trait to parse simple lists that don't have particular requirements.
@@ -40,7 +40,7 @@ pub trait ParseNodeList {
 
     /// This method is used to recover the parser in case [Self::parse_element] returns [ParsedSyntax::Absent]
     fn recover(&mut self, p: &mut Self::Parser<'_>, parsed_element: ParsedSyntax)
-        -> RecoveryResult;
+    -> RecoveryResult;
 
     /// It creates a [ParsedSyntax] that will contain the list
     fn finish_list(&mut self, p: &mut Self::Parser<'_>, m: Marker) -> CompletedMarker {
@@ -106,7 +106,7 @@ pub trait ParseSeparatedList {
 
     /// This method is used to recover the parser in case [Self::parse_element] returns [ParsedSyntax::Absent]
     fn recover(&mut self, p: &mut Self::Parser<'_>, parsed_element: ParsedSyntax)
-        -> RecoveryResult;
+    -> RecoveryResult;
 
     /// It creates a [ParsedSyntax] that will contain the list
     /// Only called if the list isn't empty

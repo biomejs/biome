@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::io;
 use ureq::get;
 use xtask::*;
-use xtask::{project_root, Mode};
+use xtask::{Mode, project_root};
 use xtask_codegen::update;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -35,7 +35,7 @@ pub(crate) fn generate_license(mode: Mode) -> Result<()> {
     let request = get(URL);
     let result = request.call()?;
     let license_list = result.into_json::<LicenseList>()?;
-    let config_root = project_root().join("crates/biome_project/src/license");
+    let config_root = project_root().join("crates/biome_package/src/license");
 
     let tokens = create_data(license_list).expect("To write data into file");
 

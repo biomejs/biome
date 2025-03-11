@@ -1,9 +1,10 @@
-use biome_grit_patterns::{compile_pattern, GritTargetFile, GritTargetLanguage, JsTargetLanguage};
-use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::JsFileSource;
+use biome_grit_patterns::{
+    CompilePatternOptions, GritTargetFile, GritTargetLanguage, JsTargetLanguage,
+    compile_pattern_with_options,
+};
+use camino::Utf8Path;
 use criterion::measurement::WallTime;
 use std::collections::HashMap;
-use std::path::Path;
 use xtask_bench::TestCase;
 
 #[cfg(not(feature = "codspeed"))]
@@ -48,24 +49,16 @@ fn bench_gritql_search(criterion: &mut Criterion) {
 }
 
 pub fn bench_search_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase) {
-    let query = compile_pattern(
+    let target_language = GritTargetLanguage::JsTargetLanguage(JsTargetLanguage);
+
+    let query = compile_pattern_with_options(
         "`getEntityNameForExtendingInterface(errorLocation)`",
-        Some(Path::new("bench.grit")),
-        GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+        CompilePatternOptions::default().with_path(Utf8Path::new("bench.grit")),
     )
     .unwrap();
 
     let code = test_case.code();
-    let source_type = if test_case.extension() == "d.ts" {
-        JsFileSource::d_ts()
-    } else {
-        JsFileSource::ts()
-    };
-
-    let target_file = GritTargetFile {
-        parse: parse(code, source_type, JsParserOptions::default()).into(),
-        path: test_case.path().to_owned(),
-    };
+    let target_file = GritTargetFile::parse(code, test_case.path().to_owned(), target_language);
 
     group.throughput(Throughput::Bytes(code.len() as u64));
     group.sample_size(10);
@@ -74,9 +67,9 @@ pub fn bench_search_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
         &code,
         |b, _| {
             b.iter(|| {
-                let (_results, logs) =
+                let query_result =
                     black_box(query.execute(target_file.clone())).expect("Couldn't execute query");
-                for log in logs.logs() {
+                for log in query_result.logs.logs() {
                     println!("{log}");
                 }
             })

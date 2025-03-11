@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: groups.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import uncle from "../uncle";
 import sibling from "./sibling";
 import express from "npm:express";
@@ -42,5 +43,3 @@ import { secret } from "/absolute/path";
 \ No newline at end of file
 
 ```
-
-

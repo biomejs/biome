@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use crate::utils::AnyJsConditional;
 
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::TsConditionalType;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsConditionalType;

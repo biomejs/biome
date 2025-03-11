@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "lib": [
-      "ESNext"
+      "ESNext",
+      "dom"
     ],
     "module": "NodeNext",
     "target": "esnext",
@@ -14,7 +15,8 @@
     "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "allowJs": true
+    "allowJs": true,
+    "outDir": "dist"
   },
   "include": [
     "src/**/*"

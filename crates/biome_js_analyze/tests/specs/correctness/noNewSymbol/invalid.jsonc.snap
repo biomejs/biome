@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ var foo = new Symbol('foo');
 ```
 invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Symbol cannot be called as a constructor.
+  i Symbol cannot be called as a constructor.
   
   > 1 │ var foo = new Symbol('foo');
       │           ^^^^^^^^^^^^^^^^^
@@ -32,7 +33,7 @@ var foo = new globalThis.Symbol('foo');
 ```
 invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Symbol cannot be called as a constructor.
+  i Symbol cannot be called as a constructor.
   
   > 1 │ var foo = new globalThis.Symbol('foo');
       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -53,7 +54,7 @@ var foo = new window.Symbol('foo');
 ```
 invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Symbol cannot be called as a constructor.
+  i Symbol cannot be called as a constructor.
   
   > 1 │ var foo = new window.Symbol('foo');
       │           ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -74,7 +75,7 @@ var foo2 = new Symbol();
 ```
 invalid.jsonc:1:12 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Symbol cannot be called as a constructor.
+  i Symbol cannot be called as a constructor.
   
   > 1 │ var foo2 = new Symbol();
       │            ^^^^^^^^^^^^
@@ -95,7 +96,7 @@ var lorem = new Symbol() // comment
 ```
 invalid.jsonc:1:13 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Symbol cannot be called as a constructor.
+  i Symbol cannot be called as a constructor.
   
   > 1 │ var lorem = new Symbol() // comment
       │             ^^^^^^^^^^^^
@@ -116,7 +117,7 @@ var s = /* prefix_cmt */ new /* suffix_cmt */ Symbol() // comment
 ```
 invalid.jsonc:1:26 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Symbol cannot be called as a constructor.
+  i Symbol cannot be called as a constructor.
   
   > 1 │ var s = /* prefix_cmt */ new /* suffix_cmt */ Symbol() // comment
       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

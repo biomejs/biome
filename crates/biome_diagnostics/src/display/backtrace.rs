@@ -97,8 +97,8 @@ impl schemars::JsonSchema for Backtrace {
         String::from("Backtrace")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<SerializedFrame>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<SerializedFrame>>::json_schema(generator)
     }
 }
 
@@ -159,7 +159,7 @@ impl NativeBacktrace {
             frame.symbols().iter().any(|symbol| {
                 symbol
                     .addr()
-                    .map_or(false, |addr| addr as usize == self.top_frame)
+                    .is_some_and(|addr| addr as usize == self.top_frame)
             })
         });
 
@@ -173,7 +173,7 @@ impl NativeBacktrace {
             frame.symbols().iter().any(|symbol| {
                 symbol
                     .addr()
-                    .map_or(false, |addr| addr as usize == self.bottom_frame)
+                    .is_some_and(|addr| addr as usize == self.bottom_frame)
             })
         });
 

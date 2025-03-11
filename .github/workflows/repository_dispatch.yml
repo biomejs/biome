@@ -28,7 +28,7 @@ jobs:
 
       - name: Warm up wasm-pack cache
         id: cache-restore
-        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: |
             ./target
@@ -52,7 +52,7 @@ jobs:
         continue-on-error: true
 
       - name: Save new wasm-pack cache
-        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: |
             ./target
@@ -60,10 +60,11 @@ jobs:
           key: ${{ env.WASM_PACK_CACHE_KEY }}
 
       - name: Install pnpm
-        run: corepack enable
+        # workaround for the issue https://github.com/actions/setup-node/issues/1222
+        run: npm i -g --force corepack && corepack enable
 
       - name: Setup node
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: 20
           cache: pnpm

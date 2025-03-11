@@ -4,12 +4,12 @@ use biome_js_syntax::JsBreakStatement;
 use biome_rowan::{AstNode, SyntaxError, SyntaxResult};
 
 use crate::services::control_flow::{
+    FunctionBuilder,
     nodes::{
         BlockVisitor, DoWhileVisitor, ForInVisitor, ForOfVisitor, ForVisitor, SwitchVisitor,
         WhileVisitor,
     },
     visitor::{FunctionVisitor, NodeVisitor, StatementStack, VisitorAdapter},
-    FunctionBuilder,
 };
 
 pub(in crate::services::control_flow) struct BreakVisitor;

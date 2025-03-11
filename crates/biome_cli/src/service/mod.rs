@@ -10,22 +10,21 @@ use std::{
     io,
     ops::Deref,
     panic::RefUnwindSafe,
-    str::{from_utf8, FromStr},
+    str::{FromStr, from_utf8},
     sync::Arc,
     time::Duration,
 };
 
-use anyhow::{bail, ensure, Context, Error};
+use anyhow::{Context, Error, bail, ensure};
 use biome_service::{
-    workspace::{TransportRequest, WorkspaceTransport},
     TransportError,
+    workspace::{TransportRequest, WorkspaceTransport},
 };
 use dashmap::DashMap;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::{
-    from_slice, from_str, to_vec,
-    value::{to_raw_value, RawValue},
-    Value,
+    Value, from_slice, from_str, to_vec,
+    value::{RawValue, to_raw_value},
 };
 use tokio::{
     io::{
@@ -34,8 +33,9 @@ use tokio::{
     },
     runtime::Runtime,
     sync::{
-        mpsc::{channel, Receiver, Sender},
-        oneshot, Notify,
+        Notify,
+        mpsc::{Receiver, Sender, channel},
+        oneshot,
     },
     time::sleep,
 };
@@ -324,7 +324,9 @@ where
             // that indicates the end of the header section
             2 => {
                 if line != "\r\n" {
-                    bail!("unexpected byte sequence received from the remote workspace, got {line:?} expected \"\\r\\n\"");
+                    bail!(
+                        "unexpected byte sequence received from the remote workspace, got {line:?} expected \"\\r\\n\""
+                    );
                 }
 
                 break;
@@ -465,7 +467,7 @@ impl FromStr for TransportHeader {
             }
             "Content-Type" => {
                 ensure!(
-                    value.starts_with( "application/vscode-jsonrpc"),
+                    value.starts_with("application/vscode-jsonrpc"),
                     "invalid value for Content-Type expected \"application/vscode-jsonrpc\", got {value:?}"
                 );
 

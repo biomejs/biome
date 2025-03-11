@@ -1,11 +1,12 @@
 use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, ProjectKey, RageParams, RageResult, RegisterProjectFolderParams,
-    ServerInfo, SetManifestForProjectParams, UnregisterProjectFolderParams,
+    CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
+    GetFileContentParams, IsPathIgnoredParams, OpenProjectParams, ProjectKey, RageParams,
+    RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use biome_fs::FileSystem;
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::json;
 use std::{
     panic::RefUnwindSafe,
@@ -16,14 +17,16 @@ use super::{
     ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult, SearchPatternParams,
-    SearchResults, SupportsFeatureParams, UpdateSettingsParams,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
+    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
+    SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 
 pub struct WorkspaceClient<T> {
     transport: T,
     request_id: AtomicU64,
     server_info: Option<ServerInfo>,
+    fs: Box<dyn FileSystem>,
 }
 
 pub trait WorkspaceTransport {
@@ -52,11 +55,12 @@ impl<T> WorkspaceClient<T>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync,
 {
-    pub fn new(transport: T) -> Result<Self, WorkspaceError> {
+    pub fn new(transport: T, fs: Box<dyn FileSystem>) -> Result<Self, WorkspaceError> {
         let mut client = Self {
             transport,
             request_id: AtomicU64::new(0),
             server_info: None,
+            fs,
         };
 
         // TODO: The current implementation of the JSON-RPC protocol in
@@ -101,16 +105,25 @@ impl<T> Workspace for WorkspaceClient<T>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync,
 {
+    fn fs(&self) -> &dyn FileSystem {
+        self.fs.as_ref()
+    }
+
     fn file_features(
         &self,
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         self.request("biome/file_features", params)
     }
+
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         self.request("biome/is_path_ignored", params)
     }
-    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
+
+    fn update_settings(
+        &self,
+        params: UpdateSettingsParams,
+    ) -> Result<UpdateSettingsResult, WorkspaceError> {
         self.request("biome/update_settings", params)
     }
 
@@ -118,25 +131,19 @@ where
         self.request("biome/open_file", params)
     }
 
-    fn set_manifest_for_project(
-        &self,
-        params: SetManifestForProjectParams,
-    ) -> Result<(), WorkspaceError> {
-        self.request("biome/set_manifest_for_project", params)
+    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
+        self.request("biome/open_project", params)
     }
 
-    fn register_project_folder(
+    fn scan_project_folder(
         &self,
-        params: RegisterProjectFolderParams,
-    ) -> Result<ProjectKey, WorkspaceError> {
-        self.request("biome/register_project_folder", params)
+        params: ScanProjectFolderParams,
+    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
+        self.request("biome/scan_project_folder", params)
     }
 
-    fn unregister_project_folder(
-        &self,
-        params: UnregisterProjectFolderParams,
-    ) -> Result<(), WorkspaceError> {
-        self.request("biome/unregister_project_folder", params)
+    fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
+        self.request("biome/close_project", params)
     }
 
     fn get_syntax_tree(
@@ -159,6 +166,13 @@ where
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
         self.request("biome/get_file_content", params)
+    }
+
+    fn check_file_size(
+        &self,
+        params: CheckFileSizeParams,
+    ) -> Result<CheckFileSizeResult, WorkspaceError> {
+        self.request("biome/check_file_size", params)
     }
 
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError> {
@@ -221,12 +235,5 @@ where
 
     fn server_info(&self) -> Option<&ServerInfo> {
         self.server_info.as_ref()
-    }
-
-    fn organize_imports(
-        &self,
-        params: OrganizeImportsParams,
-    ) -> Result<OrganizeImportsResult, WorkspaceError> {
-        self.request("biome/organize_imports", params)
     }
 }

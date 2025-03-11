@@ -1,11 +1,13 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_js_factory::make::{js_directive_list, js_function_body, js_statement_list, token};
 use biome_js_syntax::{
-    global_identifier, AnyJsMemberExpression, JsCallExpression, JsExpressionStatement,
+    AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement, T,
+    global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -85,11 +87,13 @@ impl Rule for NoConsole {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let node = JsExpressionStatement::cast(node.syntax().parent()?)?;
+        let parent = node.clone().syntax().parent()?;
+        let range = JsExpressionStatement::cast_ref(&parent)
+            .map_or(node.range(), |node| node.syntax().text_trimmed_range());
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.syntax().text_trimmed_range(),
+                range,
                 markup! {
                     "Don't use "<Emphasis>"console"</Emphasis>"."
                 },
@@ -103,14 +107,23 @@ impl Rule for NoConsole {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let call_expression = ctx.query();
         let mut mutation = ctx.root().begin();
-        match JsExpressionStatement::cast(call_expression.syntax().parent()?) {
-            Some(stmt) if stmt.semicolon_token().is_some() => {
+        let parent = call_expression.syntax().parent()?;
+        if let Some(stmt) = JsExpressionStatement::cast(parent.clone()) {
+            if stmt.semicolon_token().is_some() {
                 mutation.remove_node(stmt);
-            }
-            _ => {
+            } else {
                 mutation.remove_node(call_expression.clone());
             }
+        } else if JsArrowFunctionExpression::cast(parent).is_some() {
+            let new_body = js_function_body(
+                token(T!['{']),
+                js_directive_list(vec![]),
+                js_statement_list(vec![]),
+                token(T!['}']),
+            );
+            mutation.replace_element(call_expression.clone().into(), new_body.into());
         }
+
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),

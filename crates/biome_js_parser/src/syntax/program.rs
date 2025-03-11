@@ -2,10 +2,10 @@
 
 use super::module::parse_module_body;
 use super::stmt::parse_statements;
+use crate::JsParser;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode};
 use crate::syntax::stmt::parse_directives;
-use crate::JsParser;
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::ModuleKind;
 

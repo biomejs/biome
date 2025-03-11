@@ -3,7 +3,7 @@ use biome_parser::{
     lexer::{LexContext, Lexer, TokenFlags},
 };
 use biome_rowan::{TextRange, TextSize};
-use biome_yaml_syntax::{YamlSyntaxKind, T};
+use biome_yaml_syntax::{T, YamlSyntaxKind};
 use std::iter::FusedIterator;
 
 #[rustfmt::skip]
@@ -56,7 +56,7 @@ pub(crate) struct YamlLexer<'src> {
     context: YamlLexContext,
 }
 
-impl<'source> YamlLexer<'source> {
+impl YamlLexer<'_> {
     fn current_char(&self) -> Option<u8> {
         self.source.as_bytes().get(self.position).copied()
     }

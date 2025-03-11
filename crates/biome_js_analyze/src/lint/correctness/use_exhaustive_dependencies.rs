@@ -1,21 +1,24 @@
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize::{non_empty, DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic, non_empty,
+};
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{Capture, SemanticModel};
-use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclaration, TextRange,
-};
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, TsTypeofType};
+use biome_js_syntax::{
+    JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
+    binding_ext::AnyJsBindingDeclaration,
+};
 use biome_rowan::{AstNode, SyntaxNodeCast};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+use biome_diagnostics::Severity;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -244,6 +247,8 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
         recommended: true,
+        severity: Severity::Error,
+        domains: &[RuleDomain::React, RuleDomain::Next],
     }
 }
 
@@ -352,15 +357,15 @@ pub struct Hook {
 impl DeserializableValidator for Hook {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         match (self.closure_index, self.dependencies_index) {
             (Some(closure_index), Some(dependencies_index))
                 if closure_index == dependencies_index =>
             {
-                diagnostics.push(
+                ctx.report(
                     DeserializationDiagnostic::new(markup! {
                         <Emphasis>"closureIndex"</Emphasis>" and "<Emphasis>"dependenciesIndex"</Emphasis>" may not be the same"
                     })
@@ -506,12 +511,12 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsEnumMember(_) => false,
         // Function declarations are stable if ...
         AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
-            let declaration_range = declaration.syntax().text_range();
+            let declaration_range = declaration.syntax().text_range_with_trivia();
 
             // ... they are declared outside of the component function
             if component_function_range
                 .intersect(declaration_range)
-                .map_or(true, TextRange::is_empty)
+                .is_none_or(TextRange::is_empty)
             {
                 return false;
             }
@@ -542,12 +547,12 @@ fn capture_needs_to_be_in_the_dependency_list(
             else {
                 return false;
             };
-            let declaration_range = declaration.syntax().text_range();
+            let declaration_range = declaration.syntax().text_range_with_trivia();
 
             // ... they are declared outside of the component function
             if component_function_range
                 .intersect(declaration_range)
-                .map_or(true, TextRange::is_empty)
+                .is_none_or(TextRange::is_empty)
             {
                 return false;
             }
@@ -557,7 +562,7 @@ fn capture_needs_to_be_in_the_dependency_list(
                 if declarator
                     .initializer()
                     .and_then(|initializer| initializer.expression().ok())
-                    .map_or(true, |expr| model.is_constant(&expr))
+                    .is_none_or(|expr| model.is_constant(&expr))
                 {
                     return false;
                 }
@@ -597,7 +602,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => true,
+        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => false,
 
         // This should be unreachable because of the test if the capture is imported
         AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
@@ -680,7 +685,7 @@ fn determine_unstable_dependency(
     }
 }
 
-fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> {
+fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<> {
     let mut vec = vec![];
     let mut next = Some(node.clone());
 
@@ -760,7 +765,7 @@ impl Rule for UseExhaustiveDependencies {
                 }
             }
 
-            let component_function_range = component_function.text_range();
+            let component_function_range = component_function.text_range_with_trivia();
 
             let captures: Vec<_> = result
                 .all_captures(model)
@@ -934,13 +939,11 @@ impl Rule for UseExhaustiveDependencies {
         match dep {
             Fix::MissingDependenciesArray {
                 function_name_range,
-            } => {
-                return Some(RuleDiagnostic::new(
-                    rule_category!(),
-                    function_name_range,
-                    markup! {"This hook does not have a dependencies array"},
-                ))
-            }
+            } => Some(RuleDiagnostic::new(
+                rule_category!(),
+                function_name_range,
+                markup! {"This hook does not have a dependencies array"},
+            )),
             Fix::AddDependency {
                 function_name_range,
                 captures,

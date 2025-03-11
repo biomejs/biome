@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -27,7 +27,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:6 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Should not have curly braces around expression.
+  i Should not have curly braces around expression.
   
     1 │ <>
   > 2 │ <Foo>{'Hello world'}</Foo>
@@ -47,7 +47,7 @@ invalid.jsx:2:6 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━�
 ```
 invalid.jsx:4:10 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Should not have curly braces around expression.
+  i Should not have curly braces around expression.
   
     2 │ <Foo>{'Hello world'}</Foo>
     3 │ 
@@ -68,7 +68,7 @@ invalid.jsx:4:10 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━
 ```
 invalid.jsx:6:10 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Should have curly braces around expression.
+  i Should have curly braces around expression.
   
     4 │ <Foo foo={'bar'} />
     5 │ 
@@ -89,7 +89,7 @@ invalid.jsx:6:10 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━
 ```
 invalid.jsx:8:6 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Should not have curly braces around expression.
+  i Should not have curly braces around expression.
   
      6 │ <Foo foo=<Bar /> />
      7 │ 
@@ -120,7 +120,7 @@ invalid.jsx:8:6 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━�
 ```
 invalid.jsx:12:6 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Should not have curly braces around expression.
+  i Should not have curly braces around expression.
   
     10 │ }</Foo>
     11 │ 
@@ -146,7 +146,7 @@ invalid.jsx:12:6 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━
 ```
 invalid.jsx:14:9 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Should not have curly braces around expression.
+  i Should not have curly braces around expression.
   
     12 │ <Foo>{/*comment*/'Hello world'/*comment*/}</Foo>
     13 │ 

@@ -1,17 +1,18 @@
-use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
+use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::{make, syntax::T};
 use biome_js_syntax::{
-    global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryOperator,
-    JsCallExpression, JsClassDeclaration, JsClassExpression, JsExtendsClause, JsInExpression,
-    OperatorPrecedence,
+    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryOperator, JsCallExpression,
+    JsClassDeclaration, JsClassExpression, JsExtendsClause, JsInExpression, OperatorPrecedence,
+    global_identifier,
 };
 use biome_rowan::{
-    chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, AstSeparatedList, BatchMutationExt,
-    SyntaxResult,
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxResult, chain_trivia_pieces,
+    trim_leading_trivia_pieces,
 };
 
 declare_lint_rule! {
@@ -57,7 +58,8 @@ declare_lint_rule! {
         name: "useExponentiationOperator",
         language: "js",
         sources: &[RuleSource::Eslint("prefer-exponentiation-operator")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -95,8 +97,11 @@ impl Rule for UseExponentiationOperator {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let args = node.arguments().ok()?;
-        let [Some(AnyJsCallArgument::AnyJsExpression(base)), Some(AnyJsCallArgument::AnyJsExpression(exponent)), None] =
-            node.arguments().ok()?.get_arguments_by_index([0, 1, 2])
+        let [
+            Some(AnyJsCallArgument::AnyJsExpression(base)),
+            Some(AnyJsCallArgument::AnyJsExpression(exponent)),
+            None,
+        ] = node.arguments().ok()?.get_arguments_by_index([0, 1, 2])
         else {
             return None;
         };

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidAdjacentTokens.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // tokens that cannot be adjacent
 a+Math.pow(++b, c);
 (a)+(Math).pow((++b), c);
@@ -426,5 +427,3 @@ invalidAdjacentTokens.js:19:17 lint/style/useExponentiationOperator  FIXABLE  â”
   
 
 ```
-
-

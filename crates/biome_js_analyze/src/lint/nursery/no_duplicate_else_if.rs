@@ -1,7 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsIfStatement, JsLogicalOperator};
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 
@@ -51,6 +52,7 @@ declare_lint_rule! {
         name: "noDuplicateElseIf",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Eslint("no-dupe-else-if")],
     }
 }

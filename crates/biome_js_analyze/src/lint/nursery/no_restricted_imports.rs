@@ -1,20 +1,20 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic,
+    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_js_syntax::{
-    inner_string_text, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier,
-    AnyJsExpression, AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember,
-    JsCallExpression, JsDefaultImportSpecifier, JsExportFromClause, JsExportNamedFromClause,
+    AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsExpression,
+    AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember, JsCallExpression,
+    JsDefaultImportSpecifier, JsExportFromClause, JsExportNamedFromClause,
     JsExportNamedFromSpecifier, JsExportNamedFromSpecifierList, JsIdentifierBinding,
     JsImportBareClause, JsImportCallExpression, JsImportCombinedClause, JsImportDefaultClause,
     JsImportNamedClause, JsImportNamespaceClause, JsLanguage, JsModuleSource,
     JsNamedImportSpecifier, JsNamedImportSpecifiers, JsNamespaceImportSpecifier,
     JsObjectBindingPattern, JsObjectBindingPatternProperty,
     JsObjectBindingPatternShorthandProperty, JsShorthandNamedImportSpecifier,
-    JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator,
+    JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator, inner_string_text,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
 use rustc_hash::FxHashMap;
@@ -300,7 +300,8 @@ declare_lint_rule! {
     ///         "paths": {
     ///             "import-bar": {
     ///               "allowImportNames": ["Bar"]
-    ///             }
+    ///             },
+    ///             "restrictPackagePrivate": "all"
     ///         }
     ///     }
     /// }
@@ -323,7 +324,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[
             RuleSource::Eslint("no-restricted-imports"),
-            RuleSource::EslintTypeScript("no-restricted-imports"),
+            RuleSource::EslintTypeScript("no-restricted-imports")
         ],
         recommended: false,
     }
@@ -481,16 +482,14 @@ impl From<CustomRestrictedImport> for CustomRestrictedImportOptions {
 
 impl Deserializable for CustomRestrictedImport {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Str {
-            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
-                .map(Self::Plain)
+            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
-            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
-                .map(Self::WithOptions)
+            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::WithOptions)
         }
     }
 }
@@ -501,7 +500,7 @@ struct RestrictedImportVisitor<'a> {
     results: Vec<RestrictedImportMessage>,
 }
 
-impl<'a> RestrictedImportVisitor<'a> {
+impl RestrictedImportVisitor<'_> {
     pub const BARE_IMPORT_ALIAS: &'static str = "";
     pub const NAMESPACE_IMPORT_ALIAS: &'static str = "*";
     pub const DEFAULT_IMPORT_ALIAS: &'static str = "default";
@@ -587,7 +586,7 @@ impl<'a> RestrictedImportVisitor<'a> {
             // #2: **(import("")).then**(...)
             let static_member_expr = current.cast::<JsStaticMemberExpression>()?;
             let member_name = static_member_expr.member().ok()?;
-            if member_name.as_js_name()?.text() != "then" {
+            if member_name.as_js_name()?.syntax().text_trimmed() != "then" {
                 return None;
             }
             current = static_member_expr.syntax().parent()?;
@@ -828,8 +827,7 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     /// Checks whether this import of the form `const local_name = import(...)` is allowed.
     fn visit_namespace_binding(&mut self, namespace_import: &JsIdentifierBinding) -> Option<()> {
-        return self
-            .visit_special_import_node(namespace_import.syntax(), Self::NAMESPACE_IMPORT_ALIAS);
+        self.visit_special_import_node(namespace_import.syntax(), Self::NAMESPACE_IMPORT_ALIAS)
     }
 
     /// Checks whether this import of the form `{ imported_name }` is allowed.
@@ -952,10 +950,10 @@ impl<'a> RestrictedImportVisitor<'a> {
 }
 
 pub struct RestrictedImportMessage {
-    pub location: TextRange,
-    pub message: String,
-    pub import_source: String,
-    pub allowed_import_names: Box<[Box<str>]>,
+    location: TextRange,
+    message: String,
+    import_source: String,
+    allowed_import_names: Box<[Box<str>]>,
 }
 
 impl Rule for NoRestrictedImports {
@@ -967,16 +965,16 @@ impl Rule for NoRestrictedImports {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         if node.is_in_ts_module_declaration() {
-            return [].into();
+            return Vec::new();
         }
         let Some(module_name) = node.module_name_token() else {
-            return vec![];
+            return Vec::new();
         };
         let import_source_text = inner_string_text(&module_name);
         let import_source = import_source_text.text();
 
         let Some(restricted_import_settings) = ctx.options().paths.get(import_source) else {
-            return vec![];
+            return Vec::new();
         };
         let restricted_import: CustomRestrictedImportOptions =
             restricted_import_settings.clone().into();
@@ -1059,15 +1057,22 @@ impl Rule for NoRestrictedImports {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let RestrictedImportMessage {
+            import_source,
+            allowed_import_names,
+            location,
+            message,
+        } = state;
+
         let mut rule_diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            state.location,
+            location,
             markup! {
-                {state.message}
+                {message}
             },
         );
-        if !state.allowed_import_names.is_empty() {
-            let mut sorted = state.allowed_import_names.to_vec();
+        if !allowed_import_names.is_empty() {
+            let mut sorted = allowed_import_names.to_vec();
             sorted.sort();
             let allowed_import_names = sorted.into_iter().map(|name| {
                 if &*name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
@@ -1078,9 +1083,9 @@ impl Rule for NoRestrictedImports {
             });
 
             rule_diagnostic = rule_diagnostic.footer_list(
-                markup! { "Only the following imports from "<Emphasis>"'"{state.import_source}"'"</Emphasis>" are allowed:" },
-                allowed_import_names,
-            );
+                        markup! { "Only the following imports from "<Emphasis>"'"{import_source}"'"</Emphasis>" are allowed:" },
+                        allowed_import_names,
+                    );
         }
         Some(rule_diagnostic)
     }

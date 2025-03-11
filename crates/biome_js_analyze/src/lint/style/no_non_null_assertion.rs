@@ -1,13 +1,14 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, TsNonNullAssertionAssignment, TsNonNullAssertionExpression, T,
+    AnyJsExpression, T, TsNonNullAssertionAssignment, TsNonNullAssertionExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow non-null assertions using the `!` postfix operator.
@@ -48,7 +49,8 @@ declare_lint_rule! {
         name: "noNonNullAssertion",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-non-null-assertion")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

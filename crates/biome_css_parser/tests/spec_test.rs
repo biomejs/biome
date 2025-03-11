@@ -1,15 +1,16 @@
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_deserialize::json::deserialize_from_str;
-use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::DiagnosticExt;
+use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
+use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;
@@ -45,29 +46,28 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         // TODO: find a way to make it configurable
         .allow_metavariables();
 
-    let options_path = Path::new(test_directory).join("options.json");
+    let options_path = Utf8Path::new(test_directory).join("options.json");
 
     if options_path.exists() {
         let mut options_path = BiomePath::new(&options_path);
 
         let mut settings = Settings::default();
         // SAFETY: we checked its existence already, we assume we have rights to read it
-        let (test_options, diagnostics) = deserialize_from_str::<PartialConfiguration>(
-            options_path.get_buffer_from_file().as_str(),
-        )
-        .consume();
+        let (test_options, diagnostics) =
+            deserialize_from_str::<Configuration>(options_path.get_buffer_from_file().as_str())
+                .consume();
 
         settings
-            .merge_with_configuration(test_options.unwrap_or_default(), None, None, &[])
+            .merge_with_configuration(test_options.unwrap_or_default(), None)
             .unwrap();
 
         let settings = settings.languages.css.parser;
 
-        if settings.css_modules.unwrap_or_default() {
+        if settings.css_modules_enabled() {
             options = options.allow_css_modules();
         }
 
-        if settings.allow_wrong_line_comments.unwrap_or_default() {
+        if settings.allow_wrong_line_comments() {
             options = options.allow_wrong_line_comments();
         }
 
@@ -128,7 +128,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             std::str::from_utf8(diagnostics_buffer.as_slice()).expect("non utf8 in error buffer");
 
         if matches!(outcome, ExpectedOutcome::Pass) {
-            panic!("Expected no errors to be present in a test case that is expected to pass but the following diagnostics are present:\n{formatted_diagnostics}")
+            panic!(
+                "Expected no errors to be present in a test case that is expected to pass but the following diagnostics are present:\n{formatted_diagnostics}"
+            )
         }
 
         writeln!(snapshot, "## Diagnostics\n\n```").unwrap();
@@ -146,7 +148,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                     .descendants()
                     .any(|node| node.kind().is_bogus())
             {
-                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {formatted_ast}");
+                panic!(
+                    "Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {formatted_ast}"
+                );
             }
 
             let syntax = parsed.syntax();

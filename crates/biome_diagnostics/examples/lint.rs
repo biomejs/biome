@@ -1,6 +1,6 @@
 use std::io;
 
-use biome_console::{markup, ConsoleExt, EnvConsole};
+use biome_console::{ConsoleExt, EnvConsole, markup};
 use biome_diagnostics::{
     Advices, Diagnostic, Location, LogCategory, PrintDiagnostic, Resource, SourceCode, Visit,
 };

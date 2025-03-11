@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
 
-use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{CstFormatContext, write};
 use biome_js_syntax::expression_left_side::AnyJsExpressionLeftSide;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
@@ -20,7 +20,7 @@ impl FormatNodeRule<JsExpressionStatement> for FormatJsExpressionStatement {
         let is_after_bogus = f
             .elements()
             .start_tag(TagKind::Verbatim)
-            .map_or(false, |signal| match signal {
+            .is_some_and(|signal| match signal {
                 Tag::StartVerbatim(kind) => kind.is_bogus(),
                 _ => unreachable!(),
             });

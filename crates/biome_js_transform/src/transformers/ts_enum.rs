@@ -1,4 +1,4 @@
-use crate::{declare_transformation, JsBatchMutation};
+use crate::{JsBatchMutation, declare_transformation};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule};
 use biome_js_factory::make::{
@@ -16,7 +16,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsModuleItem, AnyJsParameter,
     AnyJsStatement, JsAssignmentExpression, JsComputedMemberAssignment, JsExpressionStatement,
     JsFunctionExpression, JsInitializerClause, JsLogicalExpression, JsModuleItemList,
-    JsStatementList, JsVariableStatement, TsEnumDeclaration, T,
+    JsStatementList, JsVariableStatement, T, TsEnumDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 
@@ -45,10 +45,10 @@ impl Rule for TsEnum {
         let node = ctx.query();
         let mut member_names = vec![];
         let id = node.id().ok()?;
-        let name = id.text();
+        let name = id.to_trimmed_string();
         for member in node.members() {
             let member = member.ok()?;
-            let key = member.name().ok()?.text();
+            let key = member.name().ok()?.to_trimmed_string();
             let value = member.initializer().clone();
             member_names.push((key, value));
         }

@@ -1,5 +1,5 @@
-use super::{compilation_context::NodeCompilationContext, PatternCompiler};
-use crate::{grit_context::GritQueryContext, CompileError};
+use super::{PatternCompiler, compilation_context::NodeCompilationContext};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_grit_syntax::GritLike;
 use grit_pattern_matcher::pattern::{FloatConstant, Like, Pattern};
 

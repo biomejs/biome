@@ -2,11 +2,11 @@ use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::path::{Component, Path};
 
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxToken};
+use biome_js_syntax::{AnyJsImportLike, JsSyntaxToken, inner_string_text};
 use biome_rowan::BatchMutationExt;
 
 use crate::JsRuleAction;
@@ -149,7 +149,7 @@ impl Rule for UseImportExtensions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let file_ext = ctx.file_path().extension().and_then(|ext| ext.to_str())?;
+        let file_ext = ctx.file_path().extension()?;
 
         let custom_suggested_imports = &ctx.options().suggested_extensions;
 
@@ -224,7 +224,7 @@ fn get_extensionless_import(
     let has_query_or_hash = last_component
         .as_os_str()
         .to_str()
-        .map_or(false, |last| last.contains('?') || last.contains('#'));
+        .is_some_and(|last| last.contains('?') || last.contains('#'));
 
     if has_query_or_hash {
         return Some(UseImportExtensionsState {

@@ -1,7 +1,7 @@
 use pico_args::Arguments;
-use xtask::{project_root, pushd, Result};
+use xtask::{Result, project_root, pushd};
 
-use xtask_coverage::{compare::coverage_compare, run, SummaryDetailLevel};
+use xtask_coverage::{SummaryDetailLevel, compare::coverage_compare, run};
 
 fn main() -> Result<()> {
     tracing_subscriber::fmt()

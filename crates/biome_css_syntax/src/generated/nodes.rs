@@ -3,15 +3,15 @@
 #![allow(dead_code)]
 #![allow(unused)]
 use crate::{
-    macros::map_syntax_node,
     CssLanguage as Language, CssSyntaxElement as SyntaxElement,
     CssSyntaxElementChildren as SyntaxElementChildren,
     CssSyntaxKind::{self as SyntaxKind, *},
     CssSyntaxList as SyntaxList, CssSyntaxNode as SyntaxNode, CssSyntaxToken as SyntaxToken,
+    macros::map_syntax_node,
 };
 use biome_rowan::{
-    support, AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
-    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult,
+    AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult, support,
 };
 use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};
@@ -8928,10 +8928,19 @@ impl AstNode for CssAtRule {
 }
 impl std::fmt::Debug for CssAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssAtRule")
-            .field("at_token", &support::DebugSyntaxResult(self.at_token()))
-            .field("rule", &support::DebugSyntaxResult(self.rule()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssAtRule")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("rule", &support::DebugSyntaxResult(self.rule()))
+                .finish()
+        } else {
+            f.debug_struct("CssAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssAtRule> for SyntaxNode {
@@ -8967,11 +8976,20 @@ impl AstNode for CssAttributeMatcher {
 }
 impl std::fmt::Debug for CssAttributeMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssAttributeMatcher")
-            .field("operator", &support::DebugSyntaxResult(self.operator()))
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .field("modifier", &support::DebugOptionalElement(self.modifier()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssAttributeMatcher")
+                .field("operator", &support::DebugSyntaxResult(self.operator()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("modifier", &support::DebugOptionalElement(self.modifier()))
+                .finish()
+        } else {
+            f.debug_struct("CssAttributeMatcher").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssAttributeMatcher> for SyntaxNode {
@@ -9007,9 +9025,18 @@ impl AstNode for CssAttributeMatcherValue {
 }
 impl std::fmt::Debug for CssAttributeMatcherValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssAttributeMatcherValue")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssAttributeMatcherValue")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssAttributeMatcherValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssAttributeMatcherValue> for SyntaxNode {
@@ -9045,13 +9072,22 @@ impl AstNode for CssAttributeName {
 }
 impl std::fmt::Debug for CssAttributeName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssAttributeName")
-            .field(
-                "namespace",
-                &support::DebugOptionalElement(self.namespace()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssAttributeName")
+                .field(
+                    "namespace",
+                    &support::DebugOptionalElement(self.namespace()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssAttributeName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssAttributeName> for SyntaxNode {
@@ -9087,18 +9123,27 @@ impl AstNode for CssAttributeSelector {
 }
 impl std::fmt::Debug for CssAttributeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssAttributeSelector")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("matcher", &support::DebugOptionalElement(self.matcher()))
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssAttributeSelector")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("matcher", &support::DebugOptionalElement(self.matcher()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssAttributeSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssAttributeSelector> for SyntaxNode {
@@ -9134,14 +9179,23 @@ impl AstNode for CssBinaryExpression {
 }
 impl std::fmt::Debug for CssBinaryExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBinaryExpression")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssBinaryExpression")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "operator_token",
+                    &support::DebugSyntaxResult(self.operator_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssBinaryExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssBinaryExpression> for SyntaxNode {
@@ -9177,17 +9231,26 @@ impl AstNode for CssBracketedValue {
 }
 impl std::fmt::Debug for CssBracketedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBracketedValue")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssBracketedValue")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssBracketedValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssBracketedValue> for SyntaxNode {
@@ -9223,17 +9286,26 @@ impl AstNode for CssCharsetAtRule {
 }
 impl std::fmt::Debug for CssCharsetAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssCharsetAtRule")
-            .field(
-                "charset_token",
-                &support::DebugSyntaxResult(self.charset_token()),
-            )
-            .field("encoding", &support::DebugSyntaxResult(self.encoding()))
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCharsetAtRule")
+                .field(
+                    "charset_token",
+                    &support::DebugSyntaxResult(self.charset_token()),
+                )
+                .field("encoding", &support::DebugSyntaxResult(self.encoding()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssCharsetAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssCharsetAtRule> for SyntaxNode {
@@ -9269,10 +9341,19 @@ impl AstNode for CssClassSelector {
 }
 impl std::fmt::Debug for CssClassSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssClassSelector")
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssClassSelector")
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssClassSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssClassSelector> for SyntaxNode {
@@ -9308,13 +9389,22 @@ impl AstNode for CssColor {
 }
 impl std::fmt::Debug for CssColor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssColor")
-            .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssColor")
+                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssColor").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssColor> for SyntaxNode {
@@ -9350,14 +9440,23 @@ impl AstNode for CssColorProfileAtRule {
 }
 impl std::fmt::Debug for CssColorProfileAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssColorProfileAtRule")
-            .field(
-                "color_profile_token",
-                &support::DebugSyntaxResult(self.color_profile_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssColorProfileAtRule")
+                .field(
+                    "color_profile_token",
+                    &support::DebugSyntaxResult(self.color_profile_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssColorProfileAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssColorProfileAtRule> for SyntaxNode {
@@ -9393,11 +9492,20 @@ impl AstNode for CssComplexSelector {
 }
 impl std::fmt::Debug for CssComplexSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssComplexSelector")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("combinator", &support::DebugSyntaxResult(self.combinator()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssComplexSelector")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("combinator", &support::DebugSyntaxResult(self.combinator()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssComplexSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssComplexSelector> for SyntaxNode {
@@ -9433,10 +9541,19 @@ impl AstNode for CssComposesImportSpecifier {
 }
 impl std::fmt::Debug for CssComposesImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssComposesImportSpecifier")
-            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssComposesImportSpecifier")
+                .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .finish()
+        } else {
+            f.debug_struct("CssComposesImportSpecifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssComposesImportSpecifier> for SyntaxNode {
@@ -9472,14 +9589,23 @@ impl AstNode for CssComposesProperty {
 }
 impl std::fmt::Debug for CssComposesProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssComposesProperty")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssComposesProperty")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssComposesProperty").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssComposesProperty> for SyntaxNode {
@@ -9515,13 +9641,22 @@ impl AstNode for CssComposesPropertyValue {
 }
 impl std::fmt::Debug for CssComposesPropertyValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssComposesPropertyValue")
-            .field("classes", &self.classes())
-            .field(
-                "specifier",
-                &support::DebugOptionalElement(self.specifier()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssComposesPropertyValue")
+                .field("classes", &self.classes())
+                .field(
+                    "specifier",
+                    &support::DebugOptionalElement(self.specifier()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssComposesPropertyValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssComposesPropertyValue> for SyntaxNode {
@@ -9557,14 +9692,23 @@ impl AstNode for CssCompoundSelector {
 }
 impl std::fmt::Debug for CssCompoundSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssCompoundSelector")
-            .field("nesting_selectors", &self.nesting_selectors())
-            .field(
-                "simple_selector",
-                &support::DebugOptionalElement(self.simple_selector()),
-            )
-            .field("sub_selectors", &self.sub_selectors())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCompoundSelector")
+                .field("nesting_selectors", &self.nesting_selectors())
+                .field(
+                    "simple_selector",
+                    &support::DebugOptionalElement(self.simple_selector()),
+                )
+                .field("sub_selectors", &self.sub_selectors())
+                .finish()
+        } else {
+            f.debug_struct("CssCompoundSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssCompoundSelector> for SyntaxNode {
@@ -9600,11 +9744,20 @@ impl AstNode for CssContainerAndQuery {
 }
 impl std::fmt::Debug for CssContainerAndQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerAndQuery")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerAndQuery")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerAndQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerAndQuery> for SyntaxNode {
@@ -9640,15 +9793,24 @@ impl AstNode for CssContainerAtRule {
 }
 impl std::fmt::Debug for CssContainerAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerAtRule")
-            .field(
-                "container_token",
-                &support::DebugSyntaxResult(self.container_token()),
-            )
-            .field("name", &support::DebugOptionalElement(self.name()))
-            .field("query", &support::DebugSyntaxResult(self.query()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerAtRule")
+                .field(
+                    "container_token",
+                    &support::DebugSyntaxResult(self.container_token()),
+                )
+                .field("name", &support::DebugOptionalElement(self.name()))
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerAtRule> for SyntaxNode {
@@ -9684,10 +9846,19 @@ impl AstNode for CssContainerNotQuery {
 }
 impl std::fmt::Debug for CssContainerNotQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerNotQuery")
-            .field("not_token", &support::DebugSyntaxResult(self.not_token()))
-            .field("query", &support::DebugSyntaxResult(self.query()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerNotQuery")
+                .field("not_token", &support::DebugSyntaxResult(self.not_token()))
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerNotQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerNotQuery> for SyntaxNode {
@@ -9723,11 +9894,20 @@ impl AstNode for CssContainerOrQuery {
 }
 impl std::fmt::Debug for CssContainerOrQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerOrQuery")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("or_token", &support::DebugSyntaxResult(self.or_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerOrQuery")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerOrQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerOrQuery> for SyntaxNode {
@@ -9763,17 +9943,26 @@ impl AstNode for CssContainerQueryInParens {
 }
 impl std::fmt::Debug for CssContainerQueryInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerQueryInParens")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("query", &support::DebugSyntaxResult(self.query()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerQueryInParens")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssContainerQueryInParens").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerQueryInParens> for SyntaxNode {
@@ -9809,17 +9998,26 @@ impl AstNode for CssContainerSizeFeatureInParens {
 }
 impl std::fmt::Debug for CssContainerSizeFeatureInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerSizeFeatureInParens")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("feature", &support::DebugSyntaxResult(self.feature()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerSizeFeatureInParens")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("feature", &support::DebugSyntaxResult(self.feature()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssContainerSizeFeatureInParens").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerSizeFeatureInParens> for SyntaxNode {
@@ -9855,11 +10053,20 @@ impl AstNode for CssContainerStyleAndQuery {
 }
 impl std::fmt::Debug for CssContainerStyleAndQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerStyleAndQuery")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerStyleAndQuery")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerStyleAndQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerStyleAndQuery> for SyntaxNode {
@@ -9895,17 +10102,26 @@ impl AstNode for CssContainerStyleInParens {
 }
 impl std::fmt::Debug for CssContainerStyleInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerStyleInParens")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("query", &support::DebugSyntaxResult(self.query()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerStyleInParens")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssContainerStyleInParens").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerStyleInParens> for SyntaxNode {
@@ -9941,10 +10157,19 @@ impl AstNode for CssContainerStyleNotQuery {
 }
 impl std::fmt::Debug for CssContainerStyleNotQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerStyleNotQuery")
-            .field("not_token", &support::DebugSyntaxResult(self.not_token()))
-            .field("query", &support::DebugSyntaxResult(self.query()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerStyleNotQuery")
+                .field("not_token", &support::DebugSyntaxResult(self.not_token()))
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerStyleNotQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerStyleNotQuery> for SyntaxNode {
@@ -9980,11 +10205,20 @@ impl AstNode for CssContainerStyleOrQuery {
 }
 impl std::fmt::Debug for CssContainerStyleOrQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerStyleOrQuery")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("or_token", &support::DebugSyntaxResult(self.or_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerStyleOrQuery")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerStyleOrQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerStyleOrQuery> for SyntaxNode {
@@ -10020,21 +10254,30 @@ impl AstNode for CssContainerStyleQueryInParens {
 }
 impl std::fmt::Debug for CssContainerStyleQueryInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssContainerStyleQueryInParens")
-            .field(
-                "style_token",
-                &support::DebugSyntaxResult(self.style_token()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("query", &support::DebugSyntaxResult(self.query()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerStyleQueryInParens")
+                .field(
+                    "style_token",
+                    &support::DebugSyntaxResult(self.style_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssContainerStyleQueryInParens").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssContainerStyleQueryInParens> for SyntaxNode {
@@ -10070,14 +10313,23 @@ impl AstNode for CssCounterStyleAtRule {
 }
 impl std::fmt::Debug for CssCounterStyleAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssCounterStyleAtRule")
-            .field(
-                "counter_style_token",
-                &support::DebugSyntaxResult(self.counter_style_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCounterStyleAtRule")
+                .field(
+                    "counter_style_token",
+                    &support::DebugSyntaxResult(self.counter_style_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssCounterStyleAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssCounterStyleAtRule> for SyntaxNode {
@@ -10113,12 +10365,21 @@ impl AstNode for CssCustomIdentifier {
 }
 impl std::fmt::Debug for CssCustomIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssCustomIdentifier")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssCustomIdentifier")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssCustomIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssCustomIdentifier> for SyntaxNode {
@@ -10154,12 +10415,21 @@ impl AstNode for CssDashedIdentifier {
 }
 impl std::fmt::Debug for CssDashedIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDashedIdentifier")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDashedIdentifier")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssDashedIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssDashedIdentifier> for SyntaxNode {
@@ -10195,13 +10465,22 @@ impl AstNode for CssDeclaration {
 }
 impl std::fmt::Debug for CssDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDeclaration")
-            .field("property", &support::DebugSyntaxResult(self.property()))
-            .field(
-                "important",
-                &support::DebugOptionalElement(self.important()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDeclaration")
+                .field("property", &support::DebugSyntaxResult(self.property()))
+                .field(
+                    "important",
+                    &support::DebugOptionalElement(self.important()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssDeclaration> for SyntaxNode {
@@ -10237,17 +10516,26 @@ impl AstNode for CssDeclarationBlock {
 }
 impl std::fmt::Debug for CssDeclarationBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDeclarationBlock")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("declarations", &self.declarations())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDeclarationBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("declarations", &self.declarations())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssDeclarationBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssDeclarationBlock> for SyntaxNode {
@@ -10283,13 +10571,22 @@ impl AstNode for CssDeclarationImportant {
 }
 impl std::fmt::Debug for CssDeclarationImportant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDeclarationImportant")
-            .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-            .field(
-                "important_token",
-                &support::DebugSyntaxResult(self.important_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDeclarationImportant")
+                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
+                .field(
+                    "important_token",
+                    &support::DebugSyntaxResult(self.important_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssDeclarationImportant").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssDeclarationImportant> for SyntaxNode {
@@ -10325,17 +10622,26 @@ impl AstNode for CssDeclarationOrAtRuleBlock {
 }
 impl std::fmt::Debug for CssDeclarationOrAtRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDeclarationOrAtRuleBlock")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDeclarationOrAtRuleBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssDeclarationOrAtRuleBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssDeclarationOrAtRuleBlock> for SyntaxNode {
@@ -10371,17 +10677,26 @@ impl AstNode for CssDeclarationOrRuleBlock {
 }
 impl std::fmt::Debug for CssDeclarationOrRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDeclarationOrRuleBlock")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDeclarationOrRuleBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssDeclarationOrRuleBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssDeclarationOrRuleBlock> for SyntaxNode {
@@ -10417,16 +10732,25 @@ impl AstNode for CssDeclarationWithSemicolon {
 }
 impl std::fmt::Debug for CssDeclarationWithSemicolon {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDeclarationWithSemicolon")
-            .field(
-                "declaration",
-                &support::DebugSyntaxResult(self.declaration()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDeclarationWithSemicolon")
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssDeclarationWithSemicolon").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssDeclarationWithSemicolon> for SyntaxNode {
@@ -10462,14 +10786,23 @@ impl AstNode for CssDocumentAtRule {
 }
 impl std::fmt::Debug for CssDocumentAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDocumentAtRule")
-            .field(
-                "document_token",
-                &support::DebugSyntaxResult(self.document_token()),
-            )
-            .field("matchers", &self.matchers())
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDocumentAtRule")
+                .field(
+                    "document_token",
+                    &support::DebugSyntaxResult(self.document_token()),
+                )
+                .field("matchers", &self.matchers())
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssDocumentAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssDocumentAtRule> for SyntaxNode {
@@ -10505,18 +10838,27 @@ impl AstNode for CssDocumentCustomMatcher {
 }
 impl std::fmt::Debug for CssDocumentCustomMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDocumentCustomMatcher")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("value", &support::DebugOptionalElement(self.value()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssDocumentCustomMatcher")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("value", &support::DebugOptionalElement(self.value()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssDocumentCustomMatcher").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssDocumentCustomMatcher> for SyntaxNode {
@@ -10552,12 +10894,21 @@ impl AstNode for CssEmptyDeclaration {
 }
 impl std::fmt::Debug for CssEmptyDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssEmptyDeclaration")
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssEmptyDeclaration")
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssEmptyDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssEmptyDeclaration> for SyntaxNode {
@@ -10593,13 +10944,22 @@ impl AstNode for CssFontFaceAtRule {
 }
 impl std::fmt::Debug for CssFontFaceAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssFontFaceAtRule")
-            .field(
-                "font_face_token",
-                &support::DebugSyntaxResult(self.font_face_token()),
-            )
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFontFaceAtRule")
+                .field(
+                    "font_face_token",
+                    &support::DebugSyntaxResult(self.font_face_token()),
+                )
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssFontFaceAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssFontFaceAtRule> for SyntaxNode {
@@ -10635,9 +10995,18 @@ impl AstNode for CssFontFamilyName {
 }
 impl std::fmt::Debug for CssFontFamilyName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssFontFamilyName")
-            .field("names", &self.names())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFontFamilyName")
+                .field("names", &self.names())
+                .finish()
+        } else {
+            f.debug_struct("CssFontFamilyName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssFontFamilyName> for SyntaxNode {
@@ -10673,14 +11042,23 @@ impl AstNode for CssFontFeatureValuesAtRule {
 }
 impl std::fmt::Debug for CssFontFeatureValuesAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssFontFeatureValuesAtRule")
-            .field(
-                "font_feature_values_token",
-                &support::DebugSyntaxResult(self.font_feature_values_token()),
-            )
-            .field("names", &self.names())
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFontFeatureValuesAtRule")
+                .field(
+                    "font_feature_values_token",
+                    &support::DebugSyntaxResult(self.font_feature_values_token()),
+                )
+                .field("names", &self.names())
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssFontFeatureValuesAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssFontFeatureValuesAtRule> for SyntaxNode {
@@ -10716,17 +11094,26 @@ impl AstNode for CssFontFeatureValuesBlock {
 }
 impl std::fmt::Debug for CssFontFeatureValuesBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssFontFeatureValuesBlock")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFontFeatureValuesBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssFontFeatureValuesBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssFontFeatureValuesBlock> for SyntaxNode {
@@ -10762,11 +11149,20 @@ impl AstNode for CssFontFeatureValuesItem {
 }
 impl std::fmt::Debug for CssFontFeatureValuesItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssFontFeatureValuesItem")
-            .field("at_token", &support::DebugSyntaxResult(self.at_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFontFeatureValuesItem")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssFontFeatureValuesItem").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssFontFeatureValuesItem> for SyntaxNode {
@@ -10802,14 +11198,23 @@ impl AstNode for CssFontPaletteValuesAtRule {
 }
 impl std::fmt::Debug for CssFontPaletteValuesAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssFontPaletteValuesAtRule")
-            .field(
-                "font_palette_values_token",
-                &support::DebugSyntaxResult(self.font_palette_values_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFontPaletteValuesAtRule")
+                .field(
+                    "font_palette_values_token",
+                    &support::DebugSyntaxResult(self.font_palette_values_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssFontPaletteValuesAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssFontPaletteValuesAtRule> for SyntaxNode {
@@ -10845,18 +11250,27 @@ impl AstNode for CssFunction {
 }
 impl std::fmt::Debug for CssFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssFunction")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssFunction")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssFunction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssFunction> for SyntaxNode {
@@ -10892,9 +11306,18 @@ impl AstNode for CssGenericDelimiter {
 }
 impl std::fmt::Debug for CssGenericDelimiter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssGenericDelimiter")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssGenericDelimiter")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssGenericDelimiter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssGenericDelimiter> for SyntaxNode {
@@ -10930,14 +11353,23 @@ impl AstNode for CssGenericProperty {
 }
 impl std::fmt::Debug for CssGenericProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssGenericProperty")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &self.value())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssGenericProperty")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &self.value())
+                .finish()
+        } else {
+            f.debug_struct("CssGenericProperty").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssGenericProperty> for SyntaxNode {
@@ -10973,10 +11405,19 @@ impl AstNode for CssIdSelector {
 }
 impl std::fmt::Debug for CssIdSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssIdSelector")
-            .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIdSelector")
+                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssIdSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssIdSelector> for SyntaxNode {
@@ -11012,12 +11453,21 @@ impl AstNode for CssIdentifier {
 }
 impl std::fmt::Debug for CssIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssIdentifier")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIdentifier")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssIdentifier> for SyntaxNode {
@@ -11053,12 +11503,21 @@ impl AstNode for CssImportAnonymousLayer {
 }
 impl std::fmt::Debug for CssImportAnonymousLayer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssImportAnonymousLayer")
-            .field(
-                "layer_token",
-                &support::DebugSyntaxResult(self.layer_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssImportAnonymousLayer")
+                .field(
+                    "layer_token",
+                    &support::DebugSyntaxResult(self.layer_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssImportAnonymousLayer").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssImportAnonymousLayer> for SyntaxNode {
@@ -11094,20 +11553,29 @@ impl AstNode for CssImportAtRule {
 }
 impl std::fmt::Debug for CssImportAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssImportAtRule")
-            .field(
-                "import_token",
-                &support::DebugSyntaxResult(self.import_token()),
-            )
-            .field("url", &support::DebugSyntaxResult(self.url()))
-            .field("layer", &support::DebugOptionalElement(self.layer()))
-            .field("supports", &support::DebugOptionalElement(self.supports()))
-            .field("media", &self.media())
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssImportAtRule")
+                .field(
+                    "import_token",
+                    &support::DebugSyntaxResult(self.import_token()),
+                )
+                .field("url", &support::DebugSyntaxResult(self.url()))
+                .field("layer", &support::DebugOptionalElement(self.layer()))
+                .field("supports", &support::DebugOptionalElement(self.supports()))
+                .field("media", &self.media())
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssImportAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssImportAtRule> for SyntaxNode {
@@ -11143,21 +11611,30 @@ impl AstNode for CssImportNamedLayer {
 }
 impl std::fmt::Debug for CssImportNamedLayer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssImportNamedLayer")
-            .field(
-                "layer_token",
-                &support::DebugSyntaxResult(self.layer_token()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("name", &self.name())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssImportNamedLayer")
+                .field(
+                    "layer_token",
+                    &support::DebugSyntaxResult(self.layer_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("name", &self.name())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssImportNamedLayer").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssImportNamedLayer> for SyntaxNode {
@@ -11193,21 +11670,30 @@ impl AstNode for CssImportSupports {
 }
 impl std::fmt::Debug for CssImportSupports {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssImportSupports")
-            .field(
-                "supports_token",
-                &support::DebugSyntaxResult(self.supports_token()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("condition", &support::DebugSyntaxResult(self.condition()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssImportSupports")
+                .field(
+                    "supports_token",
+                    &support::DebugSyntaxResult(self.supports_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssImportSupports").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssImportSupports> for SyntaxNode {
@@ -11243,14 +11729,23 @@ impl AstNode for CssKeyframesAtRule {
 }
 impl std::fmt::Debug for CssKeyframesAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssKeyframesAtRule")
-            .field(
-                "keyframes_token",
-                &support::DebugSyntaxResult(self.keyframes_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssKeyframesAtRule")
+                .field(
+                    "keyframes_token",
+                    &support::DebugSyntaxResult(self.keyframes_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssKeyframesAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssKeyframesAtRule> for SyntaxNode {
@@ -11286,17 +11781,26 @@ impl AstNode for CssKeyframesBlock {
 }
 impl std::fmt::Debug for CssKeyframesBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssKeyframesBlock")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssKeyframesBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssKeyframesBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssKeyframesBlock> for SyntaxNode {
@@ -11332,9 +11836,18 @@ impl AstNode for CssKeyframesIdentSelector {
 }
 impl std::fmt::Debug for CssKeyframesIdentSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssKeyframesIdentSelector")
-            .field("selector", &support::DebugSyntaxResult(self.selector()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssKeyframesIdentSelector")
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .finish()
+        } else {
+            f.debug_struct("CssKeyframesIdentSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssKeyframesIdentSelector> for SyntaxNode {
@@ -11370,10 +11883,19 @@ impl AstNode for CssKeyframesItem {
 }
 impl std::fmt::Debug for CssKeyframesItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssKeyframesItem")
-            .field("selectors", &self.selectors())
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssKeyframesItem")
+                .field("selectors", &self.selectors())
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssKeyframesItem").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssKeyframesItem> for SyntaxNode {
@@ -11409,9 +11931,18 @@ impl AstNode for CssKeyframesPercentageSelector {
 }
 impl std::fmt::Debug for CssKeyframesPercentageSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssKeyframesPercentageSelector")
-            .field("selector", &support::DebugSyntaxResult(self.selector()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssKeyframesPercentageSelector")
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .finish()
+        } else {
+            f.debug_struct("CssKeyframesPercentageSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssKeyframesPercentageSelector> for SyntaxNode {
@@ -11447,18 +11978,27 @@ impl AstNode for CssKeyframesScopeFunction {
 }
 impl std::fmt::Debug for CssKeyframesScopeFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssKeyframesScopeFunction")
-            .field("scope", &support::DebugSyntaxResult(self.scope()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssKeyframesScopeFunction")
+                .field("scope", &support::DebugSyntaxResult(self.scope()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssKeyframesScopeFunction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssKeyframesScopeFunction> for SyntaxNode {
@@ -11494,10 +12034,19 @@ impl AstNode for CssKeyframesScopePrefix {
 }
 impl std::fmt::Debug for CssKeyframesScopePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssKeyframesScopePrefix")
-            .field("scope", &support::DebugSyntaxResult(self.scope()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssKeyframesScopePrefix")
+                .field("scope", &support::DebugSyntaxResult(self.scope()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssKeyframesScopePrefix").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssKeyframesScopePrefix> for SyntaxNode {
@@ -11533,13 +12082,22 @@ impl AstNode for CssKeyframesScopedName {
 }
 impl std::fmt::Debug for CssKeyframesScopedName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssKeyframesScopedName")
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("scope", &support::DebugSyntaxResult(self.scope()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssKeyframesScopedName")
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("scope", &support::DebugSyntaxResult(self.scope()))
+                .finish()
+        } else {
+            f.debug_struct("CssKeyframesScopedName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssKeyframesScopedName> for SyntaxNode {
@@ -11575,13 +12133,22 @@ impl AstNode for CssLayerAtRule {
 }
 impl std::fmt::Debug for CssLayerAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssLayerAtRule")
-            .field(
-                "layer_token",
-                &support::DebugSyntaxResult(self.layer_token()),
-            )
-            .field("layer", &support::DebugSyntaxResult(self.layer()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssLayerAtRule")
+                .field(
+                    "layer_token",
+                    &support::DebugSyntaxResult(self.layer_token()),
+                )
+                .field("layer", &support::DebugSyntaxResult(self.layer()))
+                .finish()
+        } else {
+            f.debug_struct("CssLayerAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssLayerAtRule> for SyntaxNode {
@@ -11617,10 +12184,19 @@ impl AstNode for CssLayerDeclaration {
 }
 impl std::fmt::Debug for CssLayerDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssLayerDeclaration")
-            .field("references", &self.references())
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssLayerDeclaration")
+                .field("references", &self.references())
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssLayerDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssLayerDeclaration> for SyntaxNode {
@@ -11656,13 +12232,22 @@ impl AstNode for CssLayerReference {
 }
 impl std::fmt::Debug for CssLayerReference {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssLayerReference")
-            .field("references", &self.references())
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssLayerReference")
+                .field("references", &self.references())
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssLayerReference").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssLayerReference> for SyntaxNode {
@@ -11699,9 +12284,19 @@ impl AstNode for CssListOfComponentValuesExpression {
 }
 impl std::fmt::Debug for CssListOfComponentValuesExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssListOfComponentValuesExpression")
-            .field("css_component_value_list", &self.css_component_value_list())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssListOfComponentValuesExpression")
+                .field("css_component_value_list", &self.css_component_value_list())
+                .finish()
+        } else {
+            f.debug_struct("CssListOfComponentValuesExpression")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssListOfComponentValuesExpression> for SyntaxNode {
@@ -11737,11 +12332,20 @@ impl AstNode for CssMarginAtRule {
 }
 impl std::fmt::Debug for CssMarginAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMarginAtRule")
-            .field("at_token", &support::DebugSyntaxResult(self.at_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMarginAtRule")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssMarginAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMarginAtRule> for SyntaxNode {
@@ -11777,11 +12381,20 @@ impl AstNode for CssMediaAndCondition {
 }
 impl std::fmt::Debug for CssMediaAndCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaAndCondition")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaAndCondition")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssMediaAndCondition").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaAndCondition> for SyntaxNode {
@@ -11817,11 +12430,20 @@ impl AstNode for CssMediaAndTypeQuery {
 }
 impl std::fmt::Debug for CssMediaAndTypeQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaAndTypeQuery")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaAndTypeQuery")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssMediaAndTypeQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaAndTypeQuery> for SyntaxNode {
@@ -11857,14 +12479,23 @@ impl AstNode for CssMediaAtRule {
 }
 impl std::fmt::Debug for CssMediaAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaAtRule")
-            .field(
-                "media_token",
-                &support::DebugSyntaxResult(self.media_token()),
-            )
-            .field("queries", &self.queries())
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaAtRule")
+                .field(
+                    "media_token",
+                    &support::DebugSyntaxResult(self.media_token()),
+                )
+                .field("queries", &self.queries())
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssMediaAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaAtRule> for SyntaxNode {
@@ -11900,17 +12531,26 @@ impl AstNode for CssMediaConditionInParens {
 }
 impl std::fmt::Debug for CssMediaConditionInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaConditionInParens")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("condition", &support::DebugSyntaxResult(self.condition()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaConditionInParens")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssMediaConditionInParens").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaConditionInParens> for SyntaxNode {
@@ -11946,9 +12586,18 @@ impl AstNode for CssMediaConditionQuery {
 }
 impl std::fmt::Debug for CssMediaConditionQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaConditionQuery")
-            .field("condition", &support::DebugSyntaxResult(self.condition()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaConditionQuery")
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .finish()
+        } else {
+            f.debug_struct("CssMediaConditionQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaConditionQuery> for SyntaxNode {
@@ -11984,17 +12633,26 @@ impl AstNode for CssMediaFeatureInParens {
 }
 impl std::fmt::Debug for CssMediaFeatureInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaFeatureInParens")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("feature", &support::DebugSyntaxResult(self.feature()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaFeatureInParens")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("feature", &support::DebugSyntaxResult(self.feature()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssMediaFeatureInParens").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaFeatureInParens> for SyntaxNode {
@@ -12030,10 +12688,19 @@ impl AstNode for CssMediaNotCondition {
 }
 impl std::fmt::Debug for CssMediaNotCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaNotCondition")
-            .field("not_token", &support::DebugSyntaxResult(self.not_token()))
-            .field("condition", &support::DebugSyntaxResult(self.condition()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaNotCondition")
+                .field("not_token", &support::DebugSyntaxResult(self.not_token()))
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .finish()
+        } else {
+            f.debug_struct("CssMediaNotCondition").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaNotCondition> for SyntaxNode {
@@ -12069,11 +12736,20 @@ impl AstNode for CssMediaOrCondition {
 }
 impl std::fmt::Debug for CssMediaOrCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaOrCondition")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("or_token", &support::DebugSyntaxResult(self.or_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaOrCondition")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssMediaOrCondition").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaOrCondition> for SyntaxNode {
@@ -12109,9 +12785,18 @@ impl AstNode for CssMediaType {
 }
 impl std::fmt::Debug for CssMediaType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaType")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaType")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssMediaType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaType> for SyntaxNode {
@@ -12147,10 +12832,19 @@ impl AstNode for CssMediaTypeQuery {
 }
 impl std::fmt::Debug for CssMediaTypeQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaTypeQuery")
-            .field("modifier", &support::DebugOptionalElement(self.modifier()))
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMediaTypeQuery")
+                .field("modifier", &support::DebugOptionalElement(self.modifier()))
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("CssMediaTypeQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMediaTypeQuery> for SyntaxNode {
@@ -12186,12 +12880,21 @@ impl AstNode for CssMetavariable {
 }
 impl std::fmt::Debug for CssMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMetavariable")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssMetavariable")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssMetavariable").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssMetavariable> for SyntaxNode {
@@ -12227,9 +12930,18 @@ impl AstNode for CssNamedNamespacePrefix {
 }
 impl std::fmt::Debug for CssNamedNamespacePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssNamedNamespacePrefix")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssNamedNamespacePrefix")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssNamedNamespacePrefix").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssNamedNamespacePrefix> for SyntaxNode {
@@ -12265,13 +12977,22 @@ impl AstNode for CssNamespace {
 }
 impl std::fmt::Debug for CssNamespace {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssNamespace")
-            .field("prefix", &support::DebugOptionalElement(self.prefix()))
-            .field(
-                "bitwise_or_token",
-                &support::DebugSyntaxResult(self.bitwise_or_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssNamespace")
+                .field("prefix", &support::DebugOptionalElement(self.prefix()))
+                .field(
+                    "bitwise_or_token",
+                    &support::DebugSyntaxResult(self.bitwise_or_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssNamespace").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssNamespace> for SyntaxNode {
@@ -12307,18 +13028,27 @@ impl AstNode for CssNamespaceAtRule {
 }
 impl std::fmt::Debug for CssNamespaceAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssNamespaceAtRule")
-            .field(
-                "namespace_token",
-                &support::DebugSyntaxResult(self.namespace_token()),
-            )
-            .field("prefix", &support::DebugOptionalElement(self.prefix()))
-            .field("url", &support::DebugSyntaxResult(self.url()))
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssNamespaceAtRule")
+                .field(
+                    "namespace_token",
+                    &support::DebugSyntaxResult(self.namespace_token()),
+                )
+                .field("prefix", &support::DebugOptionalElement(self.prefix()))
+                .field("url", &support::DebugSyntaxResult(self.url()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssNamespaceAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssNamespaceAtRule> for SyntaxNode {
@@ -12354,10 +13084,19 @@ impl AstNode for CssNestedQualifiedRule {
 }
 impl std::fmt::Debug for CssNestedQualifiedRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssNestedQualifiedRule")
-            .field("prelude", &self.prelude())
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssNestedQualifiedRule")
+                .field("prelude", &self.prelude())
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssNestedQualifiedRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssNestedQualifiedRule> for SyntaxNode {
@@ -12393,9 +13132,18 @@ impl AstNode for CssNestedSelector {
 }
 impl std::fmt::Debug for CssNestedSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssNestedSelector")
-            .field("amp_token", &support::DebugSyntaxResult(self.amp_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssNestedSelector")
+                .field("amp_token", &support::DebugSyntaxResult(self.amp_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssNestedSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssNestedSelector> for SyntaxNode {
@@ -12431,10 +13179,19 @@ impl AstNode for CssNthOffset {
 }
 impl std::fmt::Debug for CssNthOffset {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssNthOffset")
-            .field("sign", &support::DebugSyntaxResult(self.sign()))
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssNthOffset")
+                .field("sign", &support::DebugSyntaxResult(self.sign()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssNthOffset").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssNthOffset> for SyntaxNode {
@@ -12470,12 +13227,21 @@ impl AstNode for CssNumber {
 }
 impl std::fmt::Debug for CssNumber {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssNumber")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssNumber")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssNumber").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssNumber> for SyntaxNode {
@@ -12511,11 +13277,20 @@ impl AstNode for CssPageAtRule {
 }
 impl std::fmt::Debug for CssPageAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPageAtRule")
-            .field("page_token", &support::DebugSyntaxResult(self.page_token()))
-            .field("selectors", &self.selectors())
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPageAtRule")
+                .field("page_token", &support::DebugSyntaxResult(self.page_token()))
+                .field("selectors", &self.selectors())
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssPageAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPageAtRule> for SyntaxNode {
@@ -12551,17 +13326,26 @@ impl AstNode for CssPageAtRuleBlock {
 }
 impl std::fmt::Debug for CssPageAtRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPageAtRuleBlock")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPageAtRuleBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPageAtRuleBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPageAtRuleBlock> for SyntaxNode {
@@ -12597,10 +13381,19 @@ impl AstNode for CssPageSelector {
 }
 impl std::fmt::Debug for CssPageSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPageSelector")
-            .field("ty", &support::DebugOptionalElement(self.ty()))
-            .field("pseudos", &self.pseudos())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPageSelector")
+                .field("ty", &support::DebugOptionalElement(self.ty()))
+                .field("pseudos", &self.pseudos())
+                .finish()
+        } else {
+            f.debug_struct("CssPageSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPageSelector> for SyntaxNode {
@@ -12636,13 +13429,22 @@ impl AstNode for CssPageSelectorPseudo {
 }
 impl std::fmt::Debug for CssPageSelectorPseudo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPageSelectorPseudo")
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("selector", &support::DebugSyntaxResult(self.selector()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPageSelectorPseudo")
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .finish()
+        } else {
+            f.debug_struct("CssPageSelectorPseudo").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPageSelectorPseudo> for SyntaxNode {
@@ -12678,12 +13480,21 @@ impl AstNode for CssParameter {
 }
 impl std::fmt::Debug for CssParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssParameter")
-            .field(
-                "any_css_expression",
-                &support::DebugSyntaxResult(self.any_css_expression()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssParameter")
+                .field(
+                    "any_css_expression",
+                    &support::DebugSyntaxResult(self.any_css_expression()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssParameter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssParameter> for SyntaxNode {
@@ -12719,20 +13530,29 @@ impl AstNode for CssParenthesizedExpression {
 }
 impl std::fmt::Debug for CssParenthesizedExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssParenthesizedExpression")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "expression",
-                &support::DebugOptionalElement(self.expression()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssParenthesizedExpression")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssParenthesizedExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssParenthesizedExpression> for SyntaxNode {
@@ -12768,16 +13588,25 @@ impl AstNode for CssPercentage {
 }
 impl std::fmt::Debug for CssPercentage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPercentage")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .field(
-                "percent_token",
-                &support::DebugSyntaxResult(self.percent_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPercentage")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .field(
+                    "percent_token",
+                    &support::DebugSyntaxResult(self.percent_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPercentage").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPercentage> for SyntaxNode {
@@ -12813,14 +13642,23 @@ impl AstNode for CssPositionTryAtRule {
 }
 impl std::fmt::Debug for CssPositionTryAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPositionTryAtRule")
-            .field(
-                "position_try_token",
-                &support::DebugSyntaxResult(self.position_try_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPositionTryAtRule")
+                .field(
+                    "position_try_token",
+                    &support::DebugSyntaxResult(self.position_try_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssPositionTryAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPositionTryAtRule> for SyntaxNode {
@@ -12856,14 +13694,23 @@ impl AstNode for CssPropertyAtRule {
 }
 impl std::fmt::Debug for CssPropertyAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPropertyAtRule")
-            .field(
-                "property_token",
-                &support::DebugSyntaxResult(self.property_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPropertyAtRule")
+                .field(
+                    "property_token",
+                    &support::DebugSyntaxResult(self.property_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssPropertyAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPropertyAtRule> for SyntaxNode {
@@ -12900,18 +13747,28 @@ impl AstNode for CssPseudoClassFunctionCompoundSelector {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionCompoundSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassFunctionCompoundSelector")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("selector", &support::DebugSyntaxResult(self.selector()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionCompoundSelector")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionCompoundSelector")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassFunctionCompoundSelector> for SyntaxNode {
@@ -12948,18 +13805,28 @@ impl AstNode for CssPseudoClassFunctionCompoundSelectorList {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionCompoundSelectorList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassFunctionCompoundSelectorList")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("compound_selectors", &self.compound_selectors())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionCompoundSelectorList")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("compound_selectors", &self.compound_selectors())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionCompoundSelectorList")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassFunctionCompoundSelectorList> for SyntaxNode {
@@ -12995,18 +13862,27 @@ impl AstNode for CssPseudoClassFunctionIdentifier {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassFunctionIdentifier")
-            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("ident", &support::DebugSyntaxResult(self.ident()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionIdentifier")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("ident", &support::DebugSyntaxResult(self.ident()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassFunctionIdentifier> for SyntaxNode {
@@ -13042,18 +13918,27 @@ impl AstNode for CssPseudoClassFunctionNth {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionNth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassFunctionNth")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("selector", &support::DebugSyntaxResult(self.selector()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionNth")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionNth").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassFunctionNth> for SyntaxNode {
@@ -13090,18 +13975,28 @@ impl AstNode for CssPseudoClassFunctionRelativeSelectorList {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionRelativeSelectorList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassFunctionRelativeSelectorList")
-            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("relative_selectors", &self.relative_selectors())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionRelativeSelectorList")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("relative_selectors", &self.relative_selectors())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionRelativeSelectorList")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassFunctionRelativeSelectorList> for SyntaxNode {
@@ -13137,18 +14032,27 @@ impl AstNode for CssPseudoClassFunctionSelector {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassFunctionSelector")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("selector", &support::DebugSyntaxResult(self.selector()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionSelector")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassFunctionSelector> for SyntaxNode {
@@ -13185,18 +14089,28 @@ impl AstNode for CssPseudoClassFunctionSelectorList {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionSelectorList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassFunctionSelectorList")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("selectors", &self.selectors())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionSelectorList")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("selectors", &self.selectors())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionSelectorList")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassFunctionSelectorList> for SyntaxNode {
@@ -13232,18 +14146,27 @@ impl AstNode for CssPseudoClassFunctionValueList {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionValueList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassFunctionValueList")
-            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("values", &self.values())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionValueList")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("values", &self.values())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionValueList").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassFunctionValueList> for SyntaxNode {
@@ -13279,9 +14202,18 @@ impl AstNode for CssPseudoClassIdentifier {
 }
 impl std::fmt::Debug for CssPseudoClassIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassIdentifier")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassIdentifier")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassIdentifier> for SyntaxNode {
@@ -13317,15 +14249,24 @@ impl AstNode for CssPseudoClassNth {
 }
 impl std::fmt::Debug for CssPseudoClassNth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassNth")
-            .field("sign", &support::DebugOptionalElement(self.sign()))
-            .field("value", &support::DebugOptionalElement(self.value()))
-            .field(
-                "symbol_token",
-                &support::DebugSyntaxResult(self.symbol_token()),
-            )
-            .field("offset", &support::DebugOptionalElement(self.offset()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassNth")
+                .field("sign", &support::DebugOptionalElement(self.sign()))
+                .field("value", &support::DebugOptionalElement(self.value()))
+                .field(
+                    "symbol_token",
+                    &support::DebugSyntaxResult(self.symbol_token()),
+                )
+                .field("offset", &support::DebugOptionalElement(self.offset()))
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassNth").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassNth> for SyntaxNode {
@@ -13361,9 +14302,18 @@ impl AstNode for CssPseudoClassNthIdentifier {
 }
 impl std::fmt::Debug for CssPseudoClassNthIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassNthIdentifier")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassNthIdentifier")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassNthIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassNthIdentifier> for SyntaxNode {
@@ -13399,10 +14349,19 @@ impl AstNode for CssPseudoClassNthNumber {
 }
 impl std::fmt::Debug for CssPseudoClassNthNumber {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassNthNumber")
-            .field("sign", &support::DebugOptionalElement(self.sign()))
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassNthNumber")
+                .field("sign", &support::DebugOptionalElement(self.sign()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassNthNumber").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassNthNumber> for SyntaxNode {
@@ -13438,13 +14397,22 @@ impl AstNode for CssPseudoClassNthSelector {
 }
 impl std::fmt::Debug for CssPseudoClassNthSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassNthSelector")
-            .field("nth", &support::DebugSyntaxResult(self.nth()))
-            .field(
-                "of_selector",
-                &support::DebugOptionalElement(self.of_selector()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassNthSelector")
+                .field("nth", &support::DebugSyntaxResult(self.nth()))
+                .field(
+                    "of_selector",
+                    &support::DebugOptionalElement(self.of_selector()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassNthSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassNthSelector> for SyntaxNode {
@@ -13480,10 +14448,19 @@ impl AstNode for CssPseudoClassOfNthSelector {
 }
 impl std::fmt::Debug for CssPseudoClassOfNthSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassOfNthSelector")
-            .field("of_token", &support::DebugSyntaxResult(self.of_token()))
-            .field("selectors", &self.selectors())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassOfNthSelector")
+                .field("of_token", &support::DebugSyntaxResult(self.of_token()))
+                .field("selectors", &self.selectors())
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassOfNthSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassOfNthSelector> for SyntaxNode {
@@ -13519,13 +14496,22 @@ impl AstNode for CssPseudoClassSelector {
 }
 impl std::fmt::Debug for CssPseudoClassSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoClassSelector")
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("class", &support::DebugSyntaxResult(self.class()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassSelector")
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("class", &support::DebugSyntaxResult(self.class()))
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoClassSelector> for SyntaxNode {
@@ -13561,18 +14547,28 @@ impl AstNode for CssPseudoElementFunctionIdentifier {
 }
 impl std::fmt::Debug for CssPseudoElementFunctionIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoElementFunctionIdentifier")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("ident", &support::DebugSyntaxResult(self.ident()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoElementFunctionIdentifier")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("ident", &support::DebugSyntaxResult(self.ident()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoElementFunctionIdentifier")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoElementFunctionIdentifier> for SyntaxNode {
@@ -13608,18 +14604,27 @@ impl AstNode for CssPseudoElementFunctionSelector {
 }
 impl std::fmt::Debug for CssPseudoElementFunctionSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoElementFunctionSelector")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("selector", &support::DebugSyntaxResult(self.selector()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoElementFunctionSelector")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoElementFunctionSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoElementFunctionSelector> for SyntaxNode {
@@ -13655,9 +14660,18 @@ impl AstNode for CssPseudoElementIdentifier {
 }
 impl std::fmt::Debug for CssPseudoElementIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoElementIdentifier")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoElementIdentifier")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoElementIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoElementIdentifier> for SyntaxNode {
@@ -13693,13 +14707,22 @@ impl AstNode for CssPseudoElementSelector {
 }
 impl std::fmt::Debug for CssPseudoElementSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPseudoElementSelector")
-            .field(
-                "double_colon_token",
-                &support::DebugSyntaxResult(self.double_colon_token()),
-            )
-            .field("element", &support::DebugSyntaxResult(self.element()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoElementSelector")
+                .field(
+                    "double_colon_token",
+                    &support::DebugSyntaxResult(self.double_colon_token()),
+                )
+                .field("element", &support::DebugSyntaxResult(self.element()))
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoElementSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssPseudoElementSelector> for SyntaxNode {
@@ -13735,10 +14758,19 @@ impl AstNode for CssQualifiedRule {
 }
 impl std::fmt::Debug for CssQualifiedRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssQualifiedRule")
-            .field("prelude", &self.prelude())
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssQualifiedRule")
+                .field("prelude", &self.prelude())
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssQualifiedRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssQualifiedRule> for SyntaxNode {
@@ -13774,9 +14806,18 @@ impl AstNode for CssQueryFeatureBoolean {
 }
 impl std::fmt::Debug for CssQueryFeatureBoolean {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssQueryFeatureBoolean")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssQueryFeatureBoolean")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssQueryFeatureBoolean").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssQueryFeatureBoolean> for SyntaxNode {
@@ -13812,14 +14853,23 @@ impl AstNode for CssQueryFeaturePlain {
 }
 impl std::fmt::Debug for CssQueryFeaturePlain {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssQueryFeaturePlain")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssQueryFeaturePlain")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssQueryFeaturePlain").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssQueryFeaturePlain> for SyntaxNode {
@@ -13855,11 +14905,20 @@ impl AstNode for CssQueryFeatureRange {
 }
 impl std::fmt::Debug for CssQueryFeatureRange {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssQueryFeatureRange")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("comparison", &support::DebugSyntaxResult(self.comparison()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssQueryFeatureRange")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("comparison", &support::DebugSyntaxResult(self.comparison()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssQueryFeatureRange").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssQueryFeatureRange> for SyntaxNode {
@@ -13895,9 +14954,18 @@ impl AstNode for CssQueryFeatureRangeComparison {
 }
 impl std::fmt::Debug for CssQueryFeatureRangeComparison {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssQueryFeatureRangeComparison")
-            .field("operator", &support::DebugSyntaxResult(self.operator()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssQueryFeatureRangeComparison")
+                .field("operator", &support::DebugSyntaxResult(self.operator()))
+                .finish()
+        } else {
+            f.debug_struct("CssQueryFeatureRangeComparison").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssQueryFeatureRangeComparison> for SyntaxNode {
@@ -13933,19 +15001,28 @@ impl AstNode for CssQueryFeatureRangeInterval {
 }
 impl std::fmt::Debug for CssQueryFeatureRangeInterval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssQueryFeatureRangeInterval")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "left_comparison",
-                &support::DebugSyntaxResult(self.left_comparison()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "right_comparison",
-                &support::DebugSyntaxResult(self.right_comparison()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssQueryFeatureRangeInterval")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "left_comparison",
+                    &support::DebugSyntaxResult(self.left_comparison()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "right_comparison",
+                    &support::DebugSyntaxResult(self.right_comparison()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssQueryFeatureRangeInterval").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssQueryFeatureRangeInterval> for SyntaxNode {
@@ -13981,11 +15058,20 @@ impl AstNode for CssQueryFeatureReverseRange {
 }
 impl std::fmt::Debug for CssQueryFeatureReverseRange {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssQueryFeatureReverseRange")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("comparison", &support::DebugSyntaxResult(self.comparison()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssQueryFeatureReverseRange")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("comparison", &support::DebugSyntaxResult(self.comparison()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssQueryFeatureReverseRange").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssQueryFeatureReverseRange> for SyntaxNode {
@@ -14021,17 +15107,26 @@ impl AstNode for CssRatio {
 }
 impl std::fmt::Debug for CssRatio {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssRatio")
-            .field("numerator", &support::DebugSyntaxResult(self.numerator()))
-            .field(
-                "slash_token",
-                &support::DebugSyntaxResult(self.slash_token()),
-            )
-            .field(
-                "denominator",
-                &support::DebugSyntaxResult(self.denominator()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssRatio")
+                .field("numerator", &support::DebugSyntaxResult(self.numerator()))
+                .field(
+                    "slash_token",
+                    &support::DebugSyntaxResult(self.slash_token()),
+                )
+                .field(
+                    "denominator",
+                    &support::DebugSyntaxResult(self.denominator()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssRatio").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssRatio> for SyntaxNode {
@@ -14067,13 +15162,22 @@ impl AstNode for CssRegularDimension {
 }
 impl std::fmt::Debug for CssRegularDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssRegularDimension")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssRegularDimension")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssRegularDimension").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssRegularDimension> for SyntaxNode {
@@ -14109,13 +15213,22 @@ impl AstNode for CssRelativeSelector {
 }
 impl std::fmt::Debug for CssRelativeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssRelativeSelector")
-            .field(
-                "combinator",
-                &support::DebugOptionalElement(self.combinator()),
-            )
-            .field("selector", &support::DebugSyntaxResult(self.selector()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssRelativeSelector")
+                .field(
+                    "combinator",
+                    &support::DebugOptionalElement(self.combinator()),
+                )
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .finish()
+        } else {
+            f.debug_struct("CssRelativeSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssRelativeSelector> for SyntaxNode {
@@ -14151,14 +15264,23 @@ impl AstNode for CssRoot {
 }
 impl std::fmt::Debug for CssRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssRoot")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field("rules", &self.rules())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssRoot")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field("rules", &self.rules())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssRoot> for SyntaxNode {
@@ -14194,17 +15316,26 @@ impl AstNode for CssRuleBlock {
 }
 impl std::fmt::Debug for CssRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssRuleBlock")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("rules", &self.rules())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssRuleBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("rules", &self.rules())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssRuleBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssRuleBlock> for SyntaxNode {
@@ -14240,14 +15371,23 @@ impl AstNode for CssScopeAtRule {
 }
 impl std::fmt::Debug for CssScopeAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssScopeAtRule")
-            .field(
-                "scope_token",
-                &support::DebugSyntaxResult(self.scope_token()),
-            )
-            .field("range", &support::DebugOptionalElement(self.range()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssScopeAtRule")
+                .field(
+                    "scope_token",
+                    &support::DebugSyntaxResult(self.scope_token()),
+                )
+                .field("range", &support::DebugOptionalElement(self.range()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssScopeAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssScopeAtRule> for SyntaxNode {
@@ -14283,17 +15423,26 @@ impl AstNode for CssScopeEdge {
 }
 impl std::fmt::Debug for CssScopeEdge {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssScopeEdge")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("selectors", &self.selectors())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssScopeEdge")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("selectors", &self.selectors())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssScopeEdge").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssScopeEdge> for SyntaxNode {
@@ -14329,10 +15478,19 @@ impl AstNode for CssScopeRangeEnd {
 }
 impl std::fmt::Debug for CssScopeRangeEnd {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssScopeRangeEnd")
-            .field("to_token", &support::DebugSyntaxResult(self.to_token()))
-            .field("end", &support::DebugSyntaxResult(self.end()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssScopeRangeEnd")
+                .field("to_token", &support::DebugSyntaxResult(self.to_token()))
+                .field("end", &support::DebugSyntaxResult(self.end()))
+                .finish()
+        } else {
+            f.debug_struct("CssScopeRangeEnd").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssScopeRangeEnd> for SyntaxNode {
@@ -14368,11 +15526,20 @@ impl AstNode for CssScopeRangeInterval {
 }
 impl std::fmt::Debug for CssScopeRangeInterval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssScopeRangeInterval")
-            .field("start", &support::DebugSyntaxResult(self.start()))
-            .field("to_token", &support::DebugSyntaxResult(self.to_token()))
-            .field("end", &support::DebugSyntaxResult(self.end()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssScopeRangeInterval")
+                .field("start", &support::DebugSyntaxResult(self.start()))
+                .field("to_token", &support::DebugSyntaxResult(self.to_token()))
+                .field("end", &support::DebugSyntaxResult(self.end()))
+                .finish()
+        } else {
+            f.debug_struct("CssScopeRangeInterval").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssScopeRangeInterval> for SyntaxNode {
@@ -14408,9 +15575,18 @@ impl AstNode for CssScopeRangeStart {
 }
 impl std::fmt::Debug for CssScopeRangeStart {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssScopeRangeStart")
-            .field("start", &support::DebugSyntaxResult(self.start()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssScopeRangeStart")
+                .field("start", &support::DebugSyntaxResult(self.start()))
+                .finish()
+        } else {
+            f.debug_struct("CssScopeRangeStart").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssScopeRangeStart> for SyntaxNode {
@@ -14446,13 +15622,22 @@ impl AstNode for CssStartingStyleAtRule {
 }
 impl std::fmt::Debug for CssStartingStyleAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssStartingStyleAtRule")
-            .field(
-                "starting_style_token",
-                &support::DebugSyntaxResult(self.starting_style_token()),
-            )
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssStartingStyleAtRule")
+                .field(
+                    "starting_style_token",
+                    &support::DebugSyntaxResult(self.starting_style_token()),
+                )
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssStartingStyleAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssStartingStyleAtRule> for SyntaxNode {
@@ -14488,12 +15673,21 @@ impl AstNode for CssString {
 }
 impl std::fmt::Debug for CssString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssString")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssString")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssString").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssString> for SyntaxNode {
@@ -14529,11 +15723,20 @@ impl AstNode for CssSupportsAndCondition {
 }
 impl std::fmt::Debug for CssSupportsAndCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSupportsAndCondition")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsAndCondition")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsAndCondition").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssSupportsAndCondition> for SyntaxNode {
@@ -14569,14 +15772,23 @@ impl AstNode for CssSupportsAtRule {
 }
 impl std::fmt::Debug for CssSupportsAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSupportsAtRule")
-            .field(
-                "supports_token",
-                &support::DebugSyntaxResult(self.supports_token()),
-            )
-            .field("condition", &support::DebugSyntaxResult(self.condition()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsAtRule")
+                .field(
+                    "supports_token",
+                    &support::DebugSyntaxResult(self.supports_token()),
+                )
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssSupportsAtRule> for SyntaxNode {
@@ -14612,17 +15824,26 @@ impl AstNode for CssSupportsConditionInParens {
 }
 impl std::fmt::Debug for CssSupportsConditionInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSupportsConditionInParens")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("condition", &support::DebugSyntaxResult(self.condition()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsConditionInParens")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("condition", &support::DebugSyntaxResult(self.condition()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsConditionInParens").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssSupportsConditionInParens> for SyntaxNode {
@@ -14658,20 +15879,29 @@ impl AstNode for CssSupportsFeatureDeclaration {
 }
 impl std::fmt::Debug for CssSupportsFeatureDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSupportsFeatureDeclaration")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "declaration",
-                &support::DebugSyntaxResult(self.declaration()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsFeatureDeclaration")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsFeatureDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssSupportsFeatureDeclaration> for SyntaxNode {
@@ -14707,21 +15937,30 @@ impl AstNode for CssSupportsFeatureSelector {
 }
 impl std::fmt::Debug for CssSupportsFeatureSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSupportsFeatureSelector")
-            .field(
-                "selector_token",
-                &support::DebugSyntaxResult(self.selector_token()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("selector", &support::DebugSyntaxResult(self.selector()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsFeatureSelector")
+                .field(
+                    "selector_token",
+                    &support::DebugSyntaxResult(self.selector_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsFeatureSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssSupportsFeatureSelector> for SyntaxNode {
@@ -14757,10 +15996,19 @@ impl AstNode for CssSupportsNotCondition {
 }
 impl std::fmt::Debug for CssSupportsNotCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSupportsNotCondition")
-            .field("not_token", &support::DebugSyntaxResult(self.not_token()))
-            .field("query", &support::DebugSyntaxResult(self.query()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsNotCondition")
+                .field("not_token", &support::DebugSyntaxResult(self.not_token()))
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsNotCondition").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssSupportsNotCondition> for SyntaxNode {
@@ -14796,11 +16044,20 @@ impl AstNode for CssSupportsOrCondition {
 }
 impl std::fmt::Debug for CssSupportsOrCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSupportsOrCondition")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("or_token", &support::DebugSyntaxResult(self.or_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsOrCondition")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsOrCondition").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssSupportsOrCondition> for SyntaxNode {
@@ -14836,13 +16093,22 @@ impl AstNode for CssTypeSelector {
 }
 impl std::fmt::Debug for CssTypeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssTypeSelector")
-            .field(
-                "namespace",
-                &support::DebugOptionalElement(self.namespace()),
-            )
-            .field("ident", &support::DebugSyntaxResult(self.ident()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssTypeSelector")
+                .field(
+                    "namespace",
+                    &support::DebugOptionalElement(self.namespace()),
+                )
+                .field("ident", &support::DebugSyntaxResult(self.ident()))
+                .finish()
+        } else {
+            f.debug_struct("CssTypeSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssTypeSelector> for SyntaxNode {
@@ -14878,12 +16144,21 @@ impl AstNode for CssUnicodeCodepoint {
 }
 impl std::fmt::Debug for CssUnicodeCodepoint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUnicodeCodepoint")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnicodeCodepoint")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssUnicodeCodepoint").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUnicodeCodepoint> for SyntaxNode {
@@ -14919,13 +16194,22 @@ impl AstNode for CssUnicodeRange {
 }
 impl std::fmt::Debug for CssUnicodeRange {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUnicodeRange")
-            .field(
-                "prefix_token",
-                &support::DebugSyntaxResult(self.prefix_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnicodeRange")
+                .field(
+                    "prefix_token",
+                    &support::DebugSyntaxResult(self.prefix_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssUnicodeRange").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUnicodeRange> for SyntaxNode {
@@ -14961,14 +16245,23 @@ impl AstNode for CssUnicodeRangeInterval {
 }
 impl std::fmt::Debug for CssUnicodeRangeInterval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUnicodeRangeInterval")
-            .field("start", &support::DebugSyntaxResult(self.start()))
-            .field(
-                "minus_token",
-                &support::DebugSyntaxResult(self.minus_token()),
-            )
-            .field("end", &support::DebugSyntaxResult(self.end()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnicodeRangeInterval")
+                .field("start", &support::DebugSyntaxResult(self.start()))
+                .field(
+                    "minus_token",
+                    &support::DebugSyntaxResult(self.minus_token()),
+                )
+                .field("end", &support::DebugSyntaxResult(self.end()))
+                .finish()
+        } else {
+            f.debug_struct("CssUnicodeRangeInterval").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUnicodeRangeInterval> for SyntaxNode {
@@ -15004,12 +16297,21 @@ impl AstNode for CssUnicodeRangeWildcard {
 }
 impl std::fmt::Debug for CssUnicodeRangeWildcard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUnicodeRangeWildcard")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnicodeRangeWildcard")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssUnicodeRangeWildcard").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUnicodeRangeWildcard> for SyntaxNode {
@@ -15045,9 +16347,18 @@ impl AstNode for CssUniversalNamespacePrefix {
 }
 impl std::fmt::Debug for CssUniversalNamespacePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUniversalNamespacePrefix")
-            .field("star_token", &support::DebugSyntaxResult(self.star_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUniversalNamespacePrefix")
+                .field("star_token", &support::DebugSyntaxResult(self.star_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssUniversalNamespacePrefix").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUniversalNamespacePrefix> for SyntaxNode {
@@ -15083,13 +16394,22 @@ impl AstNode for CssUniversalSelector {
 }
 impl std::fmt::Debug for CssUniversalSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUniversalSelector")
-            .field(
-                "namespace",
-                &support::DebugOptionalElement(self.namespace()),
-            )
-            .field("star_token", &support::DebugSyntaxResult(self.star_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUniversalSelector")
+                .field(
+                    "namespace",
+                    &support::DebugOptionalElement(self.namespace()),
+                )
+                .field("star_token", &support::DebugSyntaxResult(self.star_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssUniversalSelector").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUniversalSelector> for SyntaxNode {
@@ -15125,11 +16445,20 @@ impl AstNode for CssUnknownBlockAtRule {
 }
 impl std::fmt::Debug for CssUnknownBlockAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUnknownBlockAtRule")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("components", &support::DebugSyntaxResult(self.components()))
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnknownBlockAtRule")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("components", &support::DebugSyntaxResult(self.components()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssUnknownBlockAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUnknownBlockAtRule> for SyntaxNode {
@@ -15165,13 +16494,22 @@ impl AstNode for CssUnknownDimension {
 }
 impl std::fmt::Debug for CssUnknownDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUnknownDimension")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnknownDimension")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
+                .finish()
+        } else {
+            f.debug_struct("CssUnknownDimension").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUnknownDimension> for SyntaxNode {
@@ -15207,14 +16545,23 @@ impl AstNode for CssUnknownValueAtRule {
 }
 impl std::fmt::Debug for CssUnknownValueAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUnknownValueAtRule")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("components", &support::DebugSyntaxResult(self.components()))
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUnknownValueAtRule")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("components", &support::DebugSyntaxResult(self.components()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssUnknownValueAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUnknownValueAtRule> for SyntaxNode {
@@ -15250,19 +16597,28 @@ impl AstNode for CssUrlFunction {
 }
 impl std::fmt::Debug for CssUrlFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUrlFunction")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("value", &support::DebugOptionalElement(self.value()))
-            .field("modifiers", &self.modifiers())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUrlFunction")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("value", &support::DebugOptionalElement(self.value()))
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssUrlFunction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUrlFunction> for SyntaxNode {
@@ -15298,12 +16654,21 @@ impl AstNode for CssUrlValueRaw {
 }
 impl std::fmt::Debug for CssUrlValueRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssUrlValueRaw")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssUrlValueRaw")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssUrlValueRaw").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssUrlValueRaw> for SyntaxNode {
@@ -15339,17 +16704,26 @@ impl AstNode for CssValueAtRule {
 }
 impl std::fmt::Debug for CssValueAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssValueAtRule")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .field("clause", &support::DebugSyntaxResult(self.clause()))
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssValueAtRule")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .field("clause", &support::DebugSyntaxResult(self.clause()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssValueAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssValueAtRule> for SyntaxNode {
@@ -15385,9 +16759,18 @@ impl AstNode for CssValueAtRuleDeclarationClause {
 }
 impl std::fmt::Debug for CssValueAtRuleDeclarationClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssValueAtRuleDeclarationClause")
-            .field("properties", &self.properties())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssValueAtRuleDeclarationClause")
+                .field("properties", &self.properties())
+                .finish()
+        } else {
+            f.debug_struct("CssValueAtRuleDeclarationClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssValueAtRuleDeclarationClause> for SyntaxNode {
@@ -15423,14 +16806,23 @@ impl AstNode for CssValueAtRuleGenericProperty {
 }
 impl std::fmt::Debug for CssValueAtRuleGenericProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssValueAtRuleGenericProperty")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssValueAtRuleGenericProperty")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("CssValueAtRuleGenericProperty").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssValueAtRuleGenericProperty> for SyntaxNode {
@@ -15466,11 +16858,20 @@ impl AstNode for CssValueAtRuleImportClause {
 }
 impl std::fmt::Debug for CssValueAtRuleImportClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssValueAtRuleImportClause")
-            .field("specifiers", &self.specifiers())
-            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssValueAtRuleImportClause")
+                .field("specifiers", &self.specifiers())
+                .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .finish()
+        } else {
+            f.debug_struct("CssValueAtRuleImportClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssValueAtRuleImportClause> for SyntaxNode {
@@ -15506,9 +16907,18 @@ impl AstNode for CssValueAtRuleImportSpecifier {
 }
 impl std::fmt::Debug for CssValueAtRuleImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssValueAtRuleImportSpecifier")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssValueAtRuleImportSpecifier")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("CssValueAtRuleImportSpecifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssValueAtRuleImportSpecifier> for SyntaxNode {
@@ -15545,11 +16955,21 @@ impl AstNode for CssValueAtRuleNamedImportSpecifier {
 }
 impl std::fmt::Debug for CssValueAtRuleNamedImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssValueAtRuleNamedImportSpecifier")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field("local_name", &support::DebugSyntaxResult(self.local_name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssValueAtRuleNamedImportSpecifier")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field("local_name", &support::DebugSyntaxResult(self.local_name()))
+                .finish()
+        } else {
+            f.debug_struct("CssValueAtRuleNamedImportSpecifier")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssValueAtRuleNamedImportSpecifier> for SyntaxNode {
@@ -15585,13 +17005,22 @@ impl AstNode for CssViewTransitionAtRule {
 }
 impl std::fmt::Debug for CssViewTransitionAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssViewTransitionAtRule")
-            .field(
-                "view_transition_token",
-                &support::DebugSyntaxResult(self.view_transition_token()),
-            )
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssViewTransitionAtRule")
+                .field(
+                    "view_transition_token",
+                    &support::DebugSyntaxResult(self.view_transition_token()),
+                )
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("CssViewTransitionAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<CssViewTransitionAtRule> for SyntaxNode {
@@ -24758,6 +26187,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssBracketedValueList {
     syntax_list: SyntaxList,

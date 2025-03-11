@@ -1,13 +1,13 @@
 use crate::prelude::*;
 use crate::utils::{FormatOptionalSemicolon, FormatStatementSemicolon};
 
-use biome_formatter::{format_args, write, CstFormatContext};
+use biome_formatter::{CstFormatContext, format_args, write};
 use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::expression_left_side::AnyJsExpressionLeftSide;
 use biome_js_syntax::{
     AnyJsExpression, JsReturnStatement, JsSequenceExpression, JsSyntaxToken, JsThrowStatement,
 };
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsReturnStatement;
@@ -49,7 +49,7 @@ impl Format<JsFormatContext> for AnyJsStatementWithArgument {
                 .trailing_comments(self.syntax())
                 .last()
                 .or_else(|| comments.dangling_comments(self.syntax()).last())
-                .map_or(false, |comment| comment.kind().is_line());
+                .is_some_and(|comment| comment.kind().is_line());
 
             if is_last_comment_line {
                 write!(f, [FormatOptionalSemicolon::new(Some(&semicolon))])?;

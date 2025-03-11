@@ -1,15 +1,16 @@
-use crate::{services::aria::Aria, JsRuleAction};
+use crate::{JsRuleAction, services::aria::Aria};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
     jsx_string, jsx_string_literal, token,
 };
 use biome_js_syntax::{
-    jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue,
-    JsxAttributeList, T,
+    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, JsxAttributeList, T,
+    jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 
@@ -53,6 +54,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

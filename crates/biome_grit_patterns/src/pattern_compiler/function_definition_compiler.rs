@@ -1,5 +1,5 @@
 use super::{and_compiler::PrAndCompiler, compilation_context::NodeCompilationContext};
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{GritFunctionDefinition, Predicate};
 use std::collections::BTreeMap;
@@ -11,7 +11,7 @@ impl FunctionDefinitionCompiler {
         node: biome_grit_syntax::GritFunctionDefinition,
         context: &mut NodeCompilationContext,
     ) -> Result<GritFunctionDefinition<GritQueryContext>, CompileError> {
-        let name = node.name()?.text();
+        let name = node.name()?.to_trimmed_string();
         let name = name.trim();
         let mut local_vars = BTreeMap::new();
         let (scope_index, mut context) = create_scope!(context, local_vars);

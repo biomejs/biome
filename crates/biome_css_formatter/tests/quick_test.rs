@@ -1,6 +1,6 @@
 use biome_css_formatter::format_node;
-use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_formatter::{CssFormatLanguage, context::CssFormatOptions};
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_formatter_test::check_reformat::CheckReformat;
 

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: logicalAndCases3.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // chained calls
 foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz() && bing.bong
 foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz && foo.bar.baz.buzz() && bing.bong
@@ -805,5 +806,3 @@ logicalAndCases3.js:62:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
   
 
 ```
-
-

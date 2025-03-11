@@ -1,6 +1,6 @@
 use crate::services::aria::Aria;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
@@ -114,7 +114,7 @@ impl Rule for NoStaticElementInteractions {
                     if let Some(value) = node.find_attribute_by_name(handler) {
                         value
                             .as_static_value()
-                            .map_or(true, |value| value.text() != "null")
+                            .is_none_or(|value| value.text() != "null")
                     } else {
                         false
                     }
@@ -151,13 +151,13 @@ impl Rule for NoStaticElementInteractions {
  */
 fn is_hidden_from_screen_reader(node: &AnyJsxElement, element_name: &str) -> bool {
     node.find_attribute_by_name("aria-hidden")
-        .map_or(false, |attr| {
+        .is_some_and(|attr| {
             attr.as_static_value()
-                .map_or(true, |val| val.text() == "true")
+                .is_none_or(|val| val.text() == "true")
         })// <div aria-hidden />
         || (element_name == "input"
-            && node.find_attribute_by_name("type").map_or(false, |attr| {
+            && node.find_attribute_by_name("type").is_some_and(|attr| {
                 attr.as_static_value()
-                    .map_or(false, |val| val.text() == "hidden")
+                    .is_some_and(|val| val.text() == "hidden")
             })) // <input type="hidden" />
 }

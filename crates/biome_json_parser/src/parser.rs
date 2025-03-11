@@ -1,10 +1,10 @@
 use crate::token_source::JsonTokenSource;
 use biome_json_syntax::{JsonFileSource, JsonSyntaxKind};
+use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
 use biome_parser::token_source::Trivia;
-use biome_parser::ParserContext;
 
 pub(crate) struct JsonParser<'source> {
     context: ParserContext<JsonSyntaxKind>,
@@ -106,12 +106,12 @@ mod tests {
         assert!(!p1.allow_comments);
         assert!(!p1.allow_trailing_commas);
 
-        let p2 = JsonParserOptions::from(&JsonFileSource::json_allow_comments());
+        let p2 = JsonParserOptions::from(&JsonFileSource::json_allow_comments(""));
         assert!(p2.allow_comments);
         assert!(!p2.allow_trailing_commas);
 
         let p3 =
-            JsonParserOptions::from(&JsonFileSource::json_allow_comments_and_trailing_commas());
+            JsonParserOptions::from(&JsonFileSource::json_allow_comments_and_trailing_commas(""));
         assert!(p3.allow_comments);
         assert!(p3.allow_trailing_commas);
     }

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function case1() {
 	class A { }
 	foo(A);
@@ -72,5 +73,3 @@ function case11() {
 }
 
 ```
-
-

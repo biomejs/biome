@@ -1,15 +1,16 @@
 use std::borrow::Cow;
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsStatement, JsIfStatement, JsStatementList, JsSyntaxKind};
 use biome_rowan::{
-    chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, AstNodeList, BatchMutationExt,
-    SyntaxNodeOptionExt,
+    AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, chain_trivia_pieces,
+    trim_leading_trivia_pieces,
 };
 
 use crate::JsRuleAction;
@@ -93,7 +94,8 @@ declare_lint_rule! {
             RuleSource::Clippy("redundant_else 	"),
         ],
         source_kind: RuleSourceKind::Inspired,
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

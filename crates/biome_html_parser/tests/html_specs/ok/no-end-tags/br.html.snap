@@ -22,7 +22,7 @@ HtmlRoot {
         },
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@3..4 "<" [] [],
-            name: HtmlName {
+            name: HtmlTagName {
                 value_token: HTML_LITERAL@4..6 "br" [] [],
             },
             attributes: HtmlAttributeList [],
@@ -48,7 +48,7 @@ HtmlRoot {
       0: HTML_LITERAL@0..3 "foo" [] []
     1: HTML_SELF_CLOSING_ELEMENT@3..7
       0: L_ANGLE@3..4 "<" [] []
-      1: HTML_NAME@4..6
+      1: HTML_TAG_NAME@4..6
         0: HTML_LITERAL@4..6 "br" [] []
       2: HTML_ATTRIBUTE_LIST@6..6
       3: (empty)

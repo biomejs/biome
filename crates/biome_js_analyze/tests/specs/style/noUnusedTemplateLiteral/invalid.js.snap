@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var foo = `bar`;
 var foo1 = `bar `;
 var foo = `back\rtick`;
@@ -294,5 +295,3 @@ invalid.js:12:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
   
 
 ```
-
-

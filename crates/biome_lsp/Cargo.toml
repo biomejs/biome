@@ -25,7 +25,10 @@ biome_lsp_converters = { workspace = true }
 biome_rowan          = { workspace = true }
 biome_service        = { workspace = true }
 biome_text_edit      = { workspace = true }
+camino               = { workspace = true }
+crossbeam            = { workspace = true }
 futures              = "0.3.31"
+papaya               = { workspace = true }
 rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }

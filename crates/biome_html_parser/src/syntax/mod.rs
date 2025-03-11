@@ -5,12 +5,12 @@ use crate::syntax::parse_error::*;
 use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
+use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
-use biome_parser::Parser;
 
 const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<], T![/]);
 
@@ -21,7 +21,7 @@ static VOID_ELEMENTS: &[&str] = &[
 ];
 
 /// For these elements, the content is treated as raw text and no parsing is done inside them. This is so that the contents of these tags can be parsed by a different parser.
-pub(crate) static EMBEDDED_LANGUAGE_ELEMENTS: &[&str] = &["script", "style"];
+pub(crate) static EMBEDDED_LANGUAGE_ELEMENTS: &[&str] = &["script", "style", "pre"];
 
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
@@ -82,7 +82,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
-    parse_literal(p).or_add_diagnostic(p, expected_element_name);
+    parse_literal(p, HTML_TAG_NAME).or_add_diagnostic(p, expected_element_name);
 
     AttributeList.parse_list(p);
 
@@ -104,6 +104,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 HtmlLexContext::EmbeddedLanguage(match opening_tag_name.as_str() {
                     tag if tag.eq_ignore_ascii_case("script") => HtmlEmbededLanguage::Script,
                     tag if tag.eq_ignore_ascii_case("style") => HtmlEmbededLanguage::Style,
+                    tag if tag.eq_ignore_ascii_case("pre") => HtmlEmbededLanguage::Preformatted,
                     _ => unreachable!(),
                 })
             } else {
@@ -114,7 +115,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         loop {
             ElementList.parse_list(p);
             if let Some(mut closing) =
-                parse_closing_element(p).or_add_diagnostic(p, expected_closing_tag)
+                parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
             {
                 if !closing.text(p).contains(opening_tag_name.as_str()) {
                     p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
@@ -130,7 +131,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     }
 }
 
-fn parse_closing_element(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) || !p.nth_at(1, T![/]) {
         return Absent;
     }
@@ -143,7 +144,7 @@ fn parse_closing_element(p: &mut HtmlParser) -> ParsedSyntax {
     if should_be_self_closing {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
-    let _name = parse_literal(p);
+    let _name = parse_literal(p, HTML_TAG_NAME);
     p.bump_with_context(T![>], HtmlLexContext::OutsideTag);
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
@@ -159,6 +160,7 @@ impl ParseNodeList for ElementList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         match p.cur() {
             T![<!--] => parse_comment(p),
+            T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
             HTML_LITERAL => {
                 let m = p.start();
@@ -224,7 +226,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    parse_literal(p).or_add_diagnostic(p, expected_attribute);
+    parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
     if p.at(T![=]) {
         parse_attribute_initializer(p).ok();
         Present(m.complete(p, HTML_ATTRIBUTE))
@@ -233,7 +235,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
     }
 }
 
-fn parse_literal(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     if !p.at(HTML_LITERAL) {
         return Absent;
     }
@@ -241,7 +243,7 @@ fn parse_literal(p: &mut HtmlParser) -> ParsedSyntax {
 
     p.bump(HTML_LITERAL);
 
-    Present(m.complete(p, HTML_NAME))
+    Present(m.complete(p, kind))
 }
 
 fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
@@ -271,7 +273,22 @@ fn parse_comment(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.bump_with_context(T![<!--], HtmlLexContext::Comment);
-    p.bump_with_context(HTML_LITERAL, HtmlLexContext::Comment);
+    while !p.at(T![-->]) && !p.at(EOF) {
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::Comment);
+    }
     p.expect(T![-->]);
     Present(m.complete(p, HTML_COMMENT))
+}
+
+fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T!["<![CDATA["]) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump_with_context(T!["<![CDATA["], HtmlLexContext::CdataSection);
+    while !p.at(T!["]]>"]) && !p.at(EOF) {
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::CdataSection);
+    }
+    p.expect(T!["]]>"]);
+    Present(m.complete(p, HTML_CDATA_SECTION))
 }

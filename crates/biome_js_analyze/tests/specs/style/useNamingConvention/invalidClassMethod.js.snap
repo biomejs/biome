@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidClassMethod.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export default class {
     M() {}
 
@@ -31,7 +32,7 @@ export default class {
 ```
 invalidClassMethod.js:2:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class method name should be in camelCase.
+  i This class method name should be in camelCase.
   
     1 │ export default class {
   > 2 │     M() {}
@@ -45,7 +46,7 @@ invalidClassMethod.js:2:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassMethod.js:4:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class method name should be in camelCase.
+  i This class method name should be in camelCase.
   
     2 │     M() {}
     3 │ 
@@ -60,7 +61,7 @@ invalidClassMethod.js:4:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassMethod.js:6:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     4 │     METHOD() {}
     5 │ 
@@ -78,7 +79,7 @@ invalidClassMethod.js:6:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassMethod.js:8:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class method name should be in camelCase.
+  i This class method name should be in camelCase.
   
      6 │     AMethod() {}
      7 │ 
@@ -93,7 +94,7 @@ invalidClassMethod.js:8:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassMethod.js:10:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class method name should be in camelCase.
+  i This class method name should be in camelCase.
   
      8 │     method_1() {}
      9 │ 
@@ -108,7 +109,7 @@ invalidClassMethod.js:10:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassMethod.js:12:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class method name should be in camelCase.
+  i This class method name should be in camelCase.
   
     10 │     Unknown_Style() {}
     11 │ 
@@ -123,7 +124,7 @@ invalidClassMethod.js:12:6 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassMethod.js:14:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class method name should be in camelCase.
+  i This class method name should be in camelCase.
   
     12 │     #M() {}
     13 │ 
@@ -138,7 +139,7 @@ invalidClassMethod.js:14:6 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassMethod.js:16:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     14 │     #METHOD() {}
     15 │ 
@@ -156,7 +157,7 @@ invalidClassMethod.js:16:6 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassMethod.js:18:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class method name should be in camelCase.
+  i This class method name should be in camelCase.
   
     16 │     #AMethod() {}
     17 │ 
@@ -171,7 +172,7 @@ invalidClassMethod.js:18:6 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassMethod.js:20:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class method name should be in camelCase.
+  i This class method name should be in camelCase.
   
     18 │     #method_1() {}
     19 │ 

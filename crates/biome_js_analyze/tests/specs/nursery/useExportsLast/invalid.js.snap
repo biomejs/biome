@@ -4,7 +4,7 @@ expression: invalid.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export const a = 1;
 
 const b = 2;
@@ -15,7 +15,7 @@ const b = 2;
 ```
 invalid.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports should be declared after all non-export statements.
+  i All exports should be declared after all non-export statements.
   
   > 1 │ export const a = 1;
       │ ^^^^^^^^^^^^^^^^^^^

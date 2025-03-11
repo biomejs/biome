@@ -2,14 +2,14 @@ use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::js::bindings::parameters::has_only_simple_parameters;
 use crate::js::declarations::function_declaration::FormatFunctionOptions;
 use crate::js::expressions::arrow_function_expression::{
-    is_multiline_template_starting_on_same_line, FormatJsArrowFunctionExpressionOptions,
+    FormatJsArrowFunctionExpressionOptions, is_multiline_template_starting_on_same_line,
 };
 use crate::js::lists::array_element_list::can_concisely_print_array_list;
 use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::member_chain::SimpleArgument;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
-use biome_formatter::{format_args, format_element, write, VecBuffer};
+use biome_formatter::{VecBuffer, format_args, format_element, write};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
@@ -724,7 +724,7 @@ struct FormatAllArgsBrokenOut<'a> {
     node: &'a JsCallArguments,
 }
 
-impl<'a> Format<JsFormatContext> for FormatAllArgsBrokenOut<'a> {
+impl Format<JsFormatContext> for FormatAllArgsBrokenOut<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         let is_inside_import = self.node.parent::<JsImportCallExpression>().is_some();
 
@@ -1073,29 +1073,28 @@ fn can_group_expression_argument(
             //     (type: ObjectType): Provider<Opts> => {}
             //   );
             // }
-            let can_group_type =
-                return_type_annotation
-                    .and_then(|rty| rty.ty().ok())
-                    .map_or(true, |any_type| match any_type {
-                        AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(_)) => match &body {
-                            AnyJsFunctionBody::JsFunctionBody(body) => {
-                                body.statements().iter().any(|statement| match statement {
-                                    AnyJsStatement::JsEmptyStatement(s) => {
-                                        // When the body contains an empty statement, comments in
-                                        // the body will get attached to that statement rather than
-                                        // the body itself, so they need to be checked for comments
-                                        // as well to ensure that the body is still considered
-                                        // groupable when those empty statements are removed by the
-                                        // printer.
-                                        comments.has_comments(s.syntax())
-                                    }
-                                    _ => true,
-                                }) || comments.has_dangling_comments(body.syntax())
-                            }
-                            _ => false,
-                        },
-                        _ => true,
-                    });
+            let can_group_type = return_type_annotation
+                .and_then(|rty| rty.ty().ok())
+                .is_none_or(|any_type| match any_type {
+                    AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(_)) => match &body {
+                        AnyJsFunctionBody::JsFunctionBody(body) => {
+                            body.statements().iter().any(|statement| match statement {
+                                AnyJsStatement::JsEmptyStatement(s) => {
+                                    // When the body contains an empty statement, comments in
+                                    // the body will get attached to that statement rather than
+                                    // the body itself, so they need to be checked for comments
+                                    // as well to ensure that the body is still considered
+                                    // groupable when those empty statements are removed by the
+                                    // printer.
+                                    comments.has_comments(s.syntax())
+                                }
+                                _ => true,
+                            }) || comments.has_dangling_comments(body.syntax())
+                        }
+                        _ => false,
+                    },
+                    _ => true,
+                });
 
             let can_group_body = match &body {
                 AnyJsFunctionBody::JsFunctionBody(_)
@@ -1239,7 +1238,7 @@ fn is_react_hook_with_deps_array(arguments: &JsCallArguments, comments: &JsComme
 
             if !callback
                 .parameters()
-                .map_or(false, |parameters| parameters.is_empty())
+                .is_ok_and(|parameters| parameters.is_empty())
             {
                 return false;
             }
@@ -1278,7 +1277,7 @@ fn is_function_composition_args(arguments: &JsCallArguments) -> bool {
                 has_seen_function_like = true;
             }
             AnyJsCallArgument::AnyJsExpression(JsCallExpression(call)) => {
-                if call.arguments().map_or(false, |call_arguments| {
+                if call.arguments().is_ok_and(|call_arguments| {
                     call_arguments.args().iter().flatten().any(|arg| {
                         matches!(
                             arg,

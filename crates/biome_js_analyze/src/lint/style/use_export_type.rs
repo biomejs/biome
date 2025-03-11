@@ -1,17 +1,18 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExportNamedSpecifier, JsExportNamedClause, JsExportNamedFromClause, JsFileSource,
     JsSyntaxToken, T,
 };
 use biome_rowan::{
-    chain_trivia_pieces, declare_node_union, trim_leading_trivia_pieces, AstNode, AstSeparatedList,
-    BatchMutationExt, TriviaPieceKind,
+    AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, chain_trivia_pieces,
+    declare_node_union, trim_leading_trivia_pieces,
 };
 
 declare_lint_rule! {
@@ -66,7 +67,8 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("consistent-type-exports")],
         source_kind: RuleSourceKind::Inspired,
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

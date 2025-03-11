@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
-use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{CstFormatContext, write};
 use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeValue, AnyJsxElementName, JsSyntaxToken, JsxAttributeList,
     JsxOpeningElement, JsxSelfClosingElement, JsxString, TsTypeArguments,
 };
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxOpeningElement;
@@ -152,14 +152,15 @@ impl AnyJsxOpeningElement {
     fn compute_layout(&self, comments: &JsComments) -> SyntaxResult<OpeningElementLayout> {
         let attributes = self.attributes();
         let name = self.name()?;
-        let last_attribute_has_comments = self.attributes().last().map_or(false, |attribute| {
-            comments.has_trailing_comments(attribute.syntax())
-        });
+        let last_attribute_has_comments = self
+            .attributes()
+            .last()
+            .is_some_and(|attribute| comments.has_trailing_comments(attribute.syntax()));
 
         let name_has_comments = comments.has_comments(name.syntax())
             || self
                 .type_arguments()
-                .map_or(false, |arguments| comments.has_comments(arguments.syntax()));
+                .is_some_and(|arguments| comments.has_comments(arguments.syntax()));
 
         let layout = if self.is_self_closing() && attributes.is_empty() && !name_has_comments {
             OpeningElementLayout::Inline
@@ -217,19 +218,19 @@ enum OpeningElementLayout {
 
 /// Returns `true` if this is an attribute with a [JsxString] initializer that does not contain any new line characters.
 fn is_single_line_string_literal_attribute(attribute: &AnyJsxAttribute) -> bool {
-    as_string_literal_attribute_value(attribute).map_or(false, |string| {
+    as_string_literal_attribute_value(attribute).is_some_and(|string| {
         string
             .value_token()
-            .map_or(false, |text| !text.text_trimmed().contains('\n'))
+            .is_ok_and(|text| !text.text_trimmed().contains('\n'))
     })
 }
 
 /// Returns `true` if this is an attribute with a [JsxString] initializer that contains at least one new line character.
 fn is_multiline_string_literal_attribute(attribute: &AnyJsxAttribute) -> bool {
-    as_string_literal_attribute_value(attribute).map_or(false, |string| {
+    as_string_literal_attribute_value(attribute).is_some_and(|string| {
         string
             .value_token()
-            .map_or(false, |text| text.text_trimmed().contains('\n'))
+            .is_ok_and(|text| text.text_trimmed().contains('\n'))
     })
 }
 
@@ -249,6 +250,6 @@ fn as_string_literal_attribute_value(attribute: &AnyJsxAttribute) -> Option<JsxS
                     _ => None,
                 })
         }
-        JsxSpreadAttribute(_) => None,
+        JsxSpreadAttribute(_) | JsMetavariable(_) => None,
     }
 }

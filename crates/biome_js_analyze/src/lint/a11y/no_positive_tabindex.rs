@@ -1,9 +1,10 @@
+use crate::JsRuleAction;
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
-use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_factory::make::{jsx_string, jsx_string_literal};
 use biome_js_semantic::SemanticModel;
@@ -12,7 +13,7 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsCallExpression, JsNumberLiteralExpression,
     JsPropertyObjectMember, JsStringLiteralExpression, JsUnaryExpression, JsxAttribute, TextRange,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 
 declare_lint_rule! {
     /// Prevent the usage of positive integers on `tabIndex` property
@@ -53,6 +54,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -108,7 +110,7 @@ impl AnyNumberLikeExpression {
             }
             AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
                 if unary_expression.is_signed_numeric_literal().ok()? {
-                    return Some(unary_expression.text());
+                    return Some(unary_expression.to_trimmed_string());
                 }
             }
         }

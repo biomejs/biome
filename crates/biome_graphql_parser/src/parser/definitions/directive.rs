@@ -1,7 +1,6 @@
 use crate::parser::{
-    parse_binding, parse_description,
+    GraphqlParser, parse_binding, parse_description,
     parse_error::{expected_directive_location, expected_name},
-    GraphqlParser,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
@@ -9,8 +8,8 @@ use biome_graphql_syntax::{
 };
 use biome_parser::prelude::TokenSource;
 use biome_parser::{
-    parse_lists::ParseSeparatedList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, token_set, Parser, TokenSet,
+    Parser, TokenSet, parse_lists::ParseSeparatedList, parse_recovery::ParseRecovery,
+    parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, token_set,
 };
 
 use super::{field::parse_arguments_definition, is_at_definition};

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsVariableStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsVariableStatement1() {
     return;
     var variable;
@@ -41,7 +42,7 @@ function JsVariableStatement6() {
 ```
 JsVariableStatement.js:8:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      6 │ function JsVariableStatement2() {
      7 │     return;
@@ -64,7 +65,7 @@ JsVariableStatement.js:8:5 lint/correctness/noUnreachable ━━━━━━━�
 ```
 JsVariableStatement.js:18:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     16 │ function JsVariableStatement4() {
     17 │     return;
@@ -87,7 +88,7 @@ JsVariableStatement.js:18:5 lint/correctness/noUnreachable ━━━━━━━
 ```
 JsVariableStatement.js:23:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     21 │ function JsVariableStatement5() {
     22 │     return;
@@ -110,7 +111,7 @@ JsVariableStatement.js:23:5 lint/correctness/noUnreachable ━━━━━━━
 ```
 JsVariableStatement.js:28:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     26 │ function JsVariableStatement6() {
     27 │     return;
@@ -131,5 +132,3 @@ JsVariableStatement.js:28:5 lint/correctness/noUnreachable ━━━━━━━
   
 
 ```
-
-

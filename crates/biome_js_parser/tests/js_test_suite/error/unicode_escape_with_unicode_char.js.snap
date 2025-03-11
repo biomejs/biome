@@ -5,7 +5,7 @@ snapshot_kind: text
 ---
 ## Input
 
-```jsx
+```js
 const v = \u1¡1
 ```
 

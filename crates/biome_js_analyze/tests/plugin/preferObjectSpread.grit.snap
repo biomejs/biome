@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: preferObjectSpread.grit
+snapshot_kind: text
+---
+# Input
+```js
+Object.assign({}, foo);
+
+Object.assign({}, {foo: 'bar'});
+
+Object.assign({ foo: 'bar'}, baz);
+
+```
+
+# Diagnostics
+```
+preferObjectSpread.grit:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer object spread instead of `Object.assign()`
+  
+  > 1 │ Object.assign({}, foo);
+      │               ^^^^^^^
+    2 │ 
+    3 │ Object.assign({}, {foo: 'bar'});
+  
+
+```
+
+```
+preferObjectSpread.grit:3:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer object spread instead of `Object.assign()`
+  
+    1 │ Object.assign({}, foo);
+    2 │ 
+  > 3 │ Object.assign({}, {foo: 'bar'});
+      │               ^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ Object.assign({ foo: 'bar'}, baz);
+  
+
+```
+
+```
+preferObjectSpread.grit:5:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer object spread instead of `Object.assign()`
+  
+    3 │ Object.assign({}, {foo: 'bar'});
+    4 │ 
+  > 5 │ Object.assign({ foo: 'bar'}, baz);
+      │               ^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+
+```

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 throw Error()
 throw (Error)()
 throw lib.Error()
@@ -35,7 +36,7 @@ throw /**1**/ ( /**2**/ getGlobalThis().Error /**3 **/ )()
 ```
 invalid.js:1:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
   > 1 │ throw Error()
       │       ^^^^^^^
@@ -54,7 +55,7 @@ invalid.js:1:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:2:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     1 │ throw Error()
   > 2 │ throw (Error)()
@@ -74,7 +75,7 @@ invalid.js:2:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:3:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     1 │ throw Error()
     2 │ throw (Error)()
@@ -95,7 +96,7 @@ invalid.js:3:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:4:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     2 │ throw (Error)()
     3 │ throw lib.Error()
@@ -116,7 +117,7 @@ invalid.js:4:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:5:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     3 │ throw lib.Error()
     4 │ throw lib.mod.Error()
@@ -137,7 +138,7 @@ invalid.js:5:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:6:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     4 │ throw lib.mod.Error()
     5 │ throw lib[mod].Error()
@@ -158,7 +159,7 @@ invalid.js:6:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:7:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     5 │ throw lib[mod].Error()
     6 │ throw (/**1**/lib.mod).Error()
@@ -179,7 +180,7 @@ invalid.js:7:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:8:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new CustomError() instead of CustomError() when throwing an error.
+  i Use new CustomError() instead of CustomError() when throwing an error.
   
      6 │ throw (/**1**/lib.mod).Error()
      7 │ throw Error('foo')
@@ -200,7 +201,7 @@ invalid.js:8:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:9:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new FooBarBazError() instead of FooBarBazError() when throwing an error.
+  i Use new FooBarBazError() instead of FooBarBazError() when throwing an error.
   
      7 │ throw Error('foo')
      8 │ throw CustomError('foo')
@@ -221,7 +222,7 @@ invalid.js:9:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:10:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new ABCError() instead of ABCError() when throwing an error.
+  i Use new ABCError() instead of ABCError() when throwing an error.
   
      8 │ throw CustomError('foo')
      9 │ throw FooBarBazError('foo')
@@ -242,7 +243,7 @@ invalid.js:10:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:11:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Abc3Error() instead of Abc3Error() when throwing an error.
+  i Use new Abc3Error() instead of Abc3Error() when throwing an error.
   
      9 │ throw FooBarBazError('foo')
     10 │ throw ABCError('foo')
@@ -263,7 +264,7 @@ invalid.js:11:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:12:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new TypeError() instead of TypeError() when throwing an error.
+  i Use new TypeError() instead of TypeError() when throwing an error.
   
     10 │ throw ABCError('foo')
     11 │ throw Abc3Error('foo')
@@ -284,7 +285,7 @@ invalid.js:12:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:13:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new EvalError() instead of EvalError() when throwing an error.
+  i Use new EvalError() instead of EvalError() when throwing an error.
   
     11 │ throw Abc3Error('foo')
     12 │ throw TypeError()
@@ -305,7 +306,7 @@ invalid.js:13:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:14:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new RangeError() instead of RangeError() when throwing an error.
+  i Use new RangeError() instead of RangeError() when throwing an error.
   
     12 │ throw TypeError()
     13 │ throw EvalError()
@@ -326,7 +327,7 @@ invalid.js:14:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:15:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new ReferenceError() instead of ReferenceError() when throwing an error.
+  i Use new ReferenceError() instead of ReferenceError() when throwing an error.
   
     13 │ throw EvalError()
     14 │ throw RangeError()
@@ -347,7 +348,7 @@ invalid.js:15:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:16:15 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new SyntaxError() instead of SyntaxError() when throwing an error.
+  i Use new SyntaxError() instead of SyntaxError() when throwing an error.
   
     14 │ throw RangeError()
     15 │ throw ReferenceError()
@@ -368,7 +369,7 @@ invalid.js:16:15 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:17:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new URIError() instead of URIError() when throwing an error.
+  i Use new URIError() instead of URIError() when throwing an error.
   
     15 │ throw ReferenceError()
     16 │ throw /**1**/ SyntaxError() /**2**/
@@ -389,7 +390,7 @@ invalid.js:17:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:18:24 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new URIError() instead of URIError() when throwing an error.
+  i Use new URIError() instead of URIError() when throwing an error.
   
     16 │ throw /**1**/ SyntaxError() /**2**/
     17 │ throw URIError()
@@ -410,7 +411,7 @@ invalid.js:18:24 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:19:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new URIError() instead of URIError() when throwing an error.
+  i Use new URIError() instead of URIError() when throwing an error.
   
     17 │ throw URIError()
     18 │ throw /**1**/(( /**2**/URIError() ))
@@ -431,7 +432,7 @@ invalid.js:19:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:20:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     18 │ throw /**1**/(( /**2**/URIError() ))
     19 │ throw (( URIError ))()
@@ -452,7 +453,7 @@ invalid.js:20:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:21:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     19 │ throw (( URIError ))()
     20 │ throw getGlobalThis().Error()
@@ -473,7 +474,7 @@ invalid.js:21:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:22:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     20 │ throw getGlobalThis().Error()
     21 │ throw utils.getGlobalThis().Error()
@@ -494,7 +495,7 @@ invalid.js:22:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:23:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     21 │ throw utils.getGlobalThis().Error()
     22 │ throw (( ((getGlobalThis())).Error ))()
@@ -515,7 +516,7 @@ invalid.js:23:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:24:15 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error() when throwing an error.
+  i Use new Error() instead of Error() when throwing an error.
   
     22 │ throw (( ((getGlobalThis())).Error ))()
     23 │ throw ( getGlobalThis().Error )()

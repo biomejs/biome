@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidCatchParameter.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 try {} catch(E) {}
 
 try {} catch(SpecificError) {}
@@ -18,7 +19,7 @@ try {} catch(SPECIFIC_ERROR) {}
 ```
 invalidCatchParameter.js:1:14 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This catch parameter name should be in camelCase.
+  i This catch parameter name should be in camelCase.
   
   > 1 │ try {} catch(E) {}
       │              ^
@@ -38,7 +39,7 @@ invalidCatchParameter.js:1:14 lint/style/useNamingConvention  FIXABLE  ━━━
 ```
 invalidCatchParameter.js:3:14 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This catch parameter name should be in camelCase.
+  i This catch parameter name should be in camelCase.
   
     1 │ try {} catch(E) {}
     2 │ 
@@ -62,7 +63,7 @@ invalidCatchParameter.js:3:14 lint/style/useNamingConvention  FIXABLE  ━━━
 ```
 invalidCatchParameter.js:5:14 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This catch parameter name should be in camelCase.
+  i This catch parameter name should be in camelCase.
   
     3 │ try {} catch(SpecificError) {}
     4 │ 
@@ -86,7 +87,7 @@ invalidCatchParameter.js:5:14 lint/style/useNamingConvention  FIXABLE  ━━━
 ```
 invalidCatchParameter.js:7:14 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This catch parameter name should be in camelCase.
+  i This catch parameter name should be in camelCase.
   
     5 │ try {} catch(specific_error) {}
     6 │ 

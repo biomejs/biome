@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 
 use super::{
     any_class_string_like::AnyClassStringLike,
-    class_info::{get_class_info, ClassInfo},
+    class_info::{ClassInfo, get_class_info},
     sort_config::SortConfig,
 };
 
@@ -242,7 +242,7 @@ pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
                 && node
                     .syntax()
                     .prev_sibling()
-                    .map_or(false, |sibling| JsTemplateElement::can_cast(sibling.kind()))
+                    .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
         } else {
             false
         };
@@ -261,7 +261,7 @@ pub fn should_ignore_postfix(node: &AnyClassStringLike) -> bool {
                 && node
                     .syntax()
                     .next_sibling()
-                    .map_or(false, |sibling| JsTemplateElement::can_cast(sibling.kind()))
+                    .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
         } else {
             false
         };

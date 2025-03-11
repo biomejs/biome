@@ -3,15 +3,15 @@
 #![allow(dead_code)]
 #![allow(unused)]
 use crate::{
-    macros::map_syntax_node,
     YamlLanguage as Language, YamlSyntaxElement as SyntaxElement,
     YamlSyntaxElementChildren as SyntaxElementChildren,
     YamlSyntaxKind::{self as SyntaxKind, *},
     YamlSyntaxList as SyntaxList, YamlSyntaxNode as SyntaxNode, YamlSyntaxToken as SyntaxToken,
+    macros::map_syntax_node,
 };
 use biome_rowan::{
-    support, AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
-    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult,
+    AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult, support,
 };
 use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};
@@ -695,9 +695,18 @@ impl AstNode for YamlArray {
 }
 impl std::fmt::Debug for YamlArray {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlArray")
-            .field("items", &self.items())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlArray")
+                .field("items", &self.items())
+                .finish()
+        } else {
+            f.debug_struct("YamlArray").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlArray> for SyntaxNode {
@@ -733,17 +742,26 @@ impl AstNode for YamlArrayInline {
 }
 impl std::fmt::Debug for YamlArrayInline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlArrayInline")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlArrayInline")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlArrayInline").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlArrayInline> for SyntaxNode {
@@ -779,13 +797,22 @@ impl AstNode for YamlArrayItem {
 }
 impl std::fmt::Debug for YamlArrayItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlArrayItem")
-            .field(
-                "minus_token",
-                &support::DebugSyntaxResult(self.minus_token()),
-            )
-            .field("item", &support::DebugSyntaxResult(self.item()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlArrayItem")
+                .field(
+                    "minus_token",
+                    &support::DebugSyntaxResult(self.minus_token()),
+                )
+                .field("item", &support::DebugSyntaxResult(self.item()))
+                .finish()
+        } else {
+            f.debug_struct("YamlArrayItem").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlArrayItem> for SyntaxNode {
@@ -821,13 +848,22 @@ impl AstNode for YamlBlockFolded {
 }
 impl std::fmt::Debug for YamlBlockFolded {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlBlockFolded")
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlBlockFolded")
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("YamlBlockFolded").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlBlockFolded> for SyntaxNode {
@@ -863,13 +899,22 @@ impl AstNode for YamlBlockLiteral {
 }
 impl std::fmt::Debug for YamlBlockLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlBlockLiteral")
-            .field(
-                "bitwise_or_token",
-                &support::DebugSyntaxResult(self.bitwise_or_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlBlockLiteral")
+                .field(
+                    "bitwise_or_token",
+                    &support::DebugSyntaxResult(self.bitwise_or_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("YamlBlockLiteral").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlBlockLiteral> for SyntaxNode {
@@ -905,12 +950,21 @@ impl AstNode for YamlBlockValue {
 }
 impl std::fmt::Debug for YamlBlockValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlBlockValue")
-            .field(
-                "yaml_block_value_token",
-                &support::DebugSyntaxResult(self.yaml_block_value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlBlockValue")
+                .field(
+                    "yaml_block_value_token",
+                    &support::DebugSyntaxResult(self.yaml_block_value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlBlockValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlBlockValue> for SyntaxNode {
@@ -946,12 +1000,21 @@ impl AstNode for YamlBooleanValue {
 }
 impl std::fmt::Debug for YamlBooleanValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlBooleanValue")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlBooleanValue")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlBooleanValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlBooleanValue> for SyntaxNode {
@@ -987,17 +1050,26 @@ impl AstNode for YamlDocument {
 }
 impl std::fmt::Debug for YamlDocument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlDocument")
-            .field(
-                "dashdashdash_token",
-                &support::DebugOptionalElement(self.dashdashdash_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .field(
-                "dotdotdot_token",
-                &support::DebugOptionalElement(self.dotdotdot_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlDocument")
+                .field(
+                    "dashdashdash_token",
+                    &support::DebugOptionalElement(self.dashdashdash_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugOptionalElement(self.dotdotdot_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlDocument").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlDocument> for SyntaxNode {
@@ -1033,12 +1105,21 @@ impl AstNode for YamlIdentifier {
 }
 impl std::fmt::Debug for YamlIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlIdentifier")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlIdentifier")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlIdentifier> for SyntaxNode {
@@ -1074,12 +1155,21 @@ impl AstNode for YamlNullValue {
 }
 impl std::fmt::Debug for YamlNullValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlNullValue")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlNullValue")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlNullValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlNullValue> for SyntaxNode {
@@ -1115,12 +1205,21 @@ impl AstNode for YamlNumberValue {
 }
 impl std::fmt::Debug for YamlNumberValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlNumberValue")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlNumberValue")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlNumberValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlNumberValue> for SyntaxNode {
@@ -1156,9 +1255,18 @@ impl AstNode for YamlObject {
 }
 impl std::fmt::Debug for YamlObject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlObject")
-            .field("members", &self.members())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlObject")
+                .field("members", &self.members())
+                .finish()
+        } else {
+            f.debug_struct("YamlObject").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlObject> for SyntaxNode {
@@ -1194,14 +1302,23 @@ impl AstNode for YamlObjectMember {
 }
 impl std::fmt::Debug for YamlObjectMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlObjectMember")
-            .field("key", &support::DebugSyntaxResult(self.key()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlObjectMember")
+                .field("key", &support::DebugSyntaxResult(self.key()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("YamlObjectMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlObjectMember> for SyntaxNode {
@@ -1237,14 +1354,23 @@ impl AstNode for YamlRoot {
 }
 impl std::fmt::Debug for YamlRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlRoot")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field("documents", &self.documents())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlRoot")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field("documents", &self.documents())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("YamlRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlRoot> for SyntaxNode {
@@ -1280,12 +1406,21 @@ impl AstNode for YamlStringValue {
 }
 impl std::fmt::Debug for YamlStringValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("YamlStringValue")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlStringValue")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlStringValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<YamlStringValue> for SyntaxNode {
@@ -1676,6 +1811,7 @@ impl From<YamlBogusValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+biome_rowan::declare_node_union! { pub AnyYamlBogusNode = YamlBogus | YamlBogusValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct YamlArrayInlineList {
     syntax_list: SyntaxList,

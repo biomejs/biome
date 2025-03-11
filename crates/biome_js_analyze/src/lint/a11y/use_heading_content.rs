@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxElement};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{JsxElement, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -61,6 +62,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("heading-has-content")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -105,9 +107,10 @@ impl Rule for UseHeadingContent {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let range = match ctx.query() {
-            AnyJsxElement::JsxOpeningElement(node) => {
-                node.parent::<JsxElement>()?.syntax().text_range()
-            }
+            AnyJsxElement::JsxOpeningElement(node) => node
+                .parent::<JsxElement>()?
+                .syntax()
+                .text_range_with_trivia(),
             AnyJsxElement::JsxSelfClosingElement(node) => node.syntax().text_trimmed_range(),
         };
         Some(RuleDiagnostic::new(
@@ -128,13 +131,13 @@ fn has_valid_heading_content(node: &AnyJsxElement) -> bool {
         .is_some()
         || node
             .find_attribute_by_name("children")
-            .map_or(false, |attribute| {
+            .is_some_and(|attribute| {
                 if attribute.initializer().is_none() {
                     return false;
                 }
                 attribute
                     .as_static_value()
-                    .map_or(true, |attribute| !attribute.is_falsy())
+                    .is_none_or(|attribute| !attribute.is_falsy())
             })
         || node.has_spread_prop()
 }

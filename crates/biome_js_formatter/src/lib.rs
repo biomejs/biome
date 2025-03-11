@@ -180,11 +180,11 @@ mod syntax_rewriter;
 
 use biome_formatter::format_element::tag::Label;
 use biome_formatter::prelude::*;
-use biome_formatter::{
-    comments::Comments, write, CstFormatContext, Format, FormatLanguage, FormatToken,
-    TransformSourceMap,
-};
 use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
+use biome_formatter::{
+    CstFormatContext, Format, FormatLanguage, FormatToken, TransformSourceMap, comments::Comments,
+    write,
+};
 use biome_js_syntax::{
     AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
 };
@@ -211,7 +211,10 @@ impl<T, C> AsFormat<C> for &T
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = T::Format<'a> where Self: 'a;
+    type Format<'a>
+        = T::Format<'a>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         AsFormat::format(&**self)
@@ -225,7 +228,10 @@ impl<T, C> AsFormat<C> for biome_rowan::SyntaxResult<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = biome_rowan::SyntaxResult<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = biome_rowan::SyntaxResult<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         match self {
@@ -242,7 +248,10 @@ impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = Option<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = Option<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         self.as_ref().map(|value| value.format())
@@ -561,7 +570,7 @@ mod tests {
 
     use crate::context::JsFormatOptions;
     use biome_formatter::IndentStyle;
-    use biome_js_parser::{parse, parse_script, JsParserOptions};
+    use biome_js_parser::{JsParserOptions, parse, parse_script};
     use biome_js_syntax::JsFileSource;
     use biome_rowan::{TextRange, TextSize};
 

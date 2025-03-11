@@ -1,7 +1,7 @@
 use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -10,19 +10,20 @@ use biome_test_utils::{
     write_transformation_snapshot,
 };
 
+use camino::Utf8Path;
 use std::ops::Deref;
-use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
+use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
 
     let rule_folder = input_file.parent().unwrap();
-    let rule = rule_folder.file_name().unwrap().to_str().unwrap();
+    let rule = rule_folder.file_name().unwrap();
 
     if rule == "specs" {
         panic!("the test file must be placed in the {rule}/<group-name>/<rule-name>/ directory");
@@ -93,7 +94,7 @@ pub(crate) fn analyze_and_snap(
     source_type: JsFileSource,
     filter: AnalysisFilter,
     file_name: &str,
-    input_file: &Path,
+    input_file: &Utf8Path,
     parser_options: JsParserOptions,
 ) -> usize {
     let parsed = parse(input_code, source_type, parser_options.clone());
@@ -137,7 +138,7 @@ pub(crate) fn analyze_and_snap(
 }
 
 fn check_transformation(
-    path: &Path,
+    path: &Utf8Path,
     source: &str,
     source_type: JsFileSource,
     transformation: &AnalyzerTransformation<JsLanguage>,

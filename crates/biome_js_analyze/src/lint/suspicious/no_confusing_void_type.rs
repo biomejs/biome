@@ -1,10 +1,11 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyTsType, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsVoidType, T};
+use biome_js_syntax::{AnyTsType, JsSyntaxKind, JsSyntaxNode, T, TsConditionalType, TsVoidType};
 use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
@@ -63,6 +64,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-invalid-void-type")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

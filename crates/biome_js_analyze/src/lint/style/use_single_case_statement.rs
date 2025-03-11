@@ -1,7 +1,7 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsStatement, AnyJsSwitchClause, TriviaPieceKind, T};
+use biome_js_syntax::{AnyJsStatement, AnyJsSwitchClause, T, TriviaPieceKind};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
 use crate::JsRuleAction;
@@ -56,11 +56,7 @@ impl Rule for UseSingleCaseStatement {
             .iter()
             .filter(|stmt| !matches!(stmt, AnyJsStatement::JsBreakStatement(_)))
             .count();
-        if count > 1 {
-            Some(())
-        } else {
-            None
-        }
+        if count > 1 { Some(()) } else { None }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {

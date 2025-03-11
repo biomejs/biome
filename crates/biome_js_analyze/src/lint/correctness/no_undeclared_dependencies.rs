@@ -1,11 +1,12 @@
-use std::path::Path;
-
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize::{Deserializable, DeserializableType};
+use biome_deserialize::{
+    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
+};
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_rowan::AstNode;
+use camino::Utf8Path;
 
 use crate::{globals::is_node_builtin_module, services::manifest::Manifest};
 
@@ -105,14 +106,14 @@ impl Default for DependencyAvailability {
 
 impl Deserializable for DependencyAvailability {
     fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
         Some(if value.visitable_type()? == DeserializableType::Bool {
-            Self::Bool(bool::deserialize(value, name, diagnostics)?)
+            Self::Bool(bool::deserialize(ctx, value, name)?)
         } else {
-            Self::Patterns(Deserializable::deserialize(value, name, diagnostics)?)
+            Self::Patterns(Deserializable::deserialize(ctx, value, name)?)
         })
     }
 }
@@ -123,7 +124,7 @@ impl schemars::JsonSchema for DependencyAvailability {
         "DependencyAvailability".to_owned()
     }
 
-    fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         use schemars::schema::*;
 
         Schema::Object(SchemaObject {
@@ -162,7 +163,7 @@ impl schemars::JsonSchema for DependencyAvailability {
 }
 
 impl DependencyAvailability {
-    fn is_available(&self, path: &Path) -> bool {
+    fn is_available(&self, path: &Utf8Path) -> bool {
         match self {
             Self::Bool(b) => *b,
             Self::Patterns(globs) => {
@@ -268,11 +269,23 @@ impl Rule for NoUndeclaredDependencies {
             is_optional_dependency_available,
         } = state;
 
+        let Some(package_path) = ctx.package_path.as_ref() else {
+            return Some(RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {
+                    "Dependency "<Emphasis>{package_name}</Emphasis>" cannot be verified because no package.json file was found."
+                },
+            ));
+        };
+
+        let manifest_path = package_path.clone();
+
         let diag = RuleDiagnostic::new(
             rule_category!(),
             ctx.query().range(),
             markup! {
-                "The current dependency isn't specified in your package.json."
+                "Dependency "<Emphasis>{package_name}</Emphasis>" isn't specified in "<Emphasis>{manifest_path.as_str()}</Emphasis>"."
             },
         );
 

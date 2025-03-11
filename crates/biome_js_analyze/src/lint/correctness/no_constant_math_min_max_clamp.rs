@@ -1,17 +1,17 @@
 use std::{cmp::Ordering, str::FromStr};
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression,
-    JsCallExpression, JsNumberLiteralExpression,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsCallExpression,
+    JsNumberLiteralExpression, global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 
 declare_lint_rule! {
     /// Disallow the use of `Math.min` and `Math.max` to clamp a value where the result itself is constant.
@@ -94,7 +94,7 @@ impl Rule for NoConstantMathMinMaxClamp {
             ).detail(
                 state.0.range(),
                 markup! {
-                    "It always evaluates to "<Emphasis>{state.0.text()}</Emphasis>"."
+                    "It always evaluates to "<Emphasis>{state.0.to_trimmed_string()}</Emphasis>"."
                 }
             )
         )
@@ -109,7 +109,7 @@ impl Rule for NoConstantMathMinMaxClamp {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! {"Swap "<Emphasis>{state.0.text()}</Emphasis>" with "<Emphasis>{state.1.text()}</Emphasis>"."}
+            markup! {"Swap "<Emphasis>{state.0.to_trimmed_string()}</Emphasis>" with "<Emphasis>{state.1.to_trimmed_string()}</Emphasis>"."}
             .to_owned(),
             mutation,
         ))

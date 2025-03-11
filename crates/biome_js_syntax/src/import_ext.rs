@@ -1,11 +1,11 @@
 use crate::{
-    inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsModuleSource,
-    AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsImport,
-    JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
-    JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken,
+    AnyJsBinding, AnyJsImportClause, AnyJsModuleSource, AnyJsNamedImportSpecifier,
+    JsCallExpression, JsDefaultImportSpecifier, JsImport, JsImportAssertion,
+    JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
+    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken, inner_string_text,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText,
+    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
 };
 
 impl JsImport {
@@ -75,7 +75,7 @@ impl AnyJsImportClause {
         })
     }
 
-    /// Assertion of this import clause.
+    /// Attribute of this import clause.
     ///
     /// ```
     /// use biome_js_factory::make;
@@ -88,7 +88,7 @@ impl AnyJsImportClause {
     ///
     /// assert_eq!(clause.source().unwrap().as_js_module_source().unwrap().inner_string_text().unwrap().text(), "react");
     /// ```
-    pub fn assertion(&self) -> Option<JsImportAssertion> {
+    pub fn attribute(&self) -> Option<JsImportAssertion> {
         match self {
             Self::JsImportBareClause(clause) => clause.assertion(),
             Self::JsImportDefaultClause(clause) => clause.assertion(),

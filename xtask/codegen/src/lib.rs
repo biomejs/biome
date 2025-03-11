@@ -19,7 +19,6 @@ mod json_kinds_src;
 mod markdown_kinds_src;
 mod yaml_kinds_src;
 
-mod generate_crate;
 mod html_kinds_src;
 mod kind_src;
 mod language_kind;
@@ -31,13 +30,12 @@ use bpaf::Bpaf;
 use std::path::Path;
 
 use crate::generate_new_analyzer_rule::Category;
-use xtask::{glue::fs2, Mode, Result};
+use xtask::{Mode, Result, glue::fs2};
 
 pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
-pub use self::generate_crate::generate_crate;
-pub use self::generate_new_analyzer_rule::{generate_new_analyzer_rule, LanguageKind};
+pub use self::generate_new_analyzer_rule::{LanguageKind, generate_new_analyzer_rule};
 pub use self::unicode::generate_tables;
 
 pub enum UpdateResult {
@@ -134,11 +132,4 @@ pub enum TaskCommand {
     /// Runs ALL the codegen
     #[bpaf(command)]
     All,
-    /// Creates a new crate
-    #[bpaf(command, long("new-crate"))]
-    NewCrate {
-        /// The name of the crate
-        #[bpaf(long("name"), argument("STRING"))]
-        name: String,
-    },
 }

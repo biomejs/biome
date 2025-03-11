@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 if (Boolean(foo)) {
 }
 
@@ -33,7 +34,7 @@ new Boolean(!!x);
 ```
 invalid.js:1:5 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant `Boolean` call
+  × Avoid redundant `Boolean` call
   
   > 1 │ if (Boolean(foo)) {
       │     ^^^^^^^^^^^^
@@ -52,7 +53,7 @@ invalid.js:1:5 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
 ```
 invalid.js:4:5 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant double-negation.
+  × Avoid redundant double-negation.
   
     2 │ }
     3 │ 
@@ -73,7 +74,7 @@ invalid.js:4:5 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
 ```
 invalid.js:4:7 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant `Boolean` call
+  × Avoid redundant `Boolean` call
   
     2 │ }
     3 │ 
@@ -94,7 +95,7 @@ invalid.js:4:7 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
 ```
 invalid.js:7:6 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant `Boolean` call
+  × Avoid redundant `Boolean` call
   
     5 │ }
     6 │ 
@@ -115,7 +116,7 @@ invalid.js:7:6 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
 ```
 invalid.js:10:8 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant double-negation.
+  × Avoid redundant double-negation.
   
      8 │ }
      9 │ 
@@ -136,7 +137,7 @@ invalid.js:10:8 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
 ```
 invalid.js:15:10 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant `Boolean` call
+  × Avoid redundant `Boolean` call
   
     13 │ do {
     14 │ 	1 + 1;
@@ -157,7 +158,7 @@ invalid.js:15:10 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━
 ```
 invalid.js:17:8 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant double-negation.
+  × Avoid redundant double-negation.
   
     15 │ } while (Boolean(x));
     16 │ 
@@ -178,7 +179,7 @@ invalid.js:17:8 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
 ```
 invalid.js:19:13 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant double-negation.
+  × Avoid redundant double-negation.
   
     17 │ for (; !!foo; ) {}
     18 │ 
@@ -199,7 +200,7 @@ invalid.js:19:13 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━
 ```
 invalid.js:21:2 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant double-negation.
+  × Avoid redundant double-negation.
   
     19 │ new Boolean(!!x);
     20 │ 
@@ -220,7 +221,7 @@ invalid.js:21:2 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
 ```
 invalid.js:23:2 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid redundant `Boolean` call
+  × Avoid redundant `Boolean` call
   
     21 │ !!!x;
     22 │ 
@@ -235,5 +236,3 @@ invalid.js:23:2 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
        │  -------- - 
 
 ```
-
-

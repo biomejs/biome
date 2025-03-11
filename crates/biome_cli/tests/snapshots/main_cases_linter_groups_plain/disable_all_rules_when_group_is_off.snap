@@ -1,0 +1,29 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "a11y": "off"
+    }
+  }
+}
+```
+
+## `test1.jsx`
+
+```jsx
+<img src="foo.png" />
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, utils::formatters::FormatTokenAsLowercase};
 use biome_formatter::write;
 use biome_html_syntax::{HtmlDirective, HtmlDirectiveFields};
 #[derive(Debug, Clone, Default)]
@@ -25,8 +25,7 @@ impl FormatNodeRule<HtmlDirective> for FormatHtmlDirective {
             ]
         )?;
         if let Some(html) = html_token {
-            write!(f, [space()])?;
-            html.format().fmt(f)?;
+            write!(f, [space(), FormatTokenAsLowercase::from(html)])?;
         }
         if let Some(quirk) = quirk_token {
             write!(f, [space()])?;

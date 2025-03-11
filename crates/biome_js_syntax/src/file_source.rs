@@ -1,6 +1,7 @@
 use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
-use std::{borrow::Cow, ffi::OsStr, path::Path};
+use camino::Utf8Path;
+use std::borrow::Cow;
 
 /// Enum of the different ECMAScript standard versions.
 /// The versions are ordered in increasing order; The newest version comes last.
@@ -8,6 +9,7 @@ use std::{borrow::Cow, ffi::OsStr, path::Path};
 /// Defaults to the latest stable ECMAScript standard.
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum LanguageVersion {
     ES2022,
 
@@ -34,6 +36,7 @@ impl Default for LanguageVersion {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum ModuleKind {
     /// An ECMAScript [Script](https://tc39.es/ecma262/multipage/ecmascript-language-scripts-and-modules.html#sec-scripts)
     Script,
@@ -56,6 +59,7 @@ impl ModuleKind {
 #[derive(
     Debug, Copy, Clone, Eq, PartialEq, Hash, Default, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum LanguageVariant {
     /// Standard JavaScript or TypeScript syntax without any extensions
     #[default]
@@ -84,6 +88,7 @@ impl LanguageVariant {
 #[derive(
     Debug, Copy, Clone, Eq, PartialEq, Default, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum Language {
     #[default]
     JavaScript,
@@ -218,6 +223,10 @@ impl JsFileSource {
         self.module_kind = kind;
     }
 
+    pub fn set_variant(&mut self, variant: LanguageVariant) {
+        self.variant = variant;
+    }
+
     pub const fn with_version(mut self, version: LanguageVersion) -> Self {
         self.version = version;
         self
@@ -297,29 +306,43 @@ impl JsFileSource {
     }
 
     /// Try to return the JS file source corresponding to this file name from well-known files
-    pub fn try_from_well_known(_: &Path) -> Result<Self, FileSourceError> {
-        // TODO: to be implemented
-        Err(FileSourceError::UnknownFileName)
+    pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
+        // Be careful with definition files, because `Path::extension()` only
+        // returns the extension after the _last_ dot:
+        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
+        if file_name.ends_with(".d.ts") {
+            return Self::try_from_extension("d.ts");
+        } else if file_name.ends_with(".d.mts") {
+            return Self::try_from_extension("d.mts");
+        } else if file_name.ends_with(".d.cts") {
+            return Self::try_from_extension("d.cts");
+        }
+
+        match path.extension() {
+            Some(extension) => Self::try_from_extension(extension),
+            None => Err(FileSourceError::MissingFileExtension),
+        }
     }
 
     /// Try to return the JS file source corresponding to this file extension
-    pub fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
+    pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
-        match extension.as_encoded_bytes() {
-            b"js" | b"mjs" | b"jsx" => Ok(Self::jsx()),
-            b"cjs" => Ok(Self::js_script()),
-            b"ts" => Ok(Self::ts()),
-            b"mts" | b"cts" => Ok(Self::ts_restricted()),
-            b"tsx" => Ok(Self::tsx()),
+        match extension {
+            "js" | "mjs" => Ok(Self::js_module()),
+            "jsx" => Ok(Self::jsx()),
+            "cjs" => Ok(Self::js_script()),
+            "ts" => Ok(Self::ts()),
+            "mts" | "cts" => Ok(Self::ts_restricted()),
+            "tsx" => Ok(Self::tsx()),
             // Note: the extension passed to this function can contain dots,
             // this should be handled properly by the extension provider
-            b"d.ts" | b"d.mts" | b"d.cts" => Ok(Self::d_ts()),
+            "d.ts" | "d.mts" | "d.cts" => Ok(Self::d_ts()),
             // TODO: Remove once we have full support of astro files
-            b"astro" => Ok(Self::astro()),
+            "astro" => Ok(Self::astro()),
             // TODO: Remove once we have full support of vue files
-            b"vue" => Ok(Self::vue()),
+            "vue" => Ok(Self::vue()),
             // TODO: Remove once we have full support of svelte files
-            b"svelte" => Ok(Self::svelte()),
+            "svelte" => Ok(Self::svelte()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -357,10 +380,10 @@ impl JsFileSource {
     }
 }
 
-impl TryFrom<&Path> for JsFileSource {
+impl TryFrom<&Utf8Path> for JsFileSource {
     type Error = FileSourceError;
 
-    fn try_from(path: &Path) -> Result<Self, Self::Error> {
+    fn try_from(path: &Utf8Path) -> Result<Self, Self::Error> {
         if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
         }
@@ -369,7 +392,7 @@ impl TryFrom<&Path> for JsFileSource {
             .file_name()
             // We assume the file extensions are case-insensitive.
             // Thus, we normalize the filrname to lowercase.
-            .map(|filename| filename.as_encoded_bytes().to_ascii_lowercase_cow());
+            .map(|filename| filename.to_ascii_lowercase_cow());
 
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
@@ -377,9 +400,9 @@ impl TryFrom<&Path> for JsFileSource {
         // because the same logic is also used in DocumentFileSource::from_path_optional
         // and we may support more and more extensions with more than one dots.
         let extension = &match filename {
-            Some(filename) if filename.ends_with(b".d.ts") => Cow::Borrowed("d.ts".as_ref()),
-            Some(filename) if filename.ends_with(b".d.mts") => Cow::Borrowed("d.mts".as_ref()),
-            Some(filename) if filename.ends_with(b".d.cts") => Cow::Borrowed("d.cts".as_ref()),
+            Some(filename) if filename.ends_with(".d.ts") => Cow::Borrowed("d.ts"),
+            Some(filename) if filename.ends_with(".d.mts") => Cow::Borrowed("d.mts"),
+            Some(filename) if filename.ends_with(".d.cts") => Cow::Borrowed("d.cts"),
             _ => path
                 .extension()
                 // We assume the file extensions are case-insensitive.

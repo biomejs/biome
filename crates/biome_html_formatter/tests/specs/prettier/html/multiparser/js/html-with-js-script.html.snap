@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/multiparser/js/html-with-js-script.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="text/javascript">
+    hello( 'world'
+    )
+    </script>
+</head>
+<body></body>
+</html>
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,9 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html lang="en">
+   <head>
+     <script type="text/javascript">
+-      hello("world");
++    hello( 'world'
++    )
+     </script>
+   </head>
+   <body></body>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="text/javascript">
+    hello( 'world'
+    )
+    </script>
+  </head>
+  <body></body>
+</html>
+```

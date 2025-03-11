@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFixNone.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const x = 0;
 ```
 
@@ -11,7 +12,7 @@ const x = 0;
 ```
 invalidFixNone.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  i This variable is unused.
   
   > 1 │ const x = 0;
       │       ^

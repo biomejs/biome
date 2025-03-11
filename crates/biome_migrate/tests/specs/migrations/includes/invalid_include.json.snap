@@ -1,0 +1,38 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid_include.json
+---
+# Input
+```json
+{
+  "files": {
+    "include": ["./src", "*.js"]
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_include.json:3:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! include and ignore configurations have been replaced by the includes configuration.
+  
+    1 │ {
+    2 │   "files": {
+  > 3 │     "include": ["./src", "*.js"]
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   }
+    5 │ }
+  
+  i Safe fix: Use includes instead.
+  
+    1 1 │   {
+    2 2 │     "files": {
+    3   │ - ····"include":·["./src",·"*.js"]
+      3 │ + ····"includes":·["src/**",·"**/*.js"]
+    4 4 │     }
+    5 5 │   }
+  
+
+```

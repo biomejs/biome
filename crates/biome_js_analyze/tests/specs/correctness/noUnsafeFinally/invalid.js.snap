@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
 { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
 { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
@@ -25,7 +26,7 @@ expression: invalid.js
 ```
 invalid.js:1:79 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'return'.
+  × Unsafe usage of 'return'.
   
   > 1 │ { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
       │                                                                               ^^^^^^^^^
@@ -40,7 +41,7 @@ invalid.js:1:79 lint/correctness/noUnsafeFinally ━━━━━━━━━━�
 ```
 invalid.js:2:88 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'return'.
+  × Unsafe usage of 'return'.
   
     1 │ { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
   > 2 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
@@ -56,7 +57,7 @@ invalid.js:2:88 lint/correctness/noUnsafeFinally ━━━━━━━━━━�
 ```
 invalid.js:2:106 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'return'.
+  × Unsafe usage of 'return'.
   
     1 │ { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
   > 2 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
@@ -72,7 +73,7 @@ invalid.js:2:106 lint/correctness/noUnsafeFinally ━━━━━━━━━━
 ```
 invalid.js:3:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'return'.
+  × Unsafe usage of 'return'.
   
     1 │ { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
     2 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
@@ -89,7 +90,7 @@ invalid.js:3:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━�
 ```
 invalid.js:4:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'return'.
+  × Unsafe usage of 'return'.
   
     2 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
     3 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
@@ -106,7 +107,7 @@ invalid.js:4:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━�
 ```
 invalid.js:5:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'return'.
+  × Unsafe usage of 'return'.
   
     3 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }
     4 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return function(x) { return y } } } }
@@ -123,7 +124,7 @@ invalid.js:5:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━�
 ```
 invalid.js:6:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'throw'.
+  × Unsafe usage of 'throw'.
   
     4 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return function(x) { return y } } } }
     5 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return { x: function(c) { return c } } } } }
@@ -140,7 +141,7 @@ invalid.js:6:77 lint/correctness/noUnsafeFinally ━━━━━━━━━━�
 ```
 invalid.js:7:76 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'return'.
+  × Unsafe usage of 'return'.
   
     5 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return { x: function(c) { return c } } } } }
     6 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { throw new Error() } } }
@@ -157,7 +158,7 @@ invalid.js:7:76 lint/correctness/noUnsafeFinally ━━━━━━━━━━�
 ```
 invalid.js:8:61 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'break'.
+  × Unsafe usage of 'break'.
   
      6 │ { var foo = function() { try { return 1 } catch(err) { return 2 } finally { throw new Error() } } }
      7 │ { var foo = function() { try { foo(); } finally { try { bar(); } finally { return; } } }; }
@@ -174,7 +175,7 @@ invalid.js:8:61 lint/correctness/noUnsafeFinally ━━━━━━━━━━�
 ```
 invalid.js:9:82 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'break'.
+  × Unsafe usage of 'break'.
   
      7 │ { var foo = function() { try { foo(); } finally { try { bar(); } finally { return; } } }; }
      8 │ { var foo = function() { label: try { return 0; } finally { break label; } return 1; } }
@@ -191,7 +192,7 @@ invalid.js:9:82 lint/correctness/noUnsafeFinally ━━━━━━━━━━�
 ```
 invalid.js:10:56 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'break'.
+  × Unsafe usage of 'break'.
   
      8 │ { var foo = function() { label: try { return 0; } finally { break label; } return 1; } }
      9 │ { var foo = function() { a: try { return 1; } catch(err) { return 2; } finally { break a; } } }
@@ -208,7 +209,7 @@ invalid.js:10:56 lint/correctness/noUnsafeFinally ━━━━━━━━━━
 ```
 invalid.js:11:56 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'continue'.
+  × Unsafe usage of 'continue'.
   
      9 │ { var foo = function() { a: try { return 1; } catch(err) { return 2; } finally { break a; } } }
     10 │ { var foo = function() { while (true) try {} finally { break; } } }
@@ -225,7 +226,7 @@ invalid.js:11:56 lint/correctness/noUnsafeFinally ━━━━━━━━━━
 ```
 invalid.js:12:70 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'break'.
+  × Unsafe usage of 'break'.
   
     10 │ { var foo = function() { while (true) try {} finally { break; } } }
     11 │ { var foo = function() { while (true) try {} finally { continue; } } }
@@ -242,7 +243,7 @@ invalid.js:12:70 lint/correctness/noUnsafeFinally ━━━━━━━━━━
 ```
 invalid.js:13:86 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'break'.
+  × Unsafe usage of 'break'.
   
     11 │ { var foo = function() { while (true) try {} finally { continue; } } }
     12 │ { var foo = function() { switch (true) { case true: try {} finally { break; } } } }
@@ -259,7 +260,7 @@ invalid.js:13:86 lint/correctness/noUnsafeFinally ━━━━━━━━━━
 ```
 invalid.js:14:86 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'continue'.
+  × Unsafe usage of 'continue'.
   
     12 │ { var foo = function() { switch (true) { case true: try {} finally { break; } } } }
     13 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: break a; } } } }
@@ -275,7 +276,7 @@ invalid.js:14:86 lint/correctness/noUnsafeFinally ━━━━━━━━━━
 ```
 invalid.js:15:100 lint/correctness/noUnsafeFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of 'break'.
+  × Unsafe usage of 'break'.
   
     13 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: break a; } } } }
     14 │ { var foo = function() { a: while (true) try {} finally { switch (true) { case true: continue; } } } }
@@ -286,5 +287,3 @@ invalid.js:15:100 lint/correctness/noUnsafeFinally ━━━━━━━━━�
   
 
 ```
-
-

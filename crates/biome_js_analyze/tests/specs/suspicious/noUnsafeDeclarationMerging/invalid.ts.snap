@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -28,7 +29,7 @@ export {}
 ```
 invalid.ts:2:7 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class is unsafely merged with an interface.
+  × This class is unsafely merged with an interface.
   
     1 │ interface Foo {}
   > 2 │ class Foo {}
@@ -51,7 +52,7 @@ invalid.ts:2:7 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━�
 ```
 invalid.ts:4:7 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class is unsafely merged with an interface.
+  × This class is unsafely merged with an interface.
   
     2 │ class Foo {}
     3 │ 
@@ -76,7 +77,7 @@ invalid.ts:4:7 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━�
 ```
 invalid.ts:9:11 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class is unsafely merged with an interface.
+  × This class is unsafely merged with an interface.
   
      7 │ function f(){
      8 │     interface Foo3 {}
@@ -101,7 +102,7 @@ invalid.ts:9:11 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━
 ```
 invalid.ts:14:11 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class is unsafely merged with an interface.
+  × This class is unsafely merged with an interface.
   
     12 │ {
     13 │     interface Foo4 {}
@@ -122,5 +123,3 @@ invalid.ts:14:11 lint/suspicious/noUnsafeDeclarationMerging ━━━━━━�
   
 
 ```
-
-

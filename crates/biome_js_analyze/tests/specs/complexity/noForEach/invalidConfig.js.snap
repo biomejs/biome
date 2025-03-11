@@ -4,7 +4,7 @@ expression: invalidConfig.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 lib._.forEach([1, 2], function (value) {
 	console.log(value);
 });

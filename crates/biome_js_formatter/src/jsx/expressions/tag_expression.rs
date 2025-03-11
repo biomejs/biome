@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::utils::jsx::{get_wrap_state, WrapState};
+use crate::utils::jsx::{WrapState, get_wrap_state};
 
 use biome_formatter::{format_args, write};
 use biome_js_syntax::parentheses::NeedsParentheses;
@@ -106,5 +106,5 @@ pub fn should_expand(expression: &JsxTagExpression) -> bool {
     };
 
     call.parent()
-        .map_or(false, |parent| JsxExpressionChild::can_cast(parent.kind()))
+        .is_some_and(|parent| JsxExpressionChild::can_cast(parent.kind()))
 }

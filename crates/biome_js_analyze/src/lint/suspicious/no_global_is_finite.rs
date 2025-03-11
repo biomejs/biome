@@ -1,8 +1,9 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
-use biome_analyze::{context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic};
+use crate::{JsRuleAction, services::semantic::Semantic};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{global_identifier, AnyJsExpression, T};
+use biome_js_syntax::{AnyJsExpression, T, global_identifier};
 use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_lint_rule! {
@@ -31,6 +32,7 @@ declare_lint_rule! {
         name: "noGlobalIsFinite",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

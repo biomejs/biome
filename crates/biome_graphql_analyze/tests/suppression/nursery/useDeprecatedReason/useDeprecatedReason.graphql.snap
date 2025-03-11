@@ -20,7 +20,6 @@ query {
 }
 
 query {
-  # biome-ignore lint/nursery/useDeprecatedReason: testing
   member @deprecated()
 }
 
@@ -31,7 +30,7 @@ query {
 ```
 useDeprecatedReason.graphql:2:10 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The directive `@deprecated` should have a `reason` argument.
+  i The directive `@deprecated` should have a `reason` argument.
   
     1 │ query {
   > 2 │   member @deprecated {
@@ -41,7 +40,7 @@ useDeprecatedReason.graphql:2:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
   
   i Add a `reason` argument to the directive.
   
-  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for this line.
   
      1  1 │   query {
      2    │ - ··member·@deprecated·{
@@ -50,13 +49,19 @@ useDeprecatedReason.graphql:2:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
      3  4 │   		id
      4  5 │   	}
   
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for the whole file.
+  
+        1 │ + #·biome-ignore-all·lint/nursery/useDeprecatedReason:·<explanation>·
+     1  2 │   query {
+     2  3 │     member @deprecated {
+  
 
 ```
 
 ```
 useDeprecatedReason.graphql:8:10 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The directive `@deprecated` should have a `reason` argument.
+  i The directive `@deprecated` should have a `reason` argument.
   
      7 │ query {
    > 8 │   member @deprecated()
@@ -66,7 +71,7 @@ useDeprecatedReason.graphql:8:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
   
   i Add a `reason` argument to the directive.
   
-  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for this line.
   
      6  6 │   
      7  7 │   query {
@@ -76,13 +81,19 @@ useDeprecatedReason.graphql:8:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
      9 10 │   }
     10 11 │   
   
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for the whole file.
+  
+        1 │ + #·biome-ignore-all·lint/nursery/useDeprecatedReason:·<explanation>·
+     1  2 │   query {
+     2  3 │     member @deprecated {
+  
 
 ```
 
 ```
 useDeprecatedReason.graphql:13:3 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The directive `@deprecated` should have a `reason` argument.
+  i The directive `@deprecated` should have a `reason` argument.
   
     11 │ query {
     12 │   member
@@ -93,7 +104,7 @@ useDeprecatedReason.graphql:13:3 lint/nursery/useDeprecatedReason  FIXABLE  ━�
   
   i Add a `reason` argument to the directive.
   
-  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for this line.
   
     11 11 │   query {
     12 12 │     member
@@ -102,6 +113,44 @@ useDeprecatedReason.graphql:13:3 lint/nursery/useDeprecatedReason  FIXABLE  ━�
        14 │ + ··@deprecated(abc:·123)
     14 15 │   }
     15 16 │   
+  
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for the whole file.
+  
+        1 │ + #·biome-ignore-all·lint/nursery/useDeprecatedReason:·<explanation>·
+     1  2 │   query {
+     2  3 │     member @deprecated {
+  
+
+```
+
+```
+useDeprecatedReason.graphql:17:10 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The directive `@deprecated` should have a `reason` argument.
+  
+    16 │ query {
+  > 17 │   member @deprecated()
+       │          ^^^^^^^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i Add a `reason` argument to the directive.
+  
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for this line.
+  
+    15 15 │   
+    16 16 │   query {
+    17    │ - ··member·@deprecated()
+       17 │ + ··#·biome-ignore·lint/nursery/useDeprecatedReason:·<explanation>
+       18 │ + ··member··@deprecated()
+    18 19 │   }
+    19 20 │   
+  
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for the whole file.
+  
+        1 │ + #·biome-ignore-all·lint/nursery/useDeprecatedReason:·<explanation>·
+     1  2 │   query {
+     2  3 │     member @deprecated {
   
 
 ```

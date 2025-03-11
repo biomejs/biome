@@ -1,0 +1,68 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `package.json`
+
+```json
+{
+    "dependencies": {
+        "mocha": "10.0.0"
+    }
+}
+
+```
+
+## `test.js`
+
+```js
+
+describe("foo", () => {
+	beforeEach(() => {
+	});
+	beforeEach(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
+});
+    
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+/test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow duplicate setup and teardown hooks.
+  
+    3 │ 	beforeEach(() => {
+    4 │ 	});
+  > 5 │ 	beforeEach(() => {
+      │ 	^^^^^^^^^^^^^^^^^^
+  > 6 │ 	});
+      │ 	^^
+    7 │ 	test("bar", () => {
+    8 │ 		someFn();
+  
+  i Disallow beforeEach duplicacy inside the describe function.
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+```

@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_syntax_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_syntax_rule};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsNamedImportSpecifiers, JsSyntaxToken,
@@ -40,7 +40,7 @@ impl Rule for NoTypeOnlyImportAttributes {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let extension = ctx.file_path().extension()?;
-        if extension.as_encoded_bytes() == b"cts" {
+        if extension.as_bytes() == b"cts" {
             // Ignore `*.cts`
             return None;
         }

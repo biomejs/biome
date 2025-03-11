@@ -1,17 +1,15 @@
 use crate::execute::diagnostics::{ResultExt, ResultIoExt};
 use crate::execute::process_file::SharedTraversalOptions;
-use biome_diagnostics::{category, Error};
+use biome_diagnostics::{Error, category};
 use biome_fs::{BiomePath, File, OpenOptions};
-use biome_service::workspace::{FileGuard, OpenFileParams};
+use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
-use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
 
 /// Small wrapper that holds information and operations around the current processed file
 pub(crate) struct WorkspaceFile<'ctx, 'app> {
     guard: FileGuard<'app, dyn Workspace + 'ctx>,
     file: Box<dyn File>,
-    pub(crate) path: PathBuf,
+    pub(crate) path: BiomePath,
 }
 
 impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
@@ -19,37 +17,33 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
     /// saving these information internally
     pub(crate) fn new(
         ctx: &SharedTraversalOptions<'ctx, 'app>,
-        path: &Path,
+        path: BiomePath,
     ) -> Result<Self, Error> {
-        let biome_path = BiomePath::new(path);
         let open_options = OpenOptions::default()
             .read(true)
             .write(ctx.execution.requires_write_access());
         let mut file = ctx
             .fs
-            .open_with_options(path, open_options)
-            .with_file_path(path.display().to_string())?;
+            .open_with_options(path.as_path(), open_options)
+            .with_file_path(path.to_string())?;
 
         let mut input = String::new();
         file.read_to_string(&mut input)
-            .with_file_path(path.display().to_string())?;
+            .with_file_path(path.to_string())?;
 
         let guard = FileGuard::open(
             ctx.workspace,
             OpenFileParams {
+                project_key: ctx.project_key,
                 document_file_source: None,
-                path: biome_path,
-                version: 0,
-                content: input.clone(),
+                path: path.clone(),
+                content: FileContent::from_client(&input),
+                persist_node_cache: false,
             },
         )
-        .with_file_path_and_code(path.display().to_string(), category!("internalError/fs"))?;
+        .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
 
-        Ok(Self {
-            file,
-            guard,
-            path: PathBuf::from(path),
-        })
+        Ok(Self { file, guard, path })
     }
 
     pub(crate) fn guard(&self) -> &FileGuard<'app, dyn Workspace + 'ctx> {
@@ -60,7 +54,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         self.guard().get_file_content()
     }
 
-    pub(crate) fn as_extension(&self) -> Option<&OsStr> {
+    pub(crate) fn as_extension(&self) -> Option<&str> {
         self.path.extension()
     }
 
@@ -70,7 +64,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
 
         self.file
             .set_content(new_content.as_bytes())
-            .with_file_path(self.path.display().to_string())?;
+            .with_file_path(self.path.to_string())?;
         self.guard
             .change_file(self.file.file_version(), new_content)?;
         Ok(())

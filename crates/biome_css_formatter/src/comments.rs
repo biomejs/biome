@@ -5,11 +5,11 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    is_doc_comment, CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments,
-    DecoratedComment, SourceComment,
+    CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments, DecoratedComment,
+    SourceComment, is_doc_comment,
 };
 use biome_formatter::formatter::Formatter;
-use biome_formatter::{write, FormatResult, FormatRule};
+use biome_formatter::{FormatResult, FormatRule, write};
 use biome_rowan::SyntaxTriviaPieceComments;
 use biome_suppression::parse_suppression_comment;
 
@@ -72,7 +72,7 @@ impl CommentStyle for CssCommentStyle {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
             .flat_map(|suppression| suppression.categories)
-            .any(|(key, _)| key == category!("format"))
+            .any(|(key, ..)| key == category!("format"))
     }
 
     fn get_comment_kind(comment: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind {
@@ -110,9 +110,10 @@ fn handle_declaration_name_comment(
 ) -> CommentPlacement<CssLanguage> {
     match comment.preceding_node() {
         Some(following_node) if AnyCssDeclarationName::can_cast(following_node.kind()) => {
-            if following_node.parent().map_or(false, |p| {
-                p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST
-            }) {
+            if following_node
+                .parent()
+                .is_some_and(|p| p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST)
+            {
                 CommentPlacement::Default(comment)
             } else {
                 CommentPlacement::leading(following_node.clone(), comment)

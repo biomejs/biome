@@ -7,11 +7,12 @@ info: ts/suppressions.ts
 ```ts
 
 interface Suppressions {
-    // rome-ignore format: test
+    // biome-ignore format: test
     a: void
 
     b: void
 }
+
 ```
 
 
@@ -35,11 +36,12 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```ts
 interface Suppressions {
-	// rome-ignore format: test
+	// biome-ignore format: test
 	a: void
 
 	b: void;

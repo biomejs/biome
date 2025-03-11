@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```jsx
+```js
 const FOO = "FOO";
 console.log(FOO, FOO2);
 
@@ -39,7 +39,7 @@ export const e = {
 ```
 invalid.js:4:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant constant declaration.
+  i Redundant constant declaration.
   
     2 │ console.log(FOO, FOO2);
     3 │ 
@@ -77,7 +77,7 @@ invalid.js:4:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:4:34 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant constant declaration.
+  i Redundant constant declaration.
   
     2 │ console.log(FOO, FOO2);
     3 │ 
@@ -117,7 +117,7 @@ invalid.js:4:34 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:20:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant constant declaration.
+  i Redundant constant declaration.
   
     18 │ };
     19 │ 
@@ -157,7 +157,7 @@ invalid.js:20:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:26:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant constant declaration.
+  i Redundant constant declaration.
   
     24 │ };
     25 │ 
@@ -186,9 +186,8 @@ invalid.js:26:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
     26    │ - const·D·="D";
     27 25 │   export const e = {
     28    │ - → D
-       26 │ + → 
-       27 │ + → D:"D"
-    29 28 │   };
+       26 │ + → D:"D"
+    29 27 │   };
   
 
 ```

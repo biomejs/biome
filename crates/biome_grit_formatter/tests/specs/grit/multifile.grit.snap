@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/multifile.grit
-snapshot_kind: text
 ---
 # Input
 
@@ -42,7 +41,8 @@ Attribute Position: Auto
 -----
 
 ```grit
-language js;
+language js
+
 multifile {
 	bubble($prop, $source_file, $new_prop) file($body) where $body <: contains `type $prop = $_` where {
 		$source_file <: undefined,
@@ -53,7 +53,7 @@ multifile {
 	},
 	bubble($prop, $source_file, $new_prop) file($body) where {
 		$body <: contains `$prop` where {
-			$prop <: imported_from(from = includes $source_file)
+			$prop <: imported_from(from=includes $source_file)
 		},
 		$body <: contains `$prop` => $new_prop
 	}
@@ -62,5 +62,5 @@ multifile {
 
 # Lines exceeding max width of 80 characters
 ```
-    3: 	bubble($prop, $source_file, $new_prop) file($body) where $body <: contains `type $prop = $_` where {
+    4: 	bubble($prop, $source_file, $new_prop) file($body) where $body <: contains `type $prop = $_` where {
 ```

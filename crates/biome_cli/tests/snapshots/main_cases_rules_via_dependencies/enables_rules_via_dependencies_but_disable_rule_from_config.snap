@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "useExhaustiveDependencies": "off"
+      }
+    }
+  }
+}
+```
+
+## `package.json`
+
+```json
+{
+    "dependencies": {
+        "react": "latest"
+    }
+}
+
+```
+
+## `test.jsx`
+
+```jsx
+
+import { useCallback } from "react";
+
+function Component2() {
+    const [local,SetLocal] = useState(0);
+    const handle = useCallback(() => {
+      console.log(local);
+    }, [local, local]);
+}
+    
+```
+
+# Emitted Messages
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+```

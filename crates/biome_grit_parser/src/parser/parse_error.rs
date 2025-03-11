@@ -1,8 +1,8 @@
 use super::{SUPPORTED_LANGUAGE_FLAVOR_SET_STR, SUPPORTED_LANGUAGE_SET_STR};
 use crate::parser::GritParser;
+use biome_parser::Parser;
 use biome_parser::diagnostic::expected_node;
 use biome_parser::prelude::ParseDiagnostic;
-use biome_parser::Parser;
 use biome_rowan::TextRange;
 
 pub(crate) fn expected_definition(p: &GritParser, range: TextRange) -> ParseDiagnostic {

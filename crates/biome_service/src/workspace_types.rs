@@ -5,13 +5,13 @@ use std::collections::VecDeque;
 use biome_js_syntax::{AnyJsDeclaration, AnyTsTupleTypeElement};
 use rustc_hash::FxHashSet;
 use schemars::{
-    gen::{SchemaGenerator, SchemaSettings},
-    schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
     JsonSchema,
+    r#gen::{SchemaGenerator, SchemaSettings},
+    schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
 };
 use serde_json::Value;
 
-use crate::{workspace::*, WorkspaceError};
+use crate::{WorkspaceError, workspace::*};
 use biome_js_factory::{
     make,
     syntax::{AnyJsObjectMemberName, AnyTsName, AnyTsType, AnyTsTypeMember, T},
@@ -56,9 +56,10 @@ fn instance_type<'a>(
         // If the instance type is an object, generate a TS object type with the corresponding properties
         InstanceType::Object => {
             let object = schema.object.as_deref().unwrap();
-            AnyTsType::from(make::ts_object_type(
-                make::token(T!['{']),
-                make::ts_type_member_list(object.properties.iter().map(|(property, schema)| {
+            let properties = object
+                .properties
+                .iter()
+                .map(|(property, schema)| {
                     let (ts_type, optional, description) = schema_type(queue, root_schema, schema);
                     assert!(!optional, "optional nested types are not supported");
 
@@ -80,9 +81,99 @@ fn instance_type<'a>(
                         .with_type_annotation(make::ts_type_annotation(make::token(T![:]), ts_type))
                         .build(),
                     )
-                })),
-                make::token(T!['}']),
-            ))
+                })
+                .collect::<Vec<_>>();
+
+            let properties_type = (!properties.is_empty()).then(|| {
+                make::ts_object_type(
+                    make::token(T!['{']),
+                    make::ts_type_member_list(properties),
+                    make::token(T!['}']),
+                )
+                .into()
+            });
+
+            // Don't use `additionalProperties: false` here.
+            let additional_properties =
+                object
+                    .additional_properties
+                    .as_deref()
+                    .and_then(|schema| match schema {
+                        Schema::Bool(false) => None,
+                        _ => Some(schema),
+                    });
+
+            // If `additionalProperties` is not empty, add a mapped or record type.
+            let additional_properties_type = additional_properties.map(|schema| {
+                // If `propertyNames` is not empty, use it as the key type.
+                let key_type = object.property_names.as_deref().map(|schema| {
+                    let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
+                    assert!(!optional, "optional nested types are not supported");
+                    ts_type
+                });
+
+                let value_type = {
+                    let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
+                    assert!(!optional, "optional nested types are not supported");
+                    ts_type
+                };
+
+                if let Some(key_type) = key_type {
+                    // Use a mapped type for the key type and the value type. All keys are optional.
+                    // e.g. `{ [K in Key]?: Value }`.
+                    // TODO: Support `required` keys here when needed.
+                    make::ts_mapped_type(
+                        make::token(T!['{']),
+                        make::token(T!['[']),
+                        make::ts_type_parameter_name(make::ident("K")),
+                        make::token(T![in]),
+                        key_type,
+                        make::token(T![']']),
+                        make::token(T!['}']),
+                    )
+                    .with_optional_modifier(
+                        make::ts_mapped_type_optional_modifier_clause(make::token(T![?])).build(),
+                    )
+                    .with_mapped_type(make::ts_type_annotation(make::token(T![:]), value_type))
+                    .build()
+                    .into()
+                } else {
+                    // Use `Record<string, Value>` otherwise.
+                    make::ts_reference_type(
+                        make::js_reference_identifier(make::ident("Record")).into(),
+                    )
+                    .with_type_arguments(make::ts_type_arguments(
+                        make::token(T![<]),
+                        make::ts_type_argument_list(
+                            [
+                                make::ts_reference_type(
+                                    make::js_reference_identifier(make::ident("string")).into(),
+                                )
+                                .build()
+                                .into(),
+                                value_type,
+                            ],
+                            [make::token(T![,])],
+                        ),
+                        make::token(T![>]),
+                    ))
+                    .build()
+                    .into()
+                }
+            });
+
+            // If both `properties` and `additionalProperties` are provided, turn into an
+            // intersection type. Pick one for the final type otherwise.
+            let result = [properties_type, additional_properties_type]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
+
+            let separators = (0..result.len().saturating_sub(1)).map(|_| make::token(T![&]));
+
+            make::ts_intersection_type(make::ts_intersection_type_element_list(result, separators))
+                .build()
+                .into()
         }
         // If the instance type is an array, generate a TS array type with the corresponding item type
         InstanceType::Array => {
@@ -259,7 +350,7 @@ fn schema_object_type<'a>(
     let has_defaults = schema
         .metadata
         .as_ref()
-        .map_or(false, |metadata| metadata.default.is_some());
+        .is_some_and(|metadata| metadata.default.is_some());
 
     (ts_type, is_nullable || has_defaults, description)
 }
@@ -308,7 +399,7 @@ pub fn generate_type<'a>(
     match root_name {
         "Null" => return AnyTsType::TsVoidType(make::ts_void_type(make::token(T![void]))),
         "Boolean" => {
-            return AnyTsType::TsBooleanType(make::ts_boolean_type(make::token(T![boolean])))
+            return AnyTsType::TsBooleanType(make::ts_boolean_type(make::token(T![boolean])));
         }
         "String" => return AnyTsType::TsStringType(make::ts_string_type(make::token(T![string]))),
         _ => {}
@@ -319,16 +410,20 @@ pub fn generate_type<'a>(
     while let Some((name, schema)) = queue.pop_front() {
         // Detect if the type being emitted is an object, emit it as an
         // interface definition if that's the case
-        let is_interface = schema.instance_type.as_ref().map_or_else(
-            || schema.object.is_some(),
-            |instance_type| {
-                if let SingleOrVec::Single(instance_type) = instance_type {
-                    matches!(**instance_type, InstanceType::Object)
-                } else {
-                    false
-                }
-            },
-        );
+        let is_interface = schema.object.as_deref().is_some_and(|object| {
+            object
+                .additional_properties
+                .as_deref()
+                .is_none_or(|additional_properties| {
+                    matches!(additional_properties, Schema::Bool(false))
+                })
+        }) && schema.instance_type.as_ref().is_none_or(|instance_type| {
+            if let SingleOrVec::Single(instance_type) = instance_type {
+                matches!(**instance_type, InstanceType::Object)
+            } else {
+                false
+            }
+        });
 
         if is_interface {
             let mut members = Vec::new();
@@ -336,10 +431,10 @@ pub fn generate_type<'a>(
             // Create a property signature member in the interface for each
             // property of the corresponding schema object
             let object = schema.object.as_deref().unwrap();
-            for (property, schema) in &object.properties {
+            for (property_str, schema) in &object.properties {
                 let (ts_type, optional, description) = schema_type(queue, root_schema, schema);
 
-                let mut property = make::ident(property);
+                let mut property = make::ident(property_str);
                 if let Some(description) = description {
                     let comment = format!("/**\n\t* {description} \n\t */");
                     let trivia = vec![
@@ -350,10 +445,51 @@ pub fn generate_type<'a>(
                     property = property.with_leading_trivia(trivia);
                 }
 
+                let type_annotation = if let Some((container_type, key_type, value_type)) =
+                    match property_str.as_str() {
+                        "featuresSupported" => Some(("Map", "FeatureKind", "SupportKind")),
+                        _ => None,
+                    } {
+                    // HACK: force the `featuresSupported` property to be a Map<FeatureKind, SupportKind>
+                    // This is a temporary workaround to fix the type annotation for this property. The
+                    // better fix would be to use the `transform` feature that is available in `schemars` 1.0 to
+                    // add a metadata field that we can pick up here to generate the correct type annotation.
+                    // Alternatively, we could generate these types based on the actual rust types instead of the
+                    // json schema.
+                    //
+                    // We also manually fix the types for some other properties as well.
+                    let full_type = make::ts_reference_type(
+                        make::js_reference_identifier(make::ident(container_type)).into(),
+                    )
+                    .with_type_arguments(make::ts_type_arguments(
+                        make::token(T![<]),
+                        make::ts_type_argument_list(
+                            [
+                                make::ts_reference_type(
+                                    make::js_reference_identifier(make::ident(key_type)).into(),
+                                )
+                                .build()
+                                .into(),
+                                make::ts_reference_type(
+                                    make::js_reference_identifier(make::ident(value_type)).into(),
+                                )
+                                .build()
+                                .into(),
+                            ],
+                            [make::token(T![,])],
+                        ),
+                        make::token(T![>]),
+                    ))
+                    .build();
+                    make::ts_type_annotation(make::token(T![:]), full_type.into())
+                } else {
+                    make::ts_type_annotation(make::token(T![:]), ts_type)
+                };
+
                 let mut builder = make::ts_property_signature_type_member(
                     AnyJsObjectMemberName::from(make::js_literal_member_name(property)),
                 )
-                .with_type_annotation(make::ts_type_annotation(make::token(T![:]), ts_type));
+                .with_type_annotation(type_annotation);
 
                 if optional {
                     builder = builder.with_optional_token(make::token(T![?]));
@@ -451,17 +587,16 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 19] {
+pub fn methods() -> [WorkspaceMethod; 21] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
-        workspace_method!(register_project_folder),
-        workspace_method!(set_manifest_for_project),
+        workspace_method!(open_project),
         workspace_method!(open_file),
         workspace_method!(change_file),
         workspace_method!(close_file),
         workspace_method!(get_syntax_tree),
-        workspace_method!(organize_imports),
+        workspace_method!(check_file_size),
         workspace_method!(get_file_content),
         workspace_method!(get_control_flow_graph),
         workspace_method!(get_formatter_ir),
@@ -472,5 +607,8 @@ pub fn methods() -> [WorkspaceMethod; 19] {
         workspace_method!(format_on_type),
         workspace_method!(fix_file),
         workspace_method!(rename),
+        workspace_method!(parse_pattern),
+        workspace_method!(search_pattern),
+        workspace_method!(drop_pattern),
     ]
 }

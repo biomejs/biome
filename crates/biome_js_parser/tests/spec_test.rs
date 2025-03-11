@@ -1,19 +1,19 @@
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_str;
-use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::DiagnosticExt;
+use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
+use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
-use std::path::Path;
 
 #[derive(Copy, Clone)]
 pub enum ExpectedOutcome {
@@ -30,12 +30,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         _ => panic!("Invalid expected outcome {outcome_str}"),
     };
 
-    let test_case_path = Path::new(test_case);
+    let test_case_path = Utf8Path::new(test_case);
 
     let file_name = test_case_path
         .file_name()
-        .expect("Expected test to have a file name")
-        .to_str()
         .expect("File name to be valid UTF8");
 
     let content = fs::read_to_string(test_case_path)
@@ -43,29 +41,32 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let mut options = JsParserOptions::default();
 
-    let options_path = Path::new(test_case_path).with_extension("options.json");
+    let options_path = Utf8Path::new(test_case_path).with_extension("options.json");
 
     if options_path.exists() {
         let mut options_path = BiomePath::new(&options_path);
 
         let mut settings = Settings::default();
         // SAFETY: we checked its existence already, we assume we have rights to read it
-        let (test_options, diagnostics) = deserialize_from_str::<PartialConfiguration>(
-            options_path.get_buffer_from_file().as_str(),
-        )
-        .consume();
+        let (test_options, diagnostics) =
+            deserialize_from_str::<Configuration>(options_path.get_buffer_from_file().as_str())
+                .consume();
 
         settings
-            .merge_with_configuration(test_options.unwrap_or_default(), None, None, &[])
+            .merge_with_configuration(test_options.unwrap_or_default(), None)
             .unwrap();
 
         let settings = settings.languages.javascript.parser;
 
-        if settings.parse_class_parameter_decorators {
+        if settings
+            .parse_class_parameter_decorators
+            .unwrap_or_default()
+            .into()
+        {
             options = options.with_parse_class_parameter_decorators();
         }
 
-        if settings.grit_metavariables {
+        if settings.grit_metavariables.unwrap_or_default().into() {
             options = options.with_metavariables();
         }
 
@@ -129,7 +130,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             std::str::from_utf8(diagnostics_buffer.as_slice()).expect("non utf8 in error buffer");
 
         if matches!(outcome, ExpectedOutcome::Pass) {
-            panic!("Expected no errors to be present in a test case that is expected to pass but the following diagnostics are present:\n{formatted_diagnostics}")
+            panic!(
+                "Expected no errors to be present in a test case that is expected to pass but the following diagnostics are present:\n{formatted_diagnostics}"
+            )
         }
 
         writeln!(snapshot, "## Diagnostics\n\n```").unwrap();
@@ -147,7 +150,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                     .descendants()
                     .any(|node| node.kind().is_bogus())
             {
-                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {formatted_ast}");
+                panic!(
+                    "Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {formatted_ast}"
+                );
             }
 
             let syntax = parsed.syntax();
@@ -175,13 +180,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-export let shim: typeof import("./foo2") = {
-    Bar: Bar2
-};
-
-export interface Foo {
-    bar: import('immutable').Map<string, int>;
-}
+type T = import;
     "#;
 
     let root = parse(code, JsFileSource::ts(), JsParserOptions::default());

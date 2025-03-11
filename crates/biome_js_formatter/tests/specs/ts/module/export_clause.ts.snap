@@ -28,6 +28,8 @@ export  type  *  from  "types";
 
 export  type  *  as  types   from  "types";
 
+export { type default as G } from './types.ts';
+
 ```
 
 
@@ -51,6 +53,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```ts
@@ -76,4 +79,6 @@ export declare class E {}
 export type * from "types";
 
 export type * as types from "types";
+
+export { type default as G } from "./types.ts";
 ```

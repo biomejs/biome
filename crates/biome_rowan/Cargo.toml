@@ -14,19 +14,20 @@ version              = "0.5.7"
 biome_text_edit = { workspace = true }
 biome_text_size = { workspace = true }
 countme         = { workspace = true }
-hashbrown       = { version = "0.14.5", features = ["inline-more"], default-features = false }
+hashbrown       = { version = "0.15.2", features = ["inline-more", "raw-entry"], default-features = false }
 rustc-hash      = { workspace = true }
+schemars        = { workspace = true, optional = true }
 serde           = { workspace = true, optional = true }
-tracing         = { workspace = true }
 
 [dev-dependencies]
-iai               = "0.1.1"
+iai               = "=0.1.1"
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 serde_json        = { workspace = true }
 
 [features]
-serde = ["dep:serde", "biome_text_size/serde", "biome_text_size/schemars"]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde", "biome_text_size/serde", "biome_text_size/serde"]
 
 [[bench]]
 harness = false

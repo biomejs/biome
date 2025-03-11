@@ -1,11 +1,11 @@
-use crate::parser::{parse_error::expected_name, GraphqlParser};
+use crate::parser::{GraphqlParser, parse_error::expected_name};
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
 };
 use biome_parser::{
-    parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, Parser,
+    Parser, parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
+    prelude::ParsedSyntax::*,
 };
 
 use super::{argument::parse_arguments, parse_error::expected_directive, parse_reference};

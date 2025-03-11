@@ -5,11 +5,12 @@
 //! [website]: https://biomejs.dev
 
 use biome_cli::{
-    biome_command, open_transport, setup_panic_handler, to_color_mode, BiomeCommand, CliDiagnostic,
-    CliSession,
+    BiomeCommand, CliDiagnostic, CliSession, biome_command, open_transport, setup_panic_handler,
+    to_color_mode,
 };
-use biome_console::{markup, ConsoleExt, EnvConsole};
-use biome_diagnostics::{set_bottom_frame, Diagnostic, PrintDiagnostic};
+use biome_console::{ConsoleExt, EnvConsole, markup};
+use biome_diagnostics::{Diagnostic, PrintDiagnostic, set_bottom_frame};
+use biome_fs::OsFileSystem;
 use biome_service::workspace;
 use std::process::{ExitCode, Termination};
 use tokio::runtime::Runtime;
@@ -57,14 +58,15 @@ fn main() -> ExitCode {
 fn run_workspace(console: &mut EnvConsole, command: BiomeCommand) -> Result<(), CliDiagnostic> {
     // If the `--use-server` CLI flag is set, try to open a connection to an
     // existing Biome server socket
+    let fs = Box::new(OsFileSystem::default());
     let workspace = if command.should_use_server() {
         let runtime = Runtime::new()?;
         match open_transport(runtime)? {
-            Some(transport) => workspace::client(transport)?,
+            Some(transport) => workspace::client(transport, fs)?,
             None => return Err(CliDiagnostic::server_not_running()),
         }
     } else {
-        workspace::server()
+        workspace::server(fs)
     };
 
     let session = CliSession::new(&*workspace, console)?;

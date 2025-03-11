@@ -1,10 +1,10 @@
 use crate::parser::CssParser;
 use crate::syntax::block::ParseBlockBody;
-use crate::syntax::{is_at_declaration, DeclarationList};
+use crate::syntax::{DeclarationList, is_at_declaration};
 use biome_css_syntax::CssSyntaxKind;
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::CompletedMarker;
+use biome_parser::parse_lists::ParseNodeList;
 
 #[inline]
 pub(crate) fn parse_declaration_block(p: &mut CssParser) -> CompletedMarker {

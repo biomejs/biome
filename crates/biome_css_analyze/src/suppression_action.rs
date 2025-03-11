@@ -7,7 +7,7 @@ pub(crate) struct CssSuppressionAction;
 impl SuppressionAction for CssSuppressionAction {
     type Language = CssLanguage;
 
-    fn find_token_to_apply_suppression(
+    fn find_token_for_inline_suppression(
         &self,
         token: CssSyntaxToken,
     ) -> Option<ApplySuppression<Self::Language>> {
@@ -36,7 +36,7 @@ impl SuppressionAction for CssSuppressionAction {
         Some(apply_suppression)
     }
 
-    fn apply_suppression(
+    fn apply_inline_suppression(
         &self,
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
@@ -92,5 +92,9 @@ impl SuppressionAction for CssSuppressionAction {
             ]);
         }
         mutation.replace_token_transfer_trivia(token_to_apply_suppression, new_token);
+    }
+
+    fn suppression_top_level_comment(&self, suppression_text: &str) -> String {
+        format!("/** {suppression_text}: <explanation> */")
     }
 }

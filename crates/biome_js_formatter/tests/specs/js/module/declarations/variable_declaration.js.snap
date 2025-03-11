@@ -16,7 +16,7 @@ info: js/module/declarations/variable_declaration.js
         setId,
     } = privateNamesMap.get(name);
 
-		// rome-ignore format: test
+		// biome-ignore format: test
 		const {
 			id, static: isStatic, method: isMethod,
 			methodId, getId, setId,
@@ -25,7 +25,7 @@ info: js/module/declarations/variable_declaration.js
     const { id1, method: isMethod1, methodId1 } = privateNamesMap.get(name);
 
 		const { id1, method: isMethod1, methodId1 } =
-			// rome-ignore format: test
+			// biome-ignore format: test
 			privateNamesMap.get(name);
 
     const {
@@ -34,12 +34,12 @@ info: js/module/declarations/variable_declaration.js
         methodId3,
     } = anodyneCondosMalateOverateRetinol.get(bifornCringerMoshedPerplexSawder);
 
-		// rome-ignore format: test
+		// biome-ignore format: test
 		const {
 			id3, method: isMethod3,
 			methodId3,
 		} =
-			// rome-ignore format: test
+			// biome-ignore format: test
 			anodyneCondosMalateOverateRetinol.get(
 			bifornCringerMoshedPerplexSawder
 		);
@@ -56,11 +56,11 @@ const loooooooooooooooooooooooooong4 =
 	void void "looooooooooooooooooooooooooooooooooooooooooog";
 const loooooooooooooooooooooooooong5 =
 	!!"looooooooooooooooooooooooooooooooooooooooooog";
-// rome-ignore format: test
+// biome-ignore format: test
 const   loooooooooooooooooooooooooong6    =
 	void    "looooooooooooooooooooooooooooooooooooooooooog";
 const loooooooooooooooooooooooooong7    =
-	// rome-ignore format: test
+	// biome-ignore format: test
 	!      "looooooooooooooooooooooooooooooooooooooooooog";
 
 //poorly breakable member or call chain (break after operator layout)
@@ -266,7 +266,7 @@ let looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 
 const a
-	// rome-ignore format: Ignore the initializer
+	// biome-ignore format: Ignore the initializer
 				=
 
 			[A,    B,   C].push( aaa )
@@ -294,6 +294,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Expand lists: Auto
 -----
 
 ```js
@@ -308,7 +309,7 @@ Attribute Position: Auto
 		setId,
 	} = privateNamesMap.get(name);
 
-	// rome-ignore format: test
+	// biome-ignore format: test
 	const {
 			id, static: isStatic, method: isMethod,
 			methodId, getId, setId,
@@ -320,7 +321,7 @@ Attribute Position: Auto
 		id1,
 		method: isMethod1,
 		methodId1,
-	} = // rome-ignore format: test
+	} = // biome-ignore format: test
 	privateNamesMap.get(name);
 
 	const {
@@ -329,12 +330,12 @@ Attribute Position: Auto
 		methodId3,
 	} = anodyneCondosMalateOverateRetinol.get(bifornCringerMoshedPerplexSawder);
 
-	// rome-ignore format: test
+	// biome-ignore format: test
 	const {
 			id3, method: isMethod3,
 			methodId3,
 		} =
-			// rome-ignore format: test
+			// biome-ignore format: test
 			anodyneCondosMalateOverateRetinol.get(
 			bifornCringerMoshedPerplexSawder
 		);
@@ -351,11 +352,11 @@ const loooooooooooooooooooooooooong4 =
 	void void "looooooooooooooooooooooooooooooooooooooooooog";
 const loooooooooooooooooooooooooong5 =
 	!!"looooooooooooooooooooooooooooooooooooooooooog";
-// rome-ignore format: test
+// biome-ignore format: test
 const   loooooooooooooooooooooooooong6    =
 	void    "looooooooooooooooooooooooooooooooooooooooooog";
 const loooooooooooooooooooooooooong7 =
-	// rome-ignore format: test
+	// biome-ignore format: test
 	!      "looooooooooooooooooooooooooooooooooooooooooog";
 
 //poorly breakable member or call chain (break after operator layout)
@@ -749,7 +750,7 @@ let looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 	).ewqeqewqweqweqweqweqweqweqw;
 
 const a
-	// rome-ignore format: Ignore the initializer
+	// biome-ignore format: Ignore the initializer
 	=
 
 			[A,    B,   C].push( aaa );

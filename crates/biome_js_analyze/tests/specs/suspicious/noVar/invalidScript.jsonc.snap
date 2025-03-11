@@ -1,0 +1,160 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidScript.jsonc
+snapshot_kind: text
+---
+# Input
+```cjs
+var x = 1; foo(x);
+```
+
+# Diagnostics
+```
+invalidScript.jsonc:1:1 lint/suspicious/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use let or const instead of var.
+  
+  > 1 │ var x = 1; foo(x);
+      │ ^^^^^^^^^
+  
+  i A variable declared with var in the global scope pollutes the global object.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'const' instead.
+  
+  - var·x·=·1;·foo(x);
+  + const·x·=·1;·foo(x);
+  
+
+```
+
+# Input
+```cjs
+var x = 1; x = 5;
+```
+
+# Diagnostics
+```
+invalidScript.jsonc:1:1 lint/suspicious/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use let or const instead of var.
+  
+  > 1 │ var x = 1; x = 5;
+      │ ^^^^^^^^^
+  
+  i A variable declared with var in the global scope pollutes the global object.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'let' instead.
+  
+  - var·x·=·1;·x·=·5;
+  + let·x·=·1;·x·=·5;
+  
+
+```
+
+# Input
+```cjs
+for (var i in [1,2,3]) { foo(i); }
+```
+
+# Diagnostics
+```
+invalidScript.jsonc:1:6 lint/suspicious/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use let or const instead of var.
+  
+  > 1 │ for (var i in [1,2,3]) { foo(i); }
+      │      ^^^^^
+  
+  i A variable declared with var in the global scope pollutes the global object.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'const' instead.
+  
+  - for·(var·i·in·[1,2,3])·{·foo(i);·}
+  + for·(const·i·in·[1,2,3])·{·foo(i);·}
+  
+
+```
+
+# Input
+```cjs
+for (var x of [1,2,3]) { foo(x); }
+```
+
+# Diagnostics
+```
+invalidScript.jsonc:1:6 lint/suspicious/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use let or const instead of var.
+  
+  > 1 │ for (var x of [1,2,3]) { foo(x); }
+      │      ^^^^^
+  
+  i A variable declared with var in the global scope pollutes the global object.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'const' instead.
+  
+  - for·(var·x·of·[1,2,3])·{·foo(x);·}
+  + for·(const·x·of·[1,2,3])·{·foo(x);·}
+  
+
+```
+
+# Input
+```cjs
+var [x = -1, y] = [1,2]; y = 0;
+```
+
+# Diagnostics
+```
+invalidScript.jsonc:1:1 lint/suspicious/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use let or const instead of var.
+  
+  > 1 │ var [x = -1, y] = [1,2]; y = 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i A variable declared with var in the global scope pollutes the global object.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'let' instead.
+  
+  - var·[x·=·-1,·y]·=·[1,2];·y·=·0;
+  + let·[x·=·-1,·y]·=·[1,2];·y·=·0;
+  
+
+```
+
+# Input
+```cjs
+var {a: x = -1, b: y} = {a:1,b:2}; y = 0;
+```
+
+# Diagnostics
+```
+invalidScript.jsonc:1:1 lint/suspicious/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use let or const instead of var.
+  
+  > 1 │ var {a: x = -1, b: y} = {a:1,b:2}; y = 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i A variable declared with var in the global scope pollutes the global object.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'let' instead.
+  
+  - var·{a:·x·=·-1,·b:·y}·=·{a:1,b:2};·y·=·0;
+  + let·{a:·x·=·-1,·b:·y}·=·{a:1,b:2};·y·=·0;
+  
+
+```

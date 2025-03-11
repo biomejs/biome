@@ -15,7 +15,7 @@ mod tests {
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{JsFileSource, JsIdentifierBinding, JsVariableDeclarator};
 
-    use crate::{semantic_model, SemanticModelOptions};
+    use crate::{SemanticModelOptions, semantic_model};
 
     fn assert_is_const(code: &str, is_const: bool) {
         use biome_rowan::AstNode;
@@ -27,7 +27,7 @@ mod tests {
             .syntax()
             .descendants()
             .filter_map(|x| x.cast::<JsIdentifierBinding>())
-            .find(|x| x.text() == "a")
+            .find(|x| x.to_trimmed_string() == "a")
             .unwrap();
         let declarator = a_reference.parent::<JsVariableDeclarator>().unwrap();
         let initializer = declarator.initializer().unwrap();

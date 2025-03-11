@@ -1,72 +1,94 @@
 describe("foo", () => {
-	beforeEach(() => {}),
-		beforeEach(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	beforeEach(() => {
+	});
+	beforeEach(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 });
 
 describe.skip("foo", () => {
-	beforeEach(() => {}),
-		beforeAll(() => {}),
-		beforeAll(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	beforeEach(() => {
+	});
+	beforeAll(() => {
+	});
+	beforeAll(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 });
 
 describe.skip("foo", () => {
-	afterEach(() => {}),
-		afterEach(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	afterEach(() => {
+	});
+	afterEach(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 });
 
 describe.skip("foo", () => {
-	afterAll(() => {}),
-		afterAll(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	afterAll(() => {
+	});
+	afterAll(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 });
 
 describe("foo", () => {
-	beforeEach(() => {}),
-		beforeEach(() => {}),
-		beforeEach(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	beforeEach(() => {
+	});
+	beforeEach(() => {
+	});
+	beforeEach(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 });
 
 describe.skip("foo", () => {
-	afterAll(() => {}),
-		afterAll(() => {}),
-		beforeAll(() => {}),
-		beforeAll(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	afterAll(() => {
+	});
+	afterAll(() => {
+	});
+	beforeAll(() => {
+	});
+	beforeAll(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 });
 
 describe("foo", () => {
-	beforeEach(() => {}),
-		beforeEach(() => {}),
-		beforeAll(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	beforeEach(() => {
+	});
+	beforeEach(() => {
+	});
+	beforeAll(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 });
 
 describe("foo", () => {
-	beforeAll(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	beforeAll(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 	describe("inner_foo", () => {
-		beforeEach(() => {});
-		beforeEach(() => {});
+		beforeEach(() => {
+		});
+		beforeEach(() => {
+		});
 		test("inner bar", () => {
 			someFn();
 		});
@@ -74,56 +96,73 @@ describe("foo", () => {
 });
 
 describe.each(["hello"])("%s", () => {
-	beforeEach(() => {});
-	beforeEach(() => {});
+	beforeEach(() => {
+	});
+	beforeEach(() => {
+	});
 
-	it("is not fine", () => {});
+	it("is not fine", () => {
+	});
 });
 
 describe("something", () => {
 	describe.each(["hello"])("%s", () => {
-		beforeEach(() => {});
+		beforeEach(() => {
+		});
 
-		it("is fine", () => {});
+		it("is fine", () => {
+		});
 	});
 
 	describe.each(["world"])("%s", () => {
-		beforeEach(() => {});
-		beforeEach(() => {});
+		beforeEach(() => {
+		});
+		beforeEach(() => {
+		});
 
-		it("is not fine", () => {});
+		it("is not fine", () => {
+		});
 	});
 });
 
 describe("something", () => {
 	describe.each(["hello"])("%s", () => {
-		beforeEach(() => {});
+		beforeEach(() => {
+		});
 
-		it("is fine", () => {});
+		it("is fine", () => {
+		});
 	});
 
 	describe.each(["world"])("%s", () => {
 		describe("some more", () => {
-			beforeEach(() => {});
-			beforeEach(() => {});
+			beforeEach(() => {
+			});
+			beforeEach(() => {
+			});
 
-			it("is not fine", () => {});
+			it("is not fine", () => {
+			});
 		});
 	});
 });
 
 describe("foo", () => {
-	before(() => {}),
-		before(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	before(() => {
+	});
+	before(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 });
 
 describe("foo", () => {
-	after(() => {}),
-		after(() => {}),
-		test("bar", () => {
-			someFn();
-		});
+	after(() => {
+	});
+	after(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
 });

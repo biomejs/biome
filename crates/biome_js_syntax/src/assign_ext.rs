@@ -1,4 +1,4 @@
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 use crate::{AnyJsExpression, JsComputedMemberAssignment, JsStaticMemberAssignment};
 

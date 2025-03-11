@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComponent.jsx
+snapshot_kind: text
+---
+# Input
+```jsx
+import HTMLWrapper from "HTMLWrapper.tsx";
+
+function component() {
+    return <HTMLWrapper> </HTMLWrapper>;
+}
+
+```
+
+# Diagnostics
+```
+invalidComponent.jsx:1:8 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  
+  > 1 │ import HTMLWrapper from "HTMLWrapper.tsx";
+      │        ^^^^^^^^^^^
+    2 │ 
+    3 │ function component() {
+  
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    1   │ - import·HTMLWrapper·from·"HTMLWrapper.tsx";
+      1 │ + import·HtmlWrapper·from·"HTMLWrapper.tsx";
+    2 2 │   
+    3 3 │   function component() {
+    4   │ - ····return·<HTMLWrapper>·</HTMLWrapper>;
+      4 │ + ····return·<HtmlWrapper>·</HtmlWrapper>;
+    5 5 │   }
+    6 6 │   
+  
+
+```

@@ -18,7 +18,7 @@ Add the following code inside your `lib.rs` file:
 
 <summary>Code to copy</summary>
 
-```rust 
+```rust
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
@@ -164,7 +164,7 @@ where
 Then, you'll have to create four types:
 1. `HtmlCommentStyle`
 1. `HtmlFormatContext`
-1. `FormatHtmlSyntaxNode` 
+1. `FormatHtmlSyntaxNode`
 1. `HtmlLanguage`
 
 ### `HtmlCommentStyle`
@@ -196,7 +196,7 @@ Usually, the type context must contain `comments` and `source_map` fields:
 pub struct HtmlFormatContext {
     /// The comments of the nodes and tokens in the program.
     comments: Rc<HtmlComments>,
-    source_map: Option<TransformSourceMap>, 
+    source_map: Option<TransformSourceMap>,
 }
 
 impl HtmlFormatContext {
@@ -218,7 +218,7 @@ This type needs to implement the traits `FormatContext` and `CstFormatContext`.
 
 ### `FormatHtmlSyntaxNode`
 
-This type will instruct the formatter how to format a generic node. 
+This type will instruct the formatter how to format a generic node.
 
 It's more idiomatic to have `FormatHtmlSyntaxNode` inside a file called `cst.rs`.
 
@@ -300,7 +300,7 @@ where
         }
 
         self.fmt_leading_comments(node, f)?;
-        self.fmt_fields(node, f)?; 
+        self.fmt_fields(node, f)?;
         self.fmt_dangling_comments(node, f)?;
         self.fmt_trailing_comments(node, f)
     }
@@ -418,7 +418,7 @@ mod language {
 }
 
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
-    let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
+    let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
 
     let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path) else {
         return;
@@ -428,9 +428,9 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     let language = language::HtmlTestFormatLanguage::default();
 
     let snapshot = SpecSnapshot::new(
-        test_file, 
-        test_directory, 
-        language, 
+        test_file,
+        test_directory,
+        language,
         HtmlFormatLanguage::new(options),
     );
 
@@ -448,7 +448,7 @@ pub struct HtmlTestFormatLanguage {
 }
 
 impl TestFormatLanguage for HtmlTestFormatLanguage {
-    
+
 }
 ```
 

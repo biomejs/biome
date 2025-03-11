@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: missingSuper.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // valid
 class A {
     constructor() {}
@@ -113,7 +114,7 @@ class I extends A {
 ```
 missingSuper.js:19:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths that return without calling `super()`.
+  × This constructor has code paths that return without calling `super()`.
   
     17 │ // invalid
     18 │ class C extends A {
@@ -135,7 +136,7 @@ missingSuper.js:19:5 lint/correctness/noUnreachableSuper ━━━━━━━�
 ```
 missingSuper.js:28:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths that return without calling `super()`.
+  × This constructor has code paths that return without calling `super()`.
   
     26 │ // invalid
     27 │ class D extends A {
@@ -157,7 +158,7 @@ missingSuper.js:28:5 lint/correctness/noUnreachableSuper ━━━━━━━�
 ```
 missingSuper.js:41:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths that return without calling `super()` first.
+  × This constructor has code paths that return without calling `super()` first.
   
     39 │ // invalid
     40 │ class E extends A {
@@ -189,7 +190,7 @@ missingSuper.js:41:5 lint/correctness/noUnreachableSuper ━━━━━━━�
 ```
 missingSuper.js:87:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths where `super()` is called more than once.
+  × This constructor has code paths where `super()` is called more than once.
   
     85 │ // invalid
     86 │ class I extends A {
@@ -227,7 +228,7 @@ missingSuper.js:87:5 lint/correctness/noUnreachableSuper ━━━━━━━�
 ```
 missingSuper.js:99:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths that return without calling `super()`.
+  × This constructor has code paths that return without calling `super()`.
   
      97 │ // invalid
      98 │ class I extends A {
@@ -243,5 +244,3 @@ missingSuper.js:99:5 lint/correctness/noUnreachableSuper ━━━━━━━�
   
 
 ```
-
-

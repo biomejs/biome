@@ -1,5 +1,5 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{Ast, RuleSource, RuleSourceKind};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause, JsModule};
 use biome_rowan::AstNode;

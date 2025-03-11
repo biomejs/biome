@@ -1,8 +1,8 @@
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
 
 use crate::{
-    registry::NodeLanguage, AddVisitor, Phases, QueryKey, QueryMatch, Queryable, ServiceBag,
-    Visitor, VisitorContext,
+    AddVisitor, Phases, QueryKey, QueryMatch, Queryable, ServiceBag, Visitor, VisitorContext,
+    registry::NodeLanguage,
 };
 
 /// Query type usable by lint rules to match on specific [AstNode] types
@@ -80,7 +80,7 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
         }
 
         if let Some(range) = ctx.range {
-            if node.text_range().ordering(range).is_ne() {
+            if node.text_range_with_trivia().ordering(range).is_ne() {
                 self.skip_subtree = Some(node.clone());
                 return;
             }
@@ -93,15 +93,15 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
 #[cfg(test)]
 mod tests {
     use biome_rowan::{
-        raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, BatchMutation, SyntaxNode, SyntaxToken,
+        raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
     use std::convert::Infallible;
 
     use crate::{
-        matcher::MatchQueryParams, registry::Phases, Analyzer, AnalyzerContext, AnalyzerOptions,
-        AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry, Never, QueryMatcher,
-        ServiceBag, SuppressionAction, SyntaxVisitor,
+        Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression, ControlFlow,
+        MetadataRegistry, Never, QueryMatcher, ServiceBag, SuppressionAction, SyntaxVisitor,
+        matcher::MatchQueryParams, registry::Phases,
     };
 
     #[derive(Default)]
@@ -109,7 +109,7 @@ mod tests {
         nodes: Vec<RawLanguageKind>,
     }
 
-    impl<'a> QueryMatcher<RawLanguage> for &'a mut BufferMatcher {
+    impl QueryMatcher<RawLanguage> for &mut BufferMatcher {
         fn match_query(&mut self, params: MatchQueryParams<RawLanguage>) {
             self.nodes.push(
                 params
@@ -154,14 +154,14 @@ mod tests {
         impl SuppressionAction for TestAction {
             type Language = RawLanguage;
 
-            fn find_token_to_apply_suppression(
+            fn find_token_for_inline_suppression(
                 &self,
                 _: SyntaxToken<Self::Language>,
             ) -> Option<ApplySuppression<Self::Language>> {
                 None
             }
 
-            fn apply_suppression(
+            fn apply_inline_suppression(
                 &self,
                 _: &mut BatchMutation<Self::Language>,
                 _: ApplySuppression<Self::Language>,
@@ -170,12 +170,25 @@ mod tests {
             ) {
                 unreachable!("")
             }
+
+            fn apply_top_level_suppression(
+                &self,
+                _: &mut BatchMutation<Self::Language>,
+                _: SyntaxToken<Self::Language>,
+                _: &str,
+            ) {
+                unreachable!("")
+            }
+
+            fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
+                unreachable!("")
+            }
         }
 
         let mut analyzer = Analyzer::new(
             &metadata,
             &mut matcher,
-            |_| -> Vec<Result<_, Infallible>> { unreachable!() },
+            |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
             Box::new(TestAction),
             &mut emit_signal,
         );

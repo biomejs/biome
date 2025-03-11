@@ -1,11 +1,11 @@
 use crate::comments::CssComments;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
-use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{CstFormatContext, write};
 use biome_formatter::{FormatOptions, FormatResult};
 use biome_string_case::StrLikeExtension;
 
-use crate::prelude::*;
 use crate::CssFormatter;
+use crate::prelude::*;
 use biome_rowan::{AstNode, AstNodeList, TextSize};
 
 pub(crate) fn write_component_value_list<N, I>(node: &N, f: &mut CssFormatter) -> FormatResult<()>
@@ -178,8 +178,11 @@ where
     let is_grid_property = list
         .parent::<CssGenericProperty>()
         .and_then(|parent| parent.name().ok())
-        .and_then(|name| name.as_css_identifier().map(|name| name.text()))
-        .map_or(false, |name| {
+        .and_then(|name| {
+            name.as_css_identifier()
+                .map(|name| name.to_trimmed_string())
+        })
+        .is_some_and(|name| {
             let name = name.to_ascii_lowercase_cow();
 
             name.starts_with("grid-template") || name == "grid"

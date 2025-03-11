@@ -1,6 +1,6 @@
 use crate::cursor::{NodeData, SyntaxElement, SyntaxNode, SyntaxTrivia};
 use crate::green::GreenElementRef;
-use crate::{green, Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, WalkEvent};
+use crate::{Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, WalkEvent, green};
 use biome_text_size::{TextRange, TextSize};
 use std::hash::{Hash, Hasher};
 use std::ptr::NonNull;
@@ -126,7 +126,7 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> {
+    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> + use<> {
         std::iter::successors(self.parent(), SyntaxNode::parent)
     }
 
@@ -141,7 +141,7 @@ impl SyntaxToken {
     pub fn siblings_with_tokens(
         &self,
         direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement> {
+    ) -> impl Iterator<Item = SyntaxElement> + use<> {
         let next = move |el: &SyntaxElement| match direction {
             Direction::Next => el.next_sibling_or_token(),
             Direction::Prev => el.prev_sibling_or_token(),

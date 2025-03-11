@@ -1,16 +1,17 @@
+use crate::JsSyntaxFeature::TypeScript;
+use crate::parser::ParsedSyntax::{Absent, Present};
 #[expect(deprecated)]
 use crate::parser::single_token_parse_recovery::SingleTokenParseRecovery;
-use crate::parser::ParsedSyntax::{Absent, Present};
 use crate::parser::{ParsedSyntax, RecoveryResult};
 use crate::prelude::*;
 use crate::state::{EnterParameters, SignatureFlags};
 use crate::syntax::class::parse_decorators;
 use crate::syntax::expr::{
-    is_nth_at_reference_identifier, parse_assignment_expression_or_higher, parse_expression,
-    parse_reference_identifier, ExpressionContext,
+    ExpressionContext, is_nth_at_reference_identifier, parse_assignment_expression_or_higher,
+    parse_expression, parse_reference_identifier,
 };
 use crate::syntax::function::{
-    parse_formal_parameter, parse_function_body, parse_parameter_list, ParameterContext,
+    ParameterContext, parse_formal_parameter, parse_function_body, parse_parameter_list,
 };
 use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::decorators_not_allowed;
@@ -18,10 +19,9 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_accessor_type_parameters_error, ts_only_syntax_error, ts_set_accessor_return_type_error,
 };
 use crate::syntax::typescript::{
-    parse_ts_return_type_annotation, parse_ts_type_annotation, parse_ts_type_parameters,
-    TypeContext,
+    TypeContext, parse_ts_return_type_annotation, parse_ts_type_annotation,
+    parse_ts_type_parameters,
 };
-use crate::JsSyntaxFeature::TypeScript;
 use crate::{JsParser, ParseRecoveryTokenSet};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};

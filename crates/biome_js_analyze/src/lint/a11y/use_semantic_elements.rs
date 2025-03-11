@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsxAttribute, JsxOpeningElement};
 use biome_rowan::AstNode;
 
@@ -46,6 +47,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

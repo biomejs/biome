@@ -1,0 +1,152 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+snapshot_kind: text
+---
+# Input
+```jsx
+true && <p />;
+true && <></>;
+true || <p />;
+true || <></>;
+true ?? <></>;
+true ?? <></>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This logical expression can be simplified.
+  
+  > 1 │ true && <p />;
+      │ ^^^^^^^^^^^^^
+    2 │ true && <></>;
+    3 │ true || <p />;
+  
+  i This operand always evaluates to the same truthiness.
+  
+  > 1 │ true && <p />;
+      │ ^^^^
+    2 │ true && <></>;
+    3 │ true || <p />;
+  
+
+```
+
+```
+invalid.jsx:2:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This logical expression can be simplified.
+  
+    1 │ true && <p />;
+  > 2 │ true && <></>;
+      │ ^^^^^^^^^^^^^
+    3 │ true || <p />;
+    4 │ true || <></>;
+  
+  i This operand always evaluates to the same truthiness.
+  
+    1 │ true && <p />;
+  > 2 │ true && <></>;
+      │ ^^^^
+    3 │ true || <p />;
+    4 │ true || <></>;
+  
+
+```
+
+```
+invalid.jsx:3:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This logical expression can be simplified.
+  
+    1 │ true && <p />;
+    2 │ true && <></>;
+  > 3 │ true || <p />;
+      │ ^^^^^^^^^^^^^
+    4 │ true || <></>;
+    5 │ true ?? <></>;
+  
+  i This operand always evaluates to the same truthiness.
+  
+    1 │ true && <p />;
+    2 │ true && <></>;
+  > 3 │ true || <p />;
+      │ ^^^^
+    4 │ true || <></>;
+    5 │ true ?? <></>;
+  
+
+```
+
+```
+invalid.jsx:4:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This logical expression can be simplified.
+  
+    2 │ true && <></>;
+    3 │ true || <p />;
+  > 4 │ true || <></>;
+      │ ^^^^^^^^^^^^^
+    5 │ true ?? <></>;
+    6 │ true ?? <></>;
+  
+  i This operand always evaluates to the same truthiness.
+  
+    2 │ true && <></>;
+    3 │ true || <p />;
+  > 4 │ true || <></>;
+      │ ^^^^
+    5 │ true ?? <></>;
+    6 │ true ?? <></>;
+  
+
+```
+
+```
+invalid.jsx:5:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This logical expression can be simplified.
+  
+    3 │ true || <p />;
+    4 │ true || <></>;
+  > 5 │ true ?? <></>;
+      │ ^^^^^^^^^^^^^
+    6 │ true ?? <></>;
+    7 │ 
+  
+  i This operand always evaluates to the same nullishness.
+  
+    3 │ true || <p />;
+    4 │ true || <></>;
+  > 5 │ true ?? <></>;
+      │ ^^^^
+    6 │ true ?? <></>;
+    7 │ 
+  
+
+```
+
+```
+invalid.jsx:6:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This logical expression can be simplified.
+  
+    4 │ true || <></>;
+    5 │ true ?? <></>;
+  > 6 │ true ?? <></>;
+      │ ^^^^^^^^^^^^^
+    7 │ 
+  
+  i This operand always evaluates to the same nullishness.
+  
+    4 │ true || <></>;
+    5 │ true ?? <></>;
+  > 6 │ true ?? <></>;
+      │ ^^^^
+    7 │ 
+  
+
+```

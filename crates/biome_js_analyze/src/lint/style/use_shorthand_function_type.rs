@@ -1,13 +1,14 @@
 use crate::JsRuleAction;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_factory::make::ts_type_alias_declaration;
 use biome_js_syntax::AnyTsType::TsThisType;
 use biome_js_syntax::{
-    AnyJsDeclarationClause, AnyTsReturnType, AnyTsType, JsSyntaxKind, TsCallSignatureTypeMember,
-    TsFunctionType, TsInterfaceDeclaration, TsObjectType, TsTypeMemberList, T,
+    AnyJsDeclarationClause, AnyTsReturnType, AnyTsType, JsSyntaxKind, T, TsCallSignatureTypeMember,
+    TsFunctionType, TsInterfaceDeclaration, TsObjectType, TsTypeMemberList,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPieceKind};
 
@@ -80,7 +81,8 @@ declare_lint_rule! {
         name: "useShorthandFunctionType",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-function-type")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

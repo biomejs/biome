@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::{AnyCssRule, CssRuleList};
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 
 declare_lint_rule! {
@@ -31,6 +32,7 @@ declare_lint_rule! {
         name: "noInvalidPositionAtImportRule",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("no-invalid-position-at-import-rule")],
     }
 }

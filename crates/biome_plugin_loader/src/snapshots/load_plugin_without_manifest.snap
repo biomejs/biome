@@ -1,0 +1,7 @@
+---
+source: crates/biome_plugin_loader/src/lib.rs
+expression: content
+---
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Failed to resolve the plugin manifest from /my-plugin/biome-manifest.jsonc

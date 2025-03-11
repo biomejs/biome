@@ -1,7 +1,7 @@
 use crate::prelude::TagKind;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
-use biome_diagnostics::{category, Category, Diagnostic, DiagnosticTags, Location, Severity};
+use biome_diagnostics::{Category, Diagnostic, DiagnosticTags, Location, Severity, category};
 use biome_rowan::{SyntaxError, TextRange};
 use std::error::Error;
 
@@ -31,14 +31,22 @@ pub enum FormatError {
 impl std::fmt::Display for FormatError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FormatError::SyntaxError => fmt.write_str("Can't format code because it contains syntax errors"),
+            FormatError::SyntaxError => {
+                fmt.write_str("Can't format code because it contains syntax errors")
+            }
             FormatError::RangeError { input, tree } => std::write!(
                 fmt,
                 "Formatting range {input:?} is larger than syntax tree {tree:?}"
             ),
-            FormatError::InvalidDocument(error) => std::write!(fmt, "Invalid document: {error}\n\n This is an internal Biome error. Please report if necessary."),
+            FormatError::InvalidDocument(error) => std::write!(
+                fmt,
+                "Invalid document: {error}\n\n This is an internal Biome error. Please report if necessary."
+            ),
             FormatError::PoorLayout => {
-                std::write!(fmt, "Poor layout: The formatter wasn't able to pick a good layout for your document. This is an internal Biome error. Please report if necessary.")
+                std::write!(
+                    fmt,
+                    "Poor layout: The formatter wasn't able to pick a good layout for your document. This is an internal Biome error. Please report if necessary."
+                )
             }
         }
     }
@@ -55,9 +63,9 @@ impl From<SyntaxError> for FormatError {
 impl From<&SyntaxError> for FormatError {
     fn from(syntax_error: &SyntaxError) -> Self {
         match syntax_error {
-            SyntaxError::MissingRequiredChild | SyntaxError::UnexpectedMetavariable => {
-                FormatError::SyntaxError
-            }
+            SyntaxError::MissingRequiredChild
+            | SyntaxError::UnexpectedBogusNode
+            | SyntaxError::UnexpectedMetavariable => FormatError::SyntaxError,
         }
     }
 }
@@ -114,7 +122,10 @@ impl Diagnostic for FormatError {
             ),
             FormatError::InvalidDocument(error) => std::write!(fmt, "Invalid document: {error}"),
             FormatError::PoorLayout => {
-                std::write!(fmt, "Poor layout: The formatter wasn't able to pick a good layout for your document.")
+                std::write!(
+                    fmt,
+                    "Poor layout: The formatter wasn't able to pick a good layout for your document."
+                )
             }
         }
     }
@@ -187,22 +198,32 @@ impl std::fmt::Display for InvalidDocumentError {
             InvalidDocumentError::ExpectedStart {
                 expected_start,
                 actual,
-            } => {
-                match actual {
-                    ActualStart::EndOfDocument => {
-                        std::write!(f, "Expected start tag of kind {expected_start:?} but at the end of document.")
-                    }
-                    ActualStart::Start(start) => {
-                        std::write!(f, "Expected start tag of kind {expected_start:?} but found start tag of kind {start:?}.")
-                    }
-                    ActualStart::End(end) => {
-                        std::write!(f, "Expected start tag of kind {expected_start:?} but found end tag of kind {end:?}.")
-                    }
-                    ActualStart::Content => {
-                        std::write!(f, "Expected start tag of kind {expected_start:?} but found non-tag element.")
-                    }
+            } => match actual {
+                ActualStart::EndOfDocument => {
+                    std::write!(
+                        f,
+                        "Expected start tag of kind {expected_start:?} but at the end of document."
+                    )
                 }
-            }
+                ActualStart::Start(start) => {
+                    std::write!(
+                        f,
+                        "Expected start tag of kind {expected_start:?} but found start tag of kind {start:?}."
+                    )
+                }
+                ActualStart::End(end) => {
+                    std::write!(
+                        f,
+                        "Expected start tag of kind {expected_start:?} but found end tag of kind {end:?}."
+                    )
+                }
+                ActualStart::Content => {
+                    std::write!(
+                        f,
+                        "Expected start tag of kind {expected_start:?} but found non-tag element."
+                    )
+                }
+            },
         }
     }
 }
@@ -250,7 +271,7 @@ impl Diagnostic for PrintError {
 mod test {
     use crate::diagnostics::{ActualStart, InvalidDocumentError};
     use crate::prelude::{FormatError, TagKind};
-    use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+    use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_js_syntax::TextRange;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {

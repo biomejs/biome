@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeReadonlyProperty.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -21,7 +22,7 @@ export interface X {
 ```
 invalidTypeReadonlyProperty.ts:2:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This readonly property name should be in camelCase or CONSTANT_CASE.
+  i This readonly property name should be in camelCase or CONSTANT_CASE.
   
     1 │ export interface X {
   > 2 │     readonly Initialized: unknown
@@ -35,7 +36,7 @@ invalidTypeReadonlyProperty.ts:2:14 lint/style/useNamingConvention ━━━━�
 ```
 invalidTypeReadonlyProperty.ts:4:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This readonly property name should be in camelCase or CONSTANT_CASE.
+  i This readonly property name should be in camelCase or CONSTANT_CASE.
   
     2 │     readonly Initialized: unknown
     3 │ 
@@ -50,7 +51,7 @@ invalidTypeReadonlyProperty.ts:4:14 lint/style/useNamingConvention ━━━━�
 ```
 invalidTypeReadonlyProperty.ts:6:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This readonly property name should be in camelCase or CONSTANT_CASE.
+  i This readonly property name should be in camelCase or CONSTANT_CASE.
   
     4 │     readonly SpecialProperty: unknown
     5 │ 
@@ -65,7 +66,7 @@ invalidTypeReadonlyProperty.ts:6:14 lint/style/useNamingConvention ━━━━�
 ```
 invalidTypeReadonlyProperty.ts:8:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This readonly property name should be in camelCase or CONSTANT_CASE.
+  i This readonly property name should be in camelCase or CONSTANT_CASE.
   
      6 │     readonly special_property: unknown
      7 │ 
@@ -80,7 +81,7 @@ invalidTypeReadonlyProperty.ts:8:14 lint/style/useNamingConvention ━━━━�
 ```
 invalidTypeReadonlyProperty.ts:10:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This readonly property name should be in camelCase or CONSTANT_CASE.
+  i This readonly property name should be in camelCase or CONSTANT_CASE.
   
      8 │     readonly Unknown_Style: unknown
      9 │ 

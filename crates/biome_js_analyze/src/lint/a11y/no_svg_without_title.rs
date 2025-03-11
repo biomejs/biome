@@ -1,6 +1,7 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute, JsxChildList, JsxElement};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{JsxAttribute, JsxChildList, JsxElement, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, AstNodeList};
 use biome_string_case::StrLikeExtension;
 
@@ -102,6 +103,7 @@ declare_lint_rule! {
         name: "noSvgWithoutTitle",
         language: "jsx",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -131,7 +133,7 @@ impl Rule for NoSvgWithoutTitle {
         let jsx_element = node.parent::<JsxElement>()?;
         if let AnyJsxElement::JsxOpeningElement(_) = node {
             let has_valid_title = has_valid_title_element(&jsx_element.children());
-            if has_valid_title.map_or(false, |bool| bool) {
+            if has_valid_title.is_some_and(|bool| bool) {
                 return None;
             }
         }

@@ -1,0 +1,49 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid_with_conventions.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useNamingConvention": {
+          "level": "on",
+          "options": {
+            "enumMemberCase": "camelCase",
+            "conventions": [{ "selector": { "kind": "let" }, "formats": ["camelCase"] }]
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_with_conventions.json:8:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The option enumMemberCase has ben removed.
+  
+     6 │           "level": "on",
+     7 │           "options": {
+   > 8 │             "enumMemberCase": "camelCase",
+       │             ^^^^^^^^^^^^^^^^
+     9 │             "conventions": [{ "selector": { "kind": "let" }, "formats": ["camelCase"] }]
+    10 │           }
+  
+  i Safe fix: Use conventions instead of enumMemberCase.
+  
+     6  6 │             "level": "on",
+     7  7 │             "options": {
+     8    │ - ············"enumMemberCase":·"camelCase",
+     9    │ - ············"conventions":·[{·"selector":·{·"kind":·"let"·},·"formats":·["camelCase"]·}]
+        8 │ + ············"conventions":·[{"selector":{"kind":"enumMember"},"formats":["camelCase"]},{·"selector":·{·"kind":·"let"·},·"formats":·["camelCase"]·}]
+    10  9 │             }
+    11 10 │           }
+  
+
+```

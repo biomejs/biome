@@ -6,14 +6,14 @@ use biome_html_syntax::{
     HtmlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn html_attribute(name: HtmlName) -> HtmlAttributeBuilder {
+pub fn html_attribute(name: HtmlAttributeName) -> HtmlAttributeBuilder {
     HtmlAttributeBuilder {
         name,
         initializer: None,
     }
 }
 pub struct HtmlAttributeBuilder {
-    name: HtmlName,
+    name: HtmlAttributeName,
     initializer: Option<HtmlAttributeInitializerClause>,
 }
 impl HtmlAttributeBuilder {
@@ -44,10 +44,30 @@ pub fn html_attribute_initializer_clause(
         ],
     ))
 }
+pub fn html_attribute_name(value_token: SyntaxToken) -> HtmlAttributeName {
+    HtmlAttributeName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_ATTRIBUTE_NAME,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn html_cdata_section(
+    cdata_start_token: SyntaxToken,
+    content_token: SyntaxToken,
+    cdata_end_token: SyntaxToken,
+) -> HtmlCdataSection {
+    HtmlCdataSection::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_CDATA_SECTION,
+        [
+            Some(SyntaxElement::Token(cdata_start_token)),
+            Some(SyntaxElement::Token(content_token)),
+            Some(SyntaxElement::Token(cdata_end_token)),
+        ],
+    ))
+}
 pub fn html_closing_element(
     l_angle_token: SyntaxToken,
     slash_token: SyntaxToken,
-    name: HtmlName,
+    name: HtmlTagName,
     r_angle_token: SyntaxToken,
 ) -> HtmlClosingElement {
     HtmlClosingElement::unwrap_cast(SyntaxNode::new_detached(
@@ -156,15 +176,9 @@ pub fn html_element(
         ],
     ))
 }
-pub fn html_name(value_token: SyntaxToken) -> HtmlName {
-    HtmlName::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_NAME,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn html_opening_element(
     l_angle_token: SyntaxToken,
-    name: HtmlName,
+    name: HtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
 ) -> HtmlOpeningElement {
@@ -216,7 +230,7 @@ impl HtmlRootBuilder {
 }
 pub fn html_self_closing_element(
     l_angle_token: SyntaxToken,
-    name: HtmlName,
+    name: HtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
 ) -> HtmlSelfClosingElementBuilder {
@@ -230,7 +244,7 @@ pub fn html_self_closing_element(
 }
 pub struct HtmlSelfClosingElementBuilder {
     l_angle_token: SyntaxToken,
-    name: HtmlName,
+    name: HtmlTagName,
     attributes: HtmlAttributeList,
     r_angle_token: SyntaxToken,
     slash_token: Option<SyntaxToken>,
@@ -256,6 +270,12 @@ impl HtmlSelfClosingElementBuilder {
 pub fn html_string(value_token: SyntaxToken) -> HtmlString {
     HtmlString::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_STRING,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn html_tag_name(value_token: SyntaxToken) -> HtmlTagName {
+    HtmlTagName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_TAG_NAME,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }

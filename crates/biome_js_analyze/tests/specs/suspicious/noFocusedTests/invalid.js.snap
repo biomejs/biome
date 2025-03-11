@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 describe.only("bar", function () {});
 it.only("bar", function () {});
 test.only("bar", function () {});
@@ -37,7 +38,7 @@ test.only(name = name || "bar", () => {});
 ```
 invalid.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
   > 1 │ describe.only("bar", function () {});
       │          ^^^^
@@ -58,7 +59,7 @@ invalid.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:2:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     1 │ describe.only("bar", function () {});
   > 2 │ it.only("bar", function () {});
@@ -80,7 +81,7 @@ invalid.js:2:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
 ```
 invalid.js:3:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     1 │ describe.only("bar", function () {});
     2 │ it.only("bar", function () {});
@@ -103,7 +104,7 @@ invalid.js:3:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
 ```
 invalid.js:5:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     3 │ test.only("bar", function () {});
     4 │ 
@@ -126,7 +127,7 @@ invalid.js:5:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:6:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     5 │ describe.only("bar", () => {});
   > 6 │ it.only("bar", () => {});
@@ -148,7 +149,7 @@ invalid.js:6:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
 ```
 invalid.js:7:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     5 │ describe.only("bar", () => {});
     6 │ it.only("bar", () => {});
@@ -171,7 +172,7 @@ invalid.js:7:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
 ```
 invalid.js:9:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
      7 │ test.only("bar", () => {});
      8 │ 
@@ -194,7 +195,7 @@ invalid.js:9:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━
 ```
 invalid.js:10:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
      9 │ describe["only"]("bar", function () {});
   > 10 │ it["only"]("bar", function () {});
@@ -216,7 +217,7 @@ invalid.js:10:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:11:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
      9 │ describe["only"]("bar", function () {});
     10 │ it["only"]("bar", function () {});
@@ -239,7 +240,7 @@ invalid.js:11:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:13:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     11 │ test["only"]("bar", function () {});
     12 │ 
@@ -267,7 +268,7 @@ invalid.js:13:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:14:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     13 │ fdescribe("foo", () => {});
   > 14 │ fit("foo", () => {});
@@ -294,7 +295,7 @@ invalid.js:14:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:16:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     14 │ fit("foo", () => {});
     15 │ 
@@ -317,7 +318,7 @@ invalid.js:16:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:17:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     16 │ describe.only(bar, () => {});
   > 17 │ it.only(bar, () => {});
@@ -339,7 +340,7 @@ invalid.js:17:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:18:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     16 │ describe.only(bar, () => {});
     17 │ it.only(bar, () => {});
@@ -362,7 +363,7 @@ invalid.js:18:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:20:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     18 │ test.only(bar, () => {});
     19 │ 
@@ -385,7 +386,7 @@ invalid.js:20:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:21:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     20 │ describe.only(foo.bar, () => {});
   > 21 │ it.only(foo.bar, () => {});
@@ -407,7 +408,7 @@ invalid.js:21:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:22:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     20 │ describe.only(foo.bar, () => {});
     21 │ it.only(foo.bar, () => {});
@@ -430,7 +431,7 @@ invalid.js:22:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:24:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     22 │ test.only(foo.bar, () => {});
     23 │ 
@@ -453,7 +454,7 @@ invalid.js:24:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:25:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     24 │ describe.only(name = name || "bar", () => {});
   > 25 │ it.only(name = name || "bar", () => {});
@@ -475,7 +476,7 @@ invalid.js:25:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
 ```
 invalid.js:26:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't focus the test.
+  × Don't focus the test.
   
     24 │ describe.only(name = name || "bar", () => {});
     25 │ it.only(name = name || "bar", () => {});

@@ -1,15 +1,16 @@
-use crate::react::{is_react_call_api, ReactLibrary};
+use crate::react::{ReactLibrary, is_react_call_api};
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsxAttribute,
     AnyJsxChild, JsArrayExpression, JsCallExpression, JsFunctionBody, JsObjectExpression,
     JsxAttributeList, JsxExpressionChild, JsxTagExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, TextRange};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow missing key props in iterators/collection literals.
@@ -42,6 +43,8 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintReact("jsx-key")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: true,
+        severity: Severity::Error,
+        domains: &[RuleDomain::React],
     }
 }
 
@@ -324,7 +327,7 @@ fn handle_jsx_child(node: &AnyJsxChild, model: &SemanticModel) -> Option<Vec<Tex
                     // HACK: don't flag the entire fragment if there's a conditional expression
                     AnyJsxChild::JsxExpressionChild(node) => node
                         .expression()
-                        .map_or(false, |n| n.as_js_conditional_expression().is_some()),
+                        .is_some_and(|n| n.as_js_conditional_expression().is_some()),
                     _ => false,
                 });
 
@@ -382,7 +385,7 @@ fn has_key_attribute(attributes: &JsxAttributeList) -> bool {
         // key must be statically provided, so no spread
         if let AnyJsxAttribute::JsxAttribute(attr) = attr {
             if let Ok(name) = attr.name() {
-                name.text() == "key"
+                name.to_trimmed_string() == "key"
             } else {
                 false
             }

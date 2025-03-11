@@ -1,6 +1,7 @@
 use crate::parser::{
+    GraphqlParser,
     argument::parse_arguments,
-    directive::{is_at_directive, DirectiveList},
+    directive::{DirectiveList, is_at_directive},
     is_nth_at_name, parse_binding,
     parse_error::{
         expected_any_selection, expected_name, expected_type, expected_variable,
@@ -10,15 +11,14 @@ use crate::parser::{
     r#type::parse_type,
     value::parse_default_value,
     variable::{is_at_variable, parse_variable_binding},
-    GraphqlParser,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
 };
 use biome_parser::{
-    parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, token_set, Parser, TokenSet,
+    Parser, TokenSet, parse_lists::ParseNodeList, parse_recovery::ParseRecovery,
+    parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, token_set,
 };
 
 use super::fragment::{is_at_type_condition, parse_type_condition};

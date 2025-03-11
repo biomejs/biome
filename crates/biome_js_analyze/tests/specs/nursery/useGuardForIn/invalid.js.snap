@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 for (var x in o) { if (x) { f(); continue; } g(); }
 for (var x in o) { if (x) { continue; f(); } g(); }
 for (var x in o) { if (x) { f(); } g(); }
@@ -16,7 +17,7 @@ for (var x in o) foo();
 ```
 invalid.js:1:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of a for-in should be wrapped in an `if` statement.
+  i The body of a for-in should be wrapped in an `if` statement.
   
   > 1 │ for (var x in o) { if (x) { f(); continue; } g(); }
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -33,7 +34,7 @@ invalid.js:1:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━�
 ```
 invalid.js:2:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of a for-in should be wrapped in an `if` statement.
+  i The body of a for-in should be wrapped in an `if` statement.
   
     1 │ for (var x in o) { if (x) { f(); continue; } g(); }
   > 2 │ for (var x in o) { if (x) { continue; f(); } g(); }
@@ -51,7 +52,7 @@ invalid.js:2:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━�
 ```
 invalid.js:3:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of a for-in should be wrapped in an `if` statement.
+  i The body of a for-in should be wrapped in an `if` statement.
   
     1 │ for (var x in o) { if (x) { f(); continue; } g(); }
     2 │ for (var x in o) { if (x) { continue; f(); } g(); }
@@ -70,7 +71,7 @@ invalid.js:3:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━�
 ```
 invalid.js:4:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of a for-in should be wrapped in an `if` statement.
+  i The body of a for-in should be wrapped in an `if` statement.
   
     2 │ for (var x in o) { if (x) { continue; f(); } g(); }
     3 │ for (var x in o) { if (x) { f(); } g(); }
@@ -89,7 +90,7 @@ invalid.js:4:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of a for-in should be wrapped in an `if` statement.
+  i The body of a for-in should be wrapped in an `if` statement.
   
     3 │ for (var x in o) { if (x) { f(); } g(); }
     4 │ for (var x in o) { if (x) f(); g(); }
@@ -107,7 +108,7 @@ invalid.js:5:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━�
 ```
 invalid.js:6:1 lint/nursery/useGuardForIn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The body of a for-in should be wrapped in an `if` statement.
+  i The body of a for-in should be wrapped in an `if` statement.
   
     4 │ for (var x in o) { if (x) f(); g(); }
     5 │ for (var x in o) { foo() }

@@ -1,6 +1,7 @@
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsLabeledStatement, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::AstNode;
 
@@ -28,6 +29,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-label-var")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

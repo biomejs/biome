@@ -1,7 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentOperator, JsBinaryOperator, JsForStatement,
     JsIdentifierAssignment, JsIdentifierExpression, JsPostUpdateOperator, JsUnaryOperator,
@@ -46,6 +47,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("for-direction")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

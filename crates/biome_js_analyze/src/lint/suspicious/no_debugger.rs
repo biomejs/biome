@@ -1,11 +1,12 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::JsDebuggerStatement;
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::{utils::batch::JsBatchMutation, JsRuleAction};
+use crate::{JsRuleAction, utils::batch::JsBatchMutation};
 
 declare_lint_rule! {
     /// Disallow the use of `debugger`
@@ -30,6 +31,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-debugger")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

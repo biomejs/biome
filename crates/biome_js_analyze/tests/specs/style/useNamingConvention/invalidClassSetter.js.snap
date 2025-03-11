@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidClassSetter.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export default class {
     set X(x) {}
 
@@ -31,7 +32,7 @@ export default class {
 ```
 invalidClassSetter.js:2:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
     1 │ export default class {
   > 2 │     set X(x) {}
@@ -45,7 +46,7 @@ invalidClassSetter.js:2:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassSetter.js:4:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
     2 │     set X(x) {}
     3 │ 
@@ -60,7 +61,7 @@ invalidClassSetter.js:4:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassSetter.js:6:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
     4 │     set PROPERTY(x) {}
     5 │ 
@@ -75,7 +76,7 @@ invalidClassSetter.js:6:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassSetter.js:8:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
      6 │     set SpecialProperty(x) {}
      7 │ 
@@ -90,7 +91,7 @@ invalidClassSetter.js:8:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassSetter.js:10:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
      8 │     set special_property(x) {}
      9 │ 
@@ -105,7 +106,7 @@ invalidClassSetter.js:10:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassSetter.js:12:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
     10 │     set Unknown_Style(x) {}
     11 │ 
@@ -120,7 +121,7 @@ invalidClassSetter.js:12:10 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassSetter.js:14:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
     12 │     set #X(x) {}
     13 │ 
@@ -135,7 +136,7 @@ invalidClassSetter.js:14:10 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassSetter.js:16:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
     14 │     set #PROPERTY(x) {}
     15 │ 
@@ -150,7 +151,7 @@ invalidClassSetter.js:16:10 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassSetter.js:18:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
     16 │     set #SpecialProperty(x) {}
     17 │ 
@@ -165,7 +166,7 @@ invalidClassSetter.js:18:10 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassSetter.js:20:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class setter name should be in camelCase.
+  i This class setter name should be in camelCase.
   
     18 │     set #special_property(x) {}
     19 │ 

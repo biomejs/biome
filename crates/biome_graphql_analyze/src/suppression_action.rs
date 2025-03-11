@@ -7,7 +7,11 @@ pub(crate) struct GraphqlSuppressionAction;
 impl SuppressionAction for GraphqlSuppressionAction {
     type Language = GraphqlLanguage;
 
-    fn find_token_to_apply_suppression(
+    fn suppression_top_level_comment(&self, suppression_text: &str) -> String {
+        format!("# {suppression_text}: <explanation> ")
+    }
+
+    fn find_token_for_inline_suppression(
         &self,
         token: GraphqlSyntaxToken,
     ) -> Option<ApplySuppression<Self::Language>> {
@@ -34,7 +38,7 @@ impl SuppressionAction for GraphqlSuppressionAction {
         Some(apply_suppression)
     }
 
-    fn apply_suppression(
+    fn apply_inline_suppression(
         &self,
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,

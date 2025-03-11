@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 foo.trimLeft()
 foo.trimRight()
 trimLeft.trimRight()
@@ -24,7 +25,7 @@ bar[`trimLeft`]()
 ```
 invalid.js:1:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use trimStart instead of trimLeft.
+  i Use trimStart instead of trimLeft.
   
   > 1 │ foo.trimLeft()
       │     ^^^^^^^^
@@ -46,7 +47,7 @@ invalid.js:1:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:2:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use trimEnd instead of trimRight.
+  i Use trimEnd instead of trimRight.
   
     1 │ foo.trimLeft()
   > 2 │ foo.trimRight()
@@ -70,7 +71,7 @@ invalid.js:2:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:3:10 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use trimEnd instead of trimRight.
+  i Use trimEnd instead of trimRight.
   
     1 │ foo.trimLeft()
     2 │ foo.trimRight()
@@ -96,7 +97,7 @@ invalid.js:3:10 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:4:14 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use trimEnd instead of trimRight.
+  i Use trimEnd instead of trimRight.
   
     2 │ foo.trimRight()
     3 │ trimLeft.trimRight()
@@ -122,7 +123,7 @@ invalid.js:4:14 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:5:7 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use trimStart instead of trimLeft.
+  i Use trimStart instead of trimLeft.
   
     3 │ trimLeft.trimRight()
     4 │ foo.trimLeft.trimRight()
@@ -148,7 +149,7 @@ invalid.js:5:7 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:8:3 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use trimEnd instead of trimRight.
+  i Use trimEnd instead of trimRight.
   
      6 │ foo
      7 │ 	// comment
@@ -174,7 +175,7 @@ invalid.js:8:3 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:11:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use trimStart instead of trimLeft.
+  i Use trimStart instead of trimLeft.
   
      9 │ 	/* comment */
     10 │ 	()
@@ -200,7 +201,7 @@ invalid.js:11:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:12:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use trimStart instead of trimLeft.
+  i Use trimStart instead of trimLeft.
   
     10 │ 	()
     11 │ bar['trimLeft']()
@@ -226,7 +227,7 @@ invalid.js:12:5 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:13:6 lint/nursery/useTrimStartEnd  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use trimStart instead of trimLeft.
+  i Use trimStart instead of trimLeft.
   
     11 │ bar['trimLeft']()
     12 │ bar["trimLeft"]()

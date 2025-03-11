@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlDirective;
@@ -47,7 +47,7 @@ impl Rule for UseDeprecatedReason {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let name = node.name().ok()?;
-        if name.text() != "deprecated" {
+        if name.to_trimmed_string() != "deprecated" {
             return None;
         }
         // Fire diagnostic if the directive does not have any arguments
@@ -55,14 +55,12 @@ impl Rule for UseDeprecatedReason {
             return Some(node.clone());
         };
         let arguments = arguments.arguments();
-        let has_reason = arguments
-            .into_iter()
-            .any(|argument| argument.name().is_ok_and(|name| name.text() == "reason"));
-        if has_reason {
-            None
-        } else {
-            Some(node.clone())
-        }
+        let has_reason = arguments.into_iter().any(|argument| {
+            argument
+                .name()
+                .is_ok_and(|name| name.to_trimmed_string() == "reason")
+        });
+        if has_reason { None } else { Some(node.clone()) }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

@@ -4,12 +4,12 @@ use std::{
 };
 
 use biome_formatter::{
-    format_args, prelude::*, write, Buffer, Format, FormatElement, FormatResult,
+    Buffer, Format, FormatElement, FormatResult, format_args, prelude::*, write,
 };
 use biome_html_syntax::AnyHtmlElement;
 use biome_rowan::{SyntaxResult, TextLen, TextRange, TextSize, TokenText};
 
-use crate::{comments::HtmlComments, context::HtmlFormatContext, HtmlFormatter};
+use crate::{HtmlFormatter, comments::HtmlComments, context::HtmlFormatContext};
 
 pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
 

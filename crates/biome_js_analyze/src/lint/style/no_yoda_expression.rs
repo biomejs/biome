@@ -1,6 +1,6 @@
-use crate::{utils::is_node_equal, JsRuleAction};
+use crate::{JsRuleAction, utils::is_node_equal};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -364,7 +364,7 @@ fn extract_string_value(expression: AnyJsExpression) -> Option<String> {
     match expression {
         AnyJsExpression::JsUnaryExpression(unary) => match unary.operator() {
             Ok(JsUnaryOperator::Minus) => {
-                let argument = unary.argument().ok()?.text();
+                let argument = unary.argument().ok()?.to_trimmed_string();
                 let is_numeric_literal = unary.is_signed_numeric_literal().ok()?;
                 is_numeric_literal.then_some(String::from("-") + argument.as_str())
             }

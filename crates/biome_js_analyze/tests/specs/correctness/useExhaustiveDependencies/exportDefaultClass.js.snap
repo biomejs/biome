@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: exportDefaultClass.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import { Component, useMemo } from "react";
 
 export default class ClassComponent extends Component {

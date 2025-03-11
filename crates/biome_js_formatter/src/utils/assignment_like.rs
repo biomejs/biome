@@ -5,7 +5,7 @@ use crate::ts::bindings::type_parameters::FormatTsTypeParametersOptions;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
-use biome_formatter::{format_args, write, CstFormatContext, FormatOptions, VecBuffer};
+use biome_formatter::{CstFormatContext, FormatOptions, VecBuffer, format_args, write};
 use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMemberName,
@@ -20,7 +20,7 @@ use biome_js_syntax::{
     TsTypeArguments, TsUnionType,
 };
 use biome_js_syntax::{AnyJsLiteralExpression, JsUnaryExpression};
-use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxResult, declare_node_union};
 use std::iter;
 
 declare_node_union! {
@@ -160,7 +160,7 @@ pub(crate) fn is_complex_type_annotation(
                         let is_complex_type = argument
                             .as_ts_reference_type()
                             .and_then(|reference_type| reference_type.type_arguments())
-                            .map_or(false, |type_arguments| {
+                            .is_some_and(|type_arguments| {
                                 type_arguments.ts_type_argument_list().len() > 0
                             });
 
@@ -340,7 +340,9 @@ impl AnyJsAssignmentLike {
                 n.value().unwrap().into()
             }
             AnyJsAssignmentLike::TsPropertySignatureClassMember(_) => {
-                unreachable!("TsPropertySignatureClassMember doesn't have any right side. If you're here, `has_only_left_hand_side` hasn't been called")
+                unreachable!(
+                    "TsPropertySignatureClassMember doesn't have any right side. If you're here, `has_only_left_hand_side` hasn't been called"
+                )
             }
             AnyJsAssignmentLike::TsInitializedPropertySignatureClassMember(n) => {
                 // SAFETY: Calling `unwrap` here is safe because we check `has_only_left_hand_side` variant at the beginning of the `layout` function
@@ -690,7 +692,7 @@ impl AnyJsAssignmentLike {
         }
 
         if let Some(AnyJsExpression::JsCallExpression(call_expression)) = &right_expression {
-            if call_expression.callee()?.syntax().text() == "require" {
+            if call_expression.callee()?.syntax().text_with_trivia() == "require" {
                 return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
             }
         }
@@ -785,7 +787,7 @@ impl AnyJsAssignmentLike {
         let upper_chain_is_eligible =
             // First, we check if the current node is an assignment expression
             if let AnyJsAssignmentLike::JsAssignmentExpression(assignment) = self {
-                assignment.syntax().parent().map_or(false, |parent| {
+                assignment.syntax().parent().is_some_and(|parent| {
                     // Then we check if the parent is assignment expression or variable declarator
                     if matches!(
                         parent.kind(),
@@ -880,7 +882,7 @@ impl AnyJsAssignmentLike {
         let is_complex_destructuring = self
             .left()?
             .into_object_pattern()
-            .map_or(false, |pattern| pattern.is_complex());
+            .is_some_and(|pattern| pattern.is_complex());
 
         let has_complex_type_annotation = self
             .annotation()
@@ -889,9 +891,9 @@ impl AnyJsAssignmentLike {
 
         let is_complex_type_alias = self.is_complex_type_alias()?;
 
-        let is_right_arrow_func = self.right().map_or(false, |right| match right {
+        let is_right_arrow_func = self.right().is_ok_and(|right| match right {
             RightAssignmentLike::JsInitializerClause(init) => {
-                init.expression().map_or(false, |expression| {
+                init.expression().is_ok_and(|expression| {
                     matches!(expression, AnyJsExpression::JsArrowFunctionExpression(_))
                 })
             }
@@ -985,9 +987,7 @@ pub(crate) fn should_break_after_operator(
 
         AnyJsExpression::JsConditionalExpression(conditional) => {
             AnyJsBinaryLikeExpression::cast(conditional.test()?.into_syntax())
-                .map_or(false, |expression| {
-                    !expression.should_inline_logical_expression()
-                })
+                .is_some_and(|expression| !expression.should_inline_logical_expression())
         }
 
         AnyJsExpression::JsClassExpression(class) => !class.decorators().is_empty(),
@@ -1317,19 +1317,18 @@ fn is_complex_type_arguments(type_arguments: TsTypeArguments) -> SyntaxResult<bo
         return Ok(true);
     }
 
-    let is_first_argument_complex =
-        ts_type_argument_list
-            .iter()
-            .next()
-            .transpose()?
-            .map_or(false, |first_argument| {
-                matches!(
-                    first_argument,
-                    AnyTsType::TsUnionType(_)
-                        | AnyTsType::TsIntersectionType(_)
-                        | AnyTsType::TsObjectType(_)
-                )
-            });
+    let is_first_argument_complex = ts_type_argument_list
+        .iter()
+        .next()
+        .transpose()?
+        .is_some_and(|first_argument| {
+            matches!(
+                first_argument,
+                AnyTsType::TsUnionType(_)
+                    | AnyTsType::TsIntersectionType(_)
+                    | AnyTsType::TsObjectType(_)
+            )
+        });
 
     if is_first_argument_complex {
         return Ok(true);
@@ -1362,12 +1361,10 @@ fn is_annotation_breakable(annotation: AnyTsVariableAnnotation) -> SyntaxResult<
     let is_breakable = annotation
         .type_annotation()?
         .and_then(|type_annotation| type_annotation.ty().ok())
-        .map_or(false, |ty| match ty {
-            AnyTsType::TsReferenceType(reference_type) => {
-                reference_type.type_arguments().map_or(false, |type_args| {
-                    type_args.ts_type_argument_list().len() > 0
-                })
-            }
+        .is_some_and(|ty| match ty {
+            AnyTsType::TsReferenceType(reference_type) => reference_type
+                .type_arguments()
+                .is_some_and(|type_args| type_args.ts_type_argument_list().len() > 0),
             _ => false,
         });
 

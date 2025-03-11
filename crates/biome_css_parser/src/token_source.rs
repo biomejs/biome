@@ -1,5 +1,5 @@
-use crate::lexer::{CssLexContext, CssLexer, CssReLexContext};
 use crate::CssParserOptions;
+use crate::lexer::{CssLexContext, CssLexer, CssReLexContext};
 use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_css_syntax::{CssSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -82,7 +82,7 @@ impl<'src> CssTokenSource<'src> {
     }
 }
 
-impl<'source> TokenSource for CssTokenSource<'source> {
+impl TokenSource for CssTokenSource<'_> {
     type Kind = CssSyntaxKind;
 
     fn current(&self) -> Self::Kind {
@@ -114,7 +114,7 @@ impl<'source> TokenSource for CssTokenSource<'source> {
     }
 }
 
-impl<'source> BumpWithContext for CssTokenSource<'source> {
+impl BumpWithContext for CssTokenSource<'_> {
     type Context = CssLexContext;
 
     fn bump_with_context(&mut self, context: Self::Context) {

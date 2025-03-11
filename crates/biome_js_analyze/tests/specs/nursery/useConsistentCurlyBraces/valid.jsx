@@ -19,4 +19,6 @@ let baz = 4;
 <Foo><Bar /></Foo>
 
 <Foo>{/*comment*/}Hello world{/*comment*/}</Foo>
+
+<Foo>{' '}</Foo>
 </>

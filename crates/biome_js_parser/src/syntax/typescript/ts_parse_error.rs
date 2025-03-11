@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::JsParser;
+use crate::prelude::*;
 use biome_diagnostics::location::AsSpan;
 use biome_parser::diagnostic::{expected_any, expected_node};
 use biome_rowan::TextRange;
@@ -132,6 +132,16 @@ pub(crate) fn expected_ts_type_parameter(p: &JsParser, range: TextRange) -> Pars
 pub(crate) fn infer_not_allowed(p: &JsParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder(
         "'infer' declarations are only permitted in the 'extends' clause of a conditional type.",
+        range,
+    )
+}
+
+pub(crate) fn expected_ts_import_type_with_arguments(
+    p: &JsParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        format!("Expected '(', but got '{}' here", p.cur_text()),
         range,
     )
 }

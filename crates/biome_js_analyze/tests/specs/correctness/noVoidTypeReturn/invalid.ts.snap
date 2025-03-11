@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -34,7 +35,7 @@ const g = (): void => {
 ```
 invalid.ts:3:3 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The function should not return a value because its return type is void.
+  × The function should not return a value because its return type is void.
   
     1 │ class A {
     2 │ 	f(): void {
@@ -62,7 +63,7 @@ invalid.ts:3:3 lint/correctness/noVoidTypeReturn ━━━━━━━━━━�
 ```
 invalid.ts:9:3 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The function should not return a value because its return type is void.
+  × The function should not return a value because its return type is void.
   
      7 │ const a = {
      8 │ 	f(): void {
@@ -90,7 +91,7 @@ invalid.ts:9:3 lint/correctness/noVoidTypeReturn ━━━━━━━━━━�
 ```
 invalid.ts:14:2 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The function should not return a value because its return type is void.
+  × The function should not return a value because its return type is void.
   
     13 │ function f(): void {
   > 14 │ 	return undefined;
@@ -118,7 +119,7 @@ invalid.ts:14:2 lint/correctness/noVoidTypeReturn ━━━━━━━━━━
 ```
 invalid.ts:18:2 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The function should not return a value because its return type is void.
+  × The function should not return a value because its return type is void.
   
     17 │ export default function(): void {
   > 18 │ 	return undefined;
@@ -146,7 +147,7 @@ invalid.ts:18:2 lint/correctness/noVoidTypeReturn ━━━━━━━━━━
 ```
 invalid.ts:22:2 lint/correctness/noVoidTypeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The function should not return a value because its return type is void.
+  × The function should not return a value because its return type is void.
   
     21 │ const g = (): void => {
   > 22 │ 	return undefined;
@@ -169,5 +170,3 @@ invalid.ts:22:2 lint/correctness/noVoidTypeReturn ━━━━━━━━━━
   
 
 ```
-
-

@@ -1,10 +1,11 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssDimension, CssFunction, CssGenericProperty, CssQueryFeaturePlain, CssSyntaxKind,
 };
+use biome_diagnostics::Severity;
 use biome_rowan::{SyntaxNodeCast, TextRange};
 use biome_string_case::StrLikeExtension;
 
@@ -64,6 +65,7 @@ declare_lint_rule! {
         name: "noUnknownUnit",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("unit-no-unknown")],
     }
 }

@@ -1,18 +1,18 @@
+use crate::GritTargetLanguage;
 use crate::grit_code_snippet::GritCodeSnippet;
 use crate::grit_context::GritExecContext;
 use crate::grit_file::GritFile;
 use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
-use crate::GritTargetLanguage;
 use crate::{grit_binding::GritBinding, grit_context::GritQueryContext};
 use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::constant::Constant;
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
 use grit_pattern_matcher::effects::Effect;
 use grit_pattern_matcher::pattern::{
-    to_unsigned, Accessor, DynamicPattern, DynamicSnippet, DynamicSnippetPart, File, FilePtr,
-    FileRegistry, GritCall, ListIndex, Pattern, PatternName, PatternOrResolved, ResolvedFile,
-    ResolvedPattern, ResolvedSnippet, State,
+    Accessor, DynamicPattern, DynamicSnippet, DynamicSnippetPart, File, FilePtr, FileRegistry,
+    GritCall, ListIndex, Pattern, PatternName, PatternOrResolved, ResolvedFile, ResolvedPattern,
+    ResolvedSnippet, State, to_unsigned,
 };
 use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, Ast, CodeRange, Range};
@@ -326,7 +326,6 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
             | Pattern::Underscore
             | Pattern::AstLeafNode(_)
             | Pattern::Rewrite(_)
-            | Pattern::Log(_)
             | Pattern::Range(_)
             | Pattern::Contains(_)
             | Pattern::Includes(_)
@@ -362,7 +361,9 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
                 Constant::Float(d) => Ok(*d),
                 Constant::Integer(i) => Ok(*i as f64),
                 Constant::String(s) => Ok(s.parse::<f64>()?),
-                Constant::Boolean(_) | Constant::Undefined => Err(GritPatternError::new("Cannot convert constant to double. Ensure that you are only attempting arithmetic operations on numeric-parsable types.")),
+                Constant::Boolean(_) | Constant::Undefined => Err(GritPatternError::new(
+                    "Cannot convert constant to double. Ensure that you are only attempting arithmetic operations on numeric-parsable types.",
+                )),
             },
             Self::Snippets(s) => {
                 let text = s
@@ -377,13 +378,21 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
             Self::Binding(binding) => {
                 let text = binding
                     .last()
-                    .ok_or_else(|| GritPatternError::new("cannot grab text of resolved_pattern with no binding"))?
+                    .ok_or_else(|| {
+                        GritPatternError::new(
+                            "cannot grab text of resolved_pattern with no binding",
+                        )
+                    })?
                     .text(language)?;
                 text.parse::<f64>().map_err(|_| {
                     GritPatternError::new("Failed to convert binding to double. Ensure that you are only attempting arithmetic operations on numeric-parsable types.")
                 })
             }
-            Self::List(_) | Self::Map(_) | Self::File(_) | Self::Files(_) => Err(GritPatternError::new("Cannot convert type to double. Ensure that you are only attempting arithmetic operations on numeric-parsable types.")),
+            Self::List(_) | Self::Map(_) | Self::File(_) | Self::Files(_) => {
+                Err(GritPatternError::new(
+                    "Cannot convert type to double. Ensure that you are only attempting arithmetic operations on numeric-parsable types.",
+                ))
+            }
         }
     }
 
@@ -499,7 +508,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
         language: &GritTargetLanguage,
     ) -> GritResult<bool> {
         let truthiness = match self {
-            Self::Binding(bindings) => bindings.last().map_or(false, Binding::is_truthy),
+            Self::Binding(bindings) => bindings.last().is_some_and(Binding::is_truthy),
             Self::List(elements) => !elements.is_empty(),
             Self::Map(map) => !map.is_empty(),
             Self::Constant(c) => c.is_truthy(),
@@ -533,7 +542,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
             Self::Binding(b) => b
                 .last()
                 .and_then(Binding::as_constant)
-                .map_or(false, Constant::is_undefined),
+                .is_some_and(Constant::is_undefined),
             Self::Constant(Constant::Undefined) => true,
             Self::Constant(_)
             | Self::Snippets(_)

@@ -1,6 +1,6 @@
 use biome_formatter::comments::Comments;
-use biome_formatter::{prelude::*, CstFormatContext, FormatOwnedWithRule, FormatRefWithRule};
-use biome_formatter::{write, FormatLanguage, FormatResult, FormatToken, Formatted};
+use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
+use biome_formatter::{FormatLanguage, FormatResult, FormatToken, Formatted, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
 use biome_rowan::AstNode;
 use comments::HtmlCommentStyle;
@@ -41,7 +41,10 @@ impl<T, C> AsFormat<C> for &T
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = T::Format<'a> where Self: 'a;
+    type Format<'a>
+        = T::Format<'a>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         AsFormat::format(&**self)
@@ -55,7 +58,10 @@ impl<T, C> AsFormat<C> for biome_rowan::SyntaxResult<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = biome_rowan::SyntaxResult<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = biome_rowan::SyntaxResult<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         match self {
@@ -72,7 +78,10 @@ impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = Option<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = Option<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         self.as_ref().map(|value| value.format())

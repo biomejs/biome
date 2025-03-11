@@ -1,7 +1,7 @@
 use crate::format_element::tag::VerbatimKind;
 use crate::prelude::*;
 use crate::trivia::{FormatLeadingComments, FormatTrailingComments};
-use crate::{write, CstFormatContext, FormatWithRule};
+use crate::{CstFormatContext, FormatWithRule, write};
 use biome_rowan::{AstNode, Direction, Language, SyntaxElement, SyntaxNode, TextRange};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
@@ -18,7 +18,7 @@ pub fn format_verbatim_node<L: Language>(node: &SyntaxNode<L>) -> FormatVerbatim
     FormatVerbatimNode {
         node,
         kind: VerbatimKind::Verbatim {
-            length: node.text_range().len(),
+            length: node.text_range_with_trivia().len(),
         },
         format_comments: true,
     }

@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/marzano/go_unknown.grit
+---
+# Input
+
+```grit
+language go
+
+// All core stdlib functions can be done here
+private pattern before_each_file_stdlib() {
+  before_each_file_prep_imports()
+}
+
+private pattern after_each_file_stdlib() {
+  after_each_file_handle_imports()
+}
+
+pattern before_each_file() {
+  before_each_file_stdlib()
+}
+
+pattern after_each_file() {
+  after_each_file_stdlib()
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+language go
+
+// All core stdlib functions can be done here
+private pattern before_each_file_stdlib() { before_each_file_prep_imports() }
+
+private pattern after_each_file_stdlib() { after_each_file_handle_imports() }
+
+pattern before_each_file() { before_each_file_stdlib() }
+
+pattern after_each_file() { after_each_file_stdlib() }
+```

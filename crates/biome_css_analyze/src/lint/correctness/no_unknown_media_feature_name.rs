@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::{
@@ -8,6 +8,7 @@ use biome_css_syntax::{
     AnyCssMediaTypeQuery, AnyCssQueryFeature, CssMediaAndCondition, CssMediaConditionQuery,
     CssMediaOrCondition, CssMediaQueryList,
 };
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 
 use crate::utils::is_media_feature_name;
@@ -71,6 +72,7 @@ declare_lint_rule! {
         name: "noUnknownMediaFeatureName",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("media-feature-name-no-unknown")],
     }
 }

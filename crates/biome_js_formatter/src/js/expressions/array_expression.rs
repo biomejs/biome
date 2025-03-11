@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-use biome_formatter::{write, FormatRuleWithOptions};
-use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_formatter::{Expand, FormatRuleWithOptions, write};
 use biome_js_syntax::JsArrayExpression;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, JsArrayElementList, JsArrayExpressionFields,
 };
@@ -44,7 +44,8 @@ impl FormatNodeRule<JsArrayExpression> for FormatJsArrayExpression {
         } else {
             let group_id = f.group_id("array");
 
-            let should_expand = !self.options.is_force_flat_mode && should_break(&elements)?;
+            let should_expand = (!self.options.is_force_flat_mode && should_break(&elements)?)
+                || f.options().expand() == Expand::Always;
             let elements = elements.format().with_options(Some(group_id));
 
             write!(

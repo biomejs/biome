@@ -2,7 +2,7 @@
 
 use ::serde::{Deserialize, Serialize};
 
-pub mod adapters;
+mod adapters;
 pub mod advice;
 pub mod context;
 pub mod diagnostic;
@@ -13,8 +13,24 @@ pub mod location;
 pub mod panic;
 pub mod serde;
 
+#[cfg(feature = "camino")]
+pub use adapters::CaminoError;
+
+#[cfg(feature = "serde_ini")]
+pub use adapters::IniError;
+
+#[cfg(feature = "oxc_resolver")]
+pub use adapters::ResolveError;
+
+#[cfg(feature = "bpaf")]
+pub use adapters::BpafError;
+
+#[cfg(feature = "std")]
+pub use adapters::{IoError, StdError};
+
 mod suggestion;
 
+pub use self::adapters::SerdeJsonError;
 pub use self::suggestion::{Applicability, CodeSuggestion};
 pub use termcolor;
 
@@ -23,7 +39,7 @@ pub use termcolor;
 pub use biome_console as console;
 
 // Re-export macros from utility crates
-pub use biome_diagnostics_categories::{category, category_concat, Category};
+pub use biome_diagnostics_categories::{Category, category, category_concat};
 pub use biome_diagnostics_macros::Diagnostic;
 
 pub use crate::advice::{
@@ -32,7 +48,7 @@ pub use crate::advice::{
 pub use crate::context::{Context, DiagnosticExt};
 pub use crate::diagnostic::{Diagnostic, DiagnosticTags, Severity};
 pub use crate::display::{
-    set_bottom_frame, Backtrace, MessageAndDescription, PrintDescription, PrintDiagnostic,
+    Backtrace, MessageAndDescription, PrintDescription, PrintDiagnostic, set_bottom_frame,
 };
 pub use crate::display_github::PrintGitHubDiagnostic;
 pub use crate::error::{Error, Result};

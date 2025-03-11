@@ -1,11 +1,11 @@
 [package]
-edition = "2021"
+edition = "2024"
 name    = "xtask_coverage"
 publish = false
 version = "0.0.0"
 
 [dependencies]
-ascii_table        = "4.0.5"
+ascii_table        = "4.0.6"
 backtrace          = "0.3.74"
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
@@ -15,8 +15,9 @@ biome_js_syntax    = { workspace = true }
 biome_parser       = { workspace = true }
 biome_rowan        = { workspace = true }
 biome_string_case  = { workspace = true }
-colored            = "2.2.0"
-indicatif          = { version = "0.17.9", features = ["improved_unicode"] }
+camino             = { workspace = true }
+colored            = "3.0.0"
+indicatif          = { version = "0.17.11", features = ["improved_unicode"] }
 pico-args          = { version = "0.5.0", features = ["eq-separator"] }
 regex              = { workspace = true }
 serde              = { workspace = true, features = ["derive"] }

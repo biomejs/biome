@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTopLevelVariable.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -26,7 +27,7 @@ export const fooYPosition = 0;
 ```
 invalidTopLevelVariable.ts:1:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
   > 1 │ export const Unknown_Style = 0
       │              ^^^^^^^^^^^^^
@@ -39,7 +40,7 @@ invalidTopLevelVariable.ts:1:14 lint/style/useNamingConvention ━━━━━�
 ```
 invalidTopLevelVariable.ts:2:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     1 │ export const Unknown_Style = 0
   > 2 │ export const MY__CONSTANT = 0
@@ -53,7 +54,7 @@ invalidTopLevelVariable.ts:2:14 lint/style/useNamingConvention ━━━━━�
 ```
 invalidTopLevelVariable.ts:4:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This global var name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This global var name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     2 │ export const MY__CONSTANT = 0
     3 │ 
@@ -68,7 +69,7 @@ invalidTopLevelVariable.ts:4:12 lint/style/useNamingConvention ━━━━━�
 ```
 invalidTopLevelVariable.ts:6:12 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let name should be in camelCase or PascalCase.
+  i This let name should be in camelCase or PascalCase.
   
     4 │ export var Unknown_Style_1 = 0
     5 │ 
@@ -83,7 +84,7 @@ invalidTopLevelVariable.ts:6:12 lint/style/useNamingConvention ━━━━━�
 ```
 invalidTopLevelVariable.ts:9:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
      8 │ export namespace X {
    > 9 │     export const Unknown_Style = 0
@@ -97,7 +98,7 @@ invalidTopLevelVariable.ts:9:18 lint/style/useNamingConvention ━━━━━�
 ```
 invalidTopLevelVariable.ts:11:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This global var name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This global var name should be in camelCase or PascalCase or CONSTANT_CASE.
   
      9 │     export const Unknown_Style = 0
     10 │ 
@@ -112,7 +113,7 @@ invalidTopLevelVariable.ts:11:16 lint/style/useNamingConvention ━━━━━�
 ```
 invalidTopLevelVariable.ts:13:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let name should be in camelCase or PascalCase.
+  i This let name should be in camelCase or PascalCase.
   
     11 │     export var Unknown_Style_1 = 0
     12 │ 
@@ -127,7 +128,7 @@ invalidTopLevelVariable.ts:13:16 lint/style/useNamingConvention ━━━━━�
 ```
 invalidTopLevelVariable.ts:16:14 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in camelCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in camelCase because strictCase is set to `true`.
   
     14 │ }
     15 │ 

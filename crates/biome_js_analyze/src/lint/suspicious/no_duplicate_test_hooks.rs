@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
+    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+    RuleSourceKind, ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
 
@@ -61,8 +62,10 @@ declare_lint_rule! {
         name: "noDuplicateTestHooks",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::EslintJest("no-duplicate-hooks")],
         source_kind: RuleSourceKind::Inspired,
+        domains: &[RuleDomain::Test],
     }
 }
 
@@ -127,7 +130,7 @@ impl Visitor for DuplicateHooksVisitor {
                     else if let AnyJsExpression::JsCallExpression(call_expression) = callee {
                         if let Ok(callee) = call_expression.callee() {
                             if matches!(
-                                callee.text().as_str(),
+                                callee.to_trimmed_string().as_str(),
                                 "describe.each" | "describe.only.each" | "fdescribe.each"
                             ) {
                                 self.stack.push(HooksContext::default());

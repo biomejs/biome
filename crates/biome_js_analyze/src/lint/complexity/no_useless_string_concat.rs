@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make::{
@@ -357,7 +357,7 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
                     String::new(),
                     |acc, element| {
                         if let Some(chunk) = element.as_js_template_chunk_element() {
-                            return acc + chunk.text().as_str();
+                            return acc + chunk.to_trimmed_string().as_str();
                         }
                         acc
                     },

@@ -1,5 +1,5 @@
 use crate::syntax::SyntaxTrivia;
-use crate::{cursor, Language, NodeOrToken, SyntaxNode, SyntaxToken};
+use crate::{Language, NodeOrToken, SyntaxNode, SyntaxToken, cursor};
 use biome_text_size::{TextRange, TextSize};
 use std::iter;
 use std::ptr::NonNull;
@@ -16,7 +16,7 @@ impl<L: Language> SyntaxElement<L> {
 
     pub fn text_range(&self) -> TextRange {
         match self {
-            NodeOrToken::Node(it) => it.text_range(),
+            NodeOrToken::Node(it) => it.text_range_with_trivia(),
             NodeOrToken::Token(it) => it.text_range(),
         }
     }
@@ -63,7 +63,7 @@ impl<L: Language> SyntaxElement<L> {
         }
     }
 
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> {
+    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
         let first = match self {
             NodeOrToken::Node(it) => Some(it.clone()),
             NodeOrToken::Token(it) => it.parent(),

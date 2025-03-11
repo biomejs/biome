@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-use crate::utils::{with_assignment_layout, AssignmentLikeLayout};
-use biome_formatter::{write, FormatRuleWithOptions};
+use crate::utils::{AssignmentLikeLayout, with_assignment_layout};
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_js_syntax::JsInitializerClause;
 use biome_js_syntax::JsInitializerClauseFields;
 

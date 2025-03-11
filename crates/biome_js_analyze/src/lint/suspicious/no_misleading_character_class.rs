@@ -1,18 +1,11 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_factory::make;
-use biome_js_syntax::{
-    global_identifier, static_value::StaticValue, AnyJsCallArgument, AnyJsExpression,
-    AnyJsLiteralExpression, AnyJsTemplateElement, JsCallArguments, JsSyntaxKind, JsSyntaxToken, T,
-};
-use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind,
-};
-
-use super::no_control_characters_in_regex::AnyRegexExpression;
+use biome_diagnostics::Severity;
+use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
 declare_lint_rule! {
     /// Disallow characters made with multiple code points in character class syntax.
@@ -21,7 +14,7 @@ declare_lint_rule! {
     /// A RegExp character class `/[abc]/` cannot handle characters with multiple code points.
     /// For example, the character `❇️` consists of two code points: `❇` (U+2747) and `VARIATION SELECTOR-16` (U+FE0F).
     /// If this character is in a RegExp character class, it will match to either `❇` or `VARIATION SELECTOR-16` rather than `❇️`.
-    /// This rule reports the regular expressions which include multiple code point characters in character class syntax.
+    /// This rule reports the regular expression literals which include multiple code point characters in character class syntax.
     ///
     /// ## Examples
     ///
@@ -64,6 +57,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-misleading-character-class")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }
@@ -79,21 +73,29 @@ pub enum Message {
 impl Message {
     fn diagnostic(&self) -> &str {
         match self {
-            Self::CombiningClassOrVs16 => "A character class cannot match a character and a combining character.",
+            Self::CombiningClassOrVs16 => {
+                "A character class cannot match a character and a combining character."
+            }
             Self::SurrogatePairWithoutUFlag => {
                 "A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them."
             }
-            Self::EmojiModifier => "A character class cannot match an emoji with a skin tone modifier.",
+            Self::EmojiModifier => {
+                "A character class cannot match an emoji with a skin tone modifier."
+            }
             Self::RegionalIndicatorSymbol => {
                 "A character class cannot match a pair of regional indicator symbols."
             }
-            Self::JoinedCharSequence => "A character class cannot match a joined character sequence.",
+            Self::JoinedCharSequence => {
+                "A character class cannot match a joined character sequence."
+            }
         }
     }
 
     fn note(&self) -> &str {
         match self {
-            Self::CombiningClassOrVs16 => "A character and a combining character forms a new character. Replace the character class with an alternation.",
+            Self::CombiningClassOrVs16 => {
+                "A character and a combining character forms a new character. Replace the character class with an alternation."
+            }
             Self::SurrogatePairWithoutUFlag => {
                 "A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character."
             }
@@ -101,7 +103,9 @@ impl Message {
             Self::RegionalIndicatorSymbol => {
                 "A pair of regional indicator symbols encodes a country code. Replace the character class with an alternation."
             }
-            Self::JoinedCharSequence => "A zero width joiner composes several emojis into a new one. Replace the character class with an alternation.",
+            Self::JoinedCharSequence => {
+                "A zero width joiner composes several emojis into a new one. Replace the character class with an alternation."
+            }
         }
     }
 }
@@ -112,52 +116,20 @@ pub struct RuleState {
 }
 
 impl Rule for NoMisleadingCharacterClass {
-    type Query = Ast<AnyRegexExpression>;
+    type Query = Ast<JsRegexLiteralExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let regex = ctx.query();
-        let (callee, arguments) = match regex {
-            AnyRegexExpression::JsRegexLiteralExpression(expr) => {
-                let (pattern, flags) = expr.decompose().ok()?;
-                let RuleState { range, message } =
-                    diagnostic_regex_pattern(pattern.text(), flags.text(), false)?;
-                return Some(RuleState {
-                    range: range.checked_add(expr.range().start().checked_add(1.into())?)?,
-                    message,
-                });
-            }
-            AnyRegexExpression::JsNewExpression(expr) => (expr.callee().ok()?, expr.arguments()?),
-            AnyRegexExpression::JsCallExpression(expr) => {
-                (expr.callee().ok()?, expr.arguments().ok()?)
-            }
-        };
-        if is_regex_expr(callee)? {
-            let mut args = arguments.args().iter();
-            let pattern = args
-                .next()?
-                .ok()?
-                .as_any_js_expression()?
-                .as_static_value()?;
-            let pattern_range = pattern.range();
-            let pattern = pattern.as_string_constant()?;
-            let flags = args
-                .next()
-                .and_then(|arg| arg.ok()?.as_any_js_expression()?.as_static_value());
-            let flags = if let Some(StaticValue::String(flags)) = &flags {
-                flags.text()
-            } else {
-                ""
-            };
-            let RuleState { range, message } = diagnostic_regex_pattern(pattern, flags, true)?;
-            return Some(RuleState {
-                range: range.checked_add(pattern_range.start().checked_add(1.into())?)?,
-                message,
-            });
-        }
-        None
+        let node = ctx.query();
+        let (pattern, flags) = node.decompose().ok()?;
+        let RuleState { range, message } =
+            diagnostic_regex_pattern(pattern.text(), flags.text(), false)?;
+        Some(RuleState {
+            range: range.checked_add(node.range().start().checked_add(1.into())?)?,
+            message,
+        })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -168,90 +140,27 @@ impl Rule for NoMisleadingCharacterClass {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let node = ctx.query();
         let is_fixable = matches!(state.message, Message::SurrogatePairWithoutUFlag);
-        if is_fixable {
-            match node {
-                AnyRegexExpression::JsRegexLiteralExpression(expr) => {
-                    let prev_token = expr.value_token().ok()?;
-                    let text = prev_token.text();
-                    let next_token = JsSyntaxToken::new_detached(
-                        JsSyntaxKind::JS_REGEX_LITERAL,
-                        &format!("{text}u"),
-                        [],
-                        [],
-                    );
-                    let mut mutation = ctx.root().begin();
-                    mutation.replace_token(prev_token, next_token);
-                    Some(JsRuleAction::new(
-                        ctx.metadata().action_category(ctx.category(), ctx.group()),
-                        ctx.metadata().applicability(),
-                        markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
-                            .to_owned(),
-                        mutation,
-                    ))
-                }
-                AnyRegexExpression::JsNewExpression(expr) => {
-                    let prev_node = expr.arguments()?;
-                    let mut prev_args = prev_node.args().iter();
-                    let regex_pattern = prev_args.next().and_then(|a| a.ok())?;
-                    let flag = prev_args.next().and_then(|a| a.ok());
-                    match make_suggestion(regex_pattern, flag) {
-                        Some(suggest) => {
-                            let mut mutation = ctx.root().begin();
-                            mutation.replace_node(prev_node, suggest);
-                            Some(JsRuleAction::new(
-                                ctx.metadata().action_category(ctx.category(), ctx.group()),
-                                ctx.metadata().applicability(),
-                                markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
-                                    .to_owned(),
-                                mutation,
-                            ))
-                        }
-                        None => None,
-                    }
-                }
-                AnyRegexExpression::JsCallExpression(expr) => {
-                    let prev_node = expr.arguments().ok()?;
-                    let mut prev_args = expr.arguments().ok()?.args().iter();
-                    let regex_pattern = prev_args.next().and_then(|a| a.ok())?;
-                    let flag = prev_args.next().and_then(|a| a.ok());
-                    match make_suggestion(regex_pattern, flag) {
-                        Some(suggest) => {
-                            let mut mutation = ctx.root().begin();
-                            mutation.replace_node(prev_node, suggest);
-                            Some(JsRuleAction::new(
-                                ctx.metadata().action_category(ctx.category(), ctx.group()),
-                                ctx.metadata().applicability(),
-                                markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
-                                    .to_owned(),
-                                mutation,
-                            ))
-                        }
-                        None => None,
-                    }
-                }
-            }
-        } else {
-            None
+        if !is_fixable {
+            return None;
         }
-    }
-}
-
-fn is_regex_expr(expr: AnyJsExpression) -> Option<bool> {
-    match expr {
-        AnyJsExpression::JsIdentifierExpression(callee) => {
-            Some(callee.name().ok()?.has_name("RegExp"))
-        }
-        AnyJsExpression::JsStaticMemberExpression(callee) => {
-            let is_member_regexp = callee.member().ok()?.value_token().ok()?.text() == "RegExp";
-            let callee = callee.object().ok()?;
-            let (_, name) = global_identifier(&callee)?;
-            let is_global_obj =
-                name.text() == "globalThis" || name.text() == "global" || name.text() == "window";
-            Some(is_global_obj && is_member_regexp)
-        }
-        _ => Some(false),
+        let node = ctx.query();
+        let prev_token = node.value_token().ok()?;
+        let text = prev_token.text_trimmed();
+        let next_token = JsSyntaxToken::new_detached(
+            JsSyntaxKind::JS_REGEX_LITERAL,
+            &format!("{text}u"),
+            [],
+            [],
+        );
+        let mut mutation = ctx.root().begin();
+        mutation.replace_token(prev_token, next_token);
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }.to_owned(),
+            mutation,
+        ))
     }
 }
 
@@ -315,10 +224,24 @@ fn diagnostic_regex_class(
 ) -> Option<RuleState> {
     let mut prev_char_index = 0;
     let mut prev_char_type = CharType::None;
+    let mut prev_code_point = None;
+    let mut is_range_operator = false;
     let mut iter = char_class.char_indices();
+
     while let Some((i, c)) = iter.next() {
+        // Check if the current character is a potential range operator
+        // A hyphen("-") is considered a range operator when:
+        // 1. There is a previous code point (not at the start of a character class)
+        // 2. It is neither the first nor the last character in the character class.
+        if c == '-' && prev_code_point.is_some() && i > 0 && i + 1 < char_class.len() {
+            // Mark this as a range operator for later processing
+            is_range_operator = true;
+            prev_char_index = i;
+            continue;
+        }
+
         let (codepoint, end) = if c == '\\' {
-            // Maybe  unicode esccapes \u{XXX} \uXXXX
+            // Maybe unicode escapes \u{XXX} \uXXXX
             let Some((codepoint, len)) = decode_next_codepoint(&char_class[i..], is_in_string)
             else {
                 prev_char_index = i;
@@ -331,6 +254,29 @@ fn diagnostic_regex_class(
         } else {
             (c as u32, i + c.len_utf8())
         };
+
+        // Handle range operators in character classes, e.g., [a-z], [\u0300-\u0302]
+        if is_range_operator {
+            // Reset the flag after processing
+            is_range_operator = false;
+
+            // Check if we have a valid previous code point to form a range
+            if let Some(prev_cp) = prev_code_point {
+                // Ensure the range is valid (start <= end)
+                // If the range is invalid (start > end), continue with normal processing
+                if prev_cp <= codepoint {
+                    // Update tracking variables for the end of range character
+                    prev_code_point = Some(codepoint);
+                    prev_char_index = i;
+                    // Skip further processing for this character
+                    continue;
+                }
+            }
+        }
+
+        // Store the current code point for future range operations
+        prev_code_point = Some(codepoint);
+
         match codepoint {
             // Non-BMP characters are encoded as surrogate pairs in UTF-16 / UCS-2
             0x10000.. if !has_u_flag => {
@@ -355,7 +301,7 @@ fn diagnostic_regex_class(
             | 0xFE20..=0xFE2F
             // Variation Selectors Supplement (VS17 to VS256)
             | 0xE0100..=0xE01EF => {
-                if prev_char_type == CharType::Regular {
+                if prev_char_type == CharType::Regular && !is_range_operator {
                     return Some(RuleState {
                         range: TextRange::new((prev_char_index as u32).into(), (end as u32).into()),
                         message: Message::CombiningClassOrVs16,
@@ -498,7 +444,7 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             .iter()
             .enumerate()
             .skip(offset + 3)
-            .find(|(_, &c)| c == b'}')?;
+            .find(|&(_, &c)| c == b'}')?;
         Some(UnicodeEscape {
             // SAFETY: slicing is safe because `{` is at `offset + 2` and `}` is at `end`.
             codepoint: u32::from_str_radix(&s[offset + 3..end], 16).ok()?,
@@ -521,83 +467,6 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             len: offset + 6,
         })
     }
-}
-
-fn make_suggestion(
-    literal: AnyJsCallArgument,
-    flag: Option<AnyJsCallArgument>,
-) -> Option<JsCallArguments> {
-    let suggestion = match flag {
-        None => Some(AnyJsCallArgument::AnyJsExpression(
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsStringLiteralExpression(
-                    make::js_string_literal_expression(make::js_string_literal("u")),
-                ),
-            ),
-        )),
-        Some(f) => match f {
-            AnyJsCallArgument::AnyJsExpression(expr) => match expr {
-                AnyJsExpression::AnyJsLiteralExpression(e) => {
-                    let text = e.text();
-                    if text.starts_with('\'') {
-                        Some(AnyJsCallArgument::AnyJsExpression(
-                            AnyJsExpression::AnyJsLiteralExpression(
-                                AnyJsLiteralExpression::JsStringLiteralExpression(
-                                    make::js_string_literal_expression(make::js_string_literal(
-                                        &format!("'{text}u'"),
-                                    )),
-                                ),
-                            ),
-                        ))
-                    } else {
-                        Some(AnyJsCallArgument::AnyJsExpression(
-                            AnyJsExpression::AnyJsLiteralExpression(
-                                AnyJsLiteralExpression::JsStringLiteralExpression(
-                                    make::js_string_literal_expression(make::js_string_literal(
-                                        &format!("{}u", text.replace('"', "")),
-                                    )),
-                                ),
-                            ),
-                        ))
-                    }
-                }
-                AnyJsExpression::JsTemplateExpression(expr) => {
-                    let mut elements = expr
-                        .elements()
-                        .iter()
-                        .collect::<Vec<AnyJsTemplateElement>>();
-
-                    let uflag = AnyJsTemplateElement::from(make::js_template_chunk_element(
-                        make::js_template_chunk("u"),
-                    ));
-                    elements.push(uflag);
-                    Some(AnyJsCallArgument::AnyJsExpression(
-                        AnyJsExpression::JsTemplateExpression(
-                            make::js_template_expression(
-                                make::token(T!['`']),
-                                make::js_template_element_list(elements),
-                                make::token(T!['`']),
-                            )
-                            .build(),
-                        ),
-                    ))
-                }
-                AnyJsExpression::JsIdentifierExpression(_) => None,
-                _ => None,
-            },
-            AnyJsCallArgument::JsSpread(_) => None,
-        },
-    };
-    suggestion.map(|s| {
-        make::js_call_arguments(
-            make::token(T!['(']),
-            make::js_call_argument_list(
-                [literal, s],
-                Some(make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])),
-            ),
-            make::token(T![')']),
-        )
-    })
 }
 
 #[cfg(test)]

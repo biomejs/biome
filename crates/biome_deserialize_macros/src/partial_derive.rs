@@ -2,8 +2,8 @@ mod attrs;
 
 use crate::partial_derive::attrs::PartialType;
 use attrs::{Attrs, FieldAttrs};
+use proc_macro_error2::*;
 use proc_macro2::{Ident, Span, TokenStream};
-use proc_macro_error::*;
 use quote::quote;
 use syn::{Data, Field, GenericArgument, PathArguments, Type};
 
@@ -146,11 +146,11 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
          }| {
             if *should_wrap {
                 quote! {
-                    #ident: partial.#ident.map(#ty::from).unwrap_or(default.#ident)
+                    #ident: partial.#ident.map(<#ty>::from).unwrap_or(default.#ident)
                 }
             } else {
                 quote! {
-                    #ident: partial.#ident.map(#ty::from)
+                    #ident: partial.#ident.map(<#ty>::from)
                 }
             }
         },

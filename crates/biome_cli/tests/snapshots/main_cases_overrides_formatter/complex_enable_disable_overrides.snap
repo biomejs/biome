@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -15,9 +16,9 @@ expression: content
     }
   },
   "overrides": [
-    { "include": ["formatted.js"], "formatter": { "enabled": true } },
+    { "includes": ["formatted.js"], "formatter": { "enabled": true } },
     {
-      "include": ["dirty.js"],
+      "includes": ["dirty.js"],
       "linter": {
         "rules": {
           "performance": {

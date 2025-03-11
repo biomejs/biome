@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 class A {
     constructor() {
         super()
@@ -16,7 +17,7 @@ class A {
 ```
 invalid.js:3:9 syntax/correctness/noSuperWithoutExtends ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! super() is only valid in derived class constructors
+  × super() is only valid in derived class constructors
   
     1 │ class A {
     2 │     constructor() {

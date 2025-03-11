@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
-use biome_console::{markup, MarkupBuf};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_console::{MarkupBuf, markup};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClass, AnyJsExpression, JsAssignmentOperator, JsConstructorClassMember, JsLogicalOperator,
 };
@@ -51,6 +52,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("constructor-super")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

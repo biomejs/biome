@@ -1,0 +1,49 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid_with_empty_conventions.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useNamingConvention": {
+          "level": "on",
+          "options": {
+            "conventions": [],
+            "enumMemberCase": "CONSTANT_CASE"
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_with_empty_conventions.json:9:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The option enumMemberCase has ben removed.
+  
+     7 │           "options": {
+     8 │             "conventions": [],
+   > 9 │             "enumMemberCase": "CONSTANT_CASE"
+       │             ^^^^^^^^^^^^^^^^
+    10 │           }
+    11 │         }
+  
+  i Safe fix: Use conventions instead of enumMemberCase.
+  
+     6  6 │             "level": "on",
+     7  7 │             "options": {
+     8    │ - ············"conventions":·[],
+     9    │ - ············"enumMemberCase":·"CONSTANT_CASE"
+        8 │ + ············"conventions":·[{"selector":{"kind":"enumMember"},"formats":["CONSTANT_CASE"]}]
+    10  9 │             }
+    11 10 │           }
+  
+
+```

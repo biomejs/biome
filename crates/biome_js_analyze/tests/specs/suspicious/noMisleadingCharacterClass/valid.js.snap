@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```jsx
+```js
 var r = /[👍]/u;
 var r = /[\uD83D\uDC4D]/u;
 var r = /[\u{1F44D}]/u;
@@ -40,13 +40,6 @@ var r = /[🇵]/u;
 var r = /[\u200D]/;
 var r = /[\u200D]/u;
 
-// don't report and don't crash on invalid regex
-// FIXME: need to ecma regex parser to handle this case
-// var r = new RegExp('[Á] [ ');
-// var r = RegExp('{ [Á]', 'u');
-// var r = new globalThis.RegExp('[Á] [ ');
-// var r = globalThis.RegExp('{ [Á]', 'u');
-
 // v flag
 var r = /[👍]/v;
 var r = /^[\q{👶🏻}]$/v;
@@ -54,15 +47,23 @@ var r = /[🇯\q{abc}🇵]/v;
 var r = /[🇯[A]🇵]/v;
 var r = /[🇯[A--B]🇵]/v;
 
-var r = new window.RegExp(/[👍]/u);
-var r = new global.RegExp(/[👍]/u);
-var r = new globalThis.RegExp(/[👍]/u);
-var r = new globalThis.globalThis.globalThis.RegExp(/[👍]/u);
-
 // Issue: https://github.com/biomejs/biome/issues/1522
 var cyrillicChars = /[\u200E\u2066-\u2069]/gu;
 
 // Unicode char outside the class
 /[a-z]👍/;
 /\[👍]/;
+
+// Issue: https://github.com/biomejs/biome/issues/4950
+// 1. The hyphen is treated as a range operator in the character class
+/[\u0300-\u0302]/;
+
+// 2.The hyphen is treated as literal character in the character class
+// This regex is valid, it will match '\u0300' or a literal hyphen '-'
+/[\u0300-]/;
+
+// 3. The hyphen is treated as a literal character outside a character class
+// This regex will match "\u0300-\u0302"
+/\u0300-\u0302/;
+
 ```

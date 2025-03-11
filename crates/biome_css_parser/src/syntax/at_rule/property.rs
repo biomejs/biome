@@ -1,11 +1,11 @@
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_parser::TokenSet;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::token_set;
-use biome_parser::TokenSet;
-use biome_parser::{parsed_syntax::ParsedSyntax, Parser};
+use biome_parser::{Parser, parsed_syntax::ParsedSyntax};
 
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_block;

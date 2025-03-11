@@ -1,0 +1,167 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/prettier_ignore/document.html
+---
+# Input
+
+```html
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Title</title>
+  </head>
+  <body>
+    <!-- prettier-ignore -->
+    <p>
+      Test  Test   Test
+    </p>
+
+    <!-- prettier-ignore -->
+    <p attribute  =  "value">
+      Test  Test   Test
+    </p>
+
+    <!-- prettier-ignore -->
+    <ul
+      ><li> First  </li
+      ><li>Second<i>1</i><div><div>String</div></div></li
+    ></ul>
+
+    <!-- prettier-ignore -->
+    <div>
+
+
+
+
+
+    </div>
+
+    <!-- prettier-ignore -->
+    <ul><!--
+      --><li>   First   </li><!--
+      --><li>   Second   </li><!--
+    --></ul>
+
+    <!-- prettier-ignore -->
+    <br />
+  </body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,35 +7,36 @@
+   </head>
+   <body>
+     <!-- prettier-ignore -->
+-    <p>
+-      Test  Test   Test
+-    </p>
++    <p>Test Test Test</p>
+ 
+     <!-- prettier-ignore -->
+-    <p attribute  =  "value">
+-      Test  Test   Test
+-    </p>
++    <p attribute="value">Test Test Test</p>
+ 
+     <!-- prettier-ignore -->
+-    <ul
+-      ><li> First  </li
+-      ><li>Second<i>1</i><div><div>String</div></div></li
+-    ></ul>
++    <ul>
++      <li>First </li>
++      <li>
++        Second<i>1</i>
++        <div>
++          <div>String</div>
++        </div>
++      </li>
++    </ul>
+ 
+     <!-- prettier-ignore -->
+-    <div>
+-
+-
+-
+-
+-
+-    </div>
++    <div></div>
+ 
+     <!-- prettier-ignore -->
+-    <ul><!--
+-      --><li>   First   </li><!--
+-      --><li>   Second   </li><!--
+-    --></ul>
++    <ul>
++      <!--
++      -->
++      <li>First </li>
++      <!--
++      -->
++      <li>Second </li>
++      <!--
++    -->
++    </ul>
+ 
+     <!-- prettier-ignore -->
+     <br />
+```
+
+# Output
+
+```html
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Title</title>
+  </head>
+  <body>
+    <!-- prettier-ignore -->
+    <p>Test Test Test</p>
+
+    <!-- prettier-ignore -->
+    <p attribute="value">Test Test Test</p>
+
+    <!-- prettier-ignore -->
+    <ul>
+      <li>First </li>
+      <li>
+        Second<i>1</i>
+        <div>
+          <div>String</div>
+        </div>
+      </li>
+    </ul>
+
+    <!-- prettier-ignore -->
+    <div></div>
+
+    <!-- prettier-ignore -->
+    <ul>
+      <!--
+      -->
+      <li>First </li>
+      <!--
+      -->
+      <li>Second </li>
+      <!--
+    -->
+    </ul>
+
+    <!-- prettier-ignore -->
+    <br />
+  </body>
+</html>
+```

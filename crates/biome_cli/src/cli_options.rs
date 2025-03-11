@@ -1,10 +1,10 @@
-use crate::logging::LoggingKind;
 use crate::LoggingLevel;
+use crate::logging::LoggingKind;
 use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
+use camino::Utf8PathBuf;
 use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Global options applied to all commands
@@ -91,7 +91,7 @@ impl CliOptions {
     pub(crate) fn as_configuration_path_hint(&self) -> ConfigurationPathHint {
         match self.config_path.as_ref() {
             None => ConfigurationPathHint::default(),
-            Some(path) => ConfigurationPathHint::FromUser(PathBuf::from(path)),
+            Some(path) => ConfigurationPathHint::FromUser(Utf8PathBuf::from(path)),
         }
     }
 }
@@ -216,7 +216,10 @@ impl FromStr for MaxDiagnostics {
                 if let Ok(value) = s.parse::<u32>() {
                     Ok(MaxDiagnostics::Limit(value))
                 } else {
-                    Err(format!("Invalid value provided. Provide 'none' to lift the limit, or a number between 0 and {}.", u32::MAX))
+                    Err(format!(
+                        "Invalid value provided. Provide 'none' to lift the limit, or a number between 0 and {}.",
+                        u32::MAX
+                    ))
                 }
             }
         }

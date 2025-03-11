@@ -1,11 +1,11 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, T,
+    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, T, jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange, TriviaPieceKind};
 
@@ -51,8 +51,9 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintNext("google-font-preconnect")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Safe,
+        domains: &[RuleDomain::Next],
     }
 }
 
@@ -75,14 +76,14 @@ impl Rule for UseGoogleFontPreconnect {
         if href.starts_with("https://fonts.gstatic.com")
             && !matches!(rel.as_deref(), Some("preconnect"))
         {
-            return Some(node.syntax().text_range());
+            return Some(node.syntax().text_trimmed_range());
         }
 
         None
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        return Some(
+        Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
@@ -93,7 +94,7 @@ impl Rule for UseGoogleFontPreconnect {
             .note(markup!{
                 "Not using "<Emphasis>"preconnect"</Emphasis>" can cause slower font loading and increase latency."
             })
-        );
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
@@ -109,6 +110,7 @@ impl Rule for UseGoogleFontPreconnect {
         let last_attr_token = match attributes.last()? {
             AnyJsxAttribute::JsxAttribute(a) => a.name_value_token().ok()?,
             AnyJsxAttribute::JsxSpreadAttribute(a) => a.l_curly_token().ok()?,
+            AnyJsxAttribute::JsMetavariable(a) => a.value_token().ok()?,
         };
 
         let rel = if last_attr_token.has_leading_whitespace_or_newline() {

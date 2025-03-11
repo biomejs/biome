@@ -21,8 +21,8 @@ use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
 use biome_formatter::trivia::format_skipped_token_trivia;
 use biome_formatter::{
-    write, CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    TransformSourceMap,
+    CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
+    TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
@@ -43,7 +43,10 @@ impl<T, C> AsFormat<C> for &T
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = T::Format<'a> where Self: 'a;
+    type Format<'a>
+        = T::Format<'a>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         AsFormat::format(&**self)
@@ -57,7 +60,10 @@ impl<T, C> AsFormat<C> for biome_rowan::SyntaxResult<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = biome_rowan::SyntaxResult<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = biome_rowan::SyntaxResult<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         match self {
@@ -74,7 +80,10 @@ impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = Option<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = Option<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         self.as_ref().map(|value| value.format())
@@ -373,7 +382,7 @@ pub fn format_sub_tree(options: CssFormatOptions, root: &CssSyntaxNode) -> Forma
 mod tests {
     use crate::context::CssFormatOptions;
     use crate::format_node;
-    use biome_css_parser::{parse_css, CssParserOptions};
+    use biome_css_parser::{CssParserOptions, parse_css};
 
     #[test]
     fn smoke_test() {

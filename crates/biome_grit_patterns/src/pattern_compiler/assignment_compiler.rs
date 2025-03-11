@@ -1,13 +1,13 @@
 use super::{
-    compilation_context::NodeCompilationContext, container_compiler::ContainerCompiler,
-    PatternCompiler,
+    PatternCompiler, compilation_context::NodeCompilationContext,
+    container_compiler::ContainerCompiler,
 };
 use crate::{
-    grit_context::GritQueryContext, grit_target_language::GritTargetLanguage, CompileError,
+    CompileError, grit_context::GritQueryContext, grit_target_language::GritTargetLanguage,
 };
 use biome_grit_syntax::{GritAssignmentAsPattern, GritPredicateAssignment};
 use biome_rowan::AstNode;
-use grit_pattern_matcher::pattern::{is_reserved_metavariable, Assignment};
+use grit_pattern_matcher::pattern::{Assignment, is_reserved_metavariable};
 use grit_util::constants::GRIT_METAVARIABLE_PREFIX;
 
 pub(crate) struct AssignmentCompiler;

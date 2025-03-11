@@ -1,8 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxElementName, AnyJsxTag,
     JsSyntaxKind, JsxAttribute,
@@ -89,6 +90,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("label-has-associated-control")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -292,7 +294,7 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
                 }
             })
             .is_some_and(|jsx_name| for_attributes.contains(&jsx_name.text_trimmed())),
-        AnyJsxAttribute::JsxSpreadAttribute(_) => false,
+        AnyJsxAttribute::JsxSpreadAttribute(_) | AnyJsxAttribute::JsMetavariable(_) => false,
     })
 }
 

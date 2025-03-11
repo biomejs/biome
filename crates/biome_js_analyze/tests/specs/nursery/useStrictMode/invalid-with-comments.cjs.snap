@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-comments.cjs
+snapshot_kind: text
+---
+# Input
+```cjs
+// comment
+let some_variable = "some value";
+
+```
+
+# Diagnostics
+```
+invalid-with-comments.cjs:2:1 lint/nursery/useStrictMode  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected absence of the directive "use strict".
+  
+    1 │ // comment
+  > 2 │ let some_variable = "some value";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Strict mode allows to opt-in some optimisations of the runtime engines, and it eliminates some JavaScript silent errors by changing them to throw errors.
+  
+  i Check the MDN web docs for more information regarding strict mode.
+  
+  i Safe fix: Insert a top level "use strict".
+  
+      1 │ + "use·strict";
+    1 2 │   // comment
+    2 3 │   let some_variable = "some value";
+  
+
+```

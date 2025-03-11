@@ -1,19 +1,21 @@
 use biome_cli::CliDiagnostic;
 use biome_console::fmt::{Formatter, Termcolor};
-use biome_console::{markup, BufferConsole, Markup};
+use biome_console::{BufferConsole, Markup, markup};
 use biome_diagnostics::termcolor::NoColor;
-use biome_diagnostics::{print_diagnostic_to_string, Error};
+use biome_diagnostics::{Error, print_diagnostic_to_string};
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
+use camino::{Utf8Path, Utf8PathBuf};
 use regex::Regex;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
+use std::convert::identity;
 use std::env::{current_exe, temp_dir};
 use std::fmt::Write as _;
-use std::path::{Path, PathBuf, MAIN_SEPARATOR};
+use std::path::MAIN_SEPARATOR;
 use std::sync::LazyLock;
 
 static TIME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new("\\s[0-9]+[mµn]?s\\.").unwrap());
@@ -150,11 +152,10 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     let mut output = Cow::Borrowed(input);
 
     // There are some logs that print the timing, and we can't snapshot that message
-    // otherwise at each run we invalid the previous snapshot.
+    // otherwise at each run we invalidate the previous snapshot.
     //
     // This is a workaround, and it might not work for all cases.
-    let the_match = TIME_REGEX.find(output.as_ref()).map(|f| f.start()..f.end());
-    if let Some(found) = the_match {
+    while let Some(found) = TIME_REGEX.find(&output).map(|f| f.start()..f.end()) {
         output.to_mut().replace_range(found, " <TIME>.");
     }
 
@@ -263,7 +264,7 @@ fn replace_biome_dir(input: Cow<str>) -> Cow<str> {
     let mut result = String::new();
     let mut rest = input.as_ref();
 
-    let temp_dir = biome_fs::ensure_cache_dir().display().to_string();
+    let temp_dir = biome_fs::ensure_cache_dir().to_string();
     let temp_dir = temp_dir.trim_end_matches(MAIN_SEPARATOR);
 
     while let Some(index) = rest.find(temp_dir) {
@@ -329,7 +330,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
         let mut cli_snapshot = CliSnapshot::from_result(result);
 
         for file_name in ConfigName::file_names() {
-            let config_path = PathBuf::from(file_name);
+            let config_path = Utf8PathBuf::from(file_name);
             let configuration = fs.open(&config_path).ok();
             if let Some(mut configuration) = configuration {
                 let mut buffer = String::new();
@@ -339,18 +340,16 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             }
         }
 
-        let files: Vec<_> = fs
-            .files()
+        cli_snapshot.files = fs
+            .files
+            .read()
+            .iter()
             .map(|(file, entry)| {
                 let content = entry.lock();
                 let content = std::str::from_utf8(content.as_slice()).unwrap();
-                (file.to_str().unwrap().to_string(), String::from(content))
+                (file.as_str().to_string(), String::from(content))
             })
             .collect();
-
-        for (file, content) in files {
-            cli_snapshot.files.insert(file, content);
-        }
 
         let in_buffer = &console.in_buffer;
         for (index, message) in in_buffer.iter().enumerate() {
@@ -407,6 +406,17 @@ impl<'a> SnapshotPayload<'a> {
 
 /// Function used to snapshot a session test of the a CLI run.
 pub fn assert_cli_snapshot(payload: SnapshotPayload<'_>) {
+    assert_cli_snapshot_with_redactor(payload, identity)
+}
+
+/// Used to snapshot a session test of the a CLI run.
+///
+/// Takes a custom `redactor` that allows the snapshotted content to be
+/// normalized so it remains stable across test runs.
+pub fn assert_cli_snapshot_with_redactor(
+    payload: SnapshotPayload<'_>,
+    redactor: impl FnOnce(String) -> String,
+) {
     let module_path = payload.module_path.to_owned();
     let test_name = payload.test_name;
     let cli_snapshot = CliSnapshot::from(payload);
@@ -414,19 +424,19 @@ pub fn assert_cli_snapshot(payload: SnapshotPayload<'_>) {
     let content = cli_snapshot.emit_content_snapshot();
 
     let module_path = module_path.replace("::", "_");
-    let snapshot_path = PathBuf::from("snapshots").join(module_path);
+    let snapshot_path = Utf8PathBuf::from("snapshots").join(module_path);
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
-        snapshot_path => snapshot_path
+        snapshot_path => snapshot_path,
     }, {
-        insta::assert_snapshot!(test_name, content);
+        insta::assert_snapshot!(test_name, redactor(content));
 
     });
 }
 
 /// It checks if the contents of a file matches the passed `expected_content`
-pub fn assert_file_contents(fs: &MemoryFileSystem, path: &Path, expected_content: &str) {
+pub fn assert_file_contents(fs: &MemoryFileSystem, path: &Utf8Path, expected_content: &str) {
     let mut file = fs.open(path).expect("file was removed");
 
     let mut content = String::new();
@@ -434,9 +444,8 @@ pub fn assert_file_contents(fs: &MemoryFileSystem, path: &Path, expected_content
         .expect("failed to read file from memory FS");
 
     assert_eq!(
-        content,
-        expected_content,
+        content, expected_content,
         "file {} doesn't match the expected content (right)",
-        path.display()
+        path
     );
 }

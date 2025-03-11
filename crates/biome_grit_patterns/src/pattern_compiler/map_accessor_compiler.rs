@@ -2,7 +2,7 @@ use super::{
     compilation_context::NodeCompilationContext, container_compiler::ContainerCompiler,
     map_compiler::MapCompiler, variable_compiler::VariableCompiler,
 };
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_grit_syntax::{AnyGritMapAccessorSubject, AnyGritMapKey, GritMapAccessor};
 use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{Accessor, AccessorKey, AccessorMap};

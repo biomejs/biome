@@ -1,10 +1,11 @@
 use crate::utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
+    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
+    Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
 
 fn remove_vendor_prefix<'a>(prop: &'a str, prefix: &'a str) -> &'a str {
@@ -72,6 +73,7 @@ declare_lint_rule! {
         name: "noShorthandPropertyOverrides",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("declaration-block-no-shorthand-property-overrides")],
     }
 }
@@ -104,7 +106,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                     if let Some(prop_node) = CssGenericProperty::cast_ref(node)
                         .and_then(|property_node| property_node.name().ok())
                     {
-                        let prop = prop_node.text();
+                        let prop = prop_node.to_trimmed_string();
                         #[expect(clippy::disallowed_methods)]
                         let prop_lowercase = prop.to_lowercase();
 
@@ -190,7 +192,7 @@ impl Rule for NoShorthandPropertyOverrides {
         let query = ctx.query();
 
         Some(NoDeclarationBlockShorthandPropertyOverridesState {
-            target_property: query.property_node.text(),
+            target_property: query.property_node.to_trimmed_string(),
             override_property: query.override_property.clone(),
             span: query.text_range(),
         })

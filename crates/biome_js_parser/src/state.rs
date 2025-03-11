@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_js_syntax::JsFileSource;
 use biome_rowan::{TextRange, TextSize};
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
 use std::ops::{BitOr, BitOrAssign, Deref, DerefMut, Range, Sub};
@@ -306,7 +306,7 @@ impl<'parser, 't, C: ChangeParserState> ParserStateGuard<'parser, 't, C> {
     }
 }
 
-impl<'parser, 't, C: ChangeParserState> Drop for ParserStateGuard<'parser, 't, C> {
+impl<C: ChangeParserState> Drop for ParserStateGuard<'_, '_, C> {
     fn drop(&mut self) {
         let snapshot = std::mem::take(&mut self.snapshot);
 
@@ -314,7 +314,7 @@ impl<'parser, 't, C: ChangeParserState> Drop for ParserStateGuard<'parser, 't, C
     }
 }
 
-impl<'parser, 't, C: ChangeParserState> Deref for ParserStateGuard<'parser, 't, C> {
+impl<'t, C: ChangeParserState> Deref for ParserStateGuard<'_, 't, C> {
     type Target = JsParser<'t>;
 
     fn deref(&self) -> &Self::Target {
@@ -322,7 +322,7 @@ impl<'parser, 't, C: ChangeParserState> Deref for ParserStateGuard<'parser, 't, 
     }
 }
 
-impl<'parser, 't, C: ChangeParserState> DerefMut for ParserStateGuard<'parser, 't, C> {
+impl<C: ChangeParserState> DerefMut for ParserStateGuard<'_, '_, C> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.inner
     }

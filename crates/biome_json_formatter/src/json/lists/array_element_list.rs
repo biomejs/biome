@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use crate::separated::FormatAstSeparatedListExtension;
-use biome_formatter::write;
-use biome_json_syntax::{AnyJsonValue, JsonArrayElementList};
+use biome_formatter::separated::TrailingSeparator;
+use biome_formatter::{Expand, FormatContext, write};
+use biome_json_syntax::{AnyJsonValue, JsonArrayElementList, JsonFileVariant};
 use biome_rowan::{AstNode, AstSeparatedList};
 
 #[derive(Debug, Clone, Default)]
@@ -10,7 +11,10 @@ pub(crate) struct FormatJsonArrayElementList;
 impl FormatRule<JsonArrayElementList> for FormatJsonArrayElementList {
     type Context = JsonFormatContext;
     fn fmt(&self, node: &JsonArrayElementList, f: &mut JsonFormatter) -> FormatResult<()> {
-        let layout = if can_concisely_print_array_list(node) {
+        let expand_lists = f.context().options().expand() == Expand::Always;
+        let layout = if expand_lists {
+            ArrayLayout::OnePerLine
+        } else if can_concisely_print_array_list(node) {
             ArrayLayout::Fill
         } else {
             ArrayLayout::OnePerLine
@@ -18,7 +22,12 @@ impl FormatRule<JsonArrayElementList> for FormatJsonArrayElementList {
 
         match layout {
             ArrayLayout::Fill => {
-                let trailing_separator = f.options().to_trailing_separator();
+                let file_source = f.options().file_source();
+                let trailing_separator = if file_source.variant() == JsonFileVariant::Standard {
+                    TrailingSeparator::Omit
+                } else {
+                    f.options().to_trailing_separator()
+                };
                 let mut filler = f.fill();
 
                 for (element, formatted) in node
@@ -41,7 +50,12 @@ impl FormatRule<JsonArrayElementList> for FormatJsonArrayElementList {
             }
 
             ArrayLayout::OnePerLine => {
-                let trailing_separator = f.options().to_trailing_separator();
+                let file_source = f.options().file_source();
+                let trailing_separator = if file_source.variant() == JsonFileVariant::Standard {
+                    TrailingSeparator::Omit
+                } else {
+                    f.options().to_trailing_separator()
+                };
                 let mut join = f.join_nodes_with_soft_line();
 
                 for (element, formatted) in node

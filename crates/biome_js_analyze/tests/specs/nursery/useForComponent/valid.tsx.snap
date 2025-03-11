@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.tsx
+snapshot_kind: text
+---
+# Input
+```tsx
+let Component = (props) => <ol><For each={props.data}>{d => <li>{d.text}</li>}</For></ol>;
+
+let abc = x.map(y => y + z);
+
+let Component = (props) => {
+  let abc = x.map(y => y + z);
+  return <div>Hello, world!</div>;
+}
+```

@@ -1,8 +1,8 @@
+use crate::Reporter;
 use crate::execute::{Execution, TraversalMode};
 use crate::reporter::{DiagnosticsPayload, ReporterVisitor, TraversalSummary};
-use crate::Reporter;
 use biome_console::fmt::Formatter;
-use biome_console::{fmt, markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, fmt, markup};
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::BiomePath;
@@ -53,7 +53,7 @@ struct FixedPathsDiagnostic {
 
 pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 
-impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
+impl ReporterVisitor for ConsoleReporterVisitor<'_> {
     fn report_summary(
         &mut self,
         execution: &Execution,
@@ -68,7 +68,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
 
         if !execution.is_ci() && summary.diagnostics_not_printed > 0 {
             self.0.log(markup! {
-                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
+                <Warn>"The number of diagnostics exceeds the limit allowed. Use "<Emphasis>"--max-diagnostics"</Emphasis>" to increase it.\n"</Warn>
                 <Info>"Diagnostics not shown: "</Info><Emphasis>{summary.diagnostics_not_printed}</Emphasis><Info>"."</Info>
             })
         }
@@ -83,10 +83,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
     fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
             advice: ListAdvice {
-                list: evaluated_paths
-                    .iter()
-                    .map(|p| p.display().to_string())
-                    .collect(),
+                list: evaluated_paths.iter().map(|p| p.to_string()).collect(),
             },
         };
 
@@ -95,7 +92,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
                 list: evaluated_paths
                     .iter()
                     .filter(|p| p.was_written())
-                    .map(|p| p.display().to_string())
+                    .map(|p| p.to_string())
                     .collect(),
             },
         };
@@ -151,7 +148,7 @@ impl fmt::Display for Files {
 
 struct SummaryDetail<'a>(pub(crate) &'a TraversalMode, usize);
 
-impl<'a> fmt::Display for SummaryDetail<'a> {
+impl fmt::Display for SummaryDetail<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let TraversalMode::Search { .. } = self.0 {
             return Ok(());
@@ -170,7 +167,7 @@ impl<'a> fmt::Display for SummaryDetail<'a> {
 }
 struct SummaryTotal<'a>(&'a TraversalMode, usize, &'a Duration);
 
-impl<'a> fmt::Display for SummaryTotal<'a> {
+impl fmt::Display for SummaryTotal<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         let files = Files(self.1);
         match self.0 {
@@ -214,7 +211,7 @@ pub(crate) struct ConsoleTraversalSummary<'a>(
     pub(crate) &'a TraversalMode,
     pub(crate) &'a TraversalSummary,
 );
-impl<'a> fmt::Display for ConsoleTraversalSummary<'a> {
+impl fmt::Display for ConsoleTraversalSummary<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         let summary = SummaryTotal(self.0, self.1.changed + self.1.unchanged, &self.1.duration);
         let detail = SummaryDetail(self.0, self.1.changed);

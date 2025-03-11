@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsStatement, JsBlockStatement, JsElseClause, JsIfStatement};
@@ -126,7 +126,7 @@ impl Rule for UseCollapsedElseIf {
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state.if_statement.syntax().text_range(),
+            state.if_statement.syntax().text_range_with_trivia(),
             markup! {
                 "This "<Emphasis>"if"</Emphasis>" statement can be collapsed into an "<Emphasis>"else if"</Emphasis>" statement."
             },

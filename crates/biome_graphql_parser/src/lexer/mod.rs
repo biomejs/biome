@@ -2,7 +2,7 @@
 #[rustfmt::skip]
 mod tests;
 
-use biome_graphql_syntax::{GraphqlSyntaxKind, GraphqlSyntaxKind::*, TextLen, TextSize, T};
+use biome_graphql_syntax::{GraphqlSyntaxKind, GraphqlSyntaxKind::*, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
 use biome_rowan::SyntaxKind;

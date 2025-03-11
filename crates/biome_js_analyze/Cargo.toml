@@ -16,37 +16,43 @@ biome_aria               = { workspace = true }
 biome_aria_metadata      = { workspace = true }
 biome_console            = { workspace = true }
 biome_control_flow       = { workspace = true }
+biome_dependency_graph   = { workspace = true }
 biome_deserialize        = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
-biome_glob               = { workspace = true, features = ["biome_deserialize", "schemars", "serde"] }
+biome_glob               = { workspace = true, features = ["biome_deserialize", "serde"] }
 biome_js_factory         = { workspace = true }
 biome_js_semantic        = { workspace = true }
 biome_js_syntax          = { workspace = true }
-biome_project            = { workspace = true }
+biome_package            = { workspace = true }
+biome_project_layout     = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 biome_unicode_table      = { workspace = true }
 bitvec                   = "1.0.1"
+camino                   = { workspace = true }
 enumflags2               = { workspace = true }
 globset                  = { workspace = true }
 natord                   = { workspace = true }
 regex                    = { workspace = true }
-roaring                  = "0.10.9"
+roaring                  = "0.10.10"
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
 
+
 [dev-dependencies]
-biome_js_parser  = { path = "../biome_js_parser", features = ["tests"] }
-biome_test_utils = { path = "../biome_test_utils" }
-insta            = { workspace = true, features = ["glob"] }
-tests_macros     = { path = "../tests_macros" }
+biome_fs            = { workspace = true }
+biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
+biome_plugin_loader = { workspace = true }
+biome_test_utils    = { path = "../biome_test_utils" }
+insta               = { workspace = true, features = ["glob"] }
+tests_macros        = { path = "../tests_macros" }
 
 [features]
-schema = ["schemars", "biome_deserialize/schema"]
+schema = ["schemars", "biome_glob/schema"]
 
 [lints]
 workspace = true

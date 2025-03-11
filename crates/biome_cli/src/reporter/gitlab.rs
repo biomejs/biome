@@ -1,15 +1,16 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, PrintDescription, Resource, Severity};
+use camino::{Utf8Path, Utf8PathBuf};
 use path_absolutize::Absolutize;
 use serde::Serialize;
 use std::sync::RwLock;
 use std::{
     collections::HashSet,
     hash::{DefaultHasher, Hash, Hasher},
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 pub struct GitLabReporter {
@@ -26,7 +27,7 @@ impl Reporter for GitLabReporter {
 
 pub(crate) struct GitLabReporterVisitor<'a> {
     console: &'a mut dyn Console,
-    repository_root: Option<PathBuf>,
+    repository_root: Option<Utf8PathBuf>,
 }
 
 #[derive(Default)]
@@ -49,7 +50,7 @@ impl GitLabHasher {
 }
 
 impl<'a> GitLabReporterVisitor<'a> {
-    pub fn new(console: &'a mut dyn Console, repository_root: Option<PathBuf>) -> Self {
+    pub fn new(console: &'a mut dyn Console, repository_root: Option<Utf8PathBuf>) -> Self {
         Self {
             console,
             repository_root,
@@ -57,7 +58,7 @@ impl<'a> GitLabReporterVisitor<'a> {
     }
 }
 
-impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
+impl ReporterVisitor for GitLabReporterVisitor<'_> {
     fn report_summary(&mut self, _: &Execution, _: TraversalSummary) -> std::io::Result<()> {
         Ok(())
     }
@@ -77,11 +78,11 @@ impl<'a> ReporterVisitor for GitLabReporterVisitor<'a> {
 struct GitLabDiagnostics<'a>(
     DiagnosticsPayload,
     &'a RwLock<GitLabHasher>,
-    Option<&'a Path>,
+    Option<&'a Utf8Path>,
 );
 
-impl<'a> GitLabDiagnostics<'a> {
-    fn attempt_to_relativize(&self, subject: &str) -> Option<PathBuf> {
+impl GitLabDiagnostics<'_> {
+    fn attempt_to_relativize(&self, subject: &str) -> Option<Utf8PathBuf> {
         let Ok(resolved) = Path::new(subject).absolutize() else {
             return None;
         };
@@ -90,7 +91,7 @@ impl<'a> GitLabDiagnostics<'a> {
             return None;
         };
 
-        Some(relativized.to_path_buf())
+        Some(Utf8PathBuf::from_path_buf(relativized.to_path_buf()).expect("To be UTF-8 path"))
     }
 
     fn compute_initial_fingerprint(&self, diagnostic: &Error, path: &str) -> u64 {
@@ -116,7 +117,7 @@ impl<'a> GitLabDiagnostics<'a> {
     }
 }
 
-impl<'a> Display for GitLabDiagnostics<'a> {
+impl Display for GitLabDiagnostics<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         let mut hasher = self.1.write().unwrap();
         let gitlab_diagnostics: Vec<_> = self
@@ -139,8 +140,8 @@ impl<'a> Display for GitLabDiagnostics<'a> {
                 .unwrap_or_default();
                 let path_buf = self.attempt_to_relativize(absolute_path);
                 let path = match path_buf {
-                    Some(buf) => buf.to_str().unwrap_or(absolute_path).to_owned(),
-                    None => absolute_path.to_owned(),
+                    Some(buf) => buf.as_str().to_string(),
+                    None => absolute_path.to_string(),
                 };
 
                 let initial_fingerprint = self.compute_initial_fingerprint(biome_diagnostic, &path);

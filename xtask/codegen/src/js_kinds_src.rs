@@ -2,7 +2,7 @@
 //! Based on the rust analyzer parser and ast definitions
 
 use crate::kind_src::KindsSrc;
-use crate::language_kind::{LanguageKind, LANGUAGE_PREFIXES};
+use crate::language_kind::{LANGUAGE_PREFIXES, LanguageKind};
 use quote::format_ident;
 use std::collections::BTreeMap;
 
@@ -695,6 +695,8 @@ impl Field {
                     ("---", LanguageKind::Yaml) => "dashdashdash",
                     ("<!--", LanguageKind::Html) => "comment_start",
                     ("-->", LanguageKind::Html) => "comment_end",
+                    ("<![CDATA[", LanguageKind::Html) => "cdata_start",
+                    ("]]>", LanguageKind::Html) => "cdata_end",
                     _ => name,
                 };
 

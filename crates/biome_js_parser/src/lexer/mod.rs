@@ -25,11 +25,11 @@ use biome_parser::lexer::{
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
-    is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
+    is_js_id_continue, is_js_id_start, lookup_byte,
 };
 
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 
 use crate::JsParserOptions;
 
@@ -391,6 +391,9 @@ impl<'src> JsLexer<'src> {
             b'<' => self.eat_byte(T![<]),
             // `{`: empty jsx text, directly followed by an expression
             b'{' => self.eat_byte(T!['{']),
+            _ if self.options.should_parse_metavariables() && self.is_metavariable_start() => {
+                self.consume_metavariable(GRIT_METAVARIABLE)
+            }
             _ => {
                 while let Some(chr) = self.current_byte() {
                     // but not one of: { or < or > or }
@@ -511,7 +514,7 @@ impl<'src> JsLexer<'src> {
     #[inline]
     unsafe fn current_unchecked(&self) -> u8 {
         self.assert_current_char_boundary();
-        *self.source.as_bytes().get_unchecked(self.position)
+        unsafe { *self.source.as_bytes().get_unchecked(self.position) }
     }
 
     /// Advances the position by one and returns the next byte value
@@ -568,8 +571,10 @@ impl<'src> JsLexer<'src> {
             // We should not yield diagnostics on a unicode char boundary. That wont make codespan panic
             // but it may cause a panic for other crates which just consume the diagnostics
             let invalid = self.current_char_unchecked();
-            let err = ParseDiagnostic::new("expected hex digits for a unicode code point escape, but encountered an invalid character",
-                                           self.position..self.position + invalid.len_utf8());
+            let err = ParseDiagnostic::new(
+                "expected hex digits for a unicode code point escape, but encountered an invalid character",
+                self.position..self.position + invalid.len_utf8(),
+            );
             self.push_diagnostic(err);
             self.position -= 1;
             return Err(());
@@ -582,10 +587,10 @@ impl<'src> JsLexer<'src> {
         // and because input to the lexer must be valid utf8
         let digits_str = unsafe {
             debug_assert!(self.source.as_bytes().get(start..self.position).is_some());
-            debug_assert!(std::str::from_utf8(
-                self.source.as_bytes().get_unchecked(start..self.position)
-            )
-            .is_ok());
+            debug_assert!(
+                std::str::from_utf8(self.source.as_bytes().get_unchecked(start..self.position))
+                    .is_ok()
+            );
 
             std::str::from_utf8_unchecked(
                 self.source.as_bytes().get_unchecked(start..self.position),
@@ -1046,7 +1051,7 @@ impl<'src> JsLexer<'src> {
 
     #[inline]
     fn special_number_start<F: Fn(char) -> bool>(&mut self, func: F) -> bool {
-        if self.byte_at(2).map_or(false, |b| func(b as char)) {
+        if self.byte_at(2).is_some_and(|b| func(b as char)) {
             self.advance(1);
             true
         } else {

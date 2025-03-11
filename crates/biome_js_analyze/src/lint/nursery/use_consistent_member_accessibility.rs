@@ -1,15 +1,16 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMemberName, JsConstructorClassMember, JsGetterClassMember, JsMethodClassMember,
     JsPropertyClassMember, JsSetterClassMember, TsAccessibilityModifier,
     TsConstructorSignatureClassMember, TsGetterSignatureClassMember, TsMethodSignatureClassMember,
     TsPropertyParameter, TsPropertySignatureClassMember, TsSetterSignatureClassMember,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
@@ -318,6 +319,7 @@ declare_lint_rule! {
         name: "useConsistentMemberAccessibility",
         language: "ts",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::EslintTypeScript("explicit-member-accessibility")],
     }
 }

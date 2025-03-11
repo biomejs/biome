@@ -55,7 +55,7 @@ impl<'source> GraphqlTokenSource<'source> {
     }
 }
 
-impl<'source> TokenSource for GraphqlTokenSource<'source> {
+impl TokenSource for GraphqlTokenSource<'_> {
     type Kind = GraphqlSyntaxKind;
 
     fn current(&self) -> Self::Kind {

@@ -1,6 +1,6 @@
 use crate::{
-    cursor::{SyntaxNode, SyntaxToken},
     TextRange, TextSize, TokenAtOffset,
+    cursor::{SyntaxNode, SyntaxToken},
 };
 use biome_text_size::TextLen;
 use std::iter::FusedIterator;
@@ -140,11 +140,11 @@ impl SyntaxNodeText {
         }
     }
 
-    fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> {
+    fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> + use<> {
         SyntaxNodeTokenWithRanges::new(self)
     }
 
-    pub fn chars(&self) -> impl FusedIterator<Item = char> {
+    pub fn chars(&self) -> impl FusedIterator<Item = char> + use<> {
         SyntaxNodeTextChars::new(self)
     }
 }
@@ -397,8 +397,8 @@ mod private {
 
 #[cfg(test)]
 mod tests {
-    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::SyntaxNode;
+    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
 
     fn build_tree(chunks: &[&str]) -> SyntaxNode<RawLanguage> {
         let mut builder = RawSyntaxTreeBuilder::new();
@@ -413,8 +413,8 @@ mod tests {
     #[test]
     fn test_text_equality() {
         fn do_check(t1: &[&str], t2: &[&str]) {
-            let t1 = build_tree(t1).text();
-            let t2 = build_tree(t2).text();
+            let t1 = build_tree(t1).text_with_trivia();
+            let t2 = build_tree(t2).text_with_trivia();
             let expected = t1.to_string() == t2.to_string();
             let actual = t1 == t2;
             assert_eq!(expected, actual, "`{t1}` (SyntaxText) `{t2}` (SyntaxText)");
@@ -442,7 +442,7 @@ mod tests {
     #[test]
     fn test_chars() {
         fn check(t1: &[&str], expected: &str) {
-            let t1 = build_tree(t1).text();
+            let t1 = build_tree(t1).text_with_trivia();
             let actual = t1.chars().collect::<String>();
 
             assert_eq!(

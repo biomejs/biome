@@ -35,12 +35,15 @@ pub(crate) enum HtmlLexContext {
     EmbeddedLanguage(HtmlEmbededLanguage),
     /// Comments are treated as text until the closing comment tag is encountered.
     Comment,
+    /// CDATA Sections are treated as text until the closing CDATA token is encountered.
+    CdataSection,
 }
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) enum HtmlEmbededLanguage {
     Script,
     Style,
+    Preformatted,
 }
 
 impl HtmlEmbededLanguage {
@@ -48,6 +51,7 @@ impl HtmlEmbededLanguage {
         match self {
             Self::Script => "</script>",
             Self::Style => "</style>",
+            Self::Preformatted => "</pre>",
         }
     }
 }
@@ -104,7 +108,7 @@ impl<'source> HtmlTokenSource<'source> {
     }
 }
 
-impl<'src> TokenSource for HtmlTokenSource<'src> {
+impl TokenSource for HtmlTokenSource<'_> {
     type Kind = HtmlSyntaxKind;
 
     fn current(&self) -> Self::Kind {
@@ -136,7 +140,7 @@ impl<'src> TokenSource for HtmlTokenSource<'src> {
     }
 }
 
-impl<'source> BumpWithContext for HtmlTokenSource<'source> {
+impl BumpWithContext for HtmlTokenSource<'_> {
     type Context = HtmlLexContext;
     fn bump_with_context(&mut self, context: Self::Context) {
         if self.current() != EOF {

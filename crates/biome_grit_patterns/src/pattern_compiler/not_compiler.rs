@@ -1,8 +1,8 @@
 use super::{
-    compilation_context::NodeCompilationContext, predicate_compiler::PredicateCompiler,
-    PatternCompiler,
+    PatternCompiler, compilation_context::NodeCompilationContext,
+    predicate_compiler::PredicateCompiler,
 };
-use crate::{diagnostics::CompilerDiagnostic, grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, diagnostics::CompilerDiagnostic, grit_context::GritQueryContext};
 use biome_grit_syntax::{GritPatternNot, GritPredicateNot};
 use biome_rowan::AstNode;
 use grit_pattern_matcher::{
@@ -27,7 +27,7 @@ impl NotCompiler {
         }) {
             context.log(CompilerDiagnostic::new_warning(
                 "Rewrites inside of a not will never be applied",
-                node.syntax().text_range(),
+                node.syntax().text_range_with_trivia(),
             ));
         }
 
@@ -52,7 +52,7 @@ impl PrNotCompiler {
         }) {
             context.log(CompilerDiagnostic::new_warning(
                 "Rewrites inside of a not will never be applied",
-                node.syntax().text_range(),
+                node.syntax().text_range_with_trivia(),
             ));
         }
 

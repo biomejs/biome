@@ -1,7 +1,8 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttributeValue};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{AnyJsxAttributeValue, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
 
 use crate::services::aria::Aria;
@@ -43,6 +44,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -66,7 +68,7 @@ impl Rule for UseFocusableInteractive {
                 if attribute_has_interactive_role(&role_attribute_value)?
                     && tabindex_attribute.is_none()
                 {
-                    return Some(role_attribute_value.text());
+                    return Some(role_attribute_value.to_trimmed_string());
                 }
             }
         }

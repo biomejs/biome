@@ -1,11 +1,11 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::{CSS_COLOR, CSS_COLOR_LITERAL};
-use biome_css_syntax::{TextRange, T};
-use biome_parser::diagnostic::{expected_node, ParseDiagnostic};
+use biome_css_syntax::{T, TextRange};
+use biome_parser::Parser;
+use biome_parser::diagnostic::{ParseDiagnostic, expected_node};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::Parser;
 
 #[inline]
 pub(crate) fn is_at_color(p: &mut CssParser) -> bool {

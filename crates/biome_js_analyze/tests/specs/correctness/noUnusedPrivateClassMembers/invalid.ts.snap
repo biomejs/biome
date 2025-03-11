@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -46,7 +47,7 @@ class TsAccessor {
 ```
 invalid.ts:2:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This private class member is defined but never used.
+  i This private class member is defined but never used.
   
     1 │ class TsBioo {
   > 2 │ 	private unusedProperty = 5;
@@ -67,7 +68,7 @@ invalid.ts:2:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 invalid.ts:4:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This private class member is defined but never used.
+  i This private class member is defined but never used.
   
     2 │ 	private unusedProperty = 5;
     3 │ 
@@ -94,7 +95,7 @@ invalid.ts:4:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 invalid.ts:10:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This private class member is defined but never used.
+  i This private class member is defined but never used.
   
      9 │ class TSUnusedPrivateConstructor {
   > 10 │ 	constructor(private nusedProperty = 3){
@@ -112,7 +113,7 @@ invalid.ts:10:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
 ```
 invalid.ts:17:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This private class member is defined but never used.
+  i This private class member is defined but never used.
   
     16 │ class TsOnlyWrite {
   > 17 │ 	private usedOnlyInWrite = 5;
@@ -134,7 +135,7 @@ invalid.ts:17:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
 ```
 invalid.ts:25:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This private class member is defined but never used.
+  i This private class member is defined but never used.
   
     24 │ class TsSelfUpdate {
   > 25 │ 	private usedOnlyToUpdateItself = 5;
@@ -156,7 +157,7 @@ invalid.ts:25:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
 ```
 invalid.ts:33:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This private class member is defined but never used.
+  i This private class member is defined but never used.
   
     32 │ class TsAccessor {
   > 33 │ 	private get unusedAccessor() { }
@@ -178,7 +179,7 @@ invalid.ts:33:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
 ```
 invalid.ts:34:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This private class member is defined but never used.
+  i This private class member is defined but never used.
   
     32 │ class TsAccessor {
     33 │ 	private get unusedAccessor() { }

@@ -1,13 +1,14 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMember, AnyTsType, AnyTsTypeMember, ClassMemberName, JsClassDeclaration,
     JsSyntaxToken, TsDeclareStatement, TsInterfaceDeclaration, TsReferenceType,
     TsTypeAliasDeclaration,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Enforce proper usage of `new` and `constructor`.
@@ -54,6 +55,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-misused-new")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

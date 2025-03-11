@@ -1,15 +1,16 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, AnyJsExpression, JsArrowFunctionExpression, JsSuperExpression,
     JsSyntaxToken, JsThisExpression,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxResult};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxResult, declare_node_union};
 
-use crate::{services::control_flow::AnyJsControlFlowRoot, JsRuleAction};
+use crate::{JsRuleAction, services::control_flow::AnyJsControlFlowRoot};
 
 declare_lint_rule! {
     /// Disallow `this` and `super` in `static` contexts.
@@ -82,6 +83,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintMysticatea("no-this-in-static")],
         recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

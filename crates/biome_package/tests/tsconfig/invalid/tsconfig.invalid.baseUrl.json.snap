@@ -1,0 +1,14 @@
+---
+source: crates/biome_package/tests/manifest_spec_tests.rs
+expression: tsconfig.invalid.baseUrl.json
+---
+tsconfig.invalid.baseUrl.json:3:16 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × baseUrl has an incorrect type, expected a string, but received a number.
+  
+    1 │ {
+    2 │   "compilerOptions": {
+  > 3 │     "baseUrl": 1
+      │                ^
+    4 │   },
+    5 │ }

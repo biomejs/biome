@@ -1,6 +1,6 @@
 use crate::keywords::{
-    AT_RULE_PAGE_PSEUDO_CLASSES, A_NPLUS_BNOTATION_PSEUDO_CLASSES,
-    A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES, BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS,
+    A_NPLUS_BNOTATION_PSEUDO_CLASSES, A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES,
+    AT_RULE_PAGE_PSEUDO_CLASSES, BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS,
     FONT_STRETCH_KEYWORDS, FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS,
     FONT_WEIGHT_ABSOLUTE_KEYWORDS, FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, HTML_TAGS,
     KNOWN_CHROME_PROPERTIES, KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES,
@@ -48,7 +48,7 @@ pub fn is_css_variable(value: &str) -> bool {
 pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {
-        let value = v.text();
+        let value = v.to_trimmed_string();
         let lower_case_value = value.to_ascii_lowercase_cow();
 
         // Ignore CSS variables
@@ -124,7 +124,7 @@ pub fn is_custom_function(value: &str) -> bool {
 }
 
 // Returns the vendor prefix extracted from an input string.
-pub fn vender_prefix(prop: &str) -> &str {
+pub fn vender_prefix(prop: &str) -> &'static str {
     for prefix in VENDOR_PREFIXES.iter() {
         if prop.starts_with(prefix) {
             return prefix;

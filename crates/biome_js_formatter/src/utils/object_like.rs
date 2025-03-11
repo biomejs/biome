@@ -1,9 +1,11 @@
-use crate::prelude::*;
 use crate::JsFormatContext;
-use biome_formatter::write;
+use crate::prelude::*;
+use biome_formatter::{Expand, write};
 use biome_formatter::{Format, FormatResult};
-use biome_js_syntax::{JsObjectExpression, JsSyntaxToken, TsObjectType};
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, SyntaxResult};
+use biome_js_syntax::{
+    JsFormalParameter, JsObjectExpression, JsSyntaxToken, TsObjectType, TsTypeAnnotation,
+};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
 
 declare_node_union! {
     pub (crate) JsObjectLike = JsObjectExpression | TsObjectType
@@ -61,7 +63,17 @@ impl Format<JsFormatContext> for JsObjectLike {
             )?;
         } else {
             let should_insert_space_around_brackets = f.options().bracket_spacing().value();
-            let should_expand = self.members_have_leading_newline();
+            let should_expand = (f.options().expand() == Expand::Auto
+                && self.members_have_leading_newline())
+                || f.options().expand() == Expand::Always;
+
+            // const fn = ({ foo }: { foo: string }) => { ... };
+            //                      ^ do not break properties here
+            let should_expand = should_expand
+                && self
+                    .parent::<TsTypeAnnotation>()
+                    .is_none_or(|node| node.parent::<JsFormalParameter>().is_none());
+
             write!(
                 f,
                 [group(&soft_block_indent_with_maybe_space(

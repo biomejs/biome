@@ -1,0 +1,862 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: valid.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "files": {
+    "ignore": ["./src/**/*.graphql.ts"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80
+  },
+  "javascript": {
+    "formatter": {
+      "trailingCommas": "es5"
+    },
+    "jsxRuntime": "reactClassic"
+  }
+}
+
+```
+
+# Diagnostics
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useLiteralEnumMembers isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useLiteralEnumMembers":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNodejsImportProtocol isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useNodejsImportProtocol":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useSelfClosingElements isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useSelfClosingElements":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noParameterAssign isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"noParameterAssign":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useShorthandFunctionType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useShorthandFunctionType":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noUselessElse isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"noUselessElse":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useExportType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useExportType":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useImportType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useImportType":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noArguments isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"noArguments":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useDefaultParameterLast isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useDefaultParameterLast":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useTemplate isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useTemplate":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noNonNullAssertion isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"noNonNullAssertion":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useExponentiationOperator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useExponentiationOperator":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noInferrableTypes isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"noInferrableTypes":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNumberNamespace isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useNumberNamespace":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"noUnusedTemplateLiteral":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useSingleVarDeclarator":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useEnumInitializers isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useEnumInitializers":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useConst isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useConst":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNumericLiterals isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useNumericLiterals":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noCommaOperator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"noCommaOperator":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useAsConstAssertion isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ······"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useAsConstAssertion":·"error"
+       20 │ + ······}
+       21 │ + ······}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```

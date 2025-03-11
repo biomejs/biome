@@ -1,17 +1,18 @@
 use std::fmt::Display;
 
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     JsReferenceIdentifier, JsSyntaxKind, TextRange, TsIntersectionTypeElementList, TsObjectType,
     TsReferenceType, TsTypeConstraintClause,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
 
-use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Disallow primitive type aliases and misleading types.
@@ -93,6 +94,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("ban-types")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }
@@ -231,17 +233,19 @@ impl BannedType {
     /// Retrieves a diagnostic message from a [BannedType]
     fn message(&self) -> &str {
         match *self {
-			| Self::BigInt
-			| Self::Boolean
-			| Self::Number
-			| Self::String
-			| Self::Symbol => "Use lowercase primitives for consistency.",
-			Self::Function =>
-				"Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.",
-			Self::Object =>
-				"Prefer explicitly define the object shape. This type means \"any non-nullable value\", which is slightly better than 'unknown', but it's still a broad type.",
-			Self::EmptyObject => "Prefer explicitly define the object shape. '{}' means \"any non-nullable value\".",
-		}
+            Self::BigInt | Self::Boolean | Self::Number | Self::String | Self::Symbol => {
+                "Use lowercase primitives for consistency."
+            }
+            Self::Function => {
+                "Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs."
+            }
+            Self::Object => {
+                "Prefer explicitly define the object shape. This type means \"any non-nullable value\", which is slightly better than 'unknown', but it's still a broad type."
+            }
+            Self::EmptyObject => {
+                "Prefer explicitly define the object shape. '{}' means \"any non-nullable value\"."
+            }
+        }
     }
 
     /// Converts a [BannedType] to a [JsSyntaxKind]

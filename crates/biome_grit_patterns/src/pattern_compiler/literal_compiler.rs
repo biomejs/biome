@@ -3,7 +3,7 @@ use super::{
     map_compiler::MapCompiler, snippet_compiler::parse_snippet_content,
 };
 use crate::{
-    grit_context::GritQueryContext, util::TextRangeGritExt, CompileError, GritTargetLanguage,
+    CompileError, GritTargetLanguage, grit_context::GritQueryContext, util::TextRangeGritExt,
 };
 use biome_grit_syntax::{AnyGritCodeSnippetSource, AnyGritLiteral, GritSyntaxKind};
 use biome_rowan::AstNode;
@@ -33,7 +33,7 @@ impl LiteralCompiler {
                 }
                 AnyGritCodeSnippetSource::GritLanguageSpecificSnippet(node) => {
                     let lang_node = node.language()?;
-                    let lang_name = lang_node.text();
+                    let lang_name = lang_node.to_trimmed_string();
                     if GritTargetLanguage::from_extension(&lang_name).is_none() {
                         return Err(CompileError::UnknownTargetLanguage(lang_name));
                     }

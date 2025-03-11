@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make::{self, js_function_body};
@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsFormalParameter, JsObjectBindingPatternShorthandProperty, JsReturnStatement,
     JsVariableStatement, JsYieldArgument, T,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText, declare_node_union};
 
 use crate::JsRuleAction;
 
@@ -236,7 +236,7 @@ impl Rule for NoUselessUndefined {
                     "Don't use unnecessary "<Emphasis>"undefined"</Emphasis>"."
                 },
             )
-            .note(markup! {
+                .note(markup! {
                 ""<Emphasis>"undefined"</Emphasis>" is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference."
             }),
         )
@@ -257,7 +257,8 @@ impl Rule for NoUselessUndefined {
                         .filter_map(Result::ok)
                         .find(|decl| {
                             decl.id().is_ok_and(|id| {
-                                id.text() == state.binding_text.as_deref().unwrap_or("")
+                                id.syntax().text_trimmed()
+                                    == state.binding_text.as_deref().unwrap_or("")
                             })
                         })?;
 

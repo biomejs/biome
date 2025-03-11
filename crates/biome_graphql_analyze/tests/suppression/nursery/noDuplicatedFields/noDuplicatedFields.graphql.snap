@@ -39,7 +39,7 @@ query test {
 ```
 noDuplicatedFields.graphql:1:36 lint/nursery/noDuplicatedFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable `v` defined multiple times.
+  i Variable `v` defined multiple times.
   
   > 1 │ query test($v: String, $t: String, $v: String) {
       │                                    ^^^^^^^^^^
@@ -48,7 +48,7 @@ noDuplicatedFields.graphql:1:36 lint/nursery/noDuplicatedFields  FIXABLE  ━━
   
   i Remove the duplicated variable.
   
-  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields
+  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields for this line.
   
      1    │ - query·test($v:·String,·$t:·String,·$v:·String)·{
         1 │ + #·biome-ignore·lint/nursery/noDuplicatedFields:·<explanation>
@@ -56,13 +56,19 @@ noDuplicatedFields.graphql:1:36 lint/nursery/noDuplicatedFields  FIXABLE  ━━
      2  3 │     id
      3  4 │   }
   
+  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields for the whole file.
+  
+        1 │ + #·biome-ignore-all·lint/nursery/noDuplicatedFields:·<explanation>·
+     1  2 │   query test($v: String, $t: String, $v: String) {
+     2  3 │     id
+  
 
 ```
 
 ```
 noDuplicatedFields.graphql:6:48 lint/nursery/noDuplicatedFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Argument `first` defined multiple times.
+  i Argument `first` defined multiple times.
   
     5 │ query test {
   > 6 │   users(first: 100, after: 10, filter: "test", first: 50) {
@@ -72,7 +78,7 @@ noDuplicatedFields.graphql:6:48 lint/nursery/noDuplicatedFields  FIXABLE  ━━
   
   i Remove the duplicated argument.
   
-  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields
+  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields for this line.
   
      4  4 │   
      5  5 │   query test {
@@ -82,13 +88,19 @@ noDuplicatedFields.graphql:6:48 lint/nursery/noDuplicatedFields  FIXABLE  ━━
      7  8 │       id
      8  9 │     }
   
+  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields for the whole file.
+  
+        1 │ + #·biome-ignore-all·lint/nursery/noDuplicatedFields:·<explanation>·
+     1  2 │   query test($v: String, $t: String, $v: String) {
+     2  3 │     id
+  
 
 ```
 
 ```
 noDuplicatedFields.graphql:16:5 lint/nursery/noDuplicatedFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Field `name` defined multiple times.
+  i Field `name` defined multiple times.
   
     14 │     name
     15 │     email
@@ -99,7 +111,7 @@ noDuplicatedFields.graphql:16:5 lint/nursery/noDuplicatedFields  FIXABLE  ━━
   
   i Remove the duplicated field.
   
-  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields
+  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields for this line.
   
     14 14 │       name
     15 15 │       email
@@ -108,6 +120,12 @@ noDuplicatedFields.graphql:16:5 lint/nursery/noDuplicatedFields  FIXABLE  ━━
        17 │ + ····name
     17 18 │     }
     18 19 │   }
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields for the whole file.
+  
+        1 │ + #·biome-ignore-all·lint/nursery/noDuplicatedFields:·<explanation>·
+     1  2 │   query test($v: String, $t: String, $v: String) {
+     2  3 │     id
   
 
 ```

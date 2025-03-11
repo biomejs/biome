@@ -121,7 +121,7 @@ function Component7() {
 ```
 noArrayIndexKey.jsx:4:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     3 │ something.forEach((Element, index) => {
   > 4 │ 	<Component key={index}>foo</Component>;
@@ -142,7 +142,7 @@ noArrayIndexKey.jsx:4:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
       2   2 │   
       3   3 │   something.forEach((Element, index) => {
@@ -152,13 +152,19 @@ noArrayIndexKey.jsx:4:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
       5   6 │   });
       6   7 │   something.forEach((element, index, array) => {
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:7:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     5 │ });
     6 │ something.forEach((element, index, array) => {
@@ -180,7 +186,7 @@ noArrayIndexKey.jsx:7:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
       5   5 │   });
       6   6 │   something.forEach((element, index, array) => {
@@ -190,13 +196,19 @@ noArrayIndexKey.jsx:7:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
       8   9 │   });
       9  10 │   things.filter((thing, index) => {
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:10:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
      8 │ });
      9 │ things.filter((thing, index) => {
@@ -218,7 +230,7 @@ noArrayIndexKey.jsx:10:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
       8   8 │   });
       9   9 │   things.filter((thing, index) => {
@@ -228,13 +240,19 @@ noArrayIndexKey.jsx:10:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      11  12 │   });
      12  13 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:14:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     13 │ something.forEach((Element, index) => {
   > 14 │ 	<Component key={index} />;
@@ -255,7 +273,7 @@ noArrayIndexKey.jsx:14:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      12  12 │   
      13  13 │   something.forEach((Element, index) => {
@@ -265,13 +283,19 @@ noArrayIndexKey.jsx:14:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      15  16 │   });
      16  17 │   something.forEach((element, index, array) => {
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:17:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     15 │ });
     16 │ something.forEach((element, index, array) => {
@@ -293,7 +317,7 @@ noArrayIndexKey.jsx:17:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      15  15 │   });
      16  16 │   something.forEach((element, index, array) => {
@@ -303,13 +327,19 @@ noArrayIndexKey.jsx:17:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      18  19 │   });
      19  20 │   things.filter((thing, index) => {
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:20:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     18 │ });
     19 │ things.filter((thing, index) => {
@@ -331,7 +361,7 @@ noArrayIndexKey.jsx:20:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      18  18 │   });
      19  19 │   things.filter((thing, index) => {
@@ -341,13 +371,19 @@ noArrayIndexKey.jsx:20:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      21  22 │   });
      22  23 │   things.reduce(
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:23:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     21 │ });
     22 │ things.reduce(
@@ -369,7 +405,7 @@ noArrayIndexKey.jsx:23:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      21  21 │   });
      22  22 │   things.reduce(
@@ -379,13 +415,19 @@ noArrayIndexKey.jsx:23:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      24  25 │   	[]
      25  26 │   );
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:28:35 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     27 │ React.Children.map(this.props.children, (child, index) =>
   > 28 │ 	React.cloneElement(child, { key: index })
@@ -406,7 +448,7 @@ noArrayIndexKey.jsx:28:35 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      26  26 │   
      27  27 │   React.Children.map(this.props.children, (child, index) =>
@@ -416,13 +458,19 @@ noArrayIndexKey.jsx:28:35 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      29  30 │   );
      30  31 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:32:42 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     31 │ React.Children.forEach(this.props.children, function (child, index) {
   > 32 │ 	return React.cloneElement(child, { key: index });
@@ -443,7 +491,7 @@ noArrayIndexKey.jsx:32:42 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      30  30 │   
      31  31 │   React.Children.forEach(this.props.children, function (child, index) {
@@ -453,13 +501,19 @@ noArrayIndexKey.jsx:32:42 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      33  34 │   });
      34  35 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:36:29 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     35 │ Children.map(this.props.children, (child, index) =>
   > 36 │ 	cloneElement(child, { key: index })
@@ -480,7 +534,7 @@ noArrayIndexKey.jsx:36:29 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      34  34 │   
      35  35 │   Children.map(this.props.children, (child, index) =>
@@ -490,13 +544,19 @@ noArrayIndexKey.jsx:36:29 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      37  38 │   );
      38  39 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:40:36 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     39 │ Children.forEach(this.props.children, function (child, index) {
   > 40 │ 	return cloneElement(child, { key: index });
@@ -517,7 +577,7 @@ noArrayIndexKey.jsx:40:36 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      38  38 │   
      39  39 │   Children.forEach(this.props.children, function (child, index) {
@@ -527,13 +587,19 @@ noArrayIndexKey.jsx:40:36 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      41  42 │   });
      42  43 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:44:41 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     43 │ Children.forEach(this.props.children, function (child, index) {
   > 44 │ 	const foo = cloneElement(child, { key: index });
@@ -554,7 +620,7 @@ noArrayIndexKey.jsx:44:41 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      42  42 │   
      43  43 │   Children.forEach(this.props.children, function (child, index) {
@@ -564,13 +630,19 @@ noArrayIndexKey.jsx:44:41 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      45  46 │   	return foo;
      46  47 │   });
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:50:37 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     48 │ function Test(props) {
     49 │ 	return Children.map(props.children, function (child, index) {
@@ -591,7 +663,7 @@ noArrayIndexKey.jsx:50:37 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      48  48 │   function Test(props) {
      49  49 │   	return Children.map(props.children, function (child, index) {
@@ -601,13 +673,19 @@ noArrayIndexKey.jsx:50:37 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      51  52 │   	});
      52  53 │   }
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:54:63 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     52 │ }
     53 │ 
@@ -629,7 +707,7 @@ noArrayIndexKey.jsx:54:63 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      52  52 │   }
      53  53 │   
@@ -637,13 +715,19 @@ noArrayIndexKey.jsx:54:63 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      54  55 │   things.map((thing, index) => React.cloneElement(thing, { key: index }));
      55  56 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:57:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     56 │ things.flatMap((thing, index) => {
   > 57 │ 	return <Component key={index} />;
@@ -664,7 +748,7 @@ noArrayIndexKey.jsx:57:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      55  55 │   
      56  56 │   things.flatMap((thing, index) => {
@@ -674,13 +758,19 @@ noArrayIndexKey.jsx:57:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      58  59 │   });
      59  60 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:61:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     60 │ Array.from(things, (thing, index) => {
   > 61 │ 	return <Component key={index} />;
@@ -701,7 +791,7 @@ noArrayIndexKey.jsx:61:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      59  59 │   
      60  60 │   Array.from(things, (thing, index) => {
@@ -711,13 +801,19 @@ noArrayIndexKey.jsx:61:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      62  63 │   });
      63  64 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:65:54 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     64 │ const mapping = {
   > 65 │ 	foo: () => things.map((_, index) => <Component key={index} />),
@@ -737,7 +833,7 @@ noArrayIndexKey.jsx:65:54 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      63  63 │   
      64  64 │   const mapping = {
@@ -747,13 +843,19 @@ noArrayIndexKey.jsx:65:54 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      66  67 │   };
      67  68 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:69:64 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     68 │ class A extends React.Component {
   > 69 │ 	renderThings = () => things.map((_, index) => <Component key={index} />);
@@ -773,7 +875,7 @@ noArrayIndexKey.jsx:69:64 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      67  67 │   
      68  68 │   class A extends React.Component {
@@ -783,13 +885,19 @@ noArrayIndexKey.jsx:69:64 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      70  71 │   }
      71  72 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:72:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     70 │ }
     71 │ 
@@ -811,7 +919,7 @@ noArrayIndexKey.jsx:72:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      70  70 │   }
      71  71 │   
@@ -819,13 +927,19 @@ noArrayIndexKey.jsx:72:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      72  73 │   const Component1 = () => things.map((_, index) => <Component key={index} />);
      73  74 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:74:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     72 │ const Component1 = () => things.map((_, index) => <Component key={index} />);
     73 │ 
@@ -847,7 +961,7 @@ noArrayIndexKey.jsx:74:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      72  72 │   const Component1 = () => things.map((_, index) => <Component key={index} />);
      73  73 │   
@@ -855,13 +969,19 @@ noArrayIndexKey.jsx:74:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      74  75 │   const Component2 = () => things.map((_, index) => <Component key={index} />);
      75  76 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:77:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     76 │ function Component3() {
   > 77 │ 	return things.map((_, index) => <Component key={index} />);
@@ -881,7 +1001,7 @@ noArrayIndexKey.jsx:77:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      75  75 │   
      76  76 │   function Component3() {
@@ -891,13 +1011,19 @@ noArrayIndexKey.jsx:77:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      78  79 │   }
      79  80 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:81:58 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     80 │ function Component4() {
   > 81 │ 	let elements = things.map((_, index) => <Component key={index} />);
@@ -917,7 +1043,7 @@ noArrayIndexKey.jsx:81:58 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      79  79 │   
      80  80 │   function Component4() {
@@ -927,13 +1053,19 @@ noArrayIndexKey.jsx:81:58 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      82  83 │   	if (condition) {
      83  84 │   		elements = others.map((_, index) => <Component key={index} />);
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:83:55 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     81 │ 	let elements = things.map((_, index) => <Component key={index} />);
     82 │ 	if (condition) {
@@ -955,7 +1087,7 @@ noArrayIndexKey.jsx:83:55 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      81  81 │   	let elements = things.map((_, index) => <Component key={index} />);
      82  82 │   	if (condition) {
@@ -965,13 +1097,19 @@ noArrayIndexKey.jsx:83:55 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      84  85 │   	}
      85  86 │   	return elements;
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:90:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     88 │ function Component5({ things }) {
     89 │ 	const elements = useMemo(
@@ -993,7 +1131,7 @@ noArrayIndexKey.jsx:90:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      88  88 │   function Component5({ things }) {
      89  89 │   	const elements = useMemo(
@@ -1003,13 +1141,19 @@ noArrayIndexKey.jsx:90:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      91  92 │   		[things]
      92  93 │   	);
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:98:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
      96 │ function Component6({ things }) {
      97 │ 	const elements = useMemo(
@@ -1031,7 +1175,7 @@ noArrayIndexKey.jsx:98:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      96  96 │   function Component6({ things }) {
      97  97 │   	const elements = useMemo(
@@ -1041,13 +1185,19 @@ noArrayIndexKey.jsx:98:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
      99 100 │   		[things]
     100 101 │   	);
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
 
 ```
 noArrayIndexKey.jsx:107:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     105 │ 	return (
     106 │ 		<HoC>
@@ -1069,17 +1219,21 @@ noArrayIndexKey.jsx:107:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━�
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
     105 105 │   	return (
     106 106 │   		<HoC>
     107     │ - → → → {({·things·})·=>·things.map((_,·index)·=>·<Component·key={index}·/>)}
-        107 │ + → → → {/*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/}
+        107 │ + → → → {/**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/}
         108 │ + {({·things·})·=>·things.map((_,·index)·=>·<Component·key={index}·/>)}
     108 109 │   		</HoC>
     109 110 │   	);
   
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
+  
 
 ```
-
-

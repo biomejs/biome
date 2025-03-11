@@ -1,17 +1,17 @@
 //! Events emitted by the [SemanticEventExtractor] which are then constructed into the Semantic Model
 
+use JsSyntaxKind::*;
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    inner_string_text, AnyJsIdentifierUsage, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode,
-    TextRange, TsTypeParameterName,
+    AnyJsIdentifierUsage, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
+    TsTypeParameterName, inner_string_text,
 };
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 use biome_rowan::TextSize;
-use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
+use biome_rowan::{AstNode, SyntaxNodeOptionExt, TokenText, syntax::Preorder};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 use std::mem;
-use JsSyntaxKind::*;
 
 use crate::ScopeId;
 
@@ -531,14 +531,14 @@ impl SemanticEventExtractor {
                         if let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
                             declaration.parent_binding_pattern_declaration()
                         {
-                            if declarator.declaration().map_or(false, |x| x.is_var()) {
+                            if declarator.declaration().is_some_and(|x| x.is_var()) {
                                 hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
                             }
                         }
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
                     AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
-                        if declarator.declaration().map_or(false, |x| x.is_var()) {
+                        if declarator.declaration().is_some_and(|x| x.is_var()) {
                             hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
                         }
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);

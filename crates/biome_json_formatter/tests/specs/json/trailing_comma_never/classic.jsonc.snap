@@ -1,0 +1,65 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/trailing_comma_never/classic.jsonc
+---
+# Input
+
+```jsonc
+{
+	"list": [],
+	"list1": [],
+	"list2": [],
+	"list3": [],
+	"list4": [],
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Auto
+Bracket spacing: true
+-----
+
+```jsonc
+{
+	"list": [],
+	"list1": [],
+	"list2": [],
+	"list3": [],
+	"list4": []
+}
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: All
+Expand: Auto
+Bracket spacing: true
+-----
+
+```jsonc
+{
+	"list": [],
+	"list1": [],
+	"list2": [],
+	"list3": [],
+	"list4": [],
+}
+```

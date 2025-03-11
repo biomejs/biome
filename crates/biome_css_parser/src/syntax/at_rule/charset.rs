@@ -2,7 +2,7 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_string;
 use crate::syntax::parse_string;
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, TextRange, T};
+use biome_css_syntax::{CssSyntaxKind, T, TextRange};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;

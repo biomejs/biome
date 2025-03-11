@@ -1,6 +1,6 @@
-use biome_analyze::RuleSourceKind;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -57,7 +57,8 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-img-element")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
+        domains: &[RuleDomain::Next],
     }
 }
 
@@ -97,7 +98,7 @@ impl Rule for NoImgElement {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        return Some(
+        Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 ctx.query().range(),
@@ -108,6 +109,6 @@ impl Rule for NoImgElement {
             .note(markup! {
                 "Using the "<Emphasis>"<img>"</Emphasis>" can lead to slower LCP and higher bandwidth. Consider using "<Emphasis>"<Image />"</Emphasis>" from "<Emphasis>"next/image"</Emphasis>" to automatically optimize images."
             })
-        );
+        )
     }
 }

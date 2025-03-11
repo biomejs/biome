@@ -1,12 +1,12 @@
+use proc_macro_error2::*;
 use proc_macro2::{Ident, TokenStream};
-use proc_macro_error::*;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::{
-    parse::{discouraged::Speculative, Error, Parse, ParseStream, Parser, Result},
+    Attribute, DataEnum, DataStruct, Generics, Token, Variant,
+    parse::{Error, Parse, ParseStream, Parser, Result, discouraged::Speculative},
     punctuated::Punctuated,
     spanned::Spanned,
     token::Paren,
-    Attribute, DataEnum, DataStruct, Generics, Token, Variant,
 };
 
 pub(crate) enum DeriveInput {

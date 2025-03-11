@@ -1,0 +1,41 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid_include_ignore_comma.json
+---
+# Input
+```json
+{
+  "files": {
+    "include": ["./src", "*.js"],
+    "ignore": ["tests", "*.test.js"],
+    "ignoreUnknown": true
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_include_ignore_comma.json:3:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! include and ignore configurations have been replaced by the includes configuration.
+  
+    1 │ {
+    2 │   "files": {
+  > 3 │     "include": ["./src", "*.js"],
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │     "ignore": ["tests", "*.test.js"],
+    5 │     "ignoreUnknown": true
+  
+  i Safe fix: Use includes instead.
+  
+    1 1 │   {
+    2 2 │     "files": {
+    3   │ - ····"include":·["./src",·"*.js"],
+    4   │ - ····"ignore":·["tests",·"*.test.js"],
+      3 │ + ····"includes":·["src/**",·"**/*.js",·"!**/tests",·"!**/*.test.js"],
+    5 4 │       "ignoreUnknown": true
+    6 5 │     }
+  
+
+```

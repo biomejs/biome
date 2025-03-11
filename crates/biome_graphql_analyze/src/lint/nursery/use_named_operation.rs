@@ -1,6 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_graphql_factory::make;
@@ -67,7 +67,7 @@ impl Rule for UseNamedOperation {
                 rule_category!(),
                 operation_type.range(),
                 markup! {
-                    "Anonymous GraphQL operations are forbidden. Make sure to name your " {operation_type.text()}"."
+                    "Anonymous GraphQL operations are forbidden. Make sure to name your " {operation_type.to_trimmed_string()}"."
                 },
             )
             .note(markup! {
@@ -79,7 +79,7 @@ impl Rule for UseNamedOperation {
     fn action(ctx: &RuleContext<Self>, operation_type: &Self::State) -> Option<GraphqlRuleAction> {
         let mut mutation = ctx.root().begin();
         let node = ctx.query().clone();
-        let operation_type = operation_type.text();
+        let operation_type = operation_type.to_trimmed_string();
         let suggested_name = get_suggested_name(&node, operation_type.clone());
         let new_name = make::graphql_name_binding(make::ident(&suggested_name));
         let new_node = node.clone().with_name(Some(new_name));
@@ -109,8 +109,8 @@ fn get_suggested_name(operation: &GraphqlOperationDefinition, operation_type: St
         .and_then(|first_field| {
             first_field
                 .alias()
-                .map(|alias| alias.text())
-                .or(first_field.name().ok().map(|name| name.text()))
+                .map(|alias| alias.to_trimmed_string())
+                .or(first_field.name().ok().map(|name| name.to_trimmed_string()))
         })
         .unwrap_or(operation_type);
     Case::Pascal.convert(&suggested_name)

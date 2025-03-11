@@ -1,5 +1,5 @@
+use proc_macro_error2::*;
 use proc_macro2::{Ident, Span, TokenStream};
-use proc_macro_error::*;
 use quote::quote;
 
 use crate::parse::{

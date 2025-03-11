@@ -1,7 +1,7 @@
-use crate::token_source::TokenSource;
 use crate::Parser;
+use crate::token_source::TokenSource;
 use biome_diagnostics::console::fmt::Display;
-use biome_diagnostics::console::{markup, MarkupBuf};
+use biome_diagnostics::console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{Advices, Diagnostic, Location, LogCategory, MessageAndDescription, Visit};
 use biome_rowan::{SyntaxKind, TextLen, TextRange};

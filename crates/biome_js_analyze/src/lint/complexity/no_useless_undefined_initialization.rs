@@ -1,11 +1,11 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make::js_variable_declarator_list;
 use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
-use biome_rowan::{chain_trivia_pieces, SyntaxTriviaPiece};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{SyntaxTriviaPiece, chain_trivia_pieces};
 
 use crate::JsRuleAction;
 
@@ -94,7 +94,7 @@ impl Rule for NoUselessUndefinedInitialization {
 
             if keyword.is_undefined() {
                 let decl_range = initializer.range();
-                let Some(binding_name) = decl.id().ok().map(|id| id.text()) else {
+                let Some(binding_name) = decl.id().ok().map(|id| id.to_trimmed_string()) else {
                     continue;
                 };
                 signals.push((binding_name.into(), decl_range));

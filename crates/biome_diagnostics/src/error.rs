@@ -17,8 +17,8 @@ use std::{
 use biome_console::fmt;
 
 use crate::{
-    diagnostic::internal::AsDiagnostic, Category, Diagnostic, DiagnosticTags, Location, Severity,
-    Visit,
+    Category, Diagnostic, DiagnosticTags, Location, Severity, Visit,
+    diagnostic::internal::AsDiagnostic,
 };
 
 /// The `Error` struct wraps any type implementing [Diagnostic] into a single
@@ -129,8 +129,8 @@ mod tests {
     use std::{
         mem::size_of,
         sync::{
-            atomic::{AtomicBool, Ordering},
             Arc,
+            atomic::{AtomicBool, Ordering},
         },
     };
 

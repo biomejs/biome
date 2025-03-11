@@ -4292,7 +4292,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == T![U+] {
+                    if element.kind() == T!["U+"] {
                         slots.mark_present();
                         current_element = elements.next();
                     }

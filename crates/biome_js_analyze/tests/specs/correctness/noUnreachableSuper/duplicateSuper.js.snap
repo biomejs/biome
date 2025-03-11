@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: duplicateSuper.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // valid
 class B extends A {
     constructor(cond) {
@@ -93,7 +94,7 @@ class G extends A {
 ```
 duplicateSuper.js:14:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths where `super()` is called more than once.
+  × This constructor has code paths where `super()` is called more than once.
   
     12 │ // invalid
     13 │ class C extends A {
@@ -130,7 +131,7 @@ duplicateSuper.js:14:5 lint/correctness/noUnreachableSuper ━━━━━━━
 ```
 duplicateSuper.js:22:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths where `super()` is called more than once.
+  × This constructor has code paths where `super()` is called more than once.
   
     20 │ // invalid
     21 │ class D extends A {
@@ -169,7 +170,7 @@ duplicateSuper.js:22:5 lint/correctness/noUnreachableSuper ━━━━━━━
 ```
 duplicateSuper.js:32:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor calls `super()` in a loop.
+  × This constructor calls `super()` in a loop.
   
     30 │ // invalid
     31 │ class E extends A {
@@ -198,7 +199,7 @@ duplicateSuper.js:32:5 lint/correctness/noUnreachableSuper ━━━━━━━
 ```
 duplicateSuper.js:41:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths that return without calling `super()`.
+  × This constructor has code paths that return without calling `super()`.
   
     39 │ // invalid
     40 │ class F extends A {
@@ -220,7 +221,7 @@ duplicateSuper.js:41:5 lint/correctness/noUnreachableSuper ━━━━━━━
 ```
 duplicateSuper.js:53:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths that return without calling `super()`.
+  × This constructor has code paths that return without calling `super()`.
   
     51 │ // invalid
     52 │ class G extends A {
@@ -242,7 +243,7 @@ duplicateSuper.js:53:5 lint/correctness/noUnreachableSuper ━━━━━━━
 ```
 duplicateSuper.js:64:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths where `super()` is called more than once.
+  × This constructor has code paths where `super()` is called more than once.
   
     62 │ // invalid
     63 │ class G extends A {
@@ -280,7 +281,7 @@ duplicateSuper.js:64:5 lint/correctness/noUnreachableSuper ━━━━━━━
 ```
 duplicateSuper.js:75:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths where `super()` is called more than once.
+  × This constructor has code paths where `super()` is called more than once.
   
     73 │ // invalid
     74 │ class G extends A {
@@ -314,5 +315,3 @@ duplicateSuper.js:75:5 lint/correctness/noUnreachableSuper ━━━━━━━
   
 
 ```
-
-

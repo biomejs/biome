@@ -1,5 +1,6 @@
 //! Events emitted by the [SemanticEventExtractor] which are then constructed into the Semantic Model
 
+use GraphqlSyntaxKind::*;
 use biome_graphql_syntax::{
     AnyGraphqlTypeDefinition, AnyGraphqlTypeExtension, GraphqlFragmentDefinition,
     GraphqlNameBinding, GraphqlNameReference, GraphqlOperationDefinition, GraphqlSyntaxKind,
@@ -8,7 +9,6 @@ use biome_graphql_syntax::{
 use biome_rowan::{AstNode, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::{HashSet, VecDeque};
-use GraphqlSyntaxKind::*;
 
 /// Events emitted by the [SemanticEventExtractor].
 /// These events are later made into the Semantic Model.
@@ -212,7 +212,7 @@ impl SemanticEventExtractor {
         };
         let name = name_token.token_text_trimmed();
 
-        let range = node.syntax().text_range();
+        let range = node.syntax().text_range_with_trivia();
         let Some(parent) = node.syntax().parent() else {
             // every node aside from the root should have a parent, so this should never happen
             return;
@@ -242,7 +242,7 @@ impl SemanticEventExtractor {
             return;
         };
         let name = name_token.token_text_trimmed();
-        let range = node.syntax().text_range();
+        let range = node.syntax().text_range_with_trivia();
         let Some(parent) = node.syntax().parent() else {
             // every node aside from the root should have a parent, so this should never happen
             return;
@@ -302,7 +302,7 @@ impl SemanticEventExtractor {
             return;
         };
         let name_token = name_token.token_text_trimmed();
-        let range = node.syntax().text_range();
+        let range = node.syntax().text_range_with_trivia();
         scope
             .implicit_variables_references
             .entry(name_token.clone())
@@ -314,7 +314,7 @@ impl SemanticEventExtractor {
     }
 
     fn push_operation_scope(&mut self, node: &GraphqlOperationDefinition) {
-        let range = node.syntax().text_range();
+        let range = node.syntax().text_range_with_trivia();
         self.current_scope = Some(Scope {
             scope_id: self.scopes.len(),
             range,
@@ -325,7 +325,7 @@ impl SemanticEventExtractor {
     }
 
     fn push_fragment_scope(&mut self, node: &GraphqlFragmentDefinition) {
-        let range = node.syntax().text_range();
+        let range = node.syntax().text_range_with_trivia();
         self.current_scope = Some(Scope {
             scope_id: self.scopes.len(),
             range,

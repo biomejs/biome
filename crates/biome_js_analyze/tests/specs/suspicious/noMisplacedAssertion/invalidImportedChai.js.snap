@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImportedChai.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import { expect } from "chai";
 describe(() => {
 	expect("something").toBeTrue()
@@ -14,7 +15,7 @@ describe(() => {
 ```
 invalidImportedChai.js:3:2 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assertion isn't inside a it(), test() or Deno.test() function call.
+  i The assertion isn't inside a it(), test() or Deno.test() function call.
   
     1 │ import { expect } from "chai";
     2 │ describe(() => {

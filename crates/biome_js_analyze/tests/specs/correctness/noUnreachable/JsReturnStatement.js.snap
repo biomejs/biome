@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsReturnStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsReturnStatement1() {
     return;
     afterReturn();
@@ -20,7 +21,7 @@ function JsReturnStatement2() {
 ```
 JsReturnStatement.js:3:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     1 │ function JsReturnStatement1() {
     2 │     return;
@@ -43,7 +44,7 @@ JsReturnStatement.js:3:5 lint/correctness/noUnreachable ━━━━━━━━
 ```
 JsReturnStatement.js:8:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      6 │ function JsReturnStatement2() {
      7 │     return;
@@ -62,5 +63,3 @@ JsReturnStatement.js:8:5 lint/correctness/noUnreachable ━━━━━━━━
   
 
 ```
-
-

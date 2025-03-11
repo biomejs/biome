@@ -1,34 +1,31 @@
-use super::{determine_fix_file_mode, FixFileModeOptions};
+use super::{FixFileModeOptions, determine_fix_file_mode};
 use crate::cli_options::CliOptions;
-use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
+use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::RuleSelector;
-use biome_configuration::css::PartialCssLinter;
-use biome_configuration::javascript::PartialJavascriptLinter;
-use biome_configuration::json::PartialJsonLinter;
-use biome_configuration::vcs::PartialVcsConfiguration;
-use biome_configuration::{
-    PartialConfiguration, PartialFilesConfiguration, PartialGraphqlLinter,
-    PartialLinterConfiguration,
-};
+use biome_configuration::css::CssLinterConfiguration;
+use biome_configuration::graphql::GraphqlLinterConfiguration;
+use biome_configuration::javascript::JsLinterConfiguration;
+use biome_configuration::json::JsonLinterConfiguration;
+use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::projects::ProjectKey;
+use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {
-    pub(crate) apply: bool,
-    pub(crate) apply_unsafe: bool,
     pub(crate) write: bool,
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
     pub(crate) suppress: bool,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) linter_configuration: Option<PartialLinterConfiguration>,
-    pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
-    pub(crate) files_configuration: Option<PartialFilesConfiguration>,
+    pub(crate) linter_configuration: Option<LinterConfiguration>,
+    pub(crate) vcs_configuration: Option<VcsConfiguration>,
+    pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
@@ -36,10 +33,10 @@ pub(crate) struct LintCommandPayload {
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
-    pub(crate) javascript_linter: Option<PartialJavascriptLinter>,
-    pub(crate) json_linter: Option<PartialJsonLinter>,
-    pub(crate) css_linter: Option<PartialCssLinter>,
-    pub(crate) graphql_linter: Option<PartialGraphqlLinter>,
+    pub(crate) javascript_linter: Option<JsLinterConfiguration>,
+    pub(crate) json_linter: Option<JsonLinterConfiguration>,
+    pub(crate) css_linter: Option<CssLinterConfiguration>,
+    pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
 }
 
 impl CommandRunner for LintCommandPayload {
@@ -48,19 +45,19 @@ impl CommandRunner for LintCommandPayload {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        _fs: &DynRef<'_, dyn FileSystem>,
+        _fs: &dyn FileSystem,
         _console: &mut dyn Console,
-    ) -> Result<PartialConfiguration, WorkspaceError> {
+    ) -> Result<Configuration, WorkspaceError> {
         let LoadedConfiguration {
             configuration: mut fs_configuration,
             ..
         } = loaded_configuration;
 
-        fs_configuration.merge_with(PartialConfiguration {
+        fs_configuration.merge_with(Configuration {
             linter: if fs_configuration
                 .linter
                 .as_ref()
-                .is_some_and(PartialLinterConfiguration::is_disabled)
+                .is_some_and(LinterConfiguration::is_enabled)
             {
                 None
             } else {
@@ -102,8 +99,8 @@ impl CommandRunner for LintCommandPayload {
 
     fn get_files_to_process(
         &self,
-        fs: &DynRef<'_, dyn FileSystem>,
-        configuration: &PartialConfiguration,
+        fs: &dyn FileSystem,
+        configuration: &Configuration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         let paths = get_files_to_process_with_cli_options(
             self.since.as_deref(),
@@ -130,20 +127,17 @@ impl CommandRunner for LintCommandPayload {
         cli_options: &CliOptions,
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
+        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
-        let fix_file_mode = determine_fix_file_mode(
-            FixFileModeOptions {
-                apply: self.apply,
-                apply_unsafe: self.apply_unsafe,
-                write: self.write,
-                fix: self.fix,
-                unsafe_: self.unsafe_,
-                suppress: self.suppress,
-                suppression_reason: self.suppression_reason.clone(),
-            },
-            console,
-        )?;
+        let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
+            write: self.write,
+            fix: self.fix,
+            unsafe_: self.unsafe_,
+            suppress: self.suppress,
+            suppression_reason: self.suppression_reason.clone(),
+        })?;
         Ok(Execution::new(TraversalMode::Lint {
+            project_key,
             fix_file_mode,
             stdin: self.get_stdin(console)?,
             only: self.only.clone(),

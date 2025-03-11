@@ -2,8 +2,8 @@ use serde::ser::{Serialize, SerializeMap, SerializeSeq, Serializer};
 use std::fmt;
 
 use crate::{
-    syntax::{Language, SyntaxNode, SyntaxToken},
     NodeOrToken,
+    syntax::{Language, SyntaxNode, SyntaxToken},
 };
 
 struct SerDisplay<T>(T);
@@ -30,7 +30,7 @@ impl<L: Language> Serialize for SyntaxNode<L> {
     {
         let mut state = serializer.serialize_map(Some(3))?;
         state.serialize_entry("kind", &SerDisplay(DisplayDebug(self.kind())))?;
-        state.serialize_entry("text_range", &self.text_range())?;
+        state.serialize_entry("text_range", &self.text_range_with_trivia())?;
         state.serialize_entry("children", &Children(self))?;
         state.end()
     }

@@ -26,6 +26,7 @@ biome_fs             = { path = "../biome_fs" }
 biome_graphql_parser = { path = "../biome_graphql_parser" }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }
+camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, FormatOptions};
+use biome_formatter::write;
 use biome_grit_syntax::{GritCurlyPattern, GritCurlyPatternFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritCurlyPattern;

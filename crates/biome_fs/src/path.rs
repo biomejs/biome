@@ -1,18 +1,19 @@
 //! This module is responsible to manage paths inside Biome.
-//! It is a small wrapper around [path::PathBuf] but it is also able to
+//! It is a small wrapper around [path::Utf8PathBuf] but it is also able to
 //! give additional information around the file that holds:
 //! - the [FileHandlers] for the specific file
 //! - shortcuts to open/write to the file
 use crate::ConfigName;
-use enumflags2::{bitflags, BitFlags};
+use camino::{Utf8Path, Utf8PathBuf};
+use enumflags2::{BitFlags, bitflags};
 use smallvec::SmallVec;
 use std::cmp::Ordering;
-use std::ffi::OsStr;
+use std::fmt::Formatter;
 use std::fs::read_to_string;
 use std::hash::Hash;
 use std::ops::DerefMut;
-use std::path::Path;
-use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
+use std::path::PathBuf;
+use std::{fs::File, io, io::Write, ops::Deref};
 
 /// The priority of the file
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Ord, PartialOrd, Hash)]
@@ -20,8 +21,10 @@ use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 #[bitflags]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 // NOTE: The order of the variants is important, the one on the top has the highest priority
 pub enum FileKind {
     /// A configuration file has the highest priority. It's usually `biome.json` and `biome.jsonc`
@@ -90,21 +93,58 @@ impl From<FileKind> for FileKinds {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
-)]
 pub struct BiomePath {
     /// The path to the file
-    path: PathBuf,
+    path: Utf8PathBuf,
     /// Determines the kind of the file inside Biome. Some files are considered as configuration files, others as manifest files, and others as files to handle
     kind: FileKinds,
     /// Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
     was_written: bool,
 }
 
+#[cfg(feature = "serde")]
+impl serde::Serialize for BiomePath {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(self.path.as_str())
+    }
+}
+
+impl std::fmt::Display for BiomePath {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.path.as_str())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for BiomePath {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let path: std::path::PathBuf = serde::Deserialize::deserialize(deserializer)?;
+        let path = Utf8PathBuf::from_path_buf(path).map_err(|e| {
+            serde::de::Error::custom(format!("Unable to deserialize path {}", e.display()))
+        })?;
+        Ok(BiomePath::new(path))
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for BiomePath {
+    fn schema_name() -> String {
+        "BiomePath".to_string()
+    }
+
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(generator)
+    }
+}
+
 impl BiomePath {
-    pub fn new(path_to_file: impl Into<PathBuf>) -> Self {
+    pub fn new(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
         let kind = path.file_name().map(Self::priority).unwrap_or_default();
         Self {
@@ -114,7 +154,7 @@ impl BiomePath {
         }
     }
 
-    pub fn new_written(path_to_file: impl Into<PathBuf>) -> Self {
+    pub fn new_written(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
         let kind = path.file_name().map(Self::priority).unwrap_or_default();
         Self {
@@ -163,14 +203,16 @@ impl BiomePath {
     /// - `biome.json` and `biome.jsonc` have the highest priority
     /// - `package.json` and `tsconfig.json`/`jsconfig.json` have the second-highest priority, and they are considered as manifest files
     /// - Other files are considered as files to handle
-    fn priority(file_name: &OsStr) -> FileKinds {
+    fn priority(file_name: &str) -> FileKinds {
         if file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc() {
             FileKind::Config.into()
         } else if matches!(
-            file_name.as_encoded_bytes(),
-            b"package.json" | b"tsconfig.json" | b"jsconfig.json"
+            file_name,
+            "package.json" | "tsconfig.json" | "jsconfig.json"
         ) {
             FileKind::Manifest.into()
+        } else if matches!(file_name, ".gitignore" | ".ignore") {
+            FileKind::Ignore.into()
         } else {
             FileKind::Handleable.into()
         }
@@ -192,23 +234,48 @@ impl BiomePath {
         self.kind.contains(FileKind::Inspectable)
     }
 }
+impl From<Utf8PathBuf> for BiomePath {
+    fn from(value: Utf8PathBuf) -> Self {
+        Self::new(value)
+    }
+}
 
-#[cfg(feature = "serde")]
+impl From<&Utf8Path> for BiomePath {
+    fn from(value: &Utf8Path) -> Self {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<PathBuf> for BiomePath {
+    type Error = PathBuf;
+    fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
+        let path = Utf8PathBuf::from_path_buf(value)?;
+        Ok(Self::new(path))
+    }
+}
+
+#[cfg(feature = "schema")]
 impl schemars::JsonSchema for FileKinds {
     fn schema_name() -> String {
         String::from("FileKind")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<FileKind>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<FileKind>>::json_schema(generator)
     }
 }
 
 impl Deref for BiomePath {
-    type Target = PathBuf;
+    type Target = Utf8PathBuf;
 
     fn deref(&self) -> &Self::Target {
         &self.path
+    }
+}
+
+impl From<BiomePath> for Utf8PathBuf {
+    fn from(path: BiomePath) -> Self {
+        path.path
     }
 }
 
@@ -227,177 +294,83 @@ impl Ord for BiomePath {
     }
 }
 
-/// It defines an alias for a path
-#[derive(Debug, Clone, Hash, Default)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
-)]
-struct AliasPath {
-    /// The name given to the alias
-    name: String,
-    /// The paths associated to `name`
-    prefix: Vec<PathBuf>,
-}
-
-impl AliasPath {
-    pub fn new(name: impl Into<String>) -> Self {
-        Self {
-            name: name.into(),
-            prefix: vec![],
-        }
-    }
-
-    pub fn add_prefix(&mut self, prefix: impl Into<PathBuf>) {
-        self.prefix.push(prefix.into());
-    }
-}
-
-pub struct Aliases {
-    aliases: Vec<AliasPath>,
-}
-
-impl Aliases {
-    #[expect(dead_code)]
-    pub fn new() -> Self {
-        Self { aliases: vec![] }
-    }
-
-    #[expect(dead_code)]
-    pub fn with_alias<'a>(
-        mut self,
-        name: impl Into<String>,
-        paths: impl Iterator<Item = &'a Path>,
-    ) -> Self {
-        let mut alias = AliasPath::new(name);
-        for path in paths {
-            alias.add_prefix(path);
-        }
-        self.aliases.push(alias);
-        self
-    }
-
-    #[expect(dead_code)]
-    pub fn get_paths_by_name(&self, name: &str) -> Option<&[PathBuf]> {
-        self.aliases
-            .iter()
-            .find(|alias| alias.name == name)
-            .map(|alias| alias.prefix.as_slice())
-    }
-}
-
 #[cfg(test)]
 mod test {
     use crate::path::{FileKind, FileKinds};
-    use std::ffi::OsStr;
 
     #[test]
     fn test_biome_paths() {
         use super::BiomePath;
-        use std::path::PathBuf;
+        use camino::Utf8PathBuf;
 
-        let path = PathBuf::from("src/package.json");
+        let path = Utf8PathBuf::from("src/package.json");
         let biome_path = BiomePath::new(path);
-        assert_eq!(biome_path.file_name(), Some(OsStr::new("package.json")));
+        assert_eq!(biome_path.file_name(), Some("package.json"));
         assert_eq!(
-            BiomePath::priority(OsStr::new("package.json")),
+            BiomePath::priority("package.json"),
             FileKind::Manifest.into()
         );
-        assert_eq!(
-            BiomePath::priority(OsStr::new("biome.json")),
-            FileKind::Config.into()
-        );
-        assert_eq!(
-            BiomePath::priority(OsStr::new("biome.jsonc")),
-            FileKind::Config.into()
-        );
+        assert_eq!(BiomePath::priority("biome.json"), FileKind::Config.into());
+        assert_eq!(BiomePath::priority("biome.jsonc"), FileKind::Config.into());
+        assert_eq!(BiomePath::priority(".gitignore"), FileKind::Ignore.into());
+        assert_eq!(BiomePath::priority(".ignore"), FileKind::Ignore.into());
     }
 
     #[test]
     fn test_biome_file_names_order() {
         use super::BiomePath;
-        use std::path::PathBuf;
+        use camino::Utf8PathBuf;
 
-        let path1 = BiomePath::new(PathBuf::from("src/package.json"));
-        let path2 = BiomePath::new(PathBuf::from("src/biome.json"));
-        let path3 = BiomePath::new(PathBuf::from("src/biome.jsonc"));
-        let path4 = BiomePath::new(PathBuf::from("src/tsconfig.json"));
-        let path5 = BiomePath::new(PathBuf::from("src/README.md"));
-        let path6 = BiomePath::new(PathBuf::from("src/frontend/biome.jsonc"));
+        let path1 = BiomePath::new(Utf8PathBuf::from("src/package.json"));
+        let path2 = BiomePath::new(Utf8PathBuf::from("src/biome.json"));
+        let path3 = BiomePath::new(Utf8PathBuf::from("src/biome.jsonc"));
+        let path4 = BiomePath::new(Utf8PathBuf::from("src/tsconfig.json"));
+        let path5 = BiomePath::new(Utf8PathBuf::from("src/README.md"));
+        let path6 = BiomePath::new(Utf8PathBuf::from("src/frontend/biome.jsonc"));
 
         let mut paths = [path1, path2, path3, path4, path5, path6];
         paths.sort();
         let mut iter = paths.iter();
-        assert_eq!(
-            iter.next().unwrap().file_name(),
-            Some(OsStr::new("biome.json"))
-        );
-        assert_eq!(
-            iter.next().unwrap().file_name(),
-            Some(OsStr::new("biome.jsonc"))
-        );
-        assert_eq!(
-            iter.next().unwrap().file_name(),
-            Some(OsStr::new("biome.jsonc"))
-        );
-        assert_eq!(
-            iter.next().unwrap().file_name(),
-            Some(OsStr::new("package.json"))
-        );
-        assert_eq!(
-            iter.next().unwrap().file_name(),
-            Some(OsStr::new("tsconfig.json"))
-        );
-        assert_eq!(
-            iter.next().unwrap().file_name(),
-            Some(OsStr::new("README.md"))
-        );
+        assert_eq!(iter.next().unwrap().file_name(), Some("biome.json"));
+        assert_eq!(iter.next().unwrap().file_name(), Some("biome.jsonc"));
+        assert_eq!(iter.next().unwrap().file_name(), Some("biome.jsonc"));
+        assert_eq!(iter.next().unwrap().file_name(), Some("package.json"));
+        assert_eq!(iter.next().unwrap().file_name(), Some("tsconfig.json"));
+        assert_eq!(iter.next().unwrap().file_name(), Some("README.md"));
     }
 
     #[test]
     fn test_biome_paths_order() {
         use super::BiomePath;
-        use std::path::PathBuf;
+        use camino::Utf8PathBuf;
 
-        let path1 = BiomePath::new(PathBuf::from("src/package.json"));
-        let path2 = BiomePath::new(PathBuf::from("src/biome.json"));
-        let path3 = BiomePath::new(PathBuf::from("src/biome.jsonc"));
-        let path4 = BiomePath::new(PathBuf::from("src/tsconfig.json"));
-        let path5 = BiomePath::new(PathBuf::from("src/README.md"));
-        let path6 = BiomePath::new(PathBuf::from("src/frontend/biome.jsonc"));
-        let path7 = BiomePath::new(PathBuf::from("src/frontend/package.json"));
+        let path1 = BiomePath::new(Utf8PathBuf::from("src/package.json"));
+        let path2 = BiomePath::new(Utf8PathBuf::from("src/biome.json"));
+        let path3 = BiomePath::new(Utf8PathBuf::from("src/biome.jsonc"));
+        let path4 = BiomePath::new(Utf8PathBuf::from("src/tsconfig.json"));
+        let path5 = BiomePath::new(Utf8PathBuf::from("src/README.md"));
+        let path6 = BiomePath::new(Utf8PathBuf::from("src/frontend/biome.jsonc"));
+        let path7 = BiomePath::new(Utf8PathBuf::from("src/frontend/package.json"));
 
         let mut paths = vec![path1, path2, path3, path4, path5, path6, path7];
         paths.sort();
         let mut iter = paths.iter();
-        assert_eq!(iter.next().unwrap().display().to_string(), "src/biome.json");
+        assert_eq!(iter.next().unwrap().to_string(), "src/biome.json");
+        assert_eq!(iter.next().unwrap().to_string(), "src/biome.jsonc");
+        assert_eq!(iter.next().unwrap().to_string(), "src/frontend/biome.jsonc");
         assert_eq!(
-            iter.next().unwrap().display().to_string(),
-            "src/biome.jsonc"
-        );
-        assert_eq!(
-            iter.next().unwrap().display().to_string(),
-            "src/frontend/biome.jsonc"
-        );
-        assert_eq!(
-            iter.next().unwrap().display().to_string(),
+            iter.next().unwrap().to_string(),
             "src/frontend/package.json"
         );
-        assert_eq!(
-            iter.next().unwrap().display().to_string(),
-            "src/package.json"
-        );
-        assert_eq!(
-            iter.next().unwrap().display().to_string(),
-            "src/tsconfig.json"
-        );
-        assert_eq!(iter.next().unwrap().display().to_string(), "src/README.md");
+        assert_eq!(iter.next().unwrap().to_string(), "src/package.json");
+        assert_eq!(iter.next().unwrap().to_string(), "src/tsconfig.json");
+        assert_eq!(iter.next().unwrap().to_string(), "src/README.md");
     }
 
     #[test]
     #[cfg(feature = "serde")]
     fn deserialize_file_kind_from_str() {
-        let result = serde_json::from_str::<FileKinds>("[\"Config\"]");
+        let result = serde_json::from_str::<FileKinds>("[\"config\"]");
         assert!(result.is_ok());
         let file_kinds = result.unwrap();
         assert!(file_kinds.contains(FileKind::Config));
@@ -409,6 +382,6 @@ mod test {
         let file_kinds = FileKinds::from(FileKind::Config);
         let result = serde_json::to_string(&file_kinds);
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), "[\"Config\"]");
+        assert_eq!(result.unwrap(), "[\"config\"]");
     }
 }

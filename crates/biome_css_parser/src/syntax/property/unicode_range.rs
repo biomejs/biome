@@ -5,11 +5,11 @@ use biome_css_syntax::CssSyntaxKind::{
     CSS_UNICODE_CODEPOINT, CSS_UNICODE_CODEPOINT_LITERAL, CSS_UNICODE_RANGE,
     CSS_UNICODE_RANGE_INTERVAL, CSS_UNICODE_RANGE_WILDCARD, CSS_UNICODE_RANGE_WILDCARD_LITERAL,
 };
-use biome_css_syntax::{TextRange, T};
-use biome_parser::diagnostic::{expected_any, expected_node, ParseDiagnostic};
+use biome_css_syntax::{T, TextRange};
+use biome_parser::diagnostic::{ParseDiagnostic, expected_any, expected_node};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 const UNICODE: TokenSet<CssSyntaxKind> = token_set![
     // u+;
@@ -55,13 +55,13 @@ pub(crate) fn parse_unicode_range(p: &mut CssParser) -> ParsedSyntax {
     let kind = p.re_lex(CssReLexContext::UnicodeRange);
 
     // If the parser is not positioned to parse a Unicode range, return an absent value.
-    if kind != T![U+] {
+    if kind != T!["U+"] {
         return Absent;
     }
 
     let m = p.start();
 
-    p.bump_with_context(T![U+], CssLexContext::UnicodeRange);
+    p.bump_with_context(T!["U+"], CssLexContext::UnicodeRange);
 
     // Checks if the parser is positioned to parse a Unicode range wildcard.
     // A wildcard cannot be combined with a range interval. For example, `U+????-U+????` is invalid.

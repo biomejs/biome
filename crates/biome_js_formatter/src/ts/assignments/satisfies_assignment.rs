@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::TsSatisfiesAssignment;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 use super::as_assignment::format_as_or_satisfies_assignment;
 

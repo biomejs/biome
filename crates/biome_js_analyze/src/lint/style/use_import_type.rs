@@ -1,13 +1,14 @@
 use crate::{
-    react::{is_global_react_import, ReactLibrary},
-    services::semantic::Semantic,
     JsRuleAction,
+    react::{ReactLibrary, is_global_react_import},
+    services::semantic::Semantic,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, options::JsxRuntime, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule, options::JsxRuntime,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -17,9 +18,8 @@ use biome_js_syntax::{
     JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
 };
 use biome_rowan::{
-    chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces, AstNode,
-    AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
-    TriviaPieceKind,
+    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
+    TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
 };
 use rustc_hash::FxHashSet;
 
@@ -115,7 +115,8 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("consistent-type-imports")],
         source_kind: RuleSourceKind::Inspired,
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -134,7 +135,7 @@ impl Rule for UseImportType {
         let import = ctx.query();
         let import_clause = import.import_clause().ok()?;
         // Import attributes and type-only imports are not compatible.
-        if import_clause.assertion().is_some() {
+        if import_clause.attribute().is_some() {
             return None;
         }
         let model = ctx.model();

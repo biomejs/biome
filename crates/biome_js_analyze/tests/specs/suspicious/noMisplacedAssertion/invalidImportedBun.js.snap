@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImportedBun.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import {test, expect} from "bun:test";
 
 expect("something").toBeTrue()
@@ -13,7 +14,7 @@ expect("something").toBeTrue()
 ```
 invalidImportedBun.js:3:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assertion isn't inside a it(), test() or Deno.test() function call.
+  i The assertion isn't inside a it(), test() or Deno.test() function call.
   
     1 │ import {test, expect} from "bun:test";
     2 │ 

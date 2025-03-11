@@ -6,10 +6,10 @@ use std::{
     str::FromStr,
 };
 
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use serde::{Deserialize, Serialize};
 
-use biome_console::fmt;
+use biome_console::{fmt, markup};
 
 use crate::{Category, Location, Visit};
 
@@ -153,11 +153,23 @@ impl FromStr for Severity {
 impl Display for Severity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Hint => write!(f, "info"),
+            Self::Hint => write!(f, "hint"),
             Self::Information => write!(f, "info"),
             Self::Warning => write!(f, "warn"),
             Self::Error => write!(f, "error"),
             Self::Fatal => write!(f, "fatal"),
+        }
+    }
+}
+
+impl biome_console::fmt::Display for Severity {
+    fn fmt(&self, f: &mut biome_console::fmt::Formatter<'_>) -> io::Result<()> {
+        match self {
+            Self::Hint => f.write_markup(markup!(<Info>"hint"</Info>)),
+            Self::Information => f.write_markup(markup!(<Info>"info"</Info>)),
+            Self::Warning => f.write_markup(markup!(<Warn>"warn"</Warn>)),
+            Self::Error => f.write_markup(markup!(<Error>"error"</Error>)),
+            Self::Fatal => f.write_markup(markup!(<Error>"fatal"</Error>)),
         }
     }
 }

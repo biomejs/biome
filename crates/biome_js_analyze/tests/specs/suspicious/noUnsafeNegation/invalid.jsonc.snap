@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ expression: invalid.jsonc
 ```
 invalid.jsonc:1:1 lint/suspicious/noUnsafeNegation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The negation operator is used unsafely on the left side of this binary expression.
+  × The negation operator is used unsafely on the left side of this binary expression.
   
   > 1 │ !1 in [1,2];
       │ ^^^^^^^^^^^
@@ -32,7 +33,7 @@ invalid.jsonc:1:1 lint/suspicious/noUnsafeNegation  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:10 lint/suspicious/noUnsafeNegation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The negation operator is used unsafely on the left side of this binary expression.
+  × The negation operator is used unsafely on the left side of this binary expression.
   
   > 1 │ /**test*/!/** test*/1 instanceof [1,2];
       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -43,5 +44,3 @@ invalid.jsonc:1:10 lint/suspicious/noUnsafeNegation  FIXABLE  ━━━━━━
       │                     +                  + 
 
 ```
-
-

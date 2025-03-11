@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 a = a;
 [a] = [a];
 [a, b] = [a, b];
@@ -37,7 +38,7 @@ a[4] = a[4];
 ```
 invalid.js:1:5 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
   > 1 │ a = a;
       │     ^
@@ -51,13 +52,15 @@ invalid.js:1:5 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     2 │ [a] = [a];
     3 │ [a, b] = [a, b];
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:2:8 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
     1 │ a = a;
   > 2 │ [a] = [a];
@@ -73,13 +76,15 @@ invalid.js:2:8 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     3 │ [a, b] = [a, b];
     4 │ [a, ...b] = [a, ...b];
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:3:11 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
     1 │ a = a;
     2 │ [a] = [a];
@@ -97,13 +102,15 @@ invalid.js:3:11 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     4 │ [a, ...b] = [a, ...b];
     5 │ ({a, b} = {a, b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:3:14 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     1 │ a = a;
     2 │ [a] = [a];
@@ -121,13 +128,15 @@ invalid.js:3:14 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     4 │ [a, ...b] = [a, ...b];
     5 │ ({a, b} = {a, b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:4:14 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
     2 │ [a] = [a];
     3 │ [a, b] = [a, b];
@@ -145,13 +154,15 @@ invalid.js:4:14 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     5 │ ({a, b} = {a, b});
     6 │ [[a], [b]] = [[a], [b]];
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:5:12 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
     3 │ [a, b] = [a, b];
     4 │ [a, ...b] = [a, ...b];
@@ -169,13 +180,15 @@ invalid.js:5:12 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     6 │ [[a], [b]] = [[a], [b]];
     7 │ [{a}, {b}] = [{a}, {b}];
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:5:15 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     3 │ [a, b] = [a, b];
     4 │ [a, ...b] = [a, ...b];
@@ -193,13 +206,15 @@ invalid.js:5:15 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     6 │ [[a], [b]] = [[a], [b]];
     7 │ [{a}, {b}] = [{a}, {b}];
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:6:16 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
     4 │ [a, ...b] = [a, ...b];
     5 │ ({a, b} = {a, b});
@@ -217,13 +232,15 @@ invalid.js:6:16 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     7 │ [{a}, {b}] = [{a}, {b}];
     8 │ [{a}, [b]] = [{a}, [b]];
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:6:21 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     4 │ [a, ...b] = [a, ...b];
     5 │ ({a, b} = {a, b});
@@ -241,13 +258,15 @@ invalid.js:6:21 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     7 │ [{a}, {b}] = [{a}, {b}];
     8 │ [{a}, [b]] = [{a}, [b]];
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:6:21 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     4 │ [a, ...b] = [a, ...b];
     5 │ ({a, b} = {a, b});
@@ -264,6 +283,8 @@ invalid.js:6:21 lint/correctness/noSelfAssign ━━━━━━━━━━━�
       │        ^
     7 │ [{a}, {b}] = [{a}, {b}];
     8 │ [{a}, [b]] = [{a}, [b]];
+  
+  i Self assignments have no effect and can be removed.
   
 
 ```
@@ -271,7 +292,7 @@ invalid.js:6:21 lint/correctness/noSelfAssign ━━━━━━━━━━━�
 ```
 invalid.js:7:16 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
     5 │ ({a, b} = {a, b});
     6 │ [[a], [b]] = [[a], [b]];
@@ -289,13 +310,15 @@ invalid.js:7:16 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     8 │ [{a}, [b]] = [{a}, [b]];
     9 │ ({a: b} = {a: b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:7:21 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     5 │ ({a, b} = {a, b});
     6 │ [[a], [b]] = [[a], [b]];
@@ -313,13 +336,15 @@ invalid.js:7:21 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     8 │ [{a}, [b]] = [{a}, [b]];
     9 │ ({a: b} = {a: b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:7:21 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     5 │ ({a, b} = {a, b});
     6 │ [[a], [b]] = [[a], [b]];
@@ -336,6 +361,8 @@ invalid.js:7:21 lint/correctness/noSelfAssign ━━━━━━━━━━━�
       │        ^
     8 │ [{a}, [b]] = [{a}, [b]];
     9 │ ({a: b} = {a: b});
+  
+  i Self assignments have no effect and can be removed.
   
 
 ```
@@ -343,7 +370,7 @@ invalid.js:7:21 lint/correctness/noSelfAssign ━━━━━━━━━━━�
 ```
 invalid.js:8:16 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
      6 │ [[a], [b]] = [[a], [b]];
      7 │ [{a}, {b}] = [{a}, {b}];
@@ -361,13 +388,15 @@ invalid.js:8:16 lint/correctness/noSelfAssign ━━━━━━━━━━━�
      9 │ ({a: b} = {a: b});
     10 │ ({'a': b} = {'a': b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:8:21 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
      6 │ [[a], [b]] = [[a], [b]];
      7 │ [{a}, {b}] = [{a}, {b}];
@@ -385,13 +414,15 @@ invalid.js:8:21 lint/correctness/noSelfAssign ━━━━━━━━━━━�
      9 │ ({a: b} = {a: b});
     10 │ ({'a': b} = {'a': b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:8:21 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
      6 │ [[a], [b]] = [[a], [b]];
      7 │ [{a}, {b}] = [{a}, {b}];
@@ -408,6 +439,8 @@ invalid.js:8:21 lint/correctness/noSelfAssign ━━━━━━━━━━━�
        │        ^
      9 │ ({a: b} = {a: b});
     10 │ ({'a': b} = {'a': b});
+  
+  i Self assignments have no effect and can be removed.
   
 
 ```
@@ -415,7 +448,7 @@ invalid.js:8:21 lint/correctness/noSelfAssign ━━━━━━━━━━━�
 ```
 invalid.js:9:15 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
      7 │ [{a}, {b}] = [{a}, {b}];
      8 │ [{a}, [b]] = [{a}, [b]];
@@ -433,13 +466,15 @@ invalid.js:9:15 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     10 │ ({'a': b} = {'a': b});
     11 │ ({a: b} = {'a': b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:10:19 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
      8 │ [{a}, [b]] = [{a}, [b]];
      9 │ ({a: b} = {a: b});
@@ -457,13 +492,15 @@ invalid.js:10:19 lint/correctness/noSelfAssign ━━━━━━━━━━━
     11 │ ({a: b} = {'a': b});
     12 │ ({1: b} = {'1': b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:11:17 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
      9 │ ({a: b} = {a: b});
     10 │ ({'a': b} = {'a': b});
@@ -480,6 +517,8 @@ invalid.js:11:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
        │      ^
     12 │ ({1: b} = {'1': b});
     13 │ ({1: b} = {1: b});
+  
+  i Self assignments have no effect and can be removed.
   
 
 ```
@@ -487,7 +526,7 @@ invalid.js:11:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
 ```
 invalid.js:12:17 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     10 │ ({'a': b} = {'a': b});
     11 │ ({a: b} = {'a': b});
@@ -505,13 +544,15 @@ invalid.js:12:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
     13 │ ({1: b} = {1: b});
     14 │ ({['a']: b} = {a: b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:13:15 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     11 │ ({a: b} = {'a': b});
     12 │ ({1: b} = {'1': b});
@@ -529,13 +570,15 @@ invalid.js:13:15 lint/correctness/noSelfAssign ━━━━━━━━━━━
     14 │ ({['a']: b} = {a: b});
     15 │ ({1: b} = {[1]: b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:14:19 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     12 │ ({1: b} = {'1': b});
     13 │ ({1: b} = {1: b});
@@ -553,13 +596,15 @@ invalid.js:14:19 lint/correctness/noSelfAssign ━━━━━━━━━━━
     15 │ ({1: b} = {[1]: b});
     16 │ ({a: {b}, c: [d]} = {a: {b}, c: [d]});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:15:17 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     13 │ ({1: b} = {1: b});
     14 │ ({['a']: b} = {a: b});
@@ -577,13 +622,15 @@ invalid.js:15:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
     16 │ ({a: {b}, c: [d]} = {a: {b}, c: [d]});
     17 │ ({a, b} = {a, ...x, b});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:16:26 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     14 │ ({['a']: b} = {a: b});
     15 │ ({1: b} = {[1]: b});
@@ -601,13 +648,15 @@ invalid.js:16:26 lint/correctness/noSelfAssign ━━━━━━━━━━━
     17 │ ({a, b} = {a, ...x, b});
     18 │ a.b = a.b;
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:16:34 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! d is assigned to itself.
+  × d is assigned to itself.
   
     14 │ ({['a']: b} = {a: b});
     15 │ ({1: b} = {[1]: b});
@@ -625,13 +674,15 @@ invalid.js:16:34 lint/correctness/noSelfAssign ━━━━━━━━━━━
     17 │ ({a, b} = {a, ...x, b});
     18 │ a.b = a.b;
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:16:34 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! d is assigned to itself.
+  × d is assigned to itself.
   
     14 │ ({['a']: b} = {a: b});
     15 │ ({1: b} = {[1]: b});
@@ -648,6 +699,8 @@ invalid.js:16:34 lint/correctness/noSelfAssign ━━━━━━━━━━━
        │               ^
     17 │ ({a, b} = {a, ...x, b});
     18 │ a.b = a.b;
+  
+  i Self assignments have no effect and can be removed.
   
 
 ```
@@ -655,7 +708,7 @@ invalid.js:16:34 lint/correctness/noSelfAssign ━━━━━━━━━━━
 ```
 invalid.js:17:12 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
     15 │ ({1: b} = {[1]: b});
     16 │ ({a: {b}, c: [d]} = {a: {b}, c: [d]});
@@ -673,13 +726,15 @@ invalid.js:17:12 lint/correctness/noSelfAssign ━━━━━━━━━━━
     18 │ a.b = a.b;
     19 │ a.#b = a.#b;
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:18:9 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     16 │ ({a: {b}, c: [d]} = {a: {b}, c: [d]});
     17 │ ({a, b} = {a, ...x, b});
@@ -697,13 +752,15 @@ invalid.js:18:9 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     19 │ a.#b = a.#b;
     20 │ a[b] = a[b];
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:19:10 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     17 │ ({a, b} = {a, ...x, b});
     18 │ a.b = a.b;
@@ -721,13 +778,15 @@ invalid.js:19:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
     20 │ a[b] = a[b];
     21 │ a.b.c = a.b.c;
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:20:10 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     18 │ a.b = a.b;
     19 │ a.#b = a.#b;
@@ -745,13 +804,15 @@ invalid.js:20:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
     21 │ a.b.c = a.b.c;
     22 │ ({a} = {a});
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:21:13 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! c is assigned to itself.
+  × c is assigned to itself.
   
     19 │ a.#b = a.#b;
     20 │ a[b] = a[b];
@@ -769,13 +830,15 @@ invalid.js:21:13 lint/correctness/noSelfAssign ━━━━━━━━━━━
     22 │ ({a} = {a});
     23 │ a['b'].bar = a['b'].bar;
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:22:9 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! a is assigned to itself.
+  × a is assigned to itself.
   
     20 │ a[b] = a[b];
     21 │ a.b.c = a.b.c;
@@ -793,13 +856,15 @@ invalid.js:22:9 lint/correctness/noSelfAssign ━━━━━━━━━━━�
     23 │ a['b'].bar = a['b'].bar;
     24 │ a[foobar].b = a[foobar].b;
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:23:21 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! bar is assigned to itself.
+  × bar is assigned to itself.
   
     21 │ a.b.c = a.b.c;
     22 │ ({a} = {a});
@@ -817,13 +882,15 @@ invalid.js:23:21 lint/correctness/noSelfAssign ━━━━━━━━━━━
     24 │ a[foobar].b = a[foobar].b;
     25 │ a[10].b = a[10].b;
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:24:25 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     22 │ ({a} = {a});
     23 │ a['b'].bar = a['b'].bar;
@@ -841,13 +908,15 @@ invalid.js:24:25 lint/correctness/noSelfAssign ━━━━━━━━━━━
     25 │ a[10].b = a[10].b;
     26 │ a[4] = a[4];
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:25:17 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! b is assigned to itself.
+  × b is assigned to itself.
   
     23 │ a['b'].bar = a['b'].bar;
     24 │ a[foobar].b = a[foobar].b;
@@ -865,13 +934,15 @@ invalid.js:25:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
     26 │ a[4] = a[4];
     27 │ 
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
 
 ```
 invalid.js:26:10 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! 4 is assigned to itself.
+  × 4 is assigned to itself.
   
     24 │ a[foobar].b = a[foobar].b;
     25 │ a[10].b = a[10].b;
@@ -887,7 +958,7 @@ invalid.js:26:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
        │   ^
     27 │ 
   
+  i Self assignments have no effect and can be removed.
+  
 
 ```
-
-

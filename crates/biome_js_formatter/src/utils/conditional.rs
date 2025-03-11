@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::{
-    write, CstFormatContext, FormatContext, FormatOptions, FormatOwnedWithRule, FormatRefWithRule,
-    FormatRuleWithOptions,
+    CstFormatContext, FormatContext, FormatOptions, FormatOwnedWithRule, FormatRefWithRule,
+    FormatRuleWithOptions, write,
 };
 
 use crate::{AsFormat, IntoFormat};
@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsInitializerClause, JsReturnStatement, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
     JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsConditionalType,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 declare_node_union! {
     pub AnyJsConditional = JsConditionalExpression | TsConditionalType
@@ -407,35 +407,32 @@ impl FormatJsAnyConditionalRule {
                 let argument = match parent.kind() {
                     JsSyntaxKind::JS_INITIALIZER_CLAUSE => {
                         let initializer = JsInitializerClause::unwrap_cast(parent);
-                        initializer.expression().ok().map(AnyJsExpression::from)
+                        initializer.expression().ok()
                     }
                     JsSyntaxKind::JS_RETURN_STATEMENT => {
                         let return_statement = JsReturnStatement::unwrap_cast(parent);
-                        return_statement.argument().map(AnyJsExpression::from)
+                        return_statement.argument()
                     }
                     JsSyntaxKind::JS_THROW_STATEMENT => {
                         let throw_statement = JsThrowStatement::unwrap_cast(parent);
-                        throw_statement.argument().ok().map(AnyJsExpression::from)
+                        throw_statement.argument().ok()
                     }
                     JsSyntaxKind::JS_UNARY_EXPRESSION => {
                         let unary_expression = JsUnaryExpression::unwrap_cast(parent);
-                        unary_expression.argument().ok().map(AnyJsExpression::from)
+                        unary_expression.argument().ok()
                     }
                     JsSyntaxKind::JS_YIELD_ARGUMENT => {
                         let yield_argument = JsYieldArgument::unwrap_cast(parent);
-                        yield_argument.expression().ok().map(AnyJsExpression::from)
+                        yield_argument.expression().ok()
                     }
                     JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
                         let assignment_expression = JsAssignmentExpression::unwrap_cast(parent);
-                        assignment_expression
-                            .right()
-                            .ok()
-                            .map(AnyJsExpression::from)
+                        assignment_expression.right().ok()
                     }
                     _ => None,
                 };
 
-                argument.map_or(false, |argument| argument == expression)
+                argument.is_some_and(|argument| argument == expression)
             }
         }
     }
@@ -666,7 +663,7 @@ impl AnyJsConditional {
             AnyJsConditional::JsConditionalExpression(conditional) => conditional
                 .test()
                 .ok()
-                .map_or(false, |resolved| resolved.syntax() == node),
+                .is_some_and(|resolved| resolved.syntax() == node),
             AnyJsConditional::TsConditionalType(conditional) => {
                 conditional.check_type().map(AstNode::into_syntax).as_ref() == Ok(node)
                     || conditional

@@ -1,6 +1,7 @@
 use biome_analyze::Ast;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsSyntaxKind, TsTypeParameters};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt};
 
@@ -39,6 +40,7 @@ declare_lint_rule! {
         name: "noEmptyTypeParameters",
         language: "ts",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

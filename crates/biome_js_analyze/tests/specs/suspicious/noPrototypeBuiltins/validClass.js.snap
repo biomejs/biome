@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: validClass.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 class C { #hasOwnProperty; foo() { Object.#hasOwnProperty.call(obj, prop) } }
 class C { #call; foo() { Object.hasOwnProperty.#call(obj, prop) } }
 class C { #hasOwnProperty; foo() { Object.prototype.#hasOwnProperty.call(obj, prop) } }

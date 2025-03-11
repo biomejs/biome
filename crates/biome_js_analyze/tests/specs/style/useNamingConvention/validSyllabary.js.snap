@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validSyllabary.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 {
     const 안녕하세요 = 0;
 }
@@ -16,5 +17,3 @@ expression: validSyllabary.js
     class 안녕하세요 {}
 }
 ```
-
-

@@ -1,5 +1,5 @@
-use crate::{semantic_events, SemanticEvent};
-use biome_console::{markup, ConsoleExt, EnvConsole};
+use crate::{SemanticEvent, semantic_events};
+use biome_console::{ConsoleExt, EnvConsole, markup};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticExt, Location, LogCategory, PrintDiagnostic, Visit,

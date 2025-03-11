@@ -4,13 +4,13 @@ use crate::parser::{RecoveryError, RecoveryResult};
 use crate::prelude::*;
 use crate::state::{EnterType, SignatureFlags};
 use crate::syntax::expr::{
-    is_at_binary_operator, is_at_expression, is_at_identifier, is_nth_at_identifier,
-    is_nth_at_identifier_or_keyword, parse_big_int_literal_expression, parse_identifier,
-    parse_literal_expression, parse_name, parse_number_literal_expression,
-    parse_reference_identifier, parse_template_elements, ExpressionContext,
+    ExpressionContext, is_at_binary_operator, is_at_expression, is_at_identifier,
+    is_nth_at_identifier, is_nth_at_identifier_or_keyword, parse_big_int_literal_expression,
+    parse_identifier, parse_literal_expression, parse_name, parse_number_literal_expression,
+    parse_reference_identifier, parse_template_elements,
 };
 use crate::syntax::function::{
-    parse_formal_parameter, parse_parameter_list, skip_parameter_start, ParameterContext,
+    ParameterContext, parse_formal_parameter, parse_parameter_list, skip_parameter_start,
 };
 use crate::syntax::js_parse_error::{
     decorators_not_allowed, expected_identifier, expected_object_member_name, expected_parameter,
@@ -30,19 +30,20 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_in_out_modifier_cannot_appear_on_a_type_parameter,
 };
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use smallvec::SmallVec;
 
+use crate::JsSyntaxFeature::TypeScript;
 use crate::lexer::{JsLexContext, JsReLexContext};
 use crate::span::Span;
 use crate::syntax::class::parse_decorators;
-use crate::JsSyntaxFeature::TypeScript;
 use crate::{Absent, JsParser, ParseRecoveryTokenSet, ParsedSyntax, Present};
 use biome_js_syntax::JsSyntaxKind::TS_TYPE_ANNOTATION;
 use biome_js_syntax::T;
 use biome_js_syntax::{JsSyntaxKind::*, *};
 
-use super::{expect_ts_index_signature_member, is_at_ts_index_signature_member, MemberParent};
+use super::ts_parse_error::expected_ts_import_type_with_arguments;
+use super::{MemberParent, expect_ts_index_signature_member, is_at_ts_index_signature_member};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[bitflags]
@@ -130,11 +131,7 @@ impl TypeContext {
 
     /// Adds the `flag` if `set` is `true`, otherwise removes the `flag`
     fn and(self, flag: TypeContext, set: bool) -> Self {
-        if set {
-            self | flag
-        } else {
-            self - flag
-        }
+        if set { self | flag } else { self - flag }
     }
 }
 
@@ -1165,7 +1162,8 @@ fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
     p.eat(T![typeof]);
     p.expect(T![import]);
 
-    parse_ts_import_type_arguments(p, context).ok();
+    parse_ts_import_type_arguments(p, context)
+        .or_add_diagnostic(p, expected_ts_import_type_with_arguments);
 
     if p.at(T![.]) {
         let qualifier = p.start();

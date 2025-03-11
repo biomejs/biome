@@ -3,15 +3,15 @@
 mod tests;
 
 use crate::CssParserOptions;
-use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextSize, T};
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
-    is_css_non_ascii, lookup_byte,
     Dispatch::{self, *},
+    is_css_non_ascii, lookup_byte,
 };
 use std::char::REPLACEMENT_CHARACTER;
 
@@ -396,7 +396,7 @@ impl<'src> CssLexer<'src> {
         match current {
             b'u' | b'U' if matches!(self.peek_byte(), Some(b'+')) => {
                 self.advance(1);
-                self.consume_byte(T![U+])
+                self.consume_byte(T!["U+"])
             }
             b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' | b'?' => self.consume_unicode_range(),
             b'-' => self.consume_byte(T![-]),
@@ -655,7 +655,7 @@ impl<'src> CssLexer<'src> {
             // U+002E FULL STOP (.) followed by a digit...
             if self
                 .current_byte()
-                .map_or(false, |byte| byte.is_ascii_digit())
+                .is_some_and(|byte| byte.is_ascii_digit())
             {
                 // While the next input code point is a digit, consume it.
                 self.consume_number_sequence();
@@ -1244,7 +1244,7 @@ impl<'src> CssLexer<'src> {
                 Some(byte) if byte.is_ascii_digit() => true,
                 // Otherwise, if the second code point is a U+002E FULL STOP (.) and the
                 // third code point is a digit, return true.
-                Some(b'.') if self.byte_at(2).map_or(false, |byte| byte.is_ascii_digit()) => true,
+                Some(b'.') if self.byte_at(2).is_some_and(|byte| byte.is_ascii_digit()) => true,
                 _ => false,
             },
             Some(b'.') => match self.peek_byte() {

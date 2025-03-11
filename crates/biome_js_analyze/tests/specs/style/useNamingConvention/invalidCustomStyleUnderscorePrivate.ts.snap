@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidCustomStyleUnderscorePrivate.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -13,7 +14,7 @@ class X {
 ```
 invalidCustomStyleUnderscorePrivate.ts:2:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This private class member name should match the following regex /_(.*)/.
+  i This private class member name should match the following regex /_(.*)/.
   
     1 │ class X {
   > 2 │     private property: number

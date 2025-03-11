@@ -1,13 +1,14 @@
 use crate::{
+    JsRuleAction,
     lint::correctness::no_invalid_builtin_instantiation::convert_new_expression_to_call_expression,
-    services::semantic::Semantic, JsRuleAction,
+    services::semantic::Semantic,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
-    global_identifier, static_value::StaticValue, AnyJsExpression, JsNewOrCallExpression,
+    AnyJsExpression, JsNewOrCallExpression, global_identifier, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 

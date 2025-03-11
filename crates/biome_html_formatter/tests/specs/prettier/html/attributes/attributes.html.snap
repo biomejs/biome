@@ -1,0 +1,197 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/attributes.html
+---
+# Input
+
+```html
+<input name=address maxlength=200>
+<input name='address' maxlength='200'>
+<input name="address" maxlength="200">
+<div class="foo"></div>
+<div   class="foo"   ></div>
+<div class="foo bar"></div>
+<div class="foo bar" id="header"></div>
+<div   class="foo bar"   id="header"   ></div>
+<div data-prettier></div>
+<div data-prettier="true"></div>
+<meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+<div attribute>String</div>
+<div attribute="">String</div>
+<div attribute=''>String</div>
+<div attribute >String</div>
+<div attribute = "" >String</div>
+<div attribute = '' >String</div>
+<div  attribute  >String</div>
+<div  attribute  =  ""  >String</div>
+<div  attribute  =  ''  >String</div>
+<div attribute="attribute = attribute"></div>
+<div ATTRIBUTE>String</div>
+<div ATTRIBUTE="">String</div>
+<div ATTRIBUTE=''>String</div>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">...</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+  ...
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+
+
+
+</article>
+<X>
+</X>
+<X a="1">
+</X>
+<X a="1" b="2">
+</X>
+<X a="1" b="2" c="3">
+</X>
+<p 
+  class="
+    foo
+    bar
+    baz
+  "
+>
+</p>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -61,8 +61,14 @@
+   data-index-number="12314"
+   data-parent="cars"
+ ></article>
+-<X> </X>
+-<X a="1"> </X>
+-<X a="1" b="2"> </X>
+-<X a="1" b="2" c="3"> </X>
+-<p class="foo bar baz"></p>
++<X></X>
++<X a="1"></X>
++<X a="1" b="2"></X>
++<X a="1" b="2" c="3"></X>
++<p
++  class="
++    foo
++    bar
++    baz
++  "
++></p>
+```
+
+# Output
+
+```html
+<input name="address" maxlength="200" />
+<input name="address" maxlength="200" />
+<input name="address" maxlength="200" />
+<div class="foo"></div>
+<div class="foo"></div>
+<div class="foo bar"></div>
+<div class="foo bar" id="header"></div>
+<div class="foo bar" id="header"></div>
+<div data-prettier></div>
+<div data-prettier="true"></div>
+<meta
+  property="og:description"
+  content="The Mozilla Developer Network (MDN) provides
+information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+and HTML5 Apps. It also documents Mozilla products, like Firefox OS."
+/>
+<div attribute>String</div>
+<div attribute="">String</div>
+<div attribute="">String</div>
+<div attribute>String</div>
+<div attribute="">String</div>
+<div attribute="">String</div>
+<div attribute>String</div>
+<div attribute="">String</div>
+<div attribute="">String</div>
+<div attribute="attribute = attribute"></div>
+<div ATTRIBUTE>String</div>
+<div ATTRIBUTE="">String</div>
+<div ATTRIBUTE="">String</div>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars"
+></article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars"
+>
+  ...
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars"
+>
+  ...
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars"
+></article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars"
+></article>
+<X></X>
+<X a="1"></X>
+<X a="1" b="2"></X>
+<X a="1" b="2" c="3"></X>
+<p
+  class="
+    foo
+    bar
+    baz
+  "
+></p>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   14: information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+```
