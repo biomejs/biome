@@ -8,8 +8,6 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("=", "EQ"),
         ("!", "BANG"),
         ("-", "MINUS"),
-        ("<!--", "COMMENT_START"),
-        ("-->", "COMMENT_END"),
         ("<![CDATA[", "CDATA_START"),
         ("]]>", "CDATA_END"),
     ],
@@ -38,8 +36,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_ELEMENT_LIST",
         "HTML_ATTRIBUTE_LIST",
         "HTML_CONTENT",
-        "HTML_COMMENT",
         "HTML_CDATA_SECTION",
+        "COMMENT",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",
