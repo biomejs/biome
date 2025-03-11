@@ -2799,9 +2799,9 @@ export interface UseExhaustiveDependenciesOptions {
 export interface DeprecatedHooksOptions {}
 export interface UseImportExtensionsOptions {
 	/**
-	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
+	 * If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.
 	 */
-	suggestedExtensions?: Record<string, SuggestedExtensionMapping>;
+	forceJsExtensions?: boolean;
 }
 /**
  * Rule's options
@@ -2978,16 +2978,6 @@ Set to `true` to mark the identity of the hook's return value as stable, or use 
 For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
 	 */
 	stableResult?: StableHookResult;
-}
-export interface SuggestedExtensionMapping {
-	/**
-	 * Extension that should be used for component file imports
-	 */
-	component?: string;
-	/**
-	 * Extension that should be used for module imports
-	 */
-	module?: string;
 }
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
