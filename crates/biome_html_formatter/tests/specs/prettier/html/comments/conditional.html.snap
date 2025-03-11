@@ -271,6 +271,26 @@ conditional.html:14:2 parse ━━━━━━━━━━━━━━━━━�
     15 │ <!--[if lt IE 9]><html lang="zh-CN"><![endif]-->
     16 │ <html lang="zh-CN">
   
+conditional.html:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    14 │ <!DOCTYPE html>
+    15 │ <!--[if lt IE 9]><html lang="zh-CN"><![endif]-->
+  > 16 │ <html lang="zh-CN">
+       │ ^
+    17 │   <head></head>
+    18 │   <body></body>
+  
+  i Expected an attribute here.
+  
+    14 │ <!DOCTYPE html>
+    15 │ <!--[if lt IE 9]><html lang="zh-CN"><![endif]-->
+  > 16 │ <html lang="zh-CN">
+       │ ^
+    17 │   <head></head>
+    18 │   <body></body>
+  
 conditional.html:21:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an element name but instead found '!'.
@@ -290,6 +310,26 @@ conditional.html:21:2 parse ━━━━━━━━━━━━━━━━━�
        │  ^
     22 │ <!--[if lt IE 9]><html lang="zh-CN"><div><![endif]-->
     23 │ <html lang="zh-CN">
+  
+conditional.html:23:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    21 │ <!DOCTYPE html>
+    22 │ <!--[if lt IE 9]><html lang="zh-CN"><div><![endif]-->
+  > 23 │ <html lang="zh-CN">
+       │ ^
+    24 │   <head></head>
+    25 │   <body></body>
+  
+  i Expected an attribute here.
+  
+    21 │ <!DOCTYPE html>
+    22 │ <!--[if lt IE 9]><html lang="zh-CN"><div><![endif]-->
+  > 23 │ <html lang="zh-CN">
+       │ ^
+    24 │   <head></head>
+    25 │   <body></body>
   
 conditional.html:28:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -311,6 +351,26 @@ conditional.html:28:2 parse ━━━━━━━━━━━━━━━━━�
     29 │ <!--[if lt IE 9]><html lang="zh-CN"><div></div><![endif]-->
     30 │ <html lang="zh-CN">
   
+conditional.html:30:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    28 │ <!DOCTYPE html>
+    29 │ <!--[if lt IE 9]><html lang="zh-CN"><div></div><![endif]-->
+  > 30 │ <html lang="zh-CN">
+       │ ^
+    31 │   <head></head>
+    32 │   <body></body>
+  
+  i Expected an attribute here.
+  
+    28 │ <!DOCTYPE html>
+    29 │ <!--[if lt IE 9]><html lang="zh-CN"><div></div><![endif]-->
+  > 30 │ <html lang="zh-CN">
+       │ ^
+    31 │   <head></head>
+    32 │   <body></body>
+  
 conditional.html:43:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an element name but instead found '!'.
@@ -330,6 +390,26 @@ conditional.html:43:2 parse ━━━━━━━━━━━━━━━━━�
        │  ^
     44 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
     45 │ <!--[if gte IE 9]><!--><html><!--<![endif]-->
+  
+conditional.html:45:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    43 │ <!DOCTYPE html>
+    44 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+  > 45 │ <!--[if gte IE 9]><!--><html><!--<![endif]-->
+       │                        ^
+    46 │   <head></head>
+    47 │   <body></body>
+  
+  i Expected an attribute here.
+  
+    43 │ <!DOCTYPE html>
+    44 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+  > 45 │ <!--[if gte IE 9]><!--><html><!--<![endif]-->
+       │                        ^
+    46 │   <head></head>
+    47 │   <body></body>
   
 conditional.html:50:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -351,6 +431,26 @@ conditional.html:50:2 parse ━━━━━━━━━━━━━━━━━�
     51 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
     52 │ <!--[if gte IE 9]><!--><html hello><!--<![endif]-->
   
+conditional.html:52:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    50 │ <!DOCTYPE html>
+    51 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+  > 52 │ <!--[if gte IE 9]><!--><html hello><!--<![endif]-->
+       │                        ^
+    53 │   <head></head>
+    54 │   <body></body>
+  
+  i Expected an attribute here.
+  
+    50 │ <!DOCTYPE html>
+    51 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+  > 52 │ <!--[if gte IE 9]><!--><html hello><!--<![endif]-->
+       │                        ^
+    53 │   <head></head>
+    54 │   <body></body>
+  
 conditional.html:57:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an element name but instead found '!'.
@@ -371,6 +471,26 @@ conditional.html:57:2 parse ━━━━━━━━━━━━━━━━━�
     58 │ <!--[if lt IE 9]><html class="legacy-ie"><head><![endif]-->
     59 │ <!--[if gte IE 9]><!--><html><head><!--<![endif]-->
   
+conditional.html:59:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    57 │ <!DOCTYPE html>
+    58 │ <!--[if lt IE 9]><html class="legacy-ie"><head><![endif]-->
+  > 59 │ <!--[if gte IE 9]><!--><html><head><!--<![endif]-->
+       │                        ^
+    60 │   </head>
+    61 │   <body></body>
+  
+  i Expected an attribute here.
+  
+    57 │ <!DOCTYPE html>
+    58 │ <!--[if lt IE 9]><html class="legacy-ie"><head><![endif]-->
+  > 59 │ <!--[if gte IE 9]><!--><html><head><!--<![endif]-->
+       │                        ^
+    60 │   </head>
+    61 │   <body></body>
+  
 conditional.html:64:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an element name but instead found '!'.
@@ -390,6 +510,26 @@ conditional.html:64:2 parse ━━━━━━━━━━━━━━━━━�
        │  ^
     65 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
     66 │ <!--[if gte IE 9
+  
+conditional.html:67:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    65 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+    66 │ <!--[if gte IE 9
+  > 67 │ ]><!--><html><!--<![endif]-->
+       │        ^
+    68 │   <head></head>
+    69 │   <body></body>
+  
+  i Expected an attribute here.
+  
+    65 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+    66 │ <!--[if gte IE 9
+  > 67 │ ]><!--><html><!--<![endif]-->
+       │        ^
+    68 │   <head></head>
+    69 │   <body></body>
   
 conditional.html:71:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
