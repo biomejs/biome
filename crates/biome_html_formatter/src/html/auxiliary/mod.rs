@@ -5,7 +5,6 @@ pub(crate) mod attribute_initializer_clause;
 pub(crate) mod attribute_name;
 pub(crate) mod cdata_section;
 pub(crate) mod closing_element;
-pub(crate) mod comment;
 pub(crate) mod content;
 pub(crate) mod directive;
 pub(crate) mod element;

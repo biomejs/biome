@@ -122,6 +122,7 @@ fn doctype_upper_key() {
 #[test]
 fn string_literal() {
     assert_lex! {
+        HtmlLexContext::InsideTag,
         "\"data-attribute\"",
         HTML_STRING_LITERAL: 16,
     }
@@ -130,6 +131,7 @@ fn string_literal() {
 #[test]
 fn self_closing() {
     assert_lex! {
+        HtmlLexContext::InsideTag,
         "<div />",
         L_ANGLE: 1,
         HTML_LITERAL: 3,
@@ -142,6 +144,7 @@ fn self_closing() {
 #[test]
 fn element() {
     assert_lex! {
+        HtmlLexContext::InsideTag,
         "<div></div>",
         L_ANGLE: 1,
         HTML_LITERAL: 3,
@@ -156,7 +159,6 @@ fn element() {
 #[test]
 fn html_text() {
     assert_lex! {
-        HtmlLexContext::OutsideTag,
         "abcdefghijklmnopqrstuvwxyz!@_-:;",
         HTML_LITERAL: 32,
     }
@@ -195,6 +197,7 @@ fn doctype_with_quirk_and_system() {
 #[test]
 fn element_with_attributes() {
     assert_lex! {
+        HtmlLexContext::InsideTag,
         "<div class='joy and happiness'>",
         L_ANGLE: 1,
         HTML_LITERAL: 3,
@@ -209,6 +212,7 @@ fn element_with_attributes() {
 #[test]
 fn element_with_dashed_attributes() {
     assert_lex! {
+        HtmlLexContext::InsideTag,
         "<div aria-hidden>",
         L_ANGLE: 1,
         HTML_LITERAL: 3,
@@ -221,6 +225,7 @@ fn element_with_dashed_attributes() {
 #[test]
 fn html_element() {
     assert_lex! {
+        HtmlLexContext::InsideTag,
         "<html></html>",
         L_ANGLE: 1,
         HTML_LITERAL: 4,
@@ -235,7 +240,6 @@ fn html_element() {
 #[test]
 fn html_text_spaces() {
     assert_lex! {
-        HtmlLexContext::OutsideTag,
         "Lorem ipsum dolor sit amet, consectetur.",
         HTML_LITERAL: 40,
     }
@@ -244,20 +248,15 @@ fn html_text_spaces() {
 #[test]
 fn html_text_spaces_with_lines() {
     assert_lex! {
-        HtmlLexContext::OutsideTag,
         "Lorem ipsum dolor sit
         amet, consectetur.",
-        HTML_LITERAL: 21,
-        NEWLINE: 1,
-        WHITESPACE: 8,
-        HTML_LITERAL: 18,
+        HTML_LITERAL: 48,
     }
 }
 
 #[test]
 fn long_text() {
     assert_lex! {
-        HtmlLexContext::OutsideTag,
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dapibus velit non justo",
         HTML_LITERAL: 84,
     }
@@ -266,7 +265,7 @@ fn long_text() {
 #[test]
 fn text_trailing_whitespace() {
     assert_lex! {
-        HtmlLexContext::OutsideTag,
+        HtmlLexContext::Regular,
         "Lorem ipsum dolor <a",
         HTML_LITERAL: 17,
         WHITESPACE: 1,
@@ -278,7 +277,7 @@ fn text_trailing_whitespace() {
 #[test]
 fn text_trailing_whitespace_multiple() {
     assert_lex! {
-        HtmlLexContext::OutsideTag,
+        HtmlLexContext::Regular,
         "Lorem ipsum dolor  <a",
         HTML_LITERAL: 17,
         WHITESPACE: 2,
@@ -319,34 +318,6 @@ fn unquoted_attribute_value_invalid_chars() {
         L_ANGLE: 1,
         ERROR_TOKEN: 1,
         ERROR_TOKEN: 3,
-    }
-}
-
-#[test]
-fn comment_start() {
-    assert_lex! {
-        "<!--",
-        COMMENT_START: 4,
-    }
-}
-
-#[test]
-fn comment_end() {
-    assert_lex! {
-        HtmlLexContext::Comment,
-        "-->",
-        COMMENT_END: 3,
-    }
-}
-
-#[test]
-fn comment_full() {
-    assert_lex! {
-        HtmlLexContext::Comment,
-        "<!-- foo -->",
-        COMMENT_START: 4,
-        HTML_LITERAL: 5,
-        COMMENT_END: 3,
     }
 }
 

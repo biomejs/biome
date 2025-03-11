@@ -23,10 +23,12 @@ info: html/text/tag-should-in-fill.html
 -  >foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo
 -  bar</a-long-long-long-element
 ->
+-<!-- The end tag should stay in 80 print width -->
 +<a-long-long-long-element>
 +  foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar
 +</a-long-long-long-element>
- <!-- The end tag should stay in 80 print width -->
++<!-- The end tag should stay in 80 print width -->
+\ No newline at end of file
 ```
 
 # Output
@@ -35,5 +37,4 @@ info: html/text/tag-should-in-fill.html
 <a-long-long-long-element>
   foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar
 </a-long-long-long-element>
-<!-- The end tag should stay in 80 print width -->
-```
+<!-- The end tag should stay in 80 print width -->```

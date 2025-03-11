@@ -32,13 +32,7 @@ HtmlRoot {
             },
             children: HtmlElementList [
                 HtmlContent {
-                    value_token: HTML_LITERAL@5..17 "4 / 2 == 2" [Newline("\n"), Whitespace("\t")] [],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@17..24 "\"foo\"" [Newline("\n"), Whitespace("\t")] [],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@24..38 "html is cool" [Newline("\n"), Whitespace("\t")] [],
+                    value_token: HTML_LITERAL@5..38 "4 / 2 == 2\n\t\"foo\"\n\thtml is cool" [Newline("\n"), Whitespace("\t")] [],
                 },
             ],
             closing_element: HtmlClosingElement {
@@ -70,12 +64,8 @@ HtmlRoot {
         2: HTML_ATTRIBUTE_LIST@4..4
         3: R_ANGLE@4..5 ">" [] []
       1: HTML_ELEMENT_LIST@5..38
-        0: HTML_CONTENT@5..17
-          0: HTML_LITERAL@5..17 "4 / 2 == 2" [Newline("\n"), Whitespace("\t")] []
-        1: HTML_CONTENT@17..24
-          0: HTML_LITERAL@17..24 "\"foo\"" [Newline("\n"), Whitespace("\t")] []
-        2: HTML_CONTENT@24..38
-          0: HTML_LITERAL@24..38 "html is cool" [Newline("\n"), Whitespace("\t")] []
+        0: HTML_CONTENT@5..38
+          0: HTML_LITERAL@5..38 "4 / 2 == 2\n\t\"foo\"\n\thtml is cool" [Newline("\n"), Whitespace("\t")] []
       2: HTML_CLOSING_ELEMENT@38..45
         0: L_ANGLE@38..40 "<" [Newline("\n")] []
         1: SLASH@40..41 "/" [] []

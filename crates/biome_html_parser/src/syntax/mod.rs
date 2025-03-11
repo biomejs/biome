@@ -40,8 +40,8 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![<]);
-    p.bump(T![!]);
+    p.bump_with_context(T![<], HtmlLexContext::InsideTag);
+    p.bump_with_context(T![!], HtmlLexContext::Doctype);
 
     if p.at(T![doctype]) {
         p.eat_with_context(T![doctype], HtmlLexContext::Doctype);
@@ -74,7 +74,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
 
-    p.bump(T![<]);
+    p.bump_with_context(T![<], HtmlLexContext::InsideTag);
     let opening_tag_name = p.cur_text().to_string();
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
@@ -87,15 +87,15 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     AttributeList.parse_list(p);
 
     if p.at(T![/]) {
-        p.bump(T![/]);
-        p.expect_with_context(T![>], HtmlLexContext::OutsideTag);
+        p.bump_with_context(T![/], HtmlLexContext::InsideTag);
+        p.expect_with_context(T![>], HtmlLexContext::Regular);
         Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT))
     } else {
         if should_be_self_closing {
             if p.at(T![/]) {
-                p.bump(T![/]);
+                p.bump_with_context(T![/], HtmlLexContext::InsideTag);
             }
-            p.expect_with_context(T![>], HtmlLexContext::OutsideTag);
+            p.expect_with_context(T![>], HtmlLexContext::Regular);
             return Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT));
         }
         p.expect_with_context(
@@ -108,7 +108,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                     _ => unreachable!(),
                 })
             } else {
-                HtmlLexContext::OutsideTag
+                HtmlLexContext::Regular
             },
         );
         let opening = m.complete(p, HTML_OPENING_ELEMENT);
@@ -136,8 +136,8 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    p.bump(T![<]);
-    p.bump(T![/]);
+    p.bump_with_context(T![<], HtmlLexContext::InsideTag);
+    p.bump_with_context(T![/], HtmlLexContext::InsideTag);
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()));
@@ -149,9 +149,9 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     // There shouldn't be any attributes in a closing tag.
     while p.at(HTML_LITERAL) {
         p.error(closing_tag_should_not_have_attributes(p, p.cur_range()));
-        p.bump_remap(HTML_BOGUS);
+        p.bump_remap_with_context(HTML_BOGUS, HtmlLexContext::InsideTag);
     }
-    p.bump_with_context(T![>], HtmlLexContext::OutsideTag);
+    p.bump_with_context(T![>], HtmlLexContext::Regular);
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
 
@@ -165,12 +165,11 @@ impl ParseNodeList for ElementList {
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         match p.cur() {
-            T![<!--] => parse_comment(p),
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
             HTML_LITERAL => {
                 let m = p.start();
-                p.bump_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
+                p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
                 Present(m.complete(p, HTML_CONTENT))
             }
             _ => Absent,
@@ -247,7 +246,13 @@ fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     }
     let m = p.start();
 
-    p.bump(HTML_LITERAL);
+    p.bump_with_context(
+        HTML_LITERAL,
+        match kind {
+            HTML_TAG_NAME | HTML_ATTRIBUTE_NAME => HtmlLexContext::InsideTag,
+            _ => HtmlLexContext::Regular,
+        },
+    );
 
     Present(m.complete(p, kind))
 }
@@ -258,7 +263,7 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
 
-    p.bump(HTML_STRING_LITERAL);
+    p.bump_with_context(HTML_STRING_LITERAL, HtmlLexContext::InsideTag);
 
     Present(m.complete(p, HTML_STRING))
 }
@@ -271,19 +276,6 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
     parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
-}
-
-fn parse_comment(p: &mut HtmlParser) -> ParsedSyntax {
-    if !p.at(T![<!--]) {
-        return Absent;
-    }
-    let m = p.start();
-    p.bump_with_context(T![<!--], HtmlLexContext::Comment);
-    while !p.at(T![-->]) && !p.at(EOF) {
-        p.bump_with_context(HTML_LITERAL, HtmlLexContext::Comment);
-    }
-    p.expect(T![-->]);
-    Present(m.complete(p, HTML_COMMENT))
 }
 
 fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {

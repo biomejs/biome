@@ -16,13 +16,15 @@ pub(crate) struct HtmlTokenSource<'source> {
 
 #[derive(Copy, Clone, Debug, Default)]
 pub(crate) enum HtmlLexContext {
-    /// The default state. This state is used for a majority of the lexing, which is inside html tags.
-    #[default]
-    Regular,
+    /// The default state. This state is used for lexing outside of tags.
+    ///
     /// When the lexer is outside of a tag, special characters are lexed as text.
     ///
     /// The exeptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceeded with a `<`.
-    OutsideTag,
+    #[default]
+    Regular,
+    /// When the lexer is inside a tag, special characters are lexed as tag tokens.
+    InsideTag,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
@@ -33,8 +35,6 @@ pub(crate) enum HtmlLexContext {
     Doctype,
     /// Treat everything as text until the closing tag is encountered.
     EmbeddedLanguage(HtmlEmbededLanguage),
-    /// Comments are treated as text until the closing comment tag is encountered.
-    Comment,
     /// CDATA Sections are treated as text until the closing CDATA token is encountered.
     CdataSection,
 }
