@@ -41,6 +41,13 @@ pub struct FormatVerbatimNode<'node, L: Language> {
     format_comments: bool,
 }
 
+impl<L: Language> FormatVerbatimNode<'_, L> {
+    pub fn with_format_comments(mut self, format_comments: bool) -> Self {
+        self.format_comments = format_comments;
+        self
+    }
+}
+
 impl<Context> Format<Context> for FormatVerbatimNode<'_, Context::Language>
 where
     Context: CstFormatContext,

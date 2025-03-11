@@ -17,15 +17,8 @@ HtmlRoot {
     bom_token: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
-        HtmlElement {
-            opening_element: HtmlOpeningElement {
-                l_angle_token: L_ANGLE@0..1 "<" [] [],
-                name: missing (required),
-                attributes: HtmlAttributeList [],
-                r_angle_token: missing (required),
-            },
-            children: HtmlElementList [],
-            closing_element: missing (required),
+        HtmlContent {
+            value_token: HTML_LITERAL@0..1 "<" [] [],
         },
     ],
     eof_token: EOF@1..2 "" [Newline("\n")] [],
@@ -39,14 +32,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: HTML_ELEMENT_LIST@0..1
-    0: HTML_ELEMENT@0..1
-      0: HTML_OPENING_ELEMENT@0..1
-        0: L_ANGLE@0..1 "<" [] []
-        1: (empty)
-        2: HTML_ATTRIBUTE_LIST@1..1
-        3: (empty)
-      1: HTML_ELEMENT_LIST@1..1
-      2: (empty)
+    0: HTML_CONTENT@0..1
+      0: HTML_LITERAL@0..1 "<" [] []
   3: EOF@1..2 "" [Newline("\n")] []
 
 ```
@@ -54,18 +41,14 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-solo-no-tag-name.html:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+solo-no-tag-name.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an element name but instead found the end of the file.
+  × Unescaped `<` bracket character. Expected a tag or escaped character.
   
-    1 │ <
-  > 2 │ 
-      │ 
+  > 1 │ <
+      │ ^
+    2 │ 
   
-  i Expected an element name here.
-  
-    1 │ <
-  > 2 │ 
-      │ 
+  i Replace this character with `&lt;` to escape it.
   
 ```

@@ -16,14 +16,8 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     directive: missing (optional),
-    html: HtmlElementList [
-        HtmlComment {
-            comment_start_token: COMMENT_START@0..4 "<!--" [] [],
-            content_token: HTML_LITERAL@4..17 " Hello World " [] [],
-            comment_end_token: COMMENT_END@17..20 "-->" [] [],
-        },
-    ],
-    eof_token: EOF@20..21 "" [Newline("\n")] [],
+    html: HtmlElementList [],
+    eof_token: EOF@0..21 "" [Comments("<!-- Hello World -->"), Newline("\n")] [],
 }
 ```
 
@@ -33,11 +27,7 @@ HtmlRoot {
 0: HTML_ROOT@0..21
   0: (empty)
   1: (empty)
-  2: HTML_ELEMENT_LIST@0..20
-    0: HTML_COMMENT@0..20
-      0: COMMENT_START@0..4 "<!--" [] []
-      1: HTML_LITERAL@4..17 " Hello World " [] []
-      2: COMMENT_END@17..20 "-->" [] []
-  3: EOF@20..21 "" [Newline("\n")] []
+  2: HTML_ELEMENT_LIST@0..0
+  3: EOF@0..21 "" [Comments("<!-- Hello World -->"), Newline("\n")] []
 
 ```

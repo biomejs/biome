@@ -13,19 +13,25 @@ mod language {
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
+    //     let src = r#"
+    // <span>foo</span>
+    // <!-- biome-ignore format: reason -->
+    // foo bar baz boof
+    // quick brown fox
+    // "#;
     let src = r#"
-<div>
-    <p>hello
-    </p>
-</div>
-
-    "#;
+foo bar baz boof
+<!-- comment -->
+quick brown fox
+"#;
     let source_type = HtmlFileSource::html();
     let tree = parse_html(src);
+    eprintln!("{:#?}", &tree.tree());
+
     let options = HtmlFormatOptions::new(HtmlFileSource::html())
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())
-        .with_attribute_position(AttributePosition::Multiline);
+        .with_attribute_position(AttributePosition::Auto);
 
     let doc = format_node(options.clone(), &tree.syntax()).unwrap();
     let result = doc.print().unwrap();
