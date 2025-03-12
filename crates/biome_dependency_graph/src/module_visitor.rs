@@ -82,8 +82,13 @@ impl<'a> ModuleVisitor<'a> {
                 .rev()
                 .find_map(|trivia| match trivia.kind() {
                     TriviaPieceKind::MultiLineComment | TriviaPieceKind::SingleLineComment => {
-                        (trivia.text().starts_with("/**") && trivia.text().ends_with("*/"))
-                            .then(|| normalize_jsdoc_comment(trivia.text()))
+                        // JSDoc comments must start with exactly `/**`.
+                        // Either more or less asterisks are ignored.
+                        let text = trivia.text();
+                        (text.starts_with("/**")
+                            && text.as_bytes().get(3).is_some_and(|c| *c != b'*')
+                            && text.ends_with("*/"))
+                        .then(|| normalize_jsdoc_comment(text))
                     }
                     _ => None,
                 })

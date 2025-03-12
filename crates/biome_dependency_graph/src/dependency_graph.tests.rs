@@ -245,10 +245,11 @@ fn test_resolve_exports() {
 
             export { foo };
             
-            /**
-             * @package
-             */
+            /** @package */
             export function bar() {}
+
+            /* @ignored because of incorrect amount of asterisks */
+            export function baz() {}
 
             export const { a, b, c: [d, e] } = getObject();
 
@@ -302,7 +303,7 @@ fn test_resolve_exports() {
     let dependency_data = dependency_graph.data.pin();
     let data = dependency_data.get(Utf8Path::new("/src/index.ts")).unwrap();
 
-    assert_eq!(data.exports.len(), 8);
+    assert_eq!(data.exports.len(), 9);
     assert_eq!(
         data.exports.get(&Text::Static("foo")),
         Some(&Export::Own(OwnExport {
@@ -313,6 +314,12 @@ fn test_resolve_exports() {
         data.exports.get(&Text::Static("bar")),
         Some(&Export::Own(OwnExport {
             jsdoc_comment: Some("@package".to_string())
+        }))
+    );
+    assert_eq!(
+        data.exports.get(&Text::Static("baz")),
+        Some(&Export::Own(OwnExport {
+            jsdoc_comment: None // block comment is not a JSDoc comment
         }))
     );
 
