@@ -1327,7 +1327,6 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_rowan",
- "log",
 ]
 
 [[package]]

@@ -1,6 +1,5 @@
 use crate::kind_src::KindsSrc;
 
-// 对Token进行分组，生成is_xx 方法
 pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
     punct: &[
         ("<", "L_ANGLE"),
@@ -14,11 +13,15 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         ("!", "BANG"),
         ("-", "MINUS"),
         ("*", "STAR"),
+        ("**", "DOUBLE_STAR"),
         ("`", "BACKTICK"),
+        ("```", "TRIPLE_BACKTICK"),
         ("~", "TILDE"),
         ("   ", "WHITESPACE3"),
         ("_", "UNDERSCORE"),
+        ("__", "DOUBLE_UNDERSCORE"),
         ("#", "HASH"),
+        (",", "COMMA"),
     ],
     keywords: &["null"],
     literals: &[
@@ -43,6 +46,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_HEADER",
         "MD_INDENT_CODE_BLOCK",
         "MD_FENCED_CODE_BLOCK",
+        "MD_CODE_NAME_LIST",
         "MD_HTML_BLOCK",
         "MD_LINK_BLOCK",
         "MD_QUOTE",
@@ -51,11 +55,18 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_BULLET_LIST",
         "MD_ORDER_LIST",
         "MD_PARAGRAPH",
-        "MD_PARAGRAPH_ITEM_LIST",
-        "MD_INLINE_CODE",
+        "MD_INLINE_ITEM_LIST",
         "MD_INLINE_EMPHASIS",
+        "MD_INLINE_ITALIC",
+        "MD_INLINE_CODE",
+        "MD_BULLET",
         "MD_INLINE_LINK",
         "MD_INLINE_IMAGE",
+        "MD_INLINE_IMAGE_ALT",
+        "MD_INDENTED_CODE_LINE",
+        "MD_INLINE_IMAGE_LINK",
+        "MD_INLINE_IMAGE_SOURCE",
+        "MD_INDENTED_CODE_LINE_LIST",
         "MD_HARD_LINE",
         "MD_SOFT_BREAK",
         "MD_TEXTUAL",
