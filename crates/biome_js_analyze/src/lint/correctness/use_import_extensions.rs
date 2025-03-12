@@ -139,7 +139,7 @@ pub struct SuggestedExtensionMapping {
 }
 
 impl Rule for UseImportExtensions {
-    type Query = ResolvedImports;
+    type Query = ResolvedImports<AnyJsImportLike>;
     type State = UseImportExtensionsState;
     type Signals = Option<Self::State>;
     type Options = Box<UseImportExtensionsOptions>;
@@ -149,14 +149,7 @@ impl Rule for UseImportExtensions {
         let force_js_extensions = ctx.options().force_js_extensions;
 
         let node = ctx.query();
-        let name_token = node.module_name_token()?;
-        let specifier_text = inner_string_text(&name_token);
-        let specifier = specifier_text.text();
-        let import = if node.is_static_import() {
-            file_imports.static_imports.get(specifier)
-        } else {
-            file_imports.dynamic_imports.get(specifier)
-        }?;
+        let import = file_imports.get_import_by_node(node)?;
         let resolved_path = import.resolved_path.as_ref().ok()?;
 
         get_extensionless_import(node, resolved_path, force_js_extensions)
