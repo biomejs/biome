@@ -176,15 +176,7 @@ pub fn dependency_graph_for_test_file(
     let dependency_graph = DependencyGraph::default();
 
     let dir = input_file.parent().unwrap().to_path_buf();
-    let paths: Vec<_> = std::fs::read_dir(&dir)
-        .unwrap()
-        .filter_map(|path| {
-            let path = Utf8PathBuf::try_from(path.unwrap().path()).unwrap();
-            DocumentFileSource::from_well_known(&path)
-                .is_javascript_like()
-                .then(|| BiomePath::new(path))
-        })
-        .collect();
+    let paths = get_js_like_paths_in_dir(&dir);
     let fs = OsFileSystem::new(dir);
 
     dependency_graph.update_imports_for_js_paths(&fs, project_layout, &paths, &[], |path| {
@@ -199,6 +191,24 @@ pub fn dependency_graph_for_test_file(
     });
 
     Arc::new(dependency_graph)
+}
+
+fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
+    std::fs::read_dir(dir)
+        .unwrap()
+        .flat_map(|path| {
+            let path = Utf8PathBuf::try_from(path.unwrap().path()).unwrap();
+            if path.is_dir() {
+                get_js_like_paths_in_dir(&path)
+            } else {
+                DocumentFileSource::from_well_known(&path)
+                    .is_javascript_like()
+                    .then(|| BiomePath::new(path))
+                    .into_iter()
+                    .collect()
+            }
+        })
+        .collect()
 }
 
 pub fn project_layout_with_node_manifest(
