@@ -35,15 +35,31 @@ pub(crate) fn parse_blockquote(p: &mut MarkdownParser) -> ParsedSyntax {
     }
 
     // Parse the first line which must start with '>'
-    if parse_blockquote_line(p).is_absent() {
+    let first_line = parse_blockquote_line(p);
+    if first_line.is_absent() {
         p.rewind(checkpoint);
         return Absent;
     }
 
     // Parse additional lines that may be part of the blockquote
-    // This handles consecutive blockquote lines
-    while at_blockquote(p) {
-        if parse_blockquote_line(p).is_absent() {
+    // This handles consecutive blockquote lines and continuation lines
+    while !p.at(T![EOF]) {
+        // Check for another blockquote line
+        if at_blockquote(p) {
+            if parse_blockquote_line(p).is_absent() {
+                break;
+            }
+        }
+        // Check for a blank line - this ends the blockquote
+        else if p.at(NEWLINE) {
+            p.bump(NEWLINE);
+            // If the next line isn't a blockquote, we're done
+            if !at_blockquote(p) {
+                break;
+            }
+        }
+        // End of blockquote
+        else {
             break;
         }
     }
@@ -80,19 +96,22 @@ fn parse_blockquote_line(p: &mut MarkdownParser) -> ParsedSyntax {
 
     // Consume everything until the end of line or end of file
     while !p.at(NEWLINE) && !p.at(T![EOF]) {
-        // Special handling for nested blockquotes
+        // Check for nested blockquotes
         if p.at(R_ANGLE) {
+            // Try to parse a nested blockquote line
             let nested_checkpoint = p.checkpoint();
-            if parse_blockquote_line(p).is_present() {
+            let nested_result = parse_blockquote_line(p);
+
+            if nested_result.is_present() {
                 continue;
             }
+
+            // If we couldn't parse a nested blockquote, rewind and treat as regular content
             p.rewind(nested_checkpoint);
         }
 
-        // Create proper textual nodes for the content
-        let text_m = p.start();
+        // Parse regular content without creating individual textual nodes
         p.bump_any();
-        text_m.complete(p, MD_TEXTUAL);
     }
 
     content_marker.complete(p, MD_BLOCKQUOTE_CONTENT);
