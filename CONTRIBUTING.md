@@ -406,7 +406,8 @@ The description of the changeset should follow the these guidelines:
 
 - Use the past tense when describing what you did, e.g. "Added new feature", "Fixed edge case".
 - Use the present tense when describing Biome behaviour, e.g. "Biome now supports ...". 
-- If you fixed a bug, please add the link to the issue, e.g. "Fixed [#4444]()".
+- If you fixed a bug, please add the link to the issue, e.g. "Fixed [#4444](https://github.com/biomejs/biome/issues/4444)".
+- If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated yet, the URL is pretty predictable...).
 - Whenever applicable, add a code block to show your new changes. For example, for a new
   rule you might want to show an invalid case, for the formatter you might want to show
   how the new formatting changes, and so on.

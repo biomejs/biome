@@ -2,7 +2,7 @@
 "@biomejs/biome": major
 ---
 
-The rule `useNamingConvention` no longer accepts non-ASCII characters by default.
+The rule [`useNamingConvention`](https://biomejs.dev/linter/rules/use-naming-convention/) no longer accepts non-ASCII characters by default.
 
 Prior to Biome 2.0, non-ASCII names were accepted by default. They are now rejected.
 
