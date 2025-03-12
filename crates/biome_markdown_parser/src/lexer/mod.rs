@@ -180,7 +180,10 @@ impl<'src> MarkdownLexer<'src> {
         let dispatched = lookup_byte(current);
         match dispatched {
             WHS => self.consume_newline_or_whitespace(),
-            MUL | MIN | IDT => self.consume_thematic_break_literal(),
+            MUL => self.consume_star(),
+            MIN => self.consume_minus(),
+            IDT => self.consume_underscore(),
+            DIG => self.consume_digit(),
             _ => self.consume_textual(),
         }
     }
@@ -269,31 +272,128 @@ impl<'src> MarkdownLexer<'src> {
         TAB
     }
 
-    fn consume_thematic_break_literal(&mut self) -> MarkdownSyntaxKind {
+    fn consume_star(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
-        let start_char = match self.current_byte() {
-            Some(b'-') => b'-',
-            Some(b'*') => b'*',
-            Some(b'_') => b'_',
-            _ => return self.consume_textual(),
-        };
+        // First check if this might be a thematic break
+        let checkpoint = self.position;
 
-        let mut count = 0;
-        loop {
-            self.consume_whitespace();
-            if matches!(self.current_byte(), Some(ch) if ch == start_char) {
-                self.advance(1);
-                count += 1;
+        // Try to recognize thematic breaks like "***" or "* * *"
+        if self.is_thematic_break(b'*') {
+            return MD_THEMATIC_BREAK_LITERAL;
+        }
+
+        // Reset position after thematic break check
+        self.position = checkpoint;
+
+        // Check for list marker (* )
+        self.advance(1); // Consume the star
+
+        if matches!(self.current_byte(), Some(b' ' | b'\t')) {
+            // It's a list marker
+            return STAR;
+        }
+
+        // Not a special token, just a regular star
+        self.position = checkpoint;
+        self.consume_textual()
+    }
+
+    fn consume_minus(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // First check if this might be a thematic break
+        let checkpoint = self.position;
+
+        // Try to recognize thematic breaks like "---" or "- - -"
+        if self.is_thematic_break(b'-') {
+            return MD_THEMATIC_BREAK_LITERAL;
+        }
+
+        // Reset position after thematic break check
+        self.position = checkpoint;
+
+        // Check for list marker (- )
+        self.advance(1); // Consume the minus
+
+        if matches!(self.current_byte(), Some(b' ' | b'\t')) {
+            // It's a list marker
+            return MINUS;
+        }
+
+        // Not a special token, just a regular minus
+        self.position = checkpoint;
+        self.consume_textual()
+    }
+
+    fn consume_underscore(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // Check if this is a thematic break
+        let checkpoint = self.position;
+
+        // Try to recognize thematic breaks like "___" or "_ _ _"
+        if self.is_thematic_break(b'_') {
+            return MD_THEMATIC_BREAK_LITERAL;
+        }
+
+        // Not a thematic break or emphasis
+        self.position = checkpoint;
+        self.consume_textual()
+    }
+
+    /// Check if the current position starts a thematic break
+    /// This handles patterns like "---", "***", "___" as well as "- - -", "* * *", "_ _ _"
+    fn is_thematic_break(&mut self, marker: u8) -> bool {
+        let mut marker_count = 0;
+        let mut pos = self.position;
+        let src = self.source.as_bytes();
+
+        while pos < src.len() {
+            if pos < src.len() && src[pos] == marker {
+                marker_count += 1;
+                pos += 1;
+            } else if pos < src.len() && (src[pos] == b' ' || src[pos] == b'\t') {
+                pos += 1;
             } else {
                 break;
             }
         }
-        // until next newline or eof
-        if matches!(self.current_byte(), Some(b'\n' | b'\r') | None) && count >= 3 {
-            return MD_THEMATIC_BREAK_LITERAL;
+
+        // A valid thematic break must have at least 3 markers and be followed by a newline or EOF
+        if marker_count >= 3 && (pos >= src.len() || src[pos] == b'\n' || src[pos] == b'\r') {
+            // Consume the entire thematic break
+            self.position = pos;
+            return true;
         }
-        ERROR_TOKEN
+
+        false
+    }
+
+    fn consume_digit(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // Check if this is a list marker (1. ) or just a digit
+        let checkpoint = self.position;
+
+        // Consume all digits
+        while matches!(self.current_byte(), Some(b'0'..=b'9')) {
+            self.advance(1);
+        }
+
+        // Check for period or closing parenthesis
+        if matches!(self.current_byte(), Some(b'.') | Some(b')')) {
+            self.advance(1);
+
+            // Check for whitespace
+            if matches!(self.current_byte(), Some(b' ' | b'\t')) {
+                return DIGIT;
+            }
+        }
+
+        // Not a list marker, reset and parse as textual
+        self.position = checkpoint;
+        self.consume_textual()
     }
 
     /// Get the UTF8 char which starts at the current byte
