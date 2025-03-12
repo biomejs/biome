@@ -19,12 +19,17 @@ impl std::hash::Hash for TokenText {
 }
 
 impl TokenText {
-    pub(crate) fn new(token: GreenToken) -> TokenText {
+    #[inline]
+    pub fn new_raw(kind: crate::RawSyntaxKind, text: &str) -> Self {
+        Self::new(GreenToken::new_raw(kind, text))
+    }
+
+    pub(crate) fn new(token: GreenToken) -> Self {
         let range = TextRange::at(TextSize::default(), token.text_len());
         Self { token, range }
     }
 
-    pub(crate) fn with_range(token: GreenToken, range: TextRange) -> TokenText {
+    pub(crate) fn with_range(token: GreenToken, range: TextRange) -> Self {
         debug_assert!(range.end() <= token.text_len());
         Self { token, range }
     }

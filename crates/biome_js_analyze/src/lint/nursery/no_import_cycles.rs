@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_dependency_graph::ModuleImports;
+use biome_dependency_graph::ModuleDependencyData;
 use biome_diagnostics::Severity;
 use biome_js_syntax::inner_string_text;
 use biome_rowan::AstNode;
@@ -160,7 +160,7 @@ impl Rule for NoImportCycles {
 fn find_cycle(
     ctx: &RuleContext<NoImportCycles>,
     start_path: &Utf8Path,
-    mut imports: ModuleImports,
+    mut imports: ModuleDependencyData,
 ) -> Option<Vec<String>> {
     let mut seen = HashSet::new();
     let mut stack = Vec::new();

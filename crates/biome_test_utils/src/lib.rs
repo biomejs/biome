@@ -179,7 +179,7 @@ pub fn dependency_graph_for_test_file(
     let paths = get_js_like_paths_in_dir(&dir);
     let fs = OsFileSystem::new(dir);
 
-    dependency_graph.update_imports_for_js_paths(&fs, project_layout, &paths, &[], |path| {
+    dependency_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[], |path| {
         fs.read_file_from_path(path).ok().and_then(|content| {
             let file_source = path
                 .extension()
