@@ -1822,8 +1822,20 @@
 		"ImportGroup": {
 			"anyOf": [
 				{ "$ref": "#/definitions/PredefinedImportGroup" },
-				{ "$ref": "#/definitions/Glob" }
+				{ "$ref": "#/definitions/ImportSourceGlob" },
+				{
+					"type": "array",
+					"items": { "$ref": "#/definitions/ImportSourceGlob" }
+				}
 			]
+		},
+		"ImportGroups": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/ImportGroup" }
+		},
+		"ImportSourceGlob": {
+			"description": "Glob to match against import sources.",
+			"allOf": [{ "$ref": "#/definitions/Glob" }]
 		},
 		"IndentScriptAndStyle": {
 			"description": "Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).\n\nWhen true, the content of `<script>` and `<style>` tags will be indented one level.",
@@ -3045,12 +3057,13 @@
 		"Options": {
 			"type": "object",
 			"properties": {
-				"importGroups": {
-					"default": [],
-					"type": "array",
-					"items": { "$ref": "#/definitions/ImportGroup" }
-				},
-				"legacy": { "default": false, "type": "boolean" }
+				"groups": {
+					"default": null,
+					"anyOf": [
+						{ "$ref": "#/definitions/ImportGroups" },
+						{ "type": "null" }
+					]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -3279,10 +3292,7 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
-		"PredefinedImportGroup": {
-			"type": "string",
-			"enum": [":blank-line:", ":bun:", ":node:", ":types:"]
-		},
+		"PredefinedImportGroup": { "type": "string", "enum": [":BUN:", ":NODE:"] },
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },

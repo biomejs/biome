@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsorted-imports-empty-header.js
+---
+# Input
+```js
+import {} from "b"
+import {} from "a"
+
+```
+
+# Actions
+```diff
+@@ -1,2 +1,2 @@
++import {} from "a"
+ import {} from "b"
+-import {} from "a"
+
+```

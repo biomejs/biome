@@ -2377,8 +2377,7 @@ export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
 export interface Options {
-	importGroups?: ImportGroup[];
-	legacy?: boolean;
+	groups?: ImportGroups;
 }
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_Null {
@@ -2743,7 +2742,7 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	 */
 	options: NoDoubleEqualsOptions;
 }
-export type ImportGroup = PredefinedImportGroup | Glob;
+export type ImportGroups = ImportGroup[];
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -2998,11 +2997,10 @@ If `false`, no such exception will be made.
 	 */
 	ignoreNull: boolean;
 }
-export type PredefinedImportGroup =
-	| ":blank-line:"
-	| ":bun:"
-	| ":node:"
-	| ":types:";
+export type ImportGroup =
+	| PredefinedImportGroup
+	| ImportSourceGlob
+	| ImportSourceGlob[];
 export type Visibility = "public" | "package" | "private";
 export type DependencyAvailability = boolean | string[];
 export interface Hook {
@@ -3052,6 +3050,11 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
+export type PredefinedImportGroup = ":BUN:" | ":NODE:";
+/**
+ * Glob to match against import sources.
+ */
+export type ImportSourceGlob = Glob;
 export type StableHookResult = boolean | number[];
 export interface CustomRestrictedImportOptions {
 	/**

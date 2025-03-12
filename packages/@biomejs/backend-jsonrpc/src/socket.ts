@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { type Socket, connect } from "node:net";
+import { connect, type Socket } from "node:net";
 
 function getSocket(command: string): Promise<string> {
 	return new Promise((resolve, reject) => {

@@ -1,8 +1,9 @@
 use crate::{
-    AnyJsBinding, AnyJsImportClause, AnyJsModuleSource, AnyJsNamedImportSpecifier,
-    JsCallExpression, JsDefaultImportSpecifier, JsImport, JsImportAssertion,
-    JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
-    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken, inner_string_text,
+    AnyJsBinding, AnyJsCombinedSpecifier, AnyJsImportClause, AnyJsModuleSource,
+    AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsImport,
+    JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
+    JsNamedImportSpecifiers, JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier,
+    JsSyntaxKind, JsSyntaxToken, inner_string_text,
 };
 use biome_rowan::{
     AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
@@ -39,11 +40,10 @@ impl AnyJsImportClause {
     /// ```
     pub fn type_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            Self::JsImportBareClause(_) => None,
             Self::JsImportDefaultClause(clause) => clause.type_token(),
             Self::JsImportNamedClause(clause) => clause.type_token(),
             Self::JsImportNamespaceClause(clause) => clause.type_token(),
-            Self::JsImportCombinedClause(_) => None,
+            Self::JsImportBareClause(_) | Self::JsImportCombinedClause(_) => None,
         }
     }
 
@@ -75,6 +75,24 @@ impl AnyJsImportClause {
         })
     }
 
+    pub fn named_specifiers(&self) -> Option<JsNamedImportSpecifiers> {
+        match self {
+            Self::JsImportBareClause(_) => None,
+            Self::JsImportCombinedClause(clause) => {
+                if let Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifiers)) =
+                    clause.specifier()
+                {
+                    Some(named_specifiers)
+                } else {
+                    None
+                }
+            }
+            Self::JsImportDefaultClause(_) => None,
+            Self::JsImportNamedClause(clause) => clause.named_specifiers().ok(),
+            Self::JsImportNamespaceClause(_) => None,
+        }
+    }
+
     /// Attribute of this import clause.
     ///
     /// ```
@@ -95,6 +113,39 @@ impl AnyJsImportClause {
             Self::JsImportNamedClause(clause) => clause.assertion(),
             Self::JsImportNamespaceClause(clause) => clause.assertion(),
             Self::JsImportCombinedClause(clause) => clause.assertion(),
+        }
+    }
+
+    /// Returns an import clause with `named_specifiers` as named specifiers
+    /// or the import clause itself if it doesn't accept any named specifiers.
+    pub fn with_named_specifiers(self, named_specifiers: JsNamedImportSpecifiers) -> Self {
+        match self {
+            Self::JsImportBareClause(_) => self,
+            Self::JsImportCombinedClause(clause) => if matches!(
+                clause.specifier(),
+                Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(_))
+            ) {
+                clause.with_specifier(named_specifiers.into())
+            } else {
+                clause
+            }
+            .into(),
+            Self::JsImportDefaultClause(_) => self,
+            Self::JsImportNamedClause(clause) => {
+                clause.with_named_specifiers(named_specifiers).into()
+            }
+            Self::JsImportNamespaceClause(_) => self,
+        }
+    }
+
+    /// Returns an import clause with `attribute` as import attribute.
+    pub fn with_attribute(self, attribute: Option<JsImportAssertion>) -> Self {
+        match self {
+            Self::JsImportBareClause(clause) => clause.with_assertion(attribute).into(),
+            Self::JsImportCombinedClause(clause) => clause.with_assertion(attribute).into(),
+            Self::JsImportDefaultClause(clause) => clause.with_assertion(attribute).into(),
+            Self::JsImportNamedClause(clause) => clause.with_assertion(attribute).into(),
+            Self::JsImportNamespaceClause(clause) => clause.with_assertion(attribute).into(),
         }
     }
 }

@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-
 import { Transport } from "../dist/transport";
 
 function makeMessage(body) {
