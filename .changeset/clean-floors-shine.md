@@ -1,7 +1,7 @@
 ---
 "@biomejs/biome": patch
 ---
-Fix [#4553](https://github.com/biomejs/biome/issues/4553), `noUselessFragments` fix result has invalid syntax for JSX attribute, the follow code will fix:
+Fixed [#4553](https://github.com/biomejs/biome/issues/4553): `noUselessFragments` will now correctly fix JSX attributes:
 
 ```jsx
 <Suspense fallback={<><span>Loading...</span></>}>
@@ -9,7 +9,7 @@ Fix [#4553](https://github.com/biomejs/biome/issues/4553), `noUselessFragments` 
 </Suspense>;
 ```
 
-it will fix as:
+becomes:
 
 ```jsx
 <Suspense fallback={<span>Loading...</span>}>

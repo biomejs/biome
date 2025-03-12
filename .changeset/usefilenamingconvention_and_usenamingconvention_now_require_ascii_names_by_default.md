@@ -2,8 +2,9 @@
 "@biomejs/biome": major
 ---
 
-Prior to Biome 2.0, non-ASCII names were accepted by default.
-They are now rejected.
+The rule `useNamingConvention` no longer accepts non-ASCII characters by default.
+
+Prior to Biome 2.0, non-ASCII names were accepted by default. They are now rejected.
 
 For example, the following code is now reported as invalid by the `useNamingConvention` rule.
 

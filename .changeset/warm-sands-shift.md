@@ -1,6 +1,7 @@
 ---
 "@biomejs/biome": minor
 ---
+
 [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now provides a code fix.
 
 ```diff

@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fix [#2406](https://github.com/biomejs/biome/issues/2406), don't expand properties of object type annotation in function parameters, which was inconsistent with Prettier.
+Fixed [#2406](https://github.com/biomejs/biome/issues/2406): We no longer expand properties of object type annotations in function parameters to align with Prettier.

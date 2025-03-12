@@ -2,16 +2,14 @@
 "@biomejs/biome": patch
 ---
 
-Suppression comment should not fail with inner comments in functions.
+Fixed [#4714](https://github.com/biomejs/biome/pull/4714): Suppression comments no longer fail on functions that themselves contain suppression comments.
 
-The following code:
+This now works correctly:
 
 ```ts
-// biome-ignore lint/complexity/useArrowFunction: not work
+// biome-ignore lint/complexity/useArrowFunction: this suppression now works
 const foo0 = function (bar: string) {
-	// biome-ignore lint/style/noParameterAssign: work
+	// biome-ignore lint/style/noParameterAssign: even if there are other suppressions inside
 	bar = "baz";
 };
 ```
-
-The suppression comment `// biome-ignore lint/style/noParameterAssign: work` will not be invalid.
