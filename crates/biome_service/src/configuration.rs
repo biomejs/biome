@@ -292,7 +292,7 @@ fn load_user_config(
     }
 }
 
-// judge if path a is parent path for path b.
+/// judge if path a is parent path for path b.
 fn is_parent_of(a: Utf8PathBuf, b: Utf8PathBuf) -> bool {
     if a == b {
         return false;
