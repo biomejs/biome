@@ -20,7 +20,7 @@ pub fn unescape_js_string(text: TokenText) -> Text {
         Hex4Digits(u8, u32),
         // `\xXX`
         HexEscape(u8, u8),
-        // `\0...` (TODO)
+        // `\0...`
         LegacyOctal,
         // Skips one character.
         Skip,
