@@ -203,6 +203,7 @@ where
         .any(|x| CssGenericDelimiter::cast_ref(x.syntax()).is_some());
 
     // TODO: Check for comments, check for the types of elements in the list, etc.
+    // TODO: Add check here
     if is_grid_property {
         ValueListLayout::PreserveInline
     } else if list.len() == 1 {
