@@ -66,7 +66,8 @@ fn run_workspace(console: &mut EnvConsole, command: BiomeCommand) -> Result<(), 
             None => return Err(CliDiagnostic::server_not_running()),
         }
     } else {
-        workspace::server(fs)
+        let threads = command.get_threads();
+        workspace::server(fs, threads)
     };
 
     let session = CliSession::new(&*workspace, console)?;

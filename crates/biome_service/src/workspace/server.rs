@@ -131,8 +131,9 @@ impl WorkspaceServer {
         fs: Box<dyn FileSystem>,
         watcher_tx: Sender<WatcherInstruction>,
         notification_tx: watch::Sender<ServiceDataNotification>,
+        threads: Option<usize>,
     ) -> Self {
-        init_thread_pool();
+        init_thread_pool(threads);
 
         Self {
             features: Features::new(),
@@ -1416,13 +1417,15 @@ impl Workspace for WorkspaceServer {
 /// Sets up the global Rayon thread pool the first time it's called.
 ///
 /// This is used to assign friendly debug names to the threads of the pool.
-fn init_thread_pool() {
+fn init_thread_pool(threads: Option<usize>) {
     #[cfg(not(target_family = "wasm"))]
     {
         static INIT_ONCE: std::sync::Once = std::sync::Once::new();
         INIT_ONCE.call_once(|| {
             rayon::ThreadPoolBuilder::new()
                 .thread_name(|index| format!("biome::workspace_worker_{index}"))
+                // When zero is passed, rayon decides the number of threads
+                .num_threads(threads.unwrap_or(0))
                 .build_global()
                 .expect("failed to initialize the global thread pool");
         });

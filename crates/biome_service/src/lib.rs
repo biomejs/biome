@@ -48,7 +48,7 @@ impl<'app> App<'app> {
         fs: Box<dyn FileSystem>,
         console: &'app mut dyn Console,
     ) -> Self {
-        Self::new(console, WorkspaceRef::Owned(workspace::server(fs)))
+        Self::new(console, WorkspaceRef::Owned(workspace::server(fs, None)))
     }
 
     /// Create a new instance of the app using the specified [FileSystem], [Console] and [Workspace] implementation

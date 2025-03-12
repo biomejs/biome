@@ -22,7 +22,7 @@ fn close_file_through_watcher_before_client() {
 
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx);
+    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
@@ -92,7 +92,7 @@ fn close_file_from_client_before_watcher() {
 
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx);
+    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
@@ -163,7 +163,7 @@ fn close_modified_file_from_client_before_watcher() {
 
     let (watcher_tx, rx) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx);
+    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),

@@ -20,7 +20,7 @@ use super::{
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
-    let workspace = server(Box::new(MemoryFileSystem::default()));
+    let workspace = server(Box::new(MemoryFileSystem::default()), None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: Default::default(),
@@ -313,7 +313,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_A_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
 
-    let workspace = server(Box::new(fs));
+    let workspace = server(Box::new(fs), None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -388,7 +388,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs));
+    let workspace = server(Box::new(fs), None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -446,7 +446,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
     fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs));
+    let workspace = server(Box::new(fs), None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
