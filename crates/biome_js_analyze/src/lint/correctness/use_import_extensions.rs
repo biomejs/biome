@@ -25,28 +25,32 @@ declare_lint_rule! {
     /// because they do not need to guess which file to resolve.
     ///
     /// The rule checks both static imports (`import ... from "..."`) as well as
-    /// dynamic imports such as `import()` and `require()`.
+    /// dynamic imports such as `import(...)` and `require(...)`.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// The following examples assume these imports will resolve to a file with
+    /// an extension. Imports that don't resolve at all will not trigger a
+    /// diagnostic.
+    ///
+    /// ```js
     /// import "./foo";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js
     /// import "./foo/";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js
     /// import "../";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js
     /// import "../.";
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js
     /// import("./foo");
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```js
     /// require("./foo");
     /// ```
     ///
