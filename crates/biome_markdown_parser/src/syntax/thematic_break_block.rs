@@ -5,7 +5,13 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
 };
 
+/// Checks if the current position is at the start of a thematic break
 pub(crate) fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {
+    // First check if we have a thematic break literal token
+    if p.at(MD_THEMATIC_BREAK_LITERAL) {
+        return true;
+    }
+
     // Skip any amount of whitespace
     let mut i = 0;
     while p.nth_at(i, WHITESPACE) || p.nth_at(i, TAB) {
@@ -46,11 +52,23 @@ pub(crate) fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {
     count >= 3
 }
 
+/// Parses a thematic break block
 pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax {
     // Save a checkpoint in case this is not actually a thematic break
     let checkpoint = p.checkpoint();
-
     let m = p.start();
+
+    // First try to handle the case where we have a direct thematic break literal
+    if p.at(MD_THEMATIC_BREAK_LITERAL) {
+        p.bump(MD_THEMATIC_BREAK_LITERAL);
+
+        // Consume the newline if present
+        if p.at(NEWLINE) {
+            p.bump(NEWLINE);
+        }
+
+        return Present(m.complete(p, MD_THEMATIC_BREAK_BLOCK));
+    }
 
     // Skip leading whitespace
     while p.at(WHITESPACE) || p.at(TAB) {
@@ -74,6 +92,7 @@ pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax
 
     // Parse the thematic break
     let mut marker_count = 0;
+    let mut has_other_content = false;
 
     // Try to parse a thematic break (allowing spaces between markers)
     while !p.at(T![EOF]) && !p.at(NEWLINE) {
@@ -85,13 +104,13 @@ pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax
             p.bump_any();
         } else {
             // Invalid character in thematic break
-            p.rewind(checkpoint);
-            return Absent;
+            has_other_content = true;
+            p.bump_any();
         }
     }
 
-    // Must have at least 3 markers
-    if marker_count < 3 {
+    // Must have at least 3 markers and no other content
+    if marker_count < 3 || has_other_content {
         p.rewind(checkpoint);
         return Absent;
     }
