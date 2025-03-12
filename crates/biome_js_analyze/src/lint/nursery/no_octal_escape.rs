@@ -14,7 +14,7 @@ declare_lint_rule! {
     /// As of the ECMAScript 5 specification, octal escape sequences in string literals are deprecated and should not be used.
     /// Unicode escape sequences should be used instead.
     ///
-    /// ### Examples
+    /// ## Examples
     ///
     /// ### Invalid
     ///
