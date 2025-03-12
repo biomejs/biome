@@ -3,10 +3,10 @@ use biome_markdown_syntax::MarkdownSyntaxKind::*;
 use biome_markdown_syntax::T;
 use biome_parser::{
     Parser,
-    diagnostic::ParseDiagnostic,
     prelude::ParsedSyntax::{self, *},
 };
 
+/// Checks if the current position is at the start of a header
 pub(crate) fn at_header_block(p: &mut MarkdownParser) -> bool {
     // Skip leading whitespace
     let mut i = 0;
@@ -18,6 +18,7 @@ pub(crate) fn at_header_block(p: &mut MarkdownParser) -> bool {
     p.nth_at(i, HASH)
 }
 
+/// Parses an ATX header (# Header)
 pub(crate) fn parse_header_block(p: &mut MarkdownParser) -> ParsedSyntax {
     // Save a checkpoint in case this is not actually a header
     let checkpoint = p.checkpoint();
@@ -45,37 +46,30 @@ pub(crate) fn parse_header_block(p: &mut MarkdownParser) -> ParsedSyntax {
     }
 
     // Validate header format - need whitespace after hash characters
-    if !p.at(WHITESPACE) && !p.at(TAB) {
+    let is_valid_header = p.at(WHITESPACE) || p.at(TAB);
+
+    // Complete the hash list
+    hash_list.complete(p, MD_HASH_LIST);
+
+    if !is_valid_header {
         // Not a valid header, just hash symbols
-        // This creates a specific diagnostic for the invalid header
-        let error_range = p.cur_range();
-        let message = "Invalid header format: missing space after '#'";
-        let diagnostic = ParseDiagnostic::new(message, error_range);
-        p.error(diagnostic);
-
-        // Complete the hash list
-        hash_list.complete(p, MD_HASH_LIST);
-
-        // Return Absent to signal that this isn't a valid header
+        // Return Absent so it will be parsed as a paragraph
         p.rewind(checkpoint);
         return Absent;
     }
 
-    hash_list.complete(p, MD_HASH_LIST);
-
     // Consume whitespace
-    p.eat(WHITESPACE);
-    p.eat(TAB);
+    while p.at(WHITESPACE) || p.at(TAB) {
+        p.bump_any();
+    }
 
-    // Parse header content as a paragraph
+    // Parse header content
     let paragraph = p.start();
     let item_list = p.start();
 
     // Parse the content until end of line or EOF
     while !p.at(NEWLINE) && !p.at(T![EOF]) {
-        let text_m = p.start();
         p.bump_any();
-        text_m.complete(p, MD_TEXTUAL);
     }
 
     item_list.complete(p, MD_PARAGRAPH_ITEM_LIST);
