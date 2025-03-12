@@ -44,7 +44,7 @@ impl CommandRunner for CheckCommandPayload {
         &mut self,
         loaded_configuration: LoadedConfiguration,
         fs: &dyn FileSystem,
-        console: &mut dyn Console,
+        _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
         let LoadedConfiguration {
             configuration: biome_configuration,
@@ -52,7 +52,7 @@ impl CommandRunner for CheckCommandPayload {
             ..
         } = loaded_configuration;
         let mut configuration =
-            self.combine_configuration(directory_path, biome_configuration, fs, console)?;
+            self.combine_configuration(directory_path, biome_configuration, fs)?;
 
         let formatter = configuration
             .formatter

@@ -899,19 +899,13 @@ pub trait LoadEditorConfig: CommandRunner {
         configuration_path: Option<Utf8PathBuf>,
         fs_configuration: &Configuration,
         fs: &dyn FileSystem,
-        console: &mut dyn Console,
     ) -> Result<Option<Configuration>, WorkspaceError> {
         Ok(if self.should_load_editor_config(fs_configuration) {
-            let (editorconfig, editorconfig_diagnostics) = {
+            let (editorconfig, _editorconfig_diagnostics) = {
                 let search_path = fs.working_directory().unwrap_or_default();
 
                 load_editorconfig(fs, search_path, configuration_path)?
             };
-            for diagnostic in editorconfig_diagnostics {
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                })
-            }
             editorconfig
         } else {
             Default::default()
@@ -923,11 +917,10 @@ pub trait LoadEditorConfig: CommandRunner {
         configuration_path: Option<Utf8PathBuf>,
         biome_configuration: Configuration,
         fs: &dyn FileSystem,
-        console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
         Ok(
             if let Some(mut fs_configuration) =
-                self.load_editor_config(configuration_path, &biome_configuration, fs, console)?
+                self.load_editor_config(configuration_path, &biome_configuration, fs)?
             {
                 // If both `biome.json` and `.editorconfig` exist, formatter settings from the biome.json take precedence.
                 fs_configuration.merge_with(biome_configuration);

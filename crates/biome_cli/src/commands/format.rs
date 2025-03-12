@@ -48,7 +48,7 @@ impl CommandRunner for FormatCommandPayload {
         &mut self,
         loaded_configuration: LoadedConfiguration,
         fs: &dyn FileSystem,
-        console: &mut dyn Console,
+        _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
         let LoadedConfiguration {
             configuration: biome_configuration,
@@ -57,7 +57,7 @@ impl CommandRunner for FormatCommandPayload {
         } = loaded_configuration;
 
         let mut configuration =
-            self.combine_configuration(configuration_path, biome_configuration, fs, console)?;
+            self.combine_configuration(configuration_path, biome_configuration, fs)?;
 
         // merge formatter options
         if configuration

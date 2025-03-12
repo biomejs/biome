@@ -512,39 +512,3 @@ indent_size = 8
         result,
     ));
 }
-
-#[test]
-fn should_emit_diagnostics() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let editorconfig = Utf8Path::new(".editorconfig");
-    fs.insert(
-        editorconfig.into(),
-        r#"
-[*]
-insert_final_newline = false
-"#,
-    );
-
-    let test_file = Utf8Path::new("test.js");
-    let contents = r#"console.log("foo");
-"#;
-    fs.insert(test_file.into(), contents);
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", "--write", test_file.as_str()].as_slice()),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "should_emit_diagnostics",
-        fs,
-        console,
-        result,
-    ));
-}
