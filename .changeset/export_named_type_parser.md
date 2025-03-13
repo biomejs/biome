@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Export Named Type support `default` parser.
+Type exports now support renaming types to `default`.
 
 The following code is now parsed successfully:
 

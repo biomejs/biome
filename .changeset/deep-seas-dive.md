@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fix [#342](https://github.com/biomejs/biome/issues/342), js parser handle unterminated `JSX_STRING_LITERAL` properly
+Fixed [#342](https://github.com/biomejs/biome/issues/342): The JavaScript parser now properly handles unterminated string literals, such as:
 
 ```jsx
 function Comp() {

@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fix [#4121](https://github.com/biomejs/biome/issues/4326), don't ident a CSS selector when has leading comments.
+Fixed [#4121](https://github.com/biomejs/biome/issues/4326): The CSS formatter no longer indents a selector when it has leading comments.

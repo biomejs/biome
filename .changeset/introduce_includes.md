@@ -2,7 +2,7 @@
 "@biomejs/biome": major
 ---
 
-Removed `include` and `ignore` fields in favor of the new filed `includes`.
+Removed `include` and `ignore` fields in favor of the new field `includes`.
 
 The Biome configuration file allows users to specify which files should be processed using [glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)).
 Prior to Biome 2.0, this was done using the `include` and `ignore` fields.

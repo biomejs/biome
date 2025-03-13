@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Mark `useSelfClosingElements` as safe and improve error message.
+The fix for `useSelfClosingElements` was marked as safe and the error message was improved.

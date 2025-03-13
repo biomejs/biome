@@ -2,9 +2,9 @@
 "@biomejs/biome": minor
 ---
 
-`noUnusedImports` now keeps comments separated from the import with a blank line ([#3401](https://github.com/biomejs/biome/issues/3401)).
+Fixed [#3401](https://github.com/biomejs/biome/issues/3401): `noUnusedImports` now keeps comments separated from the import with a blank line.
 
-Here is an example:
+For example:
 
 ```diff
   // Orphan comment

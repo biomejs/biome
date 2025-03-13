@@ -30,4 +30,4 @@ The following rules aren't recommended anymore:
 - `noDelete`
 - `noForEach`
 
-The rule `noRenderReturnValue` is only recommended when the `react` domain is enabled.
+The rule `noRenderReturnValue` and `useExhaustiveDependencies` are only recommended when the `react` domain is enabled.

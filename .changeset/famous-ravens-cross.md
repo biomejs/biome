@@ -2,9 +2,9 @@
 "@biomejs/biome": minor
 ---
 
-Add the new JavaScript rule `useConsistentObjectDefinition` rule. The rule enforces a consistent style for the definition of objects:
+Added the new JavaScript rule [`useConsistentObjectDefinition`](https://biomejs.dev/linter/rules/use-consistent-object-definition/) rule. The rule enforces a consistent style for the definition of objects:
 
-By the default, the rule enforces a shorthand style:
+By default, the rule enforces a shorthand style:
 
 ```js
 const validShorthand = {

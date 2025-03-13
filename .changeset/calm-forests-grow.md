@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-`biome migrate eslint` now correctly resolves scoped package named `eslint-config` with a path.
+`biome migrate eslint` now correctly resolves the scoped package named `eslint-config`.
