@@ -2,11 +2,6 @@
 name: Release CLI
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - packages/@biomejs/biome/package.json
 
 jobs:
   check:

@@ -2,11 +2,6 @@
 name: Release JavaScript API
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - packages/@biomejs/js-api/package.json
 
 jobs:
   check:
