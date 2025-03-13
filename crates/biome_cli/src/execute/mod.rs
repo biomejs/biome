@@ -30,7 +30,6 @@ use biome_service::workspace::{
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
-use std::ops::Add;
 use std::time::Duration;
 use tracing::{info, instrument};
 
