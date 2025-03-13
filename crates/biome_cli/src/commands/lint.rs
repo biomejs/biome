@@ -83,12 +83,14 @@ impl CommandRunner for LintCommandPayload {
                 .get_or_insert_with(Default::default);
             graphql.linter.merge_with(self.graphql_linter.clone());
         }
+
         if self.javascript_linter.is_some() {
             let javascript = fs_configuration
                 .javascript
                 .get_or_insert_with(Default::default);
             javascript.linter.merge_with(self.javascript_linter.clone());
         }
+
         if self.json_linter.is_some() {
             let json = fs_configuration.json.get_or_insert_with(Default::default);
             json.linter.merge_with(self.json_linter.clone());
