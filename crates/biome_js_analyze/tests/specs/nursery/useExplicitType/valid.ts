@@ -116,6 +116,13 @@ function getObjectWithFunction(): Behavior {
   }
 }
 
+const getObjectWithFunction1 = (): Behavior => {
+	return {
+		namedFunc: function myFunc(): string { return "value" },
+		arrowFunc: () => {},
+	}
+}
+
 
 interface Array<Type> {
 	pop(): Type | undefined;
@@ -143,3 +150,6 @@ declare namespace myLib {
 declare module "foo" {
 	export default function bar(): string;
 }
+
+const X: Type = { prop: () => {} };
+f({ prop: () => {} })

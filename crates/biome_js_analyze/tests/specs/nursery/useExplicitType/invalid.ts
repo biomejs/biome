@@ -136,3 +136,6 @@ declare namespace myLib {
 declare module "foo" {
 	export default function bar();
 }
+
+const x = { prop: () => {} }
+const x = { bar: { prop: () => {} } }

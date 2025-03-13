@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -36,76 +36,76 @@ class Test {
 
 const obj = {
 	method() {
-		return "test"
-	}
-}
-
-const obj = {
-  get method() {
-    return "test"
-  },
+		return "test";
+	},
 };
 
-const func = (value: number) => ({ type: 'X', value }) as any;
-const func = (value: number) => ({ type: 'X', value }) as Action;
+const obj = {
+	get method() {
+		return "test";
+	},
+};
+
+const func = (value: number) => ({ type: "X", value }) as any;
+const func = (value: number) => ({ type: "X", value }) as Action;
 
 export default () => {};
 export default function () {}
 
 // check higher order functions
 const arrowFn = () => () => {};
-const arrowFn = () => function() {}
+const arrowFn = () => function () {};
 const arrowFn = () => {
-  return () => { };
-}
+	return () => {};
+};
 
 // does not support detecting a return of a function inside other statements like if, switch, etc.
-// we check only the first statment 
+// we check only the first statment
 const arrowFn = (a: number) => {
-  if (a === 1) {
-    return (): void => { };
-  } else {
-    return (): number => {
-      return a + 2
-    }
-  }
-}
+	if (a === 1) {
+		return (): void => {};
+	} else {
+		return (): number => {
+			return a + 2;
+		};
+	}
+};
 const arrowFn = (a: number) => {
-  switch (a) {
-    case 1: {
-      return (): void => { };
-    }
-    case 2: {
-      return (): void => { };
-    }
-    default: {
-      return (): void => { };
-    }
-  }
-}
+	switch (a) {
+		case 1: {
+			return (): void => {};
+		}
+		case 2: {
+			return (): void => {};
+		}
+		default: {
+			return (): void => {};
+		}
+	}
+};
 
 function f() {
-  if (x) {
-    return 0;
-  }
-  return (): void => {}
+	if (x) {
+		return 0;
+	}
+	return (): void => {};
 }
 
 function fn() {
-  let str = "hey";
-  return function (): string {
-      return str;
-  };
+	let str = "hey";
+	return function (): string {
+		return str;
+	};
 }
 
-const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
+const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
 const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
 
 
 // Returning object from function
 interface Behavior {
-  attribute: string; 
-  namedFunc: () => string; 
+  attribute: string;
+  namedFunc: () => string;
   arrowFunc: () => string;
 }
 
@@ -114,7 +114,38 @@ function getObjectWithFunction(): Behavior {
     namedFunc: function myFunc() { return "value" },
     arrowFunc: () => {},
   }
+};
+
+interface Array<Type> {
+	pop(): Type | undefined;
+	push(...items: Type[]): number;
+	method();
 }
+
+type MyObject = {
+	(input: string);
+	propertyName: string;
+};
+
+abstract class MyClass {
+	public abstract method();
+}
+
+abstract class P<T> {
+	abstract method(): T;
+	abstract get poke();
+}
+
+declare namespace myLib {
+	function makeGreeting(s: string);
+}
+
+declare module "foo" {
+	export default function bar();
+}
+
+const x = { prop: () => {} }
+const x = { bar: { prop: () => {} } }
 
 ```
 
@@ -122,7 +153,7 @@ function getObjectWithFunction(): Behavior {
 ```
 invalid.ts:1:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
   > 1 │ function test(a: number, b: number) {
       │ ^^^^^^^^^^^^^
@@ -137,15 +168,12 @@ invalid.ts:1:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:3:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
-    1 │ function test(a: number, b: number) {
-    2 │ 	return;
-  > 3 │ }
-      │  
-  > 4 │ 
+    3 │ }
+    4 │ 
   > 5 │ function test() {
       │ ^^^^^^^^^^^^^
     6 │ 	return;
@@ -161,7 +189,7 @@ invalid.ts:3:2 lint/nursery/useExplicitType ━━━━━━━━━━━━
 ```
 invalid.ts:9:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
      7 │ }
      8 │ 
@@ -183,7 +211,7 @@ invalid.ts:9:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:13:15 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     11 │ };
     12 │ 
@@ -202,7 +230,7 @@ invalid.ts:13:15 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     15 │ class Test {
     16 │ 	constructor() {}
@@ -224,7 +252,7 @@ invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     19 │ 	}
     20 │ 	set prop() {}
@@ -246,7 +274,7 @@ invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     22 │ 		return;
     23 │ 	}
@@ -265,7 +293,7 @@ invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     23 │ 	}
     24 │ 	arrow = () => "arrow";
@@ -287,15 +315,15 @@ invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     30 │ const obj = {
   > 31 │ 	method() {
        │ 	^^^^^^^^^^
-  > 32 │ 		return "test"
-  > 33 │ 	}
+  > 32 │ 		return "test";
+  > 33 │ 	},
        │ 	^
-    34 │ }
+    34 │ };
     35 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
@@ -306,16 +334,16 @@ invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:37:3 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:37:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     36 │ const obj = {
-  > 37 │   get method() {
-       │   ^^^^^^^^^^^^^^
-  > 38 │     return "test"
-  > 39 │   },
-       │   ^
+  > 37 │ 	get method() {
+       │ 	^^^^^^^^^^^^^^
+  > 38 │ 		return "test";
+  > 39 │ 	},
+       │ 	^
     40 │ };
     41 │ 
   
@@ -329,13 +357,13 @@ invalid.ts:37:3 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:42:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     40 │ };
     41 │ 
-  > 42 │ const func = (value: number) => ({ type: 'X', value }) as any;
+  > 42 │ const func = (value: number) => ({ type: "X", value }) as any;
        │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    43 │ const func = (value: number) => ({ type: 'X', value }) as Action;
+    43 │ const func = (value: number) => ({ type: "X", value }) as Action;
     44 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
@@ -348,10 +376,10 @@ invalid.ts:42:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:43:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
-    42 │ const func = (value: number) => ({ type: 'X', value }) as any;
-  > 43 │ const func = (value: number) => ({ type: 'X', value }) as Action;
+    42 │ const func = (value: number) => ({ type: "X", value }) as any;
+  > 43 │ const func = (value: number) => ({ type: "X", value }) as Action;
        │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ 
     45 │ export default () => {};
@@ -366,9 +394,9 @@ invalid.ts:43:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:45:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
-    43 │ const func = (value: number) => ({ type: 'X', value }) as Action;
+    43 │ const func = (value: number) => ({ type: "X", value }) as Action;
     44 │ 
   > 45 │ export default () => {};
        │                ^^^^^^^^
@@ -385,7 +413,7 @@ invalid.ts:45:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:46:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     45 │ export default () => {};
   > 46 │ export default function () {}
@@ -403,12 +431,12 @@ invalid.ts:46:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:49:23 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     48 │ // check higher order functions
   > 49 │ const arrowFn = () => () => {};
        │                       ^^^^^^^^
-    50 │ const arrowFn = () => function() {}
+    50 │ const arrowFn = () => function () {};
     51 │ const arrowFn = () => {
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
@@ -421,14 +449,14 @@ invalid.ts:49:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:50:23 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     48 │ // check higher order functions
     49 │ const arrowFn = () => () => {};
-  > 50 │ const arrowFn = () => function() {}
-       │                       ^^^^^^^^^^^^^
+  > 50 │ const arrowFn = () => function () {};
+       │                       ^^^^^^^^^^^^^^
     51 │ const arrowFn = () => {
-    52 │   return () => { };
+    52 │ 	return () => {};
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -438,15 +466,15 @@ invalid.ts:50:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:52:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:52:9 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
-    50 │ const arrowFn = () => function() {}
+    50 │ const arrowFn = () => function () {};
     51 │ const arrowFn = () => {
-  > 52 │   return () => { };
-       │          ^^^^^^^^^
-    53 │ }
+  > 52 │ 	return () => {};
+       │ 	       ^^^^^^^^
+    53 │ };
     54 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
@@ -459,19 +487,19 @@ invalid.ts:52:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:57:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     55 │ // does not support detecting a return of a function inside other statements like if, switch, etc.
-    56 │ // we check only the first statment·
+    56 │ // we check only the first statment
   > 57 │ const arrowFn = (a: number) => {
        │                 ^^^^^^^^^^^^^^^^
-  > 58 │   if (a === 1) {
+  > 58 │ 	if (a === 1) {
         ...
-  > 64 │   }
-  > 65 │ }
+  > 64 │ 	}
+  > 65 │ };
        │ ^
     66 │ const arrowFn = (a: number) => {
-    67 │   switch (a) {
+    67 │ 	switch (a) {
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -483,16 +511,16 @@ invalid.ts:57:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:66:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
-    64 │   }
-    65 │ }
+    64 │ 	}
+    65 │ };
   > 66 │ const arrowFn = (a: number) => {
        │                 ^^^^^^^^^^^^^^^^
-  > 67 │   switch (a) {
+  > 67 │ 	switch (a) {
         ...
-  > 77 │   }
-  > 78 │ }
+  > 77 │ 	}
+  > 78 │ };
        │ ^
     79 │ 
     80 │ function f() {
@@ -505,19 +533,16 @@ invalid.ts:66:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:78:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:80:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
-    76 │     }
-    77 │   }
-  > 78 │ }
-       │  
-  > 79 │ 
+    78 │ };
+    79 │ 
   > 80 │ function f() {
        │ ^^^^^^^^^^
-    81 │   if (x) {
-    82 │     return 0;
+    81 │ 	if (x) {
+    82 │ 		return 0;
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -527,19 +552,16 @@ invalid.ts:78:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:85:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:87:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
-    83 │   }
-    84 │   return (): void => {}
-  > 85 │ }
-       │  
-  > 86 │ 
+    85 │ }
+    86 │ 
   > 87 │ function fn() {
        │ ^^^^^^^^^^^
-    88 │   let str = "hey";
-    89 │   return function (): string {
+    88 │ 	let str = "hey";
+    89 │ 	return function (): string {
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -551,12 +573,12 @@ invalid.ts:85:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:94:29 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     92 │ }
     93 │ 
-  > 94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
-       │                             ^^^^^^^^^^^^^^^
+  > 94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
+       │                             ^^^^^^^^^^^^^^
     95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
     96 │ 
   
@@ -570,12 +592,12 @@ invalid.ts:94:29 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:94:81 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     92 │ }
     93 │ 
-  > 94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
-       │                                                                                 ^^^^^^^^^
+  > 94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
+       │                                                                                 ^^^^^^^^
     95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
     96 │ 
   
@@ -589,11 +611,11 @@ invalid.ts:94:81 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:95:36 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
-    94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
+    94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
   > 95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
-       │                                    ^^^^^^^^^^^^^^^
+       │                                    ^^^^^^^^^^^^^^
     96 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
@@ -606,11 +628,11 @@ invalid.ts:95:36 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:95:79 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
-    94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
+    94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
   > 95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
-       │                                                                               ^^^^^^^^^^^^
+       │                                                                               ^^^^^^^^^^^
     96 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
@@ -623,7 +645,7 @@ invalid.ts:95:79 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:107:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  × Missing return type on function.
   
     105 │ function getObjectWithFunction(): Behavior {
     106 │   return {
@@ -631,6 +653,152 @@ invalid.ts:107:16 lint/nursery/useExplicitType ━━━━━━━━━━━
         │                ^^^^^^^^^^^^^^^
     108 │     arrowFunc: () => {},
     109 │   }
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:115:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    113 │ 	pop(): Type | undefined;
+    114 │ 	push(...items: Type[]): number;
+  > 115 │ 	method();
+        │ 	^^^^^^^^^
+    116 │ }
+    117 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:119:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    118 │ type MyObject = {
+  > 119 │ 	(input: string);
+        │ 	^^^^^^^^^^^^^^^^
+    120 │ 	propertyName: string;
+    121 │ };
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:124:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    123 │ abstract class MyClass {
+  > 124 │ 	public abstract method();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    125 │ }
+    126 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:129:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    127 │ abstract class P<T> {
+    128 │ 	abstract method(): T;
+  > 129 │ 	abstract get poke();
+        │ 	^^^^^^^^^^^^^^^^^^^^
+    130 │ }
+    131 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:133:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    132 │ declare namespace myLib {
+  > 133 │ 	function makeGreeting(s: string);
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    134 │ }
+    135 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:137:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    136 │ declare module "foo" {
+  > 137 │ 	export default function bar();
+        │ 	               ^^^^^^^^^^^^^^^
+    138 │ }
+    139 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:140:19 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    138 │ }
+    139 │ 
+  > 140 │ const x = { prop: () => {} }
+        │                   ^^^^^^^^
+    141 │ const x = { bar: { prop: () => {} } }
+    142 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:141:26 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    140 │ const x = { prop: () => {} }
+  > 141 │ const x = { bar: { prop: () => {} } }
+        │                          ^^^^^^^^
+    142 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
