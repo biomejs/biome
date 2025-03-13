@@ -341,6 +341,17 @@ pub enum BiomeCommand {
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
+        /// The number of threads to use. This is useful when running the CLI in environments
+        /// with limited resource, for example CI.
+        #[bpaf(
+            long("threads"),
+            argument("NUMBER"),
+            env("BIOME_THREADS"),
+            optional,
+            hide_usage
+        )]
+        threads: Option<usize>,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -565,6 +576,13 @@ impl BiomeCommand {
                 cli_options.colors.as_ref()
             }
             None => None,
+        }
+    }
+
+    pub const fn get_threads(&self) -> Option<usize> {
+        match self {
+            BiomeCommand::Ci { threads, .. } => *threads,
+            _ => None,
         }
     }
 

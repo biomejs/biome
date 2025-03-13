@@ -157,6 +157,7 @@ impl<'app> CliSession<'app> {
                 cli_options,
                 changed,
                 since,
+                ..
             } => run_command(
                 self,
                 &cli_options,
