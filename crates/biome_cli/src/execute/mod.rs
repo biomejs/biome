@@ -549,7 +549,7 @@ pub fn execute_mode(
     } = traverse(&execution, &mut session, project_key, cli_options, paths)?;
     // We join the duration of the scanning with the duration of the traverse.
     if let Some(duration) = duration {
-        summary.duration = summary.duration.add(duration);
+        summary.duration += duration;
     }
     let console = session.app.console;
     let errors = summary.errors;
