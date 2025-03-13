@@ -36,6 +36,7 @@ use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
+use std::time::Duration;
 use tracing::info;
 
 pub(crate) mod check;
@@ -754,8 +755,12 @@ pub(crate) trait CommandRunner: Sized {
         let workspace = &*session.app.workspace;
         let fs = workspace.fs();
         self.check_incompatible_arguments()?;
-        let (execution, paths) = self.configure_workspace(fs, console, workspace, cli_options)?;
-        execute_mode(execution, session, cli_options, paths)
+        let ConfiguredWorkspace {
+            execution,
+            paths,
+            duration,
+        } = self.configure_workspace(fs, console, workspace, cli_options)?;
+        execute_mode(execution, session, cli_options, paths, duration)
     }
 
     /// This function prepares the workspace with the following:
@@ -770,7 +775,7 @@ pub(crate) trait CommandRunner: Sized {
         console: &mut dyn Console,
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
-    ) -> Result<(Execution, Vec<OsString>), CliDiagnostic> {
+    ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
         let loaded_configuration =
             load_configuration(fs, cli_options.as_configuration_path_hint())?;
         if self.should_validate_configuration_diagnostics() {
@@ -813,7 +818,7 @@ pub(crate) trait CommandRunner: Sized {
 
         let execution = self.get_execution(cli_options, console, workspace, project_key)?;
 
-        if execution.traversal_mode().should_scan_project() {
+        let duration = if execution.traversal_mode().should_scan_project() {
             let result = workspace.scan_project_folder(ScanProjectFolderParams {
                 project_key,
                 path: Some(project_path),
@@ -831,9 +836,16 @@ pub(crate) trait CommandRunner: Sized {
                     <Info>"Scanned project folder in "<Emphasis>{result.duration}</Emphasis>"."</Info>
                 });
             }
-        }
+            Some(result.duration)
+        } else {
+            None
+        };
 
-        Ok((execution, paths))
+        Ok(ConfiguredWorkspace {
+            execution,
+            paths,
+            duration,
+        })
     }
 
     /// Computes [Stdin] if the CLI has the necessary information.
@@ -904,6 +916,15 @@ pub(crate) trait CommandRunner: Sized {
     fn should_validate_configuration_diagnostics(&self) -> bool {
         true
     }
+}
+
+pub(crate) struct ConfiguredWorkspace {
+    /// Execution context
+    pub execution: Execution,
+    /// Paths to crawl
+    pub paths: Vec<OsString>,
+    /// The duration of the scanning
+    pub duration: Option<Duration>,
 }
 
 pub trait LoadEditorConfig: CommandRunner {

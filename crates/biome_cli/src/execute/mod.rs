@@ -30,6 +30,8 @@ use biome_service::workspace::{
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
+use std::ops::Add;
+use std::time::Duration;
 use tracing::{info, instrument};
 
 /// Useful information during the traversal of files and virtual content
@@ -493,6 +495,7 @@ pub fn execute_mode(
     mut session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
+    duration: Option<Duration>,
 ) -> Result<(), CliDiagnostic> {
     // If a custom reporter was provided, let's lift the limit so users can see all of them
     execution.max_diagnostics = if cli_options.reporter.is_default() {
@@ -540,10 +543,14 @@ pub fn execute_mode(
     }
 
     let TraverseResult {
-        summary,
+        mut summary,
         evaluated_paths,
         diagnostics,
     } = traverse(&execution, &mut session, project_key, cli_options, paths)?;
+    // We join the duration of the scanning with the duration of the traverse.
+    if let Some(duration) = duration {
+        summary.duration = summary.duration.add(duration);
+    }
     let console = session.app.console;
     let errors = summary.errors;
     let skipped = summary.skipped;
