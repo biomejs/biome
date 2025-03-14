@@ -3,6 +3,7 @@ use crate::commands::{CommandRunner, LoadEditorConfig, get_files_to_process_with
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::css::CssFormatterConfiguration;
 use biome_configuration::graphql::GraphqlFormatterConfiguration;
+use biome_configuration::html::HtmlFormatterConfiguration;
 use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_configuration::json::JsonFormatterConfiguration;
 use biome_configuration::vcs::VcsConfiguration;
@@ -20,6 +21,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) json_formatter: Option<JsonFormatterConfiguration>,
     pub(crate) css_formatter: Option<CssFormatterConfiguration>,
     pub(crate) graphql_formatter: Option<GraphqlFormatterConfiguration>,
+    pub(crate) html_formatter: Option<HtmlFormatterConfiguration>,
     pub(crate) formatter_configuration: Option<FormatterConfiguration>,
     pub(crate) vcs_configuration: Option<VcsConfiguration>,
     pub(crate) files_configuration: Option<FilesConfiguration>,
@@ -79,6 +81,10 @@ impl CommandRunner for FormatCommandPayload {
         if self.graphql_formatter.is_some() {
             let graphql = configuration.graphql.get_or_insert_with(Default::default);
             graphql.formatter.merge_with(self.graphql_formatter.clone());
+        }
+        if self.html_formatter.is_some() {
+            let html = configuration.html.get_or_insert_with(Default::default);
+            html.formatter.merge_with(self.html_formatter.clone());
         }
 
         if self.javascript_formatter.is_some() {

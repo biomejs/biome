@@ -77,8 +77,6 @@ tracing                 = { workspace = true, features = ["attributes", "log"] }
 insta = { workspace = true }
 
 [features]
-experimental-html = []
-
 schema = [
   "dep:schemars",
   "biome_configuration/schema",

@@ -3353,3 +3353,70 @@ fn applies_custom_bracket_spacing_for_graphql() {
         result,
     ));
 }
+
+/// Change this when HTML formatting is enabled by default
+#[test]
+fn html_disabled_by_default() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.html");
+    fs.insert(file_path.into(), "<!DOCTYPE HTML>");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(matches!(
+        result,
+        Err(biome_cli::CliDiagnostic::NoFilesWereProcessed(_))
+    ));
+
+    assert_file_contents(&fs, file_path, "<!DOCTYPE HTML>");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_disabled_by_default",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn html_enabled_by_arg_format() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.html");
+    fs.insert(file_path.into(), "<!DOCTYPE HTML>");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--html-formatter-enabled=true",
+                "--write",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, "<!DOCTYPE html>\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_enabled_by_arg_format",
+        fs,
+        console,
+        result,
+    ));
+}
