@@ -30,7 +30,7 @@ describe("Biome WebAssembly lintContent", () => {
 				{ category: "lint/suspicious/noDebugger" },
 				{
 					category:
-						"lint/complexity/noMultipleSpacesInRegularExpressionLiterals",
+						"lint/complexity/noMultipleSpacesInRegex",
 				},
 			]);
 		});
