@@ -458,7 +458,7 @@
 						{ "type": "null" }
 					]
 				},
-				"noMultipleSpacesInRegularExpressionLiterals": {
+				"noMultipleSpacesInRegex": {
 					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },

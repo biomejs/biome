@@ -1153,11 +1153,8 @@ pub struct Complexity {
     pub no_for_each: Option<RuleConfiguration<biome_js_analyze::options::NoForEach>>,
     #[doc = "Disallow unclear usage of consecutive space characters in regular expression literals"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_multiple_spaces_in_regular_expression_literals: Option<
-        RuleFixConfiguration<
-            biome_js_analyze::options::NoMultipleSpacesInRegularExpressionLiterals,
-        >,
-    >,
+    pub no_multiple_spaces_in_regex:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoMultipleSpacesInRegex>>,
     #[doc = "This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_static_only_class:
@@ -1262,7 +1259,7 @@ impl Complexity {
         "noExcessiveNestedTestSuites",
         "noExtraBooleanCast",
         "noForEach",
-        "noMultipleSpacesInRegularExpressionLiterals",
+        "noMultipleSpacesInRegex",
         "noStaticOnlyClass",
         "noThisInStatic",
         "noUselessCatch",
@@ -1391,10 +1388,7 @@ impl RuleGroupExt for Complexity {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self
-            .no_multiple_spaces_in_regular_expression_literals
-            .as_ref()
-        {
+        if let Some(rule) = self.no_multiple_spaces_in_regex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
@@ -1563,10 +1557,7 @@ impl RuleGroupExt for Complexity {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self
-            .no_multiple_spaces_in_regular_expression_literals
-            .as_ref()
-        {
+        if let Some(rule) = self.no_multiple_spaces_in_regex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
@@ -1755,8 +1746,8 @@ impl RuleGroupExt for Complexity {
                 .no_for_each
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noMultipleSpacesInRegularExpressionLiterals" => self
-                .no_multiple_spaces_in_regular_expression_literals
+            "noMultipleSpacesInRegex" => self
+                .no_multiple_spaces_in_regex
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noStaticOnlyClass" => self

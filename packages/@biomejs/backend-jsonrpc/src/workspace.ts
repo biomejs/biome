@@ -1118,7 +1118,7 @@ export interface Complexity {
 	/**
 	 * Disallow unclear usage of consecutive space characters in regular expression literals
 	 */
-	noMultipleSpacesInRegularExpressionLiterals?: RuleFixConfiguration_for_Null;
+	noMultipleSpacesInRegex?: RuleFixConfiguration_for_Null;
 	/**
 	 * This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
 	 */
@@ -3162,7 +3162,7 @@ export type Category =
 	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
-	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"
+	| "lint/complexity/noMultipleSpacesInRegex"
 	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"
