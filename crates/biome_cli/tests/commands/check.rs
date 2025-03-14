@@ -2861,3 +2861,38 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
         result,
     ));
 }
+
+#[test]
+fn html_enabled_by_arg_check() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.html");
+    fs.insert(file_path.into(), "<!DOCTYPE HTML>");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--html-formatter-enabled=true",
+                "--write",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, "<!DOCTYPE html>\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_enabled_by_arg_check",
+        fs,
+        console,
+        result,
+    ));
+}

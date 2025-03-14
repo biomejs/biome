@@ -10,6 +10,7 @@ use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
 use biome_configuration::css::{CssFormatterConfiguration, CssLinterConfiguration};
 use biome_configuration::formatter::FormatterEnabled;
 use biome_configuration::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
+use biome_configuration::html::{HtmlFormatterConfiguration, html_formatter_configuration};
 use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use biome_configuration::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
@@ -266,6 +267,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external(graphql_formatter_configuration), optional, hide_usage, hide)]
         graphql_formatter: Option<GraphqlFormatterConfiguration>,
+
+        #[bpaf(external(html_formatter_configuration), optional, hide_usage, hide)]
+        html_formatter: Option<HtmlFormatterConfiguration>,
 
         #[bpaf(external(vcs_configuration), optional, hide_usage)]
         vcs_configuration: Option<VcsConfiguration>,

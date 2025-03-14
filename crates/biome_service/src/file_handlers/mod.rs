@@ -162,7 +162,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "experimental-html")]
         if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -191,7 +190,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "experimental-html")]
         if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
@@ -345,8 +343,8 @@ impl DocumentFileSource {
             DocumentFileSource::Css(_)
             | DocumentFileSource::Graphql(_)
             | DocumentFileSource::Json(_)
+            | DocumentFileSource::Html(_)
             | DocumentFileSource::Grit(_) => true,
-            DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
             DocumentFileSource::Ignore => false,
             DocumentFileSource::Unknown => false,
         }
@@ -360,8 +358,8 @@ impl DocumentFileSource {
             | DocumentFileSource::Css(_)
             | DocumentFileSource::Graphql(_)
             | DocumentFileSource::Json(_)
+            | DocumentFileSource::Html(_)
             | DocumentFileSource::Grit(_) => true,
-            DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
             DocumentFileSource::Ignore => true,
             DocumentFileSource::Unknown => false,
         }
