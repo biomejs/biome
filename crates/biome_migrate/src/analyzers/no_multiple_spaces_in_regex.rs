@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make::{json_member_name, json_string_literal};
 use biome_json_syntax::JsonMemberName;
-use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_migration! {
     pub(crate) UseMultipleSpacesInRegex {
