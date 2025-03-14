@@ -23,6 +23,7 @@ use biome_configuration::{
     json::json_linter_configuration, linter_configuration, vcs::vcs_configuration,
 };
 use biome_console::{Console, ConsoleExt, markup};
+use biome_deserialize::Merge;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
@@ -937,24 +938,36 @@ pub trait LoadEditorConfig: CommandRunner {
         configuration_path: Option<Utf8PathBuf>,
         fs_configuration: &Configuration,
         fs: &dyn FileSystem,
-        console: &mut dyn Console,
-    ) -> Result<Configuration, WorkspaceError> {
+    ) -> Result<Option<Configuration>, WorkspaceError> {
         Ok(if self.should_load_editor_config(fs_configuration) {
-            let (editorconfig, editorconfig_diagnostics) = {
-                let search_path = configuration_path
-                    .clone()
-                    .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-                load_editorconfig(fs, search_path)?
+            let (editorconfig, _editorconfig_diagnostics) = {
+                let search_path = fs.working_directory().unwrap_or_default();
+
+                load_editorconfig(fs, search_path, configuration_path)?
             };
-            for diagnostic in editorconfig_diagnostics {
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                })
-            }
-            editorconfig.unwrap_or_default()
+            editorconfig
         } else {
             Default::default()
         })
+    }
+
+    fn combine_configuration(
+        &self,
+        configuration_path: Option<Utf8PathBuf>,
+        biome_configuration: Configuration,
+        fs: &dyn FileSystem,
+    ) -> Result<Configuration, WorkspaceError> {
+        Ok(
+            if let Some(mut fs_configuration) =
+                self.load_editor_config(configuration_path, &biome_configuration, fs)?
+            {
+                // If both `biome.json` and `.editorconfig` exist, formatter settings from the biome.json take precedence.
+                fs_configuration.merge_with(biome_configuration);
+                fs_configuration
+            } else {
+                biome_configuration
+            },
+        )
     }
 }
 

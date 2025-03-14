@@ -48,19 +48,16 @@ impl CommandRunner for FormatCommandPayload {
         &mut self,
         loaded_configuration: LoadedConfiguration,
         fs: &dyn FileSystem,
-        console: &mut dyn Console,
+        _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
         let LoadedConfiguration {
             configuration: biome_configuration,
             directory_path: configuration_path,
             ..
         } = loaded_configuration;
-        let editorconfig_search_path = configuration_path.clone();
-        let mut fs_configuration =
-            self.load_editor_config(editorconfig_search_path, &biome_configuration, fs, console)?;
-        // this makes biome configuration take precedence over editorconfig configuration
-        fs_configuration.merge_with(biome_configuration);
-        let mut configuration = fs_configuration;
+
+        let mut configuration =
+            self.combine_configuration(configuration_path, biome_configuration, fs)?;
 
         // merge formatter options
         if configuration

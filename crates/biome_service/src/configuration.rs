@@ -2,6 +2,7 @@ use crate::WorkspaceError;
 use crate::settings::Settings;
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
+use biome_configuration::editorconfig::parse_str;
 use biome_configuration::{
     BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload, push_to_analyzer_rules,
 };
@@ -291,16 +292,46 @@ fn load_user_config(
     }
 }
 
+/// judge if path a is parent path for path b.
+fn is_parent_of(a: Utf8PathBuf, b: Utf8PathBuf) -> bool {
+    if a == b {
+        return false;
+    }
+
+    if let Ok(relative_path) = b.strip_prefix(a) {
+        !relative_path.has_root()
+    } else {
+        false
+    }
+}
+
 pub fn load_editorconfig(
     fs: &dyn FileSystem,
     workspace_root: Utf8PathBuf,
+    config_path: Option<Utf8PathBuf>,
 ) -> Result<(Option<Configuration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
     // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
-    // We currently don't support the `root` property, so we just search for the file like we do for biome.json
+    // We currently don't support the `root` property, so we just search for the file like we do for biome.json.
+    // And we make some judge for the case when `biome.json` and `.editorconfig` both exists.
+    // If we found a `.editorconfig` directory higher than `biome.json`, we'll don't use it.
     if let Some(auto_search_result) = fs.auto_search_file(&workspace_root, ".editorconfig") {
-        let AutoSearchResult { content, .. } = auto_search_result;
-        let editorconfig = biome_configuration::editorconfig::parse_str(&content)?;
-        Ok(editorconfig.to_biome())
+        let AutoSearchResult {
+            content,
+            directory_path,
+            ..
+        } = auto_search_result;
+        let editorconfig = parse_str(&content)?;
+        if let Some(config_path) = config_path {
+            // if `.edirotconfig` is higher than `biome.json`
+            if is_parent_of(directory_path, config_path) {
+                Ok((None, vec![]))
+            } else {
+                Ok(editorconfig.to_biome())
+            }
+        } else {
+            // If we don't find `biome.json`, we'll use `.editorconfig`
+            Ok(editorconfig.to_biome())
+        }
     } else {
         Ok((None, vec![]))
     }
