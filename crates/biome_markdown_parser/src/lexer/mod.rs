@@ -184,6 +184,7 @@ impl<'src> MarkdownLexer<'src> {
             MIN => self.consume_minus(),
             IDT => self.consume_underscore(),
             DIG => self.consume_digit(),
+            PLS => self.consume_plus(),
             _ => self.consume_textual(),
         }
     }
@@ -467,6 +468,23 @@ impl<'src> MarkdownLexer<'src> {
     fn consume_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
         tok
+    }
+
+    fn consume_plus(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        // Check for list marker (+ )
+        let checkpoint = self.position;
+        self.advance(1); // Consume the plus
+
+        if matches!(self.current_byte(), Some(b' ' | b'\t')) {
+            // It's a list marker
+            return PLUS;
+        }
+
+        // Not a special token, just a regular plus
+        self.position = checkpoint;
+        self.consume_textual()
     }
 }
 

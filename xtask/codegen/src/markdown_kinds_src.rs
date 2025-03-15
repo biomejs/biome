@@ -19,6 +19,10 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         ("   ", "WHITESPACE3"),
         ("_", "UNDERSCORE"),
         ("#", "HASH"),
+        (".", "DOT"),
+        ("+", "PLUS"),
+        ("|", "PIPE"),
+        (":", "COLON"),
     ],
     keywords: &["null"],
     literals: &[
@@ -63,5 +67,22 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_STRING",
         "MD_INDENT",
         "MD_THEMATIC_BREAK_BLOCK",
+        // Block quotes
+        "MD_BLOCKQUOTE",
+        "MD_BLOCKQUOTE_LINE",
+        "MD_BLOCKQUOTE_CONTENT",
+        // Lists
+        "MD_UNORDERED_LIST",
+        "MD_ORDERED_LIST",
+        "MD_UNORDERED_LIST_ITEM",
+        "MD_ORDERED_LIST_ITEM",
+        "MD_LIST_ITEM_CONTENT",
+        // Tables
+        "MD_TABLE",
+        "MD_TABLE_HEADER",
+        "MD_TABLE_DELIMITER",
+        "MD_TABLE_ROW",
+        "MD_TABLE_CELL",
+        "MD_TABLE_DELIMITER_CELL",
     ],
 };
