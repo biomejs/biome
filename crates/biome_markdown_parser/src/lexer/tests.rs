@@ -162,3 +162,57 @@ _ _ _ _  _ "#,
         MD_THEMATIC_BREAK_LITERAL:11,
     }
 }
+
+// This is a test for list markers
+#[test]
+fn list_markers() {
+    // Testing with a star list marker
+    let mut lexer = MarkdownLexer::from_str("* List item");
+    let mut tokens = Vec::new();
+
+    while lexer.next_token(MarkdownLexContext::default()) != EOF {
+        tokens.push(lexer.current());
+    }
+
+    assert_eq!(tokens[0], STAR);
+    assert_eq!(tokens[1], WHITESPACE);
+
+    // Testing with a minus list marker
+    let mut lexer = MarkdownLexer::from_str("- List item");
+    let mut tokens = Vec::new();
+
+    while lexer.next_token(MarkdownLexContext::default()) != EOF {
+        tokens.push(lexer.current());
+    }
+
+    assert_eq!(tokens[0], MINUS);
+    assert_eq!(tokens[1], WHITESPACE);
+
+    // Testing with a plus list marker
+    let mut lexer = MarkdownLexer::from_str("+ List item");
+    let mut tokens = Vec::new();
+
+    while lexer.next_token(MarkdownLexContext::default()) != EOF {
+        tokens.push(lexer.current());
+    }
+
+    assert_eq!(tokens[0], PLUS);
+    assert_eq!(tokens[1], WHITESPACE);
+
+    // Testing with a digit list marker
+    let mut lexer = MarkdownLexer::from_str("1. List item");
+    let mut tokens = Vec::new();
+
+    while lexer.next_token(MarkdownLexContext::default()) != EOF {
+        tokens.push(lexer.current());
+    }
+
+    // The token sequence for "1. List item" should be:
+    // 1. DIGIT for "1"
+    // 2. MD_TEXTUAL_LITERAL for "."
+    // 3. WHITESPACE for " "
+    // 4+. MD_TEXTUAL_LITERAL for each letter in "List item"
+    assert_eq!(tokens[0], DIGIT);
+    assert_eq!(tokens[1], MD_TEXTUAL_LITERAL);
+    assert_eq!(tokens[2], WHITESPACE);
+}
