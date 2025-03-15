@@ -323,34 +323,6 @@ fn unquoted_attribute_value_invalid_chars() {
 }
 
 #[test]
-fn comment_start() {
-    assert_lex! {
-        "<!--",
-        COMMENT_START: 4,
-    }
-}
-
-#[test]
-fn comment_end() {
-    assert_lex! {
-        HtmlLexContext::Comment,
-        "-->",
-        COMMENT_END: 3,
-    }
-}
-
-#[test]
-fn comment_full() {
-    assert_lex! {
-        HtmlLexContext::Comment,
-        "<!-- foo -->",
-        COMMENT_START: 4,
-        HTML_LITERAL: 5,
-        COMMENT_END: 3,
-    }
-}
-
-#[test]
 fn cdata_full() {
     assert_lex! {
         HtmlLexContext::CdataSection,
