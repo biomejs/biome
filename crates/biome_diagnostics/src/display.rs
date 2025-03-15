@@ -109,22 +109,8 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
             _ => None,
         };
 
-        let is_vscode = {
-            if cfg!(debug_assertions) {
-                false
-            } else {
-                env::var("TERM_PROGRAM").unwrap_or_default() == "vscode"
-            }
-        };
-        // https://github.com/JetBrains/jediterm/issues/253#issuecomment-1280492436
-        // https://github.com/JetBrains/intellij-community/blob/5ca79d879617e9cc82f61590b8d157d6a4ad8746/plugins/terminal/src/org/jetbrains/plugins/terminal/runner/LocalOptionsConfigurer.java#L94
-        let is_jetbrains = {
-            if cfg!(debug_assertions) {
-                false
-            } else {
-                env::var("TERM_PROGRAM").unwrap_or_default() == "JetBrains-JediTerm"
-            }
-        };
+        let is_vscode = is_terminal_program("vscode");
+        let is_jetbrains = is_terminal_program("JetBrains-JediTerm");
 
         if let Some(name) = file_name {
             if is_vscode {
@@ -684,6 +670,19 @@ impl<W: fmt::Write + ?Sized> fmt::Write for IndentWriter<'_, W> {
             let content = content.to_string();
             self.write_str(elements, &content)
         }
+    }
+}
+
+/// Tests whether the name of the terminal emulator matches the given `name`.
+fn is_terminal_program(name: &str) -> bool {
+    if cfg!(debug_assertions) {
+        false
+    } else {
+        // https://github.com/JetBrains/jediterm/issues/253#issuecomment-1280492436
+        // https://github.com/JetBrains/intellij-community/blob/5ca79d879617e9cc82f61590b8d157d6a4ad8746/plugins/terminal/src/org/jetbrains/plugins/terminal/runner/LocalOptionsConfigurer.java#L94
+        // https://github.com/biomejs/biome/issues/5358#issuecomment-2726300551
+        env::var("TERM_PROGRAM").is_ok_and(|program| program == name)
+            || env::var("TERMINAL_EMULATOR").is_ok_and(|program| program == name)
     }
 }
 
