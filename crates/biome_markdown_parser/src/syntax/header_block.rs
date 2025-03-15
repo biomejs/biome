@@ -1,4 +1,4 @@
-use crate::parser::MarkdownParser;
+use crate::MarkdownParser;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
 use biome_markdown_syntax::T;
 use biome_parser::{
@@ -6,8 +6,8 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
 };
 
-/// Checks if the current position is at the start of a header
-pub(crate) fn at_header_block(p: &mut MarkdownParser) -> bool {
+/// Checks if the current position is at the start of an ATX header (# Header)
+pub(crate) fn at_atx_header(p: &mut MarkdownParser) -> bool {
     // Skip leading whitespace
     let mut i = 0;
     while p.nth_at(i, WHITESPACE) || p.nth_at(i, TAB) {
@@ -19,24 +19,22 @@ pub(crate) fn at_header_block(p: &mut MarkdownParser) -> bool {
 }
 
 /// Parses an ATX header (# Header)
-pub(crate) fn parse_header_block(p: &mut MarkdownParser) -> ParsedSyntax {
-    // Save a checkpoint in case this is not actually a header
+pub(crate) fn parse_atx_header(p: &mut MarkdownParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
-
-    let m = p.start();
 
     // Skip leading whitespace
     while p.at(WHITESPACE) || p.at(TAB) {
         p.bump_any();
     }
 
-    // Check if we're at a hash
     if !p.at(HASH) {
         p.rewind(checkpoint);
         return Absent;
     }
 
-    // Parse hash symbols (# to ######)
+    let m = p.start();
+
+    // Parse hash symbols to determine header level
     let hash_list = p.start();
     let mut hash_count = 0;
 
@@ -45,44 +43,85 @@ pub(crate) fn parse_header_block(p: &mut MarkdownParser) -> ParsedSyntax {
         hash_count += 1;
     }
 
-    // Validate header format - need whitespace after hash characters
-    let is_valid_header = p.at(WHITESPACE) || p.at(TAB);
-
-    // Complete the hash list
-    hash_list.complete(p, MD_HASH_LIST);
-
-    if !is_valid_header {
-        // Not a valid header, just hash symbols
-        // Return Absent so it will be parsed as a paragraph
+    if hash_count == 0 {
+        // Not a header
+        hash_list.abandon(p);
+        m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
     }
 
-    // Consume whitespace
+    // Complete the hash list node
+    hash_list.complete(p, MD_HASH_LIST);
+
+    // Require at least one whitespace after hashes for a valid ATX heading
+    if !p.at(WHITESPACE) && !p.at(TAB) {
+        // Not a valid header, needs whitespace after hashes
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+
+    // Skip whitespace after hashes
     while p.at(WHITESPACE) || p.at(TAB) {
         p.bump_any();
     }
 
-    // Parse header content
-    let paragraph = p.start();
-    let item_list = p.start();
+    // Parse header content until newline or EOF
+    // Create paragraph item list for the content
+    let content_list = p.start();
 
-    // Parse the content until end of line or EOF
+    // Parse all the text content until the end of the line
     while !p.at(NEWLINE) && !p.at(T![EOF]) {
-        p.bump_any();
+        // Check for trailing hashes (optional closing sequence)
+        if p.at(HASH) {
+            let trailing_checkpoint = p.checkpoint();
+            
+            // Count trailing hashes
+            while p.at(HASH) {
+                p.bump(HASH);
+            }
+            
+            // If we're at the end of the line after hashes, these are closing hashes
+            if p.at(NEWLINE) || p.at(T![EOF]) || (p.at(WHITESPACE) && p.nth_at(1, NEWLINE)) {
+                // Skip any whitespace between trailing hashes and newline
+                while p.at(WHITESPACE) || p.at(TAB) {
+                    p.bump_any();
+                }
+                break;
+            }
+            
+            // Otherwise, rewind and treat them as normal content
+            p.rewind(trailing_checkpoint);
+        }
+        
+        // Parse text content
+        let text_m = p.start();
+        if p.at(MD_TEXTUAL_LITERAL) {
+            p.bump(MD_TEXTUAL_LITERAL);
+        } else {
+            p.bump_any();
+        }
+        text_m.complete(p, MD_TEXTUAL);
     }
 
-    item_list.complete(p, MD_PARAGRAPH_ITEM_LIST);
-    paragraph.complete(p, MD_PARAGRAPH);
+    // Complete the content list
+    content_list.complete(p, MD_PARAGRAPH_ITEM_LIST);
 
     // Consume the newline if present
     if p.at(NEWLINE) {
         p.bump(NEWLINE);
     }
 
-    // Add an empty MD_HASH_LIST for the trailing hashes (which don't exist in ATX headers)
-    let empty_hash_list = p.start();
-    empty_hash_list.complete(p, MD_HASH_LIST);
-
+    // Complete the header node
     Present(m.complete(p, MD_HEADER))
+}
+
+/// Checks if the current position is at the start of a Setext header
+/// (Header text followed by a line of === or ---)
+pub(crate) fn at_setext_header(_p: &mut MarkdownParser) -> bool {
+    // Setext headers are difficult to detect in advance
+    // because they require looking ahead to the next line
+    // This would typically be handled during paragraph parsing
+    false
 }
