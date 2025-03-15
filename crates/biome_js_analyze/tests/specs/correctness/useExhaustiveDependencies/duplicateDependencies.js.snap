@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: duplicateDependencies.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -23,7 +22,7 @@ function Component2() {
 
 # Diagnostics
 ```
-duplicateDependencies.js:4:20 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+duplicateDependencies.js:4:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: a
   
@@ -42,11 +41,15 @@ duplicateDependencies.js:4:20 lint/correctness/useExhaustiveDependencies ━━�
     7 │ }
     8 │ 
   
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    6 │ ····},·[a,·a]);
+      │          ---   
 
 ```
 
 ```
-duplicateDependencies.js:11:20 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━
+duplicateDependencies.js:11:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: local
   
@@ -65,5 +68,9 @@ duplicateDependencies.js:11:20 lint/correctness/useExhaustiveDependencies ━━
        │                ^^^^^
     14 │ }
   
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    13 │ ····},·[local,·local]);
+       │              -------   
 
 ```

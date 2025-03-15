@@ -1423,7 +1423,7 @@ export interface Correctness {
 	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
-	useExhaustiveDependencies?: RuleConfiguration_for_UseExhaustiveDependenciesOptions;
+	useExhaustiveDependencies?: RuleFixConfiguration_for_UseExhaustiveDependenciesOptions;
 	/**
 	 * Enforce that all React hooks are being called from the Top Level component functions.
 	 */
@@ -2310,9 +2310,9 @@ export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 export type RuleConfiguration_for_UndeclaredVariablesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UndeclaredVariablesOptions;
-export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
+export type RuleFixConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
+	| RuleWithFixOptions_for_UseExhaustiveDependenciesOptions;
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
@@ -2477,7 +2477,11 @@ export interface RuleWithOptions_for_UndeclaredVariablesOptions {
 	 */
 	options: UndeclaredVariablesOptions;
 }
-export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
+export interface RuleWithFixOptions_for_UseExhaustiveDependenciesOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
