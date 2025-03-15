@@ -13,3 +13,5 @@
 * Mixed list with *italic*
 * List with **bold**
 * List with [link](https://example.com) 
+
++ Valid list marker

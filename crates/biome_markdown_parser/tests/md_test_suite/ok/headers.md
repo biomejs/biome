@@ -7,4 +7,12 @@
 
 # Heading with *italic*
 ## Heading with **bold**
-### Heading with [link](https://example.com) 
+### Heading with [link](https://example.com)
+
+#Invalid Header
+
+Setext Header 1
+-
+
+Setext Header 2
+=

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
 expression: snapshot
-input_file: crates/biome_markdown_parser/tests/md_test_suite/ok/blockquotes.md
 ---
 ## Input
 
@@ -24,27 +23,620 @@ input_file: crates/biome_markdown_parser/tests/md_test_suite/ok/blockquotes.md
 ## AST
 
 ```
-> Simple blockquote
-> Multiple lines in
-> the same blockquote
-
-> Blockquote with *italic*
-> Blockquote with **bold**
-> Blockquote with [link](https://example.com)
-
-> Nested blockquotes
->> Second level
->>> Third level
->>>> Fourth level 
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            md_paragraph_item_list: MdParagraphItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..2 ">" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@2..3 "S" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@3..4 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@4..5 "m" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@5..6 "p" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@6..7 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@7..9 "e" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@9..10 "b" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@10..11 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@11..12 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@12..13 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@13..14 "k" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@14..15 "q" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@15..16 "u" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@16..17 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@17..18 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@18..19 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@19..22 ">" [Newline("\n")] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@22..23 "M" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@23..24 "u" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@24..25 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@25..26 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@26..27 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@27..28 "p" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@28..29 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@29..31 "e" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@31..32 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@32..33 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@33..34 "n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@34..35 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@35..37 "s" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@37..38 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@38..39 "n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@39..42 ">" [Newline("\n")] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@42..43 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@43..44 "h" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@44..46 "e" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@46..47 "s" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@47..48 "a" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@48..49 "m" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@49..51 "e" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@51..52 "b" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@52..53 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@53..54 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@54..55 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@55..56 "k" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@56..57 "q" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@57..58 "u" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@58..59 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@59..60 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@60..61 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@61..65 ">" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@65..66 "B" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@66..67 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@67..68 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@68..69 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@69..70 "k" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@70..71 "q" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@71..72 "u" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@72..73 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@73..74 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@74..76 "e" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@76..77 "w" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@77..78 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@78..79 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@79..81 "h" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@81..82 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@82..83 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@83..84 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@84..85 "a" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@85..86 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@86..87 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@87..88 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@88..89 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@89..92 ">" [Newline("\n")] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@92..93 "B" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@93..94 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@94..95 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@95..96 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@96..97 "k" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@97..98 "q" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@98..99 "u" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@99..100 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@100..101 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@101..103 "e" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@103..104 "w" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@104..105 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@105..106 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@106..108 "h" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@108..109 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@109..110 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@110..111 "b" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@111..112 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@112..113 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@113..114 "d" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@114..115 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@115..116 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@116..119 ">" [Newline("\n")] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@119..120 "B" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@120..121 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@121..122 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@122..123 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@123..124 "k" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@124..125 "q" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@125..126 "u" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@126..127 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@127..128 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@128..130 "e" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@130..131 "w" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@131..132 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@132..133 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@133..135 "h" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@135..136 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@136..137 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@137..138 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@138..139 "n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@139..140 "k" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@140..141 "]" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@141..142 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@142..143 "h" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@143..144 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@144..145 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@145..146 "p" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@146..147 "s" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@147..148 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@148..149 "/" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@149..150 "/" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@150..151 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@151..152 "x" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@152..153 "a" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@153..154 "m" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@154..155 "p" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@155..156 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@156..157 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@157..158 "." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@158..159 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@159..160 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@160..161 "m" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@161..162 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@162..166 ">" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@166..167 "N" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@167..168 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@168..169 "s" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@169..170 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@170..171 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@171..173 "d" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@173..174 "b" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@174..175 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@175..176 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@176..177 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@177..178 "k" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@178..179 "q" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@179..180 "u" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@180..181 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@181..182 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@182..183 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@183..184 "s" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@184..186 ">" [Newline("\n")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@186..188 ">" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@188..189 "S" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@189..190 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@190..191 "c" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@191..192 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@192..193 "n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@193..195 "d" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@195..196 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@196..197 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@197..198 "v" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@198..199 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@199..200 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@200..202 ">" [Newline("\n")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@202..203 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@203..205 ">" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@205..206 "T" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@206..207 "h" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@207..208 "i" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@208..209 "r" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@209..211 "d" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@211..212 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@212..213 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@213..214 "v" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@214..215 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@215..216 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@216..218 ">" [Newline("\n")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@218..219 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@219..220 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@220..222 ">" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@222..223 "F" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@223..224 "o" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@224..225 "u" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@225..226 "r" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@226..227 "t" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@227..229 "h" [] [Whitespace(" ")],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@229..230 "l" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@230..231 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@231..232 "v" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@232..233 "e" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@233..235 "l" [] [Whitespace(" ")],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@235..235 "" [] [],
+}
 ```
 
 ## CST
 
 ```
-0: MD_BOGUS@0..235
-  0: MD_BOGUS@0..235
-    0: MD_BOGUS@0..235
-      0: MD_BOGUS@0..235
+0: MD_DOCUMENT@0..235
+  0: (empty)
+  1: MD_BLOCK_LIST@0..235
+    0: MD_PARAGRAPH@0..235
+      0: MD_PARAGRAPH_ITEM_LIST@0..235
         0: MD_TEXTUAL@0..2
           0: MD_TEXTUAL_LITERAL@0..2 ">" [] [Whitespace(" ")]
         1: MD_TEXTUAL@2..3
@@ -177,8 +769,8 @@ input_file: crates/biome_markdown_parser/tests/md_test_suite/ok/blockquotes.md
           0: MD_TEXTUAL_LITERAL@78..79 "t" [] []
         65: MD_TEXTUAL@79..81
           0: MD_TEXTUAL_LITERAL@79..81 "h" [] [Whitespace(" ")]
-        66: MD_BOGUS@81..82
-          0: ERROR_TOKEN@81..82 "*" [] []
+        66: MD_TEXTUAL@81..82
+          0: MD_TEXTUAL_LITERAL@81..82 "*" [] []
         67: MD_TEXTUAL@82..83
           0: MD_TEXTUAL_LITERAL@82..83 "i" [] []
         68: MD_TEXTUAL@83..84
@@ -191,8 +783,8 @@ input_file: crates/biome_markdown_parser/tests/md_test_suite/ok/blockquotes.md
           0: MD_TEXTUAL_LITERAL@86..87 "i" [] []
         72: MD_TEXTUAL@87..88
           0: MD_TEXTUAL_LITERAL@87..88 "c" [] []
-        73: MD_BOGUS@88..89
-          0: ERROR_TOKEN@88..89 "*" [] []
+        73: MD_TEXTUAL@88..89
+          0: MD_TEXTUAL_LITERAL@88..89 "*" [] []
         74: MD_TEXTUAL@89..92
           0: MD_TEXTUAL_LITERAL@89..92 ">" [Newline("\n")] [Whitespace(" ")]
         75: MD_TEXTUAL@92..93
@@ -223,220 +815,224 @@ input_file: crates/biome_markdown_parser/tests/md_test_suite/ok/blockquotes.md
           0: MD_TEXTUAL_LITERAL@105..106 "t" [] []
         88: MD_TEXTUAL@106..108
           0: MD_TEXTUAL_LITERAL@106..108 "h" [] [Whitespace(" ")]
-        89: MD_BOGUS@108..110
-          0: ERROR_TOKEN@108..110 "**" [] []
-        90: MD_TEXTUAL@110..111
+        89: MD_TEXTUAL@108..109
+          0: MD_TEXTUAL_LITERAL@108..109 "*" [] []
+        90: MD_TEXTUAL@109..110
+          0: MD_TEXTUAL_LITERAL@109..110 "*" [] []
+        91: MD_TEXTUAL@110..111
           0: MD_TEXTUAL_LITERAL@110..111 "b" [] []
-        91: MD_TEXTUAL@111..112
+        92: MD_TEXTUAL@111..112
           0: MD_TEXTUAL_LITERAL@111..112 "o" [] []
-        92: MD_TEXTUAL@112..113
+        93: MD_TEXTUAL@112..113
           0: MD_TEXTUAL_LITERAL@112..113 "l" [] []
-        93: MD_TEXTUAL@113..114
+        94: MD_TEXTUAL@113..114
           0: MD_TEXTUAL_LITERAL@113..114 "d" [] []
-        94: MD_BOGUS@114..116
-          0: ERROR_TOKEN@114..116 "**" [] []
-        95: MD_TEXTUAL@116..119
+        95: MD_TEXTUAL@114..115
+          0: MD_TEXTUAL_LITERAL@114..115 "*" [] []
+        96: MD_TEXTUAL@115..116
+          0: MD_TEXTUAL_LITERAL@115..116 "*" [] []
+        97: MD_TEXTUAL@116..119
           0: MD_TEXTUAL_LITERAL@116..119 ">" [Newline("\n")] [Whitespace(" ")]
-        96: MD_TEXTUAL@119..120
+        98: MD_TEXTUAL@119..120
           0: MD_TEXTUAL_LITERAL@119..120 "B" [] []
-        97: MD_TEXTUAL@120..121
+        99: MD_TEXTUAL@120..121
           0: MD_TEXTUAL_LITERAL@120..121 "l" [] []
-        98: MD_TEXTUAL@121..122
+        100: MD_TEXTUAL@121..122
           0: MD_TEXTUAL_LITERAL@121..122 "o" [] []
-        99: MD_TEXTUAL@122..123
+        101: MD_TEXTUAL@122..123
           0: MD_TEXTUAL_LITERAL@122..123 "c" [] []
-        100: MD_TEXTUAL@123..124
+        102: MD_TEXTUAL@123..124
           0: MD_TEXTUAL_LITERAL@123..124 "k" [] []
-        101: MD_TEXTUAL@124..125
+        103: MD_TEXTUAL@124..125
           0: MD_TEXTUAL_LITERAL@124..125 "q" [] []
-        102: MD_TEXTUAL@125..126
+        104: MD_TEXTUAL@125..126
           0: MD_TEXTUAL_LITERAL@125..126 "u" [] []
-        103: MD_TEXTUAL@126..127
+        105: MD_TEXTUAL@126..127
           0: MD_TEXTUAL_LITERAL@126..127 "o" [] []
-        104: MD_TEXTUAL@127..128
+        106: MD_TEXTUAL@127..128
           0: MD_TEXTUAL_LITERAL@127..128 "t" [] []
-        105: MD_TEXTUAL@128..130
+        107: MD_TEXTUAL@128..130
           0: MD_TEXTUAL_LITERAL@128..130 "e" [] [Whitespace(" ")]
-        106: MD_TEXTUAL@130..131
+        108: MD_TEXTUAL@130..131
           0: MD_TEXTUAL_LITERAL@130..131 "w" [] []
-        107: MD_TEXTUAL@131..132
+        109: MD_TEXTUAL@131..132
           0: MD_TEXTUAL_LITERAL@131..132 "i" [] []
-        108: MD_TEXTUAL@132..133
+        110: MD_TEXTUAL@132..133
           0: MD_TEXTUAL_LITERAL@132..133 "t" [] []
-        109: MD_TEXTUAL@133..135
+        111: MD_TEXTUAL@133..135
           0: MD_TEXTUAL_LITERAL@133..135 "h" [] [Whitespace(" ")]
-        110: MD_TEXTUAL@135..136
+        112: MD_TEXTUAL@135..136
           0: MD_TEXTUAL_LITERAL@135..136 "[" [] []
-        111: MD_TEXTUAL@136..137
+        113: MD_TEXTUAL@136..137
           0: MD_TEXTUAL_LITERAL@136..137 "l" [] []
-        112: MD_TEXTUAL@137..138
+        114: MD_TEXTUAL@137..138
           0: MD_TEXTUAL_LITERAL@137..138 "i" [] []
-        113: MD_TEXTUAL@138..139
+        115: MD_TEXTUAL@138..139
           0: MD_TEXTUAL_LITERAL@138..139 "n" [] []
-        114: MD_TEXTUAL@139..140
+        116: MD_TEXTUAL@139..140
           0: MD_TEXTUAL_LITERAL@139..140 "k" [] []
-        115: MD_TEXTUAL@140..141
+        117: MD_TEXTUAL@140..141
           0: MD_TEXTUAL_LITERAL@140..141 "]" [] []
-        116: MD_TEXTUAL@141..142
+        118: MD_TEXTUAL@141..142
           0: MD_TEXTUAL_LITERAL@141..142 "(" [] []
-        117: MD_TEXTUAL@142..143
+        119: MD_TEXTUAL@142..143
           0: MD_TEXTUAL_LITERAL@142..143 "h" [] []
-        118: MD_TEXTUAL@143..144
+        120: MD_TEXTUAL@143..144
           0: MD_TEXTUAL_LITERAL@143..144 "t" [] []
-        119: MD_TEXTUAL@144..145
+        121: MD_TEXTUAL@144..145
           0: MD_TEXTUAL_LITERAL@144..145 "t" [] []
-        120: MD_TEXTUAL@145..146
+        122: MD_TEXTUAL@145..146
           0: MD_TEXTUAL_LITERAL@145..146 "p" [] []
-        121: MD_TEXTUAL@146..147
+        123: MD_TEXTUAL@146..147
           0: MD_TEXTUAL_LITERAL@146..147 "s" [] []
-        122: MD_TEXTUAL@147..148
+        124: MD_TEXTUAL@147..148
           0: MD_TEXTUAL_LITERAL@147..148 ":" [] []
-        123: MD_TEXTUAL@148..149
+        125: MD_TEXTUAL@148..149
           0: MD_TEXTUAL_LITERAL@148..149 "/" [] []
-        124: MD_TEXTUAL@149..150
+        126: MD_TEXTUAL@149..150
           0: MD_TEXTUAL_LITERAL@149..150 "/" [] []
-        125: MD_TEXTUAL@150..151
+        127: MD_TEXTUAL@150..151
           0: MD_TEXTUAL_LITERAL@150..151 "e" [] []
-        126: MD_TEXTUAL@151..152
+        128: MD_TEXTUAL@151..152
           0: MD_TEXTUAL_LITERAL@151..152 "x" [] []
-        127: MD_TEXTUAL@152..153
+        129: MD_TEXTUAL@152..153
           0: MD_TEXTUAL_LITERAL@152..153 "a" [] []
-        128: MD_TEXTUAL@153..154
+        130: MD_TEXTUAL@153..154
           0: MD_TEXTUAL_LITERAL@153..154 "m" [] []
-        129: MD_TEXTUAL@154..155
+        131: MD_TEXTUAL@154..155
           0: MD_TEXTUAL_LITERAL@154..155 "p" [] []
-        130: MD_TEXTUAL@155..156
+        132: MD_TEXTUAL@155..156
           0: MD_TEXTUAL_LITERAL@155..156 "l" [] []
-        131: MD_TEXTUAL@156..157
+        133: MD_TEXTUAL@156..157
           0: MD_TEXTUAL_LITERAL@156..157 "e" [] []
-        132: MD_TEXTUAL@157..158
+        134: MD_TEXTUAL@157..158
           0: MD_TEXTUAL_LITERAL@157..158 "." [] []
-        133: MD_TEXTUAL@158..159
+        135: MD_TEXTUAL@158..159
           0: MD_TEXTUAL_LITERAL@158..159 "c" [] []
-        134: MD_TEXTUAL@159..160
+        136: MD_TEXTUAL@159..160
           0: MD_TEXTUAL_LITERAL@159..160 "o" [] []
-        135: MD_TEXTUAL@160..161
+        137: MD_TEXTUAL@160..161
           0: MD_TEXTUAL_LITERAL@160..161 "m" [] []
-        136: MD_TEXTUAL@161..162
+        138: MD_TEXTUAL@161..162
           0: MD_TEXTUAL_LITERAL@161..162 ")" [] []
-        137: MD_TEXTUAL@162..166
+        139: MD_TEXTUAL@162..166
           0: MD_TEXTUAL_LITERAL@162..166 ">" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-        138: MD_TEXTUAL@166..167
+        140: MD_TEXTUAL@166..167
           0: MD_TEXTUAL_LITERAL@166..167 "N" [] []
-        139: MD_TEXTUAL@167..168
+        141: MD_TEXTUAL@167..168
           0: MD_TEXTUAL_LITERAL@167..168 "e" [] []
-        140: MD_TEXTUAL@168..169
+        142: MD_TEXTUAL@168..169
           0: MD_TEXTUAL_LITERAL@168..169 "s" [] []
-        141: MD_TEXTUAL@169..170
+        143: MD_TEXTUAL@169..170
           0: MD_TEXTUAL_LITERAL@169..170 "t" [] []
-        142: MD_TEXTUAL@170..171
+        144: MD_TEXTUAL@170..171
           0: MD_TEXTUAL_LITERAL@170..171 "e" [] []
-        143: MD_TEXTUAL@171..173
+        145: MD_TEXTUAL@171..173
           0: MD_TEXTUAL_LITERAL@171..173 "d" [] [Whitespace(" ")]
-        144: MD_TEXTUAL@173..174
+        146: MD_TEXTUAL@173..174
           0: MD_TEXTUAL_LITERAL@173..174 "b" [] []
-        145: MD_TEXTUAL@174..175
+        147: MD_TEXTUAL@174..175
           0: MD_TEXTUAL_LITERAL@174..175 "l" [] []
-        146: MD_TEXTUAL@175..176
+        148: MD_TEXTUAL@175..176
           0: MD_TEXTUAL_LITERAL@175..176 "o" [] []
-        147: MD_TEXTUAL@176..177
+        149: MD_TEXTUAL@176..177
           0: MD_TEXTUAL_LITERAL@176..177 "c" [] []
-        148: MD_TEXTUAL@177..178
+        150: MD_TEXTUAL@177..178
           0: MD_TEXTUAL_LITERAL@177..178 "k" [] []
-        149: MD_TEXTUAL@178..179
+        151: MD_TEXTUAL@178..179
           0: MD_TEXTUAL_LITERAL@178..179 "q" [] []
-        150: MD_TEXTUAL@179..180
+        152: MD_TEXTUAL@179..180
           0: MD_TEXTUAL_LITERAL@179..180 "u" [] []
-        151: MD_TEXTUAL@180..181
+        153: MD_TEXTUAL@180..181
           0: MD_TEXTUAL_LITERAL@180..181 "o" [] []
-        152: MD_TEXTUAL@181..182
+        154: MD_TEXTUAL@181..182
           0: MD_TEXTUAL_LITERAL@181..182 "t" [] []
-        153: MD_TEXTUAL@182..183
+        155: MD_TEXTUAL@182..183
           0: MD_TEXTUAL_LITERAL@182..183 "e" [] []
-        154: MD_TEXTUAL@183..184
+        156: MD_TEXTUAL@183..184
           0: MD_TEXTUAL_LITERAL@183..184 "s" [] []
-        155: MD_TEXTUAL@184..186
+        157: MD_TEXTUAL@184..186
           0: MD_TEXTUAL_LITERAL@184..186 ">" [Newline("\n")] []
-        156: MD_TEXTUAL@186..188
+        158: MD_TEXTUAL@186..188
           0: MD_TEXTUAL_LITERAL@186..188 ">" [] [Whitespace(" ")]
-        157: MD_TEXTUAL@188..189
+        159: MD_TEXTUAL@188..189
           0: MD_TEXTUAL_LITERAL@188..189 "S" [] []
-        158: MD_TEXTUAL@189..190
+        160: MD_TEXTUAL@189..190
           0: MD_TEXTUAL_LITERAL@189..190 "e" [] []
-        159: MD_TEXTUAL@190..191
+        161: MD_TEXTUAL@190..191
           0: MD_TEXTUAL_LITERAL@190..191 "c" [] []
-        160: MD_TEXTUAL@191..192
+        162: MD_TEXTUAL@191..192
           0: MD_TEXTUAL_LITERAL@191..192 "o" [] []
-        161: MD_TEXTUAL@192..193
+        163: MD_TEXTUAL@192..193
           0: MD_TEXTUAL_LITERAL@192..193 "n" [] []
-        162: MD_TEXTUAL@193..195
+        164: MD_TEXTUAL@193..195
           0: MD_TEXTUAL_LITERAL@193..195 "d" [] [Whitespace(" ")]
-        163: MD_TEXTUAL@195..196
+        165: MD_TEXTUAL@195..196
           0: MD_TEXTUAL_LITERAL@195..196 "l" [] []
-        164: MD_TEXTUAL@196..197
+        166: MD_TEXTUAL@196..197
           0: MD_TEXTUAL_LITERAL@196..197 "e" [] []
-        165: MD_TEXTUAL@197..198
+        167: MD_TEXTUAL@197..198
           0: MD_TEXTUAL_LITERAL@197..198 "v" [] []
-        166: MD_TEXTUAL@198..199
+        168: MD_TEXTUAL@198..199
           0: MD_TEXTUAL_LITERAL@198..199 "e" [] []
-        167: MD_TEXTUAL@199..200
+        169: MD_TEXTUAL@199..200
           0: MD_TEXTUAL_LITERAL@199..200 "l" [] []
-        168: MD_TEXTUAL@200..202
+        170: MD_TEXTUAL@200..202
           0: MD_TEXTUAL_LITERAL@200..202 ">" [Newline("\n")] []
-        169: MD_TEXTUAL@202..203
+        171: MD_TEXTUAL@202..203
           0: MD_TEXTUAL_LITERAL@202..203 ">" [] []
-        170: MD_TEXTUAL@203..205
+        172: MD_TEXTUAL@203..205
           0: MD_TEXTUAL_LITERAL@203..205 ">" [] [Whitespace(" ")]
-        171: MD_TEXTUAL@205..206
+        173: MD_TEXTUAL@205..206
           0: MD_TEXTUAL_LITERAL@205..206 "T" [] []
-        172: MD_TEXTUAL@206..207
+        174: MD_TEXTUAL@206..207
           0: MD_TEXTUAL_LITERAL@206..207 "h" [] []
-        173: MD_TEXTUAL@207..208
+        175: MD_TEXTUAL@207..208
           0: MD_TEXTUAL_LITERAL@207..208 "i" [] []
-        174: MD_TEXTUAL@208..209
+        176: MD_TEXTUAL@208..209
           0: MD_TEXTUAL_LITERAL@208..209 "r" [] []
-        175: MD_TEXTUAL@209..211
+        177: MD_TEXTUAL@209..211
           0: MD_TEXTUAL_LITERAL@209..211 "d" [] [Whitespace(" ")]
-        176: MD_TEXTUAL@211..212
+        178: MD_TEXTUAL@211..212
           0: MD_TEXTUAL_LITERAL@211..212 "l" [] []
-        177: MD_TEXTUAL@212..213
+        179: MD_TEXTUAL@212..213
           0: MD_TEXTUAL_LITERAL@212..213 "e" [] []
-        178: MD_TEXTUAL@213..214
+        180: MD_TEXTUAL@213..214
           0: MD_TEXTUAL_LITERAL@213..214 "v" [] []
-        179: MD_TEXTUAL@214..215
+        181: MD_TEXTUAL@214..215
           0: MD_TEXTUAL_LITERAL@214..215 "e" [] []
-        180: MD_TEXTUAL@215..216
+        182: MD_TEXTUAL@215..216
           0: MD_TEXTUAL_LITERAL@215..216 "l" [] []
-        181: MD_TEXTUAL@216..218
+        183: MD_TEXTUAL@216..218
           0: MD_TEXTUAL_LITERAL@216..218 ">" [Newline("\n")] []
-        182: MD_TEXTUAL@218..219
+        184: MD_TEXTUAL@218..219
           0: MD_TEXTUAL_LITERAL@218..219 ">" [] []
-        183: MD_TEXTUAL@219..220
+        185: MD_TEXTUAL@219..220
           0: MD_TEXTUAL_LITERAL@219..220 ">" [] []
-        184: MD_TEXTUAL@220..222
+        186: MD_TEXTUAL@220..222
           0: MD_TEXTUAL_LITERAL@220..222 ">" [] [Whitespace(" ")]
-        185: MD_TEXTUAL@222..223
+        187: MD_TEXTUAL@222..223
           0: MD_TEXTUAL_LITERAL@222..223 "F" [] []
-        186: MD_TEXTUAL@223..224
+        188: MD_TEXTUAL@223..224
           0: MD_TEXTUAL_LITERAL@223..224 "o" [] []
-        187: MD_TEXTUAL@224..225
+        189: MD_TEXTUAL@224..225
           0: MD_TEXTUAL_LITERAL@224..225 "u" [] []
-        188: MD_TEXTUAL@225..226
+        190: MD_TEXTUAL@225..226
           0: MD_TEXTUAL_LITERAL@225..226 "r" [] []
-        189: MD_TEXTUAL@226..227
+        191: MD_TEXTUAL@226..227
           0: MD_TEXTUAL_LITERAL@226..227 "t" [] []
-        190: MD_TEXTUAL@227..229
+        192: MD_TEXTUAL@227..229
           0: MD_TEXTUAL_LITERAL@227..229 "h" [] [Whitespace(" ")]
-        191: MD_TEXTUAL@229..230
+        193: MD_TEXTUAL@229..230
           0: MD_TEXTUAL_LITERAL@229..230 "l" [] []
-        192: MD_TEXTUAL@230..231
+        194: MD_TEXTUAL@230..231
           0: MD_TEXTUAL_LITERAL@230..231 "e" [] []
-        193: MD_TEXTUAL@231..232
+        195: MD_TEXTUAL@231..232
           0: MD_TEXTUAL_LITERAL@231..232 "v" [] []
-        194: MD_TEXTUAL@232..233
+        196: MD_TEXTUAL@232..233
           0: MD_TEXTUAL_LITERAL@232..233 "e" [] []
-        195: MD_TEXTUAL@233..235
+        197: MD_TEXTUAL@233..235
           0: MD_TEXTUAL_LITERAL@233..235 "l" [] [Whitespace(" ")]
-  1: EOF@235..235 "" [] []
+  2: EOF@235..235 "" [] []
 
 ```
