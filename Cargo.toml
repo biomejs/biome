@@ -215,7 +215,7 @@ static_assertions    = "1.1"
 syn                  = "1.0.109"
 termcolor            = "1.4.1"
 terminal_size        = "0.4.2"
-tokio                = "1.43.0"
+tokio                = "1.44.1"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }
 tracing-subscriber   = "0.3.19"
 unicode-bom          = "2.0.3"
