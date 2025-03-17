@@ -201,7 +201,7 @@ proc-macro-error2    = { version = "2.0.1", default-features = false }
 proc-macro2          = "1.0.94"
 quickcheck           = "1.0.3"
 quickcheck_macros    = "1.0.0"
-quote                = "1.0.39"
+quote                = "1.0.40"
 rayon                = "1.10.0"
 regex                = "1.11.1"
 rustc-hash           = "2.1.1"
