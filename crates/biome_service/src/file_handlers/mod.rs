@@ -46,6 +46,7 @@ use biome_string_case::StrLikeExtension;
 
 use crate::file_handlers::ignore::IgnoreFileHandler;
 use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
+use biome_package::PackageJson;
 use camino::Utf8Path;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
@@ -977,7 +978,7 @@ struct LintVisitor<'a, 'b> {
     skip: Option<&'b [RuleSelector]>,
     settings: Option<&'b Settings>,
     path: Option<&'b Utf8Path>,
-    project_layout: Arc<ProjectLayout>,
+    package_json: Option<PackageJson>,
     analyzer_options: &'b mut AnalyzerOptions,
 }
 
@@ -987,7 +988,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
         path: Option<&'b Utf8Path>,
-        project_layout: Arc<ProjectLayout>,
+        package_json: Option<PackageJson>,
         analyzer_options: &'b mut AnalyzerOptions,
     ) -> Self {
         Self {
@@ -997,7 +998,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             skip,
             settings,
             path,
-            project_layout,
+            package_json,
             analyzer_options,
         }
     }
@@ -1021,7 +1022,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             return;
         }
 
-        if let Some((_, manifest)) = self.project_layout.get_node_manifest_for_path(path) {
+        if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
                 self.analyzer_options
                     .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
@@ -1458,12 +1459,17 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_graphql_analyze::visit_registry(&mut syntax);
         enabled_rules.extend(syntax.enabled_rules);
 
+        let package_json = self
+            .path
+            .and_then(|path| self.project_layout.get_node_manifest_for_path(path))
+            .map(|(_, manifest)| manifest);
+
         let mut lint = LintVisitor::new(
             self.only,
             self.skip,
             self.settings,
             self.path,
-            self.project_layout,
+            package_json,
             &mut analyzer_options,
         );
 
