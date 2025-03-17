@@ -10,7 +10,7 @@ expression: result.diagnostics
                 link: None,
             },
         ),
-        severity: Information,
+        severity: Error,
         description: "Prefer object spread instead of `Object.assign()`",
         message: "Prefer object spread instead of `Object.assign()`",
         advices: Advices {
