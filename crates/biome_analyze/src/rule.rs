@@ -1430,6 +1430,16 @@ impl RuleDiagnostic {
         self.subcategory = Some(subcategory);
         self
     }
+
+    /// Assigns an explicit severity.
+    ///
+    /// In most cases, severity should _not_ be explicitly assigned, since rule
+    /// categories and configuration define the severity. Currently this is only
+    /// used for plugins to allow plugin authors to assign an explicit severity.
+    pub fn with_severity(mut self, severity: Severity) -> Self {
+        self.severity = severity;
+        self
+    }
 }
 
 /// Code Action object returned by a single analysis rule
