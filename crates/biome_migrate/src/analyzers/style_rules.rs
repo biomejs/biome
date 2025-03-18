@@ -73,6 +73,19 @@ impl Rule for StyleRules {
                     let Some(node_text) = node_text else {
                         continue;
                     };
+
+                    if node_text == "recommended" {
+                        let recommended_disabled = node
+                            .value()
+                            .ok()
+                            .and_then(|n| n.as_json_boolean_value().cloned())
+                            .and_then(|n| n.value_token().ok())
+                            .is_some_and(|n| n.text() == "false");
+                        if recommended_disabled {
+                            return vec![];
+                        }
+                    }
+
                     if node_text == "style" {
                         let list = node
                             .value()
