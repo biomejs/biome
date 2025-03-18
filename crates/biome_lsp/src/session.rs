@@ -644,13 +644,6 @@ impl Session {
             return ConfigurationStatus::Error;
         }
 
-        if loaded_configuration.double_configuration_found {
-            warn!(
-                "Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file."
-            );
-            self.client.log_message(MessageType::WARNING, "Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file.").await;
-        }
-
         info!("Configuration loaded successfully from disk.");
         info!("Update workspace settings.");
 
