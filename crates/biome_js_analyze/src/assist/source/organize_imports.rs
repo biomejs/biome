@@ -32,7 +32,7 @@ declare_source_rule! {
     ///
     /// For example, given the following code:
     ///
-    /// ```ts title="example.ts"
+    /// ```ts
     /// import uncle from "../uncle";
     /// import sibling from "./sibling";
     /// import express from "npm:express";
@@ -50,7 +50,7 @@ declare_source_rule! {
     ///
     /// They will be sorted like this:
     ///
-    /// ```ts title="example.ts"
+    /// ```ts
     /// import { expect } from "bun:test";
     /// import assert from "node:assert";
     /// import { mock, test } from "node:test";
@@ -120,7 +120,7 @@ declare_source_rule! {
     ///
     /// For example, the following imports form 4 import groups.
     ///
-    /// ```js name="file.js"
+    /// ```js
     /// import sibling from "./sibling";       // Import group 1
     /// import { internal } from "#internal";  // Import group 1
     /// import "z";  // Import group 2
@@ -131,28 +131,13 @@ declare_source_rule! {
     ///
     /// Each group is independently sorted as follows:
     ///
-    /// ```js name="file.js"
+    /// ```js
     /// import { internal } from "#internal";  // Import group 1
     /// import sibling from "./sibling";      // Import group 1
     /// import "z";  // Import group 2
     /// import "a";  // Import group 3
     /// import assert from "node:assert";  // Import group 4
     /// import React from "react";         // Import group 4
-    /// ```
-    ///
-    /// ## Import sorting via VSCode extension
-    ///
-    /// Any LSP-compatible editor supports imports sorting through the "Organize Imports" code action.
-    /// By default, this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
-    ///
-    /// You can add the following to your VSCode extension configuration if you want the action to run automatically on save instead of calling it manually:
-    ///
-    /// ```json title="settings.json"
-    /// {
-    ///   "editor.codeActionsOnSave":{
-    ///     "source.organizeImports.biome": "explicit"
-    ///   }
-    /// }
     /// ```
     pub OrganizeImports {
         version: "1.0.0",
