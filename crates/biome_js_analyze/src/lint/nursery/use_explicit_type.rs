@@ -549,7 +549,7 @@ fn is_function_inside_typed_return(func: &AnyJsFunction) -> bool {
 
 /// Check if a function is an arrow function
 fn is_arrow_func(func: &AnyJsFunction) -> bool {
-    func.as_js_arrow_function_expression().is_some()
+    matches!(func, AnyJsFunction::JsArrowFunctionExpression(_))
 }
 
 /// Checks if a function is an IIFE (Immediately Invoked Function Expressions)

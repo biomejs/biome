@@ -198,7 +198,7 @@ mod tests {
 
     use super::*;
 
-    // #[ignore]
+    #[ignore]
     #[test]
     fn quick_test() {
         const SOURCE: &str = r#"f({ prop: () => {} })"#;
