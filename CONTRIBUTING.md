@@ -490,7 +490,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 ### Past Maintainers
 
 - [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev) (Core contributor)
-- [Jon Egeland @faultyserver](https://github.com/faultyserver)
+- [Jon Egeland @faultyserver](https://github.com/faultyserver) (Core contributor)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki) (Maintainer)
 - [Victor Teles @victor-teles](https://github.com/victor-teles) (Maintainer)
-- [Zheyu Zhang @ah-yu](https://github.com/ah-yu)
+- [Zheyu Zhang @ah-yu](https://github.com/ah-yu) (Core Contributor)
