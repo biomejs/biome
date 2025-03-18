@@ -405,7 +405,7 @@ We are very strict about `major` changes in the `@biomejs/biome` package. To bet
 The description of the changeset should follow the these guidelines:
 
 - Use the past tense when describing what you did, e.g. "Added new feature", "Fixed edge case".
-- Use the present tense when describing Biome behaviour, e.g. "Biome now supports ...". 
+- Use the present tense when describing Biome behaviour, e.g. "Biome now supports ...".
 - If you fixed a bug, please add the link to the issue, e.g. "Fixed [#4444](https://github.com/biomejs/biome/issues/4444)".
 - If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated yet, the URL is pretty predictable...).
 - Similarly, if you reference an assist, please add the link to the assist on the website, e.g. "Added the assist [`awesomeAction`](https://biomejs.dev/assist/actions/awesome-action/)".
@@ -485,7 +485,6 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Yusuke Abe @chansuke](https://github.com/chansuke)
-- [Zheyu Zhang @ah-yu](https://github.com/ah-yu)
 - [zoomdong @fireairforce](https://github.com/fireairforce)
 
 ### Past Maintainers
@@ -494,3 +493,4 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Jon Egeland @faultyserver](https://github.com/faultyserver)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki) (Maintainer)
 - [Victor Teles @victor-teles](https://github.com/victor-teles) (Maintainer)
+- [Zheyu Zhang @ah-yu](https://github.com/ah-yu)
