@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalidMedia.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -14,7 +15,7 @@ expression: invalidMedia.css
 ```
 invalidMedia.css:3:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Each @import should be unique unless differing by media queries.
+  × Each @import should be unique unless differing by media queries.
   
     1 │ @import url("a.css") tv;
     2 │ @import url("a.css") projection;

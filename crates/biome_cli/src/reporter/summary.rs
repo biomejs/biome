@@ -1,10 +1,10 @@
 use crate::reporter::terminal::ConsoleTraversalSummary;
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::{
-    category, Advices, Category, Diagnostic, MessageAndDescription, PrintDiagnostic, Resource,
-    Severity, Visit,
+    Advices, Category, Diagnostic, MessageAndDescription, PrintDiagnostic, Resource, Severity,
+    Visit, category,
 };
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};

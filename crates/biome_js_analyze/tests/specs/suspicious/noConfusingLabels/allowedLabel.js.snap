@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: allowedLabel.js
+---
+# Input
+```js
+DEV: console.assert(1 + 1 === 2);
+
+```

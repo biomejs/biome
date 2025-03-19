@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
@@ -169,21 +169,21 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
                             node: literal_member_name,
                             value: value.into_boxed_str(),
                             big_int,
-                        })
+                        });
                     }
                     Some(b'o' | b'O') => {
                         return Ok(Self::Octal {
                             node: literal_member_name,
                             value: value.into_boxed_str(),
                             big_int,
-                        })
+                        });
                     }
                     Some(b'x' | b'X') => {
                         return Ok(Self::Hexadecimal {
                             node: literal_member_name,
                             value: value.into_boxed_str(),
                             big_int,
-                        })
+                        });
                     }
                     _ => (),
                 }

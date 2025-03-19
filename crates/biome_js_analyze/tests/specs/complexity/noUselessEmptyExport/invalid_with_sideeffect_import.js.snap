@@ -14,7 +14,7 @@ export {}
 ```
 invalid_with_sideeffect_import.js:3:1 lint/complexity/noUselessEmptyExport  FIXABLE  ━━━━━━━━━━━━━━━
 
-  ! This empty export is useless because there's another export or import.
+  i This empty export is useless because there's another export or import.
   
     1 │ import "mod"
     2 │ function f() { return 0 }

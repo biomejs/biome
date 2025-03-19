@@ -20,7 +20,7 @@ import React, { useEffect } from "x"
 ```
 invalid-unused-react.jsx:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import is unused.
+  i This import is unused.
   
   > 1 │ import X from "react"
       │        ^
@@ -39,7 +39,7 @@ invalid-unused-react.jsx:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━�
 ```
 invalid-unused-react.jsx:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import is unused.
+  i This import is unused.
   
     1 │ import X from "react"
   > 2 │ import * as X from "react"
@@ -62,7 +62,7 @@ invalid-unused-react.jsx:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━�
 ```
 invalid-unused-react.jsx:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import is unused.
+  i This import is unused.
   
     1 │ import X from "react"
     2 │ import * as X from "react"
@@ -87,7 +87,7 @@ invalid-unused-react.jsx:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━�
 ```
 invalid-unused-react.jsx:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import is unused.
+  i This import is unused.
   
     3 │ import { default as X } from "react"
     4 │ 
@@ -115,7 +115,7 @@ invalid-unused-react.jsx:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━�
 ```
 invalid-unused-react.jsx:6:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import is unused.
+  i This import is unused.
   
     5 │ import React from "x"
   > 6 │ import * as React from "x"
@@ -139,7 +139,7 @@ invalid-unused-react.jsx:6:13 lint/correctness/noUnusedImports  FIXABLE  ━━�
 ```
 invalid-unused-react.jsx:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import is unused.
+  i This import is unused.
   
     5 │ import React from "x"
     6 │ import * as React from "x"
@@ -164,7 +164,7 @@ invalid-unused-react.jsx:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━�
 ```
 invalid-unused-react.jsx:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These imports are unused.
+  i These imports are unused.
   
     6 │ import * as React from "x"
     7 │ import { default as React } from "x"

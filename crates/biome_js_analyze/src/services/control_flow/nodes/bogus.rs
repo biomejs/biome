@@ -2,8 +2,8 @@ use biome_js_syntax::AnyJsBogusNode;
 use biome_rowan::{SyntaxError, SyntaxResult};
 
 use crate::services::control_flow::{
-    visitor::{NodeVisitor, StatementStack},
     FunctionBuilder,
+    visitor::{NodeVisitor, StatementStack},
 };
 
 /// Bogus visitor.

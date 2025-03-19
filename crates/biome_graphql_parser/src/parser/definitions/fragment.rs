@@ -1,13 +1,14 @@
 use crate::parser::{
+    GraphqlParser,
     directive::DirectiveList,
     parse_binding,
     parse_error::{expected_name, expected_named_type, fragment_name_must_not_be_on},
-    parse_reference, GraphqlParser,
+    parse_reference,
 };
 use biome_graphql_syntax::{GraphqlSyntaxKind::*, T};
 use biome_parser::{
-    parse_lists::ParseNodeList, parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*,
-    CompletedMarker, Parser,
+    CompletedMarker, Parser, parse_lists::ParseNodeList, parsed_syntax::ParsedSyntax,
+    prelude::ParsedSyntax::*,
 };
 
 use super::operation::parse_selection_set;

@@ -1,5 +1,5 @@
 use crate::is_dir;
-use crate::settings::{FilesSettings, Settings};
+use crate::settings::{FilesSettings, Settings, VcsIgnoredPatterns};
 use crate::workspace::FeatureKind;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -9,38 +9,6 @@ use std::fmt::Display;
 use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::{debug, instrument};
-
-/// Type that holds all the settings and information for different projects
-/// inside the workspace.
-///
-/// ## Terminology
-///
-/// Every project within a Biome workspace correlates with a single
-/// **top-level** `biome.json`. This means that if the `biome.json` is at the
-/// root of a monorepo, multiple packages (or "JavaScript projects") may reside
-/// within a single project.
-#[derive(Debug, Default)]
-pub struct Projects(HashMap<ProjectKey, ProjectData, FxBuildHasher>);
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[repr(transparent)]
-pub struct ProjectKey(NonZeroUsize);
-
-impl Display for ProjectKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ProjectKey {}", self.0.get())
-    }
-}
-
-impl ProjectKey {
-    #[expect(clippy::new_without_default)]
-    pub fn new() -> Self {
-        static KEY: AtomicUsize = AtomicUsize::new(1);
-        let key = KEY.fetch_add(1, Ordering::Relaxed);
-        Self(NonZeroUsize::new(key).unwrap())
-    }
-}
 
 /// The information tracked for each project.
 #[derive(Debug, Default)]
@@ -54,6 +22,18 @@ struct ProjectData {
     /// e.g. `biome.json`.
     settings: Settings,
 }
+
+/// Type that holds all the settings and information for different projects
+/// inside the workspace.
+///
+/// ## Terminology
+///
+/// Every project within a Biome workspace correlates with a single
+/// **top-level** `biome.json`. This means that if the `biome.json` is at the
+/// root of a monorepo, multiple packages (or "JavaScript projects") may reside
+/// within a single project.
+#[derive(Debug, Default)]
+pub struct Projects(HashMap<ProjectKey, ProjectData, FxBuildHasher>);
 
 impl Projects {
     /// Inserts a new project with the given root path.
@@ -107,6 +87,14 @@ impl Projects {
             .map(|data| data.settings.files.clone())
     }
 
+    /// Retrieves the ignore matches that have been stored inside the settings of the current project
+    pub fn get_vcs_ignored_matches(&self, project_key: ProjectKey) -> Option<VcsIgnoredPatterns> {
+        self.0
+            .pin()
+            .get(&project_key)
+            .and_then(|data| data.settings.vcs_settings.ignore_matches.clone())
+    }
+
     /// Sets the settings for the given project.
     pub fn set_settings(&self, project_key: ProjectKey, settings: Settings) {
         let data = self.0.pin();
@@ -126,6 +114,15 @@ impl Projects {
         self.0.pin().get(&project_key).map(|data| data.path.clone())
     }
 
+    /// Finds the key of the project to which a given path belongs, if any.
+    pub fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
+        self.0
+            .pin()
+            .iter()
+            .find(|(_, project_data)| path.starts_with(&project_data.path))
+            .map(|(key, _)| *key)
+    }
+
     /// Checks whether the given `path` belongs to project with the given path
     /// and no other project.
     pub fn path_belongs_only_to_project_with_path(
@@ -136,7 +133,7 @@ impl Projects {
         let mut belongs_to_project = false;
         let mut belongs_to_other = false;
         for project_data in self.0.pin().values() {
-            if path.strip_prefix(project_data.path.as_path()).is_ok() {
+            if path.starts_with(&project_data.path) {
                 if project_data.path.as_path() == project_path {
                     belongs_to_project = true;
                 } else {
@@ -174,32 +171,19 @@ impl Projects {
         };
 
         let settings = &project_data.settings;
-        let (feature_includes_files, feature_included_files, feature_ignored_files) = match feature
-        {
+        let feature_includes_files = match feature {
             FeatureKind::Format => {
                 let formatter = &settings.formatter;
-                (
-                    &formatter.includes,
-                    &formatter.included_files,
-                    &formatter.ignored_files,
-                )
+                &formatter.includes
             }
             FeatureKind::Lint => {
                 let linter = &settings.linter;
-                (
-                    &linter.includes,
-                    &linter.included_files,
-                    &linter.ignored_files,
-                )
+                &linter.includes
             }
 
             FeatureKind::Assist => {
                 let assists = &settings.assist;
-                (
-                    &assists.includes,
-                    &assists.included_files,
-                    &assists.ignored_files,
-                )
+                &assists.includes
             }
             // TODO: enable once the configuration is available
             FeatureKind::Search => return false, // There is no search-specific config.
@@ -214,11 +198,26 @@ impl Projects {
                 feature_includes_files.matches_with_exceptions(path)
             };
         }
-        if !feature_included_files.is_empty() {
-            is_feature_included =
-                is_feature_included && (is_dir(path) || feature_included_files.matches_path(path));
-        };
+        !is_feature_included
+    }
+}
 
-        !is_feature_included || feature_ignored_files.matches_path(path)
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[repr(transparent)]
+pub struct ProjectKey(NonZeroUsize);
+
+impl Display for ProjectKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ProjectKey {}", self.0.get())
+    }
+}
+
+impl ProjectKey {
+    #[expect(clippy::new_without_default)]
+    pub fn new() -> Self {
+        static KEY: AtomicUsize = AtomicUsize::new(1);
+        let key = KEY.fetch_add(1, Ordering::Relaxed);
+        Self(NonZeroUsize::new(key).unwrap())
     }
 }

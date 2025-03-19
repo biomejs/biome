@@ -5,8 +5,9 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_html_formatter::{
+    HtmlFormatOptions,
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
-    format_node, HtmlFormatOptions,
+    format_node,
 };
 use biome_html_parser::parse_html_with_cache;
 use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
@@ -20,9 +21,9 @@ use super::{
 };
 use crate::settings::{check_feature_activity, check_override_feature_activity};
 use crate::{
+    WorkspaceError,
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     workspace::GetSyntaxTreeResult,
-    WorkspaceError,
 };
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -42,18 +43,15 @@ pub struct HtmlFormatterSettings {
 impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
     fn from(config: HtmlFormatterConfiguration) -> Self {
         HtmlFormatterSettings {
-            // TODO
-            // uncomment once ready
-            // bracket_same_line: config.bracket_same_line,
-            // whitespace_sensitivity: config.whitespace_sensitivity,
-            // indent_script_and_style: config.indent_script_and_style,
             enabled: config.enabled,
             line_ending: config.line_ending,
             line_width: config.line_width,
             indent_width: config.indent_width,
             indent_style: config.indent_style,
             attribute_position: config.attribute_position,
-            ..Default::default()
+            bracket_same_line: config.bracket_same_line,
+            whitespace_sensitivity: config.whitespace_sensitivity,
+            indent_script_and_style: config.indent_script_and_style,
         }
     }
 }
@@ -128,9 +126,8 @@ impl ServiceLanguage for HtmlLanguage {
 
     fn resolve_analyzer_options(
         _global: Option<&Settings>,
-        _linter: Option<&crate::settings::LinterSettings>,
-        _overrides: Option<&crate::settings::OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
+        _environment: Option<&Self::EnvironmentSettings>,
         path: &biome_fs::BiomePath,
         _file_source: &super::DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -175,6 +172,10 @@ impl ServiceLanguage for HtmlLanguage {
 
     fn linter_enabled_for_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
         false
+    }
+
+    fn resolve_environment(_settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings> {
+        None
     }
 }
 

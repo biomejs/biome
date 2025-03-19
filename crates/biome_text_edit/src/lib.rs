@@ -10,7 +10,7 @@
 
 use biome_text_size::{TextRange, TextSize};
 pub use similar::ChangeTag;
-use similar::{utils::TextDiffRemapper, TextDiff};
+use similar::{TextDiff, utils::TextDiffRemapper};
 use std::{cmp::Ordering, num::NonZeroU32};
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
@@ -319,7 +319,7 @@ fn compress_equal_op(text: &str) -> Option<(&str, NonZeroU32, &str)> {
 mod tests {
     use std::num::NonZeroU32;
 
-    use crate::{compress_equal_op, TextEdit};
+    use crate::{TextEdit, compress_equal_op};
 
     #[test]
     fn compress_short() {

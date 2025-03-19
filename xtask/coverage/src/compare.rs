@@ -3,9 +3,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use xtask::project_root;
 
+use crate::TestResults;
 use crate::results::emit_compare;
 use crate::util::decode_maybe_utf16_string;
-use crate::TestResults;
 
 // this is the filename of the results coming from `main` branch
 const BASE_RESULT_FILE: &str = "base_results.json";

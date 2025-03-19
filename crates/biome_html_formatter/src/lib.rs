@@ -1,6 +1,6 @@
 use biome_formatter::comments::Comments;
-use biome_formatter::{prelude::*, CstFormatContext, FormatOwnedWithRule, FormatRefWithRule};
-use biome_formatter::{write, FormatLanguage, FormatResult, FormatToken, Formatted};
+use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
+use biome_formatter::{FormatLanguage, FormatResult, FormatToken, Formatted, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
 use biome_rowan::AstNode;
 use comments::HtmlCommentStyle;
@@ -242,6 +242,7 @@ impl IntoFormat<HtmlFormatContext> for HtmlSyntaxToken {
 }
 
 /// Formatting specific [Iterator] extensions
+#[expect(dead_code)]
 pub(crate) trait FormattedIterExt {
     /// Converts every item to an object that knows how to format it.
     fn formatted<Context>(self) -> FormattedIter<Self, Self::Item, Context>

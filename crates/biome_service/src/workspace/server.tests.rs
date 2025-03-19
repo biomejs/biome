@@ -1,4 +1,6 @@
 use biome_fs::MemoryFileSystem;
+use crossbeam::channel::bounded;
+use tokio::sync::watch;
 
 use super::*;
 
@@ -11,7 +13,9 @@ fn commonjs_file_rejects_import_statement() {
     fs.insert(Utf8PathBuf::from("/project/a.js"), FILE_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/package.json"), MANIFEST_CONTENT);
 
-    let workspace = WorkspaceServer::new(Box::new(fs));
+    let (watcher_tx, _) = bounded(0);
+    let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
+    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/"),
@@ -23,6 +27,8 @@ fn commonjs_file_rejects_import_statement() {
         .scan_project_folder(ScanProjectFolderParams {
             project_key,
             path: Some(BiomePath::new("/")),
+            watch: false,
+            force: false,
         })
         .unwrap();
 

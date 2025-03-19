@@ -2,7 +2,7 @@ use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
     Queryable, RuleKey, ServiceBag, SyntaxVisitor,
 };
-use biome_dependency_graph::{DependencyGraph, ModuleImports};
+use biome_dependency_graph::{DependencyGraph, ModuleDependencyData};
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_rowan::{AstNode, TextRange};
 use camino::Utf8Path;
@@ -12,8 +12,8 @@ use std::sync::Arc;
 pub struct DependencyGraphService(Arc<DependencyGraph>);
 
 impl DependencyGraphService {
-    pub fn imports_for_path(&self, path: &Utf8Path) -> Option<ModuleImports> {
-        self.0.imports_for_path(path)
+    pub fn imports_for_path(&self, path: &Utf8Path) -> Option<ModuleDependencyData> {
+        self.0.dependency_data_for_path(path)
     }
 }
 

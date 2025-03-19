@@ -1,10 +1,10 @@
 //! Provides traits for parsing pattern like nodes
+use crate::ParsedSyntax::{Absent, Present};
 use crate::prelude::*;
 use crate::syntax::expr::ExpressionContext;
-use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, ParseRecoveryTokenSet, ParsedSyntax};
 use biome_js_syntax::JsSyntaxKind::{EOF, JS_ARRAY_HOLE};
-use biome_js_syntax::{JsSyntaxKind, TextRange, T};
+use biome_js_syntax::{JsSyntaxKind, T, TextRange};
 use biome_parser::ParserProgress;
 
 use super::class::parse_initializer_clause;
@@ -156,7 +156,11 @@ pub(crate) trait ParseObjectPattern {
         let mut progress = ParserProgress::default();
 
         while !p.at(T!['}']) {
-            progress.assert_progressing(p);
+            if !progress.has_progressed(p) {
+                let diagnostic = Self::expected_property_pattern_error(p, p.cur_range());
+                p.error(diagnostic);
+                break;
+            }
 
             if p.at(T![,]) {
                 // missing element

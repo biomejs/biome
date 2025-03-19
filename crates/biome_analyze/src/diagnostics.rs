@@ -1,7 +1,7 @@
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{
-    advice::CodeSuggestionAdvice, category, Advices, Category, Diagnostic, DiagnosticExt,
-    DiagnosticTags, Error, Location, LogCategory, MessageAndDescription, Severity, Visit,
+    Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Location, LogCategory,
+    MessageAndDescription, Severity, Visit, advice::CodeSuggestionAdvice, category,
 };
 use biome_rowan::TextRange;
 use std::borrow::Cow;
@@ -26,7 +26,7 @@ pub struct AnalyzerDiagnostic {
 impl From<RuleDiagnostic> for AnalyzerDiagnostic {
     fn from(rule_diagnostic: RuleDiagnostic) -> Self {
         Self {
-            kind: DiagnosticKind::Rule(rule_diagnostic),
+            kind: DiagnosticKind::Rule(Box::new(rule_diagnostic)),
             code_suggestion_list: vec![],
         }
     }
@@ -35,7 +35,7 @@ impl From<RuleDiagnostic> for AnalyzerDiagnostic {
 #[derive(Debug)]
 enum DiagnosticKind {
     /// It holds various info related to diagnostics emitted by the rules
-    Rule(RuleDiagnostic),
+    Rule(Box<RuleDiagnostic>),
     /// We have raw information to create a basic [Diagnostic]
     Raw(Error),
 }

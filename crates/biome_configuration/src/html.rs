@@ -25,7 +25,7 @@ pub struct HtmlConfiguration {
     pub formatter: Option<HtmlFormatterConfiguration>,
 }
 
-pub type HtmlFormatterEnabled = Bool<true>;
+pub type HtmlFormatterEnabled = Bool<false>; // Keep it disabled by default while experimental.
 pub type HtmlLinterEnabled = Bool<false>;
 pub type HtmlAssistEnabled = Bool<false>;
 

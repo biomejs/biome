@@ -1,11 +1,11 @@
 use std::collections::HashSet;
 
 use crate::{
-    inner_string_text, static_value::StaticValue, AnyJsxAttribute, AnyJsxAttributeName,
-    AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsSyntaxToken, JsxAttribute,
-    JsxAttributeList, JsxElement, JsxOpeningElement, JsxSelfClosingElement, JsxString,
+    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
+    AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList, JsxElement, JsxOpeningElement,
+    JsxSelfClosingElement, JsxString, inner_string_text, static_value::StaticValue,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, SyntaxResult, TokenText};
+use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
 
 impl JsxString {
     /// Returns the inner text of a string not including the quotes.
@@ -344,6 +344,7 @@ impl AnyJsxElementName {
             AnyJsxElementName::JsxName(name) => name.value_token(),
             AnyJsxElementName::JsxNamespaceName(name) => name.name()?.value_token(),
             AnyJsxElementName::JsxReferenceIdentifier(name) => name.value_token(),
+            AnyJsxElementName::JsMetavariable(metavariable) => metavariable.value_token(),
         }
     }
 }
@@ -479,7 +480,7 @@ impl AnyJsxElement {
             .is_some_and(|attribute| {
                 attribute
                     .as_static_value()
-                    .map_or(true, |value| !(value.is_falsy() || value.text() == "false"))
+                    .is_none_or(|value| !(value.is_falsy() || value.text() == "false"))
                     && !self.has_trailing_spread_prop(&attribute)
             })
     }
@@ -590,7 +591,7 @@ impl AnyJsxChild {
                 let expression = expression.expression()?;
                 expression
                     .as_static_value()
-                    .map_or(true, |value| !value.is_falsy())
+                    .is_none_or(|value| !value.is_falsy())
             }
             AnyJsxChild::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;

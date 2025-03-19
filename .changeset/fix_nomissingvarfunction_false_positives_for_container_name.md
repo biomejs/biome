@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fix [#5007](https://github.com/biomejs/biome/issues/5007) `noMissingVarFunction` false positives for `container-name`.
+Fixed [#5007](https://github.com/biomejs/biome/issues/5007): Resolved false positives in `noMissingVarFunction` for `container-name`.

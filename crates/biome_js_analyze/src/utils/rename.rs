@@ -4,9 +4,9 @@ use biome_diagnostics::{Diagnostic, Location, Severity};
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, AnyJsIdentifierUsage, JsIdentifierAssignment,
-    JsIdentifierBinding, JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, TextRange,
-    TsIdentifierBinding, T,
+    AnyJsIdentifierUsage, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
+    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, T, TextRange, TsIdentifierBinding,
+    binding_ext::AnyJsIdentifierBinding,
 };
 use biome_rowan::{AstNode, BatchMutation, SyntaxNodeCast, TriviaPieceKind};
 use serde::{Deserialize, Serialize};
@@ -312,7 +312,7 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
 mod tests {
     use crate::utils::rename::RenameError;
     use crate::{assert_rename_nok, assert_rename_ok};
-    use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+    use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_js_syntax::TextRange;
 
     assert_rename_ok! {

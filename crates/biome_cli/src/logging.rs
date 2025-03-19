@@ -1,11 +1,11 @@
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
-use tracing::subscriber::Interest;
 use tracing::Metadata;
+use tracing::subscriber::Interest;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::layer::{Context, Filter, SubscriberExt};
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::{registry, Layer};
+use tracing_subscriber::{Layer, registry};
 
 pub fn setup_cli_subscriber(level: LoggingLevel, kind: LoggingKind) {
     if level == LoggingLevel::None {

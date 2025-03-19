@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: preferObjectSpreadSuppression.grit
+---
+# Input
+```js
+// biome-ignore lint/plugin/preferObjectSpreadSuppression: reason
+Object.assign({ foo: 'bar'}, baz);
+
+// biome-ignore-start lint/plugin/preferObjectSpreadSuppression: reason
+Object.assign({}, {foo: 'bar'});
+// biome-ignore-end lint/plugin/preferObjectSpreadSuppression: reason
+
+// if no name is specified, should suppress all plugins
+// biome-ignore lint/plugin: reason
+Object.assign({}, foo);
+
+// only suppress specified plugin
+// biome-ignore lint/plugin/anotherPlugin: reason
+Object.assign({ foo: 'bar'}, baz);
+
+```
+
+# Diagnostics
+```
+preferObjectSpreadSuppression.grit:4:1 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Found a biome-ignore-<range> suppression on plugin. This is not supported. See https://github.com/biomejs/biome/issues/5175
+  
+    2 │ Object.assign({ foo: 'bar'}, baz);
+    3 │ 
+  > 4 │ // biome-ignore-start lint/plugin/preferObjectSpreadSuppression: reason
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ Object.assign({}, {foo: 'bar'});
+    6 │ // biome-ignore-end lint/plugin/preferObjectSpreadSuppression: reason
+  
+  i Remove this suppression.
+  
+
+```
+
+```
+preferObjectSpreadSuppression.grit:6:1 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Found a biome-ignore-<range> suppression on plugin. This is not supported. See https://github.com/biomejs/biome/issues/5175
+  
+    4 │ // biome-ignore-start lint/plugin/preferObjectSpreadSuppression: reason
+    5 │ Object.assign({}, {foo: 'bar'});
+  > 6 │ // biome-ignore-end lint/plugin/preferObjectSpreadSuppression: reason
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // if no name is specified, should suppress all plugins
+  
+  i Remove this suppression.
+  
+
+```
+
+```
+preferObjectSpreadSuppression.grit:5:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer object spread instead of `Object.assign()`
+  
+    4 │ // biome-ignore-start lint/plugin/preferObjectSpreadSuppression: reason
+  > 5 │ Object.assign({}, {foo: 'bar'});
+      │               ^^^^^^^^^^^^^^^^
+    6 │ // biome-ignore-end lint/plugin/preferObjectSpreadSuppression: reason
+    7 │ 
+  
+
+```
+
+```
+preferObjectSpreadSuppression.grit:14:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer object spread instead of `Object.assign()`
+  
+    12 │ // only suppress specified plugin
+    13 │ // biome-ignore lint/plugin/anotherPlugin: reason
+  > 14 │ Object.assign({ foo: 'bar'}, baz);
+       │               ^^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+
+```
+
+```
+preferObjectSpreadSuppression.grit:13:1 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    12 │ // only suppress specified plugin
+  > 13 │ // biome-ignore lint/plugin/anotherPlugin: reason
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ Object.assign({ foo: 'bar'}, baz);
+    15 │ 
+  
+
+```

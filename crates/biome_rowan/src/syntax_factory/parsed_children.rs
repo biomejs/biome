@@ -1,6 +1,6 @@
+use crate::SyntaxKind;
 use crate::green::GreenElement;
 use crate::syntax_factory::raw_syntax::{RawSyntaxElement, RawSyntaxElementRef};
-use crate::SyntaxKind;
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 

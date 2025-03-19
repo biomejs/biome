@@ -80,7 +80,7 @@ impl CommentStyle for JsCommentStyle {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
             .flat_map(|suppression| suppression.categories)
-            .any(|(key, _)| key == category!("format"))
+            .any(|(key, ..)| key == category!("format"))
     }
 
     fn get_comment_kind(comment: &SyntaxTriviaPieceComments<JsLanguage>) -> CommentKind {
@@ -1350,7 +1350,7 @@ fn handle_import_named_clause_comments(
                     // ```
                     let is_after_from_keyword = comment
                         .following_token()
-                        .map_or(true, |token| token.kind() != JsSyntaxKind::FROM_KW);
+                        .is_none_or(|token| token.kind() != JsSyntaxKind::FROM_KW);
                     if is_after_from_keyword {
                         if let Some(following_node) = comment.following_node() {
                             return CommentPlacement::leading(following_node.clone(), comment);

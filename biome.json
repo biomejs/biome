@@ -2,8 +2,9 @@
   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
   "assist": {
     "enabled": true,
-    "ignore": [
-      "./packages/@biomejs/biome/configuration_schema.json"
+    "includes": [
+      "**",
+      "!./packages/@biomejs/biome/configuration_schema.json"
     ],
     "actions": {
       "source": {
@@ -24,14 +25,9 @@
       "**/benchmark/**",
       "!**/crates/**",
       "!**/dist/**",
-      "!**/.astro/**",
-      "!**/assets/**",
       "!**/packages/@biomejs/backend-jsonrpc/src/workspace.ts",
-      "!**/public/**",
       "!**/__snapshots__",
       "!**/undefined/**",
-      "!**/_fonts/**",
-      "!**/packages/@biomejs/wasm-*",
       "!**/benchmark/target/**"
     ]
   },
@@ -79,9 +75,15 @@
       },
       "suspicious": {
         "noVar": "on"
+      },
+      "nursery": {
+        "noImportCycles": "error"
       }
     }
   },
+  "plugins": [
+    "plugins/no-object-assign.grit"
+  ],
   "vcs": {
     "clientKind": "git",
     "enabled": true,

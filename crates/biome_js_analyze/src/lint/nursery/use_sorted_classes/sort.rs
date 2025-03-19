@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 
 use super::{
     any_class_string_like::AnyClassStringLike,
-    class_info::{get_class_info, ClassInfo},
+    class_info::{ClassInfo, get_class_info},
     sort_config::SortConfig,
 };
 

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_1926.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -16,7 +17,7 @@ expression: issue_1926.jsx
 ```
 issue_1926.jsx:2:22 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     1 │ <>
   > 2 │     <Hello leftIcon={<>{provider?.icon}</>} />
@@ -36,7 +37,7 @@ issue_1926.jsx:2:22 lint/complexity/noUselessFragments  FIXABLE  ━━━━━
 ```
 issue_1926.jsx:3:6 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     1 │ <>
     2 │     <Hello leftIcon={<>{provider?.icon}</>} />
@@ -57,7 +58,7 @@ issue_1926.jsx:3:6 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
 ```
 issue_1926.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     2 │     <Hello leftIcon={<>{provider?.icon}</>} />
     3 │     {<>{provider?.icon}</>}

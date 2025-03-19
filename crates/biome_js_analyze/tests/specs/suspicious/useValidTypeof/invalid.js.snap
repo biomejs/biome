@@ -32,7 +32,7 @@ typeof foo != (false || true);
 ```
 invalid.js:2:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! "strnig" is not a valid typeof value.
+  × "strnig" is not a valid typeof value.
   
     1 │ // Invalid string literals
   > 2 │ typeof foo === "strnig";
@@ -46,7 +46,7 @@ invalid.js:2:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━
 ```
 invalid.js:3:15 lint/suspicious/useValidTypeof  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! "String" is not a valid typeof value.
+  × "String" is not a valid typeof value.
   
     1 │ // Invalid string literals
     2 │ typeof foo === "strnig";
@@ -70,7 +70,7 @@ invalid.js:3:15 lint/suspicious/useValidTypeof  FIXABLE  ━━━━━━━�
 ```
 invalid.js:4:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! "undefimed" is not a valid typeof value.
+  × "undefimed" is not a valid typeof value.
   
     2 │ typeof foo === "strnig";
     3 │ typeof foo == `String`;
@@ -85,7 +85,7 @@ invalid.js:4:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━
 ```
 invalid.js:5:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! "undefimed" is not a valid typeof value.
+  × "undefimed" is not a valid typeof value.
   
     3 │ typeof foo == `String`;
     4 │ typeof foo !== "undefimed";
@@ -100,7 +100,7 @@ invalid.js:5:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━
 ```
 invalid.js:6:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! "nunber" is not a valid typeof value.
+  × "nunber" is not a valid typeof value.
   
     4 │ typeof foo !== "undefimed";
     5 │ typeof foo != "undefimed";
@@ -115,7 +115,7 @@ invalid.js:6:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━�
 ```
 invalid.js:7:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! "nunber" is not a valid typeof value.
+  × "nunber" is not a valid typeof value.
   
     5 │ typeof foo != "undefimed";
     6 │ "nunber" === typeof foo
@@ -130,7 +130,7 @@ invalid.js:7:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━�
 ```
 invalid.js:8:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! "fucntion" is not a valid typeof value.
+  × "fucntion" is not a valid typeof value.
   
      6 │ "nunber" === typeof foo
      7 │ "nunber" == typeof foo;
@@ -145,7 +145,7 @@ invalid.js:8:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━�
 ```
 invalid.js:9:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! "fucntion" is not a valid typeof value.
+  × "fucntion" is not a valid typeof value.
   
      7 │ "nunber" == typeof foo;
      8 │ "fucntion" !== typeof foo
@@ -160,7 +160,7 @@ invalid.js:9:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━�
 ```
 invalid.js:12:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid typeof comparison.
+  × Invalid typeof comparison.
   
     11 │ // Invalid literals
   > 12 │ typeof foo != undefined;
@@ -185,7 +185,7 @@ invalid.js:12:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 invalid.js:13:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid typeof comparison.
+  × Invalid typeof comparison.
   
     11 │ // Invalid literals
     12 │ typeof foo != undefined;
@@ -211,7 +211,7 @@ invalid.js:13:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 invalid.js:14:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid typeof comparison.
+  × Invalid typeof comparison.
   
     12 │ typeof foo != undefined;
     13 │ typeof foo != null;
@@ -237,7 +237,7 @@ invalid.js:14:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 invalid.js:15:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid typeof comparison.
+  × Invalid typeof comparison.
   
     13 │ typeof foo != null;
     14 │ typeof foo != 5;
@@ -263,7 +263,7 @@ invalid.js:15:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 invalid.js:16:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid typeof comparison.
+  × Invalid typeof comparison.
   
     14 │ typeof foo != 5;
     15 │ typeof foo != -5;
@@ -289,7 +289,7 @@ invalid.js:16:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 invalid.js:18:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid typeof comparison.
+  × Invalid typeof comparison.
   
     16 │ typeof foo != true;
     17 │ 
@@ -315,7 +315,7 @@ invalid.js:18:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 invalid.js:19:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid typeof comparison.
+  × Invalid typeof comparison.
   
     18 │ typeof foo != void 0;
   > 19 │ typeof foo != 0 + 1;
@@ -340,7 +340,7 @@ invalid.js:19:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 invalid.js:20:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid typeof comparison.
+  × Invalid typeof comparison.
   
     18 │ typeof foo != void 0;
     19 │ typeof foo != 0 + 1;

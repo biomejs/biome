@@ -1,12 +1,12 @@
 mod constants;
 
 use super::{
-    normalize_quoted_string, DisregardedSlotCondition, GritTargetLanguageImpl,
-    LeafEquivalenceClass, LeafNormalizer,
+    DisregardedSlotCondition, GritTargetLanguageImpl, LeafEquivalenceClass, LeafNormalizer,
+    normalize_quoted_string,
 };
 use crate::{
-    grit_target_node::{GritTargetNode, GritTargetSyntaxKind},
     CompileError,
+    grit_target_node::{GritTargetNode, GritTargetSyntaxKind},
 };
 use biome_js_syntax::{JsLanguage, JsSyntaxKind};
 use biome_rowan::{RawSyntaxKind, SyntaxKindSet};

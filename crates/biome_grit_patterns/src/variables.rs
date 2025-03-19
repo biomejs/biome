@@ -51,10 +51,12 @@ impl VarRegistry<'_> {
             .0
             .iter()
             .map(|scope| {
-                vec![scope
-                    .iter()
-                    .map(|s| Box::new(VariableContent::new(s.name().to_owned())))
-                    .collect()]
+                vec![
+                    scope
+                        .iter()
+                        .map(|s| Box::new(VariableContent::new(s.name().to_owned())))
+                        .collect(),
+                ]
             })
             .collect();
 

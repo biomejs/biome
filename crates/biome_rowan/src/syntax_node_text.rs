@@ -1,6 +1,6 @@
 use crate::{
-    cursor::{SyntaxNode, SyntaxToken},
     TextRange, TextSize, TokenAtOffset,
+    cursor::{SyntaxNode, SyntaxToken},
 };
 use biome_text_size::TextLen;
 use std::iter::FusedIterator;
@@ -140,11 +140,11 @@ impl SyntaxNodeText {
         }
     }
 
-    fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> {
+    fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> + use<> {
         SyntaxNodeTokenWithRanges::new(self)
     }
 
-    pub fn chars(&self) -> impl FusedIterator<Item = char> {
+    pub fn chars(&self) -> impl FusedIterator<Item = char> + use<> {
         SyntaxNodeTextChars::new(self)
     }
 }
@@ -397,8 +397,8 @@ mod private {
 
 #[cfg(test)]
 mod tests {
-    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::SyntaxNode;
+    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
 
     fn build_tree(chunks: &[&str]) -> SyntaxNode<RawLanguage> {
         let mut builder = RawSyntaxTreeBuilder::new();

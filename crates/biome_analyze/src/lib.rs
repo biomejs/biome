@@ -2,9 +2,11 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
+use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
+use std::sync::Arc;
 
 mod analyzer_plugin;
 mod categories;
@@ -25,11 +27,11 @@ mod visitor;
 // Re-exported for use in the `declare_group` macro
 pub use biome_diagnostics::category_concat;
 
-pub use crate::analyzer_plugin::AnalyzerPlugin;
+pub use crate::analyzer_plugin::{AnalyzerPlugin, AnalyzerPluginSlice, AnalyzerPluginVec};
 pub use crate::categories::{
     ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,
-    RuleCategory, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
-    SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+    RuleCategory, SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+    SourceActionKind,
 };
 pub use crate::diagnostics::{AnalyzerDiagnostic, AnalyzerSuppressionDiagnostic, RuleError};
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
@@ -50,7 +52,7 @@ pub use crate::signals::{
 use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
-use biome_diagnostics::{category, Diagnostic, DiagnosticExt};
+use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextRange, TextSize,
     TokenAtOffset, TriviaPieceKind, WalkEvent,
@@ -72,7 +74,7 @@ pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     /// List of visitors being run by this instance of the analyzer for each phase
     phases: BTreeMap<Phases, Vec<Box<dyn Visitor<Language = L> + 'analyzer>>>,
     /// Plugins to be run after the phases for built-in rules.
-    plugins: Vec<Box<dyn AnalyzerPlugin>>,
+    plugins: AnalyzerPluginVec,
     /// Holds the metadata for all the rules statically known to the analyzer
     metadata: &'analyzer MetadataRegistry,
     /// Executor for the query matches emitted by the visitors
@@ -128,7 +130,7 @@ where
     }
 
     /// Registers an [AnalyzerPlugin] to be executed after the regular phases.
-    pub fn add_plugin(&mut self, plugin: Box<dyn AnalyzerPlugin>) {
+    pub fn add_plugin(&mut self, plugin: Arc<Box<dyn AnalyzerPlugin>>) {
         self.plugins.push(plugin);
     }
 
@@ -190,10 +192,52 @@ where
         for plugin in plugins {
             let root: AnyParse = ctx.root.syntax().as_send().expect("not a root node").into();
             for diagnostic in plugin.evaluate(root, ctx.options.file_path.clone()) {
-                let signal = DiagnosticSignal::new(|| diagnostic.clone());
+                let name = diagnostic.subcategory.clone().expect("missing subcategory");
+                let text_range = diagnostic.span.expect("missing span");
 
-                if let ControlFlow::Break(br) = (emit_signal)(&signal) {
-                    return Some(br);
+                // 1. check for top level suppression
+                if suppressions.top_level_suppression.suppressed_plugin(&name)
+                    || suppressions.top_level_suppression.suppress_all
+                {
+                    break;
+                }
+
+                // 2. check for range suppression is not supprted because:
+                // plugin is handled separately after basic analyze phases
+                // at this point, we have read to the end of file, all `// biome-ignore-end` is processed, thus all range suppressions is cleared
+
+                // 3. check for line suppression
+                let suppression = {
+                    let index = suppressions
+                        .line_suppressions
+                        .binary_search_by(|suppression| {
+                            if suppression.text_range.end() < text_range.start() {
+                                Ordering::Less
+                            } else if text_range.end() < suppression.text_range.start() {
+                                Ordering::Greater
+                            } else {
+                                Ordering::Equal
+                            }
+                        });
+
+                    index
+                        .ok()
+                        .map(|index| &mut suppressions.line_suppressions[index])
+                };
+
+                let suppression = suppression.filter(|suppression| {
+                    suppression.suppress_all
+                        || suppression.suppress_all_plugins
+                        || suppression.suppressed_plugins.contains(&name)
+                });
+
+                if let Some(suppression) = suppression {
+                    suppression.did_suppress_signal = true;
+                } else {
+                    let signal = DiagnosticSignal::new(|| diagnostic.clone());
+                    if let ControlFlow::Break(br) = (emit_signal)(&signal) {
+                        return Some(br);
+                    }
                 }
             }
         }
@@ -236,9 +280,9 @@ where
                     )
                 } else {
                     AnalyzerSuppressionDiagnostic::new(
-                    category!("suppressions/unused"),
-                    suppression.comment_span,
-                    "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
+                        category!("suppressions/unused"),
+                        suppression.comment_span,
+                        "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
                     )
                 }
             });
@@ -566,7 +610,7 @@ where
 }
 
 fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
-    filter.map_or(true, |filter| filter.intersect(range).is_some())
+    filter.is_none_or(|filter| filter.intersect(range).is_some())
 }
 
 /// Signature for a suppression comment parser function
@@ -650,6 +694,14 @@ impl<'a> AnalyzerSuppression<'a> {
         }
     }
 
+    pub fn plugin(plugin_name: Option<&'a str>) -> Self {
+        Self {
+            kind: AnalyzerSuppressionKind::Plugin(plugin_name),
+            ignore_range: None,
+            variant: AnalyzerSuppressionVariant::Line,
+        }
+    }
+
     #[must_use]
     pub fn with_ignore_range(mut self, ignore_range: TextRange) -> Self {
         self.ignore_range = Some(ignore_range);
@@ -670,6 +722,8 @@ pub enum AnalyzerSuppressionKind<'a> {
     Rule(&'a str),
     /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
     RuleInstance(&'a str, &'a str),
+    /// A suppression disabling a plugin eg. `// lint/biome-ignore plugin/my-plugin`
+    Plugin(Option<&'a str>),
 }
 
 /// Takes a [Suppression] and returns a [AnalyzerSuppression]
@@ -682,9 +736,14 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().start()).start(),
         piece_range.add_start(suppression.range().end()).start(),
     );
-    for (key, value) in suppression.categories {
+    for (key, subcategory, value) in suppression.categories {
         if key == category!("lint") {
             result.push(AnalyzerSuppression::everything().with_variant(&suppression.kind));
+        } else if key == category!("lint/plugin") {
+            let suppression = AnalyzerSuppression::plugin(subcategory)
+                .with_ignore_range(ignore_range)
+                .with_variant(&suppression.kind);
+            result.push(suppression);
         } else {
             let category = key.name();
             if let Some(rule) = category.strip_prefix("lint/") {
@@ -835,7 +894,7 @@ impl<'analysis> AnalysisFilter<'analysis> {
     /// Return `true` if the group `G` matches this filter
     pub fn match_group<G: RuleGroup>(&self) -> bool {
         self.match_category::<G::Category>()
-            && self.enabled_rules.map_or(true, |enabled_rules| {
+            && self.enabled_rules.is_none_or(|enabled_rules| {
                 enabled_rules.iter().any(|filter| filter.match_group::<G>())
             })
             && !self
@@ -847,7 +906,7 @@ impl<'analysis> AnalysisFilter<'analysis> {
     /// Return `true` if the rule `R` matches this filter
     pub fn match_rule<R: Rule>(&self) -> bool {
         self.match_category::<<R::Group as RuleGroup>::Category>()
-            && self.enabled_rules.map_or(true, |enabled_rules| {
+            && self.enabled_rules.is_none_or(|enabled_rules| {
                 enabled_rules.iter().any(|filter| filter.match_rule::<R>())
             })
             && !self

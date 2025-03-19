@@ -1,5 +1,5 @@
 use biome_analyze::RuleMetadata;
-use biome_console::{markup, ConsoleExt};
+use biome_console::{ConsoleExt, markup};
 use biome_flags::biome_env;
 use biome_service::documentation::Doc;
 

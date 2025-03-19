@@ -1,4 +1,4 @@
-use similar::{utils::diff_lines, Algorithm, ChangeTag};
+use similar::{Algorithm, ChangeTag, utils::diff_lines};
 use std::sync::Mutex;
 use std::{env, fmt::Write, fs::write, os::raw::c_int, str::FromStr, sync::Once};
 
@@ -63,13 +63,13 @@ impl DiffReport {
         static ONCE: Once = Once::new();
         ONCE.call_once(|| {
             // Import the atexit function from libc
-            extern "C" {
-                fn atexit(f: extern "C" fn()) -> c_int;
+            unsafe extern "C" {
+                fn atexit(f: unsafe extern "C" fn()) -> c_int;
             }
 
             // Trampoline function into the reporter printing logic with the
             // correct extern C ABI
-            extern "C" fn print_report() {
+            unsafe extern "C" fn print_report() {
                 REPORTER.print();
             }
 

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: area.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -39,7 +40,7 @@ expression: area.jsx
 ```
 area.jsx:4:2 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     3 │ <>
   > 4 │ 	<area />
@@ -57,7 +58,7 @@ area.jsx:4:2 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 area.jsx:5:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     3 │ <>
     4 │ 	<area />
@@ -76,7 +77,7 @@ area.jsx:5:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 area.jsx:6:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     4 │ 	<area />
     5 │   <area alt />
@@ -95,7 +96,7 @@ area.jsx:6:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 area.jsx:7:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     5 │   <area alt />
     6 │   <area alt={undefined} />
@@ -114,7 +115,7 @@ area.jsx:7:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 area.jsx:8:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
      6 │   <area alt={undefined} />
      7 │   <area src="xyz" />
@@ -133,7 +134,7 @@ area.jsx:8:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 area.jsx:9:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
      7 │   <area src="xyz" />
      8 │   <area {...this.props} />
@@ -152,7 +153,7 @@ area.jsx:9:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 area.jsx:10:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
      8 │   <area {...this.props} />
      9 │   <area aria-label="" />
@@ -171,7 +172,7 @@ area.jsx:10:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
 ```
 area.jsx:11:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
      9 │   <area aria-label="" />
     10 │   <area aria-label={undefined} />
@@ -190,7 +191,7 @@ area.jsx:11:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
 ```
 area.jsx:12:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     10 │   <area aria-label={undefined} />
     11 │   <area aria-labelledby="" />
@@ -209,7 +210,7 @@ area.jsx:12:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
 ```
 area.jsx:13:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     11 │   <area aria-labelledby="" />
     12 │   <area aria-labelledby={undefined} />
@@ -228,7 +229,7 @@ area.jsx:13:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
 ```
 area.jsx:14:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     12 │   <area aria-labelledby={undefined} />
     13 │   <area aria-hidden={false} />

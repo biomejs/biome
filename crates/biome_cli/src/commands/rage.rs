@@ -1,20 +1,20 @@
 use crate::commands::daemon::read_most_recent_log_file;
 use crate::service::enumerate_pipes;
-use crate::{service, CliDiagnostic, CliSession, VERSION};
+use crate::{CliDiagnostic, CliSession, VERSION, service};
 use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{
-    fmt, markup, ConsoleExt, DebugDisplay, DisplayOption, HorizontalLine, KeyValuePair, Padding,
-    SOFT_LINE,
+    ConsoleExt, DebugDisplay, DisplayOption, HorizontalLine, KeyValuePair, Padding, SOFT_LINE, fmt,
+    markup,
 };
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
-use biome_diagnostics::{termcolor, PrintDescription};
+use biome_diagnostics::{PrintDescription, termcolor};
 use biome_flags::biome_env;
 use biome_fs::{FileSystem, OsFileSystem};
-use biome_service::configuration::{load_configuration, LoadedConfiguration};
-use biome_service::settings::Settings;
-use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::Workspace;
+use biome_service::configuration::{LoadedConfiguration, load_configuration};
+use biome_service::settings::Settings;
+use biome_service::workspace::{RageEntry, RageParams, client};
 use camino::Utf8PathBuf;
 use std::{env, io, ops::Deref};
 use terminal_size::terminal_size;
@@ -204,17 +204,22 @@ impl Display for RageConfiguration<'_> {
         match load_configuration(self.fs, ConfigurationPathHint::default()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
-                    KeyValuePair("Status", markup!(<Dim>"Not set"</Dim>)).fmt(fmt)?;
+                    markup! {
+                        {KeyValuePair("Status", markup!(<Dim>"Not set"</Dim>))}
+                        {ConfigPath("unset")}
+                    }
+                    .fmt(fmt)?;
                 } else {
                     let LoadedConfiguration {
                         configuration,
                         diagnostics,
-                        ..
+                        directory_path,
+                        file_path,
                     } = loaded_configuration;
                     let vcs_enabled = configuration.is_vcs_enabled();
                     let mut settings = Settings::default();
                     settings
-                        .merge_with_configuration(configuration.clone(), None, None, &[])
+                        .merge_with_configuration(configuration.clone(), None)
                         .unwrap();
 
                     let status = if !diagnostics.is_empty() {
@@ -231,8 +236,14 @@ impl Display for RageConfiguration<'_> {
                         markup!(<Dim>"Loaded successfully"</Dim>)
                     };
 
+                    let config_path = file_path.as_ref().map_or_else(
+                        || directory_path.as_ref().unwrap().as_str(),
+                        |path| path.as_str(),
+                    );
+
                     markup! (
                         {KeyValuePair("Status", status)}
+                        {ConfigPath(config_path)}
                         {KeyValuePair("Formatter enabled", markup!({DebugDisplay(settings.is_formatter_enabled())}))}
                         {KeyValuePair("Linter enabled", markup!({DebugDisplay(settings.is_linter_enabled())}))}
                         {KeyValuePair("Assist enabled", markup!({DebugDisplay(settings.is_assist_enabled())}))}
@@ -242,18 +253,6 @@ impl Display for RageConfiguration<'_> {
                     // Print formatter configuration if --formatter option is true
                     if self.formatter {
                         let formatter_configuration = configuration.get_formatter_configuration();
-                        let ignore = formatter_configuration.ignore.map(|list| {
-                            list.iter()
-                                .map(|s| s.to_string())
-                                .collect::<Vec<_>>()
-                                .join(", ")
-                        });
-                        let include = formatter_configuration.include.map(|list| {
-                            list.iter()
-                                .map(|s| s.to_string())
-                                .collect::<Vec<_>>()
-                                .join(", ")
-                        });
                         let includes = formatter_configuration.includes.map(|list| {
                             list.iter()
                                 .map(|s| s.to_string())
@@ -269,8 +268,6 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair("Line width", markup!({DisplayOption(formatter_configuration.line_width)}))}
                             {KeyValuePair("Attribute position", markup!({DisplayOption(formatter_configuration.attribute_position)}))}
                             {KeyValuePair("Bracket spacing", markup!({DisplayOption(formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Ignore", markup!({DisplayOption(ignore)}))}
-                            {KeyValuePair("Include", markup!({DisplayOption(include)}))}
                             {KeyValuePair("Includes", markup!({DisplayOption(includes)}))}
                         ).fmt(fmt)?;
 
@@ -440,6 +437,20 @@ impl Display for ConnectedClientServerLog<'_> {
             BiomeServerLog.fmt(fmt)
         } else {
             Ok(())
+        }
+    }
+}
+
+/// Prints the config path, but only if it is set.
+struct ConfigPath<'a>(&'a str);
+
+impl Display for ConfigPath<'_> {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        let path = self.0;
+        if path.is_empty() {
+            KeyValuePair("Path", markup! { <Dim>"unset"</Dim> }).fmt(fmt)
+        } else {
+            KeyValuePair("Path", markup!({ DebugDisplay(path) })).fmt(fmt)
         }
     }
 }

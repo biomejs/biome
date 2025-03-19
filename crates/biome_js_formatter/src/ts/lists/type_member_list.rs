@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, Buffer};
+use biome_formatter::{Buffer, write};
 use biome_js_syntax::{AnyTsTypeMember, TsTypeMemberList};
 
 use crate::context::Semicolons;

@@ -1,6 +1,6 @@
+use crate::JsParser;
 use crate::lexer::{JsSyntaxKind, T};
 use crate::prelude::*;
-use crate::JsParser;
 use biome_parser::diagnostic::ParseDiagnostic;
 
 /// This struct contains the information needed to the parser to recover from a certain error

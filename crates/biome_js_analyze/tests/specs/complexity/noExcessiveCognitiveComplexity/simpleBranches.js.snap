@@ -21,7 +21,7 @@ function simpleBranches() {
 ```
 simpleBranches.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity of 3 detected (max: 2).
+  i Excessive complexity of 3 detected (max: 2).
   
   > 1 │ function simpleBranches() {
       │          ^^^^^^^^^^^^^^

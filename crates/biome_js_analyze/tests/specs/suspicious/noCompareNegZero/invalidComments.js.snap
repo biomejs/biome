@@ -17,7 +17,7 @@ snapshot_kind: text
 ```
 invalidComments.js:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the === operator to compare against -0.
+  × Do not use the === operator to compare against -0.
   
   > 1 │ -0 /** commnet **/ === 4;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -34,7 +34,7 @@ invalidComments.js:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━�
 ```
 invalidComments.js:2:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the === operator to compare against -0.
+  × Do not use the === operator to compare against -0.
   
     1 │ -0 /** commnet **/ === 4;
   > 2 │ -0
@@ -55,7 +55,7 @@ invalidComments.js:2:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━�
 ```
 invalidComments.js:5:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the === operator to compare against -0.
+  × Do not use the === operator to compare against -0.
   
     3 │ // comment
     4 │ === 4;

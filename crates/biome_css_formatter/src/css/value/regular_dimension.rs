@@ -1,7 +1,7 @@
 use crate::{prelude::*, utils::string_utils::FormatTokenAsLowercase};
 use biome_css_syntax::{CssRegularDimension, CssRegularDimensionFields};
 use biome_formatter::{
-    token::number::{format_number_token, NumberFormatOptions},
+    token::number::{NumberFormatOptions, format_number_token},
     write,
 };
 

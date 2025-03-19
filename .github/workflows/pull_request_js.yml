@@ -8,6 +8,8 @@ on:
       - 'packages/@biomejs/**'
       - 'packages/aria-data/**'
       - 'packages/tailwindcss-config-analyzer/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
 
 # Cancel jobs when the PR is updated
 concurrency:
@@ -28,13 +30,13 @@ jobs:
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Cache pnpm modules
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-
-      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - name: Run Biome CI check
         run: |
           pnpm i

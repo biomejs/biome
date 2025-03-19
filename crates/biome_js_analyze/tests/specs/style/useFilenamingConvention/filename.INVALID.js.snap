@@ -12,7 +12,7 @@ snapshot_kind: text
 ```
 filename.INVALID.js lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The file extension should be in lowercase.
+  i The file extension should be in lowercase.
   
 
 ```

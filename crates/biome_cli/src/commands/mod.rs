@@ -1,34 +1,34 @@
 use crate::changed::{get_changed_files, get_staged_files};
-use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
+use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
 use crate::execute::{ReportMode, Stdin};
 use crate::logging::LoggingKind;
 use crate::{
-    execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION,
+    CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION, execute_mode, setup_cli_subscriber,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
 use biome_configuration::css::{CssFormatterConfiguration, CssLinterConfiguration};
 use biome_configuration::formatter::FormatterEnabled;
 use biome_configuration::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
+use biome_configuration::html::{HtmlFormatterConfiguration, html_formatter_configuration};
 use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use biome_configuration::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_configuration::{
-    configuration, css::css_formatter_configuration, css::css_linter_configuration,
-    files_configuration, formatter_configuration, graphql::graphql_formatter_configuration,
+    FilesConfiguration, FormatterConfiguration, LinterConfiguration, configuration,
+    css::css_formatter_configuration, css::css_linter_configuration, files_configuration,
+    formatter_configuration, graphql::graphql_formatter_configuration,
     graphql::graphql_linter_configuration, javascript::js_formatter_configuration,
     javascript::js_linter_configuration, json::json_formatter_configuration,
     json::json_linter_configuration, linter_configuration, vcs::vcs_configuration,
-    FilesConfiguration, FormatterConfiguration, LinterConfiguration,
 };
-use biome_configuration::{BiomeDiagnostic, Configuration};
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
+use biome_deserialize::Merge;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
-use biome_service::configuration::{
-    load_configuration, load_editorconfig, ConfigurationExt, LoadedConfiguration,
-};
+use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -38,6 +38,7 @@ use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
+use std::time::Duration;
 use tracing::info;
 
 pub(crate) mod check;
@@ -98,10 +99,6 @@ pub enum BiomeCommand {
             fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
         )]
         log_path: Utf8PathBuf,
-        /// Allows to set a custom file path to the configuration file,
-        /// or a custom directory path to find `biome.json` or `biome.jsonc`
-        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<Utf8PathBuf>,
     },
 
     /// Stops the Biome daemon server process.
@@ -273,6 +270,9 @@ pub enum BiomeCommand {
         #[bpaf(external(graphql_formatter_configuration), optional, hide_usage, hide)]
         graphql_formatter: Option<GraphqlFormatterConfiguration>,
 
+        #[bpaf(external(html_formatter_configuration), optional, hide_usage, hide)]
+        html_formatter: Option<HtmlFormatterConfiguration>,
+
         #[bpaf(external(vcs_configuration), optional, hide_usage)]
         vcs_configuration: Option<VcsConfiguration>,
 
@@ -347,6 +347,17 @@ pub enum BiomeCommand {
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
+        /// The number of threads to use. This is useful when running the CLI in environments
+        /// with limited resource, for example CI.
+        #[bpaf(
+            long("threads"),
+            argument("NUMBER"),
+            env("BIOME_THREADS"),
+            optional,
+            hide_usage
+        )]
+        threads: Option<usize>,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -381,10 +392,6 @@ pub enum BiomeCommand {
             fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
         )]
         log_path: Utf8PathBuf,
-        /// Allows to set a custom file path to the configuration file,
-        /// or a custom directory path to find `biome.json` or `biome.jsonc`
-        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<Utf8PathBuf>,
         /// Bogus argument to make the command work with vscode-languageclient
         #[bpaf(long("stdio"), hide, hide_usage, switch)]
         stdio: bool,
@@ -509,10 +516,6 @@ pub enum BiomeCommand {
 
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
-        /// Allows to set a custom file path to the configuration file,
-        /// or a custom directory path to find `biome.json` or `biome.jsonc`
-        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<Utf8PathBuf>,
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
@@ -579,6 +582,13 @@ impl BiomeCommand {
                 cli_options.colors.as_ref()
             }
             None => None,
+        }
+    }
+
+    pub const fn get_threads(&self) -> Option<usize> {
+        match self {
+            BiomeCommand::Ci { threads, .. } => *threads,
+            _ => None,
         }
     }
 
@@ -750,8 +760,12 @@ pub(crate) trait CommandRunner: Sized {
         let workspace = &*session.app.workspace;
         let fs = workspace.fs();
         self.check_incompatible_arguments()?;
-        let (execution, paths) = self.configure_workspace(fs, console, workspace, cli_options)?;
-        execute_mode(execution, session, cli_options, paths)
+        let ConfiguredWorkspace {
+            execution,
+            paths,
+            duration,
+        } = self.configure_workspace(fs, console, workspace, cli_options)?;
+        execute_mode(execution, session, cli_options, paths, duration)
     }
 
     /// This function prepares the workspace with the following:
@@ -766,7 +780,7 @@ pub(crate) trait CommandRunner: Sized {
         console: &mut dyn Console,
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
-    ) -> Result<(Execution, Vec<OsString>), CliDiagnostic> {
+    ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
         let loaded_configuration =
             load_configuration(fs, cli_options.as_configuration_path_hint())?;
         if self.should_validate_configuration_diagnostics() {
@@ -776,11 +790,6 @@ pub(crate) trait CommandRunner: Sized {
                 cli_options.verbose,
             )?;
         }
-        if loaded_configuration.double_configuration_found {
-            console.log(markup! {
-                <Warn>"Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file."</Warn>
-            })
-        }
         info!(
             "Configuration file loaded: {:?}, diagnostics detected {}",
             loaded_configuration.file_path,
@@ -788,9 +797,6 @@ pub(crate) trait CommandRunner: Sized {
         );
         let configuration_path = loaded_configuration.directory_path.clone();
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
-        let vcs_base_path = configuration_path.clone().or(fs.working_directory());
-        let (vcs_base_path, gitignore_matches) =
-            configuration.retrieve_gitignore_matches(fs, vcs_base_path.as_deref())?;
         let paths = self.get_files_to_process(fs, &configuration)?;
         let project_path = fs
             .working_directory()
@@ -801,23 +807,26 @@ pub(crate) trait CommandRunner: Sized {
             open_uninitialized: true,
         })?;
 
-        workspace.update_settings(UpdateSettingsParams {
+        let result = workspace.update_settings(UpdateSettingsParams {
             project_key,
             workspace_directory: configuration_path.map(BiomePath::from),
             configuration,
-            vcs_base_path: vcs_base_path.map(BiomePath::from),
-            gitignore_matches,
         })?;
+        for diagnostic in &result.diagnostics {
+            console.log(markup! {{PrintDiagnostic::simple(diagnostic)}});
+        }
 
         let execution = self.get_execution(cli_options, console, workspace, project_key)?;
 
-        if execution.traversal_mode().should_scan_project() {
+        let duration = if execution.traversal_mode().should_scan_project() {
             let result = workspace.scan_project_folder(ScanProjectFolderParams {
                 project_key,
                 path: Some(project_path),
+                watch: cli_options.use_server,
+                force: false, // TODO: Maybe we'll want a CLI flag for this.
             })?;
             for diagnostic in result.diagnostics {
-                if diagnostic.severity() == Severity::Fatal {
+                if diagnostic.severity() >= Severity::Error {
                     console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
                 }
             }
@@ -827,9 +836,16 @@ pub(crate) trait CommandRunner: Sized {
                     <Info>"Scanned project folder in "<Emphasis>{result.duration}</Emphasis>"."</Info>
                 });
             }
-        }
+            Some(result.duration)
+        } else {
+            None
+        };
 
-        Ok((execution, paths))
+        Ok(ConfiguredWorkspace {
+            execution,
+            paths,
+            duration,
+        })
     }
 
     /// Computes [Stdin] if the CLI has the necessary information.
@@ -902,6 +918,15 @@ pub(crate) trait CommandRunner: Sized {
     }
 }
 
+pub(crate) struct ConfiguredWorkspace {
+    /// Execution context
+    pub execution: Execution,
+    /// Paths to crawl
+    pub paths: Vec<OsString>,
+    /// The duration of the scanning
+    pub duration: Option<Duration>,
+}
+
 pub trait LoadEditorConfig: CommandRunner {
     /// Whether this command should load the `.editorconfig` file.
     fn should_load_editor_config(&self, fs_configuration: &Configuration) -> bool;
@@ -912,24 +937,36 @@ pub trait LoadEditorConfig: CommandRunner {
         configuration_path: Option<Utf8PathBuf>,
         fs_configuration: &Configuration,
         fs: &dyn FileSystem,
-        console: &mut dyn Console,
-    ) -> Result<Configuration, WorkspaceError> {
+    ) -> Result<Option<Configuration>, WorkspaceError> {
         Ok(if self.should_load_editor_config(fs_configuration) {
-            let (editorconfig, editorconfig_diagnostics) = {
-                let search_path = configuration_path
-                    .clone()
-                    .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-                load_editorconfig(fs, search_path)?
+            let (editorconfig, _editorconfig_diagnostics) = {
+                let search_path = fs.working_directory().unwrap_or_default();
+
+                load_editorconfig(fs, search_path, configuration_path)?
             };
-            for diagnostic in editorconfig_diagnostics {
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                })
-            }
-            editorconfig.unwrap_or_default()
+            editorconfig
         } else {
             Default::default()
         })
+    }
+
+    fn combine_configuration(
+        &self,
+        configuration_path: Option<Utf8PathBuf>,
+        biome_configuration: Configuration,
+        fs: &dyn FileSystem,
+    ) -> Result<Configuration, WorkspaceError> {
+        Ok(
+            if let Some(mut fs_configuration) =
+                self.load_editor_config(configuration_path, &biome_configuration, fs)?
+            {
+                // If both `biome.json` and `.editorconfig` exist, formatter settings from the biome.json take precedence.
+                fs_configuration.merge_with(biome_configuration);
+                fs_configuration
+            } else {
+                biome_configuration
+            },
+        )
     }
 }
 
@@ -939,14 +976,16 @@ mod tests {
 
     #[test]
     fn incompatible_arguments() {
-        assert!(check_fix_incompatible_arguments(FixFileModeOptions {
-            write: true,
-            fix: true,
-            unsafe_: false,
-            suppress: false,
-            suppression_reason: None
-        })
-        .is_err());
+        assert!(
+            check_fix_incompatible_arguments(FixFileModeOptions {
+                write: true,
+                fix: true,
+                unsafe_: false,
+                suppress: false,
+                suppression_reason: None
+            })
+            .is_err()
+        );
     }
 
     #[test]

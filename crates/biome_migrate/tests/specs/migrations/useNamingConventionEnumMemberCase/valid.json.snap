@@ -1,0 +1,22 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: valid.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useNamingConvention": {
+          "level": "on",
+          "options": {
+            "requireAscii": true
+          }
+        }
+      }
+    }
+  }
+}
+
+```

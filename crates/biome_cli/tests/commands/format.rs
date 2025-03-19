@@ -2,11 +2,11 @@ use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FORMAT, CONFIG_FORMAT_JSONC,
     CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
 };
-use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
+use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
 use crate::{
-    assert_cli_snapshot, run_cli, CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, UNFORMATTED,
+    CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, UNFORMATTED, assert_cli_snapshot, run_cli,
 };
-use biome_console::{markup, BufferConsole, MarkupBuf};
+use biome_console::{BufferConsole, MarkupBuf, markup};
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -1814,195 +1814,6 @@ fn print_verbose() {
 }
 
 #[test]
-fn ignore_vcs_ignored_file() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let rome_json = r#"{
-        "vcs": {
-            "enabled": true,
-            "clientKind": "git",
-            "useIgnoreFile": true
-        }
-    }"#;
-
-    let git_ignore = r#"
-file2.js
-"#;
-
-    let code2 = r#"foo.call();
-
-
-	bar.call();"#;
-    let code1 = r#"array.map(sentence =>
-
-
-	sentence.split(' ')).flat();"#;
-
-    // ignored files
-    let file_path1 = Utf8Path::new("file1.js");
-    fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Utf8Path::new("file2.js");
-    fs.insert(file_path2.into(), code2.as_bytes());
-
-    // configuration
-    let config_path = Utf8Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
-
-    // git ignore file
-    let ignore_file = Utf8Path::new(".gitignore");
-    fs.insert(ignore_file.into(), git_ignore.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                file_path1.as_str(),
-                file_path2.as_str(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "ignore_vcs_ignored_file",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn ignore_vcs_ignored_file_via_cli() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let git_ignore = r#"
-file2.js
-"#;
-
-    let code2 = r#"foo.call();
-
-
-	bar.call();"#;
-    let code1 = r#"array.map(sentence =>
-
-
-	sentence.split(' ')).flat();"#;
-
-    // ignored files
-    let file_path1 = Utf8Path::new("file1.js");
-    fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Utf8Path::new("file2.js");
-    fs.insert(file_path2.into(), code2.as_bytes());
-
-    // git folder
-    let git_folder = Utf8Path::new("./.git");
-    fs.insert(git_folder.into(), "".as_bytes());
-
-    // git ignore file
-    let ignore_file = Utf8Path::new("./.gitignore");
-    fs.insert(ignore_file.into(), git_ignore.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(
-            [
-                "format",
-                "--vcs-enabled=true",
-                "--vcs-client-kind=git",
-                "--vcs-use-ignore-file=true",
-                "--vcs-root=.",
-                "--write",
-                file_path1.as_str(),
-                file_path2.as_str(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "ignore_vcs_ignored_file_via_cli",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn include_vcs_ignore_cascade() {
-    // Only `file1.js` will be formatted:
-    // - `file2.js` is ignored at top-level
-    // - `file3.js` is ignored at formatter-level
-    // - `file4.js` is ignored in `.gitignore`
-    let git_ignore = r#"file4.js"#;
-    let config = r#"{
-        "vcs": {
-            "enabled": true,
-            "clientKind": "git",
-            "useIgnoreFile": true
-        },
-        "files": {
-            "includes": ["**", "!file2.js"]
-        },
-        "formatter": {
-          "includes": ["file1.js", "file2.js", "file4.js", "!file3.js"]
-        }
-    }"#;
-    let files = [
-        ("file1.js", true),
-        ("file2.js", false),
-        ("file3.js", false),
-        ("file4.js", false),
-    ];
-
-    let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
-    let gitignore_file = Utf8Path::new(".gitignore");
-    fs.insert(gitignore_file.into(), git_ignore.as_bytes());
-    let file_path = Utf8Path::new("biome.json");
-    fs.insert(file_path.into(), config);
-    for (file_path, _) in files {
-        let file_path = Utf8Path::new(file_path);
-        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
-    }
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", ".", "--write"].as_slice()),
-    );
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    for (file_path, expect_formatted) in files {
-        let expected = if expect_formatted {
-            FORMATTED
-        } else {
-            UNFORMATTED
-        };
-        assert_file_contents(&fs, Utf8Path::new(file_path), expected);
-    }
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "include_vcs_ignore_cascade",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn vcs_absolute_path() {
     let git_ignore = r#"file.js"#;
     let config = r#"{
@@ -2235,7 +2046,11 @@ fn format_json_when_allow_trailing_commas_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
+    assert_file_contents(
+        &fs,
+        Utf8Path::new(file_path),
+        "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n",
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2272,7 +2087,11 @@ fn format_json_trailing_commas_none() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
+    assert_file_contents(
+        &fs,
+        Utf8Path::new(file_path),
+        "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n",
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2309,7 +2128,11 @@ fn format_json_trailing_commas_all() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
+    assert_file_contents(
+        &fs,
+        Utf8Path::new(file_path),
+        "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n",
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2352,7 +2175,11 @@ fn format_json_trailing_commas_overrides_all() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
+    assert_file_contents(
+        &fs,
+        Utf8Path::new(file_path),
+        "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n",
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2395,7 +2222,11 @@ fn format_json_trailing_commas_overrides_none() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
+    assert_file_contents(
+        &fs,
+        Utf8Path::new(file_path),
+        "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n",
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3265,7 +3096,7 @@ fn format_empty_svelte_ts_files_write() {
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
-    fs.insert(svelte_file_path.into(), "<div></div>".as_bytes());
+    fs.insert(svelte_file_path.into(), "<script></script>".as_bytes());
 
     let (fs, result) = run_cli(
         fs,
@@ -3275,7 +3106,7 @@ fn format_empty_svelte_ts_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, "<div></div>");
+    assert_file_contents(&fs, svelte_file_path, "<script></script>");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3517,6 +3348,73 @@ fn applies_custom_bracket_spacing_for_graphql() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_bracket_spacing_graphql",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// Change this when HTML formatting is enabled by default
+#[test]
+fn html_disabled_by_default() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.html");
+    fs.insert(file_path.into(), "<!DOCTYPE HTML>");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(matches!(
+        result,
+        Err(biome_cli::CliDiagnostic::NoFilesWereProcessed(_))
+    ));
+
+    assert_file_contents(&fs, file_path, "<!DOCTYPE HTML>");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_disabled_by_default",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn html_enabled_by_arg_format() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.html");
+    fs.insert(file_path.into(), "<!DOCTYPE HTML>");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--html-formatter-enabled=true",
+                "--write",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, "<!DOCTYPE html>\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_enabled_by_arg_format",
         fs,
         console,
         result,

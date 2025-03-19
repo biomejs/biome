@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidEnum.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -15,7 +16,7 @@ enum SPECIAL_STATUS {}
 ```
 invalidEnum.ts:1:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This enum name should be in PascalCase.
+  i This enum name should be in PascalCase.
   
   > 1 │ enum specialStatus {}
       │      ^^^^^^^^^^^^^
@@ -35,7 +36,7 @@ invalidEnum.ts:1:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━�
 ```
 invalidEnum.ts:3:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This enum name should be in PascalCase.
+  i This enum name should be in PascalCase.
   
     1 │ enum specialStatus {}
     2 │ 
@@ -59,7 +60,7 @@ invalidEnum.ts:3:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━�
 ```
 invalidEnum.ts:5:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This enum name should be in PascalCase.
+  i This enum name should be in PascalCase.
   
     3 │ enum special_status {}
     4 │ 

@@ -100,6 +100,12 @@ impl std::fmt::Display for PluginDiagnostic {
     }
 }
 
+impl From<PluginDiagnostic> for biome_diagnostics::serde::Diagnostic {
+    fn from(error: PluginDiagnostic) -> Self {
+        biome_diagnostics::serde::Diagnostic::new(error)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "plugin",
@@ -158,7 +164,7 @@ mod test {
     use crate::plugin_manifest::PluginManifest;
 
     use biome_deserialize::json::deserialize_from_json_str;
-    use biome_diagnostics::{print_diagnostic_to_string, Error};
+    use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_json_parser::JsonParserOptions;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {

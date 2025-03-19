@@ -2,4 +2,4 @@
 "@biomejs/js-api": patch
 ---
 
-Remove wrong `openProject()` definition, and add JsDoc.
+Removed wrong `openProject()` definition, and added JSDoc documentation.

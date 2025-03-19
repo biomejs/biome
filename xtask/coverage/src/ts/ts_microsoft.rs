@@ -1,6 +1,6 @@
 use crate::check_file_encoding;
 use crate::runner::{
-    create_bogus_node_in_tree_diagnostic, TestCase, TestCaseFiles, TestRunOutcome, TestSuite,
+    TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, ModuleKind};

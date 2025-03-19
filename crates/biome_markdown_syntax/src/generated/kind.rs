@@ -23,11 +23,15 @@ pub enum MarkdownSyntaxKind {
     BANG,
     MINUS,
     STAR,
+    DOUBLE_STAR,
     BACKTICK,
+    TRIPLE_BACKTICK,
     TILDE,
     WHITESPACE3,
     UNDERSCORE,
+    DOUBLE_UNDERSCORE,
     HASH,
+    COMMA,
     NULL_KW,
     MD_HARD_LINE_LITERAL,
     MD_SOFT_BREAK_LITERAL,
@@ -49,6 +53,7 @@ pub enum MarkdownSyntaxKind {
     MD_HEADER,
     MD_INDENT_CODE_BLOCK,
     MD_FENCED_CODE_BLOCK,
+    MD_CODE_NAME_LIST,
     MD_HTML_BLOCK,
     MD_LINK_BLOCK,
     MD_QUOTE,
@@ -57,11 +62,18 @@ pub enum MarkdownSyntaxKind {
     MD_BULLET_LIST,
     MD_ORDER_LIST,
     MD_PARAGRAPH,
-    MD_PARAGRAPH_ITEM_LIST,
-    MD_INLINE_CODE,
+    MD_INLINE_ITEM_LIST,
     MD_INLINE_EMPHASIS,
+    MD_INLINE_ITALIC,
+    MD_INLINE_CODE,
+    MD_BULLET,
     MD_INLINE_LINK,
     MD_INLINE_IMAGE,
+    MD_INLINE_IMAGE_ALT,
+    MD_INDENTED_CODE_LINE,
+    MD_INLINE_IMAGE_LINK,
+    MD_INLINE_IMAGE_SOURCE,
+    MD_INDENTED_CODE_LINE_LIST,
     MD_HARD_LINE,
     MD_SOFT_BREAK,
     MD_TEXTUAL,
@@ -88,11 +100,15 @@ impl MarkdownSyntaxKind {
                 | BANG
                 | MINUS
                 | STAR
+                | DOUBLE_STAR
                 | BACKTICK
+                | TRIPLE_BACKTICK
                 | TILDE
                 | WHITESPACE3
                 | UNDERSCORE
+                | DOUBLE_UNDERSCORE
                 | HASH
+                | COMMA
         )
     }
     pub const fn is_literal(self) -> bool {
@@ -110,7 +126,13 @@ impl MarkdownSyntaxKind {
     pub const fn is_list(self) -> bool {
         matches!(
             self,
-            MD_BLOCK_LIST | MD_HASH_LIST | MD_BULLET_LIST | MD_ORDER_LIST | MD_PARAGRAPH_ITEM_LIST
+            MD_BLOCK_LIST
+                | MD_HASH_LIST
+                | MD_CODE_NAME_LIST
+                | MD_BULLET_LIST
+                | MD_ORDER_LIST
+                | MD_INLINE_ITEM_LIST
+                | MD_INDENTED_CODE_LINE_LIST
         )
     }
     pub fn from_keyword(ident: &str) -> Option<MarkdownSyntaxKind> {
@@ -133,11 +155,15 @@ impl MarkdownSyntaxKind {
             BANG => "!",
             MINUS => "-",
             STAR => "*",
+            DOUBLE_STAR => "**",
             BACKTICK => "`",
+            TRIPLE_BACKTICK => "```",
             TILDE => "~",
             WHITESPACE3 => "   ",
             UNDERSCORE => "_",
+            DOUBLE_UNDERSCORE => "__",
             HASH => "#",
+            COMMA => ",",
             NULL_KW => "null",
             _ => return None,
         };
@@ -146,4 +172,4 @@ impl MarkdownSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [<] => { $ crate :: MarkdownSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: MarkdownSyntaxKind :: R_ANGLE } ; ['('] => { $ crate :: MarkdownSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: MarkdownSyntaxKind :: R_PAREN } ; ['['] => { $ crate :: MarkdownSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: MarkdownSyntaxKind :: R_BRACK } ; [/] => { $ crate :: MarkdownSyntaxKind :: SLASH } ; [=] => { $ crate :: MarkdownSyntaxKind :: EQ } ; [!] => { $ crate :: MarkdownSyntaxKind :: BANG } ; [-] => { $ crate :: MarkdownSyntaxKind :: MINUS } ; [*] => { $ crate :: MarkdownSyntaxKind :: STAR } ; ['`'] => { $ crate :: MarkdownSyntaxKind :: BACKTICK } ; [~] => { $ crate :: MarkdownSyntaxKind :: TILDE } ; ["   "] => { $ crate :: MarkdownSyntaxKind :: WHITESPACE3 } ; ["_"] => { $ crate :: MarkdownSyntaxKind :: UNDERSCORE } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; [null] => { $ crate :: MarkdownSyntaxKind :: NULL_KW } ; [ident] => { $ crate :: MarkdownSyntaxKind :: IDENT } ; [EOF] => { $ crate :: MarkdownSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: MarkdownSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: MarkdownSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: MarkdownSyntaxKind :: R_ANGLE } ; ['('] => { $ crate :: MarkdownSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: MarkdownSyntaxKind :: R_PAREN } ; ['['] => { $ crate :: MarkdownSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: MarkdownSyntaxKind :: R_BRACK } ; [/] => { $ crate :: MarkdownSyntaxKind :: SLASH } ; [=] => { $ crate :: MarkdownSyntaxKind :: EQ } ; [!] => { $ crate :: MarkdownSyntaxKind :: BANG } ; [-] => { $ crate :: MarkdownSyntaxKind :: MINUS } ; [*] => { $ crate :: MarkdownSyntaxKind :: STAR } ; [**] => { $ crate :: MarkdownSyntaxKind :: DOUBLE_STAR } ; ['`'] => { $ crate :: MarkdownSyntaxKind :: BACKTICK } ; ["```"] => { $ crate :: MarkdownSyntaxKind :: TRIPLE_BACKTICK } ; [~] => { $ crate :: MarkdownSyntaxKind :: TILDE } ; ["   "] => { $ crate :: MarkdownSyntaxKind :: WHITESPACE3 } ; ["_"] => { $ crate :: MarkdownSyntaxKind :: UNDERSCORE } ; ["__"] => { $ crate :: MarkdownSyntaxKind :: DOUBLE_UNDERSCORE } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; [,] => { $ crate :: MarkdownSyntaxKind :: COMMA } ; [null] => { $ crate :: MarkdownSyntaxKind :: NULL_KW } ; [ident] => { $ crate :: MarkdownSyntaxKind :: IDENT } ; [EOF] => { $ crate :: MarkdownSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: MarkdownSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; }

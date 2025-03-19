@@ -3,7 +3,7 @@ use super::{
     map_compiler::MapCompiler, snippet_compiler::parse_snippet_content,
 };
 use crate::{
-    grit_context::GritQueryContext, util::TextRangeGritExt, CompileError, GritTargetLanguage,
+    CompileError, GritTargetLanguage, grit_context::GritQueryContext, util::TextRangeGritExt,
 };
 use biome_grit_syntax::{AnyGritCodeSnippetSource, AnyGritLiteral, GritSyntaxKind};
 use biome_rowan::AstNode;

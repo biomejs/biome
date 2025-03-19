@@ -46,8 +46,8 @@ pub fn parse_js_number(num: &str) -> Option<f64> {
 #[cfg(test)]
 mod tests {
     use super::split_into_radix_and_number;
-    use biome_js_factory::syntax::{JsNumberLiteralExpression, JsSyntaxKind::*};
     use biome_js_factory::JsSyntaxTreeBuilder;
+    use biome_js_factory::syntax::{JsNumberLiteralExpression, JsSyntaxKind::*};
     use biome_rowan::AstNode;
 
     fn assert_float(literal: &str, value: f64) {

@@ -87,7 +87,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
-Object wrap: Preserve
+Expand lists: Auto
 -----
 
 ```js
@@ -149,7 +149,7 @@ export * as something_bad_will_happen from "something_bad_might_not_happen" with
 ("content \\' \\' ");
 
 // you should remove the escape
-("content '' ");
+("content \'\' ");
 ```
 
 # Lines exceeding max width of 80 characters
@@ -173,7 +173,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
-Object wrap: Preserve
+Expand lists: Auto
 -----
 
 ```js
@@ -235,7 +235,7 @@ export * as something_bad_will_happen from "something_bad_might_not_happen" with
 ("content \\' \\' ");
 
 // you should remove the escape
-("content '' ");
+("content \'\' ");
 ```
 
 # Lines exceeding max width of 80 characters

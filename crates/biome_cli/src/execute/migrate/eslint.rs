@@ -1,8 +1,8 @@
-use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
-use biome_console::{markup, Console, ConsoleExt};
-use biome_deserialize::json::deserialize_from_json_str;
+use crate::diagnostics::MigrationDiagnostic;
+use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::Merge;
+use biome_deserialize::json::deserialize_from_json_str;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_json_parser::JsonParserOptions;
@@ -204,7 +204,7 @@ fn load_legacy_config_data(
                 reason: format!(
                     "ESLint configuration ending with the extension `{ext}` are not supported."
                 ),
-            }))
+            }));
         }
     };
     let path_str = path.to_string();
@@ -291,7 +291,9 @@ fn load_eslint_extends_config(
             let deserialized = deserialized.configs.remove(config_name);
             if deserialized.is_none() {
                 return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-                    reason: format!("The ESLint configuration '{config_name}' cannot be extracted from the module '{module_name}'. Make sure that '{config_name}' is a valid configuration name.")
+                    reason: format!(
+                        "The ESLint configuration '{config_name}' cannot be extracted from the module '{module_name}'. Make sure that '{config_name}' is a valid configuration name."
+                    ),
                 }));
             }
             (module_name, resolved_path, deserialized)
@@ -327,7 +329,9 @@ fn load_eslint_extends_config(
     };
     let Some(mut deserialized) = deserialized else {
         return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-            reason: format!("The ESLint configuration of the module '{specifier}' cannot be extracted. This is likely an internal error.")
+            reason: format!(
+                "The ESLint configuration of the module '{specifier}' cannot be extracted. This is likely an internal error."
+            ),
         }));
     };
     // Resolve relative path in `extends`.

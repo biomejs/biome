@@ -1,13 +1,13 @@
 use biome_cli::CliDiagnostic;
 use biome_console::fmt::{Formatter, Termcolor};
-use biome_console::{markup, BufferConsole, Markup};
+use biome_console::{BufferConsole, Markup, markup};
 use biome_diagnostics::termcolor::NoColor;
-use biome_diagnostics::{print_diagnostic_to_string, Error};
+use biome_diagnostics::{Error, print_diagnostic_to_string};
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use camino::{Utf8Path, Utf8PathBuf};
 use regex::Regex;
 use std::borrow::Cow;

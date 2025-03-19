@@ -1,6 +1,6 @@
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
-use biome_grit_formatter::{context::GritFormatContext, GritFormatLanguage};
+use biome_grit_formatter::{GritFormatLanguage, context::GritFormatContext};
 use biome_grit_parser::parse_grit;
 use biome_grit_syntax::GritLanguage;
 use biome_service::settings::ServiceLanguage;

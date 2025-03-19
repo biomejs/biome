@@ -14,8 +14,8 @@ use crate::{
 
 use crate::format_element::document::Document;
 use crate::format_element::tag::Condition;
-use crate::prelude::tag::{DedentMode, Tag, TagKind, VerbatimKind};
 use crate::prelude::Tag::EndFill;
+use crate::prelude::tag::{DedentMode, Tag, TagKind, VerbatimKind};
 use crate::printer::call_stack::{
     CallStack, FitsCallStack, FitsIndentStack, IndentStack, PrintCallStack, PrintElementArgs,
     StackFrame, SuffixStack,
@@ -1393,10 +1393,10 @@ struct FitsState {
 
 #[cfg(test)]
 mod tests {
+    use crate::LineEnding;
     use crate::prelude::*;
     use crate::printer::{PrintWidth, Printer, PrinterOptions};
-    use crate::LineEnding;
-    use crate::{format_args, write, Document, FormatState, IndentStyle, Printed, VecBuffer};
+    use crate::{Document, FormatState, IndentStyle, Printed, VecBuffer, format_args, write};
 
     fn format(root: &dyn Format<SimpleFormatContext>) -> Printed {
         format_with_options(
@@ -1738,7 +1738,10 @@ two lines`,
 
         let printed = format(&content);
 
-        assert_eq!(printed.as_code(), "The referenced group breaks.\nThis group breaks because:\nIt measures with the 'if_group_breaks' variant because the referenced group breaks and that's just way too much text.");
+        assert_eq!(
+            printed.as_code(),
+            "The referenced group breaks.\nThis group breaks because:\nIt measures with the 'if_group_breaks' variant because the referenced group breaks and that's just way too much text."
+        );
     }
 
     #[test]

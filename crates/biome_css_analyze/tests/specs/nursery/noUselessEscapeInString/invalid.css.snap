@@ -1,0 +1,54 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+.a::after {
+    content: /*before*/ "useless \a" /*after*/
+}
+.b::after {
+    content: "useless \'"
+}
+```
+
+# Diagnostics
+```
+invalid.css:2:35 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    1 │ .a::after {
+  > 2 │     content: /*before*/ "useless \a" /*after*/
+      │                                   ^
+    3 │ }
+    4 │ .b::after {
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    2 │ ····content:·/*before*/·"useless·\a"·/*after*/
+      │                                  -            
+
+```
+
+```
+invalid.css:5:24 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    3 │ }
+    4 │ .b::after {
+  > 5 │     content: "useless \'"
+      │                        ^
+    6 │ }
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    5 │ ····content:·"useless·\'"
+      │                       -  
+
+```

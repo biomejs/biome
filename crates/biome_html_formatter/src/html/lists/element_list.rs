@@ -7,14 +7,14 @@ use crate::{
     prelude::*,
     utils::{
         children::{
-            html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator,
-            HtmlSpace,
+            HtmlChild, HtmlChildrenIterator, HtmlSpace, html_split_children,
+            is_meaningful_html_text,
         },
-        metadata::is_element_whitespace_sensitive,
+        metadata::is_element_whitespace_sensitive_from_element,
     },
 };
-use biome_formatter::{best_fitting, prelude::*, CstFormatContext, FormatRuleWithOptions};
-use biome_formatter::{format_args, write, VecBuffer};
+use biome_formatter::{CstFormatContext, FormatRuleWithOptions, best_fitting, prelude::*};
+use biome_formatter::{VecBuffer, format_args, write};
 use biome_html_syntax::{
     AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElementList, HtmlRoot,
     HtmlSyntaxToken,
@@ -23,12 +23,18 @@ use tag::GroupMode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
     layout: HtmlChildListLayout,
+    /// Whether or not the parent element that encapsulates this element list is whitespace sensitive.
+    is_element_whitespace_sensitive: bool,
 
     borrowed_tokens: BorrowedTokens,
 }
 
 pub(crate) struct FormatHtmlElementListOptions {
     pub layout: HtmlChildListLayout,
+    /// Whether or not the parent element that encapsulates this element list is whitespace sensitive.
+    ///
+    /// This should always be false for the root element.
+    pub is_element_whitespace_sensitive: bool,
     pub borrowed_r_angle: Option<HtmlSyntaxToken>,
     pub borrowed_closing_tag: Option<HtmlClosingElement>,
 }
@@ -38,6 +44,7 @@ impl FormatRuleWithOptions<HtmlElementList> for FormatHtmlElementList {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.layout = options.layout;
+        self.is_element_whitespace_sensitive = options.is_element_whitespace_sensitive;
         self.borrowed_tokens = BorrowedTokens {
             borrowed_opening_r_angle: options.borrowed_r_angle,
             borrowed_closing_tag: options.borrowed_closing_tag,
@@ -153,6 +160,11 @@ impl FormatHtmlElementList {
         // Trim leading new lines
         if let Some(HtmlChild::Newline | HtmlChild::EmptyLine) = children_iter.peek() {
             children_iter.next();
+            // since there is a leading newline, we need to preserve the fact that there is whitespace there if this element is whitespace sensitive.
+            if self.is_element_whitespace_sensitive {
+                flat.write(&space(), f);
+                // don't need to add anything for multiline here because there will already be a newline.
+            }
         }
 
         flat.write(&borrowed_opening_r_angle, f);
@@ -175,9 +187,8 @@ impl FormatHtmlElementList {
                                 next_child,
                                 AnyHtmlElement::HtmlSelfClosingElement(_)
                             ) || word.is_single_character(),
-                            is_next_element_whitespace_sensitive: is_element_whitespace_sensitive(
-                                f, next_child,
-                            ),
+                            is_next_element_whitespace_sensitive:
+                                is_element_whitespace_sensitive_from_element(f, next_child),
                         }),
 
                         Some(HtmlChild::Newline | HtmlChild::Whitespace | HtmlChild::EmptyLine) => {
@@ -291,7 +302,7 @@ impl FormatHtmlElementList {
                             // adefg
                             // ```
                             let is_current_whitespace_sensitive =
-                                is_element_whitespace_sensitive(f, non_text);
+                                is_element_whitespace_sensitive_from_element(f, non_text);
                             if is_current_whitespace_sensitive {
                                 // we can't add any whitespace if the element is whitespace sensitive
                                 None
@@ -305,7 +316,51 @@ impl FormatHtmlElementList {
                         }
 
                         // Add a hard line break if what comes after the element is not a text or is all whitespace
-                        Some(HtmlChild::NonText(_)) => Some(LineMode::Hard),
+                        Some(HtmlChild::NonText(next_non_text)) => {
+                            // In the case of the formatter using the multiline layout, we want to treat inline elements like we do words.
+                            //
+                            // ```html
+                            // <a>foo</a> <a>foo</a>
+                            // ```
+                            // Should effectively be treated the same as:
+                            // ```html
+                            // foo foo
+                            // ```
+                            //
+                            // However, block elements should go on new lines. So this:
+                            // ```html
+                            // <a>foo</a> <a>foo</a> <div>bar</div> <a>foo</a> <a>foo</a>
+                            // ```
+                            //
+                            // Should get formatted as:
+                            // ```html
+                            // <a>foo</a> <a>foo</a>
+                            // <div>bar</div>
+                            // <a>foo</a> <a>foo</a>
+                            // ```
+
+                            if !is_element_whitespace_sensitive_from_element(f, non_text) {
+                                Some(LineMode::Hard)
+                            } else if is_element_whitespace_sensitive_from_element(f, next_non_text)
+                            {
+                                // only add whitespace if there is already whitespace between these elements
+                                let has_whitespace_between = non_text
+                                    .syntax()
+                                    .last_token()
+                                    .is_some_and(|tok| tok.has_trailing_whitespace())
+                                    || next_non_text
+                                        .syntax()
+                                        .first_token()
+                                        .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
+                                if has_whitespace_between {
+                                    Some(LineMode::SoftOrSpace)
+                                } else {
+                                    Some(LineMode::Soft)
+                                }
+                            } else {
+                                Some(LineMode::Hard)
+                            }
+                        }
 
                         Some(HtmlChild::Newline | HtmlChild::Whitespace | HtmlChild::EmptyLine) => {
                             None
@@ -375,8 +430,8 @@ impl FormatHtmlElementList {
     /// [HtmlContent] and instead, formats the nodes itself.
     #[cfg(debug_assertions)]
     fn disarm_debug_assertions(&self, node: &HtmlElementList, f: &mut HtmlFormatter) {
-        use biome_formatter::CstFormatContext;
         use AnyHtmlElement::*;
+        use biome_formatter::CstFormatContext;
 
         for child in node {
             match child {
@@ -777,7 +832,10 @@ impl FlatBuilder {
     }
 
     fn finish(self) -> FormatResult<FormatFlatChildren> {
-        assert!(!self.disabled, "The flat builder has been disabled and thus, does no longer store any elements. Make sure you don't call disable if you later intend to format the flat content.");
+        assert!(
+            !self.disabled,
+            "The flat builder has been disabled and thus, does no longer store any elements. Make sure you don't call disable if you later intend to format the flat content."
+        );
 
         Ok(FormatFlatChildren {
             elements: RefCell::new(self.result?),

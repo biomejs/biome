@@ -2,8 +2,8 @@
 //! when implementing a syntax formatter.
 
 pub(crate) use crate::{
-    comments::JsComments, AsFormat as _, FormatNodeRule, FormattedIterExt, JsFormatContext,
-    JsFormatter,
+    AsFormat as _, FormatNodeRule, FormattedIterExt, JsFormatContext, JsFormatter,
+    comments::JsComments,
 };
 pub use biome_formatter::prelude::*;
 pub use biome_formatter::separated::TrailingSeparator;

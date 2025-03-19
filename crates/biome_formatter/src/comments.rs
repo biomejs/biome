@@ -80,8 +80,8 @@ mod map;
 
 use self::{builder::CommentsBuilderVisitor, map::CommentsMap};
 use crate::formatter::Formatter;
-use crate::{buffer::Buffer, write};
 use crate::{CstFormatContext, FormatResult, FormatRule, TextSize, TransformSourceMap};
+use crate::{buffer::Buffer, write};
 use biome_rowan::syntax::SyntaxElementKey;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, SyntaxTriviaPieceComments};
 use rustc_hash::FxHashSet;
@@ -892,7 +892,7 @@ impl<L: Language> Comments<L> {
     pub fn leading_trailing_comments(
         &self,
         node: &SyntaxNode<L>,
-    ) -> impl Iterator<Item = &SourceComment<L>> {
+    ) -> impl Iterator<Item = &SourceComment<L>> + use<'_, L> {
         self.leading_comments(node)
             .iter()
             .chain(self.trailing_comments(node).iter())

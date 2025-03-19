@@ -1,5 +1,5 @@
 [package]
-edition = "2021"
+edition = "2024"
 name    = "xtask_bench"
 publish = false
 version = "0.0.0"
@@ -16,6 +16,9 @@ biome_graphql_formatter = { workspace = true }
 biome_graphql_parser    = { workspace = true }
 biome_graphql_syntax    = { workspace = true }
 biome_grit_patterns     = { workspace = true }
+biome_html_formatter    = { workspace = true }
+biome_html_parser       = { workspace = true }
+biome_html_syntax       = { workspace = true }
 biome_js_analyze        = { workspace = true }
 biome_js_formatter      = { workspace = true }
 biome_js_parser         = { workspace = true }
@@ -28,9 +31,9 @@ biome_rowan             = { workspace = true }
 camino                  = { workspace = true }
 
 ansi_rgb                  = "0.2.0"
-codspeed-criterion-compat = { version = "2.7.2", optional = true }
+codspeed-criterion-compat = { version = "2.8.1", optional = true }
 criterion                 = "0.5.1"
-ureq                      = "3.0.3"
+ureq                      = "3.0.8"
 url                       = "2.5.4"
 
 [target.'cfg(target_os = "windows")'.dependencies]
@@ -90,6 +93,15 @@ name    = "graphql_formatter"
 [[bench]]
 harness = false
 name    = "gritql_search"
+
+# HTML benches
+[[bench]]
+harness = false
+name    = "html_parser"
+
+[[bench]]
+harness = false
+name    = "html_formatter"
 
 [lints]
 workspace = true

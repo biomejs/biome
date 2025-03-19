@@ -1,5 +1,5 @@
 use super::{compilation_context::NodeCompilationContext, step_compiler::StepCompiler};
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_grit_syntax::{GritFiles, GritSequential};
 use grit_pattern_matcher::pattern::{Files, Pattern, Sequential, Some, Step};
 

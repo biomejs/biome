@@ -6,7 +6,7 @@ pub mod ts_parse_error;
 mod types;
 
 use self::types::parse_ts_reference_type;
-use crate::syntax::expr::{parse_identifier, parse_unary_expr, ExpressionContext};
+use crate::syntax::expr::{ExpressionContext, parse_identifier, parse_unary_expr};
 use crate::syntax::js_parse_error::expected_expression;
 
 use crate::syntax::typescript::ts_parse_error::expected_ts_type;

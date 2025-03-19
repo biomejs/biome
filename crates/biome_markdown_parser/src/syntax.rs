@@ -1,9 +1,9 @@
 pub mod thematic_break_block;
 
-use biome_markdown_syntax::{kind::MarkdownSyntaxKind::*, T};
+use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::{
-    prelude::ParsedSyntax::{self, *},
     Parser,
+    prelude::ParsedSyntax::{self, *},
 };
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 

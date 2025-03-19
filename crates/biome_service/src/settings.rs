@@ -1,28 +1,30 @@
+use crate::WorkspaceError;
 use crate::workspace::DocumentFileSource;
-use crate::{Matcher, WorkspaceError};
-use biome_analyze::{AnalyzerOptions, AnalyzerRules, RuleDomain};
+use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
-use biome_configuration::analyzer::{LinterEnabled, RuleDomainValue};
+use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::HtmlConfiguration;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::max_size::MaxSize;
+use biome_configuration::plugins::Plugins;
+use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
-    push_to_analyzer_assist, push_to_analyzer_rules, BiomeDiagnostic, Configuration,
-    CssConfiguration, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
-    GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
-    LinterConfiguration, OverrideAssistConfiguration, OverrideFormatterConfiguration,
-    OverrideLinterConfiguration, Overrides, Rules,
+    BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
+    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
+    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
+    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
+    push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
+    LineEnding, LineWidth,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
@@ -39,7 +41,6 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
-use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::ops::Deref;
 use tracing::instrument;
@@ -57,8 +58,12 @@ pub struct Settings {
     pub files: FilesSettings,
     /// Assist settings
     pub assist: AssistSettings,
+    /// Plugin settings.
+    pub plugins: Plugins,
     /// overrides
     pub override_settings: OverrideSettings,
+    /// The VCS settings of the project
+    pub vcs_settings: VcsSettings,
 }
 
 impl Settings {
@@ -68,8 +73,6 @@ impl Settings {
         &mut self,
         configuration: Configuration,
         working_directory: Option<Utf8PathBuf>,
-        vcs_path: Option<Utf8PathBuf>,
-        gitignore_matches: &[String],
     ) -> Result<(), WorkspaceError> {
         // formatter part
         if let Some(formatter) = configuration.formatter {
@@ -87,13 +90,13 @@ impl Settings {
         }
 
         // Filesystem settings
-        if let Some(files) = to_file_settings(
-            working_directory.clone(),
-            configuration.files.map(FilesConfiguration::from),
-            vcs_path,
-            gitignore_matches,
-        )? {
-            self.files = files;
+        if let Some(files) = configuration.files {
+            self.files = to_file_settings(working_directory.clone(), files)?;
+        }
+
+        // VCS settings
+        if let Some(vcs) = configuration.vcs {
+            self.vcs_settings = to_vcs_settings(vcs)?;
         }
 
         // javascript settings
@@ -111,6 +114,15 @@ impl Settings {
         // graphql settings
         if let Some(graphql) = configuration.graphql {
             self.languages.graphql = graphql.into()
+        }
+        // html settings
+        if let Some(html) = configuration.html {
+            self.languages.html = html.into()
+        }
+
+        // plugin settings
+        if let Some(plugins) = configuration.plugins {
+            self.plugins = plugins;
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
@@ -164,10 +176,7 @@ impl Settings {
     }
 
     /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
-    pub fn as_linter_domains(
-        &self,
-        path: &Utf8Path,
-    ) -> Option<Cow<FxHashMap<RuleDomain, RuleDomainValue>>> {
+    pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<RuleDomains>> {
         let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
@@ -237,10 +246,7 @@ pub struct FormatSettings {
     pub attribute_position: Option<AttributePosition>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
-    /// List of ignore paths/files
-    pub ignored_files: Matcher,
-    /// List of included paths/files
-    pub included_files: Matcher,
+    pub expand: Option<Expand>,
     /// List of included paths/files
     pub includes: Includes,
 }
@@ -266,6 +272,7 @@ pub struct OverrideFormatSettings {
     pub bracket_spacing: Option<BracketSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
+    pub expand: Option<Expand>,
 }
 
 impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
@@ -273,13 +280,14 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
         Self {
             enabled: conf.enabled,
             format_with_errors: conf.format_with_errors,
-            indent_style: conf.indent_style.map(Into::into),
+            indent_style: conf.indent_style,
             indent_width: conf.indent_width,
             line_ending: conf.line_ending,
             line_width: conf.line_width,
             bracket_spacing: conf.bracket_spacing,
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
+            expand: conf.expand,
         }
     }
 }
@@ -293,17 +301,11 @@ pub struct LinterSettings {
     /// List of rules
     pub rules: Option<Rules>,
 
-    /// List of ignored paths/files to match
-    pub ignored_files: Matcher,
-
-    /// List of included paths/files to match
-    pub included_files: Matcher,
-
     /// List of included paths/files
     pub includes: Includes,
 
     /// Rule domains
-    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
+    pub domains: Option<RuleDomains>,
 }
 
 impl LinterSettings {
@@ -322,7 +324,7 @@ pub struct OverrideLinterSettings {
     pub rules: Option<Rules>,
 
     /// List of domains
-    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
+    pub domains: Option<RuleDomains>,
 }
 
 /// Linter settings for the entire workspace
@@ -333,12 +335,6 @@ pub struct AssistSettings {
 
     /// List of rules
     pub actions: Option<Actions>,
-
-    /// List of ignored paths/files to match
-    pub ignored_files: Matcher,
-
-    /// List of included paths/files to match
-    pub included_files: Matcher,
 
     /// List of included paths/files
     pub includes: Includes,
@@ -529,6 +525,9 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Read the settings type for this language from the [LanguageListSettings] map
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self>;
 
+    /// Retrieve the environment settings of the current language
+    fn resolve_environment(settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings>;
+
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_format_options(
@@ -543,9 +542,8 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// per-language and editor provided formatter settings
     fn resolve_analyzer_options(
         global: Option<&Settings>,
-        linter: Option<&LinterSettings>,
-        overrides: Option<&OverrideSettings>,
         language: Option<&Self::LinterSettings>,
+        environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -590,20 +588,140 @@ pub struct FilesSettings {
     /// File size limit in bytes
     pub max_size: Option<MaxSize>,
 
-    /// gitignore file patterns
-    pub git_ignore: Option<Gitignore>,
-
-    /// List of paths/files to matcher
-    pub ignored_files: Matcher,
-
-    /// List of paths/files to matcher
-    pub included_files: Matcher,
-
     /// List of included paths/files
     pub includes: Includes,
 
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
+}
+
+#[derive(Clone, Default, Debug)]
+pub struct VcsSettings {
+    pub client_kind: Option<VcsClientKind>,
+    pub root: Option<Utf8PathBuf>,
+    pub use_ignore_file: Option<VcsUseIgnoreFile>,
+    pub enabled: Option<VcsEnabled>,
+
+    pub ignore_matches: Option<VcsIgnoredPatterns>,
+}
+
+impl VcsSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
+
+    pub fn to_base_path(&self, base_path: Option<&Utf8Path>) -> Option<Utf8PathBuf> {
+        Some(match (base_path, &self.root) {
+            (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
+            (None, Some(root)) => Utf8PathBuf::from(root),
+            (Some(vcs_base_path), None) => Utf8PathBuf::from(vcs_base_path),
+            (None, None) => return None,
+        })
+    }
+
+    /// Checks where if the current file is a recognised file for the current VCS client
+    pub fn is_ignore_file(&self, path: &Utf8Path) -> bool {
+        path.file_name().is_some_and(|file_name| {
+            self.client_kind
+                .is_some_and(|client_kind| client_kind.ignore_files().contains(&file_name))
+        })
+    }
+
+    /// Stores the contents found in the ignore file.
+    pub fn store_ignore_patterns(
+        &mut self,
+        path: &Utf8Path,
+        patterns: &[&str],
+    ) -> Result<(), WorkspaceError> {
+        match self.client_kind {
+            Some(VcsClientKind::Git) => {
+                let git_ignore = VcsIgnoredPatterns::git_ignore(path, patterns)?;
+                if let Some(ignore_matches) = self.ignore_matches.as_mut() {
+                    ignore_matches.insert_git_match(git_ignore);
+                } else {
+                    self.ignore_matches = Some(VcsIgnoredPatterns::Git {
+                        root: git_ignore,
+                        nested: vec![],
+                    });
+                }
+            }
+            None => {}
+        };
+
+        Ok(())
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum VcsIgnoredPatterns {
+    Git {
+        // Represents the `.gitignore` file at the root of the project
+        root: Gitignore,
+        // The list of nested `.gitignore` files found inside the project
+        nested: Vec<Gitignore>,
+    },
+}
+
+impl VcsIgnoredPatterns {
+    #[instrument(level = "debug", skip(self, path, is_dir), fields(result))]
+    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
+        match self {
+            VcsIgnoredPatterns::Git { root, nested } => {
+                root.matched(path, is_dir).is_ignore()
+                    || nested.iter().any(|gitignore| {
+                        let ignore_directory = if gitignore.path().is_file() {
+                            // SAFETY: if it's a file, it always has a parent
+                            gitignore.path().parent().unwrap()
+                        } else {
+                            gitignore.path()
+                        };
+                        let result = if let Ok(stripped_path) = path.strip_prefix(ignore_directory)
+                        {
+                            gitignore.matched(stripped_path, is_dir).is_ignore()
+                        } else {
+                            false
+                        };
+                        tracing::Span::current().record("result", result);
+                        result
+                    })
+            }
+        }
+    }
+
+    pub fn insert_git_match(&mut self, git_ignore: Gitignore) {
+        match self {
+            VcsIgnoredPatterns::Git { nested, .. } => {
+                nested.push(git_ignore);
+            }
+        }
+    }
+
+    /// Creates an instance of [Gitignore] for the given patterns.
+    ///
+    /// ## Error
+    ///
+    /// If the patterns are invalid
+    fn git_ignore(path: &Utf8Path, patterns: &[&str]) -> Result<Gitignore, WorkspaceError> {
+        let mut gitignore_builder = GitignoreBuilder::new(path.as_std_path());
+
+        for the_match in patterns {
+            gitignore_builder
+                .add_line(Some(path.to_path_buf().into_std_path_buf()), the_match)
+                .map_err(|err| {
+                    BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
+                        message: err.to_string(),
+                        file_path: Some(path.to_string()),
+                    })
+                })?;
+        }
+        let gitignore = gitignore_builder.build().map_err(|err| {
+            BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
+                message: err.to_string(),
+                file_path: Some(path.to_string()),
+            })
+        })?;
+        Ok(gitignore)
+    }
 }
 
 /// An optional list of globs with exceptions that first normalizes the tested paths before matching them against the globs.
@@ -613,18 +731,19 @@ pub struct Includes {
     working_directory: Option<Utf8PathBuf>,
     /// If `None`, then all files are included
     /// Otherwise this filtered out all files that doesn't match.
-    globs: Option<Box<[biome_glob::Glob]>>,
+    globs: Option<Vec<biome_glob::Glob>>,
 }
-
 impl Includes {
-    fn new(
-        working_directory: Option<Utf8PathBuf>,
-        globs: Option<impl Into<Box<[biome_glob::Glob]>>>,
-    ) -> Self {
+    fn new(working_directory: Option<Utf8PathBuf>, globs: Option<Vec<biome_glob::Glob>>) -> Self {
         Self {
             working_directory,
-            globs: globs.map(|globs| globs.into()),
+            globs,
         }
+    }
+
+    pub fn store_globs(&mut self, globs: impl Into<Box<[biome_glob::Glob]>>) {
+        let current_globs = self.globs.get_or_insert_default();
+        current_globs.extend(globs.into());
     }
 
     /// Returns `true` is no globs are set.
@@ -661,44 +780,62 @@ impl Includes {
     }
 }
 
+#[derive(Clone, Default, Debug)]
+pub struct OverrideIncludes {
+    /// This path is used to normalize the tested paths against [Self::globs].
+    working_directory: Option<Utf8PathBuf>,
+    /// If `None`, then all files are included
+    /// Otherwise this filtered out all files that doesn't match.
+    globs: Option<OverrideGlobs>,
+}
+impl OverrideIncludes {
+    pub fn new(working_directory: Option<Utf8PathBuf>, globs: Option<OverrideGlobs>) -> Self {
+        Self {
+            working_directory,
+            globs,
+        }
+    }
+
+    /// Returns `true` is no globs are set.
+    pub fn is_unset(&self) -> bool {
+        self.globs.is_none()
+    }
+
+    /// Normalize `path` and match it against the list of globs.
+    pub fn matches(&self, path: &Utf8Path) -> bool {
+        let Some(globs) = self.globs.as_ref() else {
+            return true;
+        };
+        let path = if let Some(working_directory) = &self.working_directory {
+            path.strip_prefix(working_directory).unwrap_or(path)
+        } else {
+            path
+        };
+        let candidate_path = biome_glob::CandidatePath::new(path);
+        globs.is_match_candidate(&candidate_path)
+    }
+}
+
 fn to_file_settings(
     working_directory: Option<Utf8PathBuf>,
-    config: Option<FilesConfiguration>,
-    vcs_config_path: Option<Utf8PathBuf>,
-    gitignore_matches: &[String],
-) -> Result<Option<FilesSettings>, WorkspaceError> {
-    let config = if let Some(config) = config {
-        Some(config)
-    } else if vcs_config_path.is_some() {
-        Some(FilesConfiguration::default())
-    } else {
-        None
-    };
-    let git_ignore = if let Some(vcs_config_path) = vcs_config_path {
-        Some(to_git_ignore(vcs_config_path, gitignore_matches)?)
-    } else {
-        None
-    };
-    Ok(if let Some(config) = config {
-        Some(FilesSettings {
-            max_size: config.max_size,
-            git_ignore,
-            ignored_files: Matcher::from_globs(
-                working_directory.clone(),
-                config.ignore.as_deref(),
-            )?,
-            included_files: Matcher::from_globs(
-                working_directory.clone(),
-                config.include.as_deref(),
-            )?,
-            includes: Includes::new(working_directory, config.includes),
-            ignore_unknown: config.ignore_unknown,
-        })
-    } else {
-        None
+    config: FilesConfiguration,
+) -> Result<FilesSettings, WorkspaceError> {
+    Ok(FilesSettings {
+        max_size: config.max_size,
+        includes: Includes::new(working_directory, config.includes),
+        ignore_unknown: config.ignore_unknown,
     })
 }
 
+fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceError> {
+    Ok(VcsSettings {
+        client_kind: config.client_kind,
+        enabled: config.enabled,
+        root: config.root.map(Utf8PathBuf::from),
+        use_ignore_file: config.use_ignore_file,
+        ignore_matches: None,
+    })
+}
 /// Handle object holding a pin of the workspace settings until the deferred
 /// language-specific options resolution is called.
 #[derive(Debug)]
@@ -754,16 +891,15 @@ impl WorkspaceSettingsHandle {
         L: ServiceLanguage,
     {
         let settings = self.settings();
-        let linter_settings = settings.map(|s| &s.linter);
-        let overrides = settings.map(|s| &s.override_settings);
         let editor_settings = settings
             .map(|s| L::lookup_settings(&s.languages))
             .map(|result| &result.linter);
+
+        let environment = L::resolve_environment(settings);
         L::resolve_analyzer_options(
             settings,
-            linter_settings,
-            overrides,
             editor_settings,
+            environment,
             path,
             file_source,
             suppression_reason,
@@ -1072,9 +1208,7 @@ impl OverrideSettings {
 
 #[derive(Clone, Debug, Default)]
 pub struct OverrideSettingPattern {
-    exclude: Matcher,
-    include: Matcher,
-    includes: Includes,
+    includes: OverrideIncludes,
     /// Formatter settings applied to all files in the workspaces
     pub formatter: OverrideFormatSettings,
     /// Linter settings applied to all files in the workspace
@@ -1091,15 +1225,7 @@ impl OverrideSettingPattern {
     /// Note that only path to regular files should be passed.
     /// This function doesn't take directories into account.
     pub fn is_file_included(&self, file_path: &Utf8Path) -> bool {
-        if self.exclude.matches_path(file_path) {
-            return false;
-        }
-        self.include.matches_path(file_path)
-            || if !self.includes.is_unset() {
-                self.includes.matches_with_exceptions(file_path)
-            } else {
-                false
-            }
+        !self.includes.is_unset() && self.includes.matches(file_path)
     }
 
     fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
@@ -1295,28 +1421,6 @@ impl OverrideSettingPattern {
     fn analyzer_rules_mut(&self, _analyzer_rules: &mut AnalyzerRules) {}
 }
 
-fn to_git_ignore(path: Utf8PathBuf, matches: &[String]) -> Result<Gitignore, WorkspaceError> {
-    let mut gitignore_builder = GitignoreBuilder::new(path.clone());
-
-    for the_match in matches {
-        gitignore_builder
-            .add_line(Some(path.clone().into_std_path_buf()), the_match)
-            .map_err(|err| {
-                BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
-                    message: err.to_string(),
-                    file_path: Some(path.to_string()),
-                })
-            })?;
-    }
-    let gitignore = gitignore_builder.build().map_err(|err| {
-        BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
-            message: err.to_string(),
-            file_path: Some(path.to_string()),
-        })
-    })?;
-    Ok(gitignore)
-}
-
 pub fn to_override_settings(
     working_directory: Option<Utf8PathBuf>,
     overrides: Overrides,
@@ -1338,6 +1442,7 @@ pub fn to_override_settings(
                 bracket_spacing: formatter.bracket_spacing,
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
+                expand: formatter.expand,
             })
             .unwrap_or_default();
         let linter = pattern
@@ -1375,9 +1480,7 @@ pub fn to_override_settings(
         languages.html = to_html_language_settings(html, &current_settings.languages.html);
 
         let pattern_setting = OverrideSettingPattern {
-            includes: Includes::new(working_directory.clone(), pattern.includes),
-            include: Matcher::from_globs(working_directory.clone(), pattern.include.as_deref())?,
-            exclude: Matcher::from_globs(working_directory.clone(), pattern.ignore.as_deref())?,
+            includes: OverrideIncludes::new(working_directory.clone(), pattern.includes),
             formatter,
             linter,
             assist,
@@ -1504,8 +1607,7 @@ pub fn to_format_settings(
         attribute_position: conf.attribute_position,
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
-        ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
-        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
+        expand: conf.expand,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -1519,7 +1621,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             Some(IndentStyle::Space) => IndentStyle::Space,
             None => IndentStyle::default(),
         };
-        let indent_width = conf.indent_width.map(Into::into).unwrap_or_default();
+        let indent_width = conf.indent_width.unwrap_or_default();
 
         Ok(Self {
             enabled: conf.enabled,
@@ -1530,9 +1632,8 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             attribute_position: Some(AttributePosition::default()),
             bracket_same_line: conf.bracket_same_line,
             bracket_spacing: Some(BracketSpacing::default()),
+            expand: conf.expand,
             format_with_errors: conf.format_with_errors,
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
             includes: Default::default(),
         })
     }
@@ -1545,8 +1646,6 @@ pub fn to_linter_settings(
     Ok(LinterSettings {
         enabled: conf.enabled,
         rules: conf.rules,
-        ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
-        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
         domains: conf.domains,
     })
@@ -1559,8 +1658,6 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
         Ok(Self {
             enabled: conf.enabled,
             rules: conf.rules,
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
             includes: Default::default(),
             domains: conf.domains,
         })
@@ -1574,8 +1671,6 @@ pub fn to_assist_settings(
     Ok(AssistSettings {
         enabled: conf.enabled,
         actions: conf.actions,
-        ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
-        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -1587,8 +1682,6 @@ impl TryFrom<OverrideAssistConfiguration> for AssistSettings {
         Ok(Self {
             enabled: conf.enabled,
             actions: conf.actions,
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
             includes: Default::default(),
         })
     }
@@ -1635,3 +1728,7 @@ pub(crate) fn check_override_feature_activity<const LANG: bool, const TOP: bool>
         // Then check the top level feature
         .or(top_level_feature_activity.map(|v| v.value().into()))
 }
+
+#[cfg(test)]
+#[path = "settings.tests.rs"]
+mod tests;

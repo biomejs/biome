@@ -1,7 +1,7 @@
 use super::diagnostic::ParseDiagnostic;
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
-use biome_unicode_table::{lookup_byte, Dispatch::WHS};
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use biome_unicode_table::{Dispatch::WHS, lookup_byte};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
 use std::ops::{BitOr, BitOrAssign};

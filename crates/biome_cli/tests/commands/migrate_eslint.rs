@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -678,7 +678,7 @@ fn migrate_eslintrcjson_extended_rules() {
 fn migrate_merge_with_overrides() {
     let biomejson = r#"{
         "overrides": [{
-            "include": ["*.js"],
+            "includes": ["*.js"],
             "linter": { "enabled": false }
         }]
     }"#;

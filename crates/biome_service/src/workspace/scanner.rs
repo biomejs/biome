@@ -1,12 +1,21 @@
+//! Scanner for crawling the file system and loading documents into projects.
+//!
+//! Conceptually, the scanner is more than just the scanning logic in this
+//! module. Rather, we also consider the [watcher](crate::WorkspaceWatcher)
+//! (which is partly implemented outside the workspace because of its
+//! threading requirements) to be a part of the scanner.
+//!
+//! In other words, the scanner is both the scanning logic in this module as
+//! well as the watcher to allow continuous scanning.
+
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
 use camino::Utf8Path;
-use crossbeam::channel::{unbounded, Receiver, Sender};
-use rayon::ThreadPoolBuilder;
+use crossbeam::channel::{Receiver, Sender, unbounded};
 use std::collections::BTreeSet;
 use std::panic::catch_unwind;
-use std::sync::{Once, RwLock};
+use std::sync::RwLock;
 use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
@@ -14,8 +23,10 @@ use tracing::instrument;
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
-use crate::{Workspace, WorkspaceError};
+use crate::workspace_watcher::WatcherSignalKind;
+use crate::{IGNORE_ENTRIES, Workspace, WorkspaceError};
 
+use super::ServiceDataNotification;
 use super::server::WorkspaceServer;
 
 pub(crate) struct ScanResult {
@@ -26,61 +37,50 @@ pub(crate) struct ScanResult {
     pub duration: Duration,
 }
 
-#[instrument(level = "debug", skip(workspace))]
-pub(crate) fn scan(
-    workspace: &WorkspaceServer,
-    project_key: ProjectKey,
-    folder: &Utf8Path,
-) -> Result<ScanResult, WorkspaceError> {
-    init_thread_pool();
+impl WorkspaceServer {
+    /// Performs a file system scan and loads all supported documents into the
+    /// project.
+    #[instrument(level = "debug", skip(self))]
+    pub(super) fn scan(
+        &self,
+        project_key: ProjectKey,
+        folder: &Utf8Path,
+    ) -> Result<ScanResult, WorkspaceError> {
+        let (interner, _path_receiver) = PathInterner::new();
+        let (diagnostics_sender, diagnostics_receiver) = unbounded();
 
-    let (interner, _path_receiver) = PathInterner::new();
-    let (diagnostics_sender, diagnostics_receiver) = unbounded();
+        let collector = DiagnosticsCollector::new();
 
-    let collector = DiagnosticsCollector::new();
+        let (duration, diagnostics) = thread::scope(|scope| {
+            let handler = thread::Builder::new()
+                .name("biome::scanner".to_string())
+                .spawn_scoped(scope, || collector.run(diagnostics_receiver))
+                .expect("failed to spawn scanner thread");
 
-    let (duration, diagnostics) = thread::scope(|scope| {
-        let handler = thread::Builder::new()
-            .name("biome::scanner".to_string())
-            .spawn_scoped(scope, || collector.run(diagnostics_receiver))
-            .expect("failed to spawn scanner thread");
+            // The traversal context is scoped to ensure all the channels it
+            // contains are properly closed once scanning finishes.
+            let duration = scan_folder(
+                folder,
+                ScanContext {
+                    workspace: self,
+                    project_key,
+                    interner,
+                    diagnostics_sender,
+                    evaluated_paths: Default::default(),
+                },
+            );
 
-        // The traversal context is scoped to ensure all the channels it
-        // contains are properly closed once scanning finishes.
-        let duration = scan_folder(
-            folder,
-            ScanContext {
-                workspace,
-                project_key,
-                interner,
-                diagnostics_sender,
-                evaluated_paths: Default::default(),
-            },
-        );
+            // Wait for the collector thread to finish.
+            let diagnostics = handler.join().unwrap();
 
-        // Wait for the collector thread to finish.
-        let diagnostics = handler.join().unwrap();
+            (duration, diagnostics)
+        });
 
-        (duration, diagnostics)
-    });
-
-    Ok(ScanResult {
-        diagnostics,
-        duration,
-    })
-}
-
-/// Sets up the global Rayon thread pool the first time it's called.
-///
-/// This is used to assign friendly debug names to the threads of the pool.
-fn init_thread_pool() {
-    static INIT_ONCE: Once = Once::new();
-    INIT_ONCE.call_once(|| {
-        ThreadPoolBuilder::new()
-            .thread_name(|index| format!("biome::workspace_worker_{index}"))
-            .build_global()
-            .expect("failed to initialize the global thread pool");
-    });
+        Ok(ScanResult {
+            diagnostics,
+            duration,
+        })
+    }
 }
 
 /// Initiates the filesystem traversal tasks from the provided path and runs it to completion.
@@ -100,11 +100,21 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     let mut configs = Vec::new();
     let mut manifests = Vec::new();
     let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
+    let mut ignore_paths = Vec::new();
     for path in evaluated_paths {
+        if path
+            .file_name()
+            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name.as_bytes()))
+        {
+            continue;
+        }
+
         if path.is_config() {
             configs.push(path);
         } else if path.is_manifest() {
             manifests.push(path);
+        } else if path.is_ignore() {
+            ignore_paths.push(path);
         } else {
             handleable_paths.push(path);
         }
@@ -123,7 +133,15 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
 
     let mut paths = configs;
     paths.append(&mut manifests);
-    ctx.workspace.update_project_layout_for_paths(&paths);
+    ctx.workspace
+        .update_project_layout_for_paths(WatcherSignalKind::AddedOrChanged, &paths);
+    let result = ctx
+        .workspace
+        .update_project_ignore_files(ctx.project_key, &ignore_paths);
+
+    if let Err(error) = result {
+        ctx.send_diagnostic(error);
+    }
 
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
         for path in &handleable_paths {
@@ -132,7 +150,12 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     }));
 
     ctx.workspace
-        .update_dependency_graph_for_paths(&handleable_paths);
+        .update_dependency_graph(WatcherSignalKind::AddedOrChanged, &handleable_paths);
+
+    let _ = ctx
+        .workspace
+        .notification_tx
+        .send(ServiceDataNotification::Updated);
 
     start.elapsed()
 }
@@ -211,7 +234,7 @@ impl TraversalContext for ScanContext<'_> {
     }
 
     fn can_handle(&self, path: &BiomePath) -> bool {
-        path.is_dir() || DocumentFileSource::try_from_path(path).is_ok()
+        path.is_dir() || DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
     }
 
     fn handle_path(&self, path: BiomePath) {
@@ -238,7 +261,6 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
             path: path.clone(),
             content: FileContent::FromServer,
             document_file_source: None,
-            version: 0,
             persist_node_cache: false,
         })
     }) {

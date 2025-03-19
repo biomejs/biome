@@ -1,8 +1,8 @@
+use crate::JsRuleAction;
 use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_is_fragment};
 use crate::services::semantic::Semantic;
-use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make::{
     jsx_child_list, jsx_closing_fragment, jsx_fragment, jsx_opening_fragment,
@@ -55,7 +55,9 @@ impl Rule for UseFragmentSyntax {
             AnyJsxElementName::JsxReferenceIdentifier(identifier) => {
                 jsx_reference_identifier_is_fragment(&identifier, model)?
             }
-            AnyJsxElementName::JsxName(_) | AnyJsxElementName::JsxNamespaceName(_) => false,
+            AnyJsxElementName::JsxName(_)
+            | AnyJsxElementName::JsxNamespaceName(_)
+            | AnyJsxElementName::JsMetavariable(_) => false,
         };
 
         if maybe_invalid && opening_element.attributes().is_empty() {

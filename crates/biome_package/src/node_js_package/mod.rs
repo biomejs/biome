@@ -6,7 +6,7 @@ pub use tsconfig_json::TsConfigJson;
 
 use biome_rowan::Language;
 
-use crate::{Manifest, Package, PackageAnalyzeResult, ProjectAnalyzeDiagnostic, LICENSE_LIST};
+use crate::{LICENSE_LIST, Manifest, Package, PackageAnalyzeResult, ProjectAnalyzeDiagnostic};
 
 #[derive(Default, Debug, Clone)]
 /// A Node.js project.

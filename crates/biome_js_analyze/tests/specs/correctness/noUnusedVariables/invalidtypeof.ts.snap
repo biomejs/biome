@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidtypeof.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -14,7 +15,7 @@ export declare const x: typeof I;
 ```
 invalidtypeof.ts:1:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface is unused.
+  i This interface is unused.
   
   > 1 │ interface I {}
       │           ^
@@ -25,5 +26,3 @@ invalidtypeof.ts:1:11 lint/correctness/noUnusedVariables ━━━━━━━�
   
 
 ```
-
-

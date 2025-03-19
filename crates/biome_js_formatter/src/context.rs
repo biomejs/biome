@@ -4,7 +4,7 @@ use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, FormatContext,
+    AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, Expand, FormatContext,
     FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
     TransformSourceMap,
 };
@@ -174,8 +174,8 @@ pub struct JsFormatOptions {
     /// Attribute position style. By default auto.
     attribute_position: AttributePosition,
 
-    /// Whether to enforce collapsing object literals when possible. Defaults to "preserve".
-    object_wrap: ObjectWrap,
+    /// Whether to expand object and array literals to multiple lines. Defaults to "auto".
+    expand: Expand,
 }
 
 impl JsFormatOptions {
@@ -195,7 +195,7 @@ impl JsFormatOptions {
             bracket_spacing: BracketSpacing::default(),
             bracket_same_line: BracketSameLine::default(),
             attribute_position: AttributePosition::default(),
-            object_wrap: ObjectWrap::default(),
+            expand: Expand::default(),
         }
     }
 
@@ -264,8 +264,8 @@ impl JsFormatOptions {
         self
     }
 
-    pub fn with_object_wrap(mut self, object_wrap: ObjectWrap) -> Self {
-        self.object_wrap = object_wrap;
+    pub fn with_expand(mut self, expand: Expand) -> Self {
+        self.expand = expand;
         self
     }
 
@@ -317,8 +317,8 @@ impl JsFormatOptions {
         self.attribute_position = attribute_position;
     }
 
-    pub fn set_object_wrap(&mut self, object_wrap: ObjectWrap) {
-        self.object_wrap = object_wrap;
+    pub fn set_expand(&mut self, expand: Expand) {
+        self.expand = expand;
     }
 
     pub fn set_semicolons(&mut self, semicolons: Semicolons) {
@@ -369,8 +369,8 @@ impl JsFormatOptions {
         self.attribute_position
     }
 
-    pub fn object_wrap(&self) -> ObjectWrap {
-        self.object_wrap
+    pub fn expand(&self) -> Expand {
+        self.expand
     }
 }
 
@@ -397,7 +397,7 @@ impl FormatOptions for JsFormatOptions {
 }
 
 impl fmt::Display for JsFormatOptions {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
@@ -411,7 +411,7 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
         writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())?;
         writeln!(f, "Attribute Position: {}", self.attribute_position)?;
-        writeln!(f, "Object wrap: {}", self.object_wrap)
+        writeln!(f, "Expand lists: {}", self.expand)
     }
 }
 
@@ -442,7 +442,7 @@ impl FromStr for QuoteProperties {
 }
 
 impl fmt::Display for QuoteProperties {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             QuoteProperties::AsNeeded => write!(f, "As needed"),
             QuoteProperties::Preserve => write!(f, "Preserve"),
@@ -480,13 +480,15 @@ impl FromStr for Semicolons {
         match s {
             "as-needed" => Ok(Self::AsNeeded),
             "always" => Ok(Self::Always),
-            _ => Err("Value not supported for Semicolons. Supported values are 'as-needed' and 'always'."),
+            _ => Err(
+                "Value not supported for Semicolons. Supported values are 'as-needed' and 'always'.",
+            ),
         }
     }
 }
 
 impl fmt::Display for Semicolons {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Semicolons::AsNeeded => write!(f, "As needed"),
             Semicolons::Always => write!(f, "Always"),
@@ -523,62 +525,20 @@ impl FromStr for ArrowParentheses {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "as-needed"  => Ok(Self::AsNeeded),
-            "always"  => Ok(Self::Always),
-            _ => Err("Value not supported for Arrow parentheses. Supported values are 'as-needed' and 'always'."),
+            "as-needed" => Ok(Self::AsNeeded),
+            "always" => Ok(Self::Always),
+            _ => Err(
+                "Value not supported for Arrow parentheses. Supported values are 'as-needed' and 'always'.",
+            ),
         }
     }
 }
 
 impl fmt::Display for ArrowParentheses {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ArrowParentheses::AsNeeded => write!(f, "As needed"),
             ArrowParentheses::Always => write!(f, "Always"),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum ObjectWrap {
-    #[default]
-    Preserve,
-    Collapse,
-}
-
-impl ObjectWrap {
-    pub const fn is_preserve(&self) -> bool {
-        matches!(self, Self::Preserve)
-    }
-
-    pub const fn is_collapse(&self) -> bool {
-        matches!(self, Self::Collapse)
-    }
-}
-
-impl FromStr for ObjectWrap {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "preserve"  => Ok(Self::Preserve),
-            "contains"  => Ok(Self::Collapse),
-            _ => Err("Value not supported for objectWrap. Supported values are 'preserve' and 'collapse'."),
-        }
-    }
-}
-
-impl fmt::Display for ObjectWrap {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Preserve => write!(f, "Preserve"),
-            Self::Collapse => write!(f, "Collapse"),
         }
     }
 }

@@ -36,7 +36,7 @@ mod merge;
 mod validator;
 
 use biome_diagnostics::{Error, Severity};
-pub use biome_rowan::TextRange;
+pub use biome_rowan::{Text, TextRange};
 pub use diagnostics::{
     DeserializableType, DeserializableTypes, DeserializationAdvice, DeserializationDiagnostic,
 };
@@ -88,10 +88,10 @@ pub trait Deserializable: Sized {
 /// Context used during deserialization.
 ///
 /// We provide a default implementation [DefaultDeserializationContext].
-/// Creating a own context implementation allows you to cistomize how diagnostics are reported.
+/// Creating a own context implementation allows you to customize how diagnostics are reported.
 pub trait DeserializationContext {
     fn id(&self) -> Option<&str>;
-    fn report(&mut self, diagnostc: DeserializationDiagnostic);
+    fn report(&mut self, diagnostic: DeserializationDiagnostic);
 }
 
 /// Default implementation for [DeserializationContext].

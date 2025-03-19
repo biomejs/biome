@@ -2,14 +2,14 @@ use crate::{
     grit_context::GritQueryContext, grit_target_language::GritTargetLanguage,
     grit_target_node::GritTargetNode, source_location_ext::SourceFileExt, util::TextRangeGritExt,
 };
-use biome_diagnostics::{display::SourceFile, SourceCode};
+use biome_diagnostics::{SourceCode, display::SourceFile};
 use biome_rowan::TextRange;
 use grit_pattern_matcher::{
     binding::Binding, constant::Constant, effects::Effect, pattern::FileRegistry,
 };
 use grit_util::{
-    error::{GritPatternError, GritResult},
     AnalysisLogBuilder, AnalysisLogs, AstNode, ByteRange, CodeRange, Range,
+    error::{GritPatternError, GritResult},
 };
 use std::{borrow::Cow, collections::HashMap, path::Path};
 

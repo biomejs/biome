@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidNamespace.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -25,7 +26,7 @@ namespace _Unknown_Style {}
 ```
 invalidNamespace.ts:1:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This namespace name should be in camelCase or PascalCase.
+  i This namespace name should be in camelCase or PascalCase.
   
   > 1 │ export namespace XXX {}
       │                  ^^^
@@ -38,7 +39,7 @@ invalidNamespace.ts:1:18 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidNamespace.ts:3:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This namespace name should be in camelCase or PascalCase.
+  i This namespace name should be in camelCase or PascalCase.
   
     1 │ export namespace XXX {}
     2 │ 
@@ -53,7 +54,7 @@ invalidNamespace.ts:3:18 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidNamespace.ts:5:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This namespace name should be in camelCase or PascalCase.
+  i This namespace name should be in camelCase or PascalCase.
   
     3 │ export namespace CONSTANT_CASE {}
     4 │ 
@@ -68,7 +69,7 @@ invalidNamespace.ts:5:18 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidNamespace.ts:7:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This namespace name should be in camelCase or PascalCase.
+  i This namespace name should be in camelCase or PascalCase.
   
     5 │ export namespace snake_case {}
     6 │ 
@@ -83,7 +84,7 @@ invalidNamespace.ts:7:18 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidNamespace.ts:9:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This namespace name part should be in camelCase or PascalCase.
+  i This namespace name part should be in camelCase or PascalCase.
   
      7 │ export namespace Unknown_Style {}
      8 │ 
@@ -107,7 +108,7 @@ invalidNamespace.ts:9:12 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidNamespace.ts:11:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This namespace name part should be in camelCase or PascalCase.
+  i This namespace name part should be in camelCase or PascalCase.
   
      9 │ namespace _XXX {}
     10 │ 
@@ -131,7 +132,7 @@ invalidNamespace.ts:11:12 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidNamespace.ts:13:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This namespace name part should be in camelCase or PascalCase.
+  i This namespace name part should be in camelCase or PascalCase.
   
     11 │ namespace _CONSTANT_CASE {}
     12 │ 
@@ -155,7 +156,7 @@ invalidNamespace.ts:13:12 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidNamespace.ts:15:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This namespace name part should be in camelCase or PascalCase.
+  i This namespace name part should be in camelCase or PascalCase.
   
     13 │ namespace _snake_case {}
     14 │ 

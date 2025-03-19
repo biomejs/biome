@@ -22,19 +22,19 @@ mod reporter;
 mod service;
 
 use crate::cli_options::{CliOptions, ColorsArg};
+use crate::commands::CommandRunner;
 use crate::commands::check::CheckCommandPayload;
 use crate::commands::ci::CiCommandPayload;
 use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
 use crate::commands::migrate::MigrateCommandPayload;
-use crate::commands::CommandRunner;
-pub use crate::commands::{biome_command, BiomeCommand};
-pub use crate::logging::{setup_cli_subscriber, LoggingLevel};
+pub use crate::commands::{BiomeCommand, biome_command};
+pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
 pub use diagnostics::CliDiagnostic;
-pub use execute::{execute_mode, Execution, TraversalMode, VcsTargeted};
+pub use execute::{Execution, TraversalMode, VcsTargeted, execute_mode};
 pub use panic::setup_panic_handler;
 pub use reporter::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
-pub use service::{open_transport, SocketTransport};
+pub use service::{SocketTransport, open_transport};
 
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
@@ -66,10 +66,9 @@ impl<'app> CliSession<'app> {
             }
             BiomeCommand::Clean => commands::clean::clean(self),
             BiomeCommand::Start {
-                config_path,
                 log_path,
                 log_prefix_name,
-            } => commands::daemon::start(self, config_path, Some(log_path), Some(log_prefix_name)),
+            } => commands::daemon::start(self, Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {
                 write,
@@ -158,6 +157,7 @@ impl<'app> CliSession<'app> {
                 cli_options,
                 changed,
                 since,
+                ..
             } => run_command(
                 self,
                 &cli_options,
@@ -184,6 +184,7 @@ impl<'app> CliSession<'app> {
                 json_formatter,
                 css_formatter,
                 graphql_formatter,
+                html_formatter,
                 staged,
                 changed,
                 since,
@@ -202,6 +203,7 @@ impl<'app> CliSession<'app> {
                     json_formatter,
                     css_formatter,
                     graphql_formatter,
+                    html_formatter,
                     staged,
                     changed,
                     since,
@@ -210,11 +212,10 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
             BiomeCommand::LspProxy {
-                config_path,
                 log_path,
                 log_prefix_name,
                 ..
-            } => commands::daemon::lsp_proxy(config_path, Some(log_path), Some(log_prefix_name)),
+            } => commands::daemon::lsp_proxy(Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Migrate {
                 cli_options,
                 write,
@@ -253,12 +254,10 @@ impl<'app> CliSession<'app> {
             ),
             BiomeCommand::RunServer {
                 stop_on_disconnect,
-                config_path,
                 log_path,
                 log_prefix_name,
             } => commands::daemon::run_server(
                 stop_on_disconnect,
-                config_path,
                 Some(log_path),
                 Some(log_prefix_name),
             ),

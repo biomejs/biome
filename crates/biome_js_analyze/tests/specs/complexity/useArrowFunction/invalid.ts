@@ -56,3 +56,12 @@ const withDirective = function () {
 	"use server";
 	return 0;
 }
+
+// https://github.com/biomejs/biome/issues/4967
+const needsParentheses1 = function () {
+	return { foo: "bar" }["foo"];
+}
+
+const needsParentheses2 = function () {
+	return { foo: "bar" }.foo;
+}

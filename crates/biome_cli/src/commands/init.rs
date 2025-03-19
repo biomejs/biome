@@ -1,6 +1,6 @@
 use crate::{CliDiagnostic, CliSession};
 use biome_configuration::Configuration;
-use biome_console::{markup, ConsoleExt};
+use biome_console::{ConsoleExt, markup};
 use biome_fs::ConfigName;
 use biome_service::configuration::create_config;
 

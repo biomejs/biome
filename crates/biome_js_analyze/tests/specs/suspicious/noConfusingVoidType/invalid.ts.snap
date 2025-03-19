@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -56,7 +57,7 @@ type invalidVoidUnion = void | Map<string, number>;
 ```
 invalid.ts:2:26 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     1 │ // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-invalid-void-type.test.ts
   > 2 │ function takeVoid(thing: void) {}
@@ -78,7 +79,7 @@ invalid.ts:2:26 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
 ```
 invalid.ts:3:33 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     1 │ // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-invalid-void-type.test.ts
     2 │ function takeVoid(thing: void) {}
@@ -102,7 +103,7 @@ invalid.ts:3:33 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
 ```
 invalid.ts:4:34 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     2 │ function takeVoid(thing: void) {}
     3 │ const arrowGeneric = <T extends void>(arg: T) => {};
@@ -126,7 +127,7 @@ invalid.ts:4:34 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
 ```
 invalid.ts:5:36 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     3 │ const arrowGeneric = <T extends void>(arg: T) => {};
     4 │ const arrowGeneric2 = <T extends void = void>(arg: T) => {};
@@ -150,7 +151,7 @@ invalid.ts:5:36 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
 ```
 invalid.ts:6:37 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     4 │ const arrowGeneric2 = <T extends void = void>(arg: T) => {};
     5 │ function functionGeneric<T extends void>(arg: T) {}
@@ -174,7 +175,7 @@ invalid.ts:6:37 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
 ```
 invalid.ts:7:48 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     5 │ function functionGeneric<T extends void>(arg: T) {}
     6 │ function functionGeneric2<T extends void = void>(arg: T) {}
@@ -198,7 +199,7 @@ invalid.ts:7:48 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
 ```
 invalid.ts:8:49 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
      6 │ function functionGeneric2<T extends void = void>(arg: T) {}
      7 │ declare function functionDeclaration<T extends void>(arg: T): void;
@@ -222,7 +223,7 @@ invalid.ts:8:49 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
 ```
 invalid.ts:10:34 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
      8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
      9 │ 
@@ -246,7 +247,7 @@ invalid.ts:10:34 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:10:43 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
      8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
      9 │ 
@@ -270,7 +271,7 @@ invalid.ts:10:43 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:11:26 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     10 │ declare function voidArray(args: void[]): void[];
   > 11 │ let value = undefined as void;
@@ -293,7 +294,7 @@ invalid.ts:11:26 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:12:14 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     10 │ declare function voidArray(args: void[]): void[];
     11 │ let value = undefined as void;
@@ -317,7 +318,7 @@ invalid.ts:12:14 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:13:33 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     11 │ let value = undefined as void;
     12 │ let value = <void>undefined;
@@ -341,7 +342,7 @@ invalid.ts:13:33 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:14:24 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     12 │ let value = <void>undefined;
     13 │ function takesThings(...things: void[]): void {}
@@ -365,7 +366,7 @@ invalid.ts:14:24 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:18:13 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     16 │ interface Interface {
     17 │   lambda: () => void;
@@ -389,7 +390,7 @@ invalid.ts:18:13 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:22:30 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     21 │ class ClassName {
   > 22 │   private readonly propName: void;
@@ -412,7 +413,7 @@ invalid.ts:22:30 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:24:14 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     22 │   private readonly propName: void;
     23 │ }
@@ -436,7 +437,7 @@ invalid.ts:24:14 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:25:17 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     23 │ }
     24 │ let letVoid: void;
@@ -460,7 +461,7 @@ invalid.ts:25:17 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:30:36 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing inside a union type.
+  × void is confusing inside a union type.
   
     28 │ }
     29 │ 
@@ -484,7 +485,7 @@ invalid.ts:30:36 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:31:55 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing inside a union type.
+  × void is confusing inside a union type.
   
     30 │ type UnionType = string | number | void;
   > 31 │ type UnionType = string | ((number & any) | (string | void));
@@ -507,7 +508,7 @@ invalid.ts:31:55 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:32:35 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing inside a union type.
+  × void is confusing inside a union type.
   
     30 │ type UnionType = string | number | void;
     31 │ type UnionType = string | ((number & any) | (string | void));
@@ -531,7 +532,7 @@ invalid.ts:32:35 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:33:42 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing inside a union type.
+  × void is confusing inside a union type.
   
     31 │ type UnionType = string | ((number & any) | (string | void));
     32 │ declare function test(): number | void;
@@ -555,7 +556,7 @@ invalid.ts:33:42 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:34:43 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     32 │ declare function test(): number | void;
     33 │ declare function test<T extends number | void>(): T;
@@ -579,7 +580,7 @@ invalid.ts:34:43 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:37:19 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     36 │ type MappedType<T> = {
   > 37 │   [K in keyof T]: void;
@@ -602,7 +603,7 @@ invalid.ts:37:19 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:41:41 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     40 │ type ConditionalType<T> = {
   > 41 │   [K in keyof T]: T[K] extends string ? void : string;
@@ -625,7 +626,7 @@ invalid.ts:41:41 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:43:26 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     41 │   [K in keyof T]: T[K] extends string ? void : string;
     42 │ };
@@ -649,7 +650,7 @@ invalid.ts:43:26 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:44:28 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing outside a return type or a type parameter.
+  × void is confusing outside a return type or a type parameter.
   
     42 │ };
     43 │ type ManyVoid = readonly void[];
@@ -673,7 +674,7 @@ invalid.ts:44:28 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
 ```
 invalid.ts:45:25 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! void is confusing inside a union type.
+  × void is confusing inside a union type.
   
     43 │ type ManyVoid = readonly void[];
     44 │ function foo(arr: readonly void[]) {}

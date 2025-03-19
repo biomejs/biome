@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -23,7 +24,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
     1 │ <>
   > 2 │   <div role="range"></div>
@@ -44,7 +45,7 @@ invalid.jsx:2:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
 ```
 invalid.jsx:3:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
     1 │ <>
     2 │   <div role="range"></div>
@@ -66,7 +67,7 @@ invalid.jsx:3:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
 ```
 invalid.jsx:4:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
     2 │   <div role="range"></div>
     3 │   <div role="datepicker"></div>
@@ -88,7 +89,7 @@ invalid.jsx:4:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
 ```
 invalid.jsx:5:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
     3 │   <div role="datepicker"></div>
     4 │   <div role=""></div>
@@ -110,7 +111,7 @@ invalid.jsx:5:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
 ```
 invalid.jsx:6:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
     4 │   <div role=""></div>
     5 │   <Foo role="Button" />
@@ -132,7 +133,7 @@ invalid.jsx:6:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
 ```
 invalid.jsx:7:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
     5 │   <Foo role="Button" />
     6 │   <Foo role="datepicker" />
@@ -154,7 +155,7 @@ invalid.jsx:7:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
 ```
 invalid.jsx:8:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
      6 │   <Foo role="datepicker" />
      7 │   <div role="unknown-invalid-role" />
@@ -176,7 +177,7 @@ invalid.jsx:8:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
 ```
 invalid.jsx:9:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
      7 │   <div role="unknown-invalid-role" />
      8 │   <div role="tabpanel row foobar"></div>
@@ -198,7 +199,7 @@ invalid.jsx:9:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
 ```
 invalid.jsx:10:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
      8 │   <div role="tabpanel row foobar"></div>
      9 │   <div role="doc-endnotes range"></div>
@@ -220,7 +221,7 @@ invalid.jsx:10:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:11:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
+  × Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
      9 │   <div role="doc-endnotes range"></div>
     10 │   <div role={null}></div>
@@ -238,5 +239,3 @@ invalid.jsx:11:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
        │        ------------------  
 
 ```
-
-

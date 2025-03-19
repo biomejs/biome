@@ -1,14 +1,14 @@
 use crate::format_element::tag::{Condition, Tag};
 use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
-use crate::{format_element, write, Argument, Arguments, GroupId, TextRange, TextSize};
+use crate::{Argument, Arguments, GroupId, TextRange, TextSize, format_element, write};
 use crate::{Buffer, VecBuffer};
+use Tag::*;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::num::NonZeroU8;
-use Tag::*;
 
 /// A line break that only gets printed if the enclosing `Group` doesn't fit on a single line.
 /// It's omitted if the enclosing `Group` fits on a single line.
@@ -391,7 +391,10 @@ impl std::fmt::Debug for LocatedTokenText {
 }
 
 fn debug_assert_no_newlines(text: &str) {
-    debug_assert!(!text.contains('\r'), "The content '{text}' contains an unsupported '\\r' line terminator character but text must only use line feeds '\\n' as line separator. Use '\\n' instead of '\\r' and '\\r\\n' to insert a line break in strings.");
+    debug_assert!(
+        !text.contains('\r'),
+        "The content '{text}' contains an unsupported '\\r' line terminator character but text must only use line feeds '\\n' as line separator. Use '\\n' instead of '\\r' and '\\r\\n' to insert a line break in strings."
+    );
 }
 
 /// Pushes some content to the end of the current line
@@ -685,11 +688,7 @@ pub const fn hard_space() -> HardSpace {
 /// ```
 #[inline]
 pub fn maybe_space(should_insert: bool) -> Option<Space> {
-    if should_insert {
-        Some(Space)
-    } else {
-        None
-    }
+    if should_insert { Some(Space) } else { None }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -2643,9 +2642,15 @@ impl<'a, Context> BestFitting<'a, Context> {
     ///
     /// You're looking for a way to create a `BestFitting` object, use the `best_fitting![least_expanded, most_expanded]` macro.
     ///
+    /// This is intended to be only used in the `best_fitting!` macro. As we can't place tail
+    /// expressions in a block for temporary lifetime extension since Rust 2024, we can't use an
+    /// `unsafe` block in the macro. Thus, this function can't be marked as unsafe, but it shouldn't
+    /// be used from outside.
+    ///
     /// ## Safety
     /// The slice must contain at least two variants.
-    pub unsafe fn from_arguments_unchecked(variants: Arguments<'a, Context>) -> Self {
+    #[doc(hidden)]
+    pub fn from_arguments_unchecked(variants: Arguments<'a, Context>) -> Self {
         assert!(
             variants.0.len() >= 2,
             "Requires at least the least expanded and most expanded variants"

@@ -14,7 +14,7 @@ String.raw`a ${x}`;
 ```
 valid.js:3:1 lint/nursery/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! String.raw is useless when the raw string doesn't contain any escape sequence.
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
   
     1 │ String.raw`\n a`;
     2 │ String.raw`\n abc`;

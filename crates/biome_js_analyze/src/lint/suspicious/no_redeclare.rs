@@ -1,6 +1,6 @@
 use crate::services::semantic::SemanticServices;
-use biome_analyze::{context::RuleContext, Rule, RuleDiagnostic};
-use biome_analyze::{declare_lint_rule, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext};
+use biome_analyze::{RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::Scope;

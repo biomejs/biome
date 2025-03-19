@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -16,7 +17,7 @@ function f() {
 ```
 invalid.js:3:1 lint/nursery/useStrictMode  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected absence of the directive "use strict".
+  × Unexpected absence of the directive "use strict".
   
   > 3 │ function f() {
       │ ^^^^^^^^^^^^^^

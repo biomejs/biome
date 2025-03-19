@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_dependency_graph::ModuleImports;
+use biome_dependency_graph::ModuleDependencyData;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike};
+use biome_js_syntax::inner_string_text;
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -101,7 +101,7 @@ impl Rule for NoImportCycles {
         let name_token = node.module_name_token()?;
         let specifier_text = inner_string_text(&name_token);
         let specifier = specifier_text.text();
-        let import = if is_static_import(node) {
+        let import = if node.is_static_import() {
             file_imports.static_imports.get(specifier)
         } else {
             file_imports.dynamic_imports.get(specifier)
@@ -160,7 +160,7 @@ impl Rule for NoImportCycles {
 fn find_cycle(
     ctx: &RuleContext<NoImportCycles>,
     start_path: &Utf8Path,
-    mut imports: ModuleImports,
+    mut imports: ModuleDependencyData,
 ) -> Option<Vec<String>> {
     let mut seen = HashSet::new();
     let mut stack = Vec::new();
@@ -205,8 +205,4 @@ fn find_cycle(
     }
 
     None
-}
-
-fn is_static_import(node: &AnyJsImportLike) -> bool {
-    matches!(node, AnyJsImportLike::JsModuleSource(_))
 }

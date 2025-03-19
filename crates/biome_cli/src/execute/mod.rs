@@ -8,7 +8,7 @@ use crate::cli_options::{CliOptions, CliReporter};
 use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
-use crate::execute::traverse::{traverse, TraverseResult};
+use crate::execute::traverse::{TraverseResult, traverse};
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
@@ -17,9 +17,9 @@ use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
 use biome_configuration::analyzer::RuleSelector;
-use biome_console::{markup, ConsoleExt};
+use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::SerdeJsonError;
-use biome_diagnostics::{category, Category};
+use biome_diagnostics::{Category, category};
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_service::projects::ProjectKey;
@@ -30,6 +30,7 @@ use biome_service::workspace::{
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
+use std::time::Duration;
 use tracing::{info, instrument};
 
 /// Useful information during the traversal of files and virtual content
@@ -493,12 +494,16 @@ pub fn execute_mode(
     mut session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
+    duration: Option<Duration>,
 ) -> Result<(), CliDiagnostic> {
     // If a custom reporter was provided, let's lift the limit so users can see all of them
     execution.max_diagnostics = if cli_options.reporter.is_default() {
         cli_options.max_diagnostics.into()
     } else {
-        info!("Removing the limit of --max-diagnostics, because of a reporter different from the default one: {}", cli_options.reporter);
+        info!(
+            "Removing the limit of --max-diagnostics, because of a reporter different from the default one: {}",
+            cli_options.reporter
+        );
         u32::MAX
     };
 
@@ -537,10 +542,14 @@ pub fn execute_mode(
     }
 
     let TraverseResult {
-        summary,
+        mut summary,
         evaluated_paths,
         diagnostics,
     } = traverse(&execution, &mut session, project_key, cli_options, paths)?;
+    // We join the duration of the scanning with the duration of the traverse.
+    if let Some(duration) = duration {
+        summary.duration += duration;
+    }
     let console = session.app.console;
     let errors = summary.errors;
     let skipped = summary.skipped;
@@ -598,9 +607,8 @@ pub fn execute_mode(
                 let report_file = BiomePath::new("_report_output.json");
                 session.app.workspace.open_file(OpenFileParams {
                     project_key,
-                    content: FileContent::FromClient(content),
+                    content: FileContent::from_client(content),
                     path: report_file.clone(),
-                    version: 0,
                     document_file_source: None,
                     persist_node_cache: false,
                 })?;

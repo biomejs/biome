@@ -1,13 +1,15 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsCallExpression,
-    JsFileSource, JsFormalParameter, JsInitializerClause, JsLanguage, JsObjectExpression,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsStatementList,
-    JsSyntaxKind, JsVariableDeclarator,
+    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType,
+    JsArrowFunctionExpression, JsCallExpression, JsFileSource, JsFormalParameter,
+    JsFunctionDeclaration, JsInitializerClause, JsLanguage, JsObjectExpression,
+    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsReturnStatement,
+    JsStatementList, JsSyntaxKind, JsVariableDeclarator,
 };
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
@@ -15,7 +17,7 @@ use biome_js_syntax::{
     TsDeclareFunctionExportDefaultDeclaration, TsGetterSignatureClassMember,
     TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Require explicit return types on functions and class methods.
@@ -258,6 +260,7 @@ declare_lint_rule! {
         name: "useExplicitType",
         language: "ts",
         recommended: false,
+        severity: Severity::Error,
         sources: &[RuleSource::EslintTypeScript("explicit-function-return-type")],
     }
 }
@@ -308,6 +311,12 @@ impl Rule for UseExplicitType {
                     return None;
                 }
 
+                if is_arrow_func(func)
+                    && (can_inline_function(func) || is_function_inside_typed_return(func))
+                {
+                    return None;
+                }
+
                 if is_higher_order_function(func) {
                     return None;
                 }
@@ -316,11 +325,11 @@ impl Rule for UseExplicitType {
                     return None;
                 }
 
-                let func_range = func.syntax().text_range_with_trivia();
+                let func_range = func.syntax().text_trimmed_range();
                 if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
                     return Some(TextRange::new(
                         func_range.start(),
-                        id.syntax().text_range_with_trivia().end(),
+                        id.syntax().text_trimmed_range().end(),
                     ));
                 }
 
@@ -459,6 +468,88 @@ fn is_function_used_in_argument_or_array(func: &AnyJsFunction) -> bool {
         func.syntax().parent().kind(),
         Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST)
     )
+}
+
+/// Checks whether a function can be inlined without being tagged with a type.
+///
+/// # Examples
+///
+/// ```ts
+/// const x: Type = { prop: () => {} }
+/// f({ prop: () => {} })
+/// ```
+///
+fn can_inline_function(func: &AnyJsFunction) -> bool {
+    let object_expression = func.syntax().ancestors().find_map(JsObjectExpression::cast);
+
+    let Some(object_expression) = object_expression else {
+        return false;
+    };
+
+    for ancestor in object_expression.syntax().ancestors() {
+        if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor) {
+            if declarator.variable_annotation().is_some() {
+                return true;
+            }
+        }
+
+        if JsCallExpression::can_cast(ancestor.kind()) {
+            return true;
+        }
+    }
+
+    false
+}
+
+/// Checks where the arrow function is inlined inside a typed return statement or arrow function
+///
+/// # Examples
+///
+/// ```ts
+/// function getObjectWithFunction(): Behavior {
+///   return {
+///     attribute: 'value',
+///     func: function myFunc(): string { return "value" },
+///     arrowFunc: () => {},
+///   }
+/// }
+/// ```
+///
+/// ```ts
+/// const getObjectWithFunction1 = (): Behavior => {
+///   return {
+///     namedFunc: function myFunc(): string { return "value" },
+///     arrowFunc: () => {},
+///   }
+/// }
+/// ```
+fn is_function_inside_typed_return(func: &AnyJsFunction) -> bool {
+    let return_statement = func.syntax().ancestors().find_map(JsReturnStatement::cast);
+
+    let Some(return_statement) = return_statement else {
+        return false;
+    };
+
+    for ancestor in return_statement.syntax().ancestors() {
+        if let Some(function_declaration) = JsFunctionDeclaration::cast_ref(&ancestor) {
+            if function_declaration.return_type_annotation().is_some() {
+                return true;
+            }
+        }
+
+        if let Some(function_expression) = JsArrowFunctionExpression::cast_ref(&ancestor) {
+            if function_expression.return_type_annotation().is_some() {
+                return true;
+            }
+        }
+    }
+
+    false
+}
+
+/// Check if a function is an arrow function
+fn is_arrow_func(func: &AnyJsFunction) -> bool {
+    matches!(func, AnyJsFunction::JsArrowFunctionExpression(_))
 }
 
 /// Checks if a function is an IIFE (Immediately Invoked Function Expressions)

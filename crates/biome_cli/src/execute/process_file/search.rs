@@ -1,7 +1,7 @@
 use crate::execute::diagnostics::{ResultExt, SearchDiagnostic};
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
-use biome_diagnostics::{category, DiagnosticExt};
+use biome_diagnostics::{DiagnosticExt, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::workspace::PatternId;

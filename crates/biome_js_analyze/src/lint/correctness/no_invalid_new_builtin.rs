@@ -1,12 +1,12 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
-use biome_analyze::{context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic};
+use crate::{JsRuleAction, services::semantic::Semantic};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, static_value::StaticValue, AnyJsExpression, JsCallExpression,
-    JsNewExpression,
+    AnyJsExpression, JsCallExpression, JsNewExpression, global_identifier,
+    static_value::StaticValue,
 };
-use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, chain_trivia_pieces};
 
 declare_lint_rule! {
     /// Disallow `new` operators with global non-constructor functions.

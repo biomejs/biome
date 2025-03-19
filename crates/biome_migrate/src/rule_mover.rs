@@ -379,7 +379,9 @@ impl AnalyzerMover {
 
             *member = group_member(new_members, new_separators, group.as_str());
         } else {
-            panic!("The group doesn't exist. This usually means that the developer needs to added to the type.")
+            panic!(
+                "The group doesn't exist. This usually means that the developer needs to added to the type."
+            )
         }
 
         Some(())
@@ -417,7 +419,9 @@ impl AnalyzerMover {
 
             *member = group_member(new_members, new_separators, group.as_str());
         } else {
-            panic!("The group doesn't exist. This usually means that the developer needs to added to the type.")
+            panic!(
+                "The group doesn't exist. This usually means that the developer needs to added to the type."
+            )
         }
 
         Some(())
@@ -775,7 +779,7 @@ mod tests {
     use biome_diagnostics::Error;
     use biome_json_formatter::context::JsonFormatOptions;
     use biome_json_formatter::format_node;
-    use biome_json_parser::{parse_json, JsonParse, JsonParserOptions};
+    use biome_json_parser::{JsonParse, JsonParserOptions, parse_json};
     use biome_test_utils::diagnostic_to_string;
     use insta::assert_snapshot;
 

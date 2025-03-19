@@ -1,12 +1,13 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_factory::make;
-use biome_js_syntax::JsStringLiteralExpression;
-use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_js_syntax::{
+    JsLiteralMemberName, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
+};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, declare_node_union};
 use rustc_hash::FxHashSet;
 use std::ops::Range;
 
@@ -78,7 +79,7 @@ pub struct RuleState {
 }
 
 impl Rule for NoNonoctalDecimalEscape {
-    type Query = Ast<JsStringLiteralExpression>;
+    type Query = Ast<AnyJsStringLiteral>;
     type State = RuleState;
     type Signals = Box<[Self::State]>;
     type Options = ();
@@ -86,10 +87,10 @@ impl Rule for NoNonoctalDecimalEscape {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let mut result = Vec::new();
-        let Some(token) = node.value_token().ok() else {
+        let Some(token) = node.string_literal_token() else {
             return result.into_boxed_slice();
         };
-        let text = token.text();
+        let text = token.text_trimmed();
         if !is_octal_escape_sequence(text) {
             return result.into_boxed_slice();
         }
@@ -205,14 +206,14 @@ impl Rule for NoNonoctalDecimalEscape {
     ) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
         let node = ctx.query();
-        let prev_token = node.value_token().ok()?;
+        let prev_token = node.string_literal_token()?;
         let replaced = safe_replace_by_range(
-            prev_token.text().to_string(),
+            prev_token.text_trimmed().to_string(),
             replace_string_range.clone(),
             replace_to,
         )?;
 
-        let next_token = make::ident(&replaced);
+        let next_token = JsSyntaxToken::new_detached(prev_token.kind(), &replaced, [], []);
 
         mutation.replace_token(prev_token, next_token);
 
@@ -226,6 +227,22 @@ impl Rule for NoNonoctalDecimalEscape {
 			},
             mutation,
         ))
+    }
+}
+
+declare_node_union! {
+    /// Any string literal excluding JsxString.
+    pub AnyJsStringLiteral = JsStringLiteralExpression | JsLiteralMemberName
+}
+impl AnyJsStringLiteral {
+    pub fn string_literal_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            AnyJsStringLiteral::JsStringLiteralExpression(node) => node.value_token().ok(),
+            AnyJsStringLiteral::JsLiteralMemberName(node) => node
+                .value()
+                .ok()
+                .filter(|token| token.kind() == JsSyntaxKind::JS_STRING_LITERAL),
+        }
     }
 }
 

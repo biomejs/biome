@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidStrictPascalCase.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -14,7 +15,7 @@ type AAb = any
 ```
 invalidStrictPascalCase.ts:1:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
   > 1 │ interface VNode {
       │           ^^^^^
@@ -30,7 +31,7 @@ invalidStrictPascalCase.ts:1:11 lint/style/useNamingConvention ━━━━━�
 ```
 invalidStrictPascalCase.ts:4:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     2 │ 	hello: 'world'
     3 │ }

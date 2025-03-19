@@ -1,10 +1,10 @@
 use std::str::FromStr;
 
-use crate::{declare_migration, MigrationAction};
+use crate::{MigrationAction, declare_migration};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
-use biome_diagnostics::{category, Applicability};
+use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonArrayValue, JsonMember, JsonObjectValue, JsonRoot, T};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize, TriviaPieceKind};
@@ -33,7 +33,7 @@ impl Rule for Includes {
                 continue;
             };
             match name.text() {
-                "files" | "formatter" | "linter" | "assists" => {
+                "files" | "formatter" | "linter" | "assist" => {
                     let Ok(AnyJsonValue::JsonObjectValue(object)) = root_member.value() else {
                         continue;
                     };

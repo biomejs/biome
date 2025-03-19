@@ -5,13 +5,13 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsExpression, AnyJsFormalParameter, AnyJsImportClause,
     AnyJsLiteralExpression, AnyJsModuleItem, AnyJsName, AnyJsNamedImportSpecifier,
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsStatement, AnyTsName,
-    AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource, TriviaPieceKind, T,
+    AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource, T, TriviaPieceKind,
 };
 use biome_rowan::AstNode;
-use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
+use biome_service::workspace_types::{ModuleQueue, generate_type, methods};
 use biome_string_case::Case;
-use schemars::gen::{SchemaGenerator, SchemaSettings};
-use xtask::{project_root, Mode, Result};
+use schemars::r#gen::{SchemaGenerator, SchemaSettings};
+use xtask::{Mode, Result, project_root};
 use xtask_codegen::update;
 
 pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {

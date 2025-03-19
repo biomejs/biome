@@ -5,18 +5,18 @@ use crate::configs::{
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
 use crate::snap_test::{
-    assert_cli_snapshot_with_redactor, assert_file_contents, markup_to_string, SnapshotPayload,
+    SnapshotPayload, assert_cli_snapshot_with_redactor, assert_file_contents, markup_to_string,
 };
 use crate::{
-    assert_cli_snapshot, run_cli, run_cli_with_dyn_fs, run_cli_with_server_workspace, FORMATTED,
-    LINT_ERROR, PARSE_ERROR,
+    FORMATTED, LINT_ERROR, PARSE_ERROR, assert_cli_snapshot, run_cli, run_cli_with_dyn_fs,
+    run_cli_with_server_workspace,
 };
-use biome_console::{markup, BufferConsole, LogLevel, MarkupBuf};
+use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
 use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env::temp_dir;
-use std::fs::{create_dir, create_dir_all, remove_dir_all, File};
+use std::fs::{File, create_dir, create_dir_all, remove_dir_all};
 use std::io::Write;
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::symlink;
@@ -155,15 +155,17 @@ fn maximum_diagnostics() {
         20_usize
     );
 
-    assert!(messages
-        .iter()
-        .filter(|m| m.level == LogLevel::Log)
-        .any(|m| {
-            let content = format!("{:?}", m.content);
-            content.contains("The number of diagnostics exceeds the limit allowed")
-                && content.contains("Diagnostics not shown")
-                && content.contains("28")
-        }));
+    assert!(
+        messages
+            .iter()
+            .filter(|m| m.level == LogLevel::Log)
+            .any(|m| {
+                let content = format!("{:?}", m.content);
+                content.contains("The number of diagnostics exceeds the limit allowed")
+                    && content.contains("Diagnostics not shown")
+                    && content.contains("28")
+            })
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -911,21 +913,27 @@ fn fs_error_infinite_symlink_expansion_to_files() {
 
     // Don't use a snapshot here, since the diagnostics can be reported in
     // arbitrary order:
-    assert!(console
-        .out_buffer
-        .iter()
-        .flat_map(|msg| msg.content.0.iter())
-        .any(|node| node.content.contains("Deeply nested symlink expansion")));
-    assert!(console
-        .out_buffer
-        .iter()
-        .flat_map(|msg| msg.content.0.iter())
-        .any(|node| node.content.contains(&symlink1_path.to_string())));
-    assert!(console
-        .out_buffer
-        .iter()
-        .flat_map(|msg| msg.content.0.iter())
-        .any(|node| node.content.contains(&symlink2_path.to_string())));
+    assert!(
+        console
+            .out_buffer
+            .iter()
+            .flat_map(|msg| msg.content.0.iter())
+            .any(|node| node.content.contains("Deeply nested symlink expansion"))
+    );
+    assert!(
+        console
+            .out_buffer
+            .iter()
+            .flat_map(|msg| msg.content.0.iter())
+            .any(|node| node.content.contains(&symlink1_path.to_string()))
+    );
+    assert!(
+        console
+            .out_buffer
+            .iter()
+            .flat_map(|msg| msg.content.0.iter())
+            .any(|node| node.content.contains(&symlink2_path.to_string()))
+    );
 }
 
 #[test]
@@ -1710,172 +1718,6 @@ fn ignore_configured_globals() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ignore_configured_globals",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn ignore_vcs_ignored_file() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let rome_json = r#"{
-        "vcs": {
-            "enabled": true,
-            "clientKind": "git",
-            "useIgnoreFile": true
-        }
-    }"#;
-
-    let git_ignore = r#"
-file2.js
-"#;
-
-    let code2 = r#"foo.call(); bar.call();"#;
-    let code1 = r#"array.map(sentence => sentence.split(' ')).flat();"#;
-
-    // ignored files
-    let file_path1 = Utf8Path::new("file1.js");
-    fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Utf8Path::new("file2.js");
-    fs.insert(file_path2.into(), code2.as_bytes());
-
-    // configuration
-    let config_path = Utf8Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
-
-    // git ignore file
-    let ignore_file = Utf8Path::new(".gitignore");
-    fs.insert(ignore_file.into(), git_ignore.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["lint", file_path1.as_str(), file_path2.as_str()].as_slice()),
-    );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "ignore_vcs_ignored_file",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn ignore_vcs_os_independent_parse() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let rome_json = r#"{
-        "vcs": {
-            "enabled": true,
-            "clientKind": "git",
-            "useIgnoreFile": true
-        }
-    }"#;
-
-    let git_ignore = "something.js\nfile2.js\r\nfile3.js";
-
-    let code3 = r#"console.log('biome is cool');"#;
-    let code2 = r#"foo.call(); bar.call();"#;
-    let code1 = r#"blah.call();"#;
-
-    let file_path1 = Utf8Path::new("file1.js");
-    fs.insert(file_path1.into(), code1.as_bytes());
-
-    // ignored files
-    let file_path2 = Utf8Path::new("file2.js");
-    fs.insert(file_path2.into(), code2.as_bytes());
-    let file_path3 = Utf8Path::new("file3.js");
-    fs.insert(file_path3.into(), code3.as_bytes());
-
-    // configuration
-    let config_path = Utf8Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
-
-    // git ignore file
-    let ignore_file = Utf8Path::new(".gitignore");
-    fs.insert(ignore_file.into(), git_ignore.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(
-            [
-                "lint",
-                file_path1.as_str(),
-                file_path2.as_str(),
-                file_path3.as_str(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "ignore_vcs_os_independent_parse",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn ignore_vcs_ignored_file_via_cli() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let git_ignore = r#"
-file2.js
-"#;
-
-    let code2 = r#"foo.call(); bar.call();"#;
-    let code1 = r#"array.map(sentence => sentence.split(' ')).flat();"#;
-
-    // ignored files
-    let file_path1 = Utf8Path::new("file1.js");
-    fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Utf8Path::new("file2.js");
-    fs.insert(file_path2.into(), code2.as_bytes());
-
-    // git folder
-    let git_folder = Utf8Path::new("./.git");
-    fs.insert(git_folder.into(), "".as_bytes());
-
-    // git ignore file
-    let ignore_file = Utf8Path::new("./.gitignore");
-    fs.insert(ignore_file.into(), git_ignore.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(
-            [
-                "lint",
-                "--vcs-enabled=true",
-                "--vcs-client-kind=git",
-                "--vcs-use-ignore-file=true",
-                "--vcs-root=.",
-                file_path1.as_str(),
-                file_path2.as_str(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "ignore_vcs_ignored_file_via_cli",
         fs,
         console,
         result,
@@ -4064,6 +3906,31 @@ fn linter_doesnt_crash_on_malformed_code_from_issue_4723() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "linter_doesnt_crash_on_malformed_code_from_issue_4723",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_report_when_schema_version_mismatch() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+    "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
+}
+        "#,
+    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from([("check")].as_slice()));
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_report_when_schema_version_mismatch",
         fs,
         console,
         result,

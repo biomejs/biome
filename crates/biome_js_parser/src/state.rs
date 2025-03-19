@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_js_syntax::JsFileSource;
 use biome_rowan::{TextRange, TextSize};
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
 use std::ops::{BitOr, BitOrAssign, Deref, DerefMut, Range, Sub};

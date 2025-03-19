@@ -1,6 +1,6 @@
 use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;
-use biome_parser::{token_set, TokenSet};
+use biome_parser::{TokenSet, token_set};
 
 // See the precedence rules defined in the Grit grammar:
 //   https://github.com/getgrit/tree-sitter-gritql/blob/main/grammar.js#L7

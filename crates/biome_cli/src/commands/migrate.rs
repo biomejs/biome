@@ -1,12 +1,12 @@
 use super::{
-    check_fix_incompatible_arguments, CommandRunner, FixFileModeOptions, MigrateSubCommand,
+    CommandRunner, FixFileModeOptions, MigrateSubCommand, check_fix_incompatible_arguments,
 };
+use crate::CliDiagnostic;
 use crate::cli_options::CliOptions;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::{Execution, TraversalMode};
-use crate::CliDiagnostic;
 use biome_configuration::Configuration;
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::projects::ProjectKey;

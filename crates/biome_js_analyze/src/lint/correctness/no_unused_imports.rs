@@ -1,11 +1,11 @@
 use crate::{
-    react::{is_global_react_import, ReactLibrary},
-    services::semantic::Semantic,
     JsRuleAction,
+    react::{ReactLibrary, is_global_react_import},
+    services::semantic::Semantic,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, options::JsxRuntime, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    options::JsxRuntime,
 };
 use biome_console::markup;
 use biome_js_factory::make;

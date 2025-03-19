@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: complexEventHandler.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -106,7 +107,7 @@ function handleArrowDown(event: React.KeyboardEvent) {
 ```
 complexEventHandler.ts:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity of 26 detected (max: 15).
+  i Excessive complexity of 26 detected (max: 15).
   
   > 1 │ function handleArrowDown(event: React.KeyboardEvent) {
       │          ^^^^^^^^^^^^^^^
@@ -117,5 +118,3 @@ complexEventHandler.ts:1:10 lint/complexity/noExcessiveCognitiveComplexity ━�
   
 
 ```
-
-

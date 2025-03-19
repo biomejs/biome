@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, FixKind, Phases, QueryMatch, Queryable,
-    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
+    AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind, ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -14,8 +14,8 @@ use biome_js_syntax::{
     JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language,
-    SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language, SyntaxNode, TextRange,
+    TriviaPieceKind, WalkEvent, declare_node_union,
 };
 
 declare_lint_rule! {
@@ -73,7 +73,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("prefer-arrow-callback")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -355,10 +355,12 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
         // To keep comments, we keep the regular function body
         return early_result;
     }
-    if matches!(
-        return_arg,
-        AnyJsExpression::JsSequenceExpression(_) | AnyJsExpression::JsObjectExpression(_)
-    ) {
+    if matches!(return_arg, AnyJsExpression::JsSequenceExpression(_))
+        || return_arg
+            .syntax()
+            .first_token()
+            .is_some_and(|token| token.kind() == T!['{'])
+    {
         // () => (first, second)
         // () => ({ ... })
         return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());

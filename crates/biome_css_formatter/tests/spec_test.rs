@@ -1,6 +1,6 @@
 use biome_configuration::css::CssFormatterConfiguration;
 use biome_configuration::{Configuration, CssConfiguration};
-use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
+use biome_css_formatter::{CssFormatLanguage, context::CssFormatOptions};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_service::workspace::UpdateSettingsParams;
 use camino::Utf8Path;
@@ -41,8 +41,6 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
                 }),
                 ..Default::default()
             },
-            vcs_base_path: None,
-            gitignore_matches: vec![],
             workspace_directory: None,
         })
     };

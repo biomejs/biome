@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::AsFormat;
+use crate::prelude::*;
 
 use crate::context::trailing_commas::FormatTrailingCommas;
 use biome_formatter::write;

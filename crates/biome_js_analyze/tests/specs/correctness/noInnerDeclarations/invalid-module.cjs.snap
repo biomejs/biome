@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-module.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -14,7 +15,7 @@ if (foo) {
 ```
 invalid-module.cjs:2:2 lint/correctness/noInnerDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This var should be declared at the root of the script.
+  × This var should be declared at the root of the script.
   
     1 │ if (foo) {
   > 2 │ 	var a;
@@ -31,7 +32,7 @@ invalid-module.cjs:2:2 lint/correctness/noInnerDeclarations ━━━━━━�
 ```
 invalid-module.cjs:3:2 lint/correctness/noInnerDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function should be declared at the root of the script.
+  × This function should be declared at the root of the script.
   
     1 │ if (foo) {
     2 │ 	var a;
@@ -44,5 +45,3 @@ invalid-module.cjs:3:2 lint/correctness/noInnerDeclarations ━━━━━━�
   
 
 ```
-
-

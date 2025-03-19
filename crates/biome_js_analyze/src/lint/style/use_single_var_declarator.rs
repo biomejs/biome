@@ -1,15 +1,15 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     JsSyntaxKind, JsSyntaxToken, JsVariableDeclarationFields, JsVariableStatement,
-    JsVariableStatementFields, TextSize, TriviaPieceKind, T,
+    JsVariableStatementFields, T, TextSize, TriviaPieceKind,
 };
 use biome_rowan::{
-    trim_leading_trivia_pieces, AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece,
+    AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece, trim_leading_trivia_pieces,
 };
 
 use crate::JsRuleAction;

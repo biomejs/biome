@@ -1,16 +1,16 @@
 use std::any::TypeId;
 
-use biome_analyze::{merge_node_visitors, Visitor, VisitorContext};
+use biome_analyze::{Visitor, VisitorContext, merge_node_visitors};
 use biome_js_syntax::{
     AnyJsFunction, JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
     JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
     JsSetterObjectMember, JsStaticInitializationBlockClassMember, TsModuleDeclaration,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxError, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxError, SyntaxResult, declare_node_union};
 
 use crate::ControlFlowGraph;
 
-use super::{nodes::*, FunctionBuilder};
+use super::{FunctionBuilder, nodes::*};
 
 /// Return a new instance of the [ControlFlowVisitor]
 pub(crate) fn make_visitor() -> impl Visitor<Language = JsLanguage> {

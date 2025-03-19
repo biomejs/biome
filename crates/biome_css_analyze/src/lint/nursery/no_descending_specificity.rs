@@ -1,6 +1,6 @@
 use rustc_hash::{FxHashMap, FxHashSet};
 
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, SemanticModel, Specificity};
 use biome_css_syntax::{AnyCssSelector, CssRoot};
@@ -93,7 +93,7 @@ pub struct DescendingSelector {
 ///   ^^^^^^^
 /// }
 /// ```
-fn find_tail_selector(selector: &AnyCssSelector) -> Option<String> {
+fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
     match selector {
         AnyCssSelector::CssCompoundSelector(s) => {
             let simple = s
@@ -105,7 +105,7 @@ fn find_tail_selector(selector: &AnyCssSelector) -> Option<String> {
             Some(last_selector)
         }
         AnyCssSelector::CssComplexSelector(s) => {
-            s.right().as_ref().ok().and_then(find_tail_selector)
+            s.right().as_ref().ok().and_then(find_tail_selector_str)
         }
         _ => None,
     }
@@ -121,35 +121,35 @@ fn find_descending_selector(
     visited_selectors: &mut FxHashMap<String, (TextRange, Specificity)>,
     descending_selectors: &mut Vec<DescendingSelector>,
 ) {
-    if visited_rules.contains(&rule.id) {
+    if !visited_rules.insert(rule.id()) {
         return;
-    } else {
-        visited_rules.insert(rule.id);
-    };
+    }
 
-    for selector in &rule.selectors {
-        let tail_selector = if let Some(s) = find_tail_selector(&selector.original) {
-            s
-        } else {
+    for selector in rule.selectors() {
+        let Some(casted_selector) = AnyCssSelector::cast(selector.node().clone()) else {
+            continue;
+        };
+        let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
             continue;
         };
 
-        if let Some((last_textrange, last_specificity)) = visited_selectors.get(&tail_selector) {
-            if last_specificity > &selector.specificity {
+        if let Some((last_text_range, last_specificity)) = visited_selectors.get(&tail_selector_str)
+        {
+            if last_specificity > &selector.specificity() {
                 descending_selectors.push(DescendingSelector {
-                    high: (*last_textrange, last_specificity.clone()),
-                    low: (selector.range, selector.specificity.clone()),
+                    high: (*last_text_range, *last_specificity),
+                    low: (selector.range(), selector.specificity()),
                 });
             }
         } else {
             visited_selectors.insert(
-                tail_selector,
-                (selector.range, selector.specificity.clone()),
+                tail_selector_str,
+                (selector.range(), selector.specificity()),
             );
         }
     }
 
-    for child_id in &rule.child_ids {
+    for child_id in rule.child_ids() {
         if let Some(child_rule) = model.get_rule_by_id(*child_id) {
             find_descending_selector(
                 child_rule,

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -19,7 +20,7 @@ enum E {
 ```
 invalid.ts:2:30 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is used before its declaration.
+  × This parameter is used before its declaration.
   
     1 │ class C {
   > 2 │     constructor(readonly a = b, readonly b = 0) {}
@@ -41,7 +42,7 @@ invalid.ts:2:30 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━�
 ```
 invalid.ts:6:9 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This enum member is used before its declaration.
+  × This enum member is used before its declaration.
   
     5 │ enum E {
   > 6 │     A = B,

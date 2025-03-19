@@ -1,17 +1,17 @@
 use std::io;
 
-use biome_console::{fmt, markup, MarkupBuf};
+use biome_console::{MarkupBuf, fmt, markup};
 use biome_rowan::TextSize;
 use biome_text_edit::TextEdit;
 use biome_text_size::TextRange;
 use serde::{
-    de::{self, SeqAccess},
     Deserialize, Deserializer, Serialize, Serializer,
+    de::{self, SeqAccess},
 };
 
 use crate::{
-    diagnostic::internal::AsDiagnostic, diagnostic::DiagnosticTag, Advices as _, Backtrace,
-    Category, DiagnosticTags, LogCategory, Resource, Severity, SourceCode, Visit,
+    Advices as _, Backtrace, Category, DiagnosticTags, LogCategory, Resource, Severity, SourceCode,
+    Visit, diagnostic::DiagnosticTag, diagnostic::internal::AsDiagnostic,
 };
 
 /// Serializable representation for a [Diagnostic](super::Diagnostic).
@@ -365,8 +365,8 @@ impl schemars::JsonSchema for DiagnosticTags {
         String::from("DiagnosticTags")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<DiagnosticTag>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<DiagnosticTag>>::json_schema(generator)
     }
 }
 
@@ -375,7 +375,7 @@ mod tests {
     use std::io;
 
     use biome_text_size::{TextRange, TextSize};
-    use serde_json::{from_value, json, to_value, Value};
+    use serde_json::{Value, from_value, json, to_value};
 
     use crate::{
         self as biome_diagnostics, {Advices, LogCategory, Visit},

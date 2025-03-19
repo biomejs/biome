@@ -2,6 +2,6 @@
 "@biomejs/biome": major
 ---
 
-Remove support for `rome-ignore` suppression comment.
+Removed support for `rome-ignore` suppression comments.
 
-Use the `biome-ignore` suppression comment instead.
+Use `biome-ignore` suppression comments instead.

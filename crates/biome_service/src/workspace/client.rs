@@ -6,7 +6,7 @@ use crate::workspace::{
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
 use biome_fs::FileSystem;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::json;
 use std::{
     panic::RefUnwindSafe,
@@ -19,7 +19,7 @@ use super::{
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
     PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
     ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateSettingsParams,
+    SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 
 pub struct WorkspaceClient<T> {
@@ -120,7 +120,10 @@ where
         self.request("biome/is_path_ignored", params)
     }
 
-    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
+    fn update_settings(
+        &self,
+        params: UpdateSettingsParams,
+    ) -> Result<UpdateSettingsResult, WorkspaceError> {
         self.request("biome/update_settings", params)
     }
 

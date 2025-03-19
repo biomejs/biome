@@ -3,7 +3,7 @@ name = "rome_fuzz"
 version = "0.0.0"
 authors = ["Addison Crump <research@addisoncrump.info>"]
 publish = false
-edition = "2021"
+edition = "2024"
 
 [features]
 default = ["libfuzzer"]

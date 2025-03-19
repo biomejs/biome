@@ -3,7 +3,7 @@ use biome_formatter::write;
 
 use crate::utils::FormatInitializerClause;
 
-use crate::js::bindings::parameters::{should_hug_function_parameters, FormatAnyJsParameters};
+use crate::js::bindings::parameters::{FormatAnyJsParameters, should_hug_function_parameters};
 use biome_js_syntax::JsFormalParameter;
 use biome_js_syntax::JsFormalParameterFields;
 

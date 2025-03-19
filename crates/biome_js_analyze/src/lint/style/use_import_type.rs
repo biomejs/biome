@@ -1,11 +1,11 @@
 use crate::{
-    react::{is_global_react_import, ReactLibrary},
-    services::semantic::Semantic,
     JsRuleAction,
+    react::{ReactLibrary, is_global_react_import},
+    services::semantic::Semantic,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, options::JsxRuntime, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule, options::JsxRuntime,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -18,9 +18,8 @@ use biome_js_syntax::{
     JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
 };
 use biome_rowan::{
-    chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces, AstNode,
-    AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
-    TriviaPieceKind,
+    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
+    TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
 };
 use rustc_hash::FxHashSet;
 

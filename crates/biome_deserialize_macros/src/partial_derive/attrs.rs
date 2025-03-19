@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use std::collections::HashSet;
-use syn::{parse_quote, AttrStyle, Attribute, Error, Lit, Meta, MetaNameValue, Path, Type};
+use syn::{AttrStyle, Attribute, Error, Lit, Meta, MetaNameValue, Path, Type, parse_quote};
 
 use crate::util::parse_meta_list;
 

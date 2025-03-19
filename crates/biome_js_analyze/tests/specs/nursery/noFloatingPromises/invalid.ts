@@ -265,3 +265,67 @@ invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty;
 invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty
 	.then(() => {})
 	.finally(() => {});
+invalidTestClassExpression.returnsPromiseProperty
+	.then(() => {})
+	.finally(() => {});
+
+const invalidTestObject = {
+	returnsPromiseArrowFunction: async (): Promise<string> => {
+		return "value";
+	},
+
+	returnsPromiseFunction: async function (): Promise<string> {
+		return "value";
+	},
+
+	async returnsPromiseMethod(): Promise<string> {
+		return "value";
+	},
+
+	someMethod() {
+		this.returnsPromiseArrowFunction();
+		this.returnsPromiseFunction().then(() => {});
+		this["returnsPromiseMethod"]();
+	},
+};
+async function testInvalidObejctMethodCalls(): Promise<void> {
+	invalidTestObject.returnsPromiseArrowFunction();
+	invalidTestObject.returnsPromiseFunction().then(() => {});
+	invalidTestObject
+		.returnsPromiseMethod()
+		.then(() => {})
+		.finally(() => {});
+	invalidTestObject["returnsPromiseMethod"]();
+}
+
+type Props = {
+	a: string;
+	returnsPromise: () => Promise<void>;
+};
+async function testCallingReturnsPromise(props: Props) {
+	props.returnsPromise().then(() => {});
+}
+const testDestructuringAndCallingReturnsPromise = async ({
+	returnsPromise,
+}: Props) => {
+	returnsPromise();
+};
+async function testPassingReturnsPromiseDirectly(
+	returnsPromise: () => Promise<void>
+) {
+	returnsPromise();
+}
+async function testCallingReturnsPromiseFromObject(props: {
+	returnsPromise: () => Promise<void>;
+}) {
+	props.returnsPromise();
+}
+async function testDestructuringAndCallingReturnsPromiseFromRest({
+	a,
+	...rest
+}: Props) {
+	rest
+		.returnsPromise()
+		.then(() => {})
+		.finally(() => {});
+}

@@ -1,9 +1,12 @@
-use crate::prelude::*;
 use crate::JsFormatContext;
-use biome_formatter::write;
+use crate::prelude::*;
+use biome_formatter::{Expand, write};
 use biome_formatter::{Format, FormatResult};
-use biome_js_syntax::{JsObjectExpression, JsSyntaxToken, TsObjectType};
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, SyntaxResult};
+use biome_js_syntax::{
+    JsFormalParameter, JsObjectExpression, JsParameterList, JsSyntaxToken, TsObjectType,
+    TsTypeAnnotation,
+};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
 
 declare_node_union! {
     pub (crate) JsObjectLike = JsObjectExpression | TsObjectType
@@ -61,17 +64,33 @@ impl Format<JsFormatContext> for JsObjectLike {
             )?;
         } else {
             let should_insert_space_around_brackets = f.options().bracket_spacing().value();
-            let should_expand =
-                f.options().object_wrap().is_preserve() && self.members_have_leading_newline();
+            let should_expand = (f.options().expand() == Expand::Auto
+                && self.members_have_leading_newline())
+                || f.options().expand() == Expand::Always;
 
-            write!(
-                f,
-                [group(&soft_block_indent_with_maybe_space(
-                    &members,
-                    should_insert_space_around_brackets
-                ))
-                .should_expand(should_expand)]
-            )?;
+            // If the object type is the type annotation of the only parameter in a function,
+            // try to hug the parameter; we don't create a group and inline the contents here.
+            //
+            // For example:
+            // ```ts
+            // const fn = ({ foo }: { foo: string }) => { ... };
+            //                      ^ do not break properties here
+            // ```
+            let should_hug = self.parent::<TsTypeAnnotation>().is_some_and(|node| {
+                node.parent::<JsFormalParameter>().is_some_and(|node| {
+                    node.parent::<JsParameterList>()
+                        .is_some_and(|node| node.len() == 1)
+                })
+            });
+
+            let inner =
+                &soft_block_indent_with_maybe_space(&members, should_insert_space_around_brackets);
+
+            if should_hug {
+                write!(f, [inner])?;
+            } else {
+                write!(f, [group(inner).should_expand(should_expand)])?;
+            }
         }
 
         write!(f, [self.r_curly_token().format()])

@@ -1,18 +1,18 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    inner_string_text, AnyJsArrayAssignmentPatternElement, AnyJsArrayElement, AnyJsAssignment,
-    AnyJsAssignmentPattern, AnyJsExpression, AnyJsLiteralExpression, AnyJsName,
-    AnyJsObjectAssignmentPatternMember, AnyJsObjectMember, JsAssignmentExpression,
-    JsAssignmentOperator, JsComputedMemberAssignment, JsComputedMemberExpression,
-    JsIdentifierAssignment, JsLanguage, JsName, JsPrivateName, JsReferenceIdentifier,
-    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxToken,
+    AnyJsArrayAssignmentPatternElement, AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsName, AnyJsObjectAssignmentPatternMember,
+    AnyJsObjectMember, JsAssignmentExpression, JsAssignmentOperator, JsComputedMemberAssignment,
+    JsComputedMemberExpression, JsIdentifierAssignment, JsLanguage, JsName, JsPrivateName,
+    JsReferenceIdentifier, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxToken,
+    inner_string_text,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxError,
-    SyntaxResult, TextRange,
+    AstNode, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxError, SyntaxResult, TextRange,
+    declare_node_union,
 };
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
@@ -122,7 +122,10 @@ impl Rule for NoSelfAssign {
                 markup! {
                     "This is where is assigned."
                 },
-            ),
+            )
+            .note(markup! {
+             "Self assignments have no effect and can be removed."
+            }),
         )
     }
 }

@@ -1,12 +1,12 @@
 use crate::comments::is_type_comment;
 use biome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use biome_js_syntax::{
-    misc_ext::AnyJsParenthesized, AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression,
-    AnyTsType, JsLanguage, JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia,
+    AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression, AnyTsType, JsLanguage,
+    JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia, misc_ext::AnyJsParenthesized,
 };
 use biome_rowan::{
-    chain_trivia_pieces, AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize,
-    VisitNodeSignal,
+    AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize, VisitNodeSignal,
+    chain_trivia_pieces,
 };
 use std::collections::BTreeSet;
 
@@ -464,9 +464,9 @@ fn has_type_cast_comment_or_skipped(trivia: &JsSyntaxTrivia) -> bool {
 #[cfg(test)]
 mod tests {
     use super::JsFormatSyntaxRewriter;
-    use crate::{format_node, JsFormatOptions, TextRange};
+    use crate::{JsFormatOptions, TextRange, format_node};
     use biome_formatter::{SourceMarker, TransformSourceMap};
-    use biome_js_parser::{parse, parse_module, JsParserOptions};
+    use biome_js_parser::{JsParserOptions, parse, parse_module};
     use biome_js_syntax::{
         JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsFileSource,
         JsIdentifierExpression, JsLogicalExpression, JsSequenceExpression,

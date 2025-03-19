@@ -5,7 +5,7 @@ use camino::Utf8Path;
 
 use crate::{
     run_cli,
-    snap_test::{assert_cli_snapshot, SnapshotPayload},
+    snap_test::{SnapshotPayload, assert_cli_snapshot},
 };
 
 // Feel free to add content at the end of this dummy file. It shouldn't affect

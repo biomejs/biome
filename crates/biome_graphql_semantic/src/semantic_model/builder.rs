@@ -68,8 +68,8 @@ impl SemanticModelBuilder {
 
     #[inline]
     pub fn push_event(&mut self, e: SemanticEvent) {
-        use std::collections::hash_map::Entry;
         use SemanticEvent::*;
+        use std::collections::hash_map::Entry;
         match e {
             Declaration { range } => {
                 let binding_id = self.bindings.len();

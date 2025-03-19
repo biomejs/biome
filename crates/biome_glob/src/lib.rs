@@ -127,6 +127,8 @@
 //! ```
 //!
 
+pub mod editorconfig;
+
 /// A Biome glob pattern.
 #[derive(Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -279,8 +281,8 @@ impl schemars::JsonSchema for Glob {
         "Glob".to_string()
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        String::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(generator)
     }
 }
 
@@ -621,10 +623,12 @@ mod tests {
         assert!(!"*.rs".parse::<Glob>().unwrap().is_match("src/lib.rs"));
         assert!("**/*.rs".parse::<Glob>().unwrap().is_match("src/lib.rs"));
         assert!("file.{js,jsx}".parse::<Glob>().unwrap().is_match("file.js"));
-        assert!("file.{js,jsx}"
-            .parse::<Glob>()
-            .unwrap()
-            .is_match("file.jsx"));
+        assert!(
+            "file.{js,jsx}"
+                .parse::<Glob>()
+                .unwrap()
+                .is_match("file.jsx")
+        );
     }
 
     #[test]

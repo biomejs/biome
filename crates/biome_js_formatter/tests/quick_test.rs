@@ -1,15 +1,15 @@
 use biome_formatter::{AttributePosition, IndentStyle, LineWidth, QuoteStyle};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, Semicolons};
-use biome_js_formatter::{format_node, JsFormatLanguage};
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_formatter::{JsFormatLanguage, format_node};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 
 mod language {
     include!("language.rs");
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {

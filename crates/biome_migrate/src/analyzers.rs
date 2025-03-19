@@ -1,12 +1,14 @@
 use crate::analyzers::all::RulesAll;
 use crate::analyzers::deleted_rules::DeletedRules;
 use crate::analyzers::includes::Includes;
+use crate::analyzers::no_multiple_spaces_in_regex::UseMultipleSpacesInRegex;
 use crate::analyzers::no_var::NoVar;
 use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::organize_imports::OrganizeImports;
 use crate::analyzers::schema::Schema;
 use crate::analyzers::style_rules::StyleRules;
 use crate::analyzers::trailing_comma::TrailingComma;
+use crate::analyzers::use_naming_convention_enum_member_case::UseNamingConventionEnumMemberCase;
 use crate::analyzers::use_while::UseWhile;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
@@ -14,12 +16,14 @@ use biome_json_syntax::JsonLanguage;
 mod all;
 mod deleted_rules;
 mod includes;
+mod no_multiple_spaces_in_regex;
 mod no_var;
 mod nursery_rules;
 mod organize_imports;
 mod schema;
 mod style_rules;
 mod trailing_comma;
+mod use_naming_convention_enum_member_case;
 mod use_while;
 
 pub(crate) struct MigrationGroup;
@@ -45,6 +49,8 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<OrganizeImports>();
         registry.record_rule::<Includes>();
         registry.record_rule::<TrailingComma>();
+        registry.record_rule::<UseNamingConventionEnumMemberCase>();
+        registry.record_rule::<UseMultipleSpacesInRegex>()
     }
 }
 

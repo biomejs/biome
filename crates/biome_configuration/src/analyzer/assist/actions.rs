@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::analyzer::{RuleAssistConfiguration, RuleAssistPlainConfiguration};
-use biome_analyze::{options::RuleOptions, RuleFilter};
+use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
 use rustc_hash::FxHashSet;

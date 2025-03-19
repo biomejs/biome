@@ -1,6 +1,6 @@
 use super::{
-    is_diagnostic_error, AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource,
-    EnabledForPath, ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities,
+    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
+    ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities, is_diagnostic_error,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -9,33 +9,32 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    check_feature_activity, check_override_feature_activity, FormatSettings, LanguageListSettings,
-    LanguageSettings, LinterSettings, OverrideSettings, ServiceLanguage, Settings,
-    WorkspaceSettingsHandle,
+    FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
+    Settings, WorkspaceSettingsHandle, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
-use crate::{extension_error, WorkspaceError};
+use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder, RuleError,
 };
+use biome_configuration::Configuration;
 use biome_configuration::json::{
     JsonAllowCommentsEnabled, JsonAllowTrailingCommasEnabled, JsonAssistConfiguration,
     JsonAssistEnabled, JsonFormatterConfiguration, JsonFormatterEnabled, JsonLinterConfiguration,
     JsonLinterEnabled, JsonParserConfiguration,
 };
-use biome_configuration::Configuration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Applicability;
 use biome_formatter::{
-    BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
 };
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::analyze;
-use biome_json_formatter::context::{Expand, JsonFormatOptions, TrailingCommas};
+use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
@@ -162,13 +161,16 @@ impl ServiceLanguage for JsonLanguage {
             language.and_then(|l| l.trailing_commas).unwrap_or_default()
         };
 
-        let expand_lists = language.and_then(|l| l.expand).unwrap_or_else(|| {
-            if path.file_name() == Some("package.json") {
-                Expand::Always
-            } else {
-                Expand::default()
-            }
-        });
+        let expand_lists = language
+            .and_then(|l| l.expand)
+            .or(global.and_then(|g| g.expand))
+            .unwrap_or_else(|| {
+                if path.file_name() == Some("package.json") {
+                    Expand::Always
+                } else {
+                    Expand::default()
+                }
+            });
 
         let bracket_spacing = language
             .and_then(|l| l.bracket_spacing)
@@ -197,9 +199,8 @@ impl ServiceLanguage for JsonLanguage {
 
     fn resolve_analyzer_options(
         global: Option<&Settings>,
-        _linter: Option<&LinterSettings>,
-        _overrides: Option<&OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
+        _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -302,6 +303,10 @@ impl ServiceLanguage for JsonLanguage {
             })
             .unwrap_or_default()
             .into()
+    }
+
+    fn resolve_environment(_settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings> {
+        None
     }
 }
 
@@ -568,6 +573,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         only,
         enabled_rules: rules,
         suppression_reason,
+        plugins: _,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();

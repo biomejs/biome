@@ -4,8 +4,8 @@ use biome_formatter::{
     AttributePosition, BracketSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle,
     IndentWidth, LineEnding, LineWidth, TransformSourceMap,
 };
-use biome_grit_syntax::file_source::GritFileSource;
 use biome_grit_syntax::GritLanguage;
+use biome_grit_syntax::file_source::GritFileSource;
 use std::fmt::Display;
 use std::rc::Rc;
 

@@ -1,7 +1,7 @@
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_json_formatter::format_node;
-use biome_json_formatter::{context::JsonFormatOptions, JsonFormatLanguage};
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_formatter::{JsonFormatLanguage, context::JsonFormatOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 
 mod language {
     include!("language.rs");

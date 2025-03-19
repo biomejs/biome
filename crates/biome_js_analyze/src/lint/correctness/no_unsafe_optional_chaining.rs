@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -12,7 +12,7 @@ use biome_js_syntax::{
     JsParenthesizedExpression, JsSequenceExpression, JsSpread, JsStaticMemberExpression,
     JsTemplateExpression, JsVariableDeclarator, JsWithStatement,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow the use of optional chaining in contexts where the undefined value is not allowed.

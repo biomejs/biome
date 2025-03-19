@@ -1,19 +1,17 @@
 use super::{eslint_eslint::ShorthandVec, node};
-use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
+use crate::diagnostics::MigrationDiagnostic;
 use biome_configuration::javascript::JsFormatterConfiguration;
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentWidth, LineEnding, LineWidth, ParseFormatNumberError,
-    QuoteStyle,
+    AttributePosition, BracketSpacing, Expand, IndentWidth, LineEnding, LineWidth,
+    ParseFormatNumberError, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
-use biome_js_formatter::context::{
-    ArrowParentheses, ObjectWrap as BiomeObjectWrap, QuoteProperties, Semicolons, TrailingCommas,
-};
+use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
 use biome_json_parser::JsonParserOptions;
 use camino::Utf8Path;
 
@@ -200,11 +198,11 @@ impl From<QuoteProps> for QuoteProperties {
     }
 }
 
-impl From<ObjectWrap> for BiomeObjectWrap {
+impl From<ObjectWrap> for Expand {
     fn from(value: ObjectWrap) -> Self {
         match value {
-            ObjectWrap::Preserve => Self::Preserve,
-            ObjectWrap::Collapse => Self::Collapse,
+            ObjectWrap::Preserve => Self::Auto,
+            ObjectWrap::Collapse => Self::Never,
         }
     }
 }
@@ -228,15 +226,14 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             line_ending: Some(value.end_of_line.into()),
             bracket_same_line: Some(value.bracket_line.into()),
             attribute_position: Some(AttributePosition::default()),
+            bracket_spacing: Some(BracketSpacing::default()),
+            expand: Some(value.object_wrap.into()),
             format_with_errors: Some(false.into()),
-            ignore: None,
-            include: None,
             includes: None,
             enabled: Some(true.into()),
             // editorconfig support is intentionally set to true, because prettier always reads the editorconfig file
             // see: https://github.com/prettier/prettier/issues/15255
             use_editorconfig: Some(true.into()),
-            bracket_spacing: Some(BracketSpacing::default()),
         };
         result.formatter = Some(formatter);
 
@@ -260,6 +257,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             line_width: None,
             indent_style: None,
             line_ending: None,
+            expand: None,
             enabled: None,
             // js ones
             bracket_same_line: Some(value.bracket_line.into()),
@@ -271,7 +269,6 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             bracket_spacing: Some(value.bracket_spacing.into()),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
-            object_wrap: Some(value.object_wrap.into()),
         };
         let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),
@@ -293,12 +290,12 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
     type Error = ParseFormatNumberError;
     fn try_from(Override { files, options }: Override) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::OverridePattern {
-            includes: Some(
+            includes: Some(biome_configuration::OverrideGlobs::Globs(
                 files
                     .into_iter()
                     .filter_map(|glob| glob.parse().ok())
                     .collect(),
-            ),
+            )),
             ..Default::default()
         };
         if options.print_width.is_some()
@@ -482,7 +479,7 @@ fn load_config(
                 reason: format!(
                     "Prettier configuration ending with the extension `{ext}` are not supported."
                 ),
-            }))
+            }));
         }
     };
     let path_str = path.to_string();

@@ -1,8 +1,8 @@
 use super::{
-    compilation_context::NodeCompilationContext, predicate_compiler::PredicateCompiler,
-    PatternCompiler,
+    PatternCompiler, compilation_context::NodeCompilationContext,
+    predicate_compiler::PredicateCompiler,
 };
-use crate::{diagnostics::CompilerDiagnostic, grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, diagnostics::CompilerDiagnostic, grit_context::GritQueryContext};
 use biome_grit_syntax::{GritPatternNot, GritPredicateNot};
 use biome_rowan::AstNode;
 use grit_pattern_matcher::{

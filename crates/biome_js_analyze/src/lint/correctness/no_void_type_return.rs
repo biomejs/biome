@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsReturnStatement,
     JsSyntaxKind,
 };
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{AstNode, declare_node_union};
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 

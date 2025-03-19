@@ -1,7 +1,7 @@
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
-use biome_graphql_formatter::context::GraphqlFormatContext;
 use biome_graphql_formatter::GraphqlFormatLanguage;
+use biome_graphql_formatter::context::GraphqlFormatContext;
 use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_parser::AnyParse;

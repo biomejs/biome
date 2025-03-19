@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -14,7 +15,7 @@ let a = <html lang="en-GB-something" />;
 ```
 invalid.jsx:1:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the lang attribute.
+  × Provide a valid value for the lang attribute.
   
   > 1 │ let a = <html lang="lorem" />;
       │                    ^^^^^^^
@@ -45,7 +46,7 @@ invalid.jsx:1:20 lint/a11y/useValidLang ━━━━━━━━━━━━━�
 ```
 invalid.jsx:2:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the lang attribute.
+  × Provide a valid value for the lang attribute.
   
     1 │ let a = <html lang="lorem" />;
   > 2 │ let a = <html lang="en-babab" />;
@@ -77,7 +78,7 @@ invalid.jsx:2:20 lint/a11y/useValidLang ━━━━━━━━━━━━━�
 ```
 invalid.jsx:3:20 lint/a11y/useValidLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid value for the lang attribute.
+  × Provide a valid value for the lang attribute.
   
     1 │ let a = <html lang="lorem" />;
     2 │ let a = <html lang="en-babab" />;
@@ -87,5 +88,3 @@ invalid.jsx:3:20 lint/a11y/useValidLang ━━━━━━━━━━━━━�
   
 
 ```
-
-

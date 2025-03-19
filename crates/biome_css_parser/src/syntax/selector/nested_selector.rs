@@ -2,11 +2,11 @@ use crate::parser::CssParser;
 use crate::syntax::selector::selector_lex_context;
 use biome_css_syntax::CssSyntaxKind::{CSS_NESTED_SELECTOR, CSS_NESTED_SELECTOR_LIST};
 use biome_css_syntax::{CssSyntaxKind, T};
+use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::Parser;
 
 pub(crate) struct NestedSelectorList;
 impl ParseNodeList for NestedSelectorList {

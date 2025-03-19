@@ -77,7 +77,12 @@ impl TransformSourceMap {
             self.source_offset(transformed_range.end(), RangePosition::End),
         );
 
-        debug_assert!(range.end() <= self.source_text.text.text_len() - self.source_text.offset, "Mapped range {:?} exceeds the length of the source document {:?}. Please check if the passed `transformed_range` is a range of the transformed tree and not of the source tree, and that it belongs to the tree for which the source map was created for.", range, self.source_text.text.text_len() - self.source_text.offset);
+        debug_assert!(
+            range.end() <= self.source_text.text.text_len() - self.source_text.offset,
+            "Mapped range {:?} exceeds the length of the source document {:?}. Please check if the passed `transformed_range` is a range of the transformed tree and not of the source tree, and that it belongs to the tree for which the source map was created for.",
+            range,
+            self.source_text.text.text_len() - self.source_text.offset
+        );
         range
     }
 
@@ -379,7 +384,12 @@ struct DeletedRange {
 
 impl DeletedRange {
     fn new(source_range: TextRange, total_length_preceding_deleted_ranges: TextSize) -> Self {
-        debug_assert!(source_range.start() >= total_length_preceding_deleted_ranges, "The total number of deleted bytes ({:?}) can not exceed the offset from the start in the source document ({:?}). This is a bug in the source map implementation.", total_length_preceding_deleted_ranges, source_range.start());
+        debug_assert!(
+            source_range.start() >= total_length_preceding_deleted_ranges,
+            "The total number of deleted bytes ({:?}) can not exceed the offset from the start in the source document ({:?}). This is a bug in the source map implementation.",
+            total_length_preceding_deleted_ranges,
+            source_range.start()
+        );
 
         Self {
             source_range,

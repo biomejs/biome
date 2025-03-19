@@ -3,17 +3,17 @@ use biome_graphql_syntax::{
     T,
 };
 use biome_parser::{
-    parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, Parser,
+    Parser, parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
+    prelude::ParsedSyntax::*,
 };
 
 use super::{
+    GraphqlParser,
     directive::is_at_directive,
     is_nth_at_name,
     parse_error::{expected_argument, expected_value},
     parse_literal_name,
     value::parse_value,
-    GraphqlParser,
 };
 
 struct ArgumentListParseRecovery;

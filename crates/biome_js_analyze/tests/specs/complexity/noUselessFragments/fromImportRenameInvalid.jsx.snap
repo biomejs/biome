@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: fromImportRenameInvalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -17,7 +18,7 @@ import AwesomeReact, { Fragment as AwesomeFragment } from "react";
 ```
 fromImportRenameInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     3 │ <>
   > 4 │     <AwesomeFragment></AwesomeFragment>
@@ -37,7 +38,7 @@ fromImportRenameInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━
 ```
 fromImportRenameInvalid.jsx:5:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     3 │ <>
     4 │     <AwesomeFragment></AwesomeFragment>
@@ -54,5 +55,3 @@ fromImportRenameInvalid.jsx:5:5 lint/complexity/noUselessFragments  FIXABLE  ━
       │     -----------------------   ------------------------
 
 ```
-
-

@@ -18,7 +18,7 @@ function JsWhileStatement1() {
 ```
 JsWhileStatement.js:4:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     2 │     while (true) {
     3 │         break;

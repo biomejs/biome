@@ -3,7 +3,7 @@ use biome_parser::{
     lexer::{LexContext, Lexer, TokenFlags},
 };
 use biome_rowan::{TextRange, TextSize};
-use biome_yaml_syntax::{YamlSyntaxKind, T};
+use biome_yaml_syntax::{T, YamlSyntaxKind};
 use std::iter::FusedIterator;
 
 #[rustfmt::skip]

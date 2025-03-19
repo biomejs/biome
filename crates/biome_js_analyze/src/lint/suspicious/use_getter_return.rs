@@ -1,7 +1,7 @@
 use crate::ControlFlowGraph;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_control_flow::{builder::ROOT_BLOCK_ID, ExceptionHandlerKind, InstructionKind};
+use biome_control_flow::{ExceptionHandlerKind, InstructionKind, builder::ROOT_BLOCK_ID};
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsGetterClassMember, JsGetterObjectMember, JsReturnStatement};
 use biome_rowan::{AstNode, NodeOrToken, TextRange};

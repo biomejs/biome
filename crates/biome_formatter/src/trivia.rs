@@ -4,9 +4,9 @@ use crate::comments::is_doc_comment;
 use crate::format_element::tag::VerbatimKind;
 use crate::prelude::*;
 use crate::{
+    Argument, Arguments, CstFormatContext, FormatRefWithRule, GroupId, SourceComment, TextRange,
     comments::{CommentKind, CommentStyle},
-    write, Argument, Arguments, CstFormatContext, FormatRefWithRule, GroupId, SourceComment,
-    TextRange,
+    write,
 };
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextSize};
 #[cfg(debug_assertions)]

@@ -1,6 +1,6 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, markup_to_string, SnapshotPayload};
-use biome_console::{markup, BufferConsole};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, markup_to_string};
+use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
 use camino::Utf8Path;

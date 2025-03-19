@@ -1,7 +1,7 @@
 use biome_configuration::graphql::GraphqlFormatterConfiguration;
 use biome_configuration::{Configuration, GraphqlConfiguration};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_graphql_formatter::{context::GraphqlFormatOptions, GraphqlFormatLanguage};
+use biome_graphql_formatter::{GraphqlFormatLanguage, context::GraphqlFormatOptions};
 use biome_service::workspace::UpdateSettingsParams;
 use camino::Utf8Path;
 
@@ -41,8 +41,6 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
                 }),
                 ..Default::default()
             },
-            vcs_base_path: None,
-            gitignore_matches: vec![],
             workspace_directory: None,
         })
     };
