@@ -36,7 +36,7 @@ impl Rule for UseMultipleSpacesInRegex {
             category!("migrate"),
             ctx.query().syntax().text_trimmed_range(),
             markup! {
-                "The rule "<Emphasis>"noMultipleSpacesInRegularExpressionLiterals"</Emphasis>" has been renamed "<Emphasis>"noMultipleSpacesInRegex"</Emphasis>"."
+                "The rule "<Emphasis>"noMultipleSpacesInRegularExpressionLiterals"</Emphasis>" has been renamed "<Emphasis>"noAdjacentSpacesInRegex"</Emphasis>"."
             }
             .to_owned(),
         ))
@@ -44,7 +44,7 @@ impl Rule for UseMultipleSpacesInRegex {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<MigrationAction> {
         let mut mutation = ctx.root().begin();
-        let new_member_name = json_member_name(json_string_literal("noMultipleSpacesInRegex"));
+        let new_member_name = json_member_name(json_string_literal("noAdjacentSpacesInRegex"));
 
         mutation.replace_node(ctx.query().clone(), new_member_name);
 
