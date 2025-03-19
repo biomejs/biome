@@ -17,7 +17,14 @@ use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use serde::{Deserialize, Serialize};
 
 #[derive(
-    Clone, Debug, Deserialize, biome_deserialize_macros::Deserializable, Eq, PartialEq, Serialize,
+    Clone,
+    Debug,
+    Deserialize,
+    biome_deserialize_macros::Deserializable,
+    Eq,
+    PartialEq,
+    Serialize,
+    Default,
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -26,14 +33,6 @@ pub struct NoUnusedVariablesOptions {
     /// (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
     #[serde(default)]
     ignore_rest_siblings: bool,
-}
-
-impl Default for NoUnusedVariablesOptions {
-    fn default() -> Self {
-        Self {
-            ignore_rest_siblings: false,
-        }
-    }
 }
 
 declare_lint_rule! {
