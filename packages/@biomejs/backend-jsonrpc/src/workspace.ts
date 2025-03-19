@@ -1317,6 +1317,10 @@ export interface Correctness {
 	 */
 	noPrecisionLoss?: RuleConfiguration_for_Null;
 	/**
+	 * Restricts imports of private exports.
+	 */
+	noPrivateImports?: RuleConfiguration_for_NoPrivateImportsOptions;
+	/**
 	 * Prevent the usage of the return value of React.render.
 	 */
 	noRenderReturnValue?: RuleConfiguration_for_Null;
@@ -1557,10 +1561,6 @@ export interface Nursery {
 	 * Disallow octal escape sequences in string literals
 	 */
 	noOctalEscape?: RuleFixConfiguration_for_Null;
-	/**
-	 * Restricts imports of "package private" exports.
-	 */
-	noPackagePrivateImports?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of process.env.
 	 */
@@ -2304,6 +2304,9 @@ export type RuleConfiguration_for_ComplexityOptions =
 export type RuleConfiguration_for_NoForEachOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoForEachOptions;
+export type RuleConfiguration_for_NoPrivateImportsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPrivateImportsOptions;
 export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUndeclaredDependenciesOptions;
@@ -2456,6 +2459,16 @@ export interface RuleWithOptions_for_NoForEachOptions {
 	 * Rule's options
 	 */
 	options: NoForEachOptions;
+}
+export interface RuleWithOptions_for_NoPrivateImportsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPrivateImportsOptions;
 }
 export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
 	/**
@@ -2754,6 +2767,17 @@ export interface NoForEachOptions {
 	allowedIdentifiers: string[];
 }
 /**
+ * Options for the rule `noPrivateImports`.
+ */
+export interface NoPrivateImportsOptions {
+	/**
+	* The default visibility to assume for symbols without annotation.
+
+Default: **public**. 
+	 */
+	defaultVisibility?: Visibility;
+}
+/**
  * Rule's options
  */
 export interface NoUndeclaredDependenciesOptions {
@@ -2952,6 +2976,7 @@ export type PredefinedImportGroup =
 	| ":bun:"
 	| ":node:"
 	| ":types:";
+export type Visibility = "public" | "package" | "private";
 export type DependencyAvailability = boolean | string[];
 export interface Hook {
 	/**
@@ -3210,6 +3235,7 @@ export type Category =
 	| "lint/correctness/noNodejsModules"
 	| "lint/correctness/noNonoctalDecimalEscape"
 	| "lint/correctness/noPrecisionLoss"
+	| "lint/correctness/noPrivateImports"
 	| "lint/correctness/noRenderReturnValue"
 	| "lint/correctness/noSelfAssign"
 	| "lint/correctness/noSetterReturn"
@@ -3278,7 +3304,6 @@ export type Category =
 	| "lint/nursery/noNestedTernary"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noOctalEscape"
-	| "lint/nursery/noPackagePrivateImports"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"

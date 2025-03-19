@@ -176,8 +176,6 @@ pub type NoNoninteractiveTabindex = < lint :: a11y :: no_noninteractive_tabindex
 pub type NoNonoctalDecimalEscape = < lint :: correctness :: no_nonoctal_decimal_escape :: NoNonoctalDecimalEscape as biome_analyze :: Rule > :: Options ;
 pub type NoOctalEscape =
     <lint::nursery::no_octal_escape::NoOctalEscape as biome_analyze::Rule>::Options;
-pub type NoPackagePrivateImports =
-    <lint::nursery::no_package_private_imports::NoPrivateImports as biome_analyze::Rule>::Options;
 pub type NoParameterAssign =
     <lint::style::no_parameter_assign::NoParameterAssign as biome_analyze::Rule>::Options;
 pub type NoParameterProperties =
@@ -186,6 +184,8 @@ pub type NoPositiveTabindex =
     <lint::a11y::no_positive_tabindex::NoPositiveTabindex as biome_analyze::Rule>::Options;
 pub type NoPrecisionLoss =
     <lint::correctness::no_precision_loss::NoPrecisionLoss as biome_analyze::Rule>::Options;
+pub type NoPrivateImports =
+    <lint::correctness::no_private_imports::NoPrivateImports as biome_analyze::Rule>::Options;
 pub type NoProcessEnv =
     <lint::nursery::no_process_env::NoProcessEnv as biome_analyze::Rule>::Options;
 pub type NoProcessGlobal =
