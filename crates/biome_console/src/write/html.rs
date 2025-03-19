@@ -3,7 +3,7 @@ use std::{
     io::{self, Write as _},
 };
 
-use crate::{fmt::MarkupElements, MarkupElement};
+use crate::{MarkupElement, fmt::MarkupElements};
 
 use super::Write;
 

@@ -45,7 +45,7 @@ function foo() {
 ```
 invalid.js:1:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new ArrayBuffer() instead of ArrayBuffer().
+  × Use new ArrayBuffer() instead of ArrayBuffer().
   
   > 1 │ ArrayBuffer()
       │ ^^^^^^^^^^^^^
@@ -62,7 +62,7 @@ invalid.js:1:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:2:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new BigInt64Array() instead of BigInt64Array().
+  × Use new BigInt64Array() instead of BigInt64Array().
   
     1 │ ArrayBuffer()
   > 2 │ BigInt64Array()
@@ -80,7 +80,7 @@ invalid.js:2:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:3:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new BigUint64Array() instead of BigUint64Array().
+  × Use new BigUint64Array() instead of BigUint64Array().
   
     1 │ ArrayBuffer()
     2 │ BigInt64Array()
@@ -99,7 +99,7 @@ invalid.js:3:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:4:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new DataView() instead of DataView().
+  × Use new DataView() instead of DataView().
   
     2 │ BigInt64Array()
     3 │ BigUint64Array()
@@ -118,7 +118,7 @@ invalid.js:4:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:5:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Float32Array() instead of Float32Array().
+  × Use new Float32Array() instead of Float32Array().
   
     3 │ BigUint64Array()
     4 │ DataView()
@@ -137,7 +137,7 @@ invalid.js:5:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:6:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Float64Array() instead of Float64Array().
+  × Use new Float64Array() instead of Float64Array().
   
     4 │ DataView()
     5 │ Float32Array()
@@ -156,7 +156,7 @@ invalid.js:6:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:7:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Int16Array() instead of Int16Array().
+  × Use new Int16Array() instead of Int16Array().
   
     5 │ Float32Array()
     6 │ Float64Array()
@@ -175,7 +175,7 @@ invalid.js:7:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:8:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Int32Array() instead of Int32Array().
+  × Use new Int32Array() instead of Int32Array().
   
      6 │ Float64Array()
      7 │ Int16Array()
@@ -194,7 +194,7 @@ invalid.js:8:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:9:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Int8Array() instead of Int8Array().
+  × Use new Int8Array() instead of Int8Array().
   
      7 │ Int16Array()
      8 │ Int32Array()
@@ -213,7 +213,7 @@ invalid.js:9:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:10:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Map() instead of Map().
+  × Use new Map() instead of Map().
   
      8 │ Int32Array()
      9 │ Int8Array()
@@ -232,7 +232,7 @@ invalid.js:10:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:11:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Proxy() instead of Proxy().
+  × Use new Proxy() instead of Proxy().
   
      9 │ Int8Array()
     10 │ Map()
@@ -251,7 +251,7 @@ invalid.js:11:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:12:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Set() instead of Set().
+  × Use new Set() instead of Set().
   
     10 │ Map()
     11 │ Proxy()
@@ -270,7 +270,7 @@ invalid.js:12:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:13:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new SharedArrayBuffer() instead of SharedArrayBuffer().
+  × Use new SharedArrayBuffer() instead of SharedArrayBuffer().
   
     11 │ Proxy()
     12 │ Set()
@@ -289,7 +289,7 @@ invalid.js:13:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:14:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Uint16Array() instead of Uint16Array().
+  × Use new Uint16Array() instead of Uint16Array().
   
     12 │ Set()
     13 │ SharedArrayBuffer()
@@ -308,7 +308,7 @@ invalid.js:14:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:15:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Uint32Array() instead of Uint32Array().
+  × Use new Uint32Array() instead of Uint32Array().
   
     13 │ SharedArrayBuffer()
     14 │ Uint16Array()
@@ -327,7 +327,7 @@ invalid.js:15:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:16:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Uint8Array() instead of Uint8Array().
+  × Use new Uint8Array() instead of Uint8Array().
   
     14 │ Uint16Array()
     15 │ Uint32Array()
@@ -346,7 +346,7 @@ invalid.js:16:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:17:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Uint8ClampedArray() instead of Uint8ClampedArray().
+  × Use new Uint8ClampedArray() instead of Uint8ClampedArray().
   
     15 │ Uint32Array()
     16 │ Uint8Array()
@@ -365,7 +365,7 @@ invalid.js:17:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:18:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new WeakMap() instead of WeakMap().
+  × Use new WeakMap() instead of WeakMap().
   
     16 │ Uint8Array()
     17 │ Uint8ClampedArray()
@@ -384,7 +384,7 @@ invalid.js:18:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:19:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new WeakSet() instead of WeakSet().
+  × Use new WeakSet() instead of WeakSet().
   
     17 │ Uint8ClampedArray()
     18 │ WeakMap()
@@ -403,7 +403,7 @@ invalid.js:19:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:20:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new WeakRef() instead of WeakRef().
+  × Use new WeakRef() instead of WeakRef().
   
     18 │ WeakMap()
     19 │ WeakSet()
@@ -422,7 +422,7 @@ invalid.js:20:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:21:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new FinalizationRegistry() instead of FinalizationRegistry().
+  × Use new FinalizationRegistry() instead of FinalizationRegistry().
   
     19 │ WeakSet()
     20 │ WeakRef()
@@ -441,7 +441,7 @@ invalid.js:21:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:22:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Map() instead of Map().
+  × Use new Map() instead of Map().
   
     20 │ WeakRef()
     21 │ FinalizationRegistry()
@@ -460,7 +460,7 @@ invalid.js:22:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:23:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Map() instead of Map().
+  × Use new Map() instead of Map().
   
     21 │ FinalizationRegistry()
     22 │ window.Map()
@@ -479,7 +479,7 @@ invalid.js:23:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:25:25 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Map() instead of Map().
+  × Use new Map() instead of Map().
   
     23 │ globalThis.Map()
     24 │ function foo() {
@@ -498,7 +498,7 @@ invalid.js:25:25 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━
 ```
 invalid.js:28:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use BigInt() instead of new BigInt().
+  × Use BigInt() instead of new BigInt().
   
     26 │ }
     27 │ 
@@ -517,7 +517,7 @@ invalid.js:28:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:29:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Symbol() instead of new Symbol().
+  × Use Symbol() instead of new Symbol().
   
     28 │ new BigInt(123)
   > 29 │ new Symbol()
@@ -535,7 +535,7 @@ invalid.js:29:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:30:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use BigInt() instead of new BigInt().
+  × Use BigInt() instead of new BigInt().
   
     28 │ new BigInt(123)
     29 │ new Symbol()
@@ -554,7 +554,7 @@ invalid.js:30:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:31:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use BigInt() instead of new BigInt().
+  × Use BigInt() instead of new BigInt().
   
     29 │ new Symbol()
     30 │ new window.BigInt(123)
@@ -573,7 +573,7 @@ invalid.js:31:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:33:25 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use BigInt() instead of new BigInt().
+  × Use BigInt() instead of new BigInt().
   
     31 │ new globalThis.BigInt(123)
     32 │ function foo() {

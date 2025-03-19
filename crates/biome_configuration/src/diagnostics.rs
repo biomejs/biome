@@ -1,5 +1,5 @@
 use biome_console::fmt::Display;
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
 use biome_deserialize::DeserializationDiagnostic;
 use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
@@ -376,7 +376,7 @@ pub struct InvalidGlobPatternDiagnostic {
 mod test {
     use crate::{BiomeDiagnostic, Configuration};
     use biome_deserialize::json::deserialize_from_json_str;
-    use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+    use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_json_parser::JsonParserOptions;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {

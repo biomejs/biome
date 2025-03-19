@@ -1,0 +1,140 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+r={
+=
+):
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsIdentifierAssignment {
+                    name_token: IDENT@0..1 "r" [] [],
+                },
+                operator_token: EQ@1..2 "=" [] [],
+                right: JsAssignmentExpression {
+                    left: JsObjectAssignmentPattern {
+                        l_curly_token: L_CURLY@2..3 "{" [] [],
+                        properties: JsObjectAssignmentPatternPropertyList [
+                            JsObjectAssignmentPatternShorthandProperty {
+                                identifier: missing (required),
+                                init: JsInitializerClause {
+                                    eq_token: EQ@3..5 "=" [Newline("\n")] [],
+                                    expression: missing (required),
+                                },
+                            },
+                            missing separator,
+                            JsObjectAssignmentPatternProperty {
+                                member: missing (required),
+                                colon_token: missing (required),
+                                pattern: missing (required),
+                                init: missing (optional),
+                            },
+                        ],
+                        r_curly_token: missing (required),
+                    },
+                    operator_token: missing (required),
+                    right: missing (required),
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                R_PAREN@5..7 ")" [Newline("\n")] [],
+                COLON@7..8 ":" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@8..8 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..8
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..8
+    0: JS_EXPRESSION_STATEMENT@0..5
+      0: JS_ASSIGNMENT_EXPRESSION@0..5
+        0: JS_IDENTIFIER_ASSIGNMENT@0..1
+          0: IDENT@0..1 "r" [] []
+        1: EQ@1..2 "=" [] []
+        2: JS_ASSIGNMENT_EXPRESSION@2..5
+          0: JS_OBJECT_ASSIGNMENT_PATTERN@2..5
+            0: L_CURLY@2..3 "{" [] []
+            1: JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST@3..5
+              0: JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY@3..5
+                0: (empty)
+                1: JS_INITIALIZER_CLAUSE@3..5
+                  0: EQ@3..5 "=" [Newline("\n")] []
+                  1: (empty)
+              1: (empty)
+              2: JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY@5..5
+                0: (empty)
+                1: (empty)
+                2: (empty)
+                3: (empty)
+            2: (empty)
+          1: (empty)
+          2: (empty)
+      1: (empty)
+    1: JS_BOGUS_STATEMENT@5..8
+      0: R_PAREN@5..7 ")" [Newline("\n")] []
+      1: COLON@7..8 ":" [] []
+  4: EOF@8..8 "" [] []
+
+```
+
+## Diagnostics
+
+```
+issue4622.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '='.
+  
+    1 │ r={
+  > 2 │ =
+      │ ^
+    3 │ ):
+  
+  i Expected an identifier here.
+  
+    1 │ r={
+  > 2 │ =
+      │ ^
+    3 │ ):
+  
+issue4622.ts:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found ')'.
+  
+    1 │ r={
+    2 │ =
+  > 3 │ ):
+      │ ^
+  
+  i Expected an expression, or an assignment here.
+  
+    1 │ r={
+    2 │ =
+  > 3 │ ):
+      │ ^
+  
+```

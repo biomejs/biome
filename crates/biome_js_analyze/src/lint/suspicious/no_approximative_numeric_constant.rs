@@ -1,14 +1,14 @@
 use std::cmp::Ordering;
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    numbers::split_into_radix_and_number, AnyJsExpression, AnyJsLiteralExpression,
-    JsNumberLiteralExpression, T,
+    AnyJsExpression, AnyJsLiteralExpression, JsNumberLiteralExpression, T,
+    numbers::split_into_radix_and_number,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 

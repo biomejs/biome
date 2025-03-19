@@ -54,6 +54,7 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
+  Path:                         biome.json
   Formatter enabled:            true
   Linter enabled:               true
   Assist enabled:               true
@@ -66,11 +67,10 @@ Linter:
   GraphQL enabled:              unset
   Recommended:                  false
   Enabled rules:
+    complexity/noAdjacentSpacesInRegex
     complexity/noBannedTypes
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
-    complexity/noForEach
-    complexity/noMultipleSpacesInRegularExpressionLiterals
     complexity/noStaticOnlyClass
     complexity/noThisInStatic
     complexity/noUselessCatch

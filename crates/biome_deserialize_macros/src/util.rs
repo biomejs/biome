@@ -1,4 +1,4 @@
-use syn::{spanned::Spanned, Error, Meta, MetaList, NestedMeta};
+use syn::{Error, Meta, MetaList, NestedMeta, spanned::Spanned};
 
 pub(crate) fn parse_meta_list(
     meta: &Meta,

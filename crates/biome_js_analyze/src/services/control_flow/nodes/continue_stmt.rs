@@ -4,9 +4,9 @@ use biome_js_syntax::JsContinueStatement;
 use biome_rowan::{AstNode, SyntaxError, SyntaxResult};
 
 use crate::services::control_flow::{
+    FunctionBuilder,
     nodes::{DoWhileVisitor, ForInVisitor, ForOfVisitor, ForVisitor, WhileVisitor},
     visitor::{FunctionVisitor, NodeVisitor, StatementStack, VisitorAdapter},
-    FunctionBuilder,
 };
 
 pub(in crate::services::control_flow) struct ContinueVisitor;

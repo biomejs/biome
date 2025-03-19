@@ -68,7 +68,6 @@ const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
 /// Spawn the daemon server process in the background
 fn spawn_daemon(
     stop_on_disconnect: bool,
-    config_path: Option<Utf8PathBuf>,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> io::Result<()> {
@@ -81,9 +80,6 @@ fn spawn_daemon(
         cmd.arg("--stop-on-disconnect");
     }
 
-    if let Some(config_path) = config_path {
-        cmd.arg(format!("--config-path={}", config_path.as_str()));
-    }
     if let Some(log_path) = log_path {
         cmd.arg(format!("--log-path={}", log_path.as_str()));
     }
@@ -183,7 +179,6 @@ impl AsyncWrite for ClientWriteHalf {
 /// to be started
 pub(crate) async fn ensure_daemon(
     stop_on_disconnect: bool,
-    config_path: Option<Utf8PathBuf>,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> io::Result<bool> {
@@ -195,7 +190,6 @@ pub(crate) async fn ensure_daemon(
             Ok(None) => {
                 spawn_daemon(
                     stop_on_disconnect,
-                    config_path.clone(),
                     log_path.clone(),
                     log_file_name_prefix.clone(),
                 )?;
@@ -212,17 +206,14 @@ pub(crate) async fn ensure_daemon(
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global pipe name in the standard output
 pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true, None, None, None).await?;
+    ensure_daemon(true, None, None).await?;
     println!("{}", get_pipe_name());
     Ok(())
 }
 
 /// Start listening on the global pipe and accepting connections with the
 /// provided [ServerFactory]
-pub(crate) async fn run_daemon(
-    factory: ServerFactory,
-    config_path: Option<Utf8PathBuf>,
-) -> io::Result<Infallible> {
+pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible> {
     let mut prev_server = ServerOptions::new()
         .first_pipe_instance(true)
         .create(get_pipe_name())?;
@@ -232,7 +223,7 @@ pub(crate) async fn run_daemon(
         let mut next_server = ServerOptions::new().create(get_pipe_name())?;
         swap(&mut prev_server, &mut next_server);
 
-        let connection = factory.create(config_path.clone());
+        let connection = factory.create();
         let span = tracing::trace_span!("run_server");
         tokio::spawn(run_server(connection, next_server).instrument(span.or_current()));
     }

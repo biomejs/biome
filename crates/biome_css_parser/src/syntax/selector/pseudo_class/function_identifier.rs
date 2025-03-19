@@ -5,11 +5,11 @@ use crate::syntax::selector::{
 };
 use biome_css_syntax::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER;
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, TextRange, T};
-use biome_parser::diagnostic::{expected_any, ParseDiagnostic};
+use biome_css_syntax::{CssSyntaxKind, T, TextRange};
+use biome_parser::diagnostic::{ParseDiagnostic, expected_any};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 const PSEUDO_CLASS_FUNCTION_IDENTIFIER_SET: TokenSet<CssSyntaxKind> = token_set![T![dir]];
 #[inline]

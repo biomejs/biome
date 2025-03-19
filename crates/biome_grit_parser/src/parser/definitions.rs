@@ -1,8 +1,8 @@
 use super::parse_error::{expected_definition, too_many_patterns};
-use super::patterns::{parse_pattern, PatternList};
+use super::patterns::{PatternList, parse_pattern};
 use super::predicates::PredicateList;
 use super::{
-    parse_language_declaration, parse_name, parse_variable_list, GritParser, VariableList,
+    GritParser, VariableList, parse_language_declaration, parse_name, parse_variable_list,
 };
 use crate::constants::*;
 use biome_grit_syntax::GritSyntaxKind::{self, *};
@@ -10,7 +10,7 @@ use biome_grit_syntax::T;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::prelude::ParsedSyntax::*;
-use biome_parser::{parsed_syntax::ParsedSyntax, Parser};
+use biome_parser::{Parser, parsed_syntax::ParsedSyntax};
 
 pub(crate) struct DefinitionList {
     has_pattern: bool,

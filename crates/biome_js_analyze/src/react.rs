@@ -4,10 +4,10 @@ pub mod hooks;
 
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsCallArgument, AnyJsExpression,
-    AnyJsMemberExpression, AnyJsNamedImportSpecifier, AnyJsObjectMember, JsCallExpression,
-    JsIdentifierBinding, JsImport, JsObjectExpression, JsPropertyObjectMember, JsxMemberName,
-    JsxReferenceIdentifier,
+    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, AnyJsNamedImportSpecifier,
+    AnyJsObjectMember, JsCallExpression, JsIdentifierBinding, JsImport, JsObjectExpression,
+    JsPropertyObjectMember, JsxMemberName, JsxReferenceIdentifier,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
 

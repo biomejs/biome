@@ -1,7 +1,7 @@
-use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
+use crate::services::semantic::Semantic;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -10,14 +10,14 @@ use biome_js_syntax::JsLanguage;
 use biome_js_syntax::JsModuleItemList;
 use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::T;
-use biome_js_syntax::{global_identifier, AnyJsExpression};
+use biome_js_syntax::{AnyJsExpression, global_identifier};
 use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
 use biome_rowan::SyntaxElement;
 use biome_rowan::SyntaxNode;
 use biome_rowan::TriviaPieceKind;
-use smallvec::smallvec;
 use smallvec::SmallVec;
+use smallvec::smallvec;
 
 declare_lint_rule! {
     /// Disallow the use of `process` global.

@@ -2,40 +2,19 @@
 //!
 //! Tests of these implementations are available in [biome_deserialize::json::tests] module.
 use crate::{
-    diagnostics::DeserializableTypes, Deserializable, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor,
+    Deserializable, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
+    DeserializationVisitor, diagnostics::DeserializableTypes,
 };
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::{Text, TextRange, TokenText};
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, HashSet},
-    hash::{BuildHasher, Hash, Hasher},
+    hash::{BuildHasher, Hash},
     marker::PhantomData,
-    num::{NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize},
+    num::{NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize},
     ops::Deref,
     path::PathBuf,
 };
 
-/// Type that allows deserializing a string without heap-allocation when possible.
-///
-/// This is analogous to [std::borrow::Cow], except for strings.
-#[derive(Clone, Debug)]
-pub enum Text {
-    Borrowed(TokenText),
-    Owned(String),
-}
-impl Text {
-    pub fn text(&self) -> &str {
-        match self {
-            Text::Borrowed(token_text) => token_text.text(),
-            Text::Owned(string) => string,
-        }
-    }
-}
-impl Default for Text {
-    fn default() -> Self {
-        Self::Owned(String::new())
-    }
-}
 impl Deserializable for Text {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
@@ -57,46 +36,6 @@ impl Deserializable for Text {
             }
         }
         value.deserialize(ctx, Visitor, name)
-    }
-}
-impl Deref for Text {
-    type Target = str;
-    fn deref(&self) -> &Self::Target {
-        self.text()
-    }
-}
-impl std::fmt::Display for Text {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.text())
-    }
-}
-impl Eq for Text {}
-impl Hash for Text {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write(self.text().as_bytes());
-    }
-}
-impl Ord for Text {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.text().cmp(other.text())
-    }
-}
-impl PartialEq for Text {
-    fn eq(&self, other: &Self) -> bool {
-        self.text() == other.text()
-    }
-}
-impl PartialOrd for Text {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-impl From<Text> for String {
-    fn from(value: Text) -> Self {
-        match value {
-            Text::Borrowed(token_text) => token_text.to_string(),
-            Text::Owned(string) => string,
-        }
     }
 }
 

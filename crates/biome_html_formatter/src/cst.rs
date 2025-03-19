@@ -1,7 +1,7 @@
 use biome_formatter::{Format, FormatOwnedWithRule, FormatRefWithRule, FormatResult};
 
 use crate::{AsFormat, HtmlFormatContext, HtmlFormatter, IntoFormat};
-use biome_html_syntax::{map_syntax_node, HtmlSyntaxNode};
+use biome_html_syntax::{HtmlSyntaxNode, map_syntax_node};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatHtmlSyntaxNode;

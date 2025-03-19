@@ -35,23 +35,23 @@ pub enum Case {
     /// ASCII numbers
     Number = 1 << 0,
     /// Alphanumeric Characters that cannot be in lowercase or uppercase (numbers and syllabary)
-    Uni = Case::Number as u16 | 1 << 1,
+    Uni = Case::Number as u16 | (1 << 1),
     /// A, B1, C42
     NumberableCapital = 1 << 2,
     /// UPPERCASE
-    Upper = Case::NumberableCapital as u16 | 1 << 3,
+    Upper = Case::NumberableCapital as u16 | (1 << 3),
     // CONSTANT_CASE
-    Constant = Case::Upper as u16 | 1 << 4,
+    Constant = Case::Upper as u16 | (1 << 4),
     /// PascalCase
-    Pascal = Case::NumberableCapital as u16 | 1 << 5,
+    Pascal = Case::NumberableCapital as u16 | (1 << 5),
     /// lowercase
-    Lower = Case::Number as u16 | 1 << 6,
+    Lower = Case::Number as u16 | (1 << 6),
     /// snake_case
-    Snake = Case::Lower as u16 | 1 << 7,
+    Snake = Case::Lower as u16 | (1 << 7),
     /// kebab-case
-    Kebab = Case::Lower as u16 | 1 << 8,
+    Kebab = Case::Lower as u16 | (1 << 8),
     // camelCase
-    Camel = Case::Lower as u16 | 1 << 9,
+    Camel = Case::Lower as u16 | (1 << 9),
     /// Unknown case
     #[default]
     Unknown = Case::Camel as u16
@@ -60,7 +60,7 @@ pub enum Case {
         | Case::Pascal as u16
         | Case::Constant as u16
         | Case::Uni as u16
-        | 1 << 10,
+        | (1 << 10),
 }
 
 impl Case {
@@ -141,7 +141,7 @@ impl Case {
                     has_consecutive_uppercase |= previous_char.is_uppercase();
                     match result {
                         Case::Camel | Case::Pascal if strict && has_consecutive_uppercase => {
-                            return Case::Unknown
+                            return Case::Unknown;
                         }
                         Case::Camel | Case::Constant | Case::Pascal => result,
                         Case::Lower | Case::Number => Case::Camel,

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
 
-use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{CstFormatContext, write};
 use biome_js_syntax::expression_left_side::AnyJsExpressionLeftSide;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{

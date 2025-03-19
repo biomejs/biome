@@ -1,6 +1,6 @@
 use biome_formatter::{
-    separated::{FormatSeparatedElementRule, FormatSeparatedIter},
     FormatRefWithRule,
+    separated::{FormatSeparatedElementRule, FormatSeparatedIter},
 };
 
 use crate::prelude::*;
@@ -8,7 +8,7 @@ use biome_grit_syntax::{GritLanguage, GritSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedListElementsIterator};
 use std::marker::PhantomData;
 
-use crate::{cst::FormatGritSyntaxToken, AsFormat, GritFormatContext};
+use crate::{AsFormat, GritFormatContext, cst::FormatGritSyntaxToken};
 
 #[derive(Clone)]
 pub(crate) struct GritFormatSeparatedElementRule<N>

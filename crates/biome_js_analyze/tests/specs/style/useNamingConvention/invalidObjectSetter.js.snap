@@ -22,7 +22,7 @@ export default {
 ```
 invalidObjectSetter.js:2:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object setter name should be in camelCase.
+  i This object setter name should be in camelCase.
   
     1 │ export default {
   > 2 │     set X(x) {},
@@ -36,7 +36,7 @@ invalidObjectSetter.js:2:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidObjectSetter.js:4:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object setter name should be in camelCase.
+  i This object setter name should be in camelCase.
   
     2 │     set X(x) {},
     3 │ 
@@ -51,7 +51,7 @@ invalidObjectSetter.js:4:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidObjectSetter.js:6:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object setter name should be in camelCase.
+  i This object setter name should be in camelCase.
   
     4 │     set PROPERTY(x) {},
     5 │ 
@@ -66,7 +66,7 @@ invalidObjectSetter.js:6:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidObjectSetter.js:8:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object setter name should be in camelCase.
+  i This object setter name should be in camelCase.
   
      6 │     set SpecialProperty(x) {},
      7 │ 
@@ -81,7 +81,7 @@ invalidObjectSetter.js:8:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidObjectSetter.js:10:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object setter name should be in camelCase.
+  i This object setter name should be in camelCase.
   
      8 │     set special_property(x) {},
      9 │ 

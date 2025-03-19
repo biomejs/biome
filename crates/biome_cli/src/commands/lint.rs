@@ -1,6 +1,6 @@
-use super::{determine_fix_file_mode, FixFileModeOptions};
+use super::{FixFileModeOptions, determine_fix_file_mode};
 use crate::cli_options::CliOptions;
-use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
+use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::CssLinterConfiguration;

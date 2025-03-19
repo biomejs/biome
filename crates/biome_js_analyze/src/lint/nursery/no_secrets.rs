@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 
@@ -95,7 +95,7 @@ impl Rule for NoSecrets {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let token = node.value_token().ok()?;
-        let text = token.text();
+        let text = token.text_trimmed();
 
         if text.len() < MIN_PATTERN_LEN {
             return None;
@@ -513,6 +513,9 @@ mod tests {
             .unwrap_or(0);
 
         let initialized_min_pattern_len = MIN_PATTERN_LEN;
-        assert_eq!(initialized_min_pattern_len, actual_min_pattern_len, "The initialized MIN_PATTERN_LEN value is not correct. Please ensure it's the smallest possible number from the SENSITIVE_PATTERNS.");
+        assert_eq!(
+            initialized_min_pattern_len, actual_min_pattern_len,
+            "The initialized MIN_PATTERN_LEN value is not correct. Please ensure it's the smallest possible number from the SENSITIVE_PATTERNS."
+        );
     }
 }

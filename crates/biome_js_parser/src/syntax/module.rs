@@ -1,5 +1,6 @@
 //! Implements the parsing logic for ES Module syntax
 
+use crate::JsSyntaxFeature::TypeScript;
 use crate::lexer::TextSize;
 use crate::prelude::*;
 use crate::state::{EnterAmbientContext, ExportDefaultItem, ExportDefaultItemKind};
@@ -12,30 +13,29 @@ use crate::syntax::class::{
     parse_class_export_default_declaration, parse_decorators,
 };
 use crate::syntax::expr::{
-    is_at_expression, is_nth_at_reference_identifier, parse_assignment_expression_or_higher,
-    parse_name, parse_reference_identifier, ExpressionContext,
+    ExpressionContext, is_at_expression, is_nth_at_reference_identifier,
+    parse_assignment_expression_or_higher, parse_name, parse_reference_identifier,
 };
-use crate::syntax::function::{parse_function_export_default_declaration, LineBreak};
+use crate::syntax::function::{LineBreak, parse_function_export_default_declaration};
 use crate::syntax::js_parse_error::{
     decorators_not_allowed, duplicate_assertion_keys_error, expected_binding, expected_declaration,
     expected_export_clause, expected_export_default_declaration, expected_export_name_specifier,
     expected_expression, expected_identifier, expected_literal_export_name, expected_module_source,
     expected_named_import_specifier, expected_namespace_or_named_import, expected_statement,
 };
-use crate::syntax::stmt::{parse_statement, semi, StatementContext, STMT_RECOVERY_SET};
+use crate::syntax::stmt::{STMT_RECOVERY_SET, StatementContext, parse_statement, semi};
 use crate::syntax::typescript::ts_parse_error::ts_only_syntax_error;
 use crate::syntax::typescript::{
     parse_ts_enum_declaration, parse_ts_import_equals_declaration_rest,
     parse_ts_interface_declaration,
 };
-use crate::JsSyntaxFeature::TypeScript;
 use crate::{Absent, JsParser, ParseRecoveryTokenSet, ParsedSyntax, Present};
 use biome_js_syntax::JsSyntaxKind::*;
-use biome_js_syntax::{JsSyntaxKind, TextRange, T};
+use biome_js_syntax::{JsSyntaxKind, T, TextRange};
+use biome_parser::ParserProgress;
 use biome_parser::diagnostic::{expected_any, expected_node};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::RecoveryResult;
-use biome_parser::ParserProgress;
 use rustc_hash::FxHashMap;
 
 use super::auxiliary::{is_nth_at_declaration_clause, parse_declaration_clause};

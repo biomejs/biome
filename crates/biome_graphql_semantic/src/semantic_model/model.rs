@@ -8,8 +8,8 @@ use biome_rowan::{AstNode, TextRange, TextSize};
 use rustc_hash::FxHashMap;
 
 use crate::{
-    semantic_model::reference::UnresolvedReference, Reference, SemanticModelReference,
-    SemanticModelUnresolvedVariableReference, UnresolvedVariableReference,
+    Reference, SemanticModelReference, SemanticModelUnresolvedVariableReference,
+    UnresolvedVariableReference, semantic_model::reference::UnresolvedReference,
 };
 
 use super::{

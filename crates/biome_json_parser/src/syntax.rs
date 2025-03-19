@@ -1,11 +1,11 @@
 use crate::prelude::*;
 use biome_json_syntax::JsonSyntaxKind;
 use biome_json_syntax::JsonSyntaxKind::*;
+use biome_parser::ParserProgress;
 use biome_parser::diagnostic::{expected_any, expected_node};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::Absent;
 use biome_parser::prelude::ParsedSyntax::Present;
-use biome_parser::ParserProgress;
 use biome_rowan::TextRange;
 
 const VALUE_START: TokenSet<JsonSyntaxKind> = token_set![

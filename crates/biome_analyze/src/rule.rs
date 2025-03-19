@@ -5,7 +5,7 @@ use crate::{
     Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
 };
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, MarkupBuf, Padding};
+use biome_console::{MarkupBuf, Padding, markup};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
@@ -85,7 +85,7 @@ impl biome_console::fmt::Display for RuleMetadata {
 
         if self.domains.is_empty() && self.recommended {
             fmt.write_markup(markup! {
-                "- This rule is not recommended"
+                "- This rule is recommended"
             })?;
         }
 
@@ -414,7 +414,7 @@ impl RuleSource {
 
     pub fn to_rule_url(&self) -> String {
         match self {
-            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
+            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
             Self::EslintGraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
@@ -510,6 +510,19 @@ impl Display for RuleDomain {
             RuleDomain::Solid => fmt.write_str("solid"),
             RuleDomain::Next => fmt.write_str("next"),
         }
+    }
+}
+
+impl Ord for RuleDomain {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Rule domains should be in alphabetical order
+        format!("{self:?}").cmp(&format!("{other:?}"))
+    }
+}
+
+impl PartialOrd for RuleDomain {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -1163,10 +1176,12 @@ pub trait Rule: RuleMeta + Sized {
 
             if let Some(first_token) = root.syntax().first_token() {
                 let mut mutation = root.begin();
+                let comment =
+                    suppression_action.suppression_top_level_comment(suppression_text.as_str());
                 suppression_action.apply_top_level_suppression(
                     &mut mutation,
                     first_token,
-                    suppression_text.as_str(),
+                    comment.as_str(),
                 );
                 return Some(SuppressAction {
                     mutation,
@@ -1210,7 +1225,7 @@ pub trait Rule: RuleMeta + Sized {
 
             Some(SuppressAction {
                 mutation,
-                message: markup! { "Suppress rule " {rule_category} }.to_owned(),
+                message: markup! { "Suppress rule " {rule_category} " for this line."}.to_owned(),
             })
         } else {
             None
@@ -1231,6 +1246,7 @@ pub trait Rule: RuleMeta + Sized {
 pub struct RuleDiagnostic {
     #[category]
     pub(crate) category: &'static Category,
+    pub(crate) subcategory: Option<String>,
     #[location(span)]
     pub(crate) span: Option<TextRange>,
     #[message]
@@ -1309,6 +1325,7 @@ impl RuleDiagnostic {
         let message = markup!({ title }).to_owned();
         Self {
             category,
+            subcategory: None,
             span: span.as_span(),
             message: MessageAndDescription::from(message),
             tags: DiagnosticTags::empty(),
@@ -1407,6 +1424,21 @@ impl RuleDiagnostic {
 
     pub fn advices(&self) -> &RuleAdvice {
         &self.rule_advice
+    }
+
+    pub fn subcategory(mut self, subcategory: String) -> Self {
+        self.subcategory = Some(subcategory);
+        self
+    }
+
+    /// Assigns an explicit severity.
+    ///
+    /// In most cases, severity should _not_ be explicitly assigned, since rule
+    /// categories and configuration define the severity. Currently this is only
+    /// used for plugins to allow plugin authors to assign an explicit severity.
+    pub fn with_severity(mut self, severity: Severity) -> Self {
+        self.severity = severity;
+        self
     }
 }
 

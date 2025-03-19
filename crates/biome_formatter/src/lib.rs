@@ -72,7 +72,7 @@ pub use buffer::{
     VecBuffer,
 };
 pub use builders::BestFitting;
-pub use format_element::{normalize_newlines, FormatElement, LINE_TERMINATORS};
+pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::marker::PhantomData;
@@ -495,6 +495,14 @@ pub enum QuoteStyle {
 }
 
 impl QuoteStyle {
+    pub fn from_byte(byte: u8) -> Option<QuoteStyle> {
+        match byte {
+            b'"' => Some(QuoteStyle::Double),
+            b'\'' => Some(QuoteStyle::Single),
+            _ => None,
+        }
+    }
+
     pub fn as_char(&self) -> char {
         match self {
             QuoteStyle::Double => '"',
@@ -642,7 +650,9 @@ impl FromStr for AttributePosition {
         match s {
             "multiline" => Ok(Self::Multiline),
             "auto" => Ok(Self::Auto),
-            _ => Err("Value not supported for attribute_position. Supported values are 'auto' and 'multiline'."),
+            _ => Err(
+                "Value not supported for attribute_position. Supported values are 'auto' and 'multiline'.",
+            ),
         }
     }
 }
@@ -689,6 +699,46 @@ impl FromStr for BracketSameLine {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum Expand {
+    /// Objects are expanded when the first property has a leading newline. Arrays are always
+    /// expanded if they are shorter than the line width.
+    #[default]
+    Auto,
+    /// Objects and arrays are always expanded.
+    Always,
+    /// Objects and arrays are never expanded, if they are shorter than the line width.
+    Never,
+}
+
+impl FromStr for Expand {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "auto" => Ok(Self::Auto),
+            "always" => Ok(Self::Always),
+            "never" => Ok(Self::Never),
+            _ => Err(std::format!("unknown expand literal: {}", s)),
+        }
+    }
+}
+
+impl fmt::Display for Expand {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Expand::Auto => std::write!(f, "Auto"),
+            Expand::Always => std::write!(f, "Always"),
+            Expand::Never => std::write!(f, "Never"),
+        }
+    }
+}
+
 /// Context object storing data relevant when formatting an object.
 pub trait FormatContext {
     type Options: FormatOptions;
@@ -706,8 +756,8 @@ pub trait FormatContext {
 
 /// Options customizing how the source code should be formatted.
 ///
-/// **Note**: This trait should **only** contain the essential abstractions required for the printing phase.  
-/// For example, do not add a `fn bracket_spacing(&self) -> BracketSpacing` method here,  
+/// **Note**: This trait should **only** contain the essential abstractions required for the printing phase.
+/// For example, do not add a `fn bracket_spacing(&self) -> BracketSpacing` method here,
 /// as the [BracketSpacing] option is not needed during the printing phase
 /// and enforcing its implementation for all structs using this trait is unnecessary.
 pub trait FormatOptions {
@@ -1934,14 +1984,15 @@ impl<Context> FormatState<Context> {
         self.group_id_builder.group_id(debug_name)
     }
 
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn track_token<L: Language>(&mut self, _token: &SyntaxToken<L>) {}
+
     /// Tracks the given token as formatted
+    #[cfg(debug_assertions)]
     #[inline]
     pub fn track_token<L: Language>(&mut self, token: &SyntaxToken<L>) {
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.track_token(token);
-            }
-        }
+        self.printed_tokens.track_token(token);
     }
 
     #[cfg(not(debug_assertions))]
@@ -1968,14 +2019,15 @@ impl<Context> FormatState<Context> {
         self.printed_tokens.is_disabled()
     }
 
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn assert_formatted_all_tokens<L: Language>(&self, _root: &SyntaxNode<L>) {}
+
     /// Asserts in debug builds that all tokens have been printed.
+    #[cfg(debug_assertions)]
     #[inline]
     pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.assert_all_tracked(root);
-            }
-        }
+        self.printed_tokens.assert_all_tracked(root);
     }
 }
 

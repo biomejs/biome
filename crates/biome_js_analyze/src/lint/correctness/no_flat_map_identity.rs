@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -39,8 +39,8 @@ declare_lint_rule! {
         version: "1.7.0",
         name: "noFlatMapIdentity",
         language: "js",
+        severity: Severity::Information,
         recommended: true,
-        severity: Severity::Error,
         sources: &[RuleSource::Clippy("flat_map_identity")],
         fix_kind: FixKind::Safe,
     }

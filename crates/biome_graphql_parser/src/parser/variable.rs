@@ -1,6 +1,6 @@
 use crate::parser::GraphqlParser;
 use biome_graphql_syntax::{GraphqlSyntaxKind::*, T};
-use biome_parser::{parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, Parser};
+use biome_parser::{Parser, parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*};
 
 use super::{parse_error::expected_name, parse_literal_name};
 

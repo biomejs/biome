@@ -6,8 +6,8 @@ use biome_graphql_syntax::{
     T,
 };
 use biome_parser::{
-    parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, token_set, Parser, TokenSet,
+    Parser, TokenSet, parse_lists::ParseNodeList, parse_recovery::ParseRecovery,
+    parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, token_set,
 };
 
 use super::{

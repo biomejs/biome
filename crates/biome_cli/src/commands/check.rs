@@ -1,16 +1,16 @@
-use super::{determine_fix_file_mode, FixFileModeOptions, LoadEditorConfig};
+use super::{FixFileModeOptions, LoadEditorConfig, determine_fix_file_mode};
 use crate::cli_options::CliOptions;
-use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
+use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
-use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::LinterEnabled;
+use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::formatter::FormatterEnabled;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_service::projects::ProjectKey;
-use biome_service::{configuration::LoadedConfiguration, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError, configuration::LoadedConfiguration};
 use std::ffi::OsString;
 
 pub(crate) struct CheckCommandPayload {
@@ -44,19 +44,17 @@ impl CommandRunner for CheckCommandPayload {
         &mut self,
         loaded_configuration: LoadedConfiguration,
         fs: &dyn FileSystem,
-        console: &mut dyn Console,
+        _console: &mut dyn Console,
     ) -> Result<Configuration, WorkspaceError> {
-        let editorconfig_search_path = loaded_configuration.directory_path.clone();
         let LoadedConfiguration {
             configuration: biome_configuration,
+            directory_path,
             ..
         } = loaded_configuration;
-        let mut fs_configuration =
-            self.load_editor_config(editorconfig_search_path, &biome_configuration, fs, console)?;
-        // this makes biome configuration take precedence over editorconfig configuration
-        fs_configuration.merge_with(biome_configuration);
+        let mut configuration =
+            self.combine_configuration(directory_path, biome_configuration, fs)?;
 
-        let formatter = fs_configuration
+        let formatter = configuration
             .formatter
             .get_or_insert_with(FormatterConfiguration::default);
 
@@ -64,7 +62,7 @@ impl CommandRunner for CheckCommandPayload {
             formatter.enabled = self.formatter_enabled;
         }
 
-        let linter = fs_configuration
+        let linter = configuration
             .linter
             .get_or_insert_with(LinterConfiguration::default);
 
@@ -72,7 +70,7 @@ impl CommandRunner for CheckCommandPayload {
             linter.enabled = self.linter_enabled;
         }
 
-        let assist = fs_configuration
+        let assist = configuration
             .assist
             .get_or_insert_with(AssistConfiguration::default);
 
@@ -80,18 +78,18 @@ impl CommandRunner for CheckCommandPayload {
             assist.enabled = self.assist_enabled;
         }
 
-        if let Some(mut configuration) = self.configuration.clone() {
-            if let Some(linter) = configuration.linter.as_mut() {
+        if let Some(mut conf) = self.configuration.clone() {
+            if let Some(linter) = conf.linter.as_mut() {
                 // Don't overwrite rules from the CLI configuration.
                 // Otherwise, rules that are disabled in the config file might
                 // become re-enabled due to the defaults included in the CLI
                 // configuration.
                 linter.rules = None;
             }
-            fs_configuration.merge_with(configuration);
+            configuration.merge_with(conf);
         }
 
-        Ok(fs_configuration)
+        Ok(configuration)
     }
 
     fn get_files_to_process(

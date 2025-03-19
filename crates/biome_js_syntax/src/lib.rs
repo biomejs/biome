@@ -26,6 +26,7 @@ pub mod static_value;
 pub mod stmt_ext;
 mod syntax_node;
 pub mod type_ext;
+mod unescape;
 mod union_ext;
 
 pub use self::generated::*;
@@ -41,6 +42,7 @@ pub use import_ext::*;
 pub use modifier_ext::*;
 pub use stmt_ext::*;
 pub use syntax_node::*;
+pub use unescape::*;
 
 use crate::JsSyntaxKind::*;
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, SyntaxResult};

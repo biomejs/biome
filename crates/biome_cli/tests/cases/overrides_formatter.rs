@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -7,8 +7,7 @@ use camino::Utf8Path;
 
 const UNFORMATTED: &str = "  statement(  )  ";
 const UNFORMATTED_JSON: &str = r#"{ "asta": ["lorem", "ipsum", "first", "second"] }"#;
-const FORMATTED_JSON: &str =
-    "{\n    \"asta\": [\n        \"lorem\",\n        \"ipsum\",\n        \"first\",\n        \"second\"\n    ]\n}\n";
+const FORMATTED_JSON: &str = "{\n    \"asta\": [\n        \"lorem\",\n        \"ipsum\",\n        \"first\",\n        \"second\"\n    ]\n}\n";
 const UNFORMATTED_CSS: &str = "html {}";
 const FORMATTED_CSS: &str = "html {\n}\n";
 
@@ -786,7 +785,7 @@ fn overrides_default_formatter_for_package_json() {
             "overrides": [
                 {
                     "includes": ["package.json"],
-                    "json": { "formatter": { "expand": "followSource" } }
+                    "json": { "formatter": { "expand": "auto" } }
                 }
             ]
         }"#,

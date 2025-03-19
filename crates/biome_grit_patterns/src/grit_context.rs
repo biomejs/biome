@@ -18,7 +18,7 @@ use grit_pattern_matcher::pattern::{
     PredicateDefinition, ResolvedPattern, State,
 };
 use grit_util::error::GritPatternError;
-use grit_util::{error::GritResult, AnalysisLogs, FileOrigin, InputRanges, MatchRanges};
+use grit_util::{AnalysisLogs, FileOrigin, InputRanges, MatchRanges, error::GritResult};
 use path_absolutize::Absolutize;
 use std::path::PathBuf;
 use std::sync::Mutex;

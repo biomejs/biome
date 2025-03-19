@@ -1,11 +1,11 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, RuleSource, Visitor,
+    FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, Visitor,
+    context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, JsLanguage, JsSyntaxKind, JsxAttribute};
+use biome_js_syntax::{JsLanguage, JsSyntaxKind, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, BatchMutationExt, WalkEvent};
 use biome_string_case::StrOnlyExtension;
 

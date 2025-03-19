@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useNamingConvention": {
+          "level": "on",
+          "options": {
+            "enumMemberCase": "PascalCase"
+          }
+        }
+      }
+    }
+  }
+}

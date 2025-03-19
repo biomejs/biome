@@ -30,12 +30,12 @@ use bpaf::Bpaf;
 use std::path::Path;
 
 use crate::generate_new_analyzer_rule::Category;
-use xtask::{glue::fs2, Mode, Result};
+use xtask::{Mode, Result, glue::fs2};
 
 pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
-pub use self::generate_new_analyzer_rule::{generate_new_analyzer_rule, LanguageKind};
+pub use self::generate_new_analyzer_rule::{LanguageKind, generate_new_analyzer_rule};
 pub use self::unicode::generate_tables;
 
 pub enum UpdateResult {

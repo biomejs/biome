@@ -2,28 +2,29 @@ use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
     unknown::UnknownFileHandler,
 };
+use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
-pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
+pub use crate::file_handlers::astro::{ASTRO_FENCE, AstroFileHandler};
 use crate::file_handlers::graphql::GraphqlFileHandler;
-pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
-pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
+pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
+pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
 use crate::settings::{Settings, WorkspaceSettingsHandle};
 use crate::workspace::{
     FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
 };
-use crate::WorkspaceError;
 use biome_analyze::{
-    AnalyzerDiagnostic, AnalyzerOptions, AnalyzerSignal, ControlFlow, GroupCategory, Never,
-    Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
+    AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal, ControlFlow,
+    GroupCategory, Never, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory,
+    RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_configuration::Rules;
+use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_dependency_graph::DependencyGraph;
-use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
+use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, category};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
@@ -32,7 +33,7 @@ use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::HtmlFileSource;
 use biome_js_analyze::METADATA as js_metadata;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
 };
@@ -43,6 +44,9 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
 
+use crate::file_handlers::ignore::IgnoreFileHandler;
+use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
+use biome_package::PackageJson;
 use camino::Utf8Path;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
@@ -57,6 +61,7 @@ pub(crate) mod css;
 pub(crate) mod graphql;
 pub(crate) mod grit;
 pub(crate) mod html;
+mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
 mod svelte;
@@ -74,6 +79,8 @@ pub enum DocumentFileSource {
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
     Grit(GritFileSource),
+    // Ignore files
+    Ignore,
     #[default]
     Unknown,
 }
@@ -121,7 +128,6 @@ impl From<&Utf8Path> for DocumentFileSource {
 }
 
 impl DocumentFileSource {
-    #[instrument(level = "debug", fields(result))]
     fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
@@ -144,7 +150,6 @@ impl DocumentFileSource {
         Self::try_from_well_known(path).unwrap_or(DocumentFileSource::Unknown)
     }
 
-    #[instrument(level = "debug", fields(result))]
     fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
@@ -158,7 +163,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "experimental-html")]
         if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -187,7 +191,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "experimental-html")]
         if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
@@ -207,7 +210,6 @@ impl DocumentFileSource {
         Self::try_from_language_id(language_id).unwrap_or(DocumentFileSource::Unknown)
     }
 
-    #[instrument(level = "debug", fields(result))]
     pub(crate) fn try_from_path(path: &Utf8Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
@@ -225,6 +227,10 @@ impl DocumentFileSource {
         // because the same logic is also used in JsFileSource::try_from
         // and we may support more and more extensions with more than one dots.
         let extension = &match filename {
+            // Ignore files are extensionless files, so they need to be handled in particular way
+            Some(filename) if filename == GIT_IGNORE_FILE_NAME || filename == IGNORE_FILE_NAME => {
+                return Ok(DocumentFileSource::Ignore);
+            }
             Some(filename) if filename.ends_with(".d.ts") => Cow::Borrowed("d.ts"),
             Some(filename) if filename.ends_with(".d.mts") => Cow::Borrowed("d.mts"),
             Some(filename) if filename.ends_with(".d.cts") => Cow::Borrowed("d.cts"),
@@ -330,20 +336,32 @@ impl DocumentFileSource {
         }
     }
 
-    pub fn can_parse(path: &Utf8Path, content: &str) -> bool {
+    /// The file can be parsed
+    pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = DocumentFileSource::from(path);
         match file_source {
-            DocumentFileSource::Js(js) => match js.as_embedding_kind() {
-                EmbeddingKind::Astro => ASTRO_FENCE.is_match(content),
-                EmbeddingKind::Vue => VUE_FENCE.is_match(content),
-                EmbeddingKind::Svelte => SVELTE_FENCE.is_match(content),
-                EmbeddingKind::None => true,
-            },
+            DocumentFileSource::Js(_) => true,
             DocumentFileSource::Css(_)
             | DocumentFileSource::Graphql(_)
             | DocumentFileSource::Json(_)
+            | DocumentFileSource::Html(_)
             | DocumentFileSource::Grit(_) => true,
-            DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
+            DocumentFileSource::Ignore => false,
+            DocumentFileSource::Unknown => false,
+        }
+    }
+
+    /// The file can be read from the file system
+    pub fn can_read(path: &Utf8Path) -> bool {
+        let file_source = DocumentFileSource::from(path);
+        match file_source {
+            DocumentFileSource::Js(_)
+            | DocumentFileSource::Css(_)
+            | DocumentFileSource::Graphql(_)
+            | DocumentFileSource::Json(_)
+            | DocumentFileSource::Html(_)
+            | DocumentFileSource::Grit(_) => true,
+            DocumentFileSource::Ignore => true,
             DocumentFileSource::Unknown => false,
         }
     }
@@ -377,6 +395,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
             DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
             DocumentFileSource::Html(_) => fmt.write_markup(markup! { "HTML" }),
             DocumentFileSource::Grit(_) => fmt.write_markup(markup! { "Grit" }),
+            DocumentFileSource::Ignore => fmt.write_markup(markup! { "Ignore" }),
             DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -397,6 +416,7 @@ pub struct FixAllParams<'a> {
     pub(crate) rule_categories: RuleCategories,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) plugins: AnalyzerPluginVec,
 }
 
 #[derive(Default)]
@@ -463,6 +483,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) plugins: AnalyzerPluginVec,
 }
 
 pub(crate) struct LintResults {
@@ -590,6 +611,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) plugins: AnalyzerPluginVec,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -684,6 +706,7 @@ pub(crate) struct Features {
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
     grit: GritFileHandler,
+    ignore: IgnoreFileHandler,
 }
 
 impl Features {
@@ -698,17 +721,14 @@ impl Features {
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
+            ignore: IgnoreFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
 
     /// Returns the [Capabilities] associated with a [BiomePath]
-    pub(crate) fn get_capabilities(
-        &self,
-        path: &Utf8Path,
-        language_hint: DocumentFileSource,
-    ) -> Capabilities {
-        match DocumentFileSource::from_path(path).or(language_hint) {
+    pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
+        match language_hint {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
@@ -720,6 +740,7 @@ impl Features {
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
     }
@@ -957,7 +978,7 @@ struct LintVisitor<'a, 'b> {
     skip: Option<&'b [RuleSelector]>,
     settings: Option<&'b Settings>,
     path: Option<&'b Utf8Path>,
-    project_layout: Arc<ProjectLayout>,
+    package_json: Option<PackageJson>,
     analyzer_options: &'b mut AnalyzerOptions,
 }
 
@@ -967,7 +988,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
         path: Option<&'b Utf8Path>,
-        project_layout: Arc<ProjectLayout>,
+        package_json: Option<PackageJson>,
         analyzer_options: &'b mut AnalyzerOptions,
     ) -> Self {
         Self {
@@ -977,7 +998,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             skip,
             settings,
             path,
-            project_layout,
+            package_json,
             analyzer_options,
         }
     }
@@ -1001,7 +1022,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             return;
         }
 
-        if let Some((_, manifest)) = self.project_layout.get_node_manifest_for_path(path) {
+        if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
                 self.analyzer_options
                     .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
@@ -1088,7 +1109,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     }
 
     fn finish(mut self) -> (FxHashSet<RuleFilter<'a>>, FxHashSet<RuleFilter<'a>>) {
-        let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
+        let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
             .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")))
@@ -1288,7 +1309,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     }
 
     fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
-        let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
+        let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
             .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")))
@@ -1438,12 +1459,17 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_graphql_analyze::visit_registry(&mut syntax);
         enabled_rules.extend(syntax.enabled_rules);
 
+        let package_json = self
+            .path
+            .and_then(|path| self.project_layout.get_node_manifest_for_path(path))
+            .map(|(_, manifest)| manifest);
+
         let mut lint = LintVisitor::new(
             self.only,
             self.skip,
             self.settings,
             self.path,
-            self.project_layout,
+            package_json,
             &mut analyzer_options,
         );
 

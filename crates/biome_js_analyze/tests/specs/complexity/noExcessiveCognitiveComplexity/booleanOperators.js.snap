@@ -20,7 +20,7 @@ function booleanOperators() {
 ```
 booleanOperators.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity of 4 detected (max: 3).
+  i Excessive complexity of 4 detected (max: 3).
   
   > 1 │ function booleanOperators() {
       │          ^^^^^^^^^^^^^^^^

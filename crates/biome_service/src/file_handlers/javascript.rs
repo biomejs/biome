@@ -1,17 +1,17 @@
 use super::{
-    search, AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
+    AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
     EnabledForPath, ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, ProcessLint, SearchCapabilities,
+    ParserCapabilities, ProcessLint, SearchCapabilities, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
-use crate::file_handlers::{is_diagnostic_error, FixAllParams};
+use crate::file_handlers::{FixAllParams, is_diagnostic_error};
 use crate::settings::{
-    check_feature_activity, check_override_feature_activity, LinterSettings, OverrideSettings,
-    Settings,
+    OverrideSettings, Settings, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::DocumentFileSource;
 use crate::{
+    WorkspaceError,
     settings::{
         FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
         WorkspaceSettingsHandle,
@@ -20,7 +20,6 @@ use crate::{
         CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
         RenameResult,
     },
-    WorkspaceError,
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
@@ -34,21 +33,19 @@ use biome_configuration::javascript::{
 };
 use biome_diagnostics::Applicability;
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, FormatError, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, Printed, QuoteStyle,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatError, IndentStyle,
+    IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
-    analyze, analyze_with_inspect_matcher, ControlFlowGraph, JsAnalyzerServices,
+    ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
 };
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
-use biome_js_formatter::context::{
-    ArrowParentheses, JsFormatOptions, ObjectWrap, QuoteProperties, Semicolons,
-};
+use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteProperties, Semicolons};
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{semantic_model, SemanticModelOptions};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, LanguageVariant, TextRange, TextSize,
     TokenAtOffset,
@@ -78,7 +75,7 @@ pub struct JsFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
-    pub object_wrap: Option<ObjectWrap>,
+    pub expand: Option<Expand>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -98,7 +95,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             indent_width: value.indent_width,
             indent_style: value.indent_style,
             line_ending: value.line_ending,
-            object_wrap: value.object_wrap,
+            expand: value.expand,
         }
     }
 }
@@ -248,7 +245,12 @@ impl ServiceLanguage for JsLanguage {
                 .or(global.and_then(|g| g.attribute_position))
                 .unwrap_or_default(),
         )
-        .with_object_wrap(language.and_then(|l| l.object_wrap).unwrap_or_default());
+        .with_expand(
+            language
+                .and_then(|l| l.expand)
+                .or(global.and_then(|g| g.expand))
+                .unwrap_or_default(),
+        );
 
         if let Some(overrides) = overrides {
             overrides.override_js_format_options(path, options)
@@ -259,9 +261,8 @@ impl ServiceLanguage for JsLanguage {
 
     fn resolve_analyzer_options(
         global: Option<&Settings>,
-        _linter: Option<&LinterSettings>,
-        overrides: Option<&OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
+        environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -296,15 +297,12 @@ impl ServiceLanguage for JsLanguage {
 
         let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
-
+        let overrides = global.map(|global| &global.override_settings);
         if let (Some(overrides), Some(global)) = (overrides, global) {
             let jsx_runtime = match overrides.override_jsx_runtime(
                 path,
-                global
-                    .languages
-                    .javascript
-                    .environment
-                    .jsx_runtime
+                environment
+                    .and_then(|env| env.jsx_runtime)
                     .unwrap_or_default(),
             ) {
                 // In the future, we may wish to map an `Auto` variant to a concrete
@@ -460,6 +458,10 @@ impl ServiceLanguage for JsLanguage {
             .unwrap_or_default()
             .into()
     }
+
+    fn resolve_environment(global: Option<&Settings>) -> Option<&Self::EnvironmentSettings> {
+        global.map(|g| &g.languages.javascript.environment)
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -550,7 +552,7 @@ fn parse(
     }
 
     let mut file_source = file_source.to_js_file_source().unwrap_or_default();
-    if jsx_everywhere {
+    if jsx_everywhere && !file_source.is_typescript() {
         file_source = file_source.with_variant(LanguageVariant::Jsx);
     }
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
@@ -605,7 +607,7 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
             }
         },
         &options,
-        Vec::new(),
+        &[],
         Default::default(),
         |_| ControlFlow::<Never>::Continue(()),
     );
@@ -672,7 +674,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         &tree,
         filter,
         &analyzer_options,
-        Vec::new(),
+        &params.plugins,
         services,
         |signal| process_lint.process_signal(signal),
     );
@@ -694,6 +696,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         skip,
         suppression_reason,
         enabled_rules: rules,
+        plugins,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -735,7 +738,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         &tree,
         filter,
         &analyzer_options,
-        Vec::new(),
+        &plugins,
         services,
         |signal| {
             actions.extend(signal.actions().into_code_action_iter().map(|item| {
@@ -814,7 +817,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             &tree,
             filter,
             &analyzer_options,
-            Vec::new(),
+            &params.plugins,
             services,
             |signal| {
                 let current_diagnostic = signal.diagnostic();
@@ -1025,3 +1028,7 @@ fn rename(
         ))
     }
 }
+
+#[cfg(test)]
+#[path = "javascript.tests.rs"]
+mod tests;

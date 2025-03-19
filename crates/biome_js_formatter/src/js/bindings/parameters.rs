@@ -1,15 +1,15 @@
 use crate::prelude::*;
-use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{CstFormatContext, write};
 
 use crate::js::expressions::arrow_function_expression::can_avoid_parentheses;
 use crate::js::lists::parameter_list::FormatJsAnyParameterList;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
 use biome_js_syntax::{
-    is_test_call_argument, AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter,
-    AnyJsExpression, AnyJsFormalParameter, AnyJsParameter, AnyTsType, JsArrowFunctionExpression,
-    JsConstructorParameters, JsParameters, JsSyntaxNode, JsSyntaxToken,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter, AnyJsExpression,
+    AnyJsFormalParameter, AnyJsParameter, AnyTsType, JsArrowFunctionExpression,
+    JsConstructorParameters, JsParameters, JsSyntaxNode, JsSyntaxToken, is_test_call_argument,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsParameters();
@@ -280,7 +280,7 @@ pub(crate) fn should_hug_function_parameters(
                 }
             }
             AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
-                return Err(FormatError::SyntaxError)
+                return Err(FormatError::SyntaxError);
             }
         };
 

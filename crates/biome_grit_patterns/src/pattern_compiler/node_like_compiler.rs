@@ -1,9 +1,9 @@
 use super::compilation_context::NodeCompilationContext;
-use super::{call_compiler::*, PatternCompiler};
+use super::{PatternCompiler, call_compiler::*};
+use crate::NodeLikeArgumentError;
 use crate::grit_node_patterns::{GritNodePattern, GritNodePatternArg};
 use crate::grit_target_node::GritTargetSyntaxKind;
-use crate::NodeLikeArgumentError;
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_grit_syntax::GritNodeLike;
 use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::Pattern;

@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: naming_convention_incorrect_options.json
 ---
 naming_convention_incorrect_options.json:9:7 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -18,4 +18,3 @@ naming_convention_incorrect_options.json:9:7 deserialize ━━━━━━━�
   - strictCase
   - requireAscii
   - conventions
-  - enumMemberCase

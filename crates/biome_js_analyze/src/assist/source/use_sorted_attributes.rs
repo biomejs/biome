@@ -1,7 +1,7 @@
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 use biome_analyze::{
-    context::RuleContext, declare_source_rule, Ast, Rule, RuleAction, RuleSource, RuleSourceKind,
+    Ast, Rule, RuleAction, RuleSource, RuleSourceKind, context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -24,11 +24,11 @@ declare_source_rule! {
     ///
     /// ## Examples
     ///
-    /// ```js,expect_diff
+    /// ```jsx,expect_diff
     /// <Hello lastName="Smith" firstName="John" />;
     /// ```
     ///
-    /// ```js,expect_diff
+    /// ```jsx,expect_diff
     /// <Hello lastName="Smith" firstName="John" {...this.props} tel="0000" address="111 Main Street"  {...another.props} lastName="Smith" />;
     /// ```
     ///
@@ -62,6 +62,7 @@ impl Rule for UseSortedAttributes {
                     prop_groups.push(current_prop_group);
                     current_prop_group = PropGroup::default();
                 }
+                AnyJsxAttribute::JsMetavariable(_) => {}
             }
         }
         prop_groups.push(current_prop_group);

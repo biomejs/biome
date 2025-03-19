@@ -1,6 +1,6 @@
 use std::io;
 
-use biome_console::{markup, ConsoleExt, EnvConsole};
+use biome_console::{ConsoleExt, EnvConsole, markup};
 use biome_diagnostics::{Advices, Diagnostic, LogCategory, PrintDiagnostic, Resource, Visit};
 use biome_rowan::{TextRange, TextSize};
 

@@ -1,7 +1,7 @@
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_grit_formatter::context::GritFormatOptions;
-use biome_grit_formatter::{format_node, GritFormatLanguage};
+use biome_grit_formatter::{GritFormatLanguage, format_node};
 use biome_grit_parser::parse_grit;
 
 mod language {

@@ -108,7 +108,7 @@ pub fn create_analyzer_options(
         );
 
         settings
-            .merge_with_configuration(configuration, None, None, &[])
+            .merge_with_configuration(configuration, None)
             .unwrap();
 
         analyzer_configuration =
@@ -152,7 +152,7 @@ where
         let configuration = deserialized.into_deserialized().unwrap_or_default();
         let mut settings = projects.get_settings(key).unwrap_or_default();
         settings
-            .merge_with_configuration(configuration, None, None, &[])
+            .merge_with_configuration(configuration, None)
             .unwrap();
 
         let handle = WorkspaceSettingsHandle::from(settings);
@@ -176,18 +176,10 @@ pub fn dependency_graph_for_test_file(
     let dependency_graph = DependencyGraph::default();
 
     let dir = input_file.parent().unwrap().to_path_buf();
-    let paths: Vec<_> = std::fs::read_dir(&dir)
-        .unwrap()
-        .filter_map(|path| {
-            let path = Utf8PathBuf::try_from(path.unwrap().path()).unwrap();
-            DocumentFileSource::from_well_known(&path)
-                .is_javascript_like()
-                .then(|| BiomePath::new(path))
-        })
-        .collect();
+    let paths = get_js_like_paths_in_dir(&dir);
     let fs = OsFileSystem::new(dir);
 
-    dependency_graph.update_imports_for_js_paths(&fs, project_layout, &paths, &[], |path| {
+    dependency_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[], |path| {
         fs.read_file_from_path(path).ok().and_then(|content| {
             let file_source = path
                 .extension()
@@ -199,6 +191,24 @@ pub fn dependency_graph_for_test_file(
     });
 
     Arc::new(dependency_graph)
+}
+
+fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
+    std::fs::read_dir(dir)
+        .unwrap()
+        .flat_map(|path| {
+            let path = Utf8PathBuf::try_from(path.unwrap().path()).unwrap();
+            if path.is_dir() {
+                get_js_like_paths_in_dir(&path)
+            } else {
+                DocumentFileSource::from_well_known(&path)
+                    .is_javascript_like()
+                    .then(|| BiomePath::new(path))
+                    .into_iter()
+                    .collect()
+            }
+        })
+        .collect()
 }
 
 pub fn project_layout_with_node_manifest(
@@ -254,15 +264,15 @@ fn markup_to_string(markup: biome_console::Markup) -> String {
 }
 
 // Check that all red / green nodes have correctly been released on exit
-extern "C" fn check_leaks() {
+unsafe extern "C" fn check_leaks() {
     if let Some(report) = biome_rowan::check_live() {
         panic!("\n{report}")
     }
 }
 pub fn register_leak_checker() {
     // Import the atexit function from libc
-    extern "C" {
-        fn atexit(f: extern "C" fn()) -> c_int;
+    unsafe extern "C" {
+        fn atexit(f: unsafe extern "C" fn()) -> c_int;
     }
 
     // Use an atomic Once to register the check_leaks function to be called
@@ -356,11 +366,12 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
             .unwrap();
     }
 
-    panic!("There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
-           path,
-           std::str::from_utf8(buffer.as_slice()).unwrap(),
-           &program,
-           &program.to_string()
+    panic!(
+        "There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
+        path,
+        std::str::from_utf8(buffer.as_slice()).unwrap(),
+        &program,
+        &program.to_string()
     );
 }
 

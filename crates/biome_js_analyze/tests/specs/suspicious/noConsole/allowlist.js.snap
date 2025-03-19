@@ -19,7 +19,7 @@ console.assert(true, "ok");
 ```
 allowlist.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
   > 1 │ console.log("invalid");
       │ ^^^^^^^^^^^^^^^^^^^^^^^
@@ -38,7 +38,7 @@ allowlist.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━
 ```
 allowlist.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
     1 │ console.log("invalid");
   > 2 │ console.debug("invalid");

@@ -42,6 +42,7 @@ schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
 
+
 [dev-dependencies]
 biome_fs            = { workspace = true }
 biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }

@@ -1,8 +1,8 @@
 use crate::{
-    services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic, JsRuleAction,
+    JsRuleAction, services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;

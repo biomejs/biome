@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, CliSnapshot, SnapshotPayload};
+use crate::snap_test::{CliSnapshot, SnapshotPayload, assert_cli_snapshot};
 use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, Console};
 use biome_fs::MemoryFileSystem;
@@ -64,6 +64,24 @@ fn with_configuration() {
     assert_rage_snapshot(SnapshotPayload::new(
         module_path!(),
         "with_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn with_no_configuration() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_no_configuration",
         fs,
         console,
         result,
@@ -368,7 +386,7 @@ impl TestLogDir {
         let guard = RAGE_GUARD.lock().unwrap();
         let path = env::temp_dir().join(name);
 
-        env::set_var("BIOME_LOG_PATH", &path);
+        unsafe { env::set_var("BIOME_LOG_PATH", &path) };
 
         Self {
             path: Utf8PathBuf::from_path_buf(path).unwrap(),
@@ -380,6 +398,6 @@ impl TestLogDir {
 impl Drop for TestLogDir {
     fn drop(&mut self) {
         fs::remove_dir_all(&self.path).ok();
-        env::remove_var("BIOME_LOG_PATH");
+        unsafe { env::remove_var("BIOME_LOG_PATH") };
     }
 }

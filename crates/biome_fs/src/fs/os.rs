@@ -2,14 +2,14 @@
 use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 use crate::fs::OpenOptions;
 use crate::{
-    fs::{TraversalContext, TraversalScope},
     BiomePath, FileSystem, MemoryFileSystem,
+    fs::{TraversalContext, TraversalScope},
 };
 use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
 use oxc_resolver::{FsResolution, ResolveError, ResolveOptions, Resolver};
 use path_absolutize::Absolutize;
-use rayon::{scope, Scope};
+use rayon::{Scope, scope};
 use std::env::temp_dir;
 use std::fs::FileType;
 use std::panic::AssertUnwindSafe;
@@ -186,7 +186,6 @@ struct OsFile {
 }
 
 impl File for OsFile {
-    #[instrument(level = "debug")]
     fn read_to_string(&mut self, buffer: &mut String) -> io::Result<()> {
         // Reset the cursor to the starting position
         self.inner.rewind()?;
@@ -502,7 +501,7 @@ impl From<FileType> for FsErrorKind {
 pub struct TemporaryFs {
     /// The current working directory. It's the OS temporary folder joined with a file
     /// name passed in the [TemporaryFs::new] function
-    working_directory: Utf8PathBuf,
+    pub working_directory: Utf8PathBuf,
     files: Vec<(Utf8PathBuf, String)>,
 }
 
@@ -514,6 +513,12 @@ impl TemporaryFs {
             fs::remove_dir_all(path.as_path()).unwrap();
         }
         fs::create_dir(&path).unwrap();
+
+        // On macOS, the temporary directory is in `/var`, which is a symlink to `/private/var`.
+        // We need to get the actual path here, or we will get path inconsistency.
+        #[cfg(target_os = "macos")]
+        let path = fs::canonicalize(path).unwrap();
+
         Self {
             working_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
             files: Vec::new(),
@@ -523,11 +528,17 @@ impl TemporaryFs {
     /// Creates a file under the working directory
     pub fn create_file(&mut self, name: &str, content: &str) {
         let path = self.working_directory.join(name);
-        std::fs::create_dir_all(path.parent().expect("parent dir exists."))
+        fs::create_dir_all(path.parent().expect("parent dir exists."))
             .expect("Temporary directory to exist and being writable");
-        std::fs::write(path.as_std_path(), content)
+        fs::write(path.as_std_path(), content)
             .expect("Temporary directory to exist and being writable");
         self.files.push((path, content.to_string()));
+    }
+
+    pub fn create_folder(&mut self, name: &str) {
+        let path = self.working_directory.join(name);
+        fs::create_dir_all(path.parent().expect("parent dir exists."))
+            .expect("Temporary directory to exist and being writable");
     }
 
     /// Returns the path to use when running the CLI

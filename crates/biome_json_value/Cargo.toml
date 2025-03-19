@@ -21,7 +21,7 @@ biome_rowan              = { workspace = true }
 indexmap                 = { workspace = true }
 oxc_resolver             = { workspace = true, optional = true }
 rustc-hash               = { workspace = true }
-static_assertions        = "1.1.0"
+static_assertions        = { workspace = true }
 
 [features]
 oxc_resolver = ["dep:oxc_resolver"]

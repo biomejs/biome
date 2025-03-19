@@ -21,8 +21,8 @@ use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
 use biome_formatter::trivia::format_skipped_token_trivia;
 use biome_formatter::{
-    write, CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    TransformSourceMap,
+    CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
+    TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
@@ -382,7 +382,7 @@ pub fn format_sub_tree(options: CssFormatOptions, root: &CssSyntaxNode) -> Forma
 mod tests {
     use crate::context::CssFormatOptions;
     use crate::format_node;
-    use biome_css_parser::{parse_css, CssParserOptions};
+    use biome_css_parser::{CssParserOptions, parse_css};
 
     #[test]
     fn smoke_test() {

@@ -27,7 +27,7 @@ const a = 1 + 1 + ""
 ```
 invalid.js:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
   > 1 │ const a = 'a' + 'b'
       │           ^^^^^^^^^
@@ -49,7 +49,7 @@ invalid.js:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 invalid.js:2:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     1 │ const a = 'a' + 'b'
   > 2 │ const a = 'a' + 'b' + 'c'
@@ -73,7 +73,7 @@ invalid.js:2:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 invalid.js:3:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     1 │ const a = 'a' + 'b'
     2 │ const a = 'a' + 'b' + 'c'
@@ -99,7 +99,7 @@ invalid.js:3:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 invalid.js:4:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     2 │ const a = 'a' + 'b' + 'c'
     3 │ const a = 'a' + ('b' + 'c')
@@ -125,7 +125,7 @@ invalid.js:4:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 invalid.js:5:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     3 │ const a = 'a' + ('b' + 'c')
     4 │ const a = ('a' + 'b') + 'c'
@@ -151,7 +151,7 @@ invalid.js:5:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 invalid.js:6:26 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     4 │ const a = ('a' + 'b') + 'c'
     5 │ const a = foo + 'a' + 'b' + 'c'
@@ -177,7 +177,7 @@ invalid.js:6:26 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 invalid.js:7:27 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     5 │ const a = foo + 'a' + 'b' + 'c'
     6 │ const a = (foo + 'a') + ('b' + 'c')
@@ -203,7 +203,7 @@ invalid.js:7:27 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 invalid.js:8:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
      6 │ const a = (foo + 'a') + ('b' + 'c')
      7 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
@@ -229,7 +229,7 @@ invalid.js:8:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 invalid.js:9:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
      7 │ const a = ((foo + 'a') + ('b' + 'c') + 1)
      8 │ const a = 'a' + `b`
@@ -255,7 +255,7 @@ invalid.js:9:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━�
 ```
 invalid.js:10:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
      8 │ const a = 'a' + `b`
      9 │ const a = `a` + 'b'
@@ -281,7 +281,7 @@ invalid.js:10:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━
 ```
 invalid.js:11:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
      9 │ const a = `a` + 'b'
     10 │ const a = `a` + `b`
@@ -307,7 +307,7 @@ invalid.js:11:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━
 ```
 invalid.js:12:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     10 │ const a = `a` + `b`
     11 │ const a = 'a' + 1
@@ -333,7 +333,7 @@ invalid.js:12:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━
 ```
 invalid.js:13:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     11 │ const a = 'a' + 1
     12 │ const a = 1 + '1'
@@ -359,7 +359,7 @@ invalid.js:13:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━
 ```
 invalid.js:14:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     12 │ const a = 1 + '1'
     13 │ const a = 1 + `1`
@@ -385,7 +385,7 @@ invalid.js:14:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━
 ```
 invalid.js:15:11 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless string concatenation.
+  i Useless string concatenation.
   
     13 │ const a = 1 + `1`
     14 │ const a = `1` + 1

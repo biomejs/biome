@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::JsLabels;
+use crate::prelude::*;
 
 use biome_formatter::{format_args, write};
 use biome_js_syntax::parentheses::NeedsParentheses;
@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsAssignmentExpression, JsInitializerClause, JsStaticMemberAssignment,
     JsStaticMemberExpression, JsSyntaxToken,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsStaticMemberExpression;

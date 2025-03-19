@@ -1,10 +1,9 @@
 use crate::{
-    inner_string_text, AnyJsExportNamedSpecifier, AnyJsName, JsIdentifierAssignment,
-    JsLiteralExportName, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxToken,
-    JsxReferenceIdentifier,
+    AnyJsExportNamedSpecifier, AnyJsName, JsIdentifierAssignment, JsLiteralExportName,
+    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxToken, JsxReferenceIdentifier, inner_string_text,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText,
+    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
 };
 
 declare_node_union! {

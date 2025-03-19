@@ -5,7 +5,7 @@
 //! - shortcuts to open/write to the file
 use crate::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
-use enumflags2::{bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags};
 use smallvec::SmallVec;
 use std::cmp::Ordering;
 use std::fmt::Formatter;
@@ -138,8 +138,8 @@ impl schemars::JsonSchema for BiomePath {
         "BiomePath".to_string()
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        String::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(generator)
     }
 }
 
@@ -211,6 +211,8 @@ impl BiomePath {
             "package.json" | "tsconfig.json" | "jsconfig.json"
         ) {
             FileKind::Manifest.into()
+        } else if matches!(file_name, ".gitignore" | ".ignore") {
+            FileKind::Ignore.into()
         } else {
             FileKind::Handleable.into()
         }
@@ -258,8 +260,8 @@ impl schemars::JsonSchema for FileKinds {
         String::from("FileKind")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<FileKind>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<FileKind>>::json_schema(generator)
     }
 }
 
@@ -310,6 +312,8 @@ mod test {
         );
         assert_eq!(BiomePath::priority("biome.json"), FileKind::Config.into());
         assert_eq!(BiomePath::priority("biome.jsonc"), FileKind::Config.into());
+        assert_eq!(BiomePath::priority(".gitignore"), FileKind::Ignore.into());
+        assert_eq!(BiomePath::priority(".ignore"), FileKind::Ignore.into());
     }
 
     #[test]

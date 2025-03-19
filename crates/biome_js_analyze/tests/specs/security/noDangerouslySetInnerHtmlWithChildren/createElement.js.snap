@@ -15,7 +15,7 @@ React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' }, childr
 ```
 createElement.js:1:30 lint/security/noDangerouslySetInnerHtmlWithChildren ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing both children and the dangerouslySetInnerHTML prop.
+  × Avoid passing both children and the dangerouslySetInnerHTML prop.
   
   > 1 │ React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, ['children'])
       │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -37,7 +37,7 @@ createElement.js:1:30 lint/security/noDangerouslySetInnerHtmlWithChildren ━━
 ```
 createElement.js:2:30 lint/security/noDangerouslySetInnerHtmlWithChildren ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing both children and the dangerouslySetInnerHTML prop.
+  × Avoid passing both children and the dangerouslySetInnerHTML prop.
   
     1 │ React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, ['children'])
   > 2 │ React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, 'children')
@@ -61,7 +61,7 @@ createElement.js:2:30 lint/security/noDangerouslySetInnerHtmlWithChildren ━━
 ```
 createElement.js:3:30 lint/security/noDangerouslySetInnerHtmlWithChildren ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing both children and the dangerouslySetInnerHTML prop.
+  × Avoid passing both children and the dangerouslySetInnerHTML prop.
   
     1 │ React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, ['children'])
     2 │ React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, 'children')

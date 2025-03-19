@@ -1,6 +1,6 @@
 use biome_grit_patterns::{
-    compile_pattern_with_options, CompilePatternOptions, GritTargetFile, GritTargetLanguage,
-    JsTargetLanguage,
+    CompilePatternOptions, GritTargetFile, GritTargetLanguage, JsTargetLanguage,
+    compile_pattern_with_options,
 };
 use camino::Utf8Path;
 use criterion::measurement::WallTime;

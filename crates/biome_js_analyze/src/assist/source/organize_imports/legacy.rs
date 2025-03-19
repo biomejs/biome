@@ -5,8 +5,8 @@ use biome_js_syntax::{
     JsSyntaxToken, JsSyntaxTrivia, T,
 };
 use biome_rowan::{
-    chain_trivia_pieces, AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutation,
-    SyntaxTriviaPiece, TextRange, TokenText, TriviaPiece, TriviaPieceKind,
+    AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutation, SyntaxTriviaPiece,
+    TextRange, TokenText, TriviaPiece, TriviaPieceKind, chain_trivia_pieces,
 };
 use std::{cell::Cell, cmp::Ordering, collections::BTreeMap, iter};
 

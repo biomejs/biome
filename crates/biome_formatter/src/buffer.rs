@@ -1,5 +1,5 @@
 #![expect(clippy::mutable_key_type)]
-use super::{write, Arguments, FormatElement};
+use super::{Arguments, FormatElement, write};
 use crate::format_element::Interned;
 use crate::prelude::tag::Condition;
 use crate::prelude::{LineMode, PrintMode, Tag};
@@ -584,7 +584,7 @@ fn clean_interned(
                                 .last()
                                 .is_some_and(|condition| condition.mode == PrintMode::Expanded) =>
                             {
-                                continue
+                                continue;
                             }
 
                             FormatElement::Line(LineMode::Soft) => continue,

@@ -5,7 +5,7 @@ use crate::ts::bindings::type_parameters::FormatTsTypeParametersOptions;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
-use biome_formatter::{format_args, write, CstFormatContext, FormatOptions, VecBuffer};
+use biome_formatter::{CstFormatContext, FormatOptions, VecBuffer, format_args, write};
 use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMemberName,
@@ -20,7 +20,7 @@ use biome_js_syntax::{
     TsTypeArguments, TsUnionType,
 };
 use biome_js_syntax::{AnyJsLiteralExpression, JsUnaryExpression};
-use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxResult, declare_node_union};
 use std::iter;
 
 declare_node_union! {
@@ -340,7 +340,9 @@ impl AnyJsAssignmentLike {
                 n.value().unwrap().into()
             }
             AnyJsAssignmentLike::TsPropertySignatureClassMember(_) => {
-                unreachable!("TsPropertySignatureClassMember doesn't have any right side. If you're here, `has_only_left_hand_side` hasn't been called")
+                unreachable!(
+                    "TsPropertySignatureClassMember doesn't have any right side. If you're here, `has_only_left_hand_side` hasn't been called"
+                )
             }
             AnyJsAssignmentLike::TsInitializedPropertySignatureClassMember(n) => {
                 // SAFETY: Calling `unwrap` here is safe because we check `has_only_left_hand_side` variant at the beginning of the `layout` function

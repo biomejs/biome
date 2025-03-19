@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{write, CstFormatContext, GroupId};
+use crate::{CstFormatContext, GroupId, write};
 use biome_rowan::{AstNode, AstSeparatedElement, SyntaxResult, SyntaxToken};
 
 pub trait FormatSeparatedElementRule<N>

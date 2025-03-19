@@ -2,21 +2,21 @@
 use crate::numbers::parse_js_number;
 use crate::static_value::StaticValue;
 use crate::{
-    inner_string_text, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument,
-    AnyJsClassMemberName, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
-    AnyJsObjectMemberName, AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression,
-    JsArrayHole, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
+    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMemberName,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMemberName,
+    AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression, JsArrayHole,
+    JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
     JsLiteralMemberName, JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression,
     JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsReferenceIdentifier,
     JsRegexLiteralExpression, JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind,
     JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression,
-    JsWhileStatement, OperatorPrecedence, TsStringLiteralType, T,
+    JsWhileStatement, OperatorPrecedence, T, TsStringLiteralType, inner_string_text,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast,
-    SyntaxResult, TextRange, TextSize, TokenText,
+    AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast, SyntaxResult, TextRange,
+    TextSize, TokenText, declare_node_union,
 };
 use core::iter;
 
@@ -673,7 +673,7 @@ impl JsTemplateExpression {
     /// The string chunks of the template. aka:
     /// `foo ${bar} foo` breaks down into:
     /// `QUASIS ELEMENT{EXPR} QUASIS`
-    pub fn quasis(&self) -> impl Iterator<Item = JsSyntaxToken> {
+    pub fn quasis(&self) -> impl Iterator<Item = JsSyntaxToken> + use<> {
         self.syntax()
             .children_with_tokens()
             .filter_map(NodeOrToken::into_token)
@@ -2091,8 +2091,8 @@ pub fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
 #[cfg(test)]
 mod test {
     use biome_js_factory::syntax::{JsCallExpression, JsTemplateExpression};
-    use biome_js_parser::parse_module;
     use biome_js_parser::JsParserOptions;
+    use biome_js_parser::parse_module;
     use biome_rowan::AstNodeList;
 
     fn extract_call_expression(src: &str) -> JsCallExpression {

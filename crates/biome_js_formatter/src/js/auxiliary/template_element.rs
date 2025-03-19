@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::prelude::tag::Tag;
 use biome_formatter::{
-    format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
+    CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer, format_args, write,
 };
 
 use crate::context::TabWidth;
@@ -10,7 +10,7 @@ use crate::js::lists::template_element_list::TemplateElementIndention;
 use biome_js_syntax::{
     AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, TsTemplateElement,
 };
-use biome_rowan::{declare_node_union, AstNode, NodeOrToken, SyntaxResult};
+use biome_rowan::{AstNode, NodeOrToken, SyntaxResult, declare_node_union};
 
 enum TemplateElementLayout {
     /// Tries to format the expression on a single line regardless of the print width.

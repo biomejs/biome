@@ -15,9 +15,9 @@ use crate::utility_types::static_assert;
 use countme::Count;
 
 use crate::{
+    GreenToken, NodeOrToken, TextRange, TextSize,
     arc::{Arc, HeaderSlice, ThinArc},
     green::{GreenElement, GreenElementRef, RawSyntaxKind},
-    GreenToken, NodeOrToken, TextRange, TextSize,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -290,8 +290,10 @@ impl GreenNode {
 
     #[inline]
     pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<GreenNodeData>) -> GreenNode {
-        let arc = Arc::from_raw(&ptr.as_ref().data as *const ReprThin);
-        let arc = mem::transmute::<Arc<ReprThin>, ThinArc<GreenNodeHead, Slot>>(arc);
+        let arc = unsafe {
+            let arc = Arc::from_raw(&ptr.as_ref().data as *const ReprThin);
+            mem::transmute::<Arc<ReprThin>, ThinArc<GreenNodeHead, Slot>>(arc)
+        };
         GreenNode { ptr: arc }
     }
 }
@@ -488,8 +490,8 @@ impl FusedIterator for Children<'_> {}
 
 #[cfg(test)]
 mod tests {
-    use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::GreenNode;
+    use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
 
     fn build_test_list() -> GreenNode {
         let mut builder: RawSyntaxTreeBuilder = RawSyntaxTreeBuilder::new();

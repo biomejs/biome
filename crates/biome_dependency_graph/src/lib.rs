@@ -1,5 +1,5 @@
 mod dependency_graph;
-mod import_visitor;
+mod module_visitor;
 mod resolver_cache;
 
-pub use dependency_graph::{DependencyGraph, ModuleImports};
+pub use dependency_graph::{DependencyGraph, ModuleDependencyData};

@@ -2,8 +2,8 @@ use serde::ser::{Serialize, SerializeMap, SerializeSeq, Serializer};
 use std::fmt;
 
 use crate::{
-    syntax::{Language, SyntaxNode, SyntaxToken},
     NodeOrToken,
+    syntax::{Language, SyntaxNode, SyntaxToken},
 };
 
 struct SerDisplay<T>(T);

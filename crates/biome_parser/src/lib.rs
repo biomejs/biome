@@ -1,7 +1,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![doc = include_str!("../CONTRIBUTING.md")]
 
-use crate::diagnostic::{expected_token, ParseDiagnostic, ToDiagnostic};
+use crate::diagnostic::{ParseDiagnostic, ToDiagnostic, expected_token};
 use crate::event::Event;
 use crate::event::Event::Token;
 use crate::token_source::{BumpWithContext, NthToken, TokenSource, TokenSourceWithBufferedLexer};
@@ -510,16 +510,21 @@ pub trait Parser: Sized {
 pub struct ParserProgress(Option<TextSize>);
 
 impl ParserProgress {
-    /// Returns true if the current parser position is passed this position
+    /// Returns true if the current parser position is passed this position,
+    /// and updates the progress.
     #[inline]
-    pub fn has_progressed<P>(&self, p: &P) -> bool
+    pub fn has_progressed<P>(&mut self, p: &P) -> bool
     where
         P: Parser,
     {
-        match self.0 {
+        let has_progressed = match self.0 {
             None => true,
             Some(pos) => pos < p.source().position(),
-        }
+        };
+
+        self.0 = Some(p.source().position());
+
+        has_progressed
     }
 
     /// Asserts that the parsing is still making progress.
@@ -539,8 +544,6 @@ impl ParserProgress {
             p.cur(),
             p.cur_range(),
         );
-
-        self.0 = Some(p.source().position());
     }
 }
 

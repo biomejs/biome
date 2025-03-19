@@ -1,11 +1,11 @@
 use crate::{
-    inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsModuleSource,
-    AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsImport,
-    JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
-    JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken,
+    AnyJsBinding, AnyJsImportClause, AnyJsModuleSource, AnyJsNamedImportSpecifier,
+    JsCallExpression, JsDefaultImportSpecifier, JsImport, JsImportAssertion,
+    JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
+    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken, inner_string_text,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText,
+    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
 };
 
 impl JsImport {
@@ -339,6 +339,15 @@ impl AnyJsImportLike {
                 self.syntax().parent().kind(),
                 Some(JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION)
             )
+    }
+
+    /// Returns whether this is a static import.
+    ///
+    /// Static imports are those where no variables are allowed within the
+    /// module specifier. Compare this to  `import()` and `require()`
+    /// expressions, which are considered dynamic imports.
+    pub fn is_static_import(&self) -> bool {
+        matches!(self, AnyJsImportLike::JsModuleSource(_))
     }
 }
 

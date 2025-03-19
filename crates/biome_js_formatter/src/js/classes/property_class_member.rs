@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, JsInitializerClause, JsPropertyClassMember,
     JsSyntaxToken, TsInitializedPropertySignatureClassMember, TsPropertySignatureClassMember,
 };
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPropertyClassMember;

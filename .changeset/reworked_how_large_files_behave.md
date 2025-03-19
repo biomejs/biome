@@ -2,6 +2,8 @@
 "@biomejs/biome": major
 ---
 
-Previously, files that should exceed the configured size limit would throw an error, and the CLI would exit with an error code.
+Biome no longer treats too large files as errors.
 
-Now, the CLI ignores the file, emits a *information* diagnostic and doesn't exit with an error code.
+Previously, files that exceed the configured size limit would throw an error, and the CLI would exit with an error code.
+
+Now, the CLI ignores the file, emits an *information* diagnostic and doesn't exit with an error code.

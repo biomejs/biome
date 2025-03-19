@@ -39,7 +39,7 @@ class D {
 ```
 invalid.js:3:3 lint/correctness/noConstructorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The constructor should not return a value.
+  × The constructor should not return a value.
   
     1 │ class A {
     2 │ 	constructor() {
@@ -67,7 +67,7 @@ invalid.js:3:3 lint/correctness/noConstructorReturn ━━━━━━━━━�
 ```
 invalid.js:9:3 lint/correctness/noConstructorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The constructor should not return a value.
+  × The constructor should not return a value.
   
      7 │ class B {
      8 │ 	constructor() {
@@ -95,7 +95,7 @@ invalid.js:9:3 lint/correctness/noConstructorReturn ━━━━━━━━━�
 ```
 invalid.js:16:3 lint/correctness/noConstructorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The constructor should not return a value.
+  × The constructor should not return a value.
   
     14 │ 	constructor(x) {
     15 │ 		this.x = x;
@@ -124,7 +124,7 @@ invalid.js:16:3 lint/correctness/noConstructorReturn ━━━━━━━━━
 ```
 invalid.js:24:4 lint/correctness/noConstructorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The constructor should not return a value.
+  × The constructor should not return a value.
   
     22 │ 		if (x > 0) {
     23 │ 			this.x = x;

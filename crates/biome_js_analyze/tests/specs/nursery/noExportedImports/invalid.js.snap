@@ -19,7 +19,7 @@ export { D };
 ```
 invalid.js:1:10 lint/nursery/noExportedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! An import should not be exported. Use export from instead.
+  i An import should not be exported. Use export from instead.
   
   > 1 │ import { A } from "mod";
       │          ^
@@ -34,7 +34,7 @@ invalid.js:1:10 lint/nursery/noExportedImports ━━━━━━━━━━━
 ```
 invalid.js:4:8 lint/nursery/noExportedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! An import should not be exported. Use export from instead.
+  i An import should not be exported. Use export from instead.
   
     2 │ export { A };
     3 │ 
@@ -51,7 +51,7 @@ invalid.js:4:8 lint/nursery/noExportedImports ━━━━━━━━━━━�
 ```
 invalid.js:7:8 lint/nursery/noExportedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! An import should not be exported. Use export from instead.
+  i An import should not be exported. Use export from instead.
   
     5 │ export { ns };
     6 │ 

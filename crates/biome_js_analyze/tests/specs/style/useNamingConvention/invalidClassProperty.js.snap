@@ -42,7 +42,7 @@ export default class {
 ```
 invalidClassProperty.js:2:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     1 │ export default class {
   > 2 │     X
@@ -56,7 +56,7 @@ invalidClassProperty.js:2:5 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassProperty.js:4:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name part should be in camelCase.
+  i This class property name part should be in camelCase.
   
     2 │     X
     3 │ 
@@ -71,7 +71,7 @@ invalidClassProperty.js:4:6 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassProperty.js:6:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     4 │     "Y" = 0
     5 │ 
@@ -86,7 +86,7 @@ invalidClassProperty.js:6:6 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassProperty.js:8:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
      6 │     #X
      7 │ 
@@ -101,7 +101,7 @@ invalidClassProperty.js:8:5 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassProperty.js:10:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
      8 │     Initialized = 0
      9 │ 
@@ -116,7 +116,7 @@ invalidClassProperty.js:10:6 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:12:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     10 │     #Initialized = 0
     11 │ 
@@ -131,7 +131,7 @@ invalidClassProperty.js:12:5 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:14:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     12 │     PROPERTY
     13 │ 
@@ -146,7 +146,7 @@ invalidClassProperty.js:14:6 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:16:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     14 │     #PROPERTY
     15 │ 
@@ -161,7 +161,7 @@ invalidClassProperty.js:16:5 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:18:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     16 │     SpecialProperty
     17 │ 
@@ -176,7 +176,7 @@ invalidClassProperty.js:18:6 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:20:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     18 │     #SpecialProperty
     19 │ 
@@ -191,7 +191,7 @@ invalidClassProperty.js:20:5 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:22:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     20 │     special_property
     21 │ 
@@ -206,7 +206,7 @@ invalidClassProperty.js:22:6 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:24:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     22 │     #special_property
     23 │ 
@@ -221,7 +221,7 @@ invalidClassProperty.js:24:5 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:26:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     24 │     Unknown_Style
     25 │ 
@@ -236,7 +236,7 @@ invalidClassProperty.js:26:6 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:28:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     26 │     #Unknown_Style
     27 │ 
@@ -251,7 +251,7 @@ invalidClassProperty.js:28:5 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidClassProperty.js:30:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class property name should be in camelCase.
+  i This class property name should be in camelCase.
   
     28 │     Unknown_Init_Style = 0
     29 │ 

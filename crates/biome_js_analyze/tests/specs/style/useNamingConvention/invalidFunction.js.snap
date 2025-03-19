@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFunction.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -20,7 +21,7 @@ function Unknown_Style() {}
 ```
 invalidFunction.js:1:10 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This global function name should be in camelCase or PascalCase or UPPERCASE.
+  i This global function name should be in camelCase or PascalCase or UPPERCASE.
   
   > 1 │ function special_function() {}
       │          ^^^^^^^^^^^^^^^^
@@ -40,7 +41,7 @@ invalidFunction.js:1:10 lint/style/useNamingConvention  FIXABLE  ━━━━━
 ```
 invalidFunction.js:3:10 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This global function name should be in camelCase or PascalCase or UPPERCASE.
+  i This global function name should be in camelCase or PascalCase or UPPERCASE.
   
     1 │ function special_function() {}
     2 │ 
@@ -64,7 +65,7 @@ invalidFunction.js:3:10 lint/style/useNamingConvention  FIXABLE  ━━━━━
 ```
 invalidFunction.js:6:14 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function name should be in camelCase or PascalCase.
+  i This function name should be in camelCase or PascalCase.
   
     5 │ (function() {
   > 6 │     function PERSON() {}
@@ -87,7 +88,7 @@ invalidFunction.js:6:14 lint/style/useNamingConvention  FIXABLE  ━━━━━
 ```
 invalidFunction.js:8:24 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function name should be in camelCase or PascalCase.
+  i This function name should be in camelCase or PascalCase.
   
      6 │     function PERSON() {}
      7 │ 

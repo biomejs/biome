@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
-use biome_css_syntax::{CssSyntaxKind, TextRange, T};
-use biome_parser::diagnostic::{expect_one_of, ParseDiagnostic, ToDiagnostic};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_css_syntax::{CssSyntaxKind, T, TextRange};
+use biome_parser::diagnostic::{ParseDiagnostic, ToDiagnostic, expect_one_of};
+use biome_parser::{Parser, TokenSet, token_set};
 
 /// A set of tokens representing the CSS Modules pseudo-classes `:local` and `:global`.
 pub(crate) const CSS_MODULES_SCOPE_SET: TokenSet<CssSyntaxKind> = token_set![T![global], T![local]];

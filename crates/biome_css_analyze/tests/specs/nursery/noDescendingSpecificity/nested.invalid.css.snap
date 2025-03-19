@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: nested.invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -19,7 +20,7 @@ b {
 ```
 nested.invalid.css:7:1 lint/nursery/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Descending specificity selector found. This selector specificity is (0, 0, 1)
+  × Descending specificity selector found. This selector specificity is (0, 0, 1)
   
     5 │ }
     6 │ 

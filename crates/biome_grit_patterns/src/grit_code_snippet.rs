@@ -6,8 +6,8 @@ use grit_pattern_matcher::context::ExecContext;
 use grit_pattern_matcher::pattern::{
     CodeSnippet, DynamicPattern, Matcher, Pattern, PatternName, ResolvedPattern, State,
 };
-use grit_util::error::GritResult;
 use grit_util::AnalysisLogs;
+use grit_util::error::GritResult;
 
 #[derive(Clone, Debug)]
 pub struct GritCodeSnippet {

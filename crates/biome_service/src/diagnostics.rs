@@ -6,13 +6,14 @@ use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_css_parser::ParseDiagnostic;
 use biome_diagnostics::{
-    category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory,
-    MessageAndDescription, Severity, Visit,
+    Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
+    Severity, Visit, category,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
 use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
+use biome_plugin_loader::PluginDiagnostic;
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
@@ -52,10 +53,14 @@ pub enum WorkspaceError {
     FileSystem(FileSystemDiagnostic),
     /// Raised when there's an issue around the VCS integration
     Vcs(VcsDiagnostic),
-    /// Diagnostic raised when a file is protected
+    /// One or more errors occurred during plugin loading.
+    PluginErrors(PluginErrors),
+    /// Diagnostic raised when a file is protected.
     ProtectedFile(ProtectedFile),
     /// Error when searching for a pattern
     SearchError(SearchError),
+    /// Error in the workspace watcher.
+    WatchError(WatchError),
 }
 
 impl WorkspaceError {
@@ -93,6 +98,10 @@ impl WorkspaceError {
             path,
             extension,
         })
+    }
+
+    pub fn plugin_errors(diagnostics: Vec<PluginDiagnostic>) -> Self {
+        Self::PluginErrors(PluginErrors { diagnostics })
     }
 
     pub fn vcs_disabled() -> Self {
@@ -296,7 +305,9 @@ Use the `files.maxSize` configuration to change the maximum size of files proces
 #[diagnostic(
     category = "project",
     message(
-        message("Biome attempted to perform an operation on the registered project, but no project was registered. This is a bug in Biome. If this problem persists, please report here: https://github.com/biomejs/biome/issues/"),
+        message(
+            "Biome attempted to perform an operation on the registered project, but no project was registered. This is a bug in Biome. If this problem persists, please report here: https://github.com/biomejs/biome/issues/"
+        ),
         description = "Biome attempted to perform an operation on the registered project, but no project was registered. This is a bug in Biome. If this problem persists, please report here: https://github.com/biomejs/biome/issues/"
     )
 )]
@@ -530,6 +541,31 @@ pub struct NoVcsFolderFound {
 )]
 pub struct DisabledVcs {}
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PluginErrors {
+    diagnostics: Vec<PluginDiagnostic>,
+}
+
+impl Diagnostic for PluginErrors {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("plugin"))
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup!("Error(s) during loading of plugins:\n"))?;
+
+        for diagnostic in &self.diagnostics {
+            diagnostic.message(fmt)?;
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "project",
@@ -557,12 +593,25 @@ impl Advices for ProtectedFileAdvice {
     }
 }
 
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+#[diagnostic(
+    category = "project",
+    severity = Error,
+    message(
+        message("Biome cannot watch files on disk: "<Info>{self.reason}</Info>),
+        description = "Biome cannot watch files on disk: {reason}",
+    ),
+)]
+pub struct WatchError {
+    pub reason: String,
+}
+
 #[cfg(test)]
 mod test {
     use crate::diagnostics::{CantReadFile, FileIgnored, NotFound, SourceFileNotSupported};
     use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
-    use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
+    use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
 

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -30,7 +31,7 @@ function ex() {
 ```
 invalid.ts:1:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The type of this variable may evolve implicitly to any type, including the any type.
+  i The type of this variable may evolve implicitly to any type, including the any type.
   
   > 1 │ let a;
       │     ^
@@ -45,7 +46,7 @@ invalid.ts:1:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━
 ```
 invalid.ts:2:7 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The type of this variable may evolve implicitly to any type, including the any type.
+  i The type of this variable may evolve implicitly to any type, including the any type.
   
     1 │ let a;
   > 2 │ const b = [];
@@ -61,7 +62,7 @@ invalid.ts:2:7 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━
 ```
 invalid.ts:3:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The type of this variable may evolve implicitly to any type, including the any type.
+  i The type of this variable may evolve implicitly to any type, including the any type.
   
     1 │ let a;
     2 │ const b = [];
@@ -78,7 +79,7 @@ invalid.ts:3:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━
 ```
 invalid.ts:5:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The type of this variable may evolve implicitly to any type, including the any type.
+  i The type of this variable may evolve implicitly to any type, including the any type.
   
     3 │ let c = null;
     4 │ 
@@ -95,7 +96,7 @@ invalid.ts:5:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━
 ```
 invalid.ts:9:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The type of this variable may evolve implicitly to any type, including the any type.
+  i The type of this variable may evolve implicitly to any type, including the any type.
   
      7 │ someVar1 = 123;
      8 │ 
@@ -112,7 +113,7 @@ invalid.ts:9:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━
 ```
 invalid.ts:13:12 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The type of this variable may evolve implicitly to any type, including the any type.
+  i The type of this variable may evolve implicitly to any type, including the any type.
   
     11 │ someVar1 = 123;
     12 │ 
@@ -129,7 +130,7 @@ invalid.ts:13:12 lint/suspicious/noEvolvingTypes ━━━━━━━━━━�
 ```
 invalid.ts:14:12 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The type of this variable may evolve implicitly to any type, including the any type.
+  i The type of this variable may evolve implicitly to any type, including the any type.
   
     13 │ let x = 0, y, z = 0;
   > 14 │ var x = 0, y, z = 0;
@@ -145,7 +146,7 @@ invalid.ts:14:12 lint/suspicious/noEvolvingTypes ━━━━━━━━━━�
 ```
 invalid.ts:15:16 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The type of this variable may evolve implicitly to any type, including the any type.
+  i The type of this variable may evolve implicitly to any type, including the any type.
   
     13 │ let x = 0, y, z = 0;
     14 │ var x = 0, y, z = 0;
@@ -162,7 +163,7 @@ invalid.ts:15:16 lint/suspicious/noEvolvingTypes ━━━━━━━━━━�
 ```
 invalid.ts:18:9 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The type of this variable may evolve implicitly to any type, including the any type.
+  i The type of this variable may evolve implicitly to any type, including the any type.
   
     17 │ function ex() {
   > 18 │     let b;

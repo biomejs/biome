@@ -2,7 +2,7 @@
 "@biomejs/biome": major
 ---
 
-The rule `lint/a11y/useAltText` doesn't check the element's attributes containing object spread.
+The rule [`useAltText`](https://biomejs.dev/linter/rules/use-alt-text/) no longer checks the element's attributes containing object spread.
 
 The following code doesn't trigger the rule anymore:
 

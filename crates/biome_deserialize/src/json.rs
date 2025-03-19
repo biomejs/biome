@@ -1,13 +1,12 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
 use crate::{
-    diagnostics::DeserializableType, DefaultDeserializationContext, Deserializable,
-    DeserializableValue, DeserializationContext, DeserializationVisitor, Deserialized, Text,
-    TextNumber,
+    DefaultDeserializationContext, Deserializable, DeserializableValue, DeserializationContext,
+    DeserializationVisitor, Deserialized, TextNumber, diagnostics::DeserializableType,
 };
 use biome_diagnostics::{DiagnosticExt, Error};
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMemberName, JsonRoot, T};
-use biome_rowan::{AstNode, AstSeparatedList, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, Text, TokenText};
 
 /// It attempts to parse and deserialize a source file in JSON. Diagnostics from the parse phase
 /// are consumed and joined with the diagnostics emitted during the deserialization.
@@ -260,6 +259,9 @@ impl DeserializableValue for JsonMemberName {
 /// If nothing is escaped, `text` is returned without any allocation. If at
 /// least one character is escaped, then a string is allocated and holds the
 /// unescaped string.
+///
+/// This function must be called on the `inner_string_text()` of a token,
+/// meaning the outer quotes are already expected to be trimmed.
 pub fn unescape_json_string(text: TokenText) -> Text {
     enum State {
         Normal,
@@ -276,9 +278,6 @@ pub fn unescape_json_string(text: TokenText) -> Text {
                 match state {
                     State::Escaped => {
                         let escaped = match c {
-                            '"' => '"',
-                            '\\' => '\\',
-                            '/' => '/',
                             'b' => '\u{0008}',
                             'f' => '\u{000c}',
                             'n' => '\n',
@@ -334,7 +333,7 @@ pub fn unescape_json_string(text: TokenText) -> Text {
 mod tests {
     use std::{
         collections::{BTreeMap, HashMap, HashSet},
-        num::{NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize},
+        num::{NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize},
     };
 
     use super::*;

@@ -17,7 +17,7 @@ foo[key]
 ```
 invalid.js:3:1 lint/nursery/noDynamicNamespaceImportAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid accessing namespace imports dynamically, it can prevent efficient tree shaking and increase bundle size.
+  i Avoid accessing namespace imports dynamically, it can prevent efficient tree shaking and increase bundle size.
   
     1 │ import * as foo from "foo"
     2 │ 
@@ -34,7 +34,7 @@ invalid.js:3:1 lint/nursery/noDynamicNamespaceImportAccess ━━━━━━━
 ```
 invalid.js:4:1 lint/nursery/noDynamicNamespaceImportAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid accessing namespace imports dynamically, it can prevent efficient tree shaking and increase bundle size.
+  i Avoid accessing namespace imports dynamically, it can prevent efficient tree shaking and increase bundle size.
   
     3 │ foo["bar"]
   > 4 │ foo[1]
@@ -50,7 +50,7 @@ invalid.js:4:1 lint/nursery/noDynamicNamespaceImportAccess ━━━━━━━
 ```
 invalid.js:6:1 lint/nursery/noDynamicNamespaceImportAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid accessing namespace imports dynamically, it can prevent efficient tree shaking and increase bundle size.
+  i Avoid accessing namespace imports dynamically, it can prevent efficient tree shaking and increase bundle size.
   
     4 │ foo[1]
     5 │ const key = "bar"

@@ -1,14 +1,14 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
+    LineEnding, LineWidth,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 pub type FormatterEnabled = Bool<true>;
-pub type UseEditorconfigEnabled = Bool<false>;
+pub type UseEditorconfigEnabled = Bool<true>;
 pub type FormatWithErrorsEnabled = Bool<false>;
 
 /// Generic options applied to all files
@@ -64,25 +64,23 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
 
+    /// Whether to expand arrays and objects on multiple lines.
+    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
+    /// and array literals are formatted on a single line if it fits in the line.
+    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
+    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
+    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+    #[bpaf(long("expand"), argument("auto|always|never"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expand: Option<Expand>,
+
     /// Use any `.editorconfig` files to configure the formatter. Configuration
     /// in `biome.json` will override `.editorconfig` configuration.
     ///
-    /// Default: `false`.
+    /// Default: `true`.
     #[bpaf(long("use-editorconfig"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_editorconfig: Option<UseEditorconfigEnabled>,
-
-    /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ignore: Option<Vec<Box<str>>>,
-
-    /// A list of Unix shell style patterns. The formatter will include files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub include: Option<Vec<Box<str>>>,
 
     /// A list of glob patterns. The formatter will include files/folders that will
     /// match these patterns.
@@ -122,6 +120,10 @@ impl FormatterConfiguration {
 
     pub fn bracket_spacing_resolved(&self) -> BracketSpacing {
         self.bracket_spacing.unwrap_or_default()
+    }
+
+    pub fn expand_resolved(&self) -> Expand {
+        self.expand.unwrap_or_default()
     }
 
     pub fn use_editorconfig_resolved(&self) -> bool {

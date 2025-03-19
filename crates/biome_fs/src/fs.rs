@@ -1,5 +1,5 @@
 use crate::{BiomePath, PathInterner};
-use biome_diagnostics::{console, Advices, Diagnostic, IoError, LogCategory, Visit};
+use biome_diagnostics::{Advices, Diagnostic, IoError, LogCategory, Visit, console};
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 pub use memory::{ErrorEntry, MemoryFileSystem};
@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
 use std::panic::RefUnwindSafe;
+use std::path::Path;
 use std::sync::Arc;
 use std::{fmt, io};
 use tracing::{error, info};
@@ -74,7 +75,7 @@ impl From<PathKind> for oxc_resolver::FileMetadata {
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// It opens a file with the given set of options
     fn open_with_options(&self, path: &Utf8Path, options: OpenOptions)
-        -> io::Result<Box<dyn File>>;
+    -> io::Result<Box<dyn File>>;
 
     /// Initiate a traversal of the filesystem
     ///
@@ -121,40 +122,45 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// there aren't any more parent folders.
     ///
     /// If no file is found, the method returns `None`
-    fn auto_search_file(
+    fn auto_search_files(
         &self,
         search_dir: &Utf8Path,
-        search_file: &str,
+        search_files: &[&str],
     ) -> Option<AutoSearchResult> {
         let mut current_search_dir = search_dir.to_path_buf();
         let mut is_searching_in_parent_dir = false;
 
         loop {
-            let file_path = current_search_dir.join(search_file);
-            match self.read_file_from_path(&file_path) {
-                Ok(content) => {
-                    if is_searching_in_parent_dir {
-                        info!(
+            // Iterate all possible file names
+            for file_name in search_files {
+                let file_path = current_search_dir.join(file_name);
+                match self.read_file_from_path(&file_path) {
+                    Ok(content) => {
+                        if is_searching_in_parent_dir {
+                            info!(
                                 "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
                                 current_search_dir
                             );
+                        }
+                        return Some(AutoSearchResult {
+                            content,
+                            file_path,
+                            directory_path: current_search_dir,
+                        });
                     }
-                    return Some(AutoSearchResult {
-                        content,
-                        file_path,
-                        directory_path: current_search_dir,
-                    });
-                }
-                _ => {
-                    if let Some(parent_search_dir) = current_search_dir.parent() {
-                        current_search_dir = Utf8PathBuf::from(parent_search_dir);
-                        is_searching_in_parent_dir = true;
-                    } else {
-                        return None;
-                    }
+                    _ => continue,
                 }
             }
+
+            if let Some(parent_search_dir) = current_search_dir.parent() {
+                current_search_dir = Utf8PathBuf::from(parent_search_dir);
+                is_searching_in_parent_dir = true;
+            } else {
+                break;
+            }
         }
+
+        None
     }
 
     /// Reads the content of a file specified by `file_path`.
@@ -447,6 +453,17 @@ pub struct FileSystemDiagnostic {
 impl Display for FileSystemDiagnostic {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         Diagnostic::description(self, f)
+    }
+}
+
+impl FileSystemDiagnostic {
+    pub fn non_utf8_path(path: &Path) -> Self {
+        Self {
+            severity: Severity::Error,
+            path: path.display().to_string(),
+            error_kind: FsErrorKind::NonUtf8Path,
+            source: None,
+        }
     }
 }
 

@@ -104,8 +104,8 @@ impl schemars::JsonSchema for RestrictedRegex {
         "Regex".to_string()
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        String::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(generator)
     }
 }
 
@@ -233,11 +233,10 @@ fn validate_restricted_regex(pattern: &str) -> Result<(), RestrictedRegexError> 
                 }
             }
             b'(' if !is_in_char_class => {
-                match it.next() {
-                    Some((_, b'[')) => {
-                        is_in_char_class = true;
-                    }
-                    Some((_, b'?')) => match it.next() {
+                let mut lookahead = it.clone();
+                if let Some((_, b'?')) = lookahead.next() {
+                    it.next();
+                    match it.next() {
                         Some((i, b'P' | b'=' | b'!' | b'<')) => {
                             return if c == b'P'
                                 || (c == b'<' && !matches!(it.next(), Some((_, b'=' | b'!'))))
@@ -292,8 +291,7 @@ fn validate_restricted_regex(pattern: &str) -> Result<(), RestrictedRegexError> 
                                 }
                             }
                         }
-                    },
-                    _ => {}
+                    }
                 }
             }
             _ => {}
@@ -331,5 +329,6 @@ mod tests {
         assert!(validate_restricted_regex("[A-Z][^a-z]").is_ok());
         assert!(validate_restricted_regex(r"\n\t\v\f").is_ok());
         assert!(validate_restricted_regex("([^_])").is_ok());
+        assert!(validate_restricted_regex(r"(\$)").is_ok());
     }
 }

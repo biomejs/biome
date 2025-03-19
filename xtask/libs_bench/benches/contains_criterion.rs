@@ -1,7 +1,7 @@
 mod contains;
 
 use contains::*;
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 use fastbloom_rs::Membership;
 
 const SEARCH_FOR: &[&str] = &[

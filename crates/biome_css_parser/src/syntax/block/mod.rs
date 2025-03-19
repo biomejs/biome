@@ -7,7 +7,7 @@ mod rule_block;
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::diagnostic::{expected_node, ParseDiagnostic};
+use biome_parser::diagnostic::{ParseDiagnostic, expected_node};
 use biome_parser::{CompletedMarker, Parser};
 use biome_rowan::TextRange;
 

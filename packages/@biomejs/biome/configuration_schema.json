@@ -6,7 +6,7 @@
 	"properties": {
 		"$schema": {
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
-			"type": ["string", "null"]
+			"anyOf": [{ "$ref": "#/definitions/Schema" }, { "type": "null" }]
 		},
 		"assist": {
 			"description": "Specific configuration for assists",
@@ -397,16 +397,6 @@
 					"description": "Whether Biome should enable assist via LSP.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
@@ -426,6 +416,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAdjacentSpacesInRegex": {
+					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
@@ -465,13 +462,6 @@
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoForEachConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noMultipleSpacesInRegularExpressionLiterals": {
-					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1316,7 +1306,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"Expand": { "type": "string", "enum": ["always", "followSource"] },
+		"Expand": {
+			"oneOf": [
+				{
+					"description": "Objects are expanded when the first property has a leading newline. Arrays are always expanded if they are shorter than the line width.",
+					"type": "string",
+					"enum": ["auto"]
+				},
+				{
+					"description": "Objects and arrays are always expanded.",
+					"type": "string",
+					"enum": ["always"]
+				},
+				{
+					"description": "Objects and arrays are never expanded, if they are shorter than the line width.",
+					"type": "string",
+					"enum": ["never"]
+				}
+			]
+		},
 		"FilenameCase": {
 			"description": "Supported cases for file names.",
 			"oneOf": [
@@ -1381,19 +1389,9 @@
 			"description": "The configuration of the filesystem",
 			"type": "object",
 			"properties": {
-				"ignore": {
-					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"ignoreUnknown": {
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
 				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will handle only those files/folders that will match these patterns.",
@@ -1465,19 +1463,13 @@
 				"enabled": {
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
+				"expand": {
+					"description": "Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
+				},
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
-				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
 				},
 				"includes": {
 					"description": "A list of glob patterns. The formatter will include files/folders that will match these patterns.",
@@ -1501,7 +1493,7 @@
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
-					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
+					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `true`.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
@@ -1929,6 +1921,10 @@
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
+				"expand": {
+					"description": "Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
+				},
 				"indentStyle": {
 					"description": "The indent style applied to JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
@@ -1948,10 +1944,6 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
-				},
-				"objectWrap": {
-					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
-					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				},
 				"quoteProperties": {
 					"description": "When properties in objects are quoted. Defaults to asNeeded.",
@@ -1998,7 +1990,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"jsxEverywhere": {
-					"description": "When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.",
+					"description": "When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.\n\nDefaults to `true`.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"unsafeParameterDecoratorsEnabled": {
@@ -2069,7 +2061,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"followSource\".",
+					"description": "Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
 					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
 				},
 				"indentStyle": {
@@ -2272,22 +2264,11 @@
 			"properties": {
 				"domains": {
 					"description": "An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.",
-					"type": ["object", "null"],
-					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
+					"anyOf": [{ "$ref": "#/definitions/RuleDomains" }, { "type": "null" }]
 				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
-				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The analyzer will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
 				},
 				"includes": {
 					"description": "A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.",
@@ -2322,10 +2303,6 @@
 					"type": "array",
 					"items": { "$ref": "#/definitions/Convention" }
 				},
-				"enumMemberCase": {
-					"description": "Allowed cases for _TypeScript_ `enum` member names.",
-					"allOf": [{ "$ref": "#/definitions/Format" }]
-				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
 					"type": "boolean"
@@ -2333,6 +2310,42 @@
 				"strictCase": {
 					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
 					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoBitwiseOperatorsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoBitwiseOperatorsOptions" }
+			]
+		},
+		"NoBitwiseOperatorsOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Allows a list of bitwise operators to be used as exceptions.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoConfusingLabelsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoConfusingLabelsOptions" }
+			]
+		},
+		"NoConfusingLabelsOptions": {
+			"description": "Options for the rule `noConfusingLabels`",
+			"type": "object",
+			"properties": {
+				"allowedLabels": {
+					"description": "A list of (non-confusing) labels that should be allowed",
+					"type": "array",
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -2512,6 +2525,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noBitwiseOperators": {
+					"description": "Disallow bitwise operators.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoBitwiseOperatorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noCommonJs": {
 					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
 					"anyOf": [
@@ -2528,6 +2548,13 @@
 				},
 				"noDescendingSpecificity": {
 					"description": "Disallow a lower specificity selector from coming after a higher specificity selector.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDestructuredProps": {
+					"description": "Disallow destructuring props inside JSX components in Solid projects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2669,7 +2696,7 @@
 				"noOctalEscape": {
 					"description": "Disallow octal escape sequences in string literals",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2785,6 +2812,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessEscapeInString": {
+					"description": "Disallow unnecessary escapes in string literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessStringRaw": {
 					"description": "Disallow unnecessary String.raw function in template string literals without any escape sequence.",
 					"anyOf": [
@@ -2863,6 +2897,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentObjectDefinition": {
+					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentObjectDefinitionConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useDeprecatedReason": {
 					"description": "Require specifying the reason argument when using @deprecated directive",
 					"anyOf": [
@@ -2879,6 +2922,13 @@
 				},
 				"useExportsLast": {
 					"description": "Require that all exports are declared after all non-export statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useForComponent": {
+					"description": "Enforce using Solid's \\<For /> component for mapping an array to JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2940,6 +2990,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSymbolDescription": {
+					"description": "Require a description parameter for the Symbol().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTrimStartEnd": {
 					"description": "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().",
 					"anyOf": [
@@ -2957,7 +3014,16 @@
 			},
 			"additionalProperties": false
 		},
-		"ObjectWrap": { "type": "string", "enum": ["preserve", "collapse"] },
+		"ObjectPropertySyntax": {
+			"oneOf": [
+				{
+					"description": "`{foo: foo}`",
+					"type": "string",
+					"enum": ["explicit"]
+				},
+				{ "description": "`{foo}`", "type": "string", "enum": ["shorthand"] }
+			]
+		},
 		"Options": {
 			"type": "object",
 			"properties": {
@@ -3011,6 +3077,10 @@
 				"enabled": {
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
+				"expand": {
+					"description": "Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
+				},
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
@@ -3038,13 +3108,16 @@
 			},
 			"additionalProperties": false
 		},
+		"OverrideGlobs": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/Glob" }
+		},
 		"OverrideLinterConfiguration": {
 			"type": "object",
 			"properties": {
 				"domains": {
 					"description": "List of rules",
-					"type": ["object", "null"],
-					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
+					"anyOf": [{ "$ref": "#/definitions/RuleDomains" }, { "type": "null" }]
 				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
@@ -3102,20 +3175,12 @@
 						{ "type": "null" }
 					]
 				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"anyOf": [
+						{ "$ref": "#/definitions/OverrideGlobs" },
+						{ "type": "null" }
+					]
 				},
 				"javascript": {
 					"description": "Specific configuration for the JavaScript language",
@@ -3291,6 +3356,27 @@
 				{ "$ref": "#/definitions/RuleWithNoOptions" }
 			]
 		},
+		"RuleDomain": {
+			"description": "Rule domains",
+			"oneOf": [
+				{
+					"description": "React library rules",
+					"type": "string",
+					"enum": ["react"]
+				},
+				{ "description": "Testing rules", "type": "string", "enum": ["test"] },
+				{
+					"description": "Solid.js framework rules",
+					"type": "string",
+					"enum": ["solid"]
+				},
+				{
+					"description": "Next.js framework rules",
+					"type": "string",
+					"enum": ["next"]
+				}
+			]
+		},
 		"RuleDomainValue": {
 			"oneOf": [
 				{
@@ -3309,6 +3395,11 @@
 					"enum": ["recommended"]
 				}
 			]
+		},
+		"RuleDomains": {
+			"type": "object",
+			"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" },
+			"propertyNames": { "$ref": "#/definitions/RuleDomain" }
 		},
 		"RuleFixConfiguration": {
 			"anyOf": [
@@ -3471,6 +3562,36 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NamingConventionOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoBitwiseOperatorsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoBitwiseOperatorsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoConfusingLabelsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoConfusingLabelsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3684,6 +3805,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseConsistentObjectDefinitionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseConsistentObjectDefinitionOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseExhaustiveDependenciesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -3850,6 +3988,7 @@
 			},
 			"additionalProperties": false
 		},
+		"Schema": { "type": "string" },
 		"Scope": { "type": "string", "enum": ["any", "global"] },
 		"Security": {
 			"description": "A list of rules that belong to this group",
@@ -4355,22 +4494,6 @@
 			},
 			"additionalProperties": false
 		},
-		"SuggestedExtensionMapping": {
-			"type": "object",
-			"properties": {
-				"component": {
-					"description": "Extension that should be used for component file imports",
-					"default": "",
-					"type": "string"
-				},
-				"module": {
-					"description": "Extension that should be used for module imports",
-					"default": "",
-					"type": "string"
-				}
-			},
-			"additionalProperties": false
-		},
 		"Suspicious": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -4434,7 +4557,7 @@
 				"noConfusingLabels": {
 					"description": "Disallow labeled statements that are not loops.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoConfusingLabelsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4460,7 +4583,7 @@
 					]
 				},
 				"noControlCharactersInRegex": {
-					"description": "Prevents from having control characters and some escape sequences that match control characters in regular expressions.",
+					"description": "Prevents from having control characters and some escape sequences that match control characters in regular expression literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -4747,7 +4870,7 @@
 					]
 				},
 				"noSparseArray": {
-					"description": "Disallow sparse arrays",
+					"description": "Prevents the use of sparse arrays (arrays with holes).",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4842,7 +4965,7 @@
 					]
 				},
 				"useValidTypeof": {
-					"description": "This rule checks that the result of a `typeof' expression is compared to a valid value.",
+					"description": "This rule checks that the result of a typeof expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4923,6 +5046,23 @@
 			},
 			"additionalProperties": false
 		},
+		"UseConsistentObjectDefinitionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseConsistentObjectDefinitionOptions" }
+			]
+		},
+		"UseConsistentObjectDefinitionOptions": {
+			"type": "object",
+			"properties": {
+				"syntax": {
+					"description": "The preferred syntax to enforce.",
+					"default": "explicit",
+					"allOf": [{ "$ref": "#/definitions/ObjectPropertySyntax" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseExhaustiveDependenciesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4961,13 +5101,10 @@
 		"UseImportExtensionsOptions": {
 			"type": "object",
 			"properties": {
-				"suggestedExtensions": {
-					"description": "A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension",
-					"default": {},
-					"type": "object",
-					"additionalProperties": {
-						"$ref": "#/definitions/SuggestedExtensionMapping"
-					}
+				"forceJsExtensions": {
+					"description": "If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.",
+					"default": false,
+					"type": "boolean"
 				}
 			},
 			"additionalProperties": false

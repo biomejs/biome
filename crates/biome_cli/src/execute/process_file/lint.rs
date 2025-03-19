@@ -1,9 +1,9 @@
+use crate::TraversalMode;
 use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
-use crate::TraversalMode;
 use biome_analyze::RuleCategoriesBuilder;
-use biome_diagnostics::{category, DiagnosticExt, Error};
+use biome_diagnostics::{DiagnosticExt, Error, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_rowan::TextSize;
 use biome_service::diagnostics::FileTooLarge;

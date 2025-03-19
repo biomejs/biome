@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -16,7 +16,7 @@ use biome_string_case::StrLikeExtension;
 use crate::JsRuleAction;
 
 declare_lint_rule! {
-    /// This rule checks that the result of a `typeof' expression is compared to a valid value.
+    /// This rule checks that the result of a `typeof` expression is compared to a valid value.
     ///
     /// ## Examples
     ///

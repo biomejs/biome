@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -19,7 +20,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:21 lint/nursery/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use valid values for the autocomplete attribute.
+  i Use valid values for the autocomplete attribute.
   
     1 │ <>
   > 2 │ 	<input type="text" autocomplete="foo" />
@@ -40,7 +41,7 @@ invalid.jsx:2:21 lint/nursery/useValidAutocomplete ━━━━━━━━━�
 ```
 invalid.jsx:3:21 lint/nursery/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use valid values for the autocomplete attribute.
+  i Use valid values for the autocomplete attribute.
   
     1 │ <>
     2 │ 	<input type="text" autocomplete="foo" />
@@ -62,7 +63,7 @@ invalid.jsx:3:21 lint/nursery/useValidAutocomplete ━━━━━━━━━�
 ```
 invalid.jsx:4:21 lint/nursery/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use valid values for the autocomplete attribute.
+  i Use valid values for the autocomplete attribute.
   
     2 │ 	<input type="text" autocomplete="foo" />
     3 │ 	<input type="text" autocomplete="name invalid" />
@@ -84,7 +85,7 @@ invalid.jsx:4:21 lint/nursery/useValidAutocomplete ━━━━━━━━━�
 ```
 invalid.jsx:5:21 lint/nursery/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use valid values for the autocomplete attribute.
+  i Use valid values for the autocomplete attribute.
   
     3 │ 	<input type="text" autocomplete="name invalid" />
     4 │ 	<input type="text" autocomplete="invalid name" />
@@ -106,7 +107,7 @@ invalid.jsx:5:21 lint/nursery/useValidAutocomplete ━━━━━━━━━�
 ```
 invalid.jsx:6:7 lint/nursery/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use valid values for the autocomplete attribute.
+  i Use valid values for the autocomplete attribute.
   
     4 │ 	<input type="text" autocomplete="invalid name" />
     5 │ 	<input type="text" autocomplete="home url" />
@@ -128,7 +129,7 @@ invalid.jsx:6:7 lint/nursery/useValidAutocomplete ━━━━━━━━━━
 ```
 invalid.jsx:7:21 lint/nursery/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use valid values for the autocomplete attribute.
+  i Use valid values for the autocomplete attribute.
   
     5 │ 	<input type="text" autocomplete="home url" />
     6 │ 	<Bar autocomplete="baz"></Bar>

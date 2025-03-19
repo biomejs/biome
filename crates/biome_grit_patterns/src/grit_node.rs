@@ -1,6 +1,6 @@
 use crate::util::TextRangeGritExt;
 use biome_grit_syntax::GritSyntaxNode;
-use grit_util::{error::GritResult, AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
+use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange, error::GritResult};
 use std::{borrow::Cow, ops::Deref};
 
 /// Wrapper around `GritSyntaxNode` as produced by our internal Grit parser.

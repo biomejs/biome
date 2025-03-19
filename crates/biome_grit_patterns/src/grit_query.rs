@@ -2,12 +2,12 @@ use crate::diagnostics::CompilerDiagnostic;
 use crate::grit_built_in_functions::BuiltIns;
 use crate::grit_context::{GritExecContext, GritQueryContext, GritTargetFile};
 use crate::grit_definitions::{
-    compile_definitions, scan_definitions, Definitions, ScannedDefinitionInfo,
+    Definitions, ScannedDefinitionInfo, compile_definitions, scan_definitions,
 };
 use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_tree::GritTargetTree;
-use crate::pattern_compiler::{auto_wrap_pattern, PatternCompiler};
+use crate::pattern_compiler::{PatternCompiler, auto_wrap_pattern};
 use crate::pattern_compiler::{
     compilation_context::CompilationContext, compilation_context::NodeCompilationContext,
 };
@@ -134,16 +134,18 @@ impl GritQuery {
             function_definition_info,
         };
 
-        let mut vars_array = vec![GLOBAL_VARS
-            .iter()
-            .map(|global_var| VariableSource::Compiled {
-                name: global_var.0.to_string(),
-                file: source_path
-                    .map(Utf8Path::to_path_buf)
-                    .map_or_else(|| "unnamed".to_owned(), |p| p.to_string()),
-                locations: BTreeSet::new(),
-            })
-            .collect::<Vec<VariableSource>>()];
+        let mut vars_array = vec![
+            GLOBAL_VARS
+                .iter()
+                .map(|global_var| VariableSource::Compiled {
+                    name: global_var.0.to_string(),
+                    file: source_path
+                        .map(Utf8Path::to_path_buf)
+                        .map_or_else(|| "unnamed".to_owned(), |p| p.to_string()),
+                    locations: BTreeSet::new(),
+                })
+                .collect::<Vec<VariableSource>>(),
+        ];
         let mut global_vars: BTreeMap<String, usize> = GLOBAL_VARS
             .iter()
             .map(|(global_var, index)| ((*global_var).to_string(), *index))

@@ -1,10 +1,10 @@
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, Text, declare_node_union};
 
 use crate::{
     AnyJsBindingPattern, AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportDefaultDeclaration,
     AnyJsExportNamedSpecifier, AnyJsExpression, AnyTsIdentifierBinding, AnyTsType, JsExport,
     JsExportNamedClause, JsIdentifierExpression, JsLiteralExportName, JsReferenceIdentifier,
-    JsSyntaxToken, TsEnumDeclaration,
+    JsSyntaxToken, TsEnumDeclaration, unescape_js_string,
 };
 
 declare_node_union! {
@@ -273,6 +273,20 @@ impl AnyJsExportNamedSpecifier {
                 .is_some()
     }
 
+    /// Returns the exported name of the export.
+    pub fn exported_name(&self) -> SyntaxResult<Text> {
+        match self {
+            Self::JsExportNamedShorthandSpecifier(specifier) => specifier
+                .name()
+                .and_then(|identifier| identifier.value_token())
+                .map(|token| token.token_text_trimmed().into()),
+            Self::JsExportNamedSpecifier(specifier) => specifier
+                .exported_name()
+                .and_then(|name| name.inner_string_text())
+                .map(unescape_js_string),
+        }
+    }
+
     /// Returns the local name of the export.
     ///
     /// ## Examples
@@ -316,8 +330,8 @@ impl AnyJsExportNamedSpecifier {
 
 #[cfg(test)]
 mod tests {
-    use biome_js_factory::syntax::{JsExport, JsSyntaxKind::*};
     use biome_js_factory::JsSyntaxTreeBuilder;
+    use biome_js_factory::syntax::{JsExport, JsSyntaxKind::*};
     use biome_rowan::AstNode;
 
     #[test]

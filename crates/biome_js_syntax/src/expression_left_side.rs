@@ -1,8 +1,8 @@
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{AstNode, declare_node_union};
 
 use crate::{
-    binary_like_expression::{AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression},
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsPrivateName,
+    binary_like_expression::{AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression},
 };
 
 declare_node_union! {
@@ -46,12 +46,12 @@ impl AnyJsExpressionLeftSide {
                     AnyJsExpression::TsSatisfiesExpression(expr) => expr.expression().ok(),
                     AnyJsExpression::TsNonNullAssertionExpression(expr) => expr.expression().ok(),
                     AnyJsExpression::JsAssignmentExpression(expr) => {
-                        return expr.left().ok().map(Self::from)
+                        return expr.left().ok().map(Self::from);
                     }
                     AnyJsExpression::JsPostUpdateExpression(expr) => {
                         return expr.operand().ok().map(|assignment| {
                             Self::from(AnyJsAssignmentPattern::AnyJsAssignment(assignment))
-                        })
+                        });
                     }
                     expr => {
                         return AnyJsBinaryLikeExpression::cast_ref(expr.syntax()).and_then(
@@ -73,10 +73,10 @@ impl AnyJsExpressionLeftSide {
                 let left = match pattern {
                     AnyJsAssignmentPattern::AnyJsAssignment(assignment) => match assignment {
                         AnyJsAssignment::JsComputedMemberAssignment(computed) => {
-                            return computed.object().ok().map(Self::from)
+                            return computed.object().ok().map(Self::from);
                         }
                         AnyJsAssignment::JsStaticMemberAssignment(member) => {
-                            return member.object().ok().map(Self::from)
+                            return member.object().ok().map(Self::from);
                         }
                         AnyJsAssignment::TsAsAssignment(parent) => parent.assignment().ok(),
                         AnyJsAssignment::TsSatisfiesAssignment(parent) => parent.assignment().ok(),

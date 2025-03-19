@@ -16,8 +16,8 @@ use std::{cmp::Ordering, collections::HashMap};
 use bitvec::{order::Lsb0, vec::BitVec};
 
 use super::{
-    class_lexer::{tokenize_class, ClassSegmentStructure},
-    sort_config::{build_variant_weight, SortConfig, VariantsConfig},
+    class_lexer::{ClassSegmentStructure, tokenize_class},
+    sort_config::{SortConfig, VariantsConfig, build_variant_weight},
 };
 use crate::lint::nursery::use_sorted_classes::sort_config::UtilityLayer;
 

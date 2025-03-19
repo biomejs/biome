@@ -2,10 +2,10 @@ use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_DISABLED_FORMATTER_JSONC, CONFIG_FILE_SIZE_LIMIT,
     CONFIG_LINTER_DISABLED,
 };
-use crate::snap_test::{assert_file_contents, SnapshotPayload};
+use crate::snap_test::{SnapshotPayload, assert_file_contents};
 use crate::{
-    assert_cli_snapshot, run_cli, CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, PARSE_ERROR,
-    UNFORMATTED,
+    CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, PARSE_ERROR, UNFORMATTED, assert_cli_snapshot,
+    run_cli,
 };
 use biome_console::{BufferConsole, MarkupBuf};
 use biome_fs::MemoryFileSystem;
@@ -692,110 +692,6 @@ something( )
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ci_formatter_linter_organize_imports",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn ignore_vcs_ignored_file() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let rome_json = r#"{
-        "vcs": {
-            "enabled": true,
-            "clientKind": "git",
-            "useIgnoreFile": true
-        }
-    }"#;
-
-    let git_ignore = r#"
-file2.js
-"#;
-
-    let code2 = r#"foo.call(); bar.call();"#;
-    let code1 = r#"array.map(sentence => sentence.split(' ')).flat();"#;
-
-    // ignored files
-    let file_path1 = Utf8Path::new("file1.js");
-    fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Utf8Path::new("file2.js");
-    fs.insert(file_path2.into(), code2.as_bytes());
-
-    // configuration
-    let config_path = Utf8Path::new("biome.json");
-    fs.insert(config_path.into(), rome_json.as_bytes());
-
-    // git ignore file
-    let ignore_file = Utf8Path::new(".gitignore");
-    fs.insert(ignore_file.into(), git_ignore.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["ci", file_path1.as_str(), file_path2.as_str()].as_slice()),
-    );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "ignore_vcs_ignored_file",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
-fn ignore_vcs_ignored_file_via_cli() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let git_ignore = r#"
-file2.js
-"#;
-
-    let code2 = r#"foo.call();
-
-
-	bar.call();"#;
-    let code1 = r#"array.map(sentence => sentence.split(' ')).flat();"#;
-
-    // ignored files
-    let file_path1 = Utf8Path::new("file1.js");
-    fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Utf8Path::new("file2.js");
-    fs.insert(file_path2.into(), code2.as_bytes());
-
-    // git ignore file
-    let ignore_file = Utf8Path::new("./.gitignore");
-    fs.insert(ignore_file.into(), git_ignore.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(
-            [
-                "ci",
-                "--vcs-enabled=true",
-                "--vcs-client-kind=git",
-                "--vcs-use-ignore-file=true",
-                "--vcs-root=.",
-                file_path1.as_str(),
-                file_path2.as_str(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "ignore_vcs_ignored_file_via_cli",
         fs,
         console,
         result,

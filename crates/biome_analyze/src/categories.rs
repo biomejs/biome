@@ -1,4 +1,4 @@
-use enumflags2::{bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags};
 use std::borrow::Cow;
 use std::fmt::{Display, Formatter};
 
@@ -36,8 +36,8 @@ impl Display for RuleCategory {
 }
 
 /// Actions that suppress rules should start with this string
-pub const SUPPRESSION_INLINE_ACTION_CATEGORY: &str = "quickfix.suppressRule.inline";
-pub const SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY: &str = "quickfix.suppressRule.topLevel";
+pub const SUPPRESSION_INLINE_ACTION_CATEGORY: &str = "quickfix.suppressRule.inline.biome";
+pub const SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY: &str = "quickfix.suppressRule.topLevel.biome";
 
 /// The category of a code action, this type maps directly to the
 /// [CodeActionKind] type in the Language Server Protocol specification
@@ -375,8 +375,8 @@ impl schemars::JsonSchema for RuleCategories {
         String::from("RuleCategories")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<RuleCategory>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<RuleCategory>>::json_schema(generator)
     }
 }
 

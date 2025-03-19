@@ -8,16 +8,16 @@ use grit_pattern_matcher::{
     constant::Constant,
     context::ExecContext,
     pattern::{
-        get_absolute_file_name, get_file_name, CallBuiltIn, CallbackPattern, JoinFn, LazyBuiltIn,
-        Pattern, ResolvedPattern, ResolvedSnippet, State,
+        CallBuiltIn, CallbackPattern, JoinFn, LazyBuiltIn, Pattern, ResolvedPattern,
+        ResolvedSnippet, State, get_absolute_file_name, get_file_name,
     },
 };
 use grit_util::{
-    error::{GritPatternError, GritResult},
     AnalysisLogBuilder, AnalysisLogs,
+    error::{GritPatternError, GritResult},
 };
 use path_absolutize::Absolutize;
-use rand::{seq::SliceRandom, Rng};
+use rand::{Rng, seq::SliceRandom};
 use std::path::Path;
 use std::{borrow::Cow, fmt::Debug, num::TryFromIntError};
 
@@ -141,10 +141,11 @@ impl Default for BuiltIns {
 
 impl BuiltIns {
     pub(crate) fn add(&mut self, built_in: BuiltInFunction) {
-        debug_assert!(self
-            .built_ins
-            .iter()
-            .all(|existing| existing.name != built_in.name));
+        debug_assert!(
+            self.built_ins
+                .iter()
+                .all(|existing| existing.name != built_in.name)
+        );
 
         self.built_ins.push(built_in);
     }
@@ -327,7 +328,7 @@ fn length_fn<'a>(
                 None => {
                     return Err(GritPatternError::new(
                         "length() requires a list or string as the first argument",
-                    ))
+                    ));
                 }
             }
         }
@@ -443,7 +444,7 @@ fn random_fn<'a>(
             Ok(ResolvedPattern::from_constant(Constant::Integer(value)))
         }
         [None, None] => {
-            let value = state.get_rng().gen::<f64>();
+            let value = state.get_rng().r#gen::<f64>();
             Ok(ResolvedPattern::from_constant(Constant::Float(value)))
         }
         _ => Err(GritPatternError::new(

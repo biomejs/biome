@@ -1,5 +1,5 @@
-use crate::prelude::*;
-use biome_formatter::{write, FormatRuleWithOptions};
+use crate::{prelude::*, utils::metadata::is_element_whitespace_sensitive};
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{HtmlClosingElement, HtmlClosingElementFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlClosingElement {
@@ -35,8 +35,19 @@ impl FormatNodeRule<HtmlClosingElement> for FormatHtmlClosingElement {
             r_angle_token,
         } = node.as_fields();
 
+        let name = name?;
+        let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &name);
+
         // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
         if !self.tag_borrowed {
+            // Handle whitespace sensitivity in cases where the HtmlElementList formatter is not invoked because the element has no children.
+            if let Ok(l_angle_token) = &l_angle_token {
+                if is_whitespace_sensitive && l_angle_token.has_leading_whitespace_or_newline() {
+                    // we can't get rid of the whitespace if the element is whitespace sensitive
+                    write!(f, [space()])?;
+                }
+            }
+
             write!(
                 f,
                 [l_angle_token.format(), slash_token.format(), name.format()]

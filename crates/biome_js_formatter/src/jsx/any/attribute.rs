@@ -8,6 +8,7 @@ impl FormatRule<AnyJsxAttribute> for FormatAnyJsxAttribute {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsxAttribute, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
+            AnyJsxAttribute::JsMetavariable(node) => node.format().fmt(f),
             AnyJsxAttribute::JsxAttribute(node) => node.format().fmt(f),
             AnyJsxAttribute::JsxSpreadAttribute(node) => node.format().fmt(f),
         }

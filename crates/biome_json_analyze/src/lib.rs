@@ -9,12 +9,13 @@ pub mod utils;
 pub use crate::registry::visit_registry;
 use crate::suppression_action::JsonSuppressionAction;
 use biome_analyze::{
-    to_analyzer_suppressions, AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression,
-    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    to_analyzer_suppressions,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
-use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
+use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::LazyLock;
 
@@ -126,14 +127,14 @@ where
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
-    use biome_console::{markup, Markup};
+    use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
-    use biome_json_parser::{parse_json, JsonParserOptions};
+    use biome_json_parser::{JsonParserOptions, parse_json};
     use biome_json_syntax::{JsonFileSource, TextRange};
     use std::slice;
 
-    use crate::{analyze, AnalysisFilter, ControlFlow};
+    use crate::{AnalysisFilter, ControlFlow, analyze};
 
     #[ignore]
     #[test]

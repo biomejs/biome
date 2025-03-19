@@ -1,6 +1,6 @@
 use crate::JsParser;
 use crate::JsSyntaxKind::JS_METAVARIABLE;
-use biome_parser::{prelude::ParsedSyntax, Parser};
+use biome_parser::{Parser, prelude::ParsedSyntax};
 
 #[inline]
 pub(crate) fn is_at_metavariable(p: &mut JsParser) -> bool {

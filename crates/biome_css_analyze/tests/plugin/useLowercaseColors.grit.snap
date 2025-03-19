@@ -16,7 +16,7 @@ div {
 ```
 useLowercaseColors.grit:3:12 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer lowercase colors
+  × Prefer lowercase colors
   
     1 │ div {
     2 │     color: red;

@@ -28,7 +28,7 @@ snapshot_kind: text
 ```
 invalidMatch.js lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This filename should match the following regex /[^i].*/.
+  i This filename should match the following regex /[^i].*/.
   
 
 ```

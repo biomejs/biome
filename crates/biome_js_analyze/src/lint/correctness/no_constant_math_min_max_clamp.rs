@@ -1,17 +1,17 @@
 use std::{cmp::Ordering, str::FromStr};
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression,
-    JsCallExpression, JsNumberLiteralExpression,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsCallExpression,
+    JsNumberLiteralExpression, global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 
 declare_lint_rule! {
     /// Disallow the use of `Math.min` and `Math.max` to clamp a value where the result itself is constant.

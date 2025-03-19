@@ -22,7 +22,7 @@ snapshot_kind: text
 ```
 invalidSyllabary.js:2:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     1 │ {
   > 2 │     const 안녕a하세요 = 0;
@@ -36,7 +36,7 @@ invalidSyllabary.js:2:11 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidSyllabary.js:6:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object property name should be in camelCase.
+  i This object property name should be in camelCase.
   
     4 │ {
     5 │     const x = {
@@ -51,7 +51,7 @@ invalidSyllabary.js:6:9 lint/style/useNamingConvention ━━━━━━━━�
 ```
 invalidSyllabary.js:10:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class name should be in PascalCase.
+  i This class name should be in PascalCase.
   
      8 │ }
      9 │ {

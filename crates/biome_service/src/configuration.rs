@@ -1,12 +1,12 @@
-use crate::matcher::Pattern;
-use crate::settings::Settings;
 use crate::WorkspaceError;
+use crate::settings::Settings;
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
-use biome_configuration::{push_to_analyzer_assist, Configuration, VERSION};
+use biome_configuration::editorconfig::parse_str;
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload,
+    BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload, push_to_analyzer_rules,
 };
+use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
@@ -20,7 +20,7 @@ use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsStr;
 use std::fmt::Debug;
@@ -44,8 +44,6 @@ pub struct LoadedConfiguration {
     pub configuration: Configuration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
-    /// Whether `biome.json` and `biome.jsonc` were found in the same folder
-    pub double_configuration_found: bool,
 }
 
 impl LoadedConfiguration {
@@ -59,7 +57,7 @@ impl LoadedConfiguration {
         self.file_path.as_deref()
     }
 
-    /// Whether the are errors emitted. Error are [Severity::Error] or greater.
+    /// Whether they are errors emitted. Error are [Severity::Error] or greater.
     pub fn has_errors(&self) -> bool {
         self.diagnostics
             .iter()
@@ -117,7 +115,6 @@ impl LoadedConfiguration {
             external_resolution_base_path,
             configuration_file_path,
             deserialized,
-            double_configuration_found,
         } = value;
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
@@ -141,7 +138,6 @@ impl LoadedConfiguration {
                 .collect(),
             directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
             file_path: Some(configuration_file_path),
-            double_configuration_found,
         })
     }
 }
@@ -200,20 +196,12 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
             return load_user_config(fs, config_file_path, external_resolution_base_path);
         }
     };
-    let biome_json_result = fs.auto_search_file(&configuration_directory, ConfigName::biome_json());
-
-    let biome_jsonc_result =
-        fs.auto_search_file(&configuration_directory, ConfigName::biome_jsonc());
-
-    let (auto_search_result, double_configuration_found) =
-        match (biome_json_result, biome_jsonc_result) {
-            (Some(biome_json_result), Some(_)) => (biome_json_result, true),
-            (Some(biome_json_result), None) => (biome_json_result, false),
-            (None, Some(biome_jsonc_result)) => (biome_jsonc_result, false),
-            (None, None) => {
-                return Ok(None);
-            }
-        };
+    let Some(auto_search_result) = fs.auto_search_files(
+        &configuration_directory,
+        &[ConfigName::biome_json(), ConfigName::biome_jsonc()],
+    ) else {
+        return Ok(None);
+    };
 
     // We first search for `biome.json` or `biome.jsonc` files
     let AutoSearchResult {
@@ -233,7 +221,6 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
         deserialized,
         configuration_file_path: file_path,
         external_resolution_base_path,
-        double_configuration_found,
     }))
 }
 
@@ -258,7 +245,6 @@ fn load_user_config(
             deserialized,
             configuration_file_path: config_file_path.to_path_buf(),
             external_resolution_base_path,
-            double_configuration_found: false,
         }))
     } else {
         let biome_json_path = config_file_path.join(ConfigName::biome_json());
@@ -287,51 +273,50 @@ fn load_user_config(
             deserialized,
             configuration_file_path: config_path.to_path_buf(),
             external_resolution_base_path,
-            double_configuration_found: biome_json_exists && biome_jsonc_exists,
         }))
+    }
+}
+
+/// judge if path a is parent path for path b.
+fn is_parent_of(a: Utf8PathBuf, b: Utf8PathBuf) -> bool {
+    if a == b {
+        return false;
+    }
+
+    if let Ok(relative_path) = b.strip_prefix(a) {
+        !relative_path.has_root()
+    } else {
+        false
     }
 }
 
 pub fn load_editorconfig(
     fs: &dyn FileSystem,
     workspace_root: Utf8PathBuf,
+    config_path: Option<Utf8PathBuf>,
 ) -> Result<(Option<Configuration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
     // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
-    // We currently don't support the `root` property, so we just search for the file like we do for biome.json
-    if let Some(auto_search_result) = fs.auto_search_file(&workspace_root, ".editorconfig") {
+    // We currently don't support the `root` property, so we just search for the file like we do for biome.json.
+    // And we make some judge for the case when `biome.json` and `.editorconfig` both exists.
+    // If we found a `.editorconfig` directory higher than `biome.json`, we'll don't use it.
+    if let Some(auto_search_result) = fs.auto_search_files(&workspace_root, &[".editorconfig"]) {
         let AutoSearchResult {
             content,
-            file_path: path,
+            directory_path,
             ..
         } = auto_search_result;
-        let editorconfig = biome_configuration::editorconfig::parse_str(&content)?;
-        let config = editorconfig.to_biome();
-
-        let patterns = config
-            .0
-            .as_ref()
-            .and_then(|c| c.overrides.as_ref())
-            .map(|overrides| {
-                overrides
-                    .0
-                    .iter()
-                    .flat_map(|override_pattern| override_pattern.include.iter().flatten())
-            });
-
-        if let Some(patterns) = patterns {
-            for pattern in patterns {
-                if let Err(err) = Pattern::new(pattern) {
-                    return Err(BiomeDiagnostic::new_invalid_ignore_pattern_with_path(
-                        pattern,
-                        err.to_string(),
-                        path.as_str(),
-                    )
-                    .into());
-                }
+        let editorconfig = parse_str(&content)?;
+        if let Some(config_path) = config_path {
+            // if `.edirotconfig` is higher than `biome.json`
+            if is_parent_of(directory_path, config_path) {
+                Ok((None, vec![]))
+            } else {
+                Ok(editorconfig.to_biome())
             }
+        } else {
+            // If we don't find `biome.json`, we'll use `.editorconfig`
+            Ok(editorconfig.to_biome())
         }
-
-        Ok(config)
     } else {
         Ok((None, vec![]))
     }
@@ -373,7 +358,7 @@ pub fn create_config(
         let schema_path = Utf8Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
         let options = OpenOptions::default().read(true);
         if fs.open_with_options(schema_path, options).is_ok() {
-            configuration.schema = Some(Box::from(schema_path.as_str()));
+            configuration.schema = Some(schema_path.to_string().into());
         }
     } else {
         configuration.schema =
@@ -432,12 +417,6 @@ pub trait ConfigurationExt {
     ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError>;
 
     fn migrate_deprecated_fields(&mut self);
-
-    fn retrieve_gitignore_matches(
-        &self,
-        fs: &dyn FileSystem,
-        vcs_base_path: Option<&Utf8Path>,
-    ) -> Result<(Option<Utf8PathBuf>, Vec<String>), WorkspaceError>;
 }
 
 impl ConfigurationExt for Configuration {
@@ -551,11 +530,10 @@ impl ConfigurationExt for Configuration {
             let mut content = String::new();
             file.read_to_string(&mut content).map_err(|err| {
                 CantLoadExtendFile::new(extend_configuration_file_path.to_string(), err.to_string()).with_verbose_advice(
-                    markup!{
+                    markup! {
                         "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
                     }
                 )
-
             })?;
             let deserialized = deserialize_from_json_str::<Configuration>(
                 content.as_str(),
@@ -575,47 +553,6 @@ impl ConfigurationExt for Configuration {
     /// Checks for the presence of deprecated fields and updates the
     /// configuration to apply them to the new schema.
     fn migrate_deprecated_fields(&mut self) {}
-
-    /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
-    /// VCS root directory and the `.gitignore` file.
-    ///
-    /// ## Returns
-    ///
-    /// A tuple with VCS root folder and the contents of the `.gitignore` file
-    fn retrieve_gitignore_matches(
-        &self,
-        fs: &dyn FileSystem,
-        vcs_base_path: Option<&Utf8Path>,
-    ) -> Result<(Option<Utf8PathBuf>, Vec<String>), WorkspaceError> {
-        let Some(vcs) = &self.vcs else {
-            return Ok((None, vec![]));
-        };
-        if vcs.is_enabled() {
-            let vcs_base_path = match (vcs_base_path, &vcs.root) {
-                (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
-                (None, Some(root)) => Utf8PathBuf::from(root),
-                (Some(vcs_base_path), None) => Utf8PathBuf::from(vcs_base_path),
-                (None, None) => return Err(WorkspaceError::vcs_disabled()),
-            };
-            if let Some(client_kind) = &vcs.client_kind {
-                if vcs.should_use_ignore_file() {
-                    let result = fs.auto_search_file(&vcs_base_path, client_kind.ignore_file());
-
-                    if let Some(result) = result {
-                        return Ok((
-                            result.file_path.parent().map(Utf8PathBuf::from),
-                            result
-                                .content
-                                .lines()
-                                .map(String::from)
-                                .collect::<Vec<String>>(),
-                        ));
-                    }
-                }
-            }
-        }
-        Ok((None, vec![]))
-    }
 }
 
 #[cfg(test)]
@@ -634,18 +571,5 @@ mod test {
         let result = load_configuration(&fs, path_hint);
 
         assert!(result.is_err());
-    }
-
-    #[test]
-    fn should_print_a_warning_for_double_configuration() {
-        let mut fs = MemoryFileSystem::default();
-        fs.insert(Utf8PathBuf::from("config/biome.json"), "{}".to_string());
-        fs.insert(Utf8PathBuf::from("config/biome.jsonc"), "{}".to_string());
-        let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("config"));
-
-        let result = load_configuration(&fs, path_hint);
-        assert!(result.is_ok());
-        let result = result.unwrap();
-        assert!(result.double_configuration_found);
     }
 }

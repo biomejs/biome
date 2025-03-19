@@ -1,4 +1,4 @@
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 use std::iter;
 
 use crate::{AnyTsReturnType, AnyTsType, TsConditionalType, TsConstructorType, TsFunctionType};

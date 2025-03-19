@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 # Emitted Messages
@@ -12,7 +12,7 @@ Summary
 - Fix: safe
 - Default severity: error
 - Available from version: 1.0.0
-- This rule is not recommended
+- This rule is recommended
 
 Description
 

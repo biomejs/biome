@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -259,7 +260,7 @@ window.abc ?? 'non-nullish' ?? anything;
 ```
 invalid.js:1:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
   > 1 │ [] && greeting;
       │ ^^^^^^^^^^^^^^
@@ -279,7 +280,7 @@ invalid.js:1:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━�
 ```
 invalid.js:2:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     1 │ [] && greeting;
   > 2 │ [] || greeting;
@@ -301,7 +302,7 @@ invalid.js:2:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━�
 ```
 invalid.js:3:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     1 │ [] && greeting;
     2 │ [] || greeting;
@@ -325,7 +326,7 @@ invalid.js:3:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━�
 ```
 invalid.js:4:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     2 │ [] || greeting;
     3 │ [] ?? greeting;
@@ -340,7 +341,7 @@ invalid.js:4:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     3 │ [] ?? greeting;
     4 │ [] == true;
@@ -355,7 +356,7 @@ invalid.js:5:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━�
 ```
 invalid.js:6:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     4 │ [] == true;
     5 │ true == [];
@@ -370,7 +371,7 @@ invalid.js:6:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━�
 ```
 invalid.js:7:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     5 │ true == [];
     6 │ [] != true;
@@ -385,7 +386,7 @@ invalid.js:7:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━�
 ```
 invalid.js:8:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
      6 │ [] != true;
      7 │ [] === true;
@@ -400,7 +401,7 @@ invalid.js:8:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━�
 ```
 invalid.js:10:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
      8 │ [] !== true;
      9 │ 
@@ -415,7 +416,7 @@ invalid.js:10:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:11:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     10 │ !foo == null;
   > 11 │ !foo ?? bar;
@@ -437,7 +438,7 @@ invalid.js:11:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:12:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     10 │ !foo == null;
     11 │ !foo ?? bar;
@@ -461,7 +462,7 @@ invalid.js:12:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:13:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     11 │ !foo ?? bar;
     12 │ (a + b) / 2 ?? bar;
@@ -485,7 +486,7 @@ invalid.js:13:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:14:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     12 │ (a + b) / 2 ?? bar;
     13 │ String(foo.bar) ?? baz;
@@ -509,7 +510,7 @@ invalid.js:14:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:15:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     13 │ String(foo.bar) ?? baz;
     14 │ "hello" + name ?? "";
@@ -533,7 +534,7 @@ invalid.js:15:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:18:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     17 │ // Logical expression with constant truthiness
   > 18 │ true && hello;
@@ -555,7 +556,7 @@ invalid.js:18:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:19:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     17 │ // Logical expression with constant truthiness
     18 │ true && hello;
@@ -579,7 +580,7 @@ invalid.js:19:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:20:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     18 │ true && hello;
     19 │ true || hello;
@@ -603,7 +604,7 @@ invalid.js:20:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:21:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     19 │ true || hello;
     20 │ true && foo;
@@ -627,7 +628,7 @@ invalid.js:21:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:22:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     20 │ true && foo;
     21 │ '' && foo;
@@ -651,7 +652,7 @@ invalid.js:22:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:23:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     21 │ '' && foo;
     22 │ 100 && foo;
@@ -675,7 +676,7 @@ invalid.js:23:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:24:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     22 │ 100 && foo;
     23 │ +100 && foo;
@@ -699,7 +700,7 @@ invalid.js:24:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:25:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     23 │ +100 && foo;
     24 │ -100 && foo;
@@ -723,7 +724,7 @@ invalid.js:25:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:26:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     24 │ -100 && foo;
     25 │ ~100 && foo;
@@ -747,7 +748,7 @@ invalid.js:26:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:27:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     25 │ ~100 && foo;
     26 │ /[a-z]/ && foo;
@@ -771,7 +772,7 @@ invalid.js:27:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:28:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     26 │ /[a-z]/ && foo;
     27 │ Boolean([]) && foo;
@@ -795,7 +796,7 @@ invalid.js:28:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:29:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     27 │ Boolean([]) && foo;
     28 │ Boolean() && foo;
@@ -819,7 +820,7 @@ invalid.js:29:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:30:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     28 │ Boolean() && foo;
     29 │ Boolean([], n) && foo;
@@ -843,7 +844,7 @@ invalid.js:30:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:31:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     29 │ Boolean([], n) && foo;
     30 │ ({}) && foo;
@@ -867,7 +868,7 @@ invalid.js:31:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:32:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     30 │ ({}) && foo;
     31 │ [] && foo;
@@ -891,7 +892,7 @@ invalid.js:32:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:33:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     31 │ [] && foo;
     32 │ (() => {}) && foo;
@@ -915,7 +916,7 @@ invalid.js:33:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:34:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     32 │ (() => {}) && foo;
     33 │ (function() {}) && foo;
@@ -939,7 +940,7 @@ invalid.js:34:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:35:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     33 │ (function() {}) && foo;
     34 │ (class {}) && foo;
@@ -963,7 +964,7 @@ invalid.js:35:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:36:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     34 │ (class {}) && foo;
     35 │ (class { valueOf() { return x; } }) && foo;
@@ -987,7 +988,7 @@ invalid.js:36:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:37:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     35 │ (class { valueOf() { return x; } }) && foo;
     36 │ (class { [x]() { return x; } }) && foo;
@@ -1011,7 +1012,7 @@ invalid.js:37:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:40:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     39 │ // (boxed values are always truthy)
   > 40 │ new Boolean(unknown) && foo;
@@ -1033,7 +1034,7 @@ invalid.js:40:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:41:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     39 │ // (boxed values are always truthy)
     40 │ new Boolean(unknown) && foo;
@@ -1057,7 +1058,7 @@ invalid.js:41:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:42:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     40 │ new Boolean(unknown) && foo;
     41 │ (bar = false) && foo;
@@ -1081,7 +1082,7 @@ invalid.js:42:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:43:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     41 │ (bar = false) && foo;
     42 │ (bar.baz = false) && foo;
@@ -1105,7 +1106,7 @@ invalid.js:43:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:44:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     42 │ (bar.baz = false) && foo;
     43 │ (bar[0] = false) && foo;
@@ -1129,7 +1130,7 @@ invalid.js:44:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:45:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     43 │ (bar[0] = false) && foo;
     44 │ `hello ${hello}` && foo;
@@ -1153,7 +1154,7 @@ invalid.js:45:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:46:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     44 │ `hello ${hello}` && foo;
     45 │ void bar && foo;
@@ -1177,7 +1178,7 @@ invalid.js:46:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:47:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     45 │ void bar && foo;
     46 │ !true && foo;
@@ -1201,7 +1202,7 @@ invalid.js:47:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:48:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     46 │ !true && foo;
     47 │ typeof bar && foo;
@@ -1225,7 +1226,7 @@ invalid.js:48:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:49:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     47 │ typeof bar && foo;
     48 │ (bar, baz, true) && foo;
@@ -1249,7 +1250,7 @@ invalid.js:49:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:52:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     51 │ // Logical expression with constant nullishness
   > 52 │ ({}) ?? foo;
@@ -1271,7 +1272,7 @@ invalid.js:52:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:53:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     51 │ // Logical expression with constant nullishness
     52 │ ({}) ?? foo;
@@ -1295,7 +1296,7 @@ invalid.js:53:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:54:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     52 │ ({}) ?? foo;
     53 │ ([]) ?? foo;
@@ -1319,7 +1320,7 @@ invalid.js:54:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:55:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     53 │ ([]) ?? foo;
     54 │ (() => {}) ?? foo;
@@ -1343,7 +1344,7 @@ invalid.js:55:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:56:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     54 │ (() => {}) ?? foo;
     55 │ (function() {}) ?? foo;
@@ -1367,7 +1368,7 @@ invalid.js:56:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:57:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     55 │ (function() {}) ?? foo;
     56 │ (class {}) ?? foo;
@@ -1391,7 +1392,7 @@ invalid.js:57:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:58:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     56 │ (class {}) ?? foo;
     57 │ new Foo() ?? foo;
@@ -1415,7 +1416,7 @@ invalid.js:58:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:59:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     57 │ new Foo() ?? foo;
     58 │ 1 ?? foo;
@@ -1439,7 +1440,7 @@ invalid.js:59:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:60:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     58 │ 1 ?? foo;
     59 │ /[a-z]/ ?? foo;
@@ -1463,7 +1464,7 @@ invalid.js:60:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:61:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     59 │ /[a-z]/ ?? foo;
     60 │ `${''}` ?? foo;
@@ -1487,7 +1488,7 @@ invalid.js:61:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:62:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     60 │ `${''}` ?? foo;
     61 │ (a = true) ?? foo;
@@ -1511,7 +1512,7 @@ invalid.js:62:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:63:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     61 │ (a = true) ?? foo;
     62 │ (a += 1) ?? foo;
@@ -1535,7 +1536,7 @@ invalid.js:63:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:64:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     62 │ (a += 1) ?? foo;
     63 │ (a -= 1) ?? foo;
@@ -1559,7 +1560,7 @@ invalid.js:64:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:65:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     63 │ (a -= 1) ?? foo;
     64 │ (a *= 1) ?? foo;
@@ -1583,7 +1584,7 @@ invalid.js:65:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:66:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     64 │ (a *= 1) ?? foo;
     65 │ (a /= 1) ?? foo;
@@ -1607,7 +1608,7 @@ invalid.js:66:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:67:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     65 │ (a /= 1) ?? foo;
     66 │ (a %= 1) ?? foo;
@@ -1631,7 +1632,7 @@ invalid.js:67:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:68:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     66 │ (a %= 1) ?? foo;
     67 │ (a <<= 1) ?? foo;
@@ -1655,7 +1656,7 @@ invalid.js:68:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:69:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     67 │ (a <<= 1) ?? foo;
     68 │ (a >>= 1) ?? foo;
@@ -1679,7 +1680,7 @@ invalid.js:69:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:70:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     68 │ (a >>= 1) ?? foo;
     69 │ (a >>>= 1) ?? foo;
@@ -1703,7 +1704,7 @@ invalid.js:70:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:71:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     69 │ (a >>>= 1) ?? foo;
     70 │ (a |= 1) ?? foo;
@@ -1727,7 +1728,7 @@ invalid.js:71:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:72:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     70 │ (a |= 1) ?? foo;
     71 │ (a ^= 1) ?? foo;
@@ -1751,7 +1752,7 @@ invalid.js:72:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:73:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     71 │ (a ^= 1) ?? foo;
     72 │ (a &= 1) ?? foo;
@@ -1775,7 +1776,7 @@ invalid.js:73:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:74:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     72 │ (a &= 1) ?? foo;
     73 │ undefined ?? foo;
@@ -1799,7 +1800,7 @@ invalid.js:74:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:75:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     73 │ undefined ?? foo;
     74 │ !bar ?? foo;
@@ -1823,7 +1824,7 @@ invalid.js:75:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:76:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     74 │ !bar ?? foo;
     75 │ void bar ?? foo;
@@ -1847,7 +1848,7 @@ invalid.js:76:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:77:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     75 │ void bar ?? foo;
     76 │ typeof bar ?? foo;
@@ -1871,7 +1872,7 @@ invalid.js:77:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:78:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     76 │ typeof bar ?? foo;
     77 │ +bar ?? foo;
@@ -1895,7 +1896,7 @@ invalid.js:78:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:79:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     77 │ +bar ?? foo;
     78 │ -bar ?? foo;
@@ -1919,7 +1920,7 @@ invalid.js:79:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:80:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     78 │ -bar ?? foo;
     79 │ ~bar ?? foo;
@@ -1943,7 +1944,7 @@ invalid.js:80:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:81:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     79 │ ~bar ?? foo;
     80 │ ++bar ?? foo;
@@ -1967,7 +1968,7 @@ invalid.js:81:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:82:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     80 │ ++bar ?? foo;
     81 │ bar++ ?? foo;
@@ -1991,7 +1992,7 @@ invalid.js:82:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:83:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     81 │ bar++ ?? foo;
     82 │ --bar ?? foo;
@@ -2015,7 +2016,7 @@ invalid.js:83:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:84:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     82 │ --bar ?? foo;
     83 │ bar-- ?? foo;
@@ -2039,7 +2040,7 @@ invalid.js:84:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:85:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     83 │ bar-- ?? foo;
     84 │ (x == y) ?? foo;
@@ -2063,7 +2064,7 @@ invalid.js:85:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:86:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     84 │ (x == y) ?? foo;
     85 │ (x + y) ?? foo;
@@ -2087,7 +2088,7 @@ invalid.js:86:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:87:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     85 │ (x + y) ?? foo;
     86 │ (x / y) ?? foo;
@@ -2111,7 +2112,7 @@ invalid.js:87:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:88:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     86 │ (x / y) ?? foo;
     87 │ (x instanceof String) ?? foo;
@@ -2135,7 +2136,7 @@ invalid.js:88:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:89:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     87 │ (x instanceof String) ?? foo;
     88 │ (x in y) ?? foo;
@@ -2159,7 +2160,7 @@ invalid.js:89:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:90:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     88 │ (x in y) ?? foo;
     89 │ Boolean(x) ?? foo;
@@ -2183,7 +2184,7 @@ invalid.js:90:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:91:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     89 │ Boolean(x) ?? foo;
     90 │ String(x) ?? foo;
@@ -2207,7 +2208,7 @@ invalid.js:91:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:94:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     93 │ // Binary expression with comparison to null
   > 94 │ ({}) != null;
@@ -2221,7 +2222,7 @@ invalid.js:94:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:95:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     93 │ // Binary expression with comparison to null
     94 │ ({}) != null;
@@ -2236,7 +2237,7 @@ invalid.js:95:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:96:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     94 │ ({}) != null;
     95 │ ({}) == null;
@@ -2251,7 +2252,7 @@ invalid.js:96:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:97:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     95 │ ({}) == null;
     96 │ null == ({});
@@ -2266,7 +2267,7 @@ invalid.js:97:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:98:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
      96 │ null == ({});
      97 │ ({}) == undefined;
@@ -2281,7 +2282,7 @@ invalid.js:98:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━
 ```
 invalid.js:101:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     100 │ // Binary expression with loose comparison to boolean
   > 101 │ ({}) != true;
@@ -2295,7 +2296,7 @@ invalid.js:101:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:102:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     100 │ // Binary expression with loose comparison to boolean
     101 │ ({}) != true;
@@ -2310,7 +2311,7 @@ invalid.js:102:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:103:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     101 │ ({}) != true;
     102 │ ({}) == true;
@@ -2325,7 +2326,7 @@ invalid.js:103:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:104:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     102 │ ({}) == true;
     103 │ ([]) == true;
@@ -2340,7 +2341,7 @@ invalid.js:104:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:105:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     103 │ ([]) == true;
     104 │ ([a, b]) == true;
@@ -2355,7 +2356,7 @@ invalid.js:105:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:106:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     104 │ ([a, b]) == true;
     105 │ (() => {}) == true;
@@ -2370,7 +2371,7 @@ invalid.js:106:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:107:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     105 │ (() => {}) == true;
     106 │ (function() {}) == true;
@@ -2385,7 +2386,7 @@ invalid.js:107:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:108:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     106 │ (function() {}) == true;
     107 │ void foo == true;
@@ -2400,7 +2401,7 @@ invalid.js:108:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:109:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     107 │ void foo == true;
     108 │ typeof foo == true;
@@ -2415,7 +2416,7 @@ invalid.js:109:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:110:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     108 │ typeof foo == true;
     109 │ ![] == true;
@@ -2430,7 +2431,7 @@ invalid.js:110:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:111:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     109 │ ![] == true;
     110 │ true == class {};
@@ -2445,7 +2446,7 @@ invalid.js:111:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:112:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     110 │ true == class {};
     111 │ true == 1;
@@ -2460,7 +2461,7 @@ invalid.js:112:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:113:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     111 │ true == 1;
     112 │ undefined == true;
@@ -2475,7 +2476,7 @@ invalid.js:113:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:114:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     112 │ undefined == true;
     113 │ true == undefined;
@@ -2490,7 +2491,7 @@ invalid.js:114:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:115:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     113 │ true == undefined;
     114 │ `hello` == true;
@@ -2505,7 +2506,7 @@ invalid.js:115:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:116:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     114 │ `hello` == true;
     115 │ /[a-z]/ == true;
@@ -2520,7 +2521,7 @@ invalid.js:116:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:117:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     115 │ /[a-z]/ == true;
     116 │ ({}) == Boolean({});
@@ -2535,7 +2536,7 @@ invalid.js:117:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:118:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     116 │ ({}) == Boolean({});
     117 │ ({}) == Boolean();
@@ -2550,7 +2551,7 @@ invalid.js:118:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:121:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     120 │ // Binary expression with strict comparison to boolean
   > 121 │ ({}) !== true;
@@ -2564,7 +2565,7 @@ invalid.js:121:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:122:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     120 │ // Binary expression with strict comparison to boolean
     121 │ ({}) !== true;
@@ -2579,7 +2580,7 @@ invalid.js:122:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:123:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     121 │ ({}) !== true;
     122 │ ({}) == !({});
@@ -2594,7 +2595,7 @@ invalid.js:123:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:124:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     122 │ ({}) == !({});
     123 │ ({}) === true;
@@ -2609,7 +2610,7 @@ invalid.js:124:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:125:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     123 │ ({}) === true;
     124 │ ([]) === true;
@@ -2624,7 +2625,7 @@ invalid.js:125:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:126:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     124 │ ([]) === true;
     125 │ (function() {}) === true;
@@ -2639,7 +2640,7 @@ invalid.js:126:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:127:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     125 │ (function() {}) === true;
     126 │ (() => {}) === true;
@@ -2654,7 +2655,7 @@ invalid.js:127:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:128:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     126 │ (() => {}) === true;
     127 │ !{} === true;
@@ -2669,7 +2670,7 @@ invalid.js:128:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:129:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     127 │ !{} === true;
     128 │ typeof n === true;
@@ -2684,7 +2685,7 @@ invalid.js:129:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:130:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     128 │ typeof n === true;
     129 │ void n === true;
@@ -2699,7 +2700,7 @@ invalid.js:130:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:131:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     129 │ void n === true;
     130 │ +n === true;
@@ -2714,7 +2715,7 @@ invalid.js:131:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:132:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     130 │ +n === true;
     131 │ -n === true;
@@ -2729,7 +2730,7 @@ invalid.js:132:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:133:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     131 │ -n === true;
     132 │ ~n === true;
@@ -2744,7 +2745,7 @@ invalid.js:133:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:134:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     132 │ ~n === true;
     133 │ true === true;
@@ -2759,7 +2760,7 @@ invalid.js:134:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:135:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     133 │ true === true;
     134 │ 1 === true;
@@ -2774,7 +2775,7 @@ invalid.js:135:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:136:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     134 │ 1 === true;
     135 │ 'hello' === true;
@@ -2789,7 +2790,7 @@ invalid.js:136:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:137:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     135 │ 'hello' === true;
     136 │ /[a-z]/ === true;
@@ -2804,7 +2805,7 @@ invalid.js:137:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:138:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     136 │ /[a-z]/ === true;
     137 │ undefined === true;
@@ -2819,7 +2820,7 @@ invalid.js:138:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:139:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     137 │ undefined === true;
     138 │ (a = {}) === true;
@@ -2834,7 +2835,7 @@ invalid.js:139:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:140:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     138 │ (a = {}) === true;
     139 │ (a += 1) === true;
@@ -2849,7 +2850,7 @@ invalid.js:140:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:141:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     139 │ (a += 1) === true;
     140 │ (a -= 1) === true;
@@ -2864,7 +2865,7 @@ invalid.js:141:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:142:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     140 │ (a -= 1) === true;
     141 │ (a *= 1) === true;
@@ -2879,7 +2880,7 @@ invalid.js:142:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:143:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     141 │ (a *= 1) === true;
     142 │ (a %= 1) === true;
@@ -2894,7 +2895,7 @@ invalid.js:143:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:144:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     142 │ (a %= 1) === true;
     143 │ (a ** b) === true;
@@ -2909,7 +2910,7 @@ invalid.js:144:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:145:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     143 │ (a ** b) === true;
     144 │ (a << b) === true;
@@ -2924,7 +2925,7 @@ invalid.js:145:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:146:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     144 │ (a << b) === true;
     145 │ (a >> b) === true;
@@ -2939,7 +2940,7 @@ invalid.js:146:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:147:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     145 │ (a >> b) === true;
     146 │ (a >>> b) === true;
@@ -2954,7 +2955,7 @@ invalid.js:147:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:148:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     146 │ (a >>> b) === true;
     147 │ --a === true;
@@ -2969,7 +2970,7 @@ invalid.js:148:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:149:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     147 │ --a === true;
     148 │ a-- === true;
@@ -2984,7 +2985,7 @@ invalid.js:149:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:150:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     148 │ a-- === true;
     149 │ ++a === true;
@@ -2999,7 +3000,7 @@ invalid.js:150:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:151:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     149 │ ++a === true;
     150 │ a++ === true;
@@ -3014,7 +3015,7 @@ invalid.js:151:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:152:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     150 │ a++ === true;
     151 │ (a + b) === true;
@@ -3029,7 +3030,7 @@ invalid.js:152:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:153:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     151 │ (a + b) === true;
     152 │ (a - b) === true;
@@ -3044,7 +3045,7 @@ invalid.js:153:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:154:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     152 │ (a - b) === true;
     153 │ (a * b) === true;
@@ -3059,7 +3060,7 @@ invalid.js:154:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:155:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     153 │ (a * b) === true;
     154 │ (a / b) === true;
@@ -3074,7 +3075,7 @@ invalid.js:155:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:156:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     154 │ (a / b) === true;
     155 │ (a % b) === true;
@@ -3089,7 +3090,7 @@ invalid.js:156:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:157:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     155 │ (a % b) === true;
     156 │ (a | b) === true;
@@ -3104,7 +3105,7 @@ invalid.js:157:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:158:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     156 │ (a | b) === true;
     157 │ (a ^ b) === true;
@@ -3119,7 +3120,7 @@ invalid.js:158:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:159:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     157 │ (a ^ b) === true;
     158 │ (a & b) === true;
@@ -3134,7 +3135,7 @@ invalid.js:159:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:160:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     158 │ (a & b) === true;
     159 │ Boolean(0) === Boolean(1);
@@ -3149,7 +3150,7 @@ invalid.js:160:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:161:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     159 │ Boolean(0) === Boolean(1);
     160 │ true === String(x);
@@ -3164,7 +3165,7 @@ invalid.js:161:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:162:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     160 │ true === String(x);
     161 │ true === Number(x);
@@ -3179,7 +3180,7 @@ invalid.js:162:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:165:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     164 │ // Binary expression with strict comparison to null
   > 165 │ ({}) !== null;
@@ -3193,7 +3194,7 @@ invalid.js:165:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:166:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     164 │ // Binary expression with strict comparison to null
     165 │ ({}) !== null;
@@ -3208,7 +3209,7 @@ invalid.js:166:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:167:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     165 │ ({}) !== null;
     166 │ ({}) === null;
@@ -3223,7 +3224,7 @@ invalid.js:167:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:168:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     166 │ ({}) === null;
     167 │ ([]) === null;
@@ -3238,7 +3239,7 @@ invalid.js:168:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:169:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     167 │ ([]) === null;
     168 │ (() => {}) === null;
@@ -3253,7 +3254,7 @@ invalid.js:169:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:170:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     168 │ (() => {}) === null;
     169 │ (function() {}) === null;
@@ -3268,7 +3269,7 @@ invalid.js:170:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:171:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     169 │ (function() {}) === null;
     170 │ (class {}) === null;
@@ -3283,7 +3284,7 @@ invalid.js:171:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:172:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     170 │ (class {}) === null;
     171 │ new Foo() === null;
@@ -3298,7 +3299,7 @@ invalid.js:172:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:173:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     171 │ new Foo() === null;
     172 │ `` === null;
@@ -3313,7 +3314,7 @@ invalid.js:173:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:174:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     172 │ `` === null;
     173 │ 1 === null;
@@ -3328,7 +3329,7 @@ invalid.js:174:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:175:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     173 │ 1 === null;
     174 │ 'hello' === null;
@@ -3343,7 +3344,7 @@ invalid.js:175:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:176:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     174 │ 'hello' === null;
     175 │ /[a-z]/ === null;
@@ -3358,7 +3359,7 @@ invalid.js:176:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:177:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     175 │ /[a-z]/ === null;
     176 │ true === null;
@@ -3373,7 +3374,7 @@ invalid.js:177:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:178:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     176 │ true === null;
     177 │ null === null;
@@ -3388,7 +3389,7 @@ invalid.js:178:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:179:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     177 │ null === null;
     178 │ a++ === null;
@@ -3403,7 +3404,7 @@ invalid.js:179:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:180:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     178 │ a++ === null;
     179 │ ++a === null;
@@ -3418,7 +3419,7 @@ invalid.js:180:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:181:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     179 │ ++a === null;
     180 │ --a === null;
@@ -3433,7 +3434,7 @@ invalid.js:181:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:182:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     180 │ --a === null;
     181 │ a-- === null;
@@ -3448,7 +3449,7 @@ invalid.js:182:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:183:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     181 │ a-- === null;
     182 │ !a === null;
@@ -3463,7 +3464,7 @@ invalid.js:183:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:184:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     182 │ !a === null;
     183 │ typeof a === null;
@@ -3478,7 +3479,7 @@ invalid.js:184:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:185:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     183 │ typeof a === null;
     184 │ delete a.b === null;
@@ -3493,7 +3494,7 @@ invalid.js:185:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:186:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     184 │ delete a.b === null;
     185 │ void a === null;
@@ -3508,7 +3509,7 @@ invalid.js:186:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:187:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     185 │ void a === null;
     186 │ undefined === null;
@@ -3523,7 +3524,7 @@ invalid.js:187:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:188:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     186 │ undefined === null;
     187 │ (x = {}) === null;
@@ -3538,7 +3539,7 @@ invalid.js:188:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:189:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     187 │ (x = {}) === null;
     188 │ (x += y) === null;
@@ -3553,7 +3554,7 @@ invalid.js:189:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:190:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     188 │ (x += y) === null;
     189 │ (x -= y) === null;
@@ -3568,7 +3569,7 @@ invalid.js:190:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:193:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     192 │ // Binary expression with strict comparison to undefined
   > 193 │ ({}) !== undefined;
@@ -3582,7 +3583,7 @@ invalid.js:193:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:194:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     192 │ // Binary expression with strict comparison to undefined
     193 │ ({}) !== undefined;
@@ -3597,7 +3598,7 @@ invalid.js:194:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:195:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     193 │ ({}) !== undefined;
     194 │ ({}) === undefined;
@@ -3612,7 +3613,7 @@ invalid.js:195:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:196:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     194 │ ({}) === undefined;
     195 │ ([]) === undefined;
@@ -3627,7 +3628,7 @@ invalid.js:196:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:197:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     195 │ ([]) === undefined;
     196 │ (() => {}) === undefined;
@@ -3642,7 +3643,7 @@ invalid.js:197:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:198:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     196 │ (() => {}) === undefined;
     197 │ (function() {}) === undefined;
@@ -3657,7 +3658,7 @@ invalid.js:198:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:199:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     197 │ (function() {}) === undefined;
     198 │ (class {}) === undefined;
@@ -3672,7 +3673,7 @@ invalid.js:199:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:200:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     198 │ (class {}) === undefined;
     199 │ new Foo() === undefined;
@@ -3687,7 +3688,7 @@ invalid.js:200:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:201:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     199 │ new Foo() === undefined;
     200 │ `` === undefined;
@@ -3702,7 +3703,7 @@ invalid.js:201:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:202:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     200 │ `` === undefined;
     201 │ 1 === undefined;
@@ -3717,7 +3718,7 @@ invalid.js:202:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:203:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     201 │ 1 === undefined;
     202 │ 'hello' === undefined;
@@ -3732,7 +3733,7 @@ invalid.js:203:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:204:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     202 │ 'hello' === undefined;
     203 │ /[a-z]/ === undefined;
@@ -3747,7 +3748,7 @@ invalid.js:204:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:205:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     203 │ /[a-z]/ === undefined;
     204 │ true === undefined;
@@ -3762,7 +3763,7 @@ invalid.js:205:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:206:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     204 │ true === undefined;
     205 │ null === undefined;
@@ -3777,7 +3778,7 @@ invalid.js:206:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:207:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     205 │ null === undefined;
     206 │ a++ === undefined;
@@ -3792,7 +3793,7 @@ invalid.js:207:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:208:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     206 │ a++ === undefined;
     207 │ ++a === undefined;
@@ -3807,7 +3808,7 @@ invalid.js:208:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:209:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     207 │ ++a === undefined;
     208 │ --a === undefined;
@@ -3822,7 +3823,7 @@ invalid.js:209:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:210:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     208 │ --a === undefined;
     209 │ a-- === undefined;
@@ -3837,7 +3838,7 @@ invalid.js:210:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:211:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     209 │ a-- === undefined;
     210 │ !a === undefined;
@@ -3852,7 +3853,7 @@ invalid.js:211:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:212:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     210 │ !a === undefined;
     211 │ typeof a === undefined;
@@ -3867,7 +3868,7 @@ invalid.js:212:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:213:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     211 │ typeof a === undefined;
     212 │ delete a.b === undefined;
@@ -3882,7 +3883,7 @@ invalid.js:213:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:214:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     212 │ delete a.b === undefined;
     213 │ void a === undefined;
@@ -3897,7 +3898,7 @@ invalid.js:214:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:215:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     213 │ void a === undefined;
     214 │ undefined === undefined;
@@ -3912,7 +3913,7 @@ invalid.js:215:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:216:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     214 │ undefined === undefined;
     215 │ (x = {}) === undefined;
@@ -3927,7 +3928,7 @@ invalid.js:216:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:217:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     215 │ (x = {}) === undefined;
     216 │ (x += y) === undefined;
@@ -3942,7 +3943,7 @@ invalid.js:217:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:218:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This binary expression leads to a constant result.
+  i This binary expression leads to a constant result.
   
     216 │ (x += y) === undefined;
     217 │ (x -= y) === undefined;
@@ -3957,7 +3958,7 @@ invalid.js:218:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:224:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison of two newly constructed objects.
+  i Unexpected comparison of two newly constructed objects.
   
     222 │  * never be equal, even with == equality.
     223 │  */
@@ -3972,7 +3973,7 @@ invalid.js:224:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:225:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison of two newly constructed objects.
+  i Unexpected comparison of two newly constructed objects.
   
     223 │  */
     224 │ [a] == [a];
@@ -3987,7 +3988,7 @@ invalid.js:225:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:226:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison of two newly constructed objects.
+  i Unexpected comparison of two newly constructed objects.
   
     224 │ [a] == [a];
     225 │ [a] != [a];
@@ -4002,7 +4003,7 @@ invalid.js:226:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:229:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     228 │ // Comparing to always new objects
   > 229 │ x === {};
@@ -4024,7 +4025,7 @@ invalid.js:229:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:230:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     228 │ // Comparing to always new objects
     229 │ x === {};
@@ -4048,7 +4049,7 @@ invalid.js:230:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:231:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     229 │ x === {};
     230 │ x !== {};
@@ -4072,7 +4073,7 @@ invalid.js:231:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:232:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     230 │ x !== {};
     231 │ x === [];
@@ -4096,7 +4097,7 @@ invalid.js:232:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:233:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     231 │ x === [];
     232 │ x === (() => {});
@@ -4120,7 +4121,7 @@ invalid.js:233:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:234:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     232 │ x === (() => {});
     233 │ x === (function() {});
@@ -4144,7 +4145,7 @@ invalid.js:234:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:235:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     233 │ x === (function() {});
     234 │ x === (class {});
@@ -4168,7 +4169,7 @@ invalid.js:235:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:236:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     234 │ x === (class {});
     235 │ x === new Boolean();
@@ -4192,7 +4193,7 @@ invalid.js:236:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:237:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     235 │ x === new Boolean();
     236 │ x === new Promise();
@@ -4216,7 +4217,7 @@ invalid.js:237:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:240:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     238 │ x === (foo, {});
     239 │ x === (y = {});
@@ -4240,7 +4241,7 @@ invalid.js:240:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:241:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected comparison to newly constructed object.
+  i Unexpected comparison to newly constructed object.
   
     239 │ x === (y = {});
     240 │ x === (y ? {} : []);
@@ -4264,7 +4265,7 @@ invalid.js:241:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:246:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     244 │ x === (x = {});
     245 │ 
@@ -4288,7 +4289,7 @@ invalid.js:246:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:247:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     246 │ window.abc && false && anything;
   > 247 │ window.abc || true || anything;
@@ -4310,7 +4311,7 @@ invalid.js:247:1 lint/nursery/noConstantBinaryExpression ━━━━━━━�
 ```
 invalid.js:248:1 lint/nursery/noConstantBinaryExpression ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This logical expression can be simplified.
+  i This logical expression can be simplified.
   
     246 │ window.abc && false && anything;
     247 │ window.abc || true || anything;

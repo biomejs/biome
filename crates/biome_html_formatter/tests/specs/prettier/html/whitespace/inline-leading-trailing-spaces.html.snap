@@ -18,8 +18,7 @@ info: html/whitespace/inline-leading-trailing-spaces.html
 --- Prettier
 +++ Biome
 @@ -1,3 +1,5 @@
--<span> 321 </span>
-+<span>321 </span>
+ <span> 321 </span>
  
 -<span> <a>321</a> </span>
 +<span>
@@ -30,7 +29,7 @@ info: html/whitespace/inline-leading-trailing-spaces.html
 # Output
 
 ```html
-<span>321 </span>
+<span> 321 </span>
 
 <span>
   <a>321</a>

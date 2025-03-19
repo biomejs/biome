@@ -7,8 +7,8 @@ use self::struct_field_attrs::DeprecatedField;
 use crate::deserializable_derive::enum_variant_attrs::EnumVariantAttrs;
 use crate::deserializable_derive::struct_field_attrs::StructFieldAttrs;
 use biome_string_case::Case;
-use proc_macro2::{Ident, TokenStream};
 use proc_macro_error2::*;
+use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 use syn::{Data, GenericParam, Generics, Path, Type};
 
@@ -135,9 +135,9 @@ impl DeriveInput {
                         })
                     } else {
                         abort!(
-                        data.fields,
-                        "Deserializable derive requires structs to have named fields or a single unnamed one -- you may need a custom Deserializable implementation"
-                    )
+                            data.fields,
+                            "Deserializable derive requires structs to have named fields or a single unnamed one -- you may need a custom Deserializable implementation"
+                        )
                     }
                 }
                 _ => abort!(

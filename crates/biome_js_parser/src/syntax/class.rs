@@ -6,11 +6,11 @@ use crate::state::{
 };
 use crate::syntax::binding::parse_binding;
 use crate::syntax::expr::{
-    parse_assignment_expression_or_higher, parse_lhs_expr, parse_private_name, ExpressionContext,
+    ExpressionContext, parse_assignment_expression_or_higher, parse_lhs_expr, parse_private_name,
 };
 use crate::syntax::function::{
-    parse_any_parameter, parse_formal_parameter, parse_function_body, parse_parameter_list,
-    parse_parameters_list, parse_ts_type_annotation_or_error, ParameterContext,
+    ParameterContext, parse_any_parameter, parse_formal_parameter, parse_function_body,
+    parse_parameter_list, parse_parameters_list, parse_ts_type_annotation_or_error,
 };
 use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{
@@ -21,7 +21,7 @@ use crate::syntax::js_parse_error::{
 use crate::syntax::object::{
     is_at_literal_member_name, parse_computed_member_name, parse_literal_member_name,
 };
-use crate::syntax::stmt::{optional_semi, parse_statements, StatementContext};
+use crate::syntax::stmt::{StatementContext, optional_semi, parse_statements};
 use crate::syntax::typescript::ts_parse_error::{
     ts_accessibility_modifier_already_seen, ts_accessor_type_parameters_error,
     ts_constructor_type_parameters_error, ts_modifier_cannot_appear_on_a_constructor_declaration,
@@ -29,8 +29,9 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_set_accessor_return_type_error,
 };
 use crate::syntax::typescript::{
-    is_reserved_type_name, parse_ts_implements_clause, parse_ts_return_type_annotation,
-    parse_ts_type_annotation, parse_ts_type_arguments, parse_ts_type_parameters, TypeContext,
+    TypeContext, is_reserved_type_name, parse_ts_implements_clause,
+    parse_ts_return_type_annotation, parse_ts_type_annotation, parse_ts_type_arguments,
+    parse_ts_type_parameters,
 };
 
 use crate::JsSyntaxFeature::TypeScript;
@@ -39,12 +40,12 @@ use crate::{JsParser, StrictMode};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::TextSize;
 use biome_js_syntax::{JsSyntaxKind, T};
+use biome_parser::ParserProgress;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
-use biome_parser::ParserProgress;
 use biome_rowan::{SyntaxKind, TextRange};
 use drop_bomb::DebugDropBomb;
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use smallvec::SmallVec;
 use std::fmt::Debug;
 use std::ops::{Add, BitOr, BitOrAssign};
@@ -55,7 +56,7 @@ use super::js_parse_error::unexpected_body_inside_ambient_context;
 use super::metavariable::{is_at_metavariable, parse_metavariable};
 use super::typescript::ts_parse_error::{self, unexpected_abstract_member_with_body};
 use super::typescript::{
-    expect_ts_index_signature_member, is_at_ts_index_signature_member, MemberParent,
+    MemberParent, expect_ts_index_signature_member, is_at_ts_index_signature_member,
 };
 
 pub(crate) fn is_at_ts_abstract_class_declaration(
@@ -579,9 +580,11 @@ fn parse_class_member(p: &mut JsParser, inside_abstract_class: bool) -> ParsedSy
         }
         Absent => {
             // If the modifier list contains a modifier other than a decorator, such modifiers can also be valid member names.
-            debug_assert!(!modifiers
-                .flags
-                .contains(ModifierFlags::ALL_MODIFIERS_EXCEPT_DECORATOR));
+            debug_assert!(
+                !modifiers
+                    .flags
+                    .contains(ModifierFlags::ALL_MODIFIERS_EXCEPT_DECORATOR)
+            );
 
             // test_err ts ts_broken_class_member_modifiers
             // class C {
@@ -2085,7 +2088,9 @@ impl ClassMemberModifiers {
             modifiers,
             list_marker,
             flags,
-            bomb: DebugDropBomb::new("list must either be 'completed' or 'abandoned' by calling 'complete' or 'abandon'.")
+            bomb: DebugDropBomb::new(
+                "list must either be 'completed' or 'abandoned' by calling 'complete' or 'abandon'.",
+            ),
         }
     }
 

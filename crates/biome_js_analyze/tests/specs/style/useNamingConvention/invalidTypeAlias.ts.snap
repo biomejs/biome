@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeAlias.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -25,7 +26,7 @@ type str = string
 ```
 invalidTypeAlias.ts:1:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name should be in PascalCase.
+  i This type alias name should be in PascalCase.
   
   > 1 │ export type camelCase = {}
       │             ^^^^^^^^^
@@ -38,7 +39,7 @@ invalidTypeAlias.ts:1:13 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidTypeAlias.ts:3:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name should be in PascalCase.
+  i This type alias name should be in PascalCase.
   
     1 │ export type camelCase = {}
     2 │ 
@@ -53,7 +54,7 @@ invalidTypeAlias.ts:3:13 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidTypeAlias.ts:5:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name should be in PascalCase.
+  i This type alias name should be in PascalCase.
   
     3 │ export type CONSTANT_CASE = {}
     4 │ 
@@ -68,7 +69,7 @@ invalidTypeAlias.ts:5:13 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidTypeAlias.ts:7:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name should be in PascalCase.
+  i This type alias name should be in PascalCase.
   
     5 │ export type snake_case = {}
     6 │ 
@@ -83,7 +84,7 @@ invalidTypeAlias.ts:7:13 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidTypeAlias.ts:9:7 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name part should be in PascalCase.
+  i This type alias name part should be in PascalCase.
   
      7 │ export type Unknown_Style = {}
      8 │ 
@@ -107,7 +108,7 @@ invalidTypeAlias.ts:9:7 lint/style/useNamingConvention  FIXABLE  ━━━━━
 ```
 invalidTypeAlias.ts:11:7 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name part should be in PascalCase.
+  i This type alias name part should be in PascalCase.
   
      9 │ type _CONSTANT_CASE = {}
     10 │ 
@@ -131,7 +132,7 @@ invalidTypeAlias.ts:11:7 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidTypeAlias.ts:13:7 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name part should be in PascalCase.
+  i This type alias name part should be in PascalCase.
   
     11 │ type _snake_case = {}
     12 │ 
@@ -155,7 +156,7 @@ invalidTypeAlias.ts:13:7 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidTypeAlias.ts:15:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type alias name should be in PascalCase.
+  i This type alias name should be in PascalCase.
   
     13 │ type _Unknown_Style = {}
     14 │ 

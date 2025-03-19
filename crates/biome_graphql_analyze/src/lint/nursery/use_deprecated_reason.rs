@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlDirective;
@@ -60,11 +60,7 @@ impl Rule for UseDeprecatedReason {
                 .name()
                 .is_ok_and(|name| name.to_trimmed_string() == "reason")
         });
-        if has_reason {
-            None
-        } else {
-            Some(node.clone())
-        }
+        if has_reason { None } else { Some(node.clone()) }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

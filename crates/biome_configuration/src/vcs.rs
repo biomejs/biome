@@ -7,7 +7,12 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
+// NOTE: when adding a new ignore file, update [DocumentFileSource::try_from_path]
+pub const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
+pub const IGNORE_FILE_NAME: &str = ".ignore";
+
+pub type VcsUseIgnoreFile = Bool<false>;
+pub type VcsEnabled = Bool<false>;
 
 /// Set of properties to integrate Biome with a VCS software.
 #[derive(
@@ -20,7 +25,7 @@ pub struct VcsConfiguration {
     /// Whether Biome should integrate itself with the VCS client
     #[bpaf(long("vcs-enabled"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub enabled: Option<Bool<false>>,
+    pub enabled: Option<VcsEnabled>,
 
     /// The kind of client.
     #[bpaf(long("vcs-client-kind"), argument("git"), optional)]
@@ -32,7 +37,7 @@ pub struct VcsConfiguration {
     /// specified in the ignore file.
     #[bpaf(long("vcs-use-ignore-file"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_ignore_file: Option<Bool<true>>,
+    pub use_ignore_file: Option<VcsUseIgnoreFile>,
 
     /// The folder where Biome should check for VCS files. By default, Biome will use the same
     /// folder where `biome.json` was found.
@@ -96,9 +101,9 @@ pub enum VcsClientKind {
 }
 
 impl VcsClientKind {
-    pub const fn ignore_file(&self) -> &'static str {
+    pub const fn ignore_files(&self) -> &[&str] {
         match self {
-            VcsClientKind::Git => GIT_IGNORE_FILE_NAME,
+            VcsClientKind::Git => &[GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME],
         }
     }
 }

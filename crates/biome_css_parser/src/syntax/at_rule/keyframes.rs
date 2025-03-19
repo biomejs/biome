@@ -3,9 +3,9 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
 };
-use crate::syntax::block::{parse_declaration_block, ParseBlockBody};
+use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
 use crate::syntax::css_modules::{
-    expected_any_css_module_scope, local_or_global_not_allowed, CSS_MODULES_SCOPE_SET,
+    CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};

@@ -1,8 +1,8 @@
-use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use crate::JsonCommentStyle;
+use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::separated::TrailingSeparator;
-use biome_formatter::{prelude::*, BracketSpacing, IndentWidth};
+use biome_formatter::{BracketSpacing, Expand, IndentWidth, prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
@@ -108,39 +108,6 @@ impl fmt::Display for TrailingCommas {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum Expand {
-    Always,
-    #[default]
-    FollowSource,
-}
-
-impl FromStr for Expand {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "always" => Ok(Self::Always),
-            "follow-source" => Ok(Self::FollowSource),
-            _ => Err(std::format!("unknown expand literal: {}", s)),
-        }
-    }
-}
-
-impl fmt::Display for Expand {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Expand::Always => std::write!(f, "Always"),
-            Expand::FollowSource => std::write!(f, "Follow Source"),
-        }
-    }
-}
-
 impl JsonFormatOptions {
     pub fn new(file_source: JsonFileSource) -> Self {
         Self {
@@ -217,6 +184,10 @@ impl JsonFormatOptions {
         self.bracket_spacing
     }
 
+    pub fn expand(&self) -> Expand {
+        self.expand
+    }
+
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
         match self.trailing_commas {
             TrailingCommas::None => TrailingSeparator::Omit,
@@ -226,10 +197,6 @@ impl JsonFormatOptions {
 
     pub(crate) fn file_source(&self) -> &JsonFileSource {
         &self.file_source
-    }
-
-    pub(crate) const fn expand(&self) -> bool {
-        matches!(self.expand, Expand::Always)
     }
 }
 

@@ -1,0 +1,6 @@
+.a::after {
+    content: /*before*/ "useless \a" /*after*/
+}
+.b::after {
+    content: "useless \'"
+}

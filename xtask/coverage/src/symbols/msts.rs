@@ -72,7 +72,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
                             options,
                         ),
                         errors: vec![],
-                    }
+                    };
                 }
             }
         };

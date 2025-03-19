@@ -198,7 +198,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
-Object wrap: Preserve
+Expand lists: Auto
 -----
 
 ```js
@@ -435,8 +435,9 @@ function* f() {
 		yield setup(2);
 }
 
-export const MSG_WITH_REMOVED_ESCAPE_CHARACTER_TEST =
-	goog.getMsg("That's all we know");
+export const MSG_WITH_REMOVED_ESCAPE_CHARACTER_TEST = goog.getMsg(
+	"That\'s all we know",
+);
 
 export const MSG_WITHOUT_ESCAPE_CHARACTER_TEST =
 	goog.getMsg("That's all we know");

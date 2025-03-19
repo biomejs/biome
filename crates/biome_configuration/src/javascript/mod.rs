@@ -70,7 +70,9 @@ pub struct JsParserConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grit_metavariables: Option<JsGritMetavariable>,
 
-    /// When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.
+    /// When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
+    ///
+    /// Defaults to `true`.
     #[bpaf(long("jsx-everywhere"), argument("true|false"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_everywhere: Option<JsxEverywhere>,

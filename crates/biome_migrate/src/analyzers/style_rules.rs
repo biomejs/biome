@@ -1,9 +1,9 @@
 use crate::rule_mover::AnalyzerMover;
-use crate::{declare_migration, MigrationAction};
+use crate::{MigrationAction, declare_migration};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
-use biome_diagnostics::{category, Applicability};
+use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make::{
     json_member, json_member_name, json_string_literal, json_string_value, token,
 };
@@ -73,6 +73,19 @@ impl Rule for StyleRules {
                     let Some(node_text) = node_text else {
                         continue;
                     };
+
+                    if node_text == "recommended" {
+                        let recommended_disabled = node
+                            .value()
+                            .ok()
+                            .and_then(|n| n.as_json_boolean_value().cloned())
+                            .and_then(|n| n.value_token().ok())
+                            .is_some_and(|n| n.text() == "false");
+                        if recommended_disabled {
+                            return vec![];
+                        }
+                    }
+
                     if node_text == "style" {
                         let list = node
                             .value()

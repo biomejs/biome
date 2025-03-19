@@ -1,14 +1,14 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, AnyJsCallArgument, AnyJsExpression, JsNewOrCallExpression, JsSyntaxKind, T,
+    AnyJsCallArgument, AnyJsExpression, JsNewOrCallExpression, JsSyntaxKind, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 
 declare_lint_rule! {
     /// Disallow Array constructors.

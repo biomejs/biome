@@ -7,8 +7,8 @@ use std::{
     ops::Deref,
     path::{Component, Path, PathBuf},
     sync::{
-        atomic::{AtomicU64, Ordering},
         Arc,
+        atomic::{AtomicU64, Ordering},
     },
 };
 
@@ -18,7 +18,7 @@ use biome_project_layout::ProjectLayout;
 use camino::{FromPathBufError, Utf8Component, Utf8Path, Utf8PathBuf};
 use once_cell::sync::OnceCell as OnceLock;
 use oxc_resolver::{
-    context::ResolveContext as Ctx, Cache, CachedPath as _, ResolveError, ResolveOptions, TsConfig,
+    Cache, CachedPath as _, ResolveError, ResolveOptions, TsConfig, context::ResolveContext as Ctx,
 };
 use papaya::{Equivalent, HashMap, HashSet};
 use rustc_hash::FxHasher;
@@ -78,12 +78,10 @@ impl<'a> ResolverCache<'a> {
             paths: HashSet::builder()
                 .hasher(BuildHasherDefault::default())
                 .resize_mode(papaya::ResizeMode::Blocking)
-                .collector(seize::Collector::new().epoch_frequency(None))
                 .build(),
             tsconfigs: HashMap::builder()
                 .hasher(BuildHasherDefault::default())
                 .resize_mode(papaya::ResizeMode::Blocking)
-                .collector(seize::Collector::new().epoch_frequency(None))
                 .build(),
         }
     }

@@ -3,7 +3,7 @@ use crate::util::TextRangeGritExt;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxNode, CssSyntaxToken};
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::{NodeOrToken, SyntaxKind, SyntaxSlot, TextRange};
-use grit_util::{error::GritResult, AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
+use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange, error::GritResult};
 use std::{borrow::Cow, fmt::Debug, ops::Deref};
 
 use NodeOrToken::*;
@@ -210,7 +210,7 @@ impl<'a> GritTargetNode<'a> {
         DescendantsIterator::new(self)
     }
 
-    pub fn named_children(&self) -> impl Iterator<Item = Self> + Clone {
+    pub fn named_children(&self) -> impl Iterator<Item = Self> + Clone + use<'a> {
         NamedChildrenIterator::new(self)
     }
 
@@ -237,7 +237,7 @@ impl<'a> GritTargetNode<'a> {
     }
 
     #[inline]
-    pub fn slots(&self) -> Option<impl Iterator<Item = GritSyntaxSlot<'a>>> {
+    pub fn slots(&self) -> Option<impl Iterator<Item = GritSyntaxSlot<'a>> + use<'a>> {
         SlotIterator::new(self)
     }
 

@@ -5,9 +5,9 @@ use crate::{
     JsBlockStatement, JsBreakStatement, JsCatchClause, JsContinueStatement, JsFinallyClause,
     JsForVariableDeclaration, JsLabeledStatement, JsStatementList, JsSyntaxKind,
     JsSyntaxToken as SyntaxToken, JsTryFinallyStatement, JsTryStatement, JsVariableDeclaration,
-    JsVariableDeclarator, TsModuleDeclaration, T,
+    JsVariableDeclarator, T, TsModuleDeclaration,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 impl AnyJsSwitchClause {
     pub fn clause_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -216,8 +216,8 @@ impl JsContinueStatement {
 
 #[cfg(test)]
 mod tests {
-    use biome_js_factory::syntax::{JsSyntaxKind::*, JsVariableDeclaration};
     use biome_js_factory::JsSyntaxTreeBuilder;
+    use biome_js_factory::syntax::{JsSyntaxKind::*, JsVariableDeclaration};
     use biome_rowan::AstNode;
 
     #[test]

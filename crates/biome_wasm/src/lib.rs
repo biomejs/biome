@@ -32,7 +32,7 @@ impl Workspace {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Workspace {
         Workspace {
-            inner: workspace::server(Box::new(MemoryFileSystem::default())),
+            inner: workspace::server(Box::new(MemoryFileSystem::default()), None),
         }
     }
 
@@ -50,10 +50,16 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = updateSettings)]
-    pub fn update_settings(&self, params: IUpdateSettingsParams) -> Result<(), Error> {
+    pub fn update_settings(
+        &self,
+        params: IUpdateSettingsParams,
+    ) -> Result<IUpdateSettingsResult, Error> {
         let params: UpdateSettingsParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
-        self.inner.update_settings(params).map_err(into_error)
+        let result = self.inner.update_settings(params).map_err(into_error)?;
+        to_value(&result)
+            .map(IUpdateSettingsResult::from)
+            .map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = openProject)]

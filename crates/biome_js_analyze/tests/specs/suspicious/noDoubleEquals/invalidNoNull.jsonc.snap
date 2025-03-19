@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: invalidNoNull.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -12,7 +12,7 @@ const isNull = a == null;
 ```
 invalidNoNull.jsonc:1:18 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
   > 1 │ const isNull = a == null;
       │                  ^^
@@ -35,7 +35,7 @@ const isNonNull = a != null;
 ```
 invalidNoNull.jsonc:1:21 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use !== instead of !=
+  × Use !== instead of !=
   
   > 1 │ const isNonNull = a != null;
       │                     ^^

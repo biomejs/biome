@@ -1,7 +1,7 @@
 [package]
 authors.workspace    = true
 categories.workspace = true
-description          = "biome_plugin_loader2"
+description          = "Functionality for loading plugins and caching them in memory"
 edition.workspace    = true
 homepage.workspace   = true
 keywords.workspace   = true
@@ -24,6 +24,8 @@ biome_rowan              = { workspace = true }
 camino                   = { workspace = true }
 grit-pattern-matcher     = { workspace = true }
 grit-util                = { workspace = true }
+papaya                   = { workspace = true }
+rustc-hash               = { workspace = true }
 serde                    = { workspace = true }
 
 [dev-dependencies]
