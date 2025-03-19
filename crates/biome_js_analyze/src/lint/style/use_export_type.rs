@@ -119,10 +119,19 @@ impl Rule for UseExportType {
                             continue;
                         }
                         let model = ctx.model();
-                        let binding = model.binding(&ref_name)?;
-                        let binding = binding.tree();
-                        if binding.is_type_only() {
-                            specifiers_requiring_type_marker.push(specifier);
+
+                        // In TypeScript, an identifier can have multiple bindings.
+                        // e.g. `let Foo` and `type Foo` can be exported via a single identifier.
+                        let is_type_only = model
+                            .global_scope()
+                            .bindings()
+                            .filter(|binding| {
+                                binding.syntax().text_trimmed() == ref_name.syntax().text_trimmed()
+                            })
+                            .all(|binding| binding.tree().is_type_only());
+
+                        if is_type_only {
+                            specifiers_requiring_type_marker.push(specifier.clone());
                         } else {
                             exports_only_types = false;
                         }
