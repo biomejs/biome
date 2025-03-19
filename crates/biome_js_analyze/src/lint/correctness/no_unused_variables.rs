@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoUnusedVariablesOptions {
-    /// Whether to ignore unused variables from an object desctructuring with a spread
+    /// Whether to ignore unused variables from an object destructuring with a spread
     /// (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
     #[serde(default)]
     ignore_rest_siblings: bool,
@@ -49,15 +49,8 @@ declare_lint_rule! {
     /// If you want to report unused imports,
     /// enable [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/).
     ///
-    /// :::caution
-    /// From `v2.0.0`, the rule won't check unused function parameters any more.
-    /// If you want to report unused function parameters,
-    /// enable [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/).
-    /// :::
     ///
     /// ## Options
-    ///
-    /// **Since v2.0.0**
     ///
     /// The rule supports the following options:
     ///
@@ -69,7 +62,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// - `ignoreRestSiblings`: Whether to ignore unused variables from an object desctructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule). Defaults to `false`.
+    /// - `ignoreRestSiblings`: Whether to ignore unused variables from an object destructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule). Defaults to `false`.
     ///
     /// ## Examples
     ///
