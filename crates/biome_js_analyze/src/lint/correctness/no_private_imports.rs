@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -211,6 +211,16 @@ impl Rule for NoPrivateImports {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let cwd = Utf8PathBuf::from(
+            std::env::current_dir()
+                .map(|cwd| cwd.to_string_lossy().to_string())
+                .unwrap_or_default(),
+        );
+
+        // Use the relative path if possible.
+        let path = Utf8PathBuf::from(&state.path);
+        let path = path.strip_prefix(&cwd).unwrap_or(&path).to_string();
+
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             state.range,
@@ -222,7 +232,7 @@ impl Rule for NoPrivateImports {
             "You may need to import an alternative symbol, or relax the visibility of this symbol."
         })
         .note(markup! {
-            "The visibility for this symbol is defined in "<Emphasis>{state.path}</Emphasis>"."
+            "The visibility for this symbol is defined in "<Emphasis>{path}</Emphasis>"."
         });
 
         Some(diagnostic)

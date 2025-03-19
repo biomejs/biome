@@ -119,7 +119,7 @@ default_package.js:10:10 lint/correctness/noPrivateImports ━━━━━━━
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
   
 
 ```
@@ -137,7 +137,7 @@ default_package.js:11:10 lint/correctness/noPrivateImports ━━━━━━━
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
   
 
 ```

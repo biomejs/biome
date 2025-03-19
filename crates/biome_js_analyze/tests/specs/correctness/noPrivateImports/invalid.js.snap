@@ -33,7 +33,7 @@ invalid.js:2:10 lint/correctness/noPrivateImports ━━━━━━━━━━
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
   
 
 ```
@@ -51,7 +51,7 @@ invalid.js:5:10 lint/correctness/noPrivateImports ━━━━━━━━━━
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
   
 
 ```
@@ -69,7 +69,7 @@ invalid.js:8:10 lint/correctness/noPrivateImports ━━━━━━━━━━
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/foo.js.
+  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/foo.js.
   
 
 ```
@@ -87,7 +87,7 @@ invalid.js:11:8 lint/correctness/noPrivateImports ━━━━━━━━━━
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/foo.js.
+  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/foo.js.
   
 
 ```
@@ -105,7 +105,7 @@ invalid.js:12:8 lint/correctness/noPrivateImports ━━━━━━━━━━
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
   
 
 ```
@@ -123,7 +123,7 @@ invalid.js:12:28 lint/correctness/noPrivateImports ━━━━━━━━━�
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
   
 
 ```
