@@ -12,7 +12,7 @@ use specifiers_attributes::{
 };
 
 use crate::JsRuleAction;
-use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newline_count};
+use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
 pub mod comparable_token;
 pub mod import_groups;
@@ -191,38 +191,58 @@ impl Rule for OrganizeImports {
         let mut result = Vec::new();
         let options = ctx.options();
         let mut chunk: Option<ChunkBuilder> = None;
-        let mut prev_item_kind: Option<JsSyntaxKind> = None;
+        let mut prev_kind: Option<JsSyntaxKind> = None;
+        let mut prev_group = 0;
         for item in root.items() {
             if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
-                let prev_is_distinct =
-                    prev_item_kind.is_some_and(|kind| kind != item.syntax().kind());
+                let prev_is_distinct = prev_kind.is_some_and(|kind| kind != item.syntax().kind());
                 // A detached comment marks the start of a new chunk
                 if prev_is_distinct || has_detached_leading_comment(item.syntax()) {
                     // The chunk ends, here
                     report_unsorted_chunk(chunk.take(), &mut result);
+                    prev_group = 0;
                 }
-                let key = ImportKey::new(info, options.groups.as_ref());
+                let key = ImportKey::new(info, &options.groups);
+                let blank_line_separated_groups = options
+                    .groups
+                    .separated_by_blank_line(prev_group, key.group);
                 let starts_chunk = chunk.is_none();
-                let leading_newline = leading_newline_count(item.syntax());
-                // A chunk must start with a blank line (two newlines)
-                // if an export or a statement precedes it.
-                // Note that we assume that every import has at least one leading newline because the formatter guarantee it.
-                if (starts_chunk && leading_newline == 1 && prev_is_distinct)
+                let leading_newline_count = leading_newlines(item.syntax()).count();
+                let are_specifiers_unsorted =
+                    specifiers.is_some_and(|specifiers| !specifiers.are_sorted());
+                let are_attributes_unsorted = attributes.is_some_and(|attributes| {
+                    !(are_import_attributes_sorted(&attributes).unwrap_or_default())
+                });
+                let newline_issue = if leading_newline_count == 1
+                    // A chunk must start with a blank line (two newlines)
+                    // if an export or a statement precedes it.
+                    && ((starts_chunk && prev_is_distinct) ||
+                    // Some groups must be separated by a blank line
+                    blank_line_separated_groups)
+                {
+                    NewLineIssue::MissingNewLine
+                } else if leading_newline_count > 1
+                    && !starts_chunk
+                    // Ignore blank lines when groups are not explicitly set
+                    && !options.groups.is_empty()
+                    && !blank_line_separated_groups
+                {
                     // An import inside a chunk must not start with a blank line
                     // if groups are explicitly set
-                    || (!starts_chunk && leading_newline > 1 && options.groups.is_some())
-                    // Specifiers must be sorted
-                    || specifiers
-                        .is_some_and(|specifiers| !specifiers.are_sorted())
-                    // Attributes must be sorted
-                    || attributes.is_some_and(|attributes| {
-                        !(are_import_attributes_sorted(&attributes).unwrap_or_default())
-                    })
+                    NewLineIssue::ExtraNewLine
+                } else {
+                    NewLineIssue::None
+                };
+                if are_specifiers_unsorted
+                    || are_attributes_unsorted
+                    || !matches!(newline_issue, NewLineIssue::None)
                 {
                     // Report the violation of one of the previous requirement
                     result.push(Issue::UnorganizedItem {
                         slot_index: key.slot_index,
-                        starts_chunk,
+                        are_specifiers_unsorted,
+                        are_attributes_unsorted,
+                        newline_issue,
                     });
                 }
                 if let Some(chunk) = &mut chunk {
@@ -230,11 +250,13 @@ impl Rule for OrganizeImports {
                     if chunk.max_key > key {
                         chunk.slot_indexes.end = key.slot_index + 1;
                     } else {
+                        prev_group = key.group;
                         chunk.max_key = key;
                     }
                 } else {
                     // New chunk
-                    chunk = Some(ChunkBuilder::new(key))
+                    prev_group = key.group;
+                    chunk = Some(ChunkBuilder::new(key));
                 }
             } else if chunk.is_some() {
                 // This is either
@@ -244,16 +266,17 @@ impl Rule for OrganizeImports {
                 //
                 // In any case, the chunk ends here
                 report_unsorted_chunk(chunk.take(), &mut result);
+                prev_group = 0;
                 // A statement must be separated of a chunk with a blank line
                 if let AnyJsModuleItem::AnyJsStatement(statement) = &item {
-                    if leading_newline_count(statement.syntax()) == 1 {
+                    if leading_newlines(statement.syntax()).count() == 1 {
                         result.push(Issue::AddLeadingNewline {
                             slot_index: statement.syntax().index() as u32,
                         });
                     }
                 }
             }
-            prev_item_kind = Some(item.syntax().kind());
+            prev_kind = Some(item.syntax().kind());
         }
         // Report the last chunk
         report_unsorted_chunk(chunk.take(), &mut result);
@@ -278,69 +301,78 @@ impl Rule for OrganizeImports {
                         .into_iter()
                         .nth(*slot_index as usize)?
                         .into_syntax();
-                    if leading_newline_count(&item) >= 1 {
-                        let newline = item.first_leading_trivia()?.pieces().take(1);
+                    if leading_newlines(&item).count() >= 1 {
+                        let newline = item.first_leading_trivia()?.pieces().next();
                         let new_item = item.clone().prepend_trivia_pieces(newline)?;
                         mutation.replace_element_discard_trivia(item.into(), new_item.into());
                     }
                 }
                 Issue::UnorganizedItem {
                     slot_index,
-                    starts_chunk,
+                    are_attributes_unsorted,
+                    are_specifiers_unsorted,
+                    newline_issue,
                 } => {
                     let item = root.items().into_iter().nth(*slot_index as usize)?;
-                    let prev_sibling = item.syntax().prev_sibling();
                     let item: AnyJsModuleItem = match item {
                         AnyJsModuleItem::AnyJsStatement(_) => {
                             continue;
                         }
                         AnyJsModuleItem::JsExport(export) => {
                             let mut clause = export.export_clause().ok()?;
-                            // Sort named specifiers
-                            if let AnyJsExportClause::JsExportNamedFromClause(casted) = &clause {
-                                if let Some(sorted_specifiers) =
-                                    sort_export_specifiers(casted.specifiers())
-                                {
-                                    clause =
-                                        casted.clone().with_specifiers(sorted_specifiers).into();
+                            if *are_specifiers_unsorted {
+                                // Sort named specifiers
+                                if let AnyJsExportClause::JsExportNamedFromClause(cast) = &clause {
+                                    if let Some(sorted_specifiers) =
+                                        sort_export_specifiers(&cast.specifiers())
+                                    {
+                                        clause =
+                                            cast.clone().with_specifiers(sorted_specifiers).into();
+                                    }
                                 }
                             }
-                            // Sort import attributes
-                            let sorted_attrs = clause.attribute().and_then(sort_attributes);
-                            let clause = clause.with_attribute(sorted_attrs);
+                            if *are_attributes_unsorted {
+                                // Sort import attributes
+                                let sorted_attrs = clause.attribute().and_then(sort_attributes);
+                                clause = clause.with_attribute(sorted_attrs);
+                            }
                             export.with_export_clause(clause).into()
                         }
                         AnyJsModuleItem::JsImport(import) => {
-                            let clause = import.import_clause().ok()?;
-                            // Sort named specifiers
-                            let clause = if let Some(sorted_specifiers) =
-                                clause.named_specifiers().and_then(sort_import_specifiers)
-                            {
-                                clause.with_named_specifiers(sorted_specifiers)
-                            } else {
-                                clause
-                            };
-                            // Sort import attributes
-                            let sorted_attrs = clause.attribute().and_then(sort_attributes);
-                            let clause = clause.with_attribute(sorted_attrs);
+                            let mut clause = import.import_clause().ok()?;
+                            if *are_specifiers_unsorted {
+                                // Sort named specifiers
+                                if let Some(sorted_specifiers) =
+                                    clause.named_specifiers().and_then(sort_import_specifiers)
+                                {
+                                    clause = clause.with_named_specifiers(sorted_specifiers)
+                                }
+                            }
+                            if *are_attributes_unsorted {
+                                // Sort import attributes
+                                let sorted_attrs = clause.attribute().and_then(sort_attributes);
+                                clause = clause.with_attribute(sorted_attrs);
+                            }
                             import.with_import_clause(clause).into()
                         }
                     };
                     let mut item = item.into_syntax();
                     // Fix newlines
-                    let leading_newlines = leading_newline_count(&item);
-                    if *starts_chunk
-                        && leading_newlines == 1
-                        && prev_sibling.is_some_and(|prev| item.kind() != prev.kind())
-                    {
-                        let newline = item.first_leading_trivia()?.pieces().take(1);
-                        item = item.prepend_trivia_pieces(newline)?
-                    } else if !starts_chunk && leading_newlines > 1 && options.groups.is_some() {
-                        // Remove extra newlines
-                        let leading_trivia = item.first_leading_trivia()?;
-                        item = item.with_leading_trivia_pieces(
-                            leading_trivia.pieces().skip(leading_newlines - 1),
-                        )?;
+                    match newline_issue {
+                        NewLineIssue::None => {}
+                        NewLineIssue::ExtraNewLine => {
+                            // Remove extra newlines
+                            let leading_trivia = item
+                                .first_leading_trivia()?
+                                .pieces()
+                                .skip(leading_newlines(&item).count() - 1);
+                            item = item.with_leading_trivia_pieces(leading_trivia)?;
+                        }
+                        NewLineIssue::MissingNewLine => {
+                            // Add missing newline
+                            let newline = leading_newlines(&item).next();
+                            item = item.prepend_trivia_pieces(newline.into_iter())?
+                        }
                     }
                     // Save the node
                     organized_items.insert(*slot_index, item);
@@ -356,56 +388,71 @@ impl Rule for OrganizeImports {
                             .skip(slot_indexes.start as usize)
                             .take(slot_indexes.len())
                             .filter_map(|item| ImportInfo::from_module_item(&item))
-                            .map(|(info, _, _)| ImportKey::new(info, options.groups.as_ref())),
+                            .map(|(info, _, _)| ImportKey::new(info, &options.groups)),
                     );
                     // Sort imports based on their import key
                     import_keys.sort_unstable();
                     // Swap the items to obtain a sorted chunk
                     let items = ctx.query().items().into_syntax();
+                    let mut prev_group: u16 = 0;
                     for (index, key) in (slot_indexes.start..).zip(import_keys.drain(..)) {
-                        // Don't make any change if it is the same node
-                        if index == key.slot_index {
+                        let blank_line_separated_groups = options
+                            .groups
+                            .separated_by_blank_line(prev_group, key.group);
+                        // Don't make any change if it is the same node and no change have to be done
+                        if !blank_line_separated_groups && index == key.slot_index {
                             continue;
                         }
                         let old_item = items.element_in_slot(index)?.into_node()?;
-                        let new_item = items.element_in_slot(key.slot_index)?.into_node()?;
-                        let new_item = organized_items.remove(&key.slot_index).unwrap_or(new_item);
-                        let new_item = if index == slot_indexes.start {
+                        let mut new_item =
+                            if let Some(item) = organized_items.remove(&key.slot_index) {
+                                item
+                            } else {
+                                items.element_in_slot(key.slot_index)?.into_node()?
+                            };
+                        if index == slot_indexes.start {
                             if let Some(detached) = detached_trivia(&old_item) {
-                                if leading_newline_count(&old_item) == 1 {
+                                if leading_newlines(&old_item).count() == 1 {
                                     let newline = old_item.first_leading_trivia()?.pieces().take(1);
-                                    new_item.prepend_trivia_pieces(chain_trivia_pieces(
-                                        newline, detached,
-                                    ))?
+                                    new_item = new_item.prepend_trivia_pieces(
+                                        chain_trivia_pieces(newline, detached),
+                                    )?;
                                 } else {
-                                    new_item.prepend_trivia_pieces(detached)?
+                                    new_item = new_item.prepend_trivia_pieces(detached)?;
                                 }
-                            } else if index == 0 && leading_newline_count(&old_item) == 0 {
+                            } else if index == 0 && leading_newlines(&old_item).count() == 0 {
                                 // We are at the top of the file.
                                 // Keep header (possibly Copyright notice)
                                 let header_trivia = old_item.first_leading_trivia()?;
                                 if header_trivia.is_empty() {
-                                    new_item.trim_leading_trivia()?
+                                    new_item = new_item.trim_leading_trivia()?;
                                 } else {
-                                    new_item.prepend_trivia_pieces(header_trivia.pieces())?
+                                    new_item =
+                                        new_item.prepend_trivia_pieces(header_trivia.pieces())?;
                                 }
-                            } else {
-                                new_item
                             }
                         } else if let Some(attached) = attached_trivia(&new_item) {
                             // Transfer attached comment
-                            new_item.with_leading_trivia_pieces(attached)?
-                        } else if key.slot_index == 0 && leading_newline_count(&new_item) == 0 {
+                            new_item = new_item.with_leading_trivia_pieces(attached)?;
+                        } else if key.slot_index == 0 && leading_newlines(&new_item).count() == 0 {
                             // Don't copy the header trivia
                             let first_token = new_item.first_token()?;
                             let new_first_token = first_token
                                 .clone()
                                 .with_leading_trivia([(TriviaPieceKind::Newline, "\n")]);
-                            new_item.replace_child(first_token.into(), new_first_token.into())?
-                        } else {
-                            new_item
-                        };
+                            new_item = new_item
+                                .replace_child(first_token.into(), new_first_token.into())?;
+                        }
+                        // Add newline for group separation
+                        if index != 0
+                            && blank_line_separated_groups
+                            && leading_newlines(&new_item).count() == 1
+                        {
+                            let newline = leading_newlines(&new_item).next();
+                            new_item = new_item.prepend_trivia_pieces(newline)?;
+                        }
                         mutation.replace_element_discard_trivia(old_item.into(), new_item.into());
+                        prev_group = key.group;
                     }
                 }
             }
@@ -432,7 +479,7 @@ impl Rule for OrganizeImports {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct Options {
-    groups: Option<import_groups::ImportGroups>,
+    groups: import_groups::ImportGroups,
 }
 
 #[derive(Debug)]
@@ -453,7 +500,16 @@ pub enum Issue {
     UnorganizedItem {
         /// Slot index of the import or export
         slot_index: u32,
-        // `true` if this import or export starts a chunk
-        starts_chunk: bool,
+        are_attributes_unsorted: bool,
+        are_specifiers_unsorted: bool,
+        newline_issue: NewLineIssue,
     },
+}
+
+#[derive(Debug)]
+pub enum NewLineIssue {
+    /// No issue
+    None,
+    ExtraNewLine,
+    MissingNewLine,
 }

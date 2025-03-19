@@ -10,14 +10,33 @@ use crate::globals::is_node_builtin_module;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ImportGroups(Box<[ImportGroup]>);
 impl ImportGroups {
+    /// Returns `true` if no explicit group is set.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     /// Returns the index of the first group containing `candidate`.
     /// If no group contains `candidate`, then the returned value corresponds to the index of the implicit group.
     /// The index of the implicit group correspond to the number of groups.
-    pub fn index(&self, candidate: &ImportSourceCandidate) -> usize {
+    pub fn index(&self, candidate: &ImportSourceCandidate) -> u16 {
         self.0
             .iter()
             .position(|group| group.contains(candidate))
-            .unwrap_or(self.0.len())
+            .unwrap_or(self.0.len()) as u16
+    }
+
+    /// Returns how many blank lines must separate `first_group` and `second_group`.
+    pub fn separated_by_blank_line(&self, first_group: u16, second_group: u16) -> bool {
+        self.0
+            .get((first_group as usize)..(second_group as usize))
+            .is_some_and(|groups| {
+                groups.iter().any(|group| {
+                    matches!(
+                        group,
+                        ImportGroup::Predefined(PredefinedImportGroup::BlankLine)
+                    )
+                })
+            })
     }
 }
 
@@ -62,6 +81,8 @@ impl Deserializable for ImportGroup {
 #[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum PredefinedImportGroup {
+    #[serde(rename = ":BLANK-LINE:")]
+    BlankLine,
     #[serde(rename = ":BUN:")]
     Bun,
     #[serde(rename = ":NODE:")]
@@ -71,6 +92,7 @@ impl PredefinedImportGroup {
     fn contains(&self, candidate: &ImportSourceCandidate) -> bool {
         let import_source = candidate.as_str();
         match self {
+            Self::BlankLine => false,
             Self::Bun => import_source == "bun" || import_source.starts_with("bun:"),
             Self::Node => {
                 import_source.starts_with("node:") || is_node_builtin_module(import_source)

@@ -59,9 +59,6 @@ pub fn sort_import_specifiers(
     named_specifiers: JsNamedImportSpecifiers,
 ) -> Option<JsNamedImportSpecifiers> {
     let list = named_specifiers.specifiers();
-    if list.len() <= 1 {
-        return Some(named_specifiers);
-    }
     let mut last_has_separator = false;
     let mut sorted = Vec::with_capacity(list.len());
     for AstSeparatedElement {
@@ -117,11 +114,8 @@ pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList)
 }
 
 pub fn sort_export_specifiers(
-    named_specifiers: JsExportNamedFromSpecifierList,
+    named_specifiers: &JsExportNamedFromSpecifierList,
 ) -> Option<JsExportNamedFromSpecifierList> {
-    if named_specifiers.len() <= 1 {
-        return Some(named_specifiers);
-    }
     let mut last_has_separator = false;
     let mut sorted = Vec::with_capacity(named_specifiers.len());
     for AstSeparatedElement {
@@ -178,9 +172,6 @@ pub fn are_import_attributes_sorted(attributes: &JsImportAssertion) -> Option<bo
 
 pub fn sort_attributes(attributes: JsImportAssertion) -> Option<JsImportAssertion> {
     let attributes_list = attributes.assertions();
-    if attributes_list.len() <= 1 {
-        return Some(attributes);
-    }
     let mut last_has_separator = false;
     let mut sorted = Vec::new();
     for AstSeparatedElement {

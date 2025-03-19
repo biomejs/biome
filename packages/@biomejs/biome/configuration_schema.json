@@ -3058,11 +3058,8 @@
 			"type": "object",
 			"properties": {
 				"groups": {
-					"default": null,
-					"anyOf": [
-						{ "$ref": "#/definitions/ImportGroups" },
-						{ "type": "null" }
-					]
+					"default": [],
+					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
 				}
 			},
 			"additionalProperties": false
@@ -3292,7 +3289,10 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
-		"PredefinedImportGroup": { "type": "string", "enum": [":BUN:", ":NODE:"] },
+		"PredefinedImportGroup": {
+			"type": "string",
+			"enum": [":BLANK-LINE:", ":BUN:", ":NODE:"]
+		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },

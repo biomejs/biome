@@ -8,11 +8,9 @@
 					"options": {
                         "groups": [
                             ":BUN:",
-                            ":NODE:",
-							["@scopeX/**", "!@scopeX/special", "!@scopeX/special/**"],
 							":BLANK-LINE:",
-							"@scopeB/**",
-							"@scopeA/**"
+                            ":NODE:",
+							":BLANK-LINE:"
                         ]
 					}
 				}

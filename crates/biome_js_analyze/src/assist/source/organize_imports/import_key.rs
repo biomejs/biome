@@ -21,10 +21,10 @@ pub struct ImportKey {
     pub slot_index: u32,
 }
 impl ImportKey {
-    pub fn new(info: ImportInfo, groups: Option<&import_groups::ImportGroups>) -> Self {
+    pub fn new(info: ImportInfo, groups: &import_groups::ImportGroups) -> Self {
         let candidate = import_groups::ImportSourceCandidate::new(info.source.inner().0.text());
         Self {
-            group: groups.map_or(0, |groups| groups.index(&candidate) as u16),
+            group: groups.index(&candidate),
             source: info.source,
             has_no_attributes: info.has_no_attributes,
             kind: info.kind,

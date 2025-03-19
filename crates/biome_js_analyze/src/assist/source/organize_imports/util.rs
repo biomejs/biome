@@ -1,13 +1,13 @@
 use biome_js_syntax::{JsLanguage, JsSyntaxNode, JsSyntaxTrivia};
 use biome_rowan::SyntaxTriviaPiece;
 
-pub fn leading_newline_count(syntax: &JsSyntaxNode) -> usize {
-    syntax.first_leading_trivia().map_or(0, |trivia| {
-        trivia
-            .pieces()
-            .take_while(|piece| piece.is_newline())
-            .count()
-    })
+pub fn leading_newlines(
+    syntax: &JsSyntaxNode,
+) -> impl Iterator<Item = SyntaxTriviaPiece<JsLanguage>> {
+    syntax
+        .first_leading_trivia()
+        .into_iter()
+        .flat_map(|trivia| trivia.pieces().take_while(|piece| piece.is_newline()))
 }
 
 /// Returns the index of the last blank line of `trivia`.

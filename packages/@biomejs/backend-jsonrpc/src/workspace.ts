@@ -3050,7 +3050,7 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
-export type PredefinedImportGroup = ":BUN:" | ":NODE:";
+export type PredefinedImportGroup = ":BLANK-LINE:" | ":BUN:" | ":NODE:";
 /**
  * Glob to match against import sources.
  */
