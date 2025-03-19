@@ -1,14 +1,14 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::{fmt::Display, markup};
-use biome_dependency_graph::{DependencyGraph, Import, ModuleDependencyData};
+use biome_dependency_graph::{Export, ModuleDependencyData};
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
-    AnyJsImportClause, AnyJsImportLike, JsDefaultImportSpecifier, JsLanguage, JsModuleSource,
-    inner_string_text,
+    AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
-use biome_rowan::{AstNode, SyntaxNode, SyntaxResult, TextRange, TokenText};
+use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -124,7 +124,7 @@ pub struct NoPrivateImportsOptions {
 #[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
-enum Visibility {
+pub enum Visibility {
     #[default]
     Public,
     Package,
@@ -141,6 +141,20 @@ impl Display for Visibility {
     }
 }
 
+impl FromStr for Visibility {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "public" => Ok(Visibility::Public),
+            "package" => Ok(Visibility::Package),
+            "private" => Ok(Visibility::Private),
+            _ => Err(()),
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct NoPrivateImportsState {
     range: TextRange,
 
@@ -158,33 +172,39 @@ impl Rule for NoPrivateImports {
     type Options = NoPrivateImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let self_path = ctx.file_path();
         let Some(file_imports) = ctx.imports_for_path(ctx.file_path()) else {
             return Vec::new();
         };
 
         let node = ctx.query();
-        let Some(target_data) = file_imports
+        let Some(target_path) = file_imports
             .get_import_by_node(node)
             .and_then(|import| import.resolved_path.as_ref().ok())
-            .and_then(|target_path| ctx.imports_for_path(&target_path))
         else {
             return Vec::new();
         };
 
+        let Some(target_data) = ctx.imports_for_path(target_path) else {
+            return Vec::new();
+        };
+
         let options = GetRestrictedImportOptions {
-            dependency_graph: ctx
-                .get_service()
-                .expect("Dependency graph must be initialised"),
+            self_path,
+            target_path,
             target_data,
             default_visibility: ctx.options().default_visibility,
         };
 
         let result = match node {
             AnyJsImportLike::JsModuleSource(node) => {
-                get_restricted_imports_from_module_source(node, options)
+                get_restricted_imports_from_module_source(node, &options)
             }
-            AnyJsImportLike::JsCallExpression(node) => todo!(),
-            AnyJsImportLike::JsImportCallExpression(node) => todo!(),
+
+            // TODO: require() and import() calls should also be handled here, but tracking the
+            //       bindings to get the used symbol names is not easy. I think we can leave it
+            //       for future opportunities.
+            _ => Ok(Vec::new()),
         };
 
         result.unwrap_or_default()
@@ -210,8 +230,11 @@ impl Rule for NoPrivateImports {
 }
 
 struct GetRestrictedImportOptions<'a> {
-    /// Reference to the dependency graph for looking up additional imports.
-    dependency_graph: &'a DependencyGraph,
+    /// The self module path we're importing to.
+    self_path: &'a Utf8Path,
+
+    /// The target module path we're importing from.
+    target_path: &'a Utf8Path,
 
     /// Dependency data of the target module we're importing from.
     target_data: ModuleDependencyData,
@@ -223,18 +246,69 @@ struct GetRestrictedImportOptions<'a> {
 
 fn get_restricted_imports_from_module_source(
     node: &JsModuleSource,
-    options: GetRestrictedImportOptions,
+    options: &GetRestrictedImportOptions,
 ) -> SyntaxResult<Vec<NoPrivateImportsState>> {
+    let path = options.target_path.to_string();
+
     let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
-        Some(AnyJsImportClause::JsImportCombinedClause(node)) => todo!(),
-        Some(AnyJsImportClause::JsImportDefaultClause(node)) => get_restricted_import(
-            node.default_specifier()
-                .map(JsDefaultImportSpecifier::into_syntax)?,
-            &options,
-        )?
-        .into_iter()
-        .collect(),
-        Some(AnyJsImportClause::JsImportNamedClause(node)) => todo!(),
+        Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
+            let range = node.default_specifier()?.range();
+            get_restricted_import(&Text::Static("default"), options)
+                .map(|visibility| NoPrivateImportsState {
+                    range,
+                    path: path.clone(),
+                    visibility,
+                })
+                .into_iter()
+                .chain(
+                    node.specifier()?
+                        .as_js_named_import_specifiers()
+                        .map(|specifiers| specifiers.specifiers())
+                        .into_iter()
+                        .flatten()
+                        .flatten()
+                        .filter_map(get_named_specifier_import_name)
+                        .filter_map(|name| {
+                            get_restricted_import(
+                                &Text::Borrowed(name.token_text_trimmed()),
+                                options,
+                            )
+                            .map(|visibility| NoPrivateImportsState {
+                                range: name.text_trimmed_range(),
+                                path: path.clone(),
+                                visibility,
+                            })
+                        }),
+                )
+                .collect()
+        }
+        Some(AnyJsImportClause::JsImportDefaultClause(node)) => {
+            let range = node.default_specifier()?.range();
+            get_restricted_import(&Text::Static("default"), options)
+                .map(|visibility| NoPrivateImportsState {
+                    range,
+                    path,
+                    visibility,
+                })
+                .into_iter()
+                .collect()
+        }
+        Some(AnyJsImportClause::JsImportNamedClause(node)) => node
+            .named_specifiers()?
+            .specifiers()
+            .into_iter()
+            .flatten()
+            .filter_map(get_named_specifier_import_name)
+            .filter_map(|name| {
+                get_restricted_import(&Text::Borrowed(name.token_text_trimmed()), options).map(
+                    |visibility| NoPrivateImportsState {
+                        range: name.text_trimmed_range(),
+                        path: path.clone(),
+                        visibility,
+                    },
+                )
+            })
+            .collect(),
         Some(
             AnyJsImportClause::JsImportBareClause(_)
             | AnyJsImportClause::JsImportNamespaceClause(_),
@@ -245,79 +319,56 @@ fn get_restricted_imports_from_module_source(
     Ok(results)
 }
 
-/// Returns `Some` signal if the given `specifier_node` references an import
+fn get_named_specifier_import_name(specifier: AnyJsNamedImportSpecifier) -> Option<JsSyntaxToken> {
+    match specifier {
+        AnyJsNamedImportSpecifier::JsNamedImportSpecifier(specifier) => {
+            specifier.name().ok().and_then(|name| name.value().ok())
+        }
+        AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(specifier) => specifier
+            .local_name()
+            .ok()
+            .and_then(|binding| binding.as_js_identifier_binding()?.name_token().ok()),
+        _ => None,
+    }
+}
+
+/// Returns `Some` signal if the given `import_name` references an import
 /// that is more private than allowed.
 fn get_restricted_import(
-    specifier_node: SyntaxNode<JsLanguage>,
+    import_name: &Text,
     options: &GetRestrictedImportOptions,
-) -> SyntaxResult<Option<NoPrivateImportsState>> {
-    let symbol_name = specifier_node.text_trimmed();
+) -> Option<Visibility> {
+    let visibility = options
+        .target_data
+        .exports
+        .get(import_name)
+        .and_then(|export| match export {
+            Export::Own(export) => export.jsdoc_comment.as_deref().and_then(parse_visibility),
 
-    if !module_path.starts_with('.') {
-        return None;
-    }
+            // TODO: Should we follow re-exports here? I think re-exports don't inherit the
+            //       visibility from where the name is declared; e.g. package-private symbols can be
+            //       re-exported from index.js to make it public. Thus we can fallback to the
+            //       default visibility if they're re-exported and not added any visibility there.
+            _ => None,
+        })
+        .unwrap_or(options.default_visibility);
 
-    let mut path_parts: Vec<_> = module_path.text().split('/').collect();
-    let mut index_filename = None;
+    let is_restricted = match visibility {
+        Visibility::Public => false,
+        Visibility::Private => true,
+        Visibility::Package => options.target_path.parent() != options.self_path.parent(),
+    };
 
-    // TODO. The implementation could be optimized further by using
-    // `Path::new(module_path.text())` for further inspiration see `use_import_extensions` rule.
-    if let Some(extension) = get_extension(&path_parts) {
-        if !SOURCE_EXTENSIONS.contains(&extension) {
-            return None; // Resource files are exempt.
-        }
-
-        if let Some(basename) = get_basename(&path_parts) {
-            if INDEX_BASENAMES.contains(&basename) {
-                // We pop the index file because it shouldn't count as a path,
-                // component, but we store the file name so we can add it to
-                // both the reported path and the suggestion.
-                index_filename = path_parts.last().copied();
-                path_parts.pop();
-            }
-        }
-    }
-
-    let is_restricted = path_parts
-        .iter()
-        .filter(|&&part| part != "." && part != "..")
-        .count()
-        > 1;
-    if !is_restricted {
-        return None;
-    }
-
-    let mut suggestion_parts = path_parts[..path_parts.len() - 1].to_vec();
-
-    // Push the index file if it exists. This makes sure the reported path
-    // matches the import path exactly.
-    if let Some(index_filename) = index_filename {
-        path_parts.push(index_filename);
-
-        // Assumes the user probably wants to use an index file that has the
-        // same name as the original.
-        suggestion_parts.push(index_filename);
-    }
-
-    Some(NoPrivateImportsState {
-        range,
-        path: path_parts.join("/"),
-        suggestion: suggestion_parts.join("/"),
-    })
+    is_restricted.then_some(visibility)
 }
 
-fn get_basename<'a>(path_parts: &'_ [&'a str]) -> Option<&'a str> {
-    path_parts.last().map(|&part| match part.find('.') {
-        Some(dot_index) if dot_index > 0 && dot_index < part.len() - 1 => &part[..dot_index],
-        _ => part,
-    })
-}
-
-fn get_extension<'a>(path_parts: &'_ [&'a str]) -> Option<&'a str> {
-    path_parts.last().and_then(|part| match part.find('.') {
-        Some(dot_index) if dot_index > 0 && dot_index < part.len() - 1 => {
-            Some(&part[dot_index + 1..])
-        }
-        _ => None,
-    })
+/// Parses a JSDoc comment to find the first `@public`, `@package`, or `@private` tag.
+fn parse_visibility(jsdoc_comment: &str) -> Option<Visibility> {
+    jsdoc_comment
+        .lines()
+        .find_map(|line| {
+            line.strip_prefix("@")
+                .and_then(|tag| tag.split_whitespace().next())
+        })
+        .and_then(|tag| Visibility::from_str(tag).ok())
 }

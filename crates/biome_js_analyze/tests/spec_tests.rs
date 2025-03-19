@@ -135,6 +135,7 @@ pub(crate) fn analyze_and_snap(
     //        trigger a leak panic...
     let dependency_graph = if input_file.components().any(|component| {
         component == Utf8Component::Normal("noImportCycles")
+            || component == Utf8Component::Normal("noPrivateImports")
             || component == Utf8Component::Normal("useImportExtensions")
     }) {
         dependency_graph_for_test_file(input_file, &project_layout)

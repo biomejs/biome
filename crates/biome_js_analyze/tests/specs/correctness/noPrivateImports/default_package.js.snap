@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: default_package.js
+---
+# Input
+```js
+// Importing a symbol without any visibility from sub package is NOT allowed when the default visibility is package.
+import { fooDefaultVariable } from "./sub/foo.js";
+
+// Looser visibility takes precedence over the default visibility, so these imports are allowed.
+import { fooPackageVariable } from "./foo.js";
+import { fooPublicVariable } from "./foo.js";
+import { fooPublicVariable as subPublic } from "./sub/foo.js";
+
+// Tighter visibility also takes precedence, so these imports are NOT allowed.
+import { fooPackageVariable as subPackage } from "./sub/foo.js";
+import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+
+```
+
+# Diagnostics
+```
+default_package.options:6:9 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noPrivateImports`.
+  
+    4 │     "rules": {
+    5 │       "nursery": {
+  > 6 │         "noPrivateImports": {
+      │         ^^^^^^^^^^^^^^^^^^
+    7 │           "level": "error",
+    8 │           "options": {
+  
+  i Known keys:
+  
+  - recommended
+  - noAwaitInLoop
+  - noBitwiseOperators
+  - noCommonJs
+  - noConstantBinaryExpression
+  - noDescendingSpecificity
+  - noDestructuredProps
+  - noDocumentCookie
+  - noDocumentImportInPage
+  - noDuplicateCustomProperties
+  - noDuplicateElseIf
+  - noDuplicateProperties
+  - noDuplicatedFields
+  - noDynamicNamespaceImportAccess
+  - noEnum
+  - noExportedImports
+  - noFloatingPromises
+  - noGlobalDirnameFilename
+  - noHeadElement
+  - noHeadImportInDocument
+  - noImgElement
+  - noImportCycles
+  - noIrregularWhitespace
+  - noMissingVarFunction
+  - noNestedTernary
+  - noNoninteractiveElementInteractions
+  - noOctalEscape
+  - noProcessEnv
+  - noProcessGlobal
+  - noRestrictedImports
+  - noRestrictedTypes
+  - noSecrets
+  - noStaticElementInteractions
+  - noSubstr
+  - noTemplateCurlyInString
+  - noTsIgnore
+  - noUnknownAtRule
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
+  - noUnknownTypeSelector
+  - noUnwantedPolyfillio
+  - noUselessEscapeInRegex
+  - noUselessEscapeInString
+  - noUselessStringRaw
+  - noUselessUndefined
+  - noValueAtRule
+  - useAdjacentOverloadSignatures
+  - useAriaPropsSupportedByRole
+  - useAtIndex
+  - useCollapsedIf
+  - useComponentExportOnlyModules
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
+  - useConsistentObjectDefinition
+  - useDeprecatedReason
+  - useExplicitType
+  - useExportsLast
+  - useForComponent
+  - useGoogleFontDisplay
+  - useGoogleFontPreconnect
+  - useGuardForIn
+  - useNamedOperation
+  - useNamingConvention
+  - useParseIntRadix
+  - useSortedClasses
+  - useStrictMode
+  - useSymbolDescription
+  - useTrimStartEnd
+  - useValidAutocomplete
+  
+
+```
+
+```
+default_package.js:10:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i You may not import a symbol with package visibility from here.
+  
+     9 │ // Tighter visibility also takes precedence, so these imports are NOT allowed.
+  > 10 │ import { fooPackageVariable as subPackage } from "./sub/foo.js";
+       │          ^^^^^^^^^^^^^^^^^^
+    11 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+    12 │ 
+  
+  i You may need to import an alternative symbol, or relax the visibility of this symbol.
+  
+  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/sub/foo.js.
+  
+
+```
+
+```
+default_package.js:11:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i You may not import a symbol with private visibility from here.
+  
+     9 │ // Tighter visibility also takes precedence, so these imports are NOT allowed.
+    10 │ import { fooPackageVariable as subPackage } from "./sub/foo.js";
+  > 11 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+       │          ^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i You may need to import an alternative symbol, or relax the visibility of this symbol.
+  
+  i The visibility for this symbol is defined in /Users/siketyan/.local/src/github.com/biomejs/biome/crates/biome_js_analyze/tests/specs/correctness/noPrivateImports/sub/foo.js.
+  
+
+```
