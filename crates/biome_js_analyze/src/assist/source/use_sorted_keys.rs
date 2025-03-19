@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 
-use biome_analyze::{context::RuleContext, declare_source_rule, Ast, Rule, RuleAction};
+use biome_analyze::{Ast, Rule, RuleAction, context::RuleContext, declare_source_rule};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsObjectMember, AnyJsObjectMemberName, JsObjectMemberList};
@@ -85,7 +85,7 @@ impl Rule for UseSortedKeys {
         let mut groups = vec![];
 
         let get_name =
-            |name: SyntaxResult<AnyJsObjectMemberName>| Some(name.ok()?.name()?.text().to_string());
+            |name: SyntaxResult<AnyJsObjectMemberName>| Some(name.ok()?.name()?.text().into());
 
         for element in ctx.query().elements() {
             if let Ok(element) = element.node() {
@@ -113,7 +113,7 @@ impl Rule for UseSortedKeys {
                         let name = member
                             .name()
                             .ok()
-                            .map(|name| Some(name.name().ok()?.text().to_string()))
+                            .map(|name| Some(name.name().ok()?.text().into()))
                             .unwrap_or_default();
 
                         members.push(ObjectMember::new(element.clone(), name));
@@ -158,11 +158,11 @@ impl Rule for UseSortedKeys {
 #[derive(PartialEq, Eq, Clone)]
 pub struct ObjectMember {
     member: AnyJsObjectMember,
-    name: Option<String>,
+    name: Option<Box<str>>,
 }
 
 impl ObjectMember {
-    fn new(member: AnyJsObjectMember, name: Option<String>) -> Self {
+    fn new(member: AnyJsObjectMember, name: Option<Box<str>>) -> Self {
         ObjectMember { member, name }
     }
 }
