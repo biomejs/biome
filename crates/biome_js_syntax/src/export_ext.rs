@@ -1,10 +1,10 @@
-use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
+use biome_rowan::{AstNode, SyntaxResult, Text, declare_node_union};
 
 use crate::{
     AnyJsBindingPattern, AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportDefaultDeclaration,
     AnyJsExportNamedSpecifier, AnyJsExpression, AnyTsIdentifierBinding, AnyTsType, JsExport,
     JsExportNamedClause, JsIdentifierExpression, JsLiteralExportName, JsReferenceIdentifier,
-    JsSyntaxToken, TsEnumDeclaration,
+    JsSyntaxToken, TsEnumDeclaration, unescape_js_string,
 };
 
 declare_node_union! {
@@ -271,6 +271,20 @@ impl AnyJsExportNamedSpecifier {
                 .export_named_clause()
                 .and_then(|x| x.type_token())
                 .is_some()
+    }
+
+    /// Returns the exported name of the export.
+    pub fn exported_name(&self) -> SyntaxResult<Text> {
+        match self {
+            Self::JsExportNamedShorthandSpecifier(specifier) => specifier
+                .name()
+                .and_then(|identifier| identifier.value_token())
+                .map(|token| token.token_text_trimmed().into()),
+            Self::JsExportNamedSpecifier(specifier) => specifier
+                .exported_name()
+                .and_then(|name| name.inner_string_text())
+                .map(unescape_js_string),
+        }
     }
 
     /// Returns the local name of the export.

@@ -5,12 +5,9 @@ use crate::{
 use biome_console::{ConsoleExt, markup};
 use biome_fs::OsFileSystem;
 use biome_lsp::ServerFactory;
-use biome_service::{
-    TransportError, WatcherInstruction, WorkspaceError, WorkspaceWatcher,
-    workspace::WorkspaceClient,
-};
+use biome_service::{TransportError, WorkspaceError, WorkspaceWatcher, workspace::WorkspaceClient};
 use camino::{Utf8Path, Utf8PathBuf};
-use std::{env, fs};
+use std::{env, fs, process};
 use tokio::io;
 use tokio::runtime::Runtime;
 use tracing::subscriber::Interest;
@@ -102,8 +99,9 @@ pub(crate) fn run_server(
             }
             _ = cancellation.notified() => {
                 tracing::info!("Received shutdown signal");
-                let _ = instruction_channel.sender.send(WatcherInstruction::Stop);
-                Ok(())
+                // Do a forced exit, as there should be no need to wait for
+                // other tasks to finish in the daemon.
+                process::exit(0);
             }
         }
     })

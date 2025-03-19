@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed the safe fix of lint rule `useArrowFunction` breaks the function body starting with `{`.
+Fixed [#4967](https://github.com/biomejs/biome/issues/4967): The fix for `useArrowFunction` no longer breaks function bodies starting with `{`.

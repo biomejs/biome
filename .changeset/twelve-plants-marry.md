@@ -2,4 +2,6 @@
 "@biomejs/biome": minor
 ---
 
-Add the new rule `useForComponent`, which enforce using Solid's `<For />` component for mapping an array to JSX elements.
+Added the new rule [`useForComponent`](https://biomejs.dev/linter/rules/use-for-component/).
+
+This rule enforces usage of Solid's `<For />` component for mapping an array to JSX elements.

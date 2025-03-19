@@ -59,7 +59,7 @@ preferObjectSpreadSuppression.grit:6:1 suppressions/incorrect ━━━━━━
 ```
 preferObjectSpreadSuppression.grit:5:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer object spread instead of `Object.assign()`
+  × Prefer object spread instead of `Object.assign()`
   
     4 │ // biome-ignore-start lint/plugin/preferObjectSpreadSuppression: reason
   > 5 │ Object.assign({}, {foo: 'bar'});
@@ -73,7 +73,7 @@ preferObjectSpreadSuppression.grit:5:15 plugin ━━━━━━━━━━━
 ```
 preferObjectSpreadSuppression.grit:14:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer object spread instead of `Object.assign()`
+  × Prefer object spread instead of `Object.assign()`
   
     12 │ // only suppress specified plugin
     13 │ // biome-ignore lint/plugin/anotherPlugin: reason

@@ -2,7 +2,7 @@
 "@biomejs/biome": major
 ---
 
-Remove support for legacy suppressions.
+Removed support for legacy suppressions.
 
 Biome used to support "legacy suppressions" that looked like this:
 

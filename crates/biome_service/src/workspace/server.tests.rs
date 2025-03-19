@@ -15,7 +15,7 @@ fn commonjs_file_rejects_import_statement() {
 
     let (watcher_tx, _) = bounded(0);
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx);
+    let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/"),

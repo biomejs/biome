@@ -147,8 +147,7 @@ impl GreenTokenData {
 
 impl GreenToken {
     #[inline]
-    #[cfg(test)]
-    pub fn new(kind: RawSyntaxKind, text: &str) -> GreenToken {
+    pub fn new_raw(kind: RawSyntaxKind, text: &str) -> Self {
         let leading = GreenTrivia::empty();
         let trailing = leading.clone();
 
@@ -161,7 +160,7 @@ impl GreenToken {
         text: &str,
         leading: GreenTrivia,
         trailing: GreenTrivia,
-    ) -> GreenToken {
+    ) -> Self {
         let head = GreenTokenHead {
             kind,
             leading,
@@ -169,7 +168,7 @@ impl GreenToken {
             _c: Count::new(),
         };
         let ptr = ThinArc::from_header_and_iter(head, text.bytes());
-        GreenToken { ptr }
+        Self { ptr }
     }
 
     #[inline]
@@ -178,12 +177,12 @@ impl GreenToken {
     }
 
     #[inline]
-    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<GreenTokenData>) -> GreenToken {
+    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<GreenTokenData>) -> Self {
         let arc = unsafe {
             let arc = Arc::from_raw(&ptr.as_ref().data as *const ReprThin);
             mem::transmute::<Arc<ReprThin>, ThinArc<GreenTokenHead, u8>>(arc)
         };
-        GreenToken { ptr: arc }
+        Self { ptr: arc }
     }
 }
 

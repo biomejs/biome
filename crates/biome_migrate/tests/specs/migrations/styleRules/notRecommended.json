@@ -1,0 +1,10 @@
+{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "style": {
+        "useImportType": "error"
+      }
+    }
+  }
+}

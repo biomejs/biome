@@ -3,7 +3,8 @@ use crate::prelude::*;
 use biome_formatter::{Expand, write};
 use biome_formatter::{Format, FormatResult};
 use biome_js_syntax::{
-    JsFormalParameter, JsObjectExpression, JsSyntaxToken, TsObjectType, TsTypeAnnotation,
+    JsFormalParameter, JsObjectExpression, JsParameterList, JsSyntaxToken, TsObjectType,
+    TsTypeAnnotation,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
 
@@ -67,21 +68,29 @@ impl Format<JsFormatContext> for JsObjectLike {
                 && self.members_have_leading_newline())
                 || f.options().expand() == Expand::Always;
 
+            // If the object type is the type annotation of the only parameter in a function,
+            // try to hug the parameter; we don't create a group and inline the contents here.
+            //
+            // For example:
+            // ```ts
             // const fn = ({ foo }: { foo: string }) => { ... };
             //                      ^ do not break properties here
-            let should_expand = should_expand
-                && self
-                    .parent::<TsTypeAnnotation>()
-                    .is_none_or(|node| node.parent::<JsFormalParameter>().is_none());
+            // ```
+            let should_hug = self.parent::<TsTypeAnnotation>().is_some_and(|node| {
+                node.parent::<JsFormalParameter>().is_some_and(|node| {
+                    node.parent::<JsParameterList>()
+                        .is_some_and(|node| node.len() == 1)
+                })
+            });
 
-            write!(
-                f,
-                [group(&soft_block_indent_with_maybe_space(
-                    &members,
-                    should_insert_space_around_brackets
-                ))
-                .should_expand(should_expand)]
-            )?;
+            let inner =
+                &soft_block_indent_with_maybe_space(&members, should_insert_space_around_brackets);
+
+            if should_hug {
+                write!(f, [inner])?;
+            } else {
+                write!(f, [group(inner).should_expand(should_expand)])?;
+            }
         }
 
         write!(f, [self.r_curly_token().format()])

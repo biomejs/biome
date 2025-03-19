@@ -44,7 +44,7 @@ declare_source_rule! {
     ///
     /// ```css,expect_diagnostic
     /// p {
-    ///   transition: opactity 1s ease;
+    ///   transition: opacity 1s ease;
     ///   border: 1px solid black;
     ///   pointer-events: none;
     ///   color: black;
@@ -65,13 +65,13 @@ declare_source_rule! {
     ///
     /// ```css
     /// p {
-    ///   --custom:·100;
-    ///   display:·block;
-    ///   margin:·8px;
+    ///   --custom: 100;
+    ///   display: block;
+    ///   margin: 8px;
     ///   color: black;
-    ///   pointer-events:·none;
-    ///   border:·1px·solid·black;
-    ///   transition:·opactity·1s·ease;
+    ///   pointer-events: none;
+    ///   border: 1px solid black;
+    ///   transition: opacity 1s ease;
     /// }
     /// ```
     ///

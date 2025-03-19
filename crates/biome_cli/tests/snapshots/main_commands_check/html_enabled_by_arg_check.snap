@@ -1,0 +1,16 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.html`
+
+```html
+<!DOCTYPE html>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

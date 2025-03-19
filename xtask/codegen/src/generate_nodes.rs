@@ -1186,6 +1186,6 @@ pub(crate) fn group_fields_for_ordering(node: &AstNodeSrc) -> Vec<Vec<&Field>> {
 pub fn should_token_be_quoted(token: &str) -> bool {
     matches!(
         token,
-        "$=" | "$_" | "U+" | "<![CDATA[" | "]]>" | "   " | "_"
+        "$=" | "$_" | "U+" | "<![CDATA[" | "]]>" | "   " | "_" | "__" | "`" | "```"
     )
 }

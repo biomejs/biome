@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::MarkdownSyntaxNode::kind(&node) {
+                $crate::MarkdownSyntaxKind::MD_BULLET => {
+                    let $pattern = unsafe { $crate::MdBullet::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_BULLET_LIST_ITEM => {
                     let $pattern = unsafe { $crate::MdBulletListItem::new_unchecked(node) };
                     $body
@@ -52,6 +56,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdIndentCodeBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_INDENTED_CODE_LINE => {
+                    let $pattern = unsafe { $crate::MdIndentedCodeLine::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_INLINE_CODE => {
                     let $pattern = unsafe { $crate::MdInlineCode::new_unchecked(node) };
                     $body
@@ -62,6 +70,22 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_INLINE_IMAGE => {
                     let $pattern = unsafe { $crate::MdInlineImage::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_INLINE_IMAGE_ALT => {
+                    let $pattern = unsafe { $crate::MdInlineImageAlt::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_INLINE_IMAGE_LINK => {
+                    let $pattern = unsafe { $crate::MdInlineImageLink::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_INLINE_IMAGE_SOURCE => {
+                    let $pattern = unsafe { $crate::MdInlineImageSource::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_INLINE_ITALIC => {
+                    let $pattern = unsafe { $crate::MdInlineItalic::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_INLINE_LINK => {
@@ -112,16 +136,24 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdBulletList::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_CODE_NAME_LIST => {
+                    let $pattern = unsafe { $crate::MdCodeNameList::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_HASH_LIST => {
                     let $pattern = unsafe { $crate::MdHashList::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_ORDER_LIST => {
-                    let $pattern = unsafe { $crate::MdOrderList::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_INDENTED_CODE_LINE_LIST => {
+                    let $pattern = unsafe { $crate::MdIndentedCodeLineList::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_PARAGRAPH_ITEM_LIST => {
-                    let $pattern = unsafe { $crate::MdParagraphItemList::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_INLINE_ITEM_LIST => {
+                    let $pattern = unsafe { $crate::MdInlineItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_ORDER_LIST => {
+                    let $pattern = unsafe { $crate::MdOrderList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

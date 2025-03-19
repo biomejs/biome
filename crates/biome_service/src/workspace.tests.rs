@@ -20,7 +20,7 @@ use super::{
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
-    let workspace = server(Box::new(MemoryFileSystem::default()));
+    let workspace = server(Box::new(MemoryFileSystem::default()), None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: Default::default(),
@@ -313,7 +313,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_A_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
 
-    let workspace = server(Box::new(fs));
+    let workspace = server(Box::new(fs), None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -388,7 +388,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
     let mut fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs));
+    let workspace = server(Box::new(fs), None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -446,7 +446,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
     fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs));
+    let workspace = server(Box::new(fs), None);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
@@ -480,6 +480,72 @@ fn plugins_are_loaded_and_used_during_analysis() {
         .pull_diagnostics(PullDiagnosticsParams {
             project_key,
             path: BiomePath::new("/project/a.ts"),
+            categories: RuleCategories::default(),
+            max_diagnostics: 10,
+            only: Vec::new(),
+            skip: Vec::new(),
+            enabled_rules: Vec::new(),
+        })
+        .unwrap();
+    assert_debug_snapshot!(result.diagnostics);
+    assert_eq!(result.errors, 0);
+}
+
+#[test]
+fn plugins_can_use_custom_severity() {
+    const PLUGIN_CONTENT: &[u8] = br#"
+language css;
+`$selector { $props }` where {
+    $props <: contains `color: $color` as $rule,
+    not $selector <: r"\.color-.*",
+    register_diagnostic(
+        span = $rule,
+        message = "Don't set explicit colors. Use `.color-*` classes instead.",
+        severity = "warn"
+    )
+}
+"#;
+
+    const FILE_CONTENT: &[u8] = b"p { color: red }";
+
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
+    fs.insert(Utf8PathBuf::from("/project/a.css"), FILE_CONTENT);
+
+    let workspace = server(Box::new(fs), None);
+    let project_key = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                    "./plugin.grit".to_string(),
+                )])),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+        })
+        .unwrap();
+
+    workspace
+        .scan_project_folder(ScanProjectFolderParams {
+            project_key,
+            path: None,
+            watch: false,
+            force: false,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new("/project/a.css"),
             categories: RuleCategories::default(),
             max_diagnostics: 10,
             only: Vec::new(),

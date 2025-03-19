@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -69,7 +70,7 @@ Linter:
     complexity/noBannedTypes
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
-    complexity/noMultipleSpacesInRegularExpressionLiterals
+    complexity/noMultipleSpacesInRegex
     complexity/noStaticOnlyClass
     complexity/noThisInStatic
     complexity/noUselessCatch

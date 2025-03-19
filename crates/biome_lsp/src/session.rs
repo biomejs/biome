@@ -644,13 +644,6 @@ impl Session {
             return ConfigurationStatus::Error;
         }
 
-        if loaded_configuration.double_configuration_found {
-            warn!(
-                "Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file."
-            );
-            self.client.log_message(MessageType::WARNING, "Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file.").await;
-        }
-
         info!("Configuration loaded successfully from disk.");
         info!("Update workspace settings.");
 
@@ -667,7 +660,7 @@ impl Session {
                 let search_path = configuration_path
                     .clone()
                     .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-                match load_editorconfig(fs, search_path) {
+                match load_editorconfig(fs, search_path, None) {
                     Ok(result) => result,
                     Err(error) => {
                         error!("Failed load the `.editorconfig` file. Reason: {error}");

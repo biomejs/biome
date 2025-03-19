@@ -2,4 +2,6 @@
 "@biomejs/biome": major
 ---
 
-Remove support for `rome.json`.
+Removed support for `rome.json`.
+
+Use `biome.json` or `biome.jsonc` instead.

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: useLowercaseColors.grit
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -17,7 +16,7 @@ div {
 ```
 useLowercaseColors.grit:3:12 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Prefer lowercase colors
+  × Prefer lowercase colors
   
     1 │ div {
     2 │     color: red;

@@ -10,22 +10,23 @@ use std::{collections::BTreeMap, sync::Arc};
 use biome_fs::{BiomePath, FileSystem, PathKind};
 use biome_js_syntax::AnyJsRoot;
 use biome_project_layout::ProjectLayout;
+use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{EnforceExtension, ResolveError, ResolveOptions, ResolverGeneric};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 
-use crate::{import_visitor::ImportVisitor, resolver_cache::ResolverCache};
+use crate::{module_visitor::ModuleVisitor, resolver_cache::ResolverCache};
 
-/// Data structure for tracking imports across files.
+/// Data structure for tracking imports and exports across files.
 ///
 /// The dependency graph is simply a flat mapping from paths to module imports.
 /// This approach makes both lookups easy and makes it very easy for us to
 /// invalidate part of the graph when there are file system changes.
 #[derive(Debug, Default)]
 pub struct DependencyGraph {
-    /// Cached imports per file.
-    imports: HashMap<Utf8PathBuf, ModuleImports, FxBuildHasher>,
+    /// Cached dependency data per file.
+    data: HashMap<Utf8PathBuf, ModuleDependencyData, FxBuildHasher>,
 
     /// Cache that tracks the presence of files, directories, and symlinks
     /// across the project.
@@ -33,13 +34,18 @@ pub struct DependencyGraph {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct ModuleImports {
+pub struct ModuleDependencyData {
     /// Map of all static imports found in the module.
     ///
     /// Maps from the identifier found in the import statement to the absolute
     /// path it resolves to. The resolved path may be looked up as key in the
     /// [DependencyGraphModel::modules] map, although it is not required to
     /// exist (for instance, if the path is outside the project's scope).
+    ///
+    /// Note that re-exports may introduce additional dependencies, because they
+    /// import another module and immediately re-export from that module.
+    /// Re-exports are tracked as part of [Self::exports] and
+    /// [Self::blanket_reexports].
     pub static_imports: BTreeMap<String, Import>,
 
     /// Map of all dynamic imports found in the module for which the import
@@ -57,9 +63,23 @@ pub struct ModuleImports {
     /// `require()` expressions in CommonJS sources are also included with the
     /// dynamic imports.
     pub dynamic_imports: BTreeMap<String, Import>,
+
+    /// Map of exports from the module.
+    ///
+    /// The keys are the names of the exports, where "default" is used for the
+    /// default export. See [Export] for information tracked per export.
+    ///
+    /// Re-exports are tracked in this map as well. They exception are "blanket"
+    /// re-exports, such as `export * from "other-module"`. Those are tracked in
+    /// [Self::forwarding_exports] instead.
+    pub exports: BTreeMap<Text, Export>,
+
+    /// Re-exports that apply to all symbols from another module, without
+    /// assigning a name to them.
+    pub blanket_reexports: Vec<ReexportAll>,
 }
 
-impl ModuleImports {
+impl ModuleDependencyData {
     /// Allows draining a single entry from the imports.
     ///
     /// Returns a `(specifier, import)` pair from either the static or dynamic
@@ -89,8 +109,10 @@ pub struct Import {
 }
 
 impl DependencyGraph {
-    pub fn imports_for_path(&self, path: &Utf8Path) -> Option<ModuleImports> {
-        self.imports.pin().get(path).cloned()
+    /// Returns the dependency data, such as imports and exports, for the
+    /// given `path`.
+    pub fn dependency_data_for_path(&self, path: &Utf8Path) -> Option<ModuleDependencyData> {
+        self.data.pin().get(path).cloned()
     }
 
     /// Updates the dependency graph to add, update, or remove files.
@@ -106,7 +128,7 @@ impl DependencyGraph {
     /// by the time `get_js_syntax_for_path` is called for it, `None` must be
     /// returned. Error reporting, if necessary, should be handled by the
     /// workspace server instead.
-    pub fn update_imports_for_js_paths(
+    pub fn update_graph_for_js_paths(
         &self,
         fs: &dyn FileSystem,
         project_layout: &ProjectLayout,
@@ -156,15 +178,15 @@ impl DependencyGraph {
 
         // Traverse all the added and updated paths and insert their resolved
         // imports.
-        let imports = self.imports.pin();
+        let imports = self.data.pin();
         for path in added_or_updated_paths {
             let Some(root) = get_js_syntax_for_path(path) else {
                 continue;
             };
 
             let directory = path.parent().unwrap_or(path);
-            let visitor = ImportVisitor::new(root, directory, &resolver);
-            let module_imports = visitor.find_module_imports();
+            let visitor = ModuleVisitor::new(root, directory, &resolver);
+            let module_imports = visitor.collect_data();
             imports.insert(path.to_path_buf(), module_imports);
         }
 
@@ -185,6 +207,60 @@ impl DependencyGraph {
     pub(crate) fn path_kind(&self, path: &Utf8Path) -> Option<PathKind> {
         self.path_info.pin().get(path).copied().flatten()
     }
+}
+
+/// Information tracked for every export.
+///
+/// Exports come in three varieties: "own" exports that are defined in the
+/// module itself, re-exports for named exports, and re-exports that apply to
+/// all symbols from another module.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Export {
+    /// An export that is defined in this module.
+    Own(OwnExport),
+    /// An export that is re-exported by this module, but which is defined
+    /// within another module.
+    ///
+    /// E.g. `export { someSymbol } from "other-module"`.
+    Reexport(Import),
+    /// An export that creates an alias for all symbols from another module.
+    ///
+    /// E.g. `export { * as alias } from "other-module"`.
+    ReexportAll(ReexportAll),
+}
+
+/// Information tracked for every "own" export.
+#[derive(Clone, Debug, PartialEq)]
+pub struct OwnExport {
+    /// Optional JSDoc comment associated with the export.
+    ///
+    /// The comment is trimmed and normalized to remove the trivia of the
+    /// comment.
+    ///
+    /// ## Example
+    ///
+    /// Assuming the following export:
+    ///
+    /// ```ts
+    /// /**
+    ///  * Magic constant of fooness.
+    ///  *
+    ///  * For if you want more ways to write 1.
+    ///  */
+    /// export const FOO = 1;
+    /// ```
+    ///
+    /// The comment would be:
+    /// `"Magic constant of fooness.\n\nFor if you want more ways to write 1."`.
+    pub jsdoc_comment: Option<String>,
+}
+
+/// Information about an export statement that re-exports all symbols from
+/// another module.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ReexportAll {
+    /// Import from which the symbols are being re-exported.
+    pub import: Import,
 }
 
 #[cfg(test)]

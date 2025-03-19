@@ -458,7 +458,7 @@
 						{ "type": "null" }
 					]
 				},
-				"noMultipleSpacesInRegularExpressionLiterals": {
+				"noMultipleSpacesInRegex": {
 					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
@@ -1493,7 +1493,7 @@
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
-					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
+					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `true`.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
@@ -4458,22 +4458,6 @@
 			},
 			"additionalProperties": false
 		},
-		"SuggestedExtensionMapping": {
-			"type": "object",
-			"properties": {
-				"component": {
-					"description": "Extension that should be used for component file imports",
-					"default": "",
-					"type": "string"
-				},
-				"module": {
-					"description": "Extension that should be used for module imports",
-					"default": "",
-					"type": "string"
-				}
-			},
-			"additionalProperties": false
-		},
 		"Suspicious": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -5081,13 +5065,10 @@
 		"UseImportExtensionsOptions": {
 			"type": "object",
 			"properties": {
-				"suggestedExtensions": {
-					"description": "A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension",
-					"default": {},
-					"type": "object",
-					"additionalProperties": {
-						"$ref": "#/definitions/SuggestedExtensionMapping"
-					}
+				"forceJsExtensions": {
+					"description": "If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.",
+					"default": false,
+					"type": "boolean"
 				}
 			},
 			"additionalProperties": false

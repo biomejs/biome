@@ -10,6 +10,7 @@ use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
 use biome_configuration::css::{CssFormatterConfiguration, CssLinterConfiguration};
 use biome_configuration::formatter::FormatterEnabled;
 use biome_configuration::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
+use biome_configuration::html::{HtmlFormatterConfiguration, html_formatter_configuration};
 use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use biome_configuration::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
@@ -23,6 +24,7 @@ use biome_configuration::{
     json::json_linter_configuration, linter_configuration, vcs::vcs_configuration,
 };
 use biome_console::{Console, ConsoleExt, markup};
+use biome_deserialize::Merge;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
@@ -36,6 +38,7 @@ use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
+use std::time::Duration;
 use tracing::info;
 
 pub(crate) mod check;
@@ -267,6 +270,9 @@ pub enum BiomeCommand {
         #[bpaf(external(graphql_formatter_configuration), optional, hide_usage, hide)]
         graphql_formatter: Option<GraphqlFormatterConfiguration>,
 
+        #[bpaf(external(html_formatter_configuration), optional, hide_usage, hide)]
+        html_formatter: Option<HtmlFormatterConfiguration>,
+
         #[bpaf(external(vcs_configuration), optional, hide_usage)]
         vcs_configuration: Option<VcsConfiguration>,
 
@@ -340,6 +346,17 @@ pub enum BiomeCommand {
         /// flag and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
+
+        /// The number of threads to use. This is useful when running the CLI in environments
+        /// with limited resource, for example CI.
+        #[bpaf(
+            long("threads"),
+            argument("NUMBER"),
+            env("BIOME_THREADS"),
+            optional,
+            hide_usage
+        )]
+        threads: Option<usize>,
 
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
@@ -568,6 +585,13 @@ impl BiomeCommand {
         }
     }
 
+    pub const fn get_threads(&self) -> Option<usize> {
+        match self {
+            BiomeCommand::Ci { threads, .. } => *threads,
+            _ => None,
+        }
+    }
+
     pub const fn should_use_server(&self) -> bool {
         match self.cli_options() {
             Some(cli_options) => cli_options.use_server,
@@ -736,8 +760,12 @@ pub(crate) trait CommandRunner: Sized {
         let workspace = &*session.app.workspace;
         let fs = workspace.fs();
         self.check_incompatible_arguments()?;
-        let (execution, paths) = self.configure_workspace(fs, console, workspace, cli_options)?;
-        execute_mode(execution, session, cli_options, paths)
+        let ConfiguredWorkspace {
+            execution,
+            paths,
+            duration,
+        } = self.configure_workspace(fs, console, workspace, cli_options)?;
+        execute_mode(execution, session, cli_options, paths, duration)
     }
 
     /// This function prepares the workspace with the following:
@@ -752,7 +780,7 @@ pub(crate) trait CommandRunner: Sized {
         console: &mut dyn Console,
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
-    ) -> Result<(Execution, Vec<OsString>), CliDiagnostic> {
+    ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
         let loaded_configuration =
             load_configuration(fs, cli_options.as_configuration_path_hint())?;
         if self.should_validate_configuration_diagnostics() {
@@ -761,11 +789,6 @@ pub(crate) trait CommandRunner: Sized {
                 console,
                 cli_options.verbose,
             )?;
-        }
-        if loaded_configuration.double_configuration_found {
-            console.log(markup! {
-                <Warn>"Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file."</Warn>
-            })
         }
         info!(
             "Configuration file loaded: {:?}, diagnostics detected {}",
@@ -795,7 +818,7 @@ pub(crate) trait CommandRunner: Sized {
 
         let execution = self.get_execution(cli_options, console, workspace, project_key)?;
 
-        if execution.traversal_mode().should_scan_project() {
+        let duration = if execution.traversal_mode().should_scan_project() {
             let result = workspace.scan_project_folder(ScanProjectFolderParams {
                 project_key,
                 path: Some(project_path),
@@ -813,9 +836,16 @@ pub(crate) trait CommandRunner: Sized {
                     <Info>"Scanned project folder in "<Emphasis>{result.duration}</Emphasis>"."</Info>
                 });
             }
-        }
+            Some(result.duration)
+        } else {
+            None
+        };
 
-        Ok((execution, paths))
+        Ok(ConfiguredWorkspace {
+            execution,
+            paths,
+            duration,
+        })
     }
 
     /// Computes [Stdin] if the CLI has the necessary information.
@@ -888,6 +918,15 @@ pub(crate) trait CommandRunner: Sized {
     }
 }
 
+pub(crate) struct ConfiguredWorkspace {
+    /// Execution context
+    pub execution: Execution,
+    /// Paths to crawl
+    pub paths: Vec<OsString>,
+    /// The duration of the scanning
+    pub duration: Option<Duration>,
+}
+
 pub trait LoadEditorConfig: CommandRunner {
     /// Whether this command should load the `.editorconfig` file.
     fn should_load_editor_config(&self, fs_configuration: &Configuration) -> bool;
@@ -898,24 +937,36 @@ pub trait LoadEditorConfig: CommandRunner {
         configuration_path: Option<Utf8PathBuf>,
         fs_configuration: &Configuration,
         fs: &dyn FileSystem,
-        console: &mut dyn Console,
-    ) -> Result<Configuration, WorkspaceError> {
+    ) -> Result<Option<Configuration>, WorkspaceError> {
         Ok(if self.should_load_editor_config(fs_configuration) {
-            let (editorconfig, editorconfig_diagnostics) = {
-                let search_path = configuration_path
-                    .clone()
-                    .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-                load_editorconfig(fs, search_path)?
+            let (editorconfig, _editorconfig_diagnostics) = {
+                let search_path = fs.working_directory().unwrap_or_default();
+
+                load_editorconfig(fs, search_path, configuration_path)?
             };
-            for diagnostic in editorconfig_diagnostics {
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                })
-            }
-            editorconfig.unwrap_or_default()
+            editorconfig
         } else {
             Default::default()
         })
+    }
+
+    fn combine_configuration(
+        &self,
+        configuration_path: Option<Utf8PathBuf>,
+        biome_configuration: Configuration,
+        fs: &dyn FileSystem,
+    ) -> Result<Configuration, WorkspaceError> {
+        Ok(
+            if let Some(mut fs_configuration) =
+                self.load_editor_config(configuration_path, &biome_configuration, fs)?
+            {
+                // If both `biome.json` and `.editorconfig` exist, formatter settings from the biome.json take precedence.
+                fs_configuration.merge_with(biome_configuration);
+                fs_configuration
+            } else {
+                biome_configuration
+            },
+        )
     }
 }
 

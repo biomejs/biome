@@ -157,6 +157,7 @@ impl<'app> CliSession<'app> {
                 cli_options,
                 changed,
                 since,
+                ..
             } => run_command(
                 self,
                 &cli_options,
@@ -183,6 +184,7 @@ impl<'app> CliSession<'app> {
                 json_formatter,
                 css_formatter,
                 graphql_formatter,
+                html_formatter,
                 staged,
                 changed,
                 since,
@@ -201,6 +203,7 @@ impl<'app> CliSession<'app> {
                     json_formatter,
                     css_formatter,
                     graphql_formatter,
+                    html_formatter,
                     staged,
                     changed,
                     since,

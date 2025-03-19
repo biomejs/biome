@@ -37,26 +37,42 @@
 
 SyntaxElement = SyntaxElement
 
+// Needed by the infrastructure
 MdBogus = SyntaxElement*
 
 MdDocument =
-	bom: 'UNICODE_BOM'?
-    value: MdBlockList
-    eof: 'EOF'
+  bom: 'UNICODE_BOM'?
+  value: MdBlockList
+  eof: 'EOF'
 
 MdBlockList = AnyMdBlock*
 
-AnyMdBlock = AnyLeafBlock  | AnyContainerBlock
+AnyMdBlock =
+	AnyLeafBlock
+	| AnyContainerBlock
 
-AnyLeafBlock = MdThematicBreakBlock | MdHeader | MdSetextHeader
-                | AnyCodeBlock | MdHtmlBlock | MdLinkBlock | MdParagraph
+AnyLeafBlock =
+	MdThematicBreakBlock
+	| MdHeader
+	| MdSetextHeader
+	| AnyCodeBlock
+	| MdHtmlBlock
+	| MdLinkBlock
+	| MdParagraph
 
-AnyContainerBlock = MdQuote | MdBulletListItem | MdOrderListItem
+AnyContainerBlock =
+	MdQuote
+	| MdBulletListItem
+	| MdOrderListItem
 
 
 
-// h1..h6
-MdHeader = before:MdHashList MdParagraph? after:MdHashList
+// ## Lorem
+// ^^^^^^^^
+MdHeader =
+	before: MdHashList
+	content: MdParagraph?
+	after: MdHashList
 
 MdHashList = MdHash*
 
@@ -71,14 +87,35 @@ MdHash = '#'
 MdSetextHeader  = MdParagraph
 
 // indented code blocks & fenced code blocks
-AnyCodeBlock = MdIndentCodeBlock | MdFencedCodeBlock
+AnyCodeBlock =
+	MdIndentCodeBlock
+	| MdFencedCodeBlock
 
-// [    ] xxx
-MdIndentCodeBlock = MdTextual
-// ~~~
-// xxx
-// ~~~
-MdFencedCodeBlock = MdTextual
+//     code
+// ^^^^^^^^
+// The space before "code" is intentional.
+MdIndentCodeBlock =
+	lines: MdIndentedCodeLineList
+
+MdIndentedCodeLineList = MdIndentedCodeLine*
+
+MdIndentedCodeLine =
+	indentation: MdIndent
+	content: MdTextual
+
+
+// ```shell
+//
+// ```
+MdFencedCodeBlock =
+	l_fence: '```'
+	code_list: MdCodeNameList
+	l_hard_line: MdHardLine
+	content: MdTextual
+	r_hard_line: MdHardLine
+	r_fence: '```'
+
+MdCodeNameList = (MdTextual (',' MdTextual)*)
 
 // html block
 MdHtmlBlock = MdTextual
@@ -93,35 +130,111 @@ MdBulletListItem = MdBulletList
 MdOrderListItem = MdBulletList
 
 
-MdBulletList = AnyCodeBlock*
+MdBulletList = MdBullet*
+// - Hey!
+// ^^^^^^
+MdBullet =
+	bullet: ('-' | '*')
+	space: 'md_textual_literal'
+	content: MdInlineItemList
+
 MdOrderList = AnyCodeBlock*
 
+// Any block paragraph
+//
+// Another block paragraph
+MdParagraph =
+	list: MdInlineItemList
+	hard_line: MdHardLine
 
-MdParagraph = MdParagraphItemList
+MdInlineItemList = AnyMdInline*
 
-MdParagraphItemList = AnyMdInline*
 
-AnyMdInline = MdInlineCode | MdInlineEmphasis | MdInlineLink | MdInlineImage
-               |  MdHtmlBlock | MdHardLine | MdSoftBreak
-                | MdTextual
-MdInlineCode = MdTextual
-MdInlineEmphasis = MdTextual
-MdInlineLink = label: MdTextual
-                    url: MdTextual
-                    title: MdTextual?
+AnyMdInline =
+	MdInlineCode
+	| MdInlineEmphasis
+	| MdInlineItalic
+	| MdInlineLink
+	| MdInlineImage
+	| MdHtmlBlock
+	| MdHardLine
+	| MdSoftBreak
+	| MdTextual
 
-MdInlineImage = alt: MdTextual
-                    src: MdTextual
-                    title: MdTextual?
 
-MdHardLine = value: 'md_hard_line_literal'
-MdSoftBreak = value: 'md_soft_break_literal'
-MdTextual = value: 'md_textual_literal'
-MdIndent = value: 'md_indent_chunk_literal'
+// *italic*
+// ^^^^^^^^
+MdInlineItalic =
+	l_fence: ('*' | '_')
+	content: MdInlineItemList
+	r_fence: ('*' | '_')
+
+// **bold**
+// ^^^^^^^^
+MdInlineEmphasis =
+	l_fence: ('**' | '__')
+	content: MdInlineItemList
+	r_fence: ('**' | '__')
+
+
+// `code`
+// ^^^^^^
+MdInlineCode =
+	l_tick: '`'
+	content: MdInlineItemList
+	r_tick: '`'
+
+// [text](href)
+// ^^^^^^^^^^^^
+MdInlineLink =
+	'['
+	text: MdInlineItemList
+	']'
+	'('
+	source: MdInlineItemList
+	')'
+
+// [![alt](image)](link)
+// ^^^^^^^^^^^^^^^^^^^^^
+MdInlineImage =
+	'['
+	'!'
+	alt: MdInlineImageAlt
+	source: MdInlineImageSource
+	']'
+  link: MdInlineImageLink?
+
+// [![alt](image)](link)
+//   ^^^^^
+MdInlineImageAlt =
+	'['
+	content: MdInlineItemList
+	']'
+
+// [![alt](image)](link)
+//        ^^^^^^^
+MdInlineImageSource =
+	'('
+	content: MdInlineItemList
+	')'
+
+// [![alt](image)](link)
+//                ^^^^^^
+MdInlineImageLink =
+	'('
+	content: MdInlineItemList
+	')'
 
 // ***
 // ---
 // ___
 // https://spec.commonmark.org/0.31.2/#container-blocks-and-leaf-blocks
 MdThematicBreakBlock = value: 'md_thematic_break_literal'
+
+MdHardLine = value: 'md_hard_line_literal'
+MdSoftBreak = value: 'md_soft_break_literal'
+MdTextual = value: 'md_textual_literal'
+MdIndent = value: 'md_indent_chunk_literal'
+
+
 

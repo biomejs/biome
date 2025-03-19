@@ -1,0 +1,9 @@
+{
+  "linter": {
+    "rules": {
+      "complexity": {
+        "noMultipleSpacesInRegularExpressionLiterals": "off"
+      }
+    }
+  }
+}

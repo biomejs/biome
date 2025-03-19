@@ -1,0 +1,19 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: notRecommended.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "style": {
+        "useImportType": "error"
+      }
+    }
+  }
+}
+
+```

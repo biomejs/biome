@@ -122,40 +122,45 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// there aren't any more parent folders.
     ///
     /// If no file is found, the method returns `None`
-    fn auto_search_file(
+    fn auto_search_files(
         &self,
         search_dir: &Utf8Path,
-        search_file: &str,
+        search_files: &[&str],
     ) -> Option<AutoSearchResult> {
         let mut current_search_dir = search_dir.to_path_buf();
         let mut is_searching_in_parent_dir = false;
 
         loop {
-            let file_path = current_search_dir.join(search_file);
-            match self.read_file_from_path(&file_path) {
-                Ok(content) => {
-                    if is_searching_in_parent_dir {
-                        info!(
-                            "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
-                            current_search_dir
-                        );
+            // Iterate all possible file names
+            for file_name in search_files {
+                let file_path = current_search_dir.join(file_name);
+                match self.read_file_from_path(&file_path) {
+                    Ok(content) => {
+                        if is_searching_in_parent_dir {
+                            info!(
+                                "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
+                                current_search_dir
+                            );
+                        }
+                        return Some(AutoSearchResult {
+                            content,
+                            file_path,
+                            directory_path: current_search_dir,
+                        });
                     }
-                    return Some(AutoSearchResult {
-                        content,
-                        file_path,
-                        directory_path: current_search_dir,
-                    });
-                }
-                _ => {
-                    if let Some(parent_search_dir) = current_search_dir.parent() {
-                        current_search_dir = Utf8PathBuf::from(parent_search_dir);
-                        is_searching_in_parent_dir = true;
-                    } else {
-                        return None;
-                    }
+                    _ => continue,
                 }
             }
+
+            if let Some(parent_search_dir) = current_search_dir.parent() {
+                current_search_dir = Utf8PathBuf::from(parent_search_dir);
+                is_searching_in_parent_dir = true;
+            } else {
+                break;
+            }
         }
+
+        None
     }
 
     /// Reads the content of a file specified by `file_path`.

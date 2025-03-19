@@ -192,8 +192,8 @@ where
         for plugin in plugins {
             let root: AnyParse = ctx.root.syntax().as_send().expect("not a root node").into();
             for diagnostic in plugin.evaluate(root, ctx.options.file_path.clone()) {
-                let name = diagnostic.subcategory.clone().expect("");
-                let text_range = diagnostic.span.expect("");
+                let name = diagnostic.subcategory.clone().expect("missing subcategory");
+                let text_range = diagnostic.span.expect("missing span");
 
                 // 1. check for top level suppression
                 if suppressions.top_level_suppression.suppressed_plugin(&name)
