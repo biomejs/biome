@@ -67,10 +67,10 @@ Linter:
   GraphQL enabled:              unset
   Recommended:                  false
   Enabled rules:
+    complexity/noAdjacentSpacesInRegex
     complexity/noBannedTypes
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
-    complexity/noMultipleSpacesInRegex
     complexity/noStaticOnlyClass
     complexity/noThisInStatic
     complexity/noUselessCatch

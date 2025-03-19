@@ -416,6 +416,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAdjacentSpacesInRegex": {
+					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
@@ -455,13 +462,6 @@
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoForEachConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noMultipleSpacesInRegex": {
-					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

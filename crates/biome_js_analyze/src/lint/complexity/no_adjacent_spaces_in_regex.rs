@@ -45,9 +45,9 @@ declare_lint_rule! {
     /// ```js
     /// /foo bar	baz/
     ///```
-    pub NoMultipleSpacesInRegex {
+    pub NoAdjacentSpacesInRegex {
         version: "1.0.0",
-        name: "noMultipleSpacesInRegex",
+        name: "noAdjacentSpacesInRegex",
         language: "js",
         sources: &[RuleSource::Eslint("no-regex-spaces")],
         recommended: true,
@@ -56,7 +56,7 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for NoMultipleSpacesInRegex {
+impl Rule for NoAdjacentSpacesInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = Vec<Range<usize>>;
     type Signals = Option<Self::State>;

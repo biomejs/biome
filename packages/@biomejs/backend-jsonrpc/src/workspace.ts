@@ -1092,6 +1092,10 @@ export interface A11y {
  */
 export interface Complexity {
 	/**
+	 * Disallow unclear usage of consecutive space characters in regular expression literals
+	 */
+	noAdjacentSpacesInRegex?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow primitive type aliases and misleading types.
 	 */
 	noBannedTypes?: RuleFixConfiguration_for_Null;
@@ -1115,10 +1119,6 @@ export interface Complexity {
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
 	noForEach?: RuleConfiguration_for_NoForEachOptions;
-	/**
-	 * Disallow unclear usage of consecutive space characters in regular expression literals
-	 */
-	noMultipleSpacesInRegex?: RuleFixConfiguration_for_Null;
 	/**
 	 * This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
 	 */
@@ -3162,7 +3162,7 @@ export type Category =
 	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
-	| "lint/complexity/noMultipleSpacesInRegex"
+	| "lint/complexity/noAdjacentSpacesInRegex"
 	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"
