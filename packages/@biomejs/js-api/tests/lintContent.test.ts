@@ -29,7 +29,7 @@ describe("Biome WebAssembly lintContent", () => {
 			expect(result.diagnostics).toMatchObject([
 				{ category: "lint/suspicious/noDebugger" },
 				{
-					category: "lint/complexity/noMultipleSpacesInRegex",
+					category: "lint/complexity/noAdjacentSpacesInRegex",
 				},
 			]);
 		});
