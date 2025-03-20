@@ -2721,6 +2721,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactDeps": {
+					"description": "Disallow usage of dependency arrays in createEffect and createMemo.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRestrictedImports": {
 					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [
