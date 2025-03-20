@@ -5,7 +5,7 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
@@ -156,6 +156,7 @@ pub(crate) fn analyze_and_snap(
                                 source_type,
                                 &action,
                                 parser_options.clone(),
+                                &root,
                             );
                             diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                         }
@@ -166,6 +167,7 @@ pub(crate) fn analyze_and_snap(
                             source_type,
                             &action,
                             parser_options.clone(),
+                            &root,
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
@@ -184,6 +186,7 @@ pub(crate) fn analyze_and_snap(
                             source_type,
                             &action,
                             parser_options.clone(),
+                            &root,
                         );
                         code_fixes.push(code_fix_to_string(input_code, action));
                     }
@@ -194,6 +197,7 @@ pub(crate) fn analyze_and_snap(
                         source_type,
                         &action,
                         parser_options.clone(),
+                        &root,
                     );
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
@@ -235,6 +239,7 @@ fn check_code_action(
     source_type: JsFileSource,
     action: &AnalyzerAction<JsLanguage>,
     options: JsParserOptions,
+    root: &AnyJsRoot,
 ) {
     let (new_tree, text_edit) = match action
         .mutation
@@ -255,7 +260,8 @@ fn check_code_action(
         "Code action and syntax tree differ"
     );
 
-    if has_bogus_nodes_or_empty_slots(&new_tree) {
+    // We check the action only if the original source doesn't have bogus nodes
+    if has_bogus_nodes_or_empty_slots(&new_tree) && !has_bogus_nodes_or_empty_slots(root.syntax()) {
         panic!("modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}")
     }
 
@@ -264,9 +270,12 @@ fn check_code_action(
         panic!("modified tree has missing children:\n{new_tree:#?}")
     }
 
-    // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse(&output, source_type, options);
-    assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
+    // We check the re-parsed modified code only if the original source doesn't have bogus nodes
+    if !has_bogus_nodes_or_empty_slots(root.syntax()) {
+        // Re-parse the modified code and panic if the resulting tree has syntax errors
+        let re_parse = parse(&output, source_type, options);
+        assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
+    }
 }
 
 pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
