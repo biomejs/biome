@@ -1,3 +1,5 @@
+use std::cmp;
+
 use crate::comments::CssComments;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_formatter::{CstFormatContext, write};
@@ -31,6 +33,7 @@ where
 
     let values = format_with(|f: &mut Formatter<'_, CssFormatContext>| {
         let mut fill = f.fill();
+        let mut at_group_boundary = false;
 
         for (element, formatted) in node.iter().zip(node.iter().formatted()) {
             fill.entry(
@@ -57,10 +60,15 @@ where
                             } else {
                                 write!(f, [space()])?;
                             }
+                        } else if at_group_boundary {
+                            write!(f, [hard_line_break()])?;
                         } else {
                             write!(f, [soft_line_break_or_space()])?
                         }
                     }
+
+                    at_group_boundary =
+                        is_comma && matches!(layout, ValueListLayout::OneGroupPerLine);
 
                     Ok(())
                 }),
@@ -89,7 +97,7 @@ where
         ValueListLayout::SingleValue => {
             write!(f, [values])
         }
-        ValueListLayout::OnePerLine => {
+        ValueListLayout::OnePerLine | ValueListLayout::OneGroupPerLine => {
             let content = format_once(|f| {
                 write!(f, [hard_line_break()])?;
                 write!(f, [values])
@@ -160,6 +168,16 @@ pub(crate) enum ValueListLayout {
     ///     sans-serif;
     /// ```
     OnePerLine,
+
+    /// Separate values by comma into multiple groups, and print each group on a single line
+    /// ```css
+    ///   transition:
+    ///     color 0.15s ease-in-out,
+    ///     background-color 0.15s ease-in-out,
+    ///     border-color 0.15s ease-in-out,
+    ///     box-shadow 0.15s ease-in-out;
+    /// ```
+    OneGroupPerLine,
 }
 
 /// Returns the layout to use when printing the provided CssComponentValueList.
@@ -175,18 +193,18 @@ where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
     I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
 {
-    let is_grid_property = list
+    let css_property = list
         .parent::<CssGenericProperty>()
         .and_then(|parent| parent.name().ok())
         .and_then(|name| {
             name.as_css_identifier()
                 .map(|name| name.to_trimmed_string())
-        })
-        .is_some_and(|name| {
-            let name = name.to_ascii_lowercase_cow();
-
-            name.starts_with("grid-template") || name == "grid"
         });
+    let is_grid_property = css_property.as_ref().is_some_and(|name| {
+        let name = name.to_ascii_lowercase_cow();
+
+        name.starts_with("grid-template") || name == "grid"
+    });
 
     let text_size: TextSize = list
         .iter()
@@ -207,6 +225,8 @@ where
         ValueListLayout::PreserveInline
     } else if list.len() == 1 {
         ValueListLayout::SingleValue
+    } else if use_one_group_per_line(css_property, list) {
+        ValueListLayout::OneGroupPerLine
     } else if is_comma_separated
         && value_count > 12
         && text_size >= TextSize::from(f.options().line_width().value() as u32)
@@ -215,4 +235,36 @@ where
     } else {
         ValueListLayout::Fill
     }
+}
+
+pub(crate) fn use_one_group_per_line<N, I>(css_property: Option<String>, list: &N) -> bool
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+{
+    let is_css_property = css_property.is_some();
+    let is_custom_property = css_property.is_some_and(|name| name.starts_with("--"));
+    if !is_css_property || is_custom_property {
+        return false;
+    }
+
+    let mut group_count = 0;
+    let mut group_size = 0;
+    let mut max_group_size = 0;
+    for item in list.iter() {
+        let token_kind = CssGenericDelimiter::cast_ref(item.syntax())
+            .and_then(|node| node.value().ok())
+            .map(|token| token.kind());
+        if matches!(token_kind, Some(CssSyntaxKind::COMMA)) {
+            group_count += 1;
+            max_group_size = cmp::max(group_size, max_group_size);
+            group_size = 0;
+            continue;
+        }
+        group_size += 1;
+    }
+    group_count += 1;
+    max_group_size = cmp::max(group_size, max_group_size);
+
+    group_count >= 2 && max_group_size >= 2
 }
