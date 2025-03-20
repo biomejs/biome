@@ -111,8 +111,6 @@ declare_lint_rule! {
     /// tw`px-2 foo p-4 bar`;
     /// ```
     ///
-    /// **Since v2.0.0**, tagged template literals like `` tw.div`...` `` are supported by setting `tw.*`:
-    ///
     /// ```js,expect_diagnostic,use_options
     /// tw.div`px-2 foo p-4 bar`;
     /// ```
