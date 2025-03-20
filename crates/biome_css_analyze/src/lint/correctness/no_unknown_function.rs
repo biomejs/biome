@@ -43,7 +43,7 @@ declare_lint_rule! {
 }
 
 pub struct NoUnknownFunctionState {
-    function_name: String,
+    function_name: Box<str>,
     span: TextRange,
 }
 
@@ -55,20 +55,21 @@ impl Rule for NoUnknownFunction {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let function_name = node.name().ok()?.to_trimmed_string();
+        let binding = node.name().ok()?.value_token().ok()?;
+        let function_name = binding.text_trimmed();
 
         // We don't have a semantic model yet, so we can't determine if functions are defined elsewhere.
         // Therefore, we ignore these custom functions to prevent false detections.
-        if is_custom_function(&function_name) {
+        if is_custom_function(function_name) {
             return None;
         }
 
-        if is_function_keyword(&function_name) {
+        if is_function_keyword(function_name) {
             return None;
         }
 
         Some(NoUnknownFunctionState {
-            function_name,
+            function_name: function_name.into(),
             span: node.name().ok()?.range(),
         })
     }
