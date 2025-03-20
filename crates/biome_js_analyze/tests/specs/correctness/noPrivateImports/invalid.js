@@ -3,6 +3,7 @@ import { fooPackageVariable as subPackage } from "./sub/foo.js";
 
 // Attempt to import a private symbol from outside the package.
 import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+import { fooPrivateVariable as subPrivate2 } from "./sub";
 
 // Attempt to import a private symbol from the same package.
 import { fooPrivateVariable } from "./foo.js";

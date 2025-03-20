@@ -1,6 +1,6 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::{fmt::Display, markup};
-use biome_dependency_graph::{Export, ModuleDependencyData};
+use biome_dependency_graph::{DependencyGraph, ModuleDependencyData};
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
@@ -190,6 +190,7 @@ impl Rule for NoPrivateImports {
         };
 
         let options = GetRestrictedImportOptions {
+            dependency_graph: ctx.dependency_graph(),
             self_path,
             target_path,
             target_data,
@@ -218,8 +219,8 @@ impl Rule for NoPrivateImports {
         );
 
         // Use the relative path if possible.
-        let path = Utf8PathBuf::from(&state.path);
-        let path = path.strip_prefix(&cwd).unwrap_or(&path).to_string();
+        let path = Utf8Path::new(&state.path);
+        let path = path.strip_prefix(&cwd).unwrap_or(path).as_str();
 
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
@@ -232,7 +233,7 @@ impl Rule for NoPrivateImports {
             "You may need to import an alternative symbol, or relax the visibility of this symbol."
         })
         .note(markup! {
-            "The visibility for this symbol is defined in "<Emphasis>{path}</Emphasis>"."
+            "This symbol was imported from "<Emphasis>{path}</Emphasis>"."
         });
 
         Some(diagnostic)
@@ -240,6 +241,9 @@ impl Rule for NoPrivateImports {
 }
 
 struct GetRestrictedImportOptions<'a> {
+    /// The dependency graph to use for further lookups.
+    dependency_graph: &'a DependencyGraph,
+
     /// The self module path we're importing to.
     self_path: &'a Utf8Path,
 
@@ -254,6 +258,14 @@ struct GetRestrictedImportOptions<'a> {
     default_visibility: Visibility,
 }
 
+impl GetRestrictedImportOptions<'_> {
+    /// Returns whether [Self::target_path] is within the same package as
+    /// [Self::self_path].
+    fn target_path_is_in_same_package(&self) -> bool {
+        target_path_is_in_same_package_as_self_path(self.target_path, self.self_path)
+    }
+}
+
 fn get_restricted_imports_from_module_source(
     node: &JsModuleSource,
     options: &GetRestrictedImportOptions,
@@ -263,7 +275,7 @@ fn get_restricted_imports_from_module_source(
     let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
         Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
             let range = node.default_specifier()?.range();
-            get_restricted_import(&Text::Static("default"), options)
+            get_restricted_import_visibility(&Text::Static("default"), options)
                 .map(|visibility| NoPrivateImportsState {
                     range,
                     path: path.clone(),
@@ -279,7 +291,7 @@ fn get_restricted_imports_from_module_source(
                         .flatten()
                         .filter_map(get_named_specifier_import_name)
                         .filter_map(|name| {
-                            get_restricted_import(
+                            get_restricted_import_visibility(
                                 &Text::Borrowed(name.token_text_trimmed()),
                                 options,
                             )
@@ -294,7 +306,7 @@ fn get_restricted_imports_from_module_source(
         }
         Some(AnyJsImportClause::JsImportDefaultClause(node)) => {
             let range = node.default_specifier()?.range();
-            get_restricted_import(&Text::Static("default"), options)
+            get_restricted_import_visibility(&Text::Static("default"), options)
                 .map(|visibility| NoPrivateImportsState {
                     range,
                     path,
@@ -310,13 +322,15 @@ fn get_restricted_imports_from_module_source(
             .flatten()
             .filter_map(get_named_specifier_import_name)
             .filter_map(|name| {
-                get_restricted_import(&Text::Borrowed(name.token_text_trimmed()), options).map(
-                    |visibility| NoPrivateImportsState {
-                        range: name.text_trimmed_range(),
-                        path: path.clone(),
-                        visibility,
-                    },
+                get_restricted_import_visibility(
+                    &Text::Borrowed(name.token_text_trimmed()),
+                    options,
                 )
+                .map(|visibility| NoPrivateImportsState {
+                    range: name.text_trimmed_range(),
+                    path: path.clone(),
+                    visibility,
+                })
             })
             .collect(),
         Some(
@@ -342,43 +356,101 @@ fn get_named_specifier_import_name(specifier: AnyJsNamedImportSpecifier) -> Opti
     }
 }
 
-/// Returns `Some` signal if the given `import_name` references an import
-/// that is more private than allowed.
-fn get_restricted_import(
+/// Returns the visibility of the symbol exported as the given `import_name`,
+/// if (and only if) that symbol has a stricter visibility than allowed.
+fn get_restricted_import_visibility(
     import_name: &Text,
     options: &GetRestrictedImportOptions,
 ) -> Option<Visibility> {
     let visibility = options
         .target_data
-        .exports
-        .get(import_name)
-        .and_then(|export| match export {
-            Export::Own(export) => export.jsdoc_comment.as_deref().and_then(parse_visibility),
-
-            // TODO: Should we follow re-exports here? I think re-exports don't inherit the
-            //       visibility from where the name is declared; e.g. package-private symbols can be
-            //       re-exported from index.js to make it public. Thus we can fallback to the
-            //       default visibility if they're re-exported and not added any visibility there.
-            _ => None,
-        })
+        .find_exported_symbol(options.dependency_graph, import_name.text())
+        .and_then(|export| export.jsdoc_comment.as_deref().and_then(parse_visibility))
         .unwrap_or(options.default_visibility);
 
     let is_restricted = match visibility {
         Visibility::Public => false,
         Visibility::Private => true,
-        Visibility::Package => options.target_path.parent() != options.self_path.parent(),
+        Visibility::Package => !options.target_path_is_in_same_package(),
     };
 
     is_restricted.then_some(visibility)
 }
 
-/// Parses a JSDoc comment to find the first `@public`, `@package`, or `@private` tag.
+/// Searches JSDoc comments to find the first `@public`, `@package`, `@private`,
+/// or `@access` tag, and maps it to one of the supported [Visibility] values,
+/// if possible.
 fn parse_visibility(jsdoc_comment: &str) -> Option<Visibility> {
-    jsdoc_comment
-        .lines()
-        .find_map(|line| {
-            line.strip_prefix("@")
-                .and_then(|tag| tag.split_whitespace().next())
-        })
-        .and_then(|tag| Visibility::from_str(tag).ok())
+    jsdoc_comment.lines().find_map(|line| {
+        line.strip_prefix('@')
+            .map(|tag| tag.strip_prefix("access ").unwrap_or(tag))
+            .and_then(|tag| tag.split_whitespace().next())
+            .and_then(|tag| Visibility::from_str(tag).ok())
+    })
+}
+
+/// Returns whether `target_path` is within the same package as `self_path`.
+#[inline]
+fn target_path_is_in_same_package_as_self_path(
+    target_path: &Utf8Path,
+    self_path: &Utf8Path,
+) -> bool {
+    let target_path = if target_path.file_stem().is_some_and(|stem| stem == "index") {
+        target_path.parent().unwrap_or(Utf8Path::new("."))
+    } else {
+        target_path
+    };
+
+    let Some(target_parent) = target_path.parent() else {
+        // If we cannot navigate further up from the target path, it means the
+        // target is in the root, which means everything else is in the same
+        // package as it.
+        return true;
+    };
+
+    self_path
+        .ancestors()
+        .any(|ancestor| ancestor == target_parent)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_target_path_is_in_same_package_as_self_path() {
+        assert!(target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("target.js"),
+            Utf8Path::new("self.js")
+        ));
+        assert!(target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("target.js"),
+            Utf8Path::new("nested/self.js")
+        ));
+        assert!(target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("./target.js"),
+            Utf8Path::new("./nested/self.js")
+        ));
+        assert!(target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("target/index.js"),
+            Utf8Path::new("self.js")
+        ));
+        assert!(target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("target/index.js"),
+            Utf8Path::new("nested/self.js")
+        ));
+
+        assert!(!target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("target/private.js"),
+            Utf8Path::new("self.js")
+        ));
+        assert!(!target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("target/private.js"),
+            Utf8Path::new("nested/self.js")
+        ));
+        assert!(!target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("./target/private.js"),
+            Utf8Path::new("./self.js")
+        ));
+    }
 }

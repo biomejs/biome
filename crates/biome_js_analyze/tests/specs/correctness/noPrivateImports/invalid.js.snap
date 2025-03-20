@@ -9,6 +9,7 @@ import { fooPackageVariable as subPackage } from "./sub/foo.js";
 
 // Attempt to import a private symbol from outside the package.
 import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+import { fooPrivateVariable as subPrivate2 } from "./sub";
 
 // Attempt to import a private symbol from the same package.
 import { fooPrivateVariable } from "./foo.js";
@@ -33,7 +34,7 @@ invalid.js:2:10 lint/correctness/noPrivateImports ━━━━━━━━━━
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/sub/foo.js.
   
 
 ```
@@ -46,48 +47,49 @@ invalid.js:5:10 lint/correctness/noPrivateImports ━━━━━━━━━━
     4 │ // Attempt to import a private symbol from outside the package.
   > 5 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
       │          ^^^^^^^^^^^^^^^^^^
-    6 │ 
-    7 │ // Attempt to import a private symbol from the same package.
+    6 │ import { fooPrivateVariable as subPrivate2 } from "./sub";
+    7 │ 
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/sub/foo.js.
   
 
 ```
 
 ```
-invalid.js:8:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i You may not import a symbol with private visibility from here.
   
-     7 │ // Attempt to import a private symbol from the same package.
-   > 8 │ import { fooPrivateVariable } from "./foo.js";
+    4 │ // Attempt to import a private symbol from outside the package.
+    5 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+  > 6 │ import { fooPrivateVariable as subPrivate2 } from "./sub";
+      │          ^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Attempt to import a private symbol from the same package.
+  
+  i You may need to import an alternative symbol, or relax the visibility of this symbol.
+  
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/sub/index.js.
+  
+
+```
+
+```
+invalid.js:9:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i You may not import a symbol with private visibility from here.
+  
+     8 │ // Attempt to import a private symbol from the same package.
+   > 9 │ import { fooPrivateVariable } from "./foo.js";
        │          ^^^^^^^^^^^^^^^^^^
-     9 │ 
-    10 │ // Default and combined imports of private symbols are still not allowed
+    10 │ 
+    11 │ // Default and combined imports of private symbols are still not allowed
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/foo.js.
-  
-
-```
-
-```
-invalid.js:11:8 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i You may not import a symbol with private visibility from here.
-  
-    10 │ // Default and combined imports of private symbols are still not allowed
-  > 11 │ import privateFunction from "./foo.js";
-       │        ^^^^^^^^^^^^^^^
-    12 │ import privateFunction2, { fooPrivateVariable as subPrivate2 } from "./sub/foo.js";
-    13 │ 
-  
-  i You may need to import an alternative symbol, or relax the visibility of this symbol.
-  
-  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/foo.js.
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/foo.js.
   
 
 ```
@@ -97,33 +99,51 @@ invalid.js:12:8 lint/correctness/noPrivateImports ━━━━━━━━━━
 
   i You may not import a symbol with private visibility from here.
   
-    10 │ // Default and combined imports of private symbols are still not allowed
-    11 │ import privateFunction from "./foo.js";
-  > 12 │ import privateFunction2, { fooPrivateVariable as subPrivate2 } from "./sub/foo.js";
-       │        ^^^^^^^^^^^^^^^^
-    13 │ 
+    11 │ // Default and combined imports of private symbols are still not allowed
+  > 12 │ import privateFunction from "./foo.js";
+       │        ^^^^^^^^^^^^^^^
+    13 │ import privateFunction2, { fooPrivateVariable as subPrivate2 } from "./sub/foo.js";
+    14 │ 
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/foo.js.
   
 
 ```
 
 ```
-invalid.js:12:28 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:8 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i You may not import a symbol with private visibility from here.
   
-    10 │ // Default and combined imports of private symbols are still not allowed
-    11 │ import privateFunction from "./foo.js";
-  > 12 │ import privateFunction2, { fooPrivateVariable as subPrivate2 } from "./sub/foo.js";
-       │                            ^^^^^^^^^^^^^^^^^^
-    13 │ 
+    11 │ // Default and combined imports of private symbols are still not allowed
+    12 │ import privateFunction from "./foo.js";
+  > 13 │ import privateFunction2, { fooPrivateVariable as subPrivate2 } from "./sub/foo.js";
+       │        ^^^^^^^^^^^^^^^^
+    14 │ 
   
   i You may need to import an alternative symbol, or relax the visibility of this symbol.
   
-  i The visibility for this symbol is defined in tests/specs/correctness/noPrivateImports/sub/foo.js.
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/sub/foo.js.
+  
+
+```
+
+```
+invalid.js:13:28 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i You may not import a symbol with private visibility from here.
+  
+    11 │ // Default and combined imports of private symbols are still not allowed
+    12 │ import privateFunction from "./foo.js";
+  > 13 │ import privateFunction2, { fooPrivateVariable as subPrivate2 } from "./sub/foo.js";
+       │                            ^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i You may need to import an alternative symbol, or relax the visibility of this symbol.
+  
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/sub/foo.js.
   
 
 ```

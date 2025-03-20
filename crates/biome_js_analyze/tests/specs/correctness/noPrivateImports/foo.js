@@ -9,5 +9,14 @@ export const fooPublicVariable = {};
 
 export const fooDefaultVariable = {};
 
-/** @private */
-export default function privateFunction() {}
+/**
+ * @param {string} a A parameter.
+ * @access public
+ */
+export function fooPublicFunction(a) {}
+
+/**
+ * @param {string} a A parameter.
+ * @access private
+ */
+export default function privateFunction(a) {}

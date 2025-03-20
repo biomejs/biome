@@ -1,0 +1,10 @@
+// Visibility modifiers are taken from the original symbol definition, so the
+// re-exports here should preserve the visibility of the symbols they are
+// re-exporting.
+//
+// In theory, we could imagine a re-export overruling the visibility by adding
+// its own annotation, but this is not something we support (at least not yet).
+//
+// Note that re-exporting of package private symbols will implicitly widen the
+// scope from where they may be imported.
+export { fooDefaultVariable, fooPackageVariable, fooPrivateVariable, fooPublicVariable } from "./foo"

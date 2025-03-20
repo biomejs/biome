@@ -11,6 +11,10 @@ use std::sync::Arc;
 pub struct DependencyGraphService(Arc<DependencyGraph>);
 
 impl DependencyGraphService {
+    pub fn dependency_graph(&self) -> &DependencyGraph {
+        self.0.as_ref()
+    }
+
     pub fn imports_for_path(&self, path: &Utf8Path) -> Option<ModuleDependencyData> {
         self.0.dependency_data_for_path(path)
     }
