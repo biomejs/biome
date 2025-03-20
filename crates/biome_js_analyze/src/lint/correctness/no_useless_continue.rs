@@ -69,18 +69,17 @@ declare_lint_rule! {
     ///   }
     /// }
     /// ```
-    pub NoUnnecessaryContinue {
+    pub NoUselessContinue {
         version: "1.0.0",
-        name: "noUnnecessaryContinue",
+        name: "noUselessContinue",
         language: "js",
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
-
 }
 
-impl Rule for NoUnnecessaryContinue {
+impl Rule for NoUselessContinue {
     type Query = Ast<JsContinueStatement>;
     type State = ();
     type Signals = Option<Self::State>;

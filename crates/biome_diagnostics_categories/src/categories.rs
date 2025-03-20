@@ -113,7 +113,7 @@ define_categories! {
     "lint/correctness/noUnknownProperty": "https://biomejs.dev/linter/rules/no-unknown-property",
     "lint/correctness/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
     "lint/correctness/noUnmatchableAnbSelector": "https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
-    "lint/correctness/noUnnecessaryContinue": "https://biomejs.dev/linter/rules/no-unnecessary-continue",
+    "lint/correctness/noUselessContinue": "https://biomejs.dev/linter/rules/no-useless-continue",
     "lint/correctness/noUnreachable": "https://biomejs.dev/linter/rules/no-unreachable",
     "lint/correctness/noUnreachableSuper": "https://biomejs.dev/docs/linter/rules/no-unreachable-super",
     "lint/correctness/noUnsafeFinally": "https://biomejs.dev/linter/rules/no-unsafe-finally",

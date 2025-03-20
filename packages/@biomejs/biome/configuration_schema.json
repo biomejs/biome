@@ -973,13 +973,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnnecessaryContinue": {
-					"description": "Avoid using unnecessary continue.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUnreachable": {
 					"description": "Disallow unreachable code",
 					"anyOf": [
@@ -1040,6 +1033,13 @@
 					"description": "Disallow unused variables.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnusedVariablesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessContinue": {
+					"description": "Avoid using unnecessary continue.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

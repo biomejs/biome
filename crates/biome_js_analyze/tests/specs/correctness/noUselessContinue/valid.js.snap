@@ -82,7 +82,7 @@ function f(xs) {
 
 # Diagnostics
 ```
-valid.js:53:3 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+valid.js:53:3 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unnecessary continue statement
   
