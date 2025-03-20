@@ -8,9 +8,9 @@
 					"options": {
                         "groups": [
                             ":BUN:",
-							":BLANK-LINE:",
+							":BLANK_LINE:",
                             ":NODE:",
-							":BLANK-LINE:"
+							":BLANK_LINE:"
                         ]
 					}
 				}
