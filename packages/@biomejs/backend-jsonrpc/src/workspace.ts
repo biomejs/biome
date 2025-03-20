@@ -797,7 +797,7 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
-	 * Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.
+	 * Provides a code action to sort the imports and exports in the file using a built-in or custom order.
 	 */
 	organizeImports?: RuleAssistConfiguration_for_Options;
 	/**
@@ -3050,7 +3050,15 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
-export type PredefinedImportGroup = ":BLANK-LINE:" | ":BUN:" | ":NODE:";
+export type PredefinedImportGroup =
+	| ":BLANK_LINE:"
+	| ":ALIAS:"
+	| ":BUN:"
+	| ":NODE:"
+	| ":PACKAGE:"
+	| ":PACKAGE_WITH_PROTOCOL:"
+	| ":PATH:"
+	| ":URL:";
 /**
  * Glob to match against import sources.
  */

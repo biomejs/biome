@@ -10,7 +10,7 @@
                             ":BUN:",
                             ":NODE:",
 							["@scopeX/**", "!@scopeX/special", "!@scopeX/special/**"],
-							":BLANK-LINE:",
+							":BLANK_LINE:",
 							"@scopeB/**",
 							"@scopeA/**"
                         ]

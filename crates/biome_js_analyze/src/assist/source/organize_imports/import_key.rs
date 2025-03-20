@@ -22,9 +22,8 @@ pub struct ImportKey {
 }
 impl ImportKey {
     pub fn new(info: ImportInfo, groups: &import_groups::ImportGroups) -> Self {
-        let candidate = import_groups::ImportSourceCandidate::new(info.source.inner().0.text());
         Self {
-            group: groups.index(&candidate),
+            group: groups.index(&info.source),
             source: info.source,
             has_no_attributes: info.has_no_attributes,
             kind: info.kind,
