@@ -3049,14 +3049,14 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_else_if:
         Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateElseIf>>,
+    #[doc = "No duplicated fields in GraphQL operations."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_duplicate_fields:
+        Option<RuleConfiguration<biome_graphql_analyze::options::NoDuplicateFields>>,
     #[doc = "Disallow duplicate properties within declaration blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_properties:
         Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateProperties>>,
-    #[doc = "No duplicated fields in GraphQL operations."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicated_fields:
-        Option<RuleConfiguration<biome_graphql_analyze::options::NoDuplicatedFields>>,
     #[doc = "Disallow accessing namespace imports dynamically."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_dynamic_namespace_import_access:
@@ -3279,8 +3279,8 @@ impl Nursery {
         "noDocumentImportInPage",
         "noDuplicateCustomProperties",
         "noDuplicateElseIf",
+        "noDuplicateFields",
         "noDuplicateProperties",
-        "noDuplicatedFields",
         "noDynamicNamespaceImportAccess",
         "noEnum",
         "noExportedImports",
@@ -3492,12 +3492,12 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_duplicate_properties.as_ref() {
+        if let Some(rule) = self.no_duplicate_fields.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_duplicated_fields.as_ref() {
+        if let Some(rule) = self.no_duplicate_properties.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
@@ -3841,12 +3841,12 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_duplicate_properties.as_ref() {
+        if let Some(rule) = self.no_duplicate_fields.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_duplicated_fields.as_ref() {
+        if let Some(rule) = self.no_duplicate_properties.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
@@ -4206,12 +4206,12 @@ impl RuleGroupExt for Nursery {
                 .no_duplicate_else_if
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noDuplicateProperties" => self
-                .no_duplicate_properties
+            "noDuplicateFields" => self
+                .no_duplicate_fields
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noDuplicatedFields" => self
-                .no_duplicated_fields
+            "noDuplicateProperties" => self
+                .no_duplicate_properties
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDynamicNamespaceImportAccess" => self

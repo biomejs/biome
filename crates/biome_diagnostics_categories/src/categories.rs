@@ -149,7 +149,7 @@ define_categories! {
     "lint/nursery/noDuplicateCustomProperties": "https://biomejs.dev/linter/rules/no-duplicate-custom-properties",
     "lint/nursery/noDuplicateElseIf": "https://biomejs.dev/linter/rules/no-duplicate-else-if",
     "lint/nursery/noDuplicateProperties": "https://biomejs.dev/linter/rules/no-duplicate-properties",
-    "lint/nursery/noDuplicatedFields": "https://biomejs.dev/linter/rules/no-duplicated-fields",
+    "lint/nursery/noDuplicateFields": "https://biomejs.dev/linter/rules/no-duplicate-fields",
     "lint/nursery/noDynamicNamespaceImportAccess": "https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access",
     "lint/nursery/noEnum": "https://biomejs.dev/linter/rules/no-enum",
     "lint/nursery/noExportedImports": "https://biomejs.dev/linter/rules/no-exported-imports",

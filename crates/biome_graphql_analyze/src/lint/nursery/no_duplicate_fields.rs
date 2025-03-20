@@ -36,9 +36,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub NoDuplicatedFields {
+    pub NoDuplicateFields {
         version: "1.9.0",
-        name: "noDuplicatedFields",
+        name: "noDuplicateFields",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("no-duplicate-fields")],
         source_kind: RuleSourceKind::SameLogic,
@@ -46,7 +46,7 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for NoDuplicatedFields {
+impl Rule for NoDuplicateFields {
     type Query = Ast<AnyGraphqlOperationDefinition>;
     type State = DuplicatedField;
     type Signals = Box<[Self::State]>;
