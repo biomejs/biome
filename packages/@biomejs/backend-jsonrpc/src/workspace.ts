@@ -197,7 +197,7 @@ export interface FormatterConfiguration {
 	/**
 	* Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.
 
-Default: `false`. 
+Default: `true`. 
 	 */
 	useEditorconfig?: Bool;
 }
@@ -1092,6 +1092,10 @@ export interface A11y {
  */
 export interface Complexity {
 	/**
+	 * Disallow unclear usage of consecutive space characters in regular expression literals
+	 */
+	noAdjacentSpacesInRegex?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow primitive type aliases and misleading types.
 	 */
 	noBannedTypes?: RuleFixConfiguration_for_Null;
@@ -1115,10 +1119,6 @@ export interface Complexity {
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
 	noForEach?: RuleConfiguration_for_NoForEachOptions;
-	/**
-	 * Disallow unclear usage of consecutive space characters in regular expression literals
-	 */
-	noMultipleSpacesInRegularExpressionLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
 	 */
@@ -1403,7 +1403,7 @@ export interface Correctness {
 	/**
 	 * Disallow unused variables.
 	 */
-	noUnusedVariables?: RuleFixConfiguration_for_Null;
+	noUnusedVariables?: RuleFixConfiguration_for_NoUnusedVariablesOptions;
 	/**
 	 * This rules prevents void elements (AKA self-closing elements) from having children.
 	 */
@@ -1423,7 +1423,7 @@ export interface Correctness {
 	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
-	useExhaustiveDependencies?: RuleFixConfiguration_for_UseExhaustiveDependenciesOptions;
+	useExhaustiveDependencies?: RuleConfiguration_for_UseExhaustiveDependenciesOptions;
 	/**
 	 * Enforce that all React hooks are being called from the Top Level component functions.
 	 */
@@ -2310,9 +2310,12 @@ export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 export type RuleConfiguration_for_UndeclaredVariablesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UndeclaredVariablesOptions;
-export type RuleFixConfiguration_for_UseExhaustiveDependenciesOptions =
+export type RuleFixConfiguration_for_NoUnusedVariablesOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseExhaustiveDependenciesOptions;
+	| RuleWithFixOptions_for_NoUnusedVariablesOptions;
+export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
@@ -2477,11 +2480,21 @@ export interface RuleWithOptions_for_UndeclaredVariablesOptions {
 	 */
 	options: UndeclaredVariablesOptions;
 }
-export interface RuleWithFixOptions_for_UseExhaustiveDependenciesOptions {
+export interface RuleWithFixOptions_for_NoUnusedVariablesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
 	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnusedVariablesOptions;
+}
+export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -2780,6 +2793,12 @@ export interface UndeclaredVariablesOptions {
 	 */
 	checkTypes?: boolean;
 }
+export interface NoUnusedVariablesOptions {
+	/**
+	 * Whether to ignore unused variables from an object destructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
+	 */
+	ignoreRestSiblings?: boolean;
+}
 /**
  * Options for the rule `useExhaustiveDependencies`
  */
@@ -2803,9 +2822,9 @@ export interface UseExhaustiveDependenciesOptions {
 export interface DeprecatedHooksOptions {}
 export interface UseImportExtensionsOptions {
 	/**
-	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
+	 * If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.
 	 */
-	suggestedExtensions?: Record<string, SuggestedExtensionMapping>;
+	forceJsExtensions?: boolean;
 }
 /**
  * Rule's options
@@ -2982,16 +3001,6 @@ Set to `true` to mark the identity of the hook's return value as stable, or use 
 For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
 	 */
 	stableResult?: StableHookResult;
-}
-export interface SuggestedExtensionMapping {
-	/**
-	 * Extension that should be used for component file imports
-	 */
-	component?: string;
-	/**
-	 * Extension that should be used for module imports
-	 */
-	module?: string;
 }
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
@@ -3176,7 +3185,7 @@ export type Category =
 	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
-	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"
+	| "lint/complexity/noAdjacentSpacesInRegex"
 	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"

@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fix [#5031](https://github.com/biomejs/biome/issues/5031). Improve CSS formatting for numbers:
+Fixed [#5031](https://github.com/biomejs/biome/issues/5031): CSS formatting has been improved for numbers:
 
 ```diff
 .class {

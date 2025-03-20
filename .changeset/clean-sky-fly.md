@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-`biome migrate eslint` now correctly handles shared ESLint configuration that don't follow the ESLint naming convention ([#4528](https://github.com/biomejs/biome/issues/4528)).
+Fixed [#4528](https://github.com/biomejs/biome/issues/4528): `biome migrate eslint` now correctly handles shared ESLint configuration that don't follow the ESLint naming convention.
 
 ESLint recommends that a package that exports a shared configuration be prefixed with `eslint-config-` or simply named `eslint-config`.
 This is only a recommendation.

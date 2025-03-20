@@ -81,6 +81,9 @@
       }
     }
   },
+  "plugins": [
+    "plugins/no-object-assign.grit"
+  ],
   "vcs": {
     "clientKind": "git",
     "enabled": true,

@@ -2,7 +2,7 @@
 "@biomejs/biome": major
 ---
 
-Remove the option `enumMemberCase` from the lint rule `useNamingConvention`.
+Removed the option `enumMemberCase` from the lint rule `useNamingConvention`.
 
 `enumMemberCase` is an option that allows to customize the enforced case for TypeScript's enum members.
 The option was introduced prior to the `conventions` option that allows to do the same thing.

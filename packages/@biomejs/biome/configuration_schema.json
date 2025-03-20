@@ -416,6 +416,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAdjacentSpacesInRegex": {
+					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
@@ -455,13 +462,6 @@
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoForEachConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noMultipleSpacesInRegularExpressionLiterals": {
-					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1039,7 +1039,7 @@
 				"noUnusedVariables": {
 					"description": "Disallow unused variables.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/NoUnusedVariablesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1493,7 +1493,7 @@
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
-					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
+					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `true`.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
@@ -2493,6 +2493,23 @@
 					"description": "If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.",
 					"default": true,
 					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUnusedVariablesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnusedVariablesOptions" }
+			]
+		},
+		"NoUnusedVariablesOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreRestSiblings": {
+					"description": "Whether to ignore unused variables from an object destructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).",
+					"default": false,
+					"type": "boolean"
 				}
 			},
 			"additionalProperties": false
@@ -3707,6 +3724,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoUnusedVariablesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnusedVariablesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithRestrictedGlobalsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -4462,22 +4498,6 @@
 			},
 			"additionalProperties": false
 		},
-		"SuggestedExtensionMapping": {
-			"type": "object",
-			"properties": {
-				"component": {
-					"description": "Extension that should be used for component file imports",
-					"default": "",
-					"type": "string"
-				},
-				"module": {
-					"description": "Extension that should be used for module imports",
-					"default": "",
-					"type": "string"
-				}
-			},
-			"additionalProperties": false
-		},
 		"Suspicious": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -5085,13 +5105,10 @@
 		"UseImportExtensionsOptions": {
 			"type": "object",
 			"properties": {
-				"suggestedExtensions": {
-					"description": "A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension",
-					"default": {},
-					"type": "object",
-					"additionalProperties": {
-						"$ref": "#/definitions/SuggestedExtensionMapping"
-					}
+				"forceJsExtensions": {
+					"description": "If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.",
+					"default": false,
+					"type": "boolean"
 				}
 			},
 			"additionalProperties": false

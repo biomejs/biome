@@ -39,7 +39,7 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --profiling --scope biomejs crates/biome_wasm --features experimental-html
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --profiling --scope biomejs crates/biome_wasm
 
       # https://github.com/actions/cache/issues/342
       - name: Clear old wasm-pack cache
@@ -64,7 +64,7 @@ jobs:
         run: npm i -g --force corepack && corepack enable
 
       - name: Setup node
-        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version: 20
           cache: pnpm

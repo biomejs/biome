@@ -1,6 +1,6 @@
 use biome_analyze::RuleDiagnostic;
 use biome_console::markup;
-use biome_diagnostics::category;
+use biome_diagnostics::{Severity, category};
 use biome_fs::FileSystem;
 use biome_grit_patterns::{
     BuiltInFunction, CompilePatternOptions, GritBinding, GritExecContext, GritPattern, GritQuery,
@@ -12,7 +12,7 @@ use biome_rowan::TextRange;
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{AnalysisLogs, error::GritPatternError};
-use std::{borrow::Cow, fmt::Debug};
+use std::{borrow::Cow, fmt::Debug, str::FromStr};
 
 use crate::{AnalyzerPlugin, PluginDiagnostic};
 
@@ -29,13 +29,7 @@ impl AnalyzerGritPlugin {
             .with_extra_built_ins(vec![
                 BuiltInFunction::new(
                     "register_diagnostic",
-                    &[
-                        "span",
-                        "message",
-                        "fixer_description",
-                        "category",
-                        "applicability",
-                    ],
+                    &["span", "message", "severity"],
                     Box::new(register_diagnostic),
                 )
                 .as_predicate(),
@@ -96,26 +90,11 @@ fn register_diagnostic<'a>(
 ) -> Result<GritResolvedPattern<'a>, GritPatternError> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
 
-    let (span_node, message, _fixer_description, _category, _applicability) = match args.as_slice()
-    {
-        [Some(span), Some(message), None, None, None] => (span, message, None, None, None),
-        [
-            Some(span),
-            Some(message),
-            Some(fixer_description),
-            Some(category),
-            Some(applicability),
-        ] => (
-            span,
-            message,
-            Some(fixer_description),
-            Some(category),
-            Some(applicability),
-        ),
-        // TODO: Do we want to make `category` and `applicability` optional, even for rules with a fixer?
+    let (span_node, message, severity) = match args.as_slice() {
+        [Some(span), Some(message), severity] => (span, message, severity),
         _ => {
             return Err(GritPatternError::new(
-                "register_diagnostic() takes 2 or 5 arguments: span and message, and optional fixer_description, category and applicability",
+                "register_diagnostic() takes 2 required arguments: span and message, and an optional severity",
             ));
         }
     };
@@ -144,7 +123,15 @@ fn register_diagnostic<'a>(
     };
     let message = message.as_deref().unwrap_or("(no message)");
 
-    context.add_diagnostic(RuleDiagnostic::new(category!("plugin"), span, message));
+    let severity = severity
+        .as_ref()
+        .and_then(|severity| severity.text(&state.files, &context.lang).ok())
+        .and_then(|severity| Severity::from_str(severity.as_ref()).ok())
+        .unwrap_or(Severity::Error);
+
+    context.add_diagnostic(
+        RuleDiagnostic::new(category!("plugin"), span, message).with_severity(severity),
+    );
 
     Ok(span_node.clone())
 }

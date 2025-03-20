@@ -32,7 +32,7 @@ impl Workspace {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Workspace {
         Workspace {
-            inner: workspace::server(Box::new(MemoryFileSystem::default())),
+            inner: workspace::server(Box::new(MemoryFileSystem::default()), None),
         }
     }
 

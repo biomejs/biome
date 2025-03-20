@@ -660,9 +660,15 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
 }
 
 fn is_tag_name_byte(byte: u8) -> bool {
+    // Canonical HTML tag names are specified to be case-insensitive and alphanumeric.
     // https://html.spec.whatwg.org/#elements-2
     // https://html.spec.whatwg.org/multipage/syntax.html#syntax-tag-name
-    byte.is_ascii_alphanumeric()
+    // However, custom tag names must start with a lowercase letter, but they can be followed by pretty much anything else.
+    // https://html.spec.whatwg.org/#valid-custom-element-name
+
+    // FIXME: The extra characters allowed here `-` and `:` is a temporary fix for now to fix parsing issues in some prettier test cases.
+
+    byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':'
 }
 
 fn is_attribute_name_byte(byte: u8) -> bool {

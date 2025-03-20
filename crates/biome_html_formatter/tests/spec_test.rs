@@ -1,6 +1,9 @@
+use biome_configuration::{Configuration, HtmlConfiguration, html::HtmlFormatterConfiguration};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
+use biome_fs::BiomePath;
 use biome_html_formatter::{HtmlFormatLanguage, context::HtmlFormatOptions};
 use biome_html_syntax::HtmlFileSource;
+use biome_service::workspace::UpdateSettingsParams;
 use camino::Utf8Path;
 
 mod language {
@@ -27,7 +30,22 @@ mod language {
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
     let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/html"));
 
-    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, |_| None) else {
+    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, |project_key| {
+        Some(UpdateSettingsParams {
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    formatter: Some(HtmlFormatterConfiguration {
+                        enabled: Some(true.into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            project_key,
+            workspace_directory: Some(BiomePath::new(test_directory)),
+        })
+    }) else {
         panic!("Failed to set up snapshot test");
     };
 

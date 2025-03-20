@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-The `useNamingConvention` rule now suggests a rename that preserves uppercase if possible.
+The rule [`useNamingConvention`](https://biomejs.dev/linter/rules/use-naming-convention/) now suggests a rename that preserves uppercase if possible.
 
 For instance, Biome suggested renaming `HTMLWrapper` as `htmlWrapper`:
 

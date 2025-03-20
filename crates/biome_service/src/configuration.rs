@@ -2,6 +2,7 @@ use crate::WorkspaceError;
 use crate::settings::Settings;
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
+use biome_configuration::editorconfig::parse_str;
 use biome_configuration::{
     BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload, push_to_analyzer_rules,
 };
@@ -43,8 +44,6 @@ pub struct LoadedConfiguration {
     pub configuration: Configuration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
-    /// Whether `biome.json` and `biome.jsonc` were found in the same folder
-    pub double_configuration_found: bool,
 }
 
 impl LoadedConfiguration {
@@ -58,7 +57,7 @@ impl LoadedConfiguration {
         self.file_path.as_deref()
     }
 
-    /// Whether the are errors emitted. Error are [Severity::Error] or greater.
+    /// Whether they are errors emitted. Error are [Severity::Error] or greater.
     pub fn has_errors(&self) -> bool {
         self.diagnostics
             .iter()
@@ -116,7 +115,6 @@ impl LoadedConfiguration {
             external_resolution_base_path,
             configuration_file_path,
             deserialized,
-            double_configuration_found,
         } = value;
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
@@ -140,7 +138,6 @@ impl LoadedConfiguration {
                 .collect(),
             directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
             file_path: Some(configuration_file_path),
-            double_configuration_found,
         })
     }
 }
@@ -199,20 +196,12 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
             return load_user_config(fs, config_file_path, external_resolution_base_path);
         }
     };
-    let biome_json_result = fs.auto_search_file(&configuration_directory, ConfigName::biome_json());
-
-    let biome_jsonc_result =
-        fs.auto_search_file(&configuration_directory, ConfigName::biome_jsonc());
-
-    let (auto_search_result, double_configuration_found) =
-        match (biome_json_result, biome_jsonc_result) {
-            (Some(biome_json_result), Some(_)) => (biome_json_result, true),
-            (Some(biome_json_result), None) => (biome_json_result, false),
-            (None, Some(biome_jsonc_result)) => (biome_jsonc_result, false),
-            (None, None) => {
-                return Ok(None);
-            }
-        };
+    let Some(auto_search_result) = fs.auto_search_files(
+        &configuration_directory,
+        &[ConfigName::biome_json(), ConfigName::biome_jsonc()],
+    ) else {
+        return Ok(None);
+    };
 
     // We first search for `biome.json` or `biome.jsonc` files
     let AutoSearchResult {
@@ -232,7 +221,6 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
         deserialized,
         configuration_file_path: file_path,
         external_resolution_base_path,
-        double_configuration_found,
     }))
 }
 
@@ -257,7 +245,6 @@ fn load_user_config(
             deserialized,
             configuration_file_path: config_file_path.to_path_buf(),
             external_resolution_base_path,
-            double_configuration_found: false,
         }))
     } else {
         let biome_json_path = config_file_path.join(ConfigName::biome_json());
@@ -286,21 +273,50 @@ fn load_user_config(
             deserialized,
             configuration_file_path: config_path.to_path_buf(),
             external_resolution_base_path,
-            double_configuration_found: biome_json_exists && biome_jsonc_exists,
         }))
+    }
+}
+
+/// judge if path a is parent path for path b.
+fn is_parent_of(a: Utf8PathBuf, b: Utf8PathBuf) -> bool {
+    if a == b {
+        return false;
+    }
+
+    if let Ok(relative_path) = b.strip_prefix(a) {
+        !relative_path.has_root()
+    } else {
+        false
     }
 }
 
 pub fn load_editorconfig(
     fs: &dyn FileSystem,
     workspace_root: Utf8PathBuf,
+    config_path: Option<Utf8PathBuf>,
 ) -> Result<(Option<Configuration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
     // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
-    // We currently don't support the `root` property, so we just search for the file like we do for biome.json
-    if let Some(auto_search_result) = fs.auto_search_file(&workspace_root, ".editorconfig") {
-        let AutoSearchResult { content, .. } = auto_search_result;
-        let editorconfig = biome_configuration::editorconfig::parse_str(&content)?;
-        Ok(editorconfig.to_biome())
+    // We currently don't support the `root` property, so we just search for the file like we do for biome.json.
+    // And we make some judge for the case when `biome.json` and `.editorconfig` both exists.
+    // If we found a `.editorconfig` directory higher than `biome.json`, we'll don't use it.
+    if let Some(auto_search_result) = fs.auto_search_files(&workspace_root, &[".editorconfig"]) {
+        let AutoSearchResult {
+            content,
+            directory_path,
+            ..
+        } = auto_search_result;
+        let editorconfig = parse_str(&content)?;
+        if let Some(config_path) = config_path {
+            // if `.edirotconfig` is higher than `biome.json`
+            if is_parent_of(directory_path, config_path) {
+                Ok((None, vec![]))
+            } else {
+                Ok(editorconfig.to_biome())
+            }
+        } else {
+            // If we don't find `biome.json`, we'll use `.editorconfig`
+            Ok(editorconfig.to_biome())
+        }
     } else {
         Ok((None, vec![]))
     }
@@ -555,18 +571,5 @@ mod test {
         let result = load_configuration(&fs, path_hint);
 
         assert!(result.is_err());
-    }
-
-    #[test]
-    fn should_print_a_warning_for_double_configuration() {
-        let mut fs = MemoryFileSystem::default();
-        fs.insert(Utf8PathBuf::from("config/biome.json"), "{}".to_string());
-        fs.insert(Utf8PathBuf::from("config/biome.jsonc"), "{}".to_string());
-        let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("config"));
-
-        let result = load_configuration(&fs, path_hint);
-        assert!(result.is_ok());
-        let result = result.unwrap();
-        assert!(result.double_configuration_found);
     }
 }

@@ -281,8 +281,7 @@ impl Configuration {
     pub fn use_editorconfig(&self) -> bool {
         self.formatter
             .as_ref()
-            .and_then(|f| f.use_editorconfig)
-            .is_some_and(|editorconfig| editorconfig.value())
+            .is_some_and(|c| c.use_editorconfig_resolved())
     }
 
     pub fn get_json_linter_configuration(&self) -> JsonLinterConfiguration {
@@ -502,8 +501,6 @@ pub struct ConfigurationPayload {
     pub configuration_file_path: Utf8PathBuf,
     /// The base path where the external configuration in a package should be resolved from
     pub external_resolution_base_path: Utf8PathBuf,
-    /// Whether `biome.json` and `biome.jsonc` were found in the same folder
-    pub double_configuration_found: bool,
 }
 
 #[derive(Debug, Default, PartialEq, Clone)]

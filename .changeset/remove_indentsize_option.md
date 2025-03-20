@@ -2,7 +2,7 @@
 "@biomejs/biome": major
 ---
 
-Remove `indentSize` deprecated option.
+Removed the deprecated `indentSize` option.
 
 The deprecated option `indentSize`, and its relative CLI options, has been removed:
 - Configuration file: `formatter.indentSize`

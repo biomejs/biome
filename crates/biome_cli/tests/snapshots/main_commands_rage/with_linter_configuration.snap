@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -66,10 +67,10 @@ Linter:
   GraphQL enabled:              unset
   Recommended:                  false
   Enabled rules:
+    complexity/noAdjacentSpacesInRegex
     complexity/noBannedTypes
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
-    complexity/noMultipleSpacesInRegularExpressionLiterals
     complexity/noStaticOnlyClass
     complexity/noThisInStatic
     complexity/noUselessCatch

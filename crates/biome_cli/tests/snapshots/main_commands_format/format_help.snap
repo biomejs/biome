@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
+snapshot_kind: text
 ---
 # Emitted Messages
 
@@ -32,7 +33,7 @@ Generic options applied to all files
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration.
-                              Default: `false`.
+                              Default: `true`.
 
 Formatting options specific to the JavaScript files
         --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its

@@ -404,8 +404,11 @@ We are very strict about `major` changes in the `@biomejs/biome` package. To bet
 
 The description of the changeset should follow the these guidelines:
 
-- Use the past tense, e.g. "Added new feature", "Fixed edge case".
-- If you fixed a bug, please add the link to the issue, e.g. "Fixed edge case [#4444]()".
+- Use the past tense when describing what you did, e.g. "Added new feature", "Fixed edge case".
+- Use the present tense when describing Biome behaviour, e.g. "Biome now supports ...".
+- If you fixed a bug, please add the link to the issue, e.g. "Fixed [#4444](https://github.com/biomejs/biome/issues/4444)".
+- If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated yet, the URL is pretty predictable...).
+- Similarly, if you reference an assist, please add the link to the assist on the website, e.g. "Added the assist [`awesomeAction`](https://biomejs.dev/assist/actions/awesome-action/)".
 - Whenever applicable, add a code block to show your new changes. For example, for a new
   rule you might want to show an invalid case, for the formatter you might want to show
   how the new formatting changes, and so on.
@@ -482,12 +485,12 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Yusuke Abe @chansuke](https://github.com/chansuke)
-- [Zheyu Zhang @ah-yu](https://github.com/ah-yu)
 - [zoomdong @fireairforce](https://github.com/fireairforce)
 
 ### Past Maintainers
 
 - [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev) (Core contributor)
-- [Jon Egeland @faultyserver](https://github.com/faultyserver)
+- [Jon Egeland @faultyserver](https://github.com/faultyserver) (Core contributor)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki) (Maintainer)
 - [Victor Teles @victor-teles](https://github.com/victor-teles) (Maintainer)
+- [Zheyu Zhang @ah-yu](https://github.com/ah-yu) (Core Contributor)

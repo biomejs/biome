@@ -53,7 +53,7 @@ define_categories! {
     "lint/complexity/noExcessiveNestedTestSuites": "https://biomejs.dev/linter/rules/no-excessive-nested-test-suites",
     "lint/complexity/noExtraBooleanCast": "https://biomejs.dev/linter/rules/no-extra-boolean-cast",
     "lint/complexity/noForEach": "https://biomejs.dev/linter/rules/no-for-each",
-    "lint/complexity/noMultipleSpacesInRegularExpressionLiterals": "https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals",
+    "lint/complexity/noAdjacentSpacesInRegex": "https://biomejs.dev/linter/rules/no-adjacent-spaces-in-regex",
     "lint/complexity/noStaticOnlyClass": "https://biomejs.dev/linter/rules/no-static-only-class",
     "lint/complexity/noThisInStatic": "https://biomejs.dev/linter/rules/no-this-in-static",
     "lint/complexity/noUselessCatch": "https://biomejs.dev/linter/rules/no-useless-catch",
