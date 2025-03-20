@@ -13,7 +13,7 @@ function{
 
 # Diagnostics
 ```
- at issue4567.js:3:24 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+issue4567.js:3:24 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: w
   

@@ -16,7 +16,7 @@ xpor function ueCanvasn(
 
 # Diagnostics
 ```
-issue4568.js:6:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue4568.js:6:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: c
   
@@ -34,5 +34,9 @@ issue4568.js:6:3 lint/correctness/useExhaustiveDependencies ━━━━━━�
       │                                  ^
     7 │ 
   
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    6 │ ··useEffect(·=>·{on·late·Point},[c
+      │                                  -
 
 ```
