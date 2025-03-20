@@ -13,7 +13,7 @@ function{
 
 # Diagnostics
 ```
-issue4567.js:3:24 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ at issue4567.js:3:24 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: w
   
@@ -31,5 +31,9 @@ issue4567.js:3:24 lint/correctness/useExhaustiveDependencies ━━━━━━�
       │                                                      ^
     4 │ 
   
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    3 │ ··const·[width,(dh]··=·useCallback(()·=>{·width)·},·[w
+      │                                                      -
 
 ```
