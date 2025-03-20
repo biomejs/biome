@@ -41,7 +41,7 @@ test2: do {
 
 # Diagnostics
 ```
-invalid.js:2:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unnecessary continue statement
   
@@ -62,7 +62,7 @@ invalid.js:2:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:6:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unnecessary continue statement
   
@@ -84,7 +84,7 @@ invalid.js:6:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:10:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unnecessary continue statement
   
@@ -106,7 +106,7 @@ invalid.js:10:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:16:3 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:3 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unnecessary continue statement
   
@@ -129,7 +129,7 @@ invalid.js:16:3 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:25:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unnecessary continue statement
   
@@ -151,7 +151,7 @@ invalid.js:25:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:28:35 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:35 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unnecessary continue statement
   
@@ -170,7 +170,7 @@ invalid.js:28:35 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.js:31:2 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unnecessary continue statement
   

@@ -1369,10 +1369,6 @@ export interface Correctness {
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
 	/**
-	 * Avoid using unnecessary continue.
-	 */
-	noUnnecessaryContinue?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow unreachable code
 	 */
 	noUnreachable?: RuleConfiguration_for_Null;
@@ -1408,6 +1404,10 @@ export interface Correctness {
 	 * Disallow unused variables.
 	 */
 	noUnusedVariables?: RuleFixConfiguration_for_NoUnusedVariablesOptions;
+	/**
+	 * Avoid using unnecessary continue.
+	 */
+	noUselessContinue?: RuleFixConfiguration_for_Null;
 	/**
 	 * This rules prevents void elements (AKA self-closing elements) from having children.
 	 */
@@ -1498,13 +1498,13 @@ export interface Nursery {
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
 	/**
+	 * No duplicated fields in GraphQL operations.
+	 */
+	noDuplicateFields?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate properties within declaration blocks.
 	 */
 	noDuplicateProperties?: RuleConfiguration_for_Null;
-	/**
-	 * No duplicated fields in GraphQL operations.
-	 */
-	noDuplicatedFields?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow accessing namespace imports dynamically.
 	 */
@@ -3271,7 +3271,7 @@ export type Category =
 	| "lint/correctness/noUnknownProperty"
 	| "lint/correctness/noUnknownUnit"
 	| "lint/correctness/noUnmatchableAnbSelector"
-	| "lint/correctness/noUnnecessaryContinue"
+	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noUnreachable"
 	| "lint/correctness/noUnreachableSuper"
 	| "lint/correctness/noUnsafeFinally"
@@ -3307,7 +3307,7 @@ export type Category =
 	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateProperties"
-	| "lint/nursery/noDuplicatedFields"
+	| "lint/nursery/noDuplicateFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
