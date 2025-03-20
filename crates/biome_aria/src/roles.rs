@@ -270,4 +270,17 @@ impl AriaRoles {
             },
         }
     }
+
+    /// Check if the element's implicit ARIA semantics have been removed.
+    /// See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/presentation_role
+    ///
+    /// Ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isPresentationRole.js
+    pub fn is_presentation_role(&self, element: &impl Element) -> bool {
+        if let Some(attribute) = element.find_attribute_by_name(|n| n == "role") {
+            if let Some(value) = attribute.value() {
+                return matches!(value.as_ref(), "presentation" | "none");
+            }
+        }
+        false
+    }
 }

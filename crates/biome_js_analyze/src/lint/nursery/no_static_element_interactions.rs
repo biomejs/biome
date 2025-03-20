@@ -1,3 +1,4 @@
+use crate::a11y::is_hidden_from_screen_reader;
 use crate::services::aria::Aria;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
@@ -91,11 +92,8 @@ impl Rule for NoStaticElementInteractions {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-        let element_name = element_name.text_trimmed();
 
-        // Check if the element is hidden from screen readers.
-        if is_hidden_from_screen_reader(node, element_name) {
+        if is_hidden_from_screen_reader(node) {
             return None;
         }
 
@@ -139,25 +137,4 @@ impl Rule for NoStaticElementInteractions {
             markup! {{"To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value."}}
         ))
     }
-}
-
-/**
- * Returns boolean indicating that the aria-hidden prop
- * is present or the value is true. Will also return true if
- * there is an input with type='hidden'.
- *
- * <div aria-hidden /> is equivalent to the DOM as <div aria-hidden=true />.
- * ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/src/util/isHiddenFromScreenReader.js
- */
-fn is_hidden_from_screen_reader(node: &AnyJsxElement, element_name: &str) -> bool {
-    node.find_attribute_by_name("aria-hidden")
-        .is_some_and(|attr| {
-            attr.as_static_value()
-                .is_none_or(|val| val.text() == "true")
-        })// <div aria-hidden />
-        || (element_name == "input"
-            && node.find_attribute_by_name("type").is_some_and(|attr| {
-                attr.as_static_value()
-                    .is_some_and(|val| val.text() == "hidden")
-            })) // <input type="hidden" />
 }
