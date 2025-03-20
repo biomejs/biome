@@ -117,13 +117,13 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
                 fmt.write_str(name)?;
             } else {
                 let path_name = Path::new(name);
-                if path_name.is_absolute() {
+                if is_jetbrains {
+                    fmt.write_str(&format!(" at {name}"))?;
+                } else if path_name.is_absolute() {
                     let link = format!("file://{name}");
                     fmt.write_markup(markup! {
                         <Hyperlink href={link}>{name}</Hyperlink>
                     })?;
-                } else if is_jetbrains {
-                    fmt.write_str(&format!(" at {name}"))?;
                 } else if cfg!(debug_assertions) && cfg!(windows) {
                     fmt.write_str(name.replace('\\', "/").as_str())?;
                 } else {
@@ -675,7 +675,7 @@ impl<W: fmt::Write + ?Sized> fmt::Write for IndentWriter<'_, W> {
 
 /// Tests whether the name of the terminal emulator matches the given `name`.
 fn is_terminal_program(name: &str) -> bool {
-    if cfg!(debug_assertions) {
+    if cfg!(test) {
         false
     } else {
         // https://github.com/JetBrains/jediterm/issues/253#issuecomment-1280492436
