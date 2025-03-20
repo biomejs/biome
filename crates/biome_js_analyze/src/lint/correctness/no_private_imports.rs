@@ -43,8 +43,6 @@ declare_lint_rule! {
     ///   files. Imports for resources such as images or CSS files are exempted
     ///   regardless of the default visibility setting.
     ///
-    /// Source: https://github.com/uhyo/eslint-plugin-import-access
-    ///
     /// ## Examples
     ///
     /// ### Invalid
