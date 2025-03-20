@@ -37,7 +37,7 @@ query test {
 
 # Diagnostics
 ```
-invalid.graphql:1:36 lint/nursery/noDuplicatedFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:1:36 lint/nursery/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Variable `v` defined multiple times.
   
@@ -52,7 +52,7 @@ invalid.graphql:1:36 lint/nursery/noDuplicatedFields ━━━━━━━━━
 ```
 
 ```
-invalid.graphql:6:48 lint/nursery/noDuplicatedFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:6:48 lint/nursery/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Argument `first` defined multiple times.
   
@@ -68,7 +68,7 @@ invalid.graphql:6:48 lint/nursery/noDuplicatedFields ━━━━━━━━━
 ```
 
 ```
-invalid.graphql:16:5 lint/nursery/noDuplicatedFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:16:5 lint/nursery/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Field `name` defined multiple times.
   
@@ -85,7 +85,7 @@ invalid.graphql:16:5 lint/nursery/noDuplicatedFields ━━━━━━━━━
 ```
 
 ```
-invalid.graphql:25:5 lint/nursery/noDuplicatedFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:25:5 lint/nursery/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Field `email` defined multiple times.
   

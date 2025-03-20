@@ -675,7 +675,7 @@ impl<W: fmt::Write + ?Sized> fmt::Write for IndentWriter<'_, W> {
 
 /// Tests whether the name of the terminal emulator matches the given `name`.
 fn is_terminal_program(name: &str) -> bool {
-    if cfg!(test) {
+    if cfg!(debug_assertions) {
         false
     } else {
         // https://github.com/JetBrains/jediterm/issues/253#issuecomment-1280492436
