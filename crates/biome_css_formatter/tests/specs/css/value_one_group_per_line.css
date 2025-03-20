@@ -1,0 +1,31 @@
+body {
+	background:
+		url("image.jpg") no-repeat center center,
+		rgba(0, 0, 0, 0.5);
+	--my-background: url("image.jpg") no-repeat center center, rgba(0, 0, 0, 0.5);
+	background: url("image.jpg") no-repeat center center;
+    unicode-range: U+0025-00FF, U+4??;
+
+	font-family: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+		Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
+		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+	transition:
+		color 0.15s ease-in-out,
+		background-color 0.15s ease-in-out,
+		border-color 0.15s ease-in-out,
+		box-shadow 0.15s ease-in-out;
+
+	box-shadow:
+		0 0 0 1px #fff,
+		0 0 0 3.2px rgba(89, 89, 235, 0.25);
+}
+
+* {
+	box-shadow:
+		0 0 0 1px #fff,
+		0 0 0 3.2px rgba(89, 89, 235, 0.25),
+		0 0 0 3.2px rgba(89, 89, 235, 0.25),
+		0 0 0 3.2px red,
+		0 0 0 3.2px rgba(89, 89, 235, 0.25);
+}
