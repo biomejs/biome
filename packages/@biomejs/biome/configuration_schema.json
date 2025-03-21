@@ -2450,7 +2450,7 @@
 			"type": "object",
 			"properties": {
 				"defaultVisibility": {
-					"description": "The default visibility to assume for symbols without annotation.\n\nDefault: **public**.",
+					"description": "The default visibility to assume for symbols without visibility tag.\n\nDefault: **public**.",
 					"default": "public",
 					"allOf": [{ "$ref": "#/definitions/Visibility" }]
 				}

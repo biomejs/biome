@@ -15,6 +15,8 @@ use schemars::JsonSchema;
 
 use crate::services::dependency_graph::ResolvedImports;
 
+const INDEX_BASENAMES: &[&str] = &["index", "mod"];
+
 declare_lint_rule! {
     /// Restricts imports of private exports.
     ///
@@ -24,21 +26,64 @@ declare_lint_rule! {
     /// this makes it hard to enforce module boundaries, or to prevent importing
     /// things that were only exported for test purposes, for instance.
     ///
-    /// This rule recognizes the JSDoc annotations `@public`, `@package`, and
+    /// This rule recognizes the JSDoc tags `@public`, `@package`, and
     /// `@private` so that you are free to set the visibility of exports.
-    /// Exports without annotation have a default visibility of **public**, but
-    /// this can be configured.
+    /// Exports without tag have a default visibility of **public**, but  this
+    /// can be configured.
     ///
-    /// By enabling this rule, all exported symbols, such as types, functions
-    /// or other things that may be exported, are considered to be "package
-    /// private". This means that modules that reside in the same directory, as
-    /// well as submodules of those "sibling" modules, are allowed to import
-    /// them, while any other modules that are further away in the file system
-    /// are restricted from importing them. A symbol's visibility may be
-    /// extended by re-exporting from an index file.
+    /// The `@access` tag is also supported if it's used with one of the values
+    /// `public`, `package`, or `private`.
     ///
-    /// Notes:
+    /// ## Public visibility
     ///
+    /// Public visibility is the default and means there are no restrictions for
+    /// importing a given symbol. In other words, without this rule, all
+    /// exported symbols are implicitly public.
+    ///
+    /// ## Package visibility
+    ///
+    /// Within the context of this rule, _package visibility_ means that a
+    /// symbol is visible within the same "package", which means that any module
+    /// that resides in the same folder, or one of its subfolders, is allowed to
+    /// import the symbol. Modules that only share a common folder higher up in
+    /// the hierarchy are not allowed to import the symbol.
+    ///
+    /// For a visual explanation, see
+    /// [this illustration](https://github.com/uhyo/eslint-plugin-import-access?tab=readme-ov-file#what).
+    ///
+    /// ## Private visibility
+    ///
+    /// Private visibility means that a symbol may not be imported. This may
+    /// sound backwards: Why export a symbol at all if you intend for it to be
+    /// private?
+    ///
+    /// But to understand the usefulness of `@private`, we should consider that
+    /// this rule doesn't treat modules and files as one and the same thing.
+    /// While files are indeed modules, folders are considered modules too, with
+    /// their files and subfolders being submodules. Therefore, symbols exported
+    /// as `@private` from an index file, such as `index.js`, can _still_ be
+    /// imported from other submodules in that same module.
+    ///
+    /// :::note
+    /// For the sake of compatibility with conventions used with Deno, modules
+    /// named `mod.js`/`mod.ts` are considered index files too.
+    /// :::
+    ///
+    /// Another reason why private visibility may still be useful is that it
+    /// allows you to choose specific exceptions. For example, using
+    /// [overrides](https://biomejs.dev/reference/configuration/#overrides), you
+    /// may want to disable this rule in all files with a `.test.js` extension.
+    /// This way, symbols marked private cannot be imported from anywhere except
+    /// test files.
+    ///
+    /// ## Known Limitations
+    ///
+    /// * This rule currently only looks at the JSDoc comments that are attached
+    ///   to the _`export` statement_ nearest to the symbol's definition. If the
+    ///   symbol isn't exported in the same statement as in which it is defined,
+    ///   the visibility as specified in `export` statement is used, not that of
+    ///   the symbol definition. Re-exports cannot override the visibility from
+    ///   the original `export`.
     /// * This rule only applies to imports for JavaScript and TypeScript
     ///   files. Imports for resources such as images or CSS files are exempted
     ///   regardless of the default visibility setting.
@@ -96,7 +141,6 @@ declare_lint_rule! {
     /// // import from the index file of a parent module:
     /// import { subPrivateVariable } from "../index.js";
     /// ```
-    ///
     pub NoPrivateImports {
         version: "next",
         name: "noPrivateImports",
@@ -113,7 +157,7 @@ declare_lint_rule! {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoPrivateImportsOptions {
-    /// The default visibility to assume for symbols without annotation.
+    /// The default visibility to assume for symbols without visibility tag.
     ///
     /// Default: **public**.
     pub default_visibility: Visibility,
@@ -251,12 +295,17 @@ struct GetRestrictedImportOptions<'a> {
     /// Dependency data of the target module we're importing from.
     target_data: ModuleDependencyData,
 
-    /// The visibility to assume for symbols without explicit visibility
-    /// annotation.
+    /// The visibility to assume for symbols without explicit visibility tag.
     default_visibility: Visibility,
 }
 
 impl GetRestrictedImportOptions<'_> {
+    /// Returns whether [Self::target_path] is within the same module as
+    /// [Self::self_path].
+    fn target_path_is_in_same_module(&self) -> bool {
+        target_path_is_in_same_module_as_self_path(self.target_path, self.self_path)
+    }
+
     /// Returns whether [Self::target_path] is within the same package as
     /// [Self::self_path].
     fn target_path_is_in_same_package(&self) -> bool {
@@ -368,7 +417,7 @@ fn get_restricted_import_visibility(
 
     let is_restricted = match visibility {
         Visibility::Public => false,
-        Visibility::Private => true,
+        Visibility::Private => !options.target_path_is_in_same_module(),
         Visibility::Package => !options.target_path_is_in_same_package(),
     };
 
@@ -387,13 +436,41 @@ fn parse_visibility(jsdoc_comment: &str) -> Option<Visibility> {
     })
 }
 
+/// Returns whether `target_path` is within the same module as `self_path`.
+#[inline]
+fn target_path_is_in_same_module_as_self_path(
+    target_path: &Utf8Path,
+    self_path: &Utf8Path,
+) -> bool {
+    if !target_path
+        .file_stem()
+        .is_some_and(|stem| INDEX_BASENAMES.contains(&stem))
+    {
+        return false;
+    }
+
+    let Some(target_parent) = target_path.parent() else {
+        // If we cannot navigate further up from the target path, it means the
+        // target is in the root, which means everything else is in the same
+        // module as it.
+        return true;
+    };
+
+    self_path
+        .ancestors()
+        .any(|ancestor| ancestor == target_parent)
+}
+
 /// Returns whether `target_path` is within the same package as `self_path`.
 #[inline]
 fn target_path_is_in_same_package_as_self_path(
     target_path: &Utf8Path,
     self_path: &Utf8Path,
 ) -> bool {
-    let target_path = if target_path.file_stem().is_some_and(|stem| stem == "index") {
+    let target_path = if target_path
+        .file_stem()
+        .is_some_and(|stem| INDEX_BASENAMES.contains(&stem))
+    {
         target_path.parent().unwrap_or(Utf8Path::new("."))
     } else {
         target_path
@@ -416,7 +493,76 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_target_path_is_in_same_module_as_self_path() {
+        assert!(target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("index.js"),
+            Utf8Path::new("self.js")
+        ));
+        assert!(target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("index.js"),
+            Utf8Path::new("nested/self.js")
+        ));
+        assert!(target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("./index.js"),
+            Utf8Path::new("./nested/self.js")
+        ));
+        assert!(target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("./nested/index.js"),
+            Utf8Path::new("./nested/nested/self.js")
+        ));
+
+        assert!(!target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("target.js"),
+            Utf8Path::new("self.js")
+        ));
+        assert!(!target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("target.js"),
+            Utf8Path::new("nested/self.js")
+        ));
+        assert!(!target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("./target.js"),
+            Utf8Path::new("./nested/self.js")
+        ));
+        assert!(!target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("target/index.js"),
+            Utf8Path::new("self.js")
+        ));
+        assert!(!target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("target/index.js"),
+            Utf8Path::new("nested/self.js")
+        ));
+        assert!(!target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("target/private.js"),
+            Utf8Path::new("self.js")
+        ));
+        assert!(!target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("target/private.js"),
+            Utf8Path::new("nested/self.js")
+        ));
+        assert!(!target_path_is_in_same_module_as_self_path(
+            Utf8Path::new("./target/private.js"),
+            Utf8Path::new("./self.js")
+        ));
+    }
+
+    #[test]
     fn test_target_path_is_in_same_package_as_self_path() {
+        assert!(target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("index.js"),
+            Utf8Path::new("self.js")
+        ));
+        assert!(target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("index.js"),
+            Utf8Path::new("nested/self.js")
+        ));
+        assert!(target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("./index.js"),
+            Utf8Path::new("./nested/self.js")
+        ));
+        assert!(target_path_is_in_same_package_as_self_path(
+            Utf8Path::new("./nested/index.js"),
+            Utf8Path::new("./nested/nested/self.js")
+        ));
         assert!(target_path_is_in_same_package_as_self_path(
             Utf8Path::new("target.js"),
             Utf8Path::new("self.js")

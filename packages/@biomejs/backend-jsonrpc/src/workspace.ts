@@ -2788,7 +2788,7 @@ export interface NoForEachOptions {
  */
 export interface NoPrivateImportsOptions {
 	/**
-	* The default visibility to assume for symbols without annotation.
+	* The default visibility to assume for symbols without visibility tag.
 
 Default: **public**. 
 	 */
