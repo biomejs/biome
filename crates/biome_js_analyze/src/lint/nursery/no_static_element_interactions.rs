@@ -43,6 +43,11 @@ declare_lint_rule! {
     /// </>
     /// ```
     ///
+    /// Custom components are not checked.
+    /// ```jsx
+    /// <TestComponent onClick={doFoo} />
+    /// ```
+    ///
     pub NoStaticElementInteractions {
         version: "1.9.0",
         name: "noStaticElementInteractions",
