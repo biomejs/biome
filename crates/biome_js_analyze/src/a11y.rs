@@ -8,18 +8,21 @@ use biome_js_syntax::jsx_ext::AnyJsxElement;
 /// - https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isHiddenFromScreenReader.js
 pub(crate) fn is_hidden_from_screen_reader(element: &AnyJsxElement) -> bool {
     let is_aria_hidden = element.has_truthy_attribute("aria-hidden");
-    let name = element.name_value_token().ok();
-    if let Some(name) = name {
-        if name.text_trimmed() == "input" {
+    if is_aria_hidden {
+        return true;
+    }
+
+    match element.name_value_token().ok() {
+        Some(name) if name.text_trimmed() == "input" => {
             let is_input_hidden = element
                 .find_attribute_by_name("type")
                 .and_then(|attribute| attribute.as_static_value())
                 .and_then(|value| value.as_string_constant().map(|value| value == "hidden"))
                 .unwrap_or_default();
-            return is_aria_hidden || is_input_hidden;
+            is_input_hidden
         }
+        _ => false,
     }
-    false
 }
 
 /// Check if the element is `contentEditable`
