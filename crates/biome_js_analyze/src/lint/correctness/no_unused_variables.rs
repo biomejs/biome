@@ -75,12 +75,6 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// export function foo(myVar) {
-    ///     console.log('foo');
-    /// }
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
     /// function foo() {
     ///     foo();
     /// }
