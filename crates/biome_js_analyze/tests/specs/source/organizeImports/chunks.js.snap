@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: chunks.js
+---
+# Input
+```js
+// Header file comment to keep at the top
+import { D } from "d";
+import { B } from "b";
+
+// Detached comment (Start of Chunk 2)
+
+// Attached C
+import { C } from "c";
+
+// Attached A
+import { A3, A1, A2 } from "a" with { "k2": "", "k1": "" };
+
+// Attached E
+import { E } from "e";
+
+// Detached comment (Start of Chunk 3)
+
+import { D } from "d";
+
+import { G } from "g";
+
+```
+
+# Actions
+```diff
+@@ -1,14 +1,15 @@
+ // Header file comment to keep at the top
+-import { D } from "d";
++
+ import { B } from "b";
++import { D } from "d";
+ 
+ // Detached comment (Start of Chunk 2)
+ 
+-// Attached C
+-import { C } from "c";
+ 
+ // Attached A
+-import { A3, A1, A2 } from "a" with { "k2": "", "k1": "" };
++import { A1, A2, A3 } from "a" with { "k1": "", "k2": "" };
++// Attached C
++import { C } from "c";
+ 
+ // Attached E
+ import { E } from "e";
+
+```

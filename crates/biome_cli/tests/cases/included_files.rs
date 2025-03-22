@@ -13,8 +13,6 @@ const FIX_AFTER: &str = "(1 >= 0)";
 
 const UNORGANIZED: &str = r#"import * as something from "../something";
 import { lorem, foom, bar } from "foo";"#;
-const ORGANIZED: &str = r#"import { bar, foom, lorem } from "foo";
-import * as something from "../something";"#;
 
 #[test]
 fn does_handle_only_included_files() {
@@ -198,10 +196,6 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, test2, ORGANIZED);
-
-    assert_file_contents(&fs, test, UNORGANIZED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

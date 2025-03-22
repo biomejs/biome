@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: one-liner.js
+---
+# Input
+```js
+import { B } from "b"; import { A } from "a"; function f() {}
+```
+
+# Actions
+```diff
+@@ -1 +1,2 @@
+-import { B } from "b"; import { A } from "a"; function f() {}
+\ No newline at end of file
++import { A } from "a"; 
++import { B } from "b"; function f() {}
+\ No newline at end of file
+
+```

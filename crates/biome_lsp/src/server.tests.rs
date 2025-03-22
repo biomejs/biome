@@ -1929,23 +1929,10 @@ if(a === -0) {}
                     },
                     end: Position {
                         line: 2,
-                        character: 13,
+                        character: 15,
                     },
                 },
                 new_text: String::from("z"),
-            },
-            TextEdit {
-                range: Range {
-                    start: Position {
-                        line: 2,
-                        character: 14,
-                    },
-                    end: Position {
-                        line: 2,
-                        character: 16,
-                    },
-                },
-                new_text: String::new(),
             },
             TextEdit {
                 range: Range {

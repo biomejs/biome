@@ -1,0 +1,7 @@
+import { test as testBun } from "bun:test"
+import { test as testNode } from "node:test"
+import { test as testNode } from "@scopeX/special/subpath"
+import { test as testNode } from "@scopeX/special"
+import { test as testNode } from "@scopeX/lib"
+import { test as testNode } from "@scopeA/lib"
+import { test as testNode } from "@scopeB/lib"
