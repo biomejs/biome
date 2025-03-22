@@ -1,4 +1,7 @@
-use crate::services::aria::Aria;
+use crate::{
+    a11y::{is_content_editable, is_hidden_from_screen_reader},
+    services::aria::Aria,
+};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -96,8 +99,8 @@ impl Rule for NoNoninteractiveElementInteractions {
 
         if !has_handler_props(element)
             || is_content_editable(element)
-            || has_presentation_role(element)
-            || is_hidden_from_screen_reader(element)?
+            || aria_roles.is_presentation_role(element)
+            || is_hidden_from_screen_reader(element)
             || has_interactive_role
         {
             return None;
@@ -162,54 +165,4 @@ fn has_handler_props(element: &AnyJsxElement) -> bool {
     INTERACTIVE_HANDLERS
         .iter()
         .any(|handler| element.find_attribute_by_name(handler).is_some())
-}
-
-/// Check if the element's implicit ARIA semantics have been removed.
-/// See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/presentation_role
-///
-/// Ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isPresentationRole.js
-fn has_presentation_role(element: &AnyJsxElement) -> bool {
-    if let Some(attribute) = element.find_attribute_by_name("role") {
-        let value = attribute.as_static_value();
-        if let Some(value) = value {
-            return matches!(value.as_string_constant(), Some("presentation" | "none"));
-        }
-    }
-    false
-}
-
-/// Check the element is hidden from screen reader.
-/// See
-/// - https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden
-/// - https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/hidden
-///
-/// Ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isHiddenFromScreenReader.js
-fn is_hidden_from_screen_reader(element_name: &AnyJsxElement) -> Option<bool> {
-    let is_aria_hidden = element_name.has_truthy_attribute("aria-hidden");
-
-    let name = element_name.name_value_token().ok()?;
-
-    let is_input_hidden = if name.text_trimmed() == "input" {
-        element_name
-            .find_attribute_by_name("type")
-            .and_then(|attribute| attribute.as_static_value())
-            .and_then(|value| value.as_string_constant().map(|value| value == "hidden"))
-            .unwrap_or_default()
-    } else {
-        false
-    };
-
-    Some(is_aria_hidden || is_input_hidden)
-}
-
-/// Check if the element is `contentEditable`
-/// See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable
-///
-/// Ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isContentEditable.js
-fn is_content_editable(element: &AnyJsxElement) -> bool {
-    element
-        .find_attribute_by_name("contentEditable")
-        .and_then(|attribute| attribute.as_static_value())
-        .and_then(|value| value.as_string_constant().map(|value| value == "true"))
-        .unwrap_or_default()
 }
