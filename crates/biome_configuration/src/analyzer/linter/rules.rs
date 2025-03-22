@@ -2042,7 +2042,7 @@ pub struct Correctness {
     #[doc = "Enforce all dependencies are correctly specified in a React hook."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_exhaustive_dependencies:
-        Option<RuleConfiguration<biome_js_analyze::options::UseExhaustiveDependencies>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseExhaustiveDependencies>>,
     #[doc = "Enforce that all React hooks are being called from the Top Level component functions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_hook_at_top_level:

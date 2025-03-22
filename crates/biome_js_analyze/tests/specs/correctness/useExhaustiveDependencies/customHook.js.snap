@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: customHook.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -26,7 +25,7 @@ function MyComponent() {
 
 # Diagnostics
 ```
-customHook.js:5:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This hook does not specify all of its dependencies: a
   
@@ -48,11 +47,15 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    7 │ ····},·[a]);
+      │         +   
 
 ```
 
 ```
-customHook.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+customHook.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This hook does not specify all of its dependencies: a
   
@@ -73,5 +76,9 @@ customHook.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    11 │ ····},·[a]);
+       │         +   
 
 ```
