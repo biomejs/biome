@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
 info: css/atrule/font_face.css
 ---
 # Input
@@ -114,33 +115,39 @@ Quote style: Double Quotes
 ```css
 @font-face {
 	font-family: "Open Sans";
-	src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+	src:
+		url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
 		url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
 	font-family: "Open Sans";
-	src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+	src:
+		url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
 		url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
 	font-family: "Open Sans";
-	src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+	src:
+		url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
 		url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
 	font-family: "Open Sans";
-	src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+	src:
+		url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
 		url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
 	font-family: "Open Sans";
-	src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+	src:
+		url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
 		url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 @font-face {
 	font-family: "Open Sans";
 
-	src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+	src:
+		url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
 		url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
 }
 ```
