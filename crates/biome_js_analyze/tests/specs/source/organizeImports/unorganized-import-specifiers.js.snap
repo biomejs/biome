@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unorganized-import-specifiers.js
+---
+# Input
+```js
+import D, { B, A } from "a";
+import { Y, X } from "x";
+
+```
+
+# Actions
+```diff
+@@ -1,2 +1,2 @@
+-import D, { B, A } from "a";
+-import { Y, X } from "x";
++import D, { A, B } from "a";
++import { X, Y } from "x";
+
+```

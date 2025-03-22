@@ -6,7 +6,7 @@ import type {
 	ProjectKey,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
-import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
+import { Distribution, loadModule, type WasmModule, wrapError } from "./wasm";
 
 // Re-export of some useful types for users
 export type { Diagnostic, Configuration };

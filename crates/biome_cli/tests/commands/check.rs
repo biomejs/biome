@@ -1653,9 +1653,6 @@ fn applies_organize_imports_from_cli() {
     let content = r#"import * as something from "../something";
 import { lorem, foom, bar } from "foo";
 "#;
-    let expected = r#"import { bar, foom, lorem } from "foo";
-import * as something from "../something";
-"#;
 
     fs.insert(file_path.into(), content.as_bytes());
 
@@ -1676,8 +1673,6 @@ import * as something from "../something";
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, file_path, expected);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1845,20 +1840,6 @@ fn check_stdin_write_unsafe_only_organize_imports() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(
-        content,
-        "import _ from 'lodash'; import zod from 'zod'; function f() {return{}} class Foo {}"
-    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

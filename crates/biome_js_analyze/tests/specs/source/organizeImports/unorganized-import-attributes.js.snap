@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unorganized-import-attributes.js
+---
+# Input
+```js
+import { A, B } from "" with { "k2": "", "k1": "" };
+
+```
+
+# Actions
+```diff
+@@ -1 +1 @@
+-import { A, B } from "" with { "k2": "", "k1": "" };
++import { A, B } from "" with { "k1": "", "k2": "" };
+
+```
