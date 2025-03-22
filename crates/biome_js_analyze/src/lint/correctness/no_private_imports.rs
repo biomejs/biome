@@ -53,11 +53,10 @@ declare_lint_rule! {
     ///
     /// ## Private visibility
     ///
-    /// Private visibility means that a symbol may not be imported. This may
-    /// sound backwards: Why export a symbol at all if you intend for it to be
-    /// private?
+    /// Private visibility means that a symbol may not be imported from other
+    /// modules.
     ///
-    /// But to understand the usefulness of `@private`, we should consider that
+    /// The key thing to understanding the usefulness of `@private` is that
     /// this rule doesn't treat modules and files as one and the same thing.
     /// While files are indeed modules, folders are considered modules too, with
     /// their files and subfolders being submodules. Therefore, symbols exported
@@ -73,18 +72,18 @@ declare_lint_rule! {
     /// allows you to choose specific exceptions. For example, using
     /// [overrides](https://biomejs.dev/reference/configuration/#overrides), you
     /// may want to disable this rule in all files with a `.test.js` extension.
-    /// This way, symbols marked private cannot be imported from anywhere except
-    /// test files.
+    /// This way, symbols marked private cannot be imported from outside
+    /// modules, with the exception of test files.
     ///
     /// ## Known Limitations
     ///
     /// * This rule currently only looks at the JSDoc comments that are attached
     ///   to the _`export` statement_ nearest to the symbol's definition. If the
     ///   symbol isn't exported in the same statement as in which it is defined,
-    ///   the visibility as specified in `export` statement is used, not that of
-    ///   the symbol definition. Re-exports cannot override the visibility from
-    ///   the original `export`.
-    /// * This rule only applies to imports for JavaScript and TypeScript
+    ///   the visibility as specified in the `export` statement is used, not
+    ///   that of the symbol definition. Re-exports cannot (currently) override
+    ///   the visibility from the original `export`.
+    /// * This rule only applies to imports from JavaScript and TypeScript
     ///   files. Imports for resources such as images or CSS files are exempted
     ///   regardless of the default visibility setting.
     ///
