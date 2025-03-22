@@ -1,23 +1,30 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_html_syntax::HtmlRoot;
+use biome_html_syntax::{HtmlRoot, HtmlRootFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlRoot;
 impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
     fn fmt_fields(&self, node: &HtmlRoot, f: &mut HtmlFormatter) -> FormatResult<()> {
-        if let Some(bom) = node.bom_token() {
-            bom.format().fmt(f)?;
-        }
-        if let Some(directive) = node.directive() {
-            directive.format().fmt(f)?;
-        }
+        let HtmlRootFields {
+            bom_token,
+            directive,
+            html,
+            eof_token,
+        } = node.as_fields();
 
-        node.html().format().fmt(f)?;
+        dbg!(node.syntax().text_with_trivia());
+        dbg!(eof_token.as_ref()?.leading_trivia());
 
-        if let Ok(eof) = node.eof_token() {
-            eof.format().fmt(f)?;
-        }
-        write!(f, [hard_line_break()])?;
+        write!(
+            f,
+            [
+                bom_token.format(),
+                directive.format(),
+                html.format(),
+                hard_line_break(),
+                format_removed(&eof_token?),
+            ]
+        )?;
 
         Ok(())
     }
