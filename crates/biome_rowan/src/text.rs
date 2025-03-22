@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 
@@ -11,6 +12,12 @@ pub enum Text {
     Borrowed(TokenText),
     Owned(String),
     Static(&'static str),
+}
+
+impl Borrow<str> for Text {
+    fn borrow(&self) -> &str {
+        self.text()
+    }
 }
 
 impl Default for Text {

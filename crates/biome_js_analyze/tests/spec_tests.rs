@@ -135,6 +135,7 @@ pub(crate) fn analyze_and_snap(
     //        trigger a leak panic...
     let dependency_graph = if input_file.components().any(|component| {
         component == Utf8Component::Normal("noImportCycles")
+            || component == Utf8Component::Normal("noPrivateImports")
             || component == Utf8Component::Normal("useImportExtensions")
     }) {
         dependency_graph_for_test_file(input_file, &project_layout)
@@ -222,10 +223,10 @@ pub(crate) fn analyze_and_snap(
     //        for all tests, since it would cause many incorrect replacements.
     //        Maybe there's a regular expression that could work, but it feels
     //        flimsy too...
-    if input_file
-        .components()
-        .any(|component| component == Utf8Component::Normal("noImportCycles"))
-    {
+    if input_file.components().any(|component| {
+        component == Utf8Component::Normal("noImportCycles")
+            || component == Utf8Component::Normal("noPrivateImports")
+    }) {
         // Normalize Windows paths.
         *snapshot = snapshot.replace('\\', "/");
     }
