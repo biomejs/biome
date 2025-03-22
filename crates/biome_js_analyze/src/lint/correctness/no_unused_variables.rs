@@ -4,9 +4,7 @@ use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
-use biome_js_syntax::binding_ext::{
-    AnyJsBindingDeclaration, AnyJsIdentifierBinding, AnyJsParameterParentFunction,
-};
+use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
     AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
@@ -74,12 +72,6 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// function foo() {}
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// export function foo(myVar) {
-    ///     console.log('foo');
-    /// }
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -163,31 +155,6 @@ pub enum SuggestedFix {
     PrefixUnderscore,
 }
 
-fn is_function_that_is_ok_parameter_not_be_used(
-    parent_function: &Option<AnyJsParameterParentFunction>,
-) -> bool {
-    matches!(
-        parent_function,
-        Some(
-            // bindings in signatures are ok to not be used
-            AnyJsParameterParentFunction::TsMethodSignatureClassMember(_)
-            | AnyJsParameterParentFunction::TsCallSignatureTypeMember(_)
-            | AnyJsParameterParentFunction::TsConstructSignatureTypeMember(_)
-            | AnyJsParameterParentFunction::TsConstructorSignatureClassMember(_)
-            | AnyJsParameterParentFunction::TsMethodSignatureTypeMember(_)
-            | AnyJsParameterParentFunction::TsSetterSignatureClassMember(_)
-            | AnyJsParameterParentFunction::TsSetterSignatureTypeMember(_)
-            | AnyJsParameterParentFunction::TsIndexSignatureClassMember(_)
-            // bindings in function types are ok to not be used
-            | AnyJsParameterParentFunction::TsFunctionType(_)
-            | AnyJsParameterParentFunction::TsConstructorType(_)
-            // binding in declare are ok to not be used
-            | AnyJsParameterParentFunction::TsDeclareFunctionDeclaration(_)
-            | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
-        )
-    )
-}
-
 /// Returns `true` if the binding is part of an object pattern with a rest element as a sibling
 fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
     if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
@@ -241,20 +208,7 @@ fn suggested_fix_if_unused(
             suggestion_for_binding(binding)
         }
         AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
-        AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
-            if is_function_that_is_ok_parameter_not_be_used(&parameter.parent_function()) {
-                None
-            } else {
-                suggestion_for_binding(binding)
-            }
-        }
-        AnyJsBindingDeclaration::JsRestParameter(parameter) => {
-            if is_function_that_is_ok_parameter_not_be_used(&parameter.parent_function()) {
-                None
-            } else {
-                suggestion_for_binding(binding)
-            }
-        }
+
         // declarations need to be check if they are under `declare`
         AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
         | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
@@ -322,6 +276,8 @@ fn suggested_fix_if_unused(
         | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
         | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsFormalParameter(_)
+        | AnyJsBindingDeclaration::JsRestParameter(_)
         | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
             None
         }
@@ -429,21 +385,21 @@ impl Rule for NoUnusedVariables {
                         return is_unused;
                     }
                     match ancestor.kind() {
-                            JsSyntaxKind::JS_FUNCTION_BODY => {
-                                // reset because we are inside a function
-                                is_unused = true;
-                            }
-                            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
-                            | JsSyntaxKind::JS_CALL_EXPRESSION
-                            | JsSyntaxKind::JS_NEW_EXPRESSION
-                            // These can call a getter
-                            | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
-                            | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
-                                // The ref can be leaked or code can be executed
-                                is_unused = false;
-                            }
-                            _ => {}
+                        JsSyntaxKind::JS_FUNCTION_BODY => {
+                            // reset because we are inside a function
+                            is_unused = true;
                         }
+                        JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                        | JsSyntaxKind::JS_CALL_EXPRESSION
+                        | JsSyntaxKind::JS_NEW_EXPRESSION
+                        // These can call a getter
+                        | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+                        | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
+                            // The ref can be leaked or code can be executed
+                            is_unused = false;
+                        }
+                        _ => {}
+                    }
                 }
                 // Always false when the ref is outside the declaration
                 false
@@ -519,7 +475,7 @@ impl Rule for NoUnusedVariables {
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
-                    .to_owned(),
+                        .to_owned(),
                     mutation,
                 ))
             }

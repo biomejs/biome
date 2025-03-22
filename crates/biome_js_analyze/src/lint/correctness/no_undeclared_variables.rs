@@ -14,7 +14,7 @@ declare_lint_rule! {
     ///
     /// If you need to allow-list some global bindings, you can use the [`javascript.globals`](/reference/configuration/#javascriptglobals) configuration.
     ///
-    /// ## Options (Since v2.0.0)
+    /// ## Options
     ///
     /// The rule provides a `checkTypes` option that make the rule checks undeclared types.
     /// The option defaults to `true`.

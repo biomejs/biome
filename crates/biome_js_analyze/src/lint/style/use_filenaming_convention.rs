@@ -97,7 +97,7 @@ declare_lint_rule! {
     ///
     /// Default: `true`
     ///
-    /// ### match (Since v2.0.0)
+    /// ### match
     ///
     /// `match` defines a regular expression that the filename must match.
     /// If the regex has capturing groups, then the first capture is considered as the filename
