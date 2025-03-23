@@ -5075,7 +5075,7 @@
 			"properties": {
 				"checkTypes": {
 					"description": "Check undeclared types.",
-					"default": true,
+					"default": false,
 					"type": "boolean"
 				}
 			}

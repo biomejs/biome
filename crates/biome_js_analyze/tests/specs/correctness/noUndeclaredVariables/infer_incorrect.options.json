@@ -3,9 +3,9 @@
         "rules": {
             "correctness": {
                 "noUndeclaredVariables": {
-                    "level": "error",
+                    "level": "on",
                     "options": {
-                        "checkTypes": false
+                        "checkTypes": true
                     }
                 }
             }
