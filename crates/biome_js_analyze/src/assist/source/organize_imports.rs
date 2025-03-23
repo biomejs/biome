@@ -277,7 +277,7 @@ declare_source_rule! {
     ///                     "options": {
     ///                         "groups": [
     ///                             ":URL:",
-    ///                             ":NODE:",
+    ///                             ":NODE:"
     ///                         ]
     ///                     }
     ///                 }
