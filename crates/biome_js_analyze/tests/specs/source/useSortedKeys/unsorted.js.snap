@@ -17,6 +17,8 @@ const obj = {
 	aba: 2,
 	abc: 3,
 	abb: 3,
+	a10: 0,
+	19: 0,
 	get aaa() {
 		return "";
 	},
@@ -26,11 +28,21 @@ const obj = {
 
 # Actions
 ```diff
-@@ -1,17 +1,17 @@
+@@ -1,6 +1,6 @@
  const obj = {
 +	a: 1,
  	b: 1,
 -	a: 1,
+ 	...g,
+ 	ba: 2,
+ 	ab: 1,
+
+```
+
+```diff
+@@ -2,18 +2,18 @@
+ 	b: 1,
+ 	a: 1,
  	...g,
 -	ba: 2,
 -	ab: 1,
@@ -43,6 +55,9 @@ const obj = {
 -	aba: 2,
 -	abc: 3,
 -	abb: 3,
++	19: 0,
+ 	a10: 0,
+-	19: 0,
  	get aaa() {
  		return "";
  	},

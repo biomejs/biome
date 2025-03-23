@@ -11,6 +11,8 @@ const obj = {
 	aba: 2,
 	abc: 3,
 	abb: 3,
+	a10: 0,
+	19: 0,
 	get aaa() {
 		return "";
 	},
