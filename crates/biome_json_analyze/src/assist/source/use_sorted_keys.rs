@@ -5,6 +5,7 @@ use biome_diagnostics::Applicability;
 use biome_json_factory::make::{json_member_list, token};
 use biome_json_syntax::{JsonMember, JsonMemberList, T};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
+use biome_string_case::StrLikeExtension;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
@@ -37,11 +38,14 @@ pub struct MemberKey {
 
 impl Ord for MemberKey {
     fn cmp(&self, other: &Self) -> Ordering {
-        // Sort keys using natural ordering
-        natord::compare(
-            &self.node.name().unwrap().to_trimmed_string(),
-            &other.node.name().unwrap().to_trimmed_string(),
-        )
+        // Keep the order for elements that cannot be compared
+        let Ok(self_name) = self.node.name().and_then(|name| name.inner_string_text()) else {
+            return Ordering::Equal;
+        };
+        let Ok(other_name) = other.node.name().and_then(|name| name.inner_string_text()) else {
+            return Ordering::Equal;
+        };
+        self_name.text().ascii_nat_cmp(other_name.text())
     }
 }
 

@@ -5,7 +5,8 @@ use biome_analyze::{Ast, Rule, RuleAction, context::RuleContext, declare_source_
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsObjectMember, AnyJsObjectMemberName, JsObjectMemberList};
-use biome_rowan::{AstSeparatedList, BatchMutationExt, SyntaxResult};
+use biome_rowan::{AstSeparatedList, BatchMutationExt, SyntaxResult, TokenText};
+use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
 
@@ -13,7 +14,7 @@ declare_source_rule! {
     /// Enforce ordering of a JS object properties.
     ///
     /// This rule checks if keys of the object are sorted in a consistent way.
-    /// Keys are sorted in a natural order.
+    /// Keys are sorted in a [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order).
     /// This rule will consider spread/calculated keys e.g [k]: 1 as non-sortable.
     /// Instead, whenever it encounters a non-sortable key, it will sort all the
     /// previous sortable keys up until the nearest non-sortable key, if one
@@ -76,16 +77,15 @@ declare_source_rule! {
 
 impl Rule for UseSortedKeys {
     type Query = Ast<JsObjectMemberList>;
-    type State = Vec<Vec<ObjectMember>>;
-    type Signals = Option<Self::State>;
+    type State = Vec<ObjectMember>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut members = vec![];
-        let mut groups = vec![];
+        let mut members = Vec::new();
+        let mut groups = Vec::new();
 
-        let get_name =
-            |name: SyntaxResult<AnyJsObjectMemberName>| Some(name.ok()?.name()?.text().into());
+        let get_name = |name: SyntaxResult<AnyJsObjectMemberName>| name.ok()?.name();
 
         for element in ctx.query().elements() {
             if let Ok(element) = element.node() {
@@ -93,7 +93,10 @@ impl Rule for UseSortedKeys {
                     AnyJsObjectMember::JsSpread(_) | AnyJsObjectMember::JsBogusMember(_) => {
                         // Keep the spread order because it's not safe to change order of it.
                         // Logic here is similar to /crates/biome_js_analyze/src/assists/source/use_sorted_attributes.rs
-                        groups.push(members.clone());
+                        if !members.is_empty() && !members.is_sorted() {
+                            groups.push(members.clone());
+                        }
+                        // Reuse the same buffer
                         members.clear();
                         members.push(ObjectMember::new(element.clone(), None));
                     }
@@ -113,7 +116,7 @@ impl Rule for UseSortedKeys {
                         let name = member
                             .name()
                             .ok()
-                            .map(|name| Some(name.name().ok()?.text().into()))
+                            .map(|name| name.name().ok())
                             .unwrap_or_default();
 
                         members.push(ObjectMember::new(element.clone(), name));
@@ -122,27 +125,27 @@ impl Rule for UseSortedKeys {
             }
         }
 
-        if !members.is_empty() {
+        if !members.is_empty() && !members.is_sorted() {
             groups.push(members);
         }
 
-        Some(groups)
+        groups.into_boxed_slice()
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut sorted_state = state.clone();
 
-        for group in sorted_state.iter_mut() {
-            group.sort();
-        }
+        sorted_state.sort_unstable();
 
-        if sorted_state == *state {
+        // FIXME: why do we need to check it?
+        // Checking if it is sorted in `run` should be enough.
+        if &sorted_state == state {
             return None;
         }
 
         let mut mutation = ctx.root().begin();
 
-        for (unsorted, sorted) in state.iter().flatten().zip(sorted_state.iter().flatten()) {
+        for (unsorted, sorted) in state.iter().zip(sorted_state.iter()) {
             mutation.replace_node(unsorted.member.clone(), sorted.member.clone());
         }
 
@@ -155,14 +158,14 @@ impl Rule for UseSortedKeys {
     }
 }
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ObjectMember {
     member: AnyJsObjectMember,
-    name: Option<Box<str>>,
+    name: Option<TokenText>,
 }
 
 impl ObjectMember {
-    fn new(member: AnyJsObjectMember, name: Option<Box<str>>) -> Self {
+    fn new(member: AnyJsObjectMember, name: Option<TokenText>) -> Self {
         ObjectMember { member, name }
     }
 }
@@ -174,7 +177,7 @@ impl Ord for ObjectMember {
             return Ordering::Equal;
         };
 
-        natord::compare(self_name, other_name)
+        self_name.text().ascii_nat_cmp(other_name.text())
     }
 }
 
