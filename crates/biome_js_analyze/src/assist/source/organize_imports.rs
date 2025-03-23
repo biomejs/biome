@@ -377,7 +377,7 @@ declare_source_rule! {
     ///     "options": {
     ///         "groups": [
     ///             ":NODE:",
-    ///             ":BLANK_LINE:"
+    ///             ":BLANK_LINE:",
     ///             ["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**"],
     ///             "@/**"
     ///         ]
