@@ -289,7 +289,7 @@ declare_source_rule! {
     ///
     /// ...and the following code...
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js
     /// import sibling from "./file.js";
     /// import internal from "#alias";
     /// import fs from "fs";
@@ -337,7 +337,7 @@ declare_source_rule! {
     ///
     /// By applying this configuration to the following code...
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js
     /// import lib from "@my/lib";
     /// import aliased from "@/alias";
     /// import path from "@my/lib/special";
@@ -387,7 +387,7 @@ declare_source_rule! {
     ///
     /// ...the following code...
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js
     /// import path from "node:path";
     /// import lib from "@my/lib";
     /// import test from "@my/lib/path";
