@@ -6,7 +6,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttribute, JsxAttributeList};
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::BatchMutationExt;
+use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
 
@@ -14,7 +15,7 @@ declare_source_rule! {
     /// Enforce attribute sorting in JSX elements.
     ///
     /// This rule checks if the JSX props are sorted in a consistent way.
-    /// Props are sorted alphabetically.
+    /// Props are sorted alphabetically using a [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order).
     /// This rule will not consider spread props as sortable.
     /// Instead, whenever it encounters a spread prop, it will sort all the
     /// previous non spread props up until the nearest spread prop, if one
@@ -49,36 +50,40 @@ impl Rule for UseSortedAttributes {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let props = ctx.query().clone();
+        let props = ctx.query();
         let mut current_prop_group = PropGroup::default();
         let mut prop_groups = Vec::new();
-        for prop in props.clone() {
+        for prop in props {
             match prop {
                 AnyJsxAttribute::JsxAttribute(attr) => {
                     current_prop_group.props.push(PropElement { prop: attr });
                 }
                 // spread prop reset sort order
                 AnyJsxAttribute::JsxSpreadAttribute(_) => {
-                    prop_groups.push(current_prop_group);
-                    current_prop_group = PropGroup::default();
+                    if !current_prop_group.is_empty() && !current_prop_group.is_sorted() {
+                        prop_groups.push(current_prop_group);
+                        current_prop_group = PropGroup::default();
+                    } else {
+                        // Reuse the same buffer
+                        current_prop_group.clear();
+                    }
                 }
                 AnyJsxAttribute::JsMetavariable(_) => {}
             }
         }
-        prop_groups.push(current_prop_group);
+        if !current_prop_group.is_empty() && !current_prop_group.is_sorted() {
+            prop_groups.push(current_prop_group);
+        }
         prop_groups.into_boxed_slice()
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        if state.is_sorted() {
-            return None;
-        }
         let mut mutation = ctx.root().begin();
 
         for (PropElement { prop }, PropElement { prop: sorted_prop }) in
-            zip(state.props.clone(), state.get_sorted_props())
+            zip(state.props.iter(), state.get_sorted_props())
         {
-            mutation.replace_node(prop, sorted_prop);
+            mutation.replace_node(prop.clone(), sorted_prop);
         }
 
         Some(RuleAction::new(
@@ -100,12 +105,13 @@ impl Ord for PropElement {
         let (Ok(self_name), Ok(other_name)) = (self.prop.name(), other.prop.name()) else {
             return Ordering::Equal;
         };
-        let (a_name, b_name) = (
-            self_name.to_trimmed_string(),
-            other_name.to_trimmed_string(),
-        );
+        let (Ok(self_name), Ok(other_name)) = (self_name.name(), other_name.name()) else {
+            return Ordering::Equal;
+        };
 
-        a_name.cmp(&b_name)
+        self_name
+            .text_trimmed()
+            .ascii_nat_cmp(other_name.text_trimmed())
     }
 }
 
@@ -121,15 +127,21 @@ pub struct PropGroup {
 }
 
 impl PropGroup {
+    fn is_empty(&self) -> bool {
+        self.props.is_empty()
+    }
+
     fn is_sorted(&self) -> bool {
-        let mut new_props = self.props.clone();
-        new_props.sort();
-        new_props == self.props
+        self.props.is_sorted()
     }
 
     fn get_sorted_props(&self) -> Vec<PropElement> {
         let mut new_props = self.props.clone();
-        new_props.sort();
+        new_props.sort_unstable();
         new_props
+    }
+
+    fn clear(&mut self) {
+        self.props.clear();
     }
 }
