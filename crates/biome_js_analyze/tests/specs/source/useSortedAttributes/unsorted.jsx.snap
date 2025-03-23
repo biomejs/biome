@@ -6,30 +6,43 @@ expression: unsorted.jsx
 ```jsx
 <Hello lastName="Smith" firstName="John" />;
 <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+<Hello a10="" a9="" A="" />;
 
 ```
 
 # Actions
 ```diff
-@@ -1,2 +1,2 @@
+@@ -1,3 +1,3 @@
 -<Hello lastName="Smith" firstName="John" />;
 +<Hello firstName="John" lastName="Smith" />;
  <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+ <Hello a10="" a9="" A="" />;
 
 ```
 
 ```diff
-@@ -1,2 +1,2 @@
+@@ -1,3 +1,3 @@
  <Hello lastName="Smith" firstName="John" />;
 -<Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
 +<Hello address="NY" tel={5555555} {...this.props} lastName="Smith" firstName="John" />;
+ <Hello a10="" a9="" A="" />;
 
 ```
 
 ```diff
-@@ -1,2 +1,2 @@
+@@ -1,3 +1,3 @@
  <Hello lastName="Smith" firstName="John" />;
 -<Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
 +<Hello tel={5555555} address="NY" {...this.props} firstName="John" lastName="Smith" />;
+ <Hello a10="" a9="" A="" />;
+
+```
+
+```diff
+@@ -1,3 +1,3 @@
+ <Hello lastName="Smith" firstName="John" />;
+ <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+-<Hello a10="" a9="" A="" />;
++<Hello A="" a9="" a10="" />;
 
 ```
