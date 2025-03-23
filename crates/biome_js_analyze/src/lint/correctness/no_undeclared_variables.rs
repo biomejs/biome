@@ -17,9 +17,9 @@ declare_lint_rule! {
     /// ## Options (Since v2.0.0)
     ///
     /// The rule provides a `checkTypes` option that make the rule checks undeclared types.
-    /// The option defaults to `true`.
+    /// The option defaults to `false`.
     ///
-    /// ```json,options
+    /// ```json
     /// {
     ///     "options": {
     ///         "checkTypes": true
@@ -126,17 +126,14 @@ impl Rule for NoUndeclaredVariables {
     }
 }
 
-#[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, rename_all = "camelCase")]
 pub struct UndeclaredVariablesOptions {
     /// Check undeclared types.
     check_types: bool,
-}
-impl Default for UndeclaredVariablesOptions {
-    fn default() -> Self {
-        Self { check_types: true }
-    }
 }
 
 fn is_global(reference_name: &str, source_type: &JsFileSource) -> bool {
