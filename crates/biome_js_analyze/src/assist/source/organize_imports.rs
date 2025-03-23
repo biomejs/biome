@@ -208,7 +208,7 @@ declare_source_rule! {
     /// Also, import and exports with attributes are always placed first.
     /// For example, the following code...
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// import * as namespaceImport from "same-source";
     /// import type * as namespaceTypeImport from "same-source";
     /// import { namedImport } from "same-source";
@@ -222,7 +222,7 @@ declare_source_rule! {
     ///
     /// is sorted as follows:
     ///
-    /// ```js,ignore
+    /// ```ts,ignore
     /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
     /// import type defaultTypeImport from "same-source";
     /// import defaultImport from "same-source";
@@ -324,7 +324,7 @@ declare_source_rule! {
     /// Glob patterns selects imports and exports with a source that matches the pattern.
     /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/speciaal` and the other that gathers imports/exports starting with `@/`.
     ///
-    /// ```json,options
+    /// ```json
     /// {
     ///     "options": {
     ///         "groups": [
@@ -372,7 +372,7 @@ declare_source_rule! {
     /// The sorter allows the separation of two groups with a blank line using the predefined string `:BLANK_LINE:`.
     /// Given the following configuration...
     ///
-    /// ```json,options
+    /// ```json
     /// {
     ///     "options": {
     ///         "groups": [
