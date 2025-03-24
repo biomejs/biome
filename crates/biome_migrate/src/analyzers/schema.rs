@@ -8,6 +8,11 @@ use biome_json_syntax::{JsonMember, TextRange};
 use biome_rowan::{AstNode, BatchMutationExt};
 use std::env;
 
+pub(crate) const BIOME_VERSION: &str = match option_env!("BIOME_VERSION") {
+    Some(version) => version,
+    None => env!("CARGO_PKG_VERSION"),
+};
+
 declare_migration! {
     pub(crate) Schema {
         version: "1.5.0",
@@ -34,11 +39,9 @@ impl Rule for Schema {
                 .strip_prefix("https://biomejs.dev/schemas/")?
                 .strip_suffix("/schema.json");
 
-            if let Ok(version) = env::var("BIOME_VERSION") {
-                if let Some(current_version) = value {
-                    if current_version != version {
-                        return Some(string_value.range());
-                    }
+            if let Some(current_version) = value {
+                if current_version != BIOME_VERSION {
+                    return Some(string_value.range());
                 }
             }
         }
@@ -62,8 +65,7 @@ impl Rule for Schema {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<MigrationAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        let version = env::var("BIOME_VERSION").ok()?;
-        let schema = format!("\"https://biomejs.dev/schemas/{version}/schema.json\"");
+        let schema = format!("\"https://biomejs.dev/schemas/{BIOME_VERSION}/schema.json\"");
 
         let new_node = json_string_value(ident(&schema));
         let member_value = node.value().ok()?;
