@@ -5,16 +5,7 @@ import { fileURLToPath } from "node:url";
 const BIOME_CLI_ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 const MANIFEST_PATH = resolve(BIOME_CLI_ROOT, "package.json");
 
-const rootManifest = JSON.parse(
-	fs.readFileSync(MANIFEST_PATH).toString("utf-8"),
-);
-
-let [major, minor, patch] = rootManifest.version
-	.split(".")
-	.map((num) => Number.parseInt(num, 10));
-// increment patch version
-patch += 1;
-let version = `${major}.${minor}.${patch}`;
+const rootManifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf-8"));
 
 if (
 	typeof process.env.GITHUB_SHA !== "string" ||
@@ -23,7 +14,7 @@ if (
 	throw new Error("GITHUB_SHA environment variable is undefined");
 }
 
-version += `-beta.${process.env.GITHUB_SHA.substring(0, 7)}`;
+const version = "2.0.0-beta";
 rootManifest.version = version;
 
 const content = JSON.stringify(rootManifest);
