@@ -75,11 +75,32 @@ function copyBinaryToNativePackage(platform, arch) {
 function updateVersionInJsPackage(packageName) {
 	const packageRoot = resolve(PACKAGES_ROOT, packageName);
 	const manifestPath = resolve(packageRoot, "package.json");
+
+	const { version } = rootManifest;
+
 	const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
-	manifest.version = rootManifest.version;
+	manifest.version = version;
+	updateVersionInDependencies(manifest.dependencies, version);
+	updateVersionInDependencies(manifest.devDependencies, version);
+	updateVersionInDependencies(manifest.optionalDependencies, version);
+	updateVersionInDependencies(
+		manifest.peerDependencies,
+		// Versions with a suffix shouldn't get the `^` prefix.
+		version.includes("-") ? version : `^${version}`,
+	);
 
 	console.info(`Update manifest ${manifestPath}`);
 	fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+}
+
+function updateVersionInDependencies(dependencies, version) {
+	if (dependencies) {
+		for (const dependency of Object.keys(dependencies)) {
+			if (dependency.startsWith("@biomejs/")) {
+				dependencies[dependency] = version;
+			}
+		}
+	}
 }
 
 /**
