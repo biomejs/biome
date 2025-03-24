@@ -521,9 +521,9 @@ impl<'src> Lexer<'src> {
                     self.advance(1);
 
                     match self.current_byte() {
-                        Some(b'"' | b'\\' | b'/' | b'b' | b'f' | b'n' | b'r' | b't') => {
-                            self.advance(1)
-                        }
+                        Some(
+                            b'"' | b'\\' | b'/' | b'b' | b'f' | b'n' | b'r' | b't' | b'[' | b']',
+                        ) => self.advance(1),
 
                         Some(b'u') => match (self.lex_unicode_escape(), state) {
                             (Ok(_), _) => {}
@@ -545,11 +545,10 @@ impl<'src> Lexer<'src> {
                                 let c = self.current_char_unchecked();
                                 self.diagnostics.push(
                                     ParseDiagnostic::new(
-
                                         "Invalid escape sequence",
                                         escape_start..self.text_position() + c.text_len(),
                                     )
-                                        .with_hint(r#"Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. "#),
+                                        .with_hint(r#"Valid escape sequences are: `\\`, `\/`, `/"`, `\b\`, `\f`, `\n`, `\r`, `\t`, `\[`, `\]` or any unicode escape sequence `\uXXXX` where X is hexedecimal number. "#),
                                 );
                                 state = LexStringState::InvalidEscapeSequence;
                             }

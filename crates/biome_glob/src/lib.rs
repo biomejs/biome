@@ -479,7 +479,7 @@ fn validate_glob(pattern: &str) -> Result<(), GlobError> {
             b'\\' => {
                 // Accept a restrictive set of escape sequence
                 if let Some((_, c)) = it.next() {
-                    if !matches!(c, b'!' | b'*' | b'?' | b'{' | b'}' | b'[' | b']' | b'\\') {
+                    if !matches!(c, b'!' | b'*' | b'?' | b'{' | b'}' | b'\\') {
                         return Err(GlobError::Regular {
                             kind: GlobErrorKind::InvalidEscape,
                             index: i as u32,
@@ -495,12 +495,6 @@ fn validate_glob(pattern: &str) -> Result<(), GlobError> {
             b'?' => {
                 return Err(GlobError::Regular {
                     kind: GlobErrorKind::UnsupportedAnyCharacter,
-                    index: i as u32,
-                });
-            }
-            b'[' | b']' => {
-                return Err(GlobError::Regular {
-                    kind: GlobErrorKind::UnsupportedCharacterClass,
                     index: i as u32,
                 });
             }
