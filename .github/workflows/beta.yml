@@ -122,7 +122,7 @@ jobs:
 
       # Upload the CLI binary as a build artifact
       - name: Upload CLI artifact
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: cli-${{ matrix.target }}
           path: ./dist/biome-*
@@ -147,7 +147,7 @@ jobs:
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomejs crates/biome_wasm
 
       - name: Upload WASM artifact
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: wasm-${{ matrix.target }}
           path: |
@@ -170,12 +170,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Download CLI artifacts
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           pattern: cli-*
           merge-multiple: true
       - name: Download WASM artifacts
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           pattern: wasm-*
           merge-multiple: true
