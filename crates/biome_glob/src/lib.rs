@@ -173,7 +173,7 @@ impl Glob {
     }
 
     /// Tests whether the given path matches this pattern, ignoring the negation.
-    fn is_raw_match(&self, path: impl AsRef<std::path::Path>) -> bool {
+    pub fn is_raw_match(&self, path: impl AsRef<std::path::Path>) -> bool {
         self.glob.is_match(path)
     }
 
@@ -302,6 +302,11 @@ impl<'a> CandidatePath<'a> {
     /// Tests whether the current path matches `glob`.
     pub fn matches(&self, glob: &Glob) -> bool {
         glob.is_match_candidate(self)
+    }
+
+    /// Tests whether the current path matches `glob` ignoring the negation of `glob`.
+    pub fn matches_raw(&self, glob: &Glob) -> bool {
+        glob.is_raw_match_candidate(self)
     }
 
     /// Match against a list of globs where negated globs are handled as exceptions.

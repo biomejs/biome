@@ -1677,6 +1677,12 @@
 			},
 			"additionalProperties": false
 		},
+		"GroupMatcher": {
+			"anyOf": [
+				{ "$ref": "#/definitions/PredefinedGroupMatcher" },
+				{ "$ref": "#/definitions/ImportSourceGlob" }
+			]
+		},
 		"GroupPlainConfiguration": {
 			"oneOf": [
 				{
@@ -1821,12 +1827,9 @@
 		},
 		"ImportGroup": {
 			"anyOf": [
-				{ "$ref": "#/definitions/PredefinedImportGroup" },
-				{ "$ref": "#/definitions/ImportSourceGlob" },
-				{
-					"type": "array",
-					"items": { "$ref": "#/definitions/ImportSourceGlob" }
-				}
+				{ "type": "null" },
+				{ "$ref": "#/definitions/GroupMatcher" },
+				{ "type": "array", "items": { "$ref": "#/definitions/GroupMatcher" } }
 			]
 		},
 		"ImportGroups": {
@@ -3289,19 +3292,7 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
-		"PredefinedImportGroup": {
-			"type": "string",
-			"enum": [
-				":BLANK_LINE:",
-				":ALIAS:",
-				":BUN:",
-				":NODE:",
-				":PACKAGE:",
-				":PACKAGE_WITH_PROTOCOL:",
-				":PATH:",
-				":URL:"
-			]
-		},
+		"PredefinedGroupMatcher": { "type": "string" },
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },

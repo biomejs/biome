@@ -2997,10 +2997,7 @@ If `false`, no such exception will be made.
 	 */
 	ignoreNull: boolean;
 }
-export type ImportGroup =
-	| PredefinedImportGroup
-	| ImportSourceGlob
-	| ImportSourceGlob[];
+export type ImportGroup = null | GroupMatcher | GroupMatcher[];
 export type Visibility = "public" | "package" | "private";
 export type DependencyAvailability = boolean | string[];
 export interface Hook {
@@ -3050,19 +3047,7 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
-export type PredefinedImportGroup =
-	| ":BLANK_LINE:"
-	| ":ALIAS:"
-	| ":BUN:"
-	| ":NODE:"
-	| ":PACKAGE:"
-	| ":PACKAGE_WITH_PROTOCOL:"
-	| ":PATH:"
-	| ":URL:";
-/**
- * Glob to match against import sources.
- */
-export type ImportSourceGlob = Glob;
+export type GroupMatcher = PredefinedGroupMatcher | ImportSourceGlob;
 export type StableHookResult = boolean | number[];
 export interface CustomRestrictedImportOptions {
 	/**
@@ -3106,6 +3091,11 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
+export type PredefinedGroupMatcher = string;
+/**
+ * Glob to match against import sources.
+ */
+export type ImportSourceGlob = Glob;
 /**
  * Supported cases.
  */
