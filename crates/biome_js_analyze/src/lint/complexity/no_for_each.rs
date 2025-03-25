@@ -68,8 +68,6 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// **Since v2.0.0**
-    ///
     /// The rule provides a `validIdentifiers` option that allows specific variable names to call `forEach`.
     /// In the following configuration, it's allowed to call `forEach` with expressions that match `Effect` or `_`:
     ///

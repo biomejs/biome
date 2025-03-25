@@ -401,7 +401,7 @@ declare_lint_rule! {
     ///
     /// **Default:** `true`
     ///
-    /// ### conventions (Since v1.8.0)
+    /// ### conventions
     ///
     /// The `conventions` option allows applying custom conventions.
     /// The option takes an array of conventions.
