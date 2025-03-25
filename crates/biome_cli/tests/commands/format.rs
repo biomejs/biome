@@ -3420,3 +3420,43 @@ fn html_enabled_by_arg_format() {
         result,
     ));
 }
+
+#[test]
+fn html_not_processed_when_disabled() {
+    // HTML files should not be parsed when no tools are enabled.
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.html");
+    fs.insert(file_path.into(), "<!DOCTYPE");
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--html-formatter-enabled=false",
+                "--write",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(matches!(
+        result,
+        Err(biome_cli::CliDiagnostic::NoFilesWereProcessed(_))
+    ));
+
+    assert_file_contents(&fs, file_path, "<!DOCTYPE");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_not_processed_when_disabled",
+        fs,
+        console,
+        result,
+    ));
+}

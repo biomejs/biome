@@ -8,7 +8,7 @@ pub use crate::file_handlers::astro::{ASTRO_FENCE, AstroFileHandler};
 use crate::file_handlers::graphql::GraphqlFileHandler;
 pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
 pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
-use crate::settings::{Settings, WorkspaceSettingsHandle};
+use crate::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
 use crate::workspace::{
     FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
 };
@@ -30,8 +30,9 @@ use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
+use biome_grit_syntax::GritLanguage;
 use biome_grit_syntax::file_source::GritFileSource;
-use biome_html_syntax::HtmlFileSource;
+use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
@@ -363,6 +364,71 @@ impl DocumentFileSource {
             | DocumentFileSource::Grit(_) => true,
             DocumentFileSource::Ignore => true,
             DocumentFileSource::Unknown => false,
+        }
+    }
+
+    pub fn formatter_enabled(path: &Utf8Path, settings: Option<&Settings>) -> bool {
+        let file_source = DocumentFileSource::from(path);
+        match file_source {
+            DocumentFileSource::Js(_) => {
+                JsLanguage::formatter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Css(_) => {
+                CssLanguage::formatter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Graphql(_) => {
+                GraphqlLanguage::formatter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Json(_) => {
+                JsonLanguage::formatter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Html(_) => {
+                HtmlLanguage::formatter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Grit(_) => {
+                GritLanguage::formatter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Ignore | DocumentFileSource::Unknown => false,
+        }
+    }
+
+    pub fn linter_enabled(path: &Utf8Path, settings: Option<&Settings>) -> bool {
+        match DocumentFileSource::from_path(path) {
+            DocumentFileSource::Js(_) => JsLanguage::linter_enabled_for_file_path(settings, path),
+            DocumentFileSource::Css(_) => CssLanguage::linter_enabled_for_file_path(settings, path),
+            DocumentFileSource::Graphql(_) => {
+                GraphqlLanguage::linter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Json(_) => {
+                JsonLanguage::linter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Html(_) => {
+                HtmlLanguage::linter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Grit(_) => {
+                GritLanguage::linter_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Ignore | DocumentFileSource::Unknown => false,
+        }
+    }
+
+    pub fn assist_enabled(path: &Utf8Path, settings: Option<&Settings>) -> bool {
+        match DocumentFileSource::from_path(path) {
+            DocumentFileSource::Js(_) => JsLanguage::assist_enabled_for_file_path(settings, path),
+            DocumentFileSource::Css(_) => CssLanguage::assist_enabled_for_file_path(settings, path),
+            DocumentFileSource::Graphql(_) => {
+                GraphqlLanguage::assist_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Json(_) => {
+                JsonLanguage::assist_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Html(_) => {
+                HtmlLanguage::assist_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Grit(_) => {
+                GritLanguage::assist_enabled_for_file_path(settings, path)
+            }
+            DocumentFileSource::Ignore | DocumentFileSource::Unknown => false,
         }
     }
 }

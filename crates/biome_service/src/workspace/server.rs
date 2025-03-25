@@ -331,6 +331,17 @@ impl WorkspaceServer {
         } else if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
             None
         } else {
+            // Before we try to parse the file, we might not even have anything to do with it.
+            // If none of the tools for this file are enabled, we can just skip it.
+            let settings = self.projects.get_settings(project_key);
+            let should_process = DocumentFileSource::formatter_enabled(&path, settings.as_ref())
+                || DocumentFileSource::linter_enabled(&path, settings.as_ref())
+                || DocumentFileSource::assist_enabled(&path, settings.as_ref());
+
+            if !should_process {
+                return Ok(());
+            }
+
             let mut node_cache = NodeCache::default();
             let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
 
