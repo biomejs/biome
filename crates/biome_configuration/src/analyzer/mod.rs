@@ -87,6 +87,16 @@ impl<T: Default> Default for RuleConfiguration<T> {
         Self::Plain(RulePlainConfiguration::Off)
     }
 }
+impl<T: Default> From<RulePlainConfiguration> for RuleConfiguration<T> {
+    fn from(value: RulePlainConfiguration) -> Self {
+        Self::Plain(value)
+    }
+}
+impl<T: Default> From<GroupPlainConfiguration> for RuleConfiguration<T> {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self::from(RulePlainConfiguration::from(value))
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
@@ -158,6 +168,16 @@ impl<T: Clone + Default + 'static> RuleFixConfiguration<T> {
                 Some(RuleOptions::new(options.options.clone(), options.fix))
             }
         }
+    }
+}
+impl<T: Default> From<RulePlainConfiguration> for RuleFixConfiguration<T> {
+    fn from(value: RulePlainConfiguration) -> Self {
+        Self::Plain(value)
+    }
+}
+impl<T: Default> From<GroupPlainConfiguration> for RuleFixConfiguration<T> {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self::from(RulePlainConfiguration::from(value))
     }
 }
 impl<T: Default> From<&RuleConfiguration<T>> for Severity {
@@ -546,7 +566,7 @@ impl schemars::JsonSchema for RuleSelector {
     }
 }
 
-pub trait RuleGroupExt: Default + Merge + Debug {
+pub trait RuleGroupExt: Default + Merge + Debug + From<GroupPlainConfiguration> {
     /// Retrieves the recommended rules
     fn is_recommended_true(&self) -> bool;
     fn is_recommended_unset(&self) -> bool;
@@ -727,14 +747,26 @@ where
 
 impl<G> Merge for SeverityOrGroup<G>
 where
-    G: RuleGroupExt,
+    G: RuleGroupExt + Clone,
 {
     fn merge_with(&mut self, other: Self) {
-        match (self, other) {
-            (Self::Plain(lhs), Self::Plain(rhs)) => lhs.merge_with(rhs),
-            (Self::Group(lhs), Self::Group(rhs)) => lhs.merge_with(rhs),
-            (Self::Plain(_), Self::Group(_)) => {}
-            (Self::Group(_), Self::Plain(_)) => {}
+        *self = match (&self, other) {
+            (Self::Plain(lhs), Self::Plain(rhs)) => {
+                let mut lhs = lhs.clone();
+                lhs.merge_with(rhs);
+                Self::Plain(lhs)
+            }
+            (Self::Group(lhs), Self::Group(rhs)) => {
+                let mut lhs = lhs.clone();
+                lhs.merge_with(rhs);
+                Self::Group(lhs)
+            }
+            (Self::Plain(lhs), Self::Group(rhs)) => {
+                let mut lhs = G::from(*lhs);
+                lhs.merge_with(rhs);
+                Self::Group(lhs)
+            }
+            (Self::Group(_), Self::Plain(rhs)) => Self::Plain(rhs),
         }
     }
 }

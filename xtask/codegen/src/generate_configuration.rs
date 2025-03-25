@@ -334,7 +334,7 @@ fn generate_for_groups(
         }
     } else {
         quote! {
-            use crate::analyzer::{RuleConfiguration, RulePlainConfiguration, RuleFixConfiguration, SeverityOrGroup, RuleGroupExt};
+            use crate::analyzer::{GroupPlainConfiguration, RuleConfiguration, RulePlainConfiguration, RuleFixConfiguration, SeverityOrGroup, RuleGroupExt};
             use biome_analyze::{options::RuleOptions, RuleFilter};
         }
     };
@@ -640,6 +640,7 @@ fn generate_group_struct(
     let mut rule_enabled_check_line = Vec::new();
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
+    let mut rule_identifiers = Vec::new();
 
     for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
@@ -772,6 +773,8 @@ fn generate_group_struct(
                 #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
             });
         }
+
+        rule_identifiers.push(rule_identifier);
     }
 
     let group_pascal_ident = Ident::new(&to_capitalized(group), Span::call_site());
@@ -956,6 +959,15 @@ fn generate_group_struct(
                 }
 
                 #get_configuration_function
+            }
+
+            impl From<GroupPlainConfiguration> for #group_pascal_ident {
+                fn from(value: GroupPlainConfiguration) -> Self {
+                    Self {
+                        recommended: None,
+                        #( #rule_identifiers: Some(value.into()), )*
+                    }
+                }
             }
         }
     }
