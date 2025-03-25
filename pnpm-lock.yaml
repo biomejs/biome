@@ -48,8 +48,8 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
       vite:
-        specifier: 5.4.14
-        version: 5.4.14(@types/node@20.17.26)
+        specifier: 5.4.15
+        version: 5.4.15(@types/node@20.17.26)
       vitest:
         specifier: 1.6.1
         version: 1.6.1(@types/node@20.17.26)(happy-dom@15.11.7)
@@ -137,8 +137,8 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
       vite:
-        specifier: 5.4.14
-        version: 5.4.14(@types/node@22.13.12)
+        specifier: 5.4.15
+        version: 5.4.15(@types/node@22.13.12)
       vitest:
         specifier: 1.6.1
         version: 1.6.1(@types/node@22.13.12)(happy-dom@15.11.7)
@@ -1806,8 +1806,8 @@ packages:
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
-  vite@5.4.14:
-    resolution: {integrity: sha512-EK5cY7Q1D8JNhSaPKVK4pwBFvaTmZxEnoKXLG/U9gmdDcihQGNzFlgIvaxezFR4glP1LsuiedwMBqCXH3wZccA==}
+  vite@5.4.15:
+    resolution: {integrity: sha512-6ANcZRivqL/4WtwPGTKNaosuNJr5tWiftOC7liM7G9+rMb8+oeJeyzymDu4rTN93seySBmbjSfsS3Vzr19KNtA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -3529,7 +3529,7 @@ snapshots:
       debug: 4.3.7
       pathe: 1.1.2
       picocolors: 1.1.1
-      vite: 5.4.14(@types/node@20.17.26)
+      vite: 5.4.15(@types/node@20.17.26)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -3547,7 +3547,7 @@ snapshots:
       debug: 4.3.7
       pathe: 1.1.2
       picocolors: 1.1.1
-      vite: 5.4.14(@types/node@22.13.12)
+      vite: 5.4.15(@types/node@22.13.12)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -3559,7 +3559,7 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.4.14(@types/node@20.17.26):
+  vite@5.4.15(@types/node@20.17.26):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.47
@@ -3568,7 +3568,7 @@ snapshots:
       '@types/node': 20.17.26
       fsevents: 2.3.3
 
-  vite@5.4.14(@types/node@22.13.12):
+  vite@5.4.15(@types/node@22.13.12):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.47
@@ -3596,7 +3596,7 @@ snapshots:
       strip-literal: 2.1.0
       tinybench: 2.9.0
       tinypool: 0.8.4
-      vite: 5.4.14(@types/node@20.17.26)
+      vite: 5.4.15(@types/node@20.17.26)
       vite-node: 1.6.1(@types/node@20.17.26)
       why-is-node-running: 2.3.0
     optionalDependencies:
@@ -3631,7 +3631,7 @@ snapshots:
       strip-literal: 2.1.0
       tinybench: 2.9.0
       tinypool: 0.8.4
-      vite: 5.4.14(@types/node@22.13.12)
+      vite: 5.4.15(@types/node@22.13.12)
       vite-node: 1.6.1(@types/node@22.13.12)
       why-is-node-running: 2.3.0
     optionalDependencies:
