@@ -752,7 +752,7 @@ where
     fn merge_with(&mut self, other: Self) {
         *self = match (&self, other) {
             (Self::Plain(lhs), Self::Plain(rhs)) => {
-                let mut lhs = lhs.clone();
+                let mut lhs = *lhs;
                 lhs.merge_with(rhs);
                 Self::Plain(lhs)
             }
