@@ -1,0 +1,140 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: issue_5470.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noDebugger": "error",
+        "noShadowRestrictedNames": "off",
+        "noExplicitAny": "off",
+        "useValidTypeof": "error",
+        "noAsyncPromiseExecutor": "off",
+        "noEmptyInterface": "error",
+        "noAssignInExpressions": "error",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["info", "error", "warn", "time", "timeEnd"]
+          }
+        },
+        "noPrototypeBuiltins": "error"
+      },
+      "style": {
+        "noVar": "error",
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false
+          }
+        },
+        "noDefaultExport": "error"
+      },
+      "correctness": {
+        "noConstantCondition": "error",
+        "noInvalidConstructorSuper": "error",
+        "noUnusedVariables": "error",
+        "noUnreachable": "error",
+        "noUnsafeFinally": "error",
+        "noSwitchDeclarations": "off",
+        "noSelfAssign": "off"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+issue_5470.json:22:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule style/noVar has ben moved to the suspicious group.
+  
+    20 │       },
+    21 │       "style": {
+  > 22 │         "noVar": "error",
+       │         ^^^^^^^^^^^^^^^^
+    23 │         "useNamingConvention": {
+    24 │           "level": "error",
+  
+  i Safe fix: Move the rule in the correct group.
+  
+     3  3 │       "enabled": true,
+     4  4 │       "rules": {
+     5    │ - ······"suspicious":·{
+     6    │ - ········"noDebugger":·"error",
+     7    │ - ········"noShadowRestrictedNames":·"off",
+     8    │ - ········"noExplicitAny":·"off",
+     9    │ - ········"useValidTypeof":·"error",
+    10    │ - ········"noAsyncPromiseExecutor":·"off",
+    11    │ - ········"noEmptyInterface":·"error",
+    12    │ - ········"noAssignInExpressions":·"error",
+    13    │ - ········"noConsole":·{
+    14    │ - ··········"level":·"error",
+    15    │ - ··········"options":·{
+    16    │ - ············"allow":·["info",·"error",·"warn",·"time",·"timeEnd"]
+    17    │ - ··········}
+    18    │ - ········},
+    19    │ - ········"noPrototypeBuiltins":·"error"
+    20    │ - ······},
+    21    │ - ······"style":·{
+    22    │ - ········"noVar":·"error",
+    23    │ - ········"useNamingConvention":·{
+        5 │ + ······"correctness":·{
+        6 │ + ········"noConstantCondition":·"error",
+        7 │ + ········"noInvalidConstructorSuper":·"error",
+        8 │ + ········"noUnusedVariables":·"error",
+        9 │ + ········"noUnreachable":·"error",
+       10 │ + ········"noUnsafeFinally":·"error",
+       11 │ + ········"noSwitchDeclarations":·"off",
+       12 │ + ········"noSelfAssign":·"off"
+       13 │ + ······},
+       14 │ + ······"suspicious":·{
+       15 │ + ········"noDebugger":·"error",
+       16 │ + ········"noShadowRestrictedNames":·"off",
+       17 │ + ········"noExplicitAny":·"off",
+       18 │ + ········"useValidTypeof":·"error",
+       19 │ + ········"noAsyncPromiseExecutor":·"off",
+       20 │ + ········"noEmptyInterface":·"error",
+       21 │ + ········"noAssignInExpressions":·"error",
+       22 │ + ········"noConsole":·{
+    24 23 │             "level": "error",
+    25 24 │             "options": {
+    26    │ - ············"strictCase":·false
+    27    │ - ··········}
+    28    │ - ········},
+    29    │ - ········"noDefaultExport":·"error"
+    30    │ - ······},
+    31    │ - ······"correctness":·{
+    32    │ - ········"noConstantCondition":·"error",
+    33    │ - ········"noInvalidConstructorSuper":·"error",
+    34    │ - ········"noUnusedVariables":·"error",
+    35    │ - ········"noUnreachable":·"error",
+    36    │ - ········"noUnsafeFinally":·"error",
+    37    │ - ········"noSwitchDeclarations":·"off",
+    38    │ - ········"noSelfAssign":·"off"
+       25 │ + ············"allow":·["info",·"error",·"warn",·"time",·"timeEnd"]
+       26 │ + ··········}
+       27 │ + ········},
+       28 │ + ········"noPrototypeBuiltins":·"error",
+       29 │ + ········"noVar":·"error"
+       30 │ + ······},
+       31 │ + ······"style":··{
+       32 │ + ········"useNamingConvention":·{
+       33 │ + ··········"level":·"error",
+       34 │ + ··········"options":·{
+       35 │ + ············"strictCase":·false
+       36 │ + ··········}
+       37 │ + ········},
+       38 │ + ········"noDefaultExport":·"error"
+    39 39 │         }
+    40 40 │       }
+  
+
+```
