@@ -4,8 +4,8 @@ on:
     inputs:
       version:
         type: string
+        required: true
         description: The version to release
-        default: 'v0.8.0-beta'
 
 env:
   INPUT_VERSION: ${{ inputs.version }}
