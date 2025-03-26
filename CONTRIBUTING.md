@@ -432,10 +432,8 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 ### Beta releases
 
-1. [ ] Make sure the version number of the beta is correctly set to be a beta of the _upcoming_ version in `update-beta-version.mjs`.
-1. [ ] Create a PR and let it be reviewed to make sure that the right version will get released.
-1. [ ] Merge the PR.
-1. [ ] When everything is set, run the `beta` workflow.
+1. [ ] Run the `beta` workflow.
+   Input the _upcoming_ version with an incremented number for each release (e.g. `2.0.0-beta.1`).
 
 ### Regular releases
 
