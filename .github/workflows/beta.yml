@@ -1,6 +1,14 @@
 name: Beta release CLI
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: The version to release
+        default: 'v0.8.0-beta'
+
+env:
+  INPUT_VERSION: ${{ inputs.version }}
 
 jobs:
   version:

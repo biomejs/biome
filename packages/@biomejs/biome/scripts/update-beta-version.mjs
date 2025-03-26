@@ -14,7 +14,11 @@ if (
 	throw new Error("GITHUB_SHA environment variable is undefined");
 }
 
-const version = "2.0.0-beta.1";
+const version = process.env.INPUT_VERSION;
+if (typeof version !== "string" || version === "") {
+	throw new Error("INPUT_VERSION environment variable is undefined");
+}
+
 rootManifest.version = version;
 
 const content = JSON.stringify(rootManifest);

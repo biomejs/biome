@@ -1,6 +1,14 @@
 name: Beta release JavaScript API
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: The version to release
+        default: 'v0.8.0-beta'
+
+env:
+  INPUT_VERSION: ${{ inputs.version }}
 
 jobs:
   version:
@@ -98,7 +106,6 @@ jobs:
 
       - name: Publish npm package as beta
         run: npm publish packages/@biomejs/js-api --tag beta --access public --provenance
-        if: needs.build.outputs.prerelease == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
