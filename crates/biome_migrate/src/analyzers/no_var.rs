@@ -170,14 +170,12 @@ impl Rule for NoVar {
         let mut new_rules_member = vec![];
         for item in rules_member_list.iter().flatten() {
             let name = item.name().ok()?.inner_string_text().ok()?;
-            if name.text() == "suspicious" {
-                new_rules_member.push(suspicious_member.clone());
-            } else if name.text() == "style" {
-                new_rules_member.push(style_member.clone());
-            } else {
+            if !matches!(name.text(), "suspicious" | "style") {
                 new_rules_member.push(item);
             }
         }
+        new_rules_member.push(suspicious_member);
+        new_rules_member.push(style_member);
         for _ in 0..new_rules_member.len().saturating_sub(1) {
             separators.push(token(T![,]))
         }
