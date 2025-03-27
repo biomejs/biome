@@ -180,6 +180,38 @@ impl AnalyzerSuppressionDiagnostic {
         self.advice.messages.push((message, None));
         self
     }
+
+    pub(crate) fn new_unknown_lint_rule(group: &str, rule: &str, range: TextRange) -> Self {
+        Self::new(
+            category!("suppressions/unknownRule"),
+            range,
+            format_args!("Unknown lint rule {group}/{rule} in suppression comment"),
+        )
+    }
+
+    pub(crate) fn new_unknown_lint_group(group: &str, range: TextRange) -> Self {
+        Self::new(
+            category!("suppressions/unknownGroup"),
+            range,
+            format_args!("Unknown lint group {group} in suppression comment"),
+        )
+    }
+
+    pub(crate) fn new_unknown_assist_group(group: &str, range: TextRange) -> Self {
+        Self::new(
+            category!("suppressions/unknownGroup"),
+            range,
+            format_args!("Unknown assist group {group} in suppression comment"),
+        )
+    }
+
+    pub(crate) fn new_unknown_assist_action(group: &str, action: &str, range: TextRange) -> Self {
+        Self::new(
+            category!("suppressions/unknownAction"),
+            range,
+            format_args!("Unknown assist action {group}/{action} in suppression comment"),
+        )
+    }
 }
 
 #[derive(Debug, Default, Clone)]

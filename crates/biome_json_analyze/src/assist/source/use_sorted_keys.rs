@@ -3,7 +3,7 @@ use biome_analyze::{Ast, Rule, RuleAction, context::RuleContext, declare_source_
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_json_factory::make::{json_member_list, token};
-use biome_json_syntax::{JsonMember, JsonMemberList, T};
+use biome_json_syntax::{JsonMember, JsonMemberList, JsonObjectValue, T, TextRange};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
 use biome_string_case::StrLikeExtension;
 use std::borrow::Cow;
@@ -120,6 +120,14 @@ impl Rule for UseSortedKeys {
         } else {
             None
         }
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        ctx.query()
+            .syntax()
+            .ancestors()
+            .find_map(JsonObjectValue::cast)
+            .map(|node| node.range())
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsonRuleAction> {
