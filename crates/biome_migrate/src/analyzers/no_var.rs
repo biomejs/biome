@@ -107,13 +107,13 @@ impl Rule for NoVar {
             )),
         );
 
-        let linter_member_list = rules_member
+        let rules_member_list = rules_member
             .value()
             .ok()?
             .as_json_object_value()?
             .json_member_list();
 
-        let suspicious_member = linter_member_list
+        let suspicious_member = rules_member_list
             .iter()
             .flatten()
             .find_map(|member| {
@@ -126,10 +126,9 @@ impl Rule for NoVar {
             })
             .and_then(|suspicious_member| {
                 // we inject the new member here
-                let (list, mut separators) = suspicious_member.unzip_elements()?;
-                for _ in 0..list.len().saturating_sub(1) {
-                    separators.push(token(T![,]))
-                }
+                let (mut list, mut separators) = suspicious_member.unzip_elements()?;
+                list.push(no_var_member.clone());
+                separators.push(token(T![,]));
 
                 Some(json_member(
                     suspicious_member.name().ok()?,
@@ -168,25 +167,22 @@ impl Rule for NoVar {
             ));
 
         let mut separators = vec![];
-        let mut new_members = vec![];
-        for item in linter_member_list.iter().flatten() {
+        let mut new_rules_member = vec![];
+        for item in rules_member_list.iter().flatten() {
             let name = item.name().ok()?.inner_string_text().ok()?;
-            if name.text() != "suspicious" {
-                new_members.push(suspicious_member.clone());
-            } else if name.text() == "style" {
-                new_members.push(style_member.clone());
-            } else {
-                new_members.push(item);
+            if !matches!(name.text(), "suspicious" | "style") {
+                new_rules_member.push(item);
             }
         }
-        new_members.push(suspicious_member);
-        for _ in 0..new_members.len().saturating_sub(1) {
+        new_rules_member.push(suspicious_member);
+        new_rules_member.push(style_member);
+        for _ in 0..new_rules_member.len().saturating_sub(1) {
             separators.push(token(T![,]))
         }
 
         mutation.replace_node(
-            linter_member_list,
-            json_member_list(new_members, separators),
+            rules_member_list,
+            json_member_list(new_rules_member, separators),
         );
 
         Some(RuleAction::new(
