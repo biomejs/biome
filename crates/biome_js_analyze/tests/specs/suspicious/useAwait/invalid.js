@@ -63,3 +63,28 @@ async function withoutForAwait () {
 	}
 	return sum;
 };
+
+function Sample(validator) {
+	return (
+		_,
+		__,
+		descriptor
+	) => {
+		const originalMethod = descriptor.value;
+		validator()
+		descriptor.value = async (...args) => originalMethod.apply(this, args);
+		return descriptor;
+	};
+}
+
+class Sample {
+	@Sample()
+	async decoratedBreaks() {
+		return true;
+	}
+
+	@Sample(() => true)
+	async decoratedWithCallbackBreaks() {
+		return true;
+	}
+}
