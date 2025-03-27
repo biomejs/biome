@@ -440,3 +440,70 @@ fn prettier_migrate_overrides() {
         result,
     ));
 }
+
+#[test]
+fn prettier_migrate_override_with_bad_print_width() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "formatter": { "enabled": true } }"#;
+    let prettier = r#"{
+        "overrides": [{
+            "files": ["**/*.test.js"],
+            "options": { "printWidth": 666 }
+        }]
+    }"#;
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_override_with_bad_print_width",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_with_bad_top_level_print_width() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "formatter": { "enabled": true } }"#;
+    let prettier = r#"{ "printWidth": 666 }"#;
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_with_bad_top_level_print_width",
+        fs,
+        console,
+        result,
+    ));
+}
