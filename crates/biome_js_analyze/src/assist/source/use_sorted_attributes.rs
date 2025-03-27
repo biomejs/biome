@@ -82,13 +82,9 @@ impl Rule for UseSortedAttributes {
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
         ctx.query().syntax().ancestors().find_map(|node| {
-            if let Some(element) = JsxOpeningElement::cast_ref(&node) {
-                Some(element.range())
-            } else if let Some(element) = JsxSelfClosingElement::cast_ref(&node) {
-                Some(element.range())
-            } else {
-                None
-            }
+            JsxOpeningElement::cast_ref(&node)
+                .map(|element| element.range())
+                .or_else(|| JsxSelfClosingElement::cast_ref(&node).map(|element| element.range()))
         })
     }
 

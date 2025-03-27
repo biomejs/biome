@@ -134,6 +134,7 @@ fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
     });
 }
 
+#[expect(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
