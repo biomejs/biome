@@ -424,6 +424,8 @@ impl HookConfigMaps {
 pub enum Fix {
     /// When the entire dependencies array is missing
     MissingDependenciesArray { function_name_range: TextRange },
+    /// When the dependency array is not an array literal node.
+    NonLiteralDependenciesArray { expr: AnyJsExpression },
     /// When a dependency needs to be added.
     AddDependency {
         function_name_range: TextRange,
@@ -762,23 +764,23 @@ impl Rule for UseExhaustiveDependencies {
                 return Vec::new().into_boxed_slice();
             };
 
-            if result.dependencies_node.is_none() {
-                return if options.report_missing_dependencies_array {
-                    vec![Fix::MissingDependenciesArray {
-                        function_name_range: result.function_name_range,
-                    }]
-                    .into_boxed_slice()
-                } else {
-                    Vec::new().into_boxed_slice()
-                };
-            }
-
-            // SAFETY: dependencies_node == None is already checked above
-            let dependencies_array = result
-                .dependencies_node
-                .as_ref()
-                .and_then(|node| node.as_js_array_expression().cloned())
-                .unwrap();
+            let dependencies_array = match &result.dependencies_node {
+                Some(AnyJsExpression::JsArrayExpression(dependencies_array)) => dependencies_array,
+                Some(expr) => {
+                    return vec![Fix::NonLiteralDependenciesArray { expr: expr.clone() }]
+                        .into_boxed_slice();
+                }
+                None => {
+                    return if options.report_missing_dependencies_array {
+                        vec![Fix::MissingDependenciesArray {
+                            function_name_range: result.function_name_range,
+                        }]
+                        .into_boxed_slice()
+                    } else {
+                        Vec::new().into_boxed_slice()
+                    };
+                }
+            };
 
             let component_function_range = component_function.text_range_with_trivia();
 
@@ -923,9 +925,8 @@ impl Rule for UseExhaustiveDependencies {
 
     fn instances_for_signal(signal: &Self::State) -> Box<[Box<str>]> {
         match signal {
-            Fix::MissingDependenciesArray {
-                function_name_range: _,
-            } => vec![].into_boxed_slice(),
+            Fix::MissingDependenciesArray { .. } => vec![].into_boxed_slice(),
+            Fix::NonLiteralDependenciesArray { .. } => vec![].into_boxed_slice(),
             Fix::AddDependency { captures, .. } => vec![captures.0.clone()].into(),
             Fix::RemoveDependency { dependencies, .. } => dependencies
                 .iter()
@@ -950,6 +951,15 @@ impl Rule for UseExhaustiveDependencies {
                 function_name_range,
                 markup! {"This hook does not have a dependencies array"},
             )),
+            Fix::NonLiteralDependenciesArray { expr } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    expr.range(),
+                    markup! {"This dependencies list is not an array literal."},
+                )
+                .note(markup! {"Biome can't statically verify whether you've passed the correct dependencies."})
+                .note(markup! { "Replace with an array literal and list your dependencies within it."})
+            ),
             Fix::AddDependency {
                 function_name_range,
                 captures,
