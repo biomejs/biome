@@ -1185,10 +1185,16 @@ pub trait Rule: RuleMeta + Sized {
                     first_token,
                     comment.as_str(),
                 );
+                let message = if category == RuleCategory::Action {
+                    "action"
+                } else {
+                    "rule"
+                };
                 return Some(SuppressAction {
                     mutation,
-                    message: markup! { "Suppress rule " {rule_category} " for the whole file."}
-                        .to_owned(),
+                    message:
+                        markup! { "Suppress " {message} " " {rule_category} " for the whole file."}
+                            .to_owned(),
                 });
             }
         }
@@ -1227,9 +1233,16 @@ pub trait Rule: RuleMeta + Sized {
                 suppression_reason: suppression_reason.unwrap_or("<explanation>"),
             });
 
+            let message = if category == RuleCategory::Action {
+                "action"
+            } else {
+                "rule"
+            };
+
             Some(SuppressAction {
                 mutation,
-                message: markup! { "Suppress rule " {rule_category} " for this line."}.to_owned(),
+                message: markup! { "Suppress " {message} " " {rule_category} " for this line."}
+                    .to_owned(),
             })
         } else {
             None

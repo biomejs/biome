@@ -1991,7 +1991,50 @@ if(a === -0) {}
         data: None,
     });
 
-    assert_eq!(res, vec![expected_code_action]);
+    let mut top_level_changes = HashMap::default();
+    top_level_changes.insert(
+        url!("document.js"),
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 0,
+                },
+                end: Position {
+                    line: 0,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                "/** biome-ignore-all assist/source/organizeImports: <explanation> */\n",
+            ),
+        }],
+    );
+
+    let expected_toplevel_suppression_action =
+        lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+            title: String::from(
+                "Suppress action assist/source/organizeImports for the whole file.",
+            ),
+            kind: Some(lsp::CodeActionKind::new(
+                "quickfix.suppressRule.topLevel.biome",
+            )),
+            diagnostics: None,
+            edit: Some(lsp::WorkspaceEdit {
+                changes: Some(top_level_changes),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        });
+
+    assert_eq!(
+        res,
+        vec![expected_code_action, expected_toplevel_suppression_action]
+    );
 
     server.close_document().await?;
 

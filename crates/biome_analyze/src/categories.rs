@@ -30,7 +30,7 @@ impl RuleCategory {
         match self {
             RuleCategory::Syntax => "syntax",
             RuleCategory::Lint => "lint",
-            RuleCategory::Action => "action",
+            RuleCategory::Action => "assist",
             RuleCategory::Transformation => "transformation",
         }
     }
