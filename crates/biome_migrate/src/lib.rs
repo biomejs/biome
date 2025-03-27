@@ -75,7 +75,7 @@ where
         }
 
         fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
-            unreachable!("")
+            "".to_string()
         }
     }
     let mut analyzer = Analyzer::new(

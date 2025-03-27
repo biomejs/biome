@@ -735,7 +735,7 @@ pub enum AnalyzerSuppressionKind<'a> {
     Plugin(Option<&'a str>),
 }
 
-impl<'a> AnalyzerSuppressionKind<'a> {
+impl AnalyzerSuppressionKind<'_> {
     /// Whether this suppression is meant to suppress an action
     pub fn is_action(&self) -> bool {
         match self {
