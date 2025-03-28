@@ -137,7 +137,6 @@ pub(crate) struct Query {
 #[derive(Debug)]
 enum QueryKind {
     Move(Category, Category),
-    Replace(Category),
     Remove(Category),
 }
 
@@ -248,26 +247,6 @@ impl AnalyzerMover {
         })
     }
 
-    /// Register a query where an existing rule is replaced with a new [JsonMember]
-    ///
-    /// ## Panics
-    ///
-    /// It panics if the group doesn't exist. This usually means that the developer must add the new group
-    pub(crate) fn replace_rule(
-        &mut self,
-        rule_name: impl ToString,
-        rule_member: JsonMember,
-        group: &str,
-    ) {
-        let category = Category::from_str(group).expect("to be a valid group");
-
-        self.queries.push(Query {
-            rule_name: rule_name.to_string(),
-            kind: QueryKind::Replace(category),
-            rule_member: Some(rule_member),
-        })
-    }
-
     /// Register the move of a rule from one group to another
     ///
     /// ## Panics
@@ -305,44 +284,6 @@ impl AnalyzerMover {
             kind: QueryKind::Move(from_group, to_group),
             rule_member,
         })
-    }
-
-    fn replace_rule_in_group(
-        groups: &mut FxHashMap<Category, JsonMember>,
-        rule_name: &str,
-        rule_member: JsonMember,
-        group: &Category,
-    ) -> Option<()> {
-        if let Some(member) = groups.get_mut(group) {
-            let list = member
-                .value()
-                .ok()?
-                .as_json_object_value()?
-                .json_member_list();
-
-            let mut new_members = Vec::with_capacity(list.len());
-            let mut new_separators = Vec::with_capacity(list.len());
-            let mut rule_member_added = false;
-            for member in list.iter().flatten() {
-                if rule_name == member.name().ok()?.inner_string_text().ok()?.text() {
-                    new_members.push(rule_member.clone());
-                    rule_member_added = true;
-                } else {
-                    new_members.push(member);
-                }
-            }
-
-            if !rule_member_added {
-                new_members.push(rule_member);
-            }
-            for _ in 0..new_members.len().saturating_sub(1) {
-                new_separators.push(token(T![,]));
-            }
-
-            *member = group_member(new_members, new_separators, group.as_str());
-        }
-
-        Some(())
     }
 
     /// Removes a rule from a group, and returns the new member list
@@ -455,14 +396,6 @@ impl AnalyzerMover {
                 QueryKind::Move(from, to) => {
                     AnalyzerMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &from)?;
                     AnalyzerMover::add_rule_to_group(&mut groups, rule_member, &to)?
-                }
-                QueryKind::Replace(group) => {
-                    AnalyzerMover::replace_rule_in_group(
-                        &mut groups,
-                        rule_name.as_str(),
-                        rule_member,
-                        &group,
-                    )?;
                 }
                 QueryKind::Remove(group) => {
                     AnalyzerMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;

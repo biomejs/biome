@@ -45,21 +45,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"noCommaOperator":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"noCommaOperator":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -85,21 +77,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useAsConstAssertion":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useAsConstAssertion":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -125,21 +109,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useConst":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useConst":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -165,21 +141,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useImportType":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useImportType":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -205,21 +173,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"noNonNullAssertion":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"noNonNullAssertion":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -245,21 +205,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"noUselessElse":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"noUselessElse":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -285,21 +237,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useTemplate":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useTemplate":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -325,21 +269,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useExponentiationOperator":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useExponentiationOperator":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -365,21 +301,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"noInferrableTypes":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"noInferrableTypes":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -405,21 +333,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useNumberNamespace":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useNumberNamespace":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -445,21 +365,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"noUnusedTemplateLiteral":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"noUnusedTemplateLiteral":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -485,21 +397,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useSelfClosingElements":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useSelfClosingElements":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -525,21 +429,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useSingleVarDeclarator":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useSingleVarDeclarator":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -565,21 +461,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useEnumInitializers":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useEnumInitializers":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -605,21 +493,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useNodejsImportProtocol":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useNodejsImportProtocol":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```
@@ -645,21 +525,13 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"recommended":·true,
-     5    │ - ······"style":·{
-        4 │ + ······"style":·{
-     6  5 │           "useLiteralEnumMembers": "warn",
-     7  6 │           "noArguments": "warn",
-    ····· │ 
-     9  8 │           "useShorthandFunctionType": "warn",
-    10  9 │           "useExportType":  "warn",
+     9  9 │           "useShorthandFunctionType": "warn",
+    10 10 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-       10 │ + ········"useDefaultParameterLast":·"warn",
-       11 │ + ········"useNumericLiterals":·"error"
-    12 12 │         }
-    13 13 │       }
+       11 │ + ········"useDefaultParameterLast":·"warn",
+       12 │ + ········"useNumericLiterals":·"error"
+    12 13 │         }
+    13 14 │       }
   
 
 ```

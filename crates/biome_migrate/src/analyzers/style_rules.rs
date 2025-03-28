@@ -1,14 +1,16 @@
-use crate::rule_mover::AnalyzerMover;
 use crate::{MigrationAction, declare_migration};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make::{
-    json_member, json_member_name, json_string_literal, json_string_value, token,
+    json_member, json_member_list, json_member_name, json_object_value, json_string_literal,
+    json_string_value, token,
 };
-use biome_json_syntax::{AnyJsonValue, JsonMember, JsonRoot, T};
-use biome_rowan::{AstNode, TriviaPieceKind, WalkEvent};
+use biome_json_syntax::{
+    AnyJsonValue, JsonMember, JsonMemberList, JsonObjectValue, JsonRoot, JsonSyntaxToken, T,
+};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, WalkEvent};
 use rustc_hash::FxHashSet;
 
 declare_migration! {
@@ -127,9 +129,8 @@ impl Rule for StyleRules {
     }
 
     fn action(ctx: &RuleContext<Self>, rule_to_move: &Self::State) -> Option<MigrationAction> {
-        let mut rule_mover = AnalyzerMover::from_root(ctx.root());
-
-        let member = json_member(
+        let root = ctx.root();
+        let new_rule_member = json_member(
             json_member_name(
                 json_string_literal(rule_to_move.as_ref()).with_leading_trivia(vec![
                     (TriviaPieceKind::Newline, "\n"),
@@ -142,9 +143,70 @@ impl Rule for StyleRules {
                     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
             )),
         );
-        rule_mover.replace_rule(rule_to_move.as_ref(), member, "style");
+        let linter_member = get_linter_field(ctx.root());
+        let rules_member = linter_member
+            .as_ref()
+            .and_then(|linter_member| find_member_by_name(linter_member, "rules"));
+        let styles_member = rules_member
+            .as_ref()
+            .and_then(|rules_member| find_member_by_name(rules_member, "style"));
 
-        let mutation = rule_mover.run_queries()?;
+        let new_styles_member = match styles_member {
+            None => create_style_member(vec![new_rule_member], vec![], 6),
+            Some(styles_member) => {
+                let (list, separators) =
+                    add_or_replace_member(styles_member, new_rule_member.clone())?;
+                create_style_member(list, separators, 6)
+            }
+        };
+
+        eprintln!("{:#?}", new_styles_member.to_string());
+
+        let new_rules_member = match rules_member {
+            None => create_rules_member(vec![new_styles_member], vec![], 4),
+            Some(rules_member) => {
+                let (list, separators) =
+                    add_or_replace_member(rules_member, new_styles_member.clone())?;
+                create_rules_member(list, separators, 4)
+            }
+        };
+
+        let new_linter_member = match linter_member {
+            None => create_linter_member(vec![new_rules_member], vec![], 2),
+            Some(linter_member) => {
+                let (list, separators) =
+                    add_or_replace_member(linter_member, new_rules_member.clone())?;
+
+                create_linter_member(list, separators, 2)
+            }
+        };
+
+        let mut mutation = ctx.root().begin();
+
+        let root_list = root
+            .value()
+            .ok()?
+            .as_json_object_value()?
+            .json_member_list();
+        let mut linter_replaced = false;
+        for member in root_list.iter().flatten() {
+            let member_name = member.name().ok()?.inner_string_text().ok()?;
+            if member_name.text() == "linter" {
+                mutation.replace_node(member, new_linter_member.clone());
+                linter_replaced = true;
+            }
+        }
+
+        if !linter_replaced {
+            let mut new_root_list = root_list.iter().flatten().collect::<Vec<_>>();
+            new_root_list.push(new_linter_member);
+            let mut separators = vec![];
+            for _ in 0..new_root_list.len().saturating_sub(1) {
+                separators.push(token(T![,]))
+            }
+            debug_assert_eq!(new_root_list.len(), separators.len() + 1);
+            mutation.replace_node(root_list, json_member_list(new_root_list, separators));
+        }
 
         Some(RuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -156,4 +218,134 @@ impl Rule for StyleRules {
             mutation,
         ))
     }
+}
+
+fn find_member_by_name(member: &JsonMember, field_name: &str) -> Option<JsonMember> {
+    member
+        .value()
+        .ok()?
+        .as_json_object_value()?
+        .json_member_list()
+        .iter()
+        .flatten()
+        .find_map(|member| {
+            if member
+                .name()
+                .ok()?
+                .inner_string_text()
+                .ok()
+                .is_some_and(|name| name.text() == field_name)
+            {
+                Some(member)
+            } else {
+                None
+            }
+        })
+}
+
+fn get_linter_field(root: JsonRoot) -> Option<JsonMember> {
+    root.value()
+        .ok()?
+        .as_json_object_value()?
+        .json_member_list()
+        .iter()
+        .flatten()
+        .find_map(|member| {
+            if member
+                .name()
+                .ok()?
+                .inner_string_text()
+                .ok()
+                .is_some_and(|name| name.text() == "linter")
+            {
+                Some(member)
+            } else {
+                None
+            }
+        })
+}
+
+fn create_member(text: &str, value: AnyJsonValue, level: usize) -> JsonMember {
+    json_member(
+        json_member_name(json_string_literal(text).with_leading_trivia(vec![
+            (TriviaPieceKind::Newline, "\n"),
+            (TriviaPieceKind::Whitespace, " ".repeat(level).as_str()),
+        ])),
+        token(T![:]),
+        value,
+    )
+}
+
+fn create_object(list: JsonMemberList, spaces: usize) -> JsonObjectValue {
+    json_object_value(
+        token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+        list,
+        token(T!['}']).with_leading_trivia(vec![
+            (TriviaPieceKind::Newline, "\n"),
+            (TriviaPieceKind::Whitespace, " ".repeat(spaces).as_str()),
+        ]),
+    )
+}
+
+fn create_rules_member(
+    members: Vec<JsonMember>,
+    separators: Vec<JsonSyntaxToken>,
+    white_space: usize,
+) -> JsonMember {
+    let list = json_member_list(members, separators);
+    let object = create_object(list, white_space);
+    create_member("rules", AnyJsonValue::JsonObjectValue(object), white_space)
+}
+
+fn create_style_member(
+    members: Vec<JsonMember>,
+    separators: Vec<JsonSyntaxToken>,
+    white_space: usize,
+) -> JsonMember {
+    let list = json_member_list(members, separators);
+    let object = create_object(list, white_space);
+    create_member("style", AnyJsonValue::JsonObjectValue(object), white_space)
+}
+
+fn create_linter_member(
+    members: Vec<JsonMember>,
+    separators: Vec<JsonSyntaxToken>,
+    white_space: usize,
+) -> JsonMember {
+    let list = json_member_list(members, separators);
+    let object = create_object(list, white_space);
+    create_member("linter", AnyJsonValue::JsonObjectValue(object), white_space)
+}
+
+fn add_or_replace_member(
+    parent_member: JsonMember,
+    member_to_replace_or_add: JsonMember,
+) -> Option<(Vec<JsonMember>, Vec<JsonSyntaxToken>)> {
+    let (list, mut separators) = parent_member.unzip_elements()?;
+    let mut new_list = vec![];
+    let mut member_replaced = false;
+
+    let new_member_name = member_to_replace_or_add
+        .name()
+        .ok()?
+        .inner_string_text()
+        .ok()?;
+    for member in &list {
+        let member_name = member.name().ok()?.inner_string_text().ok()?;
+        if member_name.text() == new_member_name.text() {
+            new_list.push(member_to_replace_or_add.clone());
+            member_replaced = true
+        } else {
+            new_list.push(member.clone());
+        }
+    }
+    if !member_replaced {
+        new_list.push(member_to_replace_or_add);
+        if new_list.len() > 1 {
+            separators.push(token(T![,]));
+        }
+    }
+    debug_assert_eq!(new_list.len() - 1, separators.len());
+
+    Some((new_list, separators))
 }
