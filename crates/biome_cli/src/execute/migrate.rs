@@ -9,7 +9,6 @@ use biome_deserialize::Merge;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{PrintDiagnostic, category};
-use biome_formatter::ParseFormatNumberError;
 use biome_fs::{BiomePath, OpenOptions};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
@@ -96,14 +95,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 return Ok(());
             };
             let old_biome_config = biome_config.clone();
-            let prettier_biome_config =
-                prettier_config
-                    .try_into()
-                    .map_err(|err: ParseFormatNumberError| {
-                        CliDiagnostic::MigrateError(MigrationDiagnostic {
-                            reason: err.to_string(),
-                        })
-                    })?;
+            let prettier_biome_config = prettier_config.try_into().map_err(|err| {
+                CliDiagnostic::MigrateError(MigrationDiagnostic {
+                    reason: format!("{:#}", err),
+                })
+            })?;
             biome_config.merge_with(prettier_biome_config);
             if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, prettier::IGNORE_FILE) {
                 if !ignore_patterns.patterns.is_empty() {
