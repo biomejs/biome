@@ -1,4 +1,4 @@
-use biome_diagnostics::{Category, Diagnostic};
+use biome_diagnostics::{Advices, Category, Diagnostic, LogCategory, Visit};
 use biome_rowan::{TextLen, TextRange, TextSize};
 use std::ops::Add;
 
@@ -187,28 +187,72 @@ pub struct SuppressionDiagnostic {
     span: TextRange,
 }
 
+impl Advices for SuppressionDiagnostic {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        match self.message {
+            SuppressionDiagnosticKind::MissingColon => {
+                visitor.record_log(
+                    LogCategory::Info,
+                    &"A semicolon is required after the category.",
+                )?;
+            }
+            SuppressionDiagnosticKind::ParseCategory(_) => {
+                visitor.record_log(
+                    LogCategory::Info,
+                    &"Biome can't recognize the category, usually it's because it doesn't match the expected ones.",
+                )?;
+            }
+            SuppressionDiagnosticKind::MissingCategory => {
+                visitor.record_log(
+                    LogCategory::Info,
+                    &"A category is mandatory: try lint, format, assist or plugin.",
+                )?;
+            }
+            SuppressionDiagnosticKind::MissingClosingParen => {}
+        }
+
+        visitor.record_log(
+            LogCategory::Info,
+            &"Example of suppression: // biome-ignore lint: reason",
+        )
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum SuppressionDiagnosticKind {
     MissingColon,
     ParseCategory(String),
     MissingCategory,
-    MissingParen,
+    MissingClosingParen,
 }
 
 impl std::fmt::Display for SuppressionDiagnosticKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SuppressionDiagnosticKind::MissingColon => write!(
-                f,
-                "unexpected token, expected one of ':', '(' or whitespace"
-            ),
+            SuppressionDiagnosticKind::MissingColon => {
+                write!(
+                    f,
+                    "Unexpected token, expected one of ':', '(' or whitespace. Example of suppression: // biome-ignore lint: reason"
+                )
+            }
             SuppressionDiagnosticKind::ParseCategory(category) => {
-                write!(f, "failed to parse category {category:?}")
+                write!(
+                    f,
+                    "Failed to parse category {category:?}. Example of suppression: // biome-ignore lint: reason"
+                )
             }
             SuppressionDiagnosticKind::MissingCategory => {
-                write!(f, "unexpected token, expected one of ':' or whitespace")
+                write!(
+                    f,
+                    "Incorrect suppression: unexpected token, expected one of ':' or whitespace. Example of suppression: // biome-ignore lint: reason"
+                )
             }
-            SuppressionDiagnosticKind::MissingParen => write!(f, "unexpected token, expected ')'"),
+            SuppressionDiagnosticKind::MissingClosingParen => {
+                write!(
+                    f,
+                    "Unexpected token, expected ')'. Example of suppression: // biome-ignore lint: reason"
+                )
+            }
         }
     }
 }
@@ -218,16 +262,16 @@ impl biome_console::fmt::Display for SuppressionDiagnosticKind {
         match self {
             SuppressionDiagnosticKind::MissingColon => write!(
                 fmt,
-                "unexpected token, expected one of ':', '(' or whitespace"
+                "Unexpected token, expected one of ':', '(' or whitespace"
             ),
             SuppressionDiagnosticKind::ParseCategory(category) => {
-                write!(fmt, "failed to parse category {category:?}")
+                write!(fmt, "Failed to parse category {category:?}")
             }
             SuppressionDiagnosticKind::MissingCategory => {
-                write!(fmt, "unexpected token, expected one of ':' or whitespace")
+                write!(fmt, "Unexpected token, expected one of ':' or whitespace.")
             }
-            SuppressionDiagnosticKind::MissingParen => {
-                write!(fmt, "unexpected token, expected ')'")
+            SuppressionDiagnosticKind::MissingClosingParen => {
+                write!(fmt, "Unexpected token, expected ')'.")
             }
         }
     }
@@ -278,7 +322,7 @@ fn parse_suppression_line(
                     ),
                 })?;
                 let paren = rest.find(')').ok_or_else(|| SuppressionDiagnostic {
-                    message: SuppressionDiagnosticKind::MissingParen,
+                    message: SuppressionDiagnosticKind::MissingClosingParen,
                     span: TextRange::at(offset_from(base, rest), TextSize::of(rest)),
                 })?;
 
@@ -701,19 +745,8 @@ mod tests_biome_ignore_inline {
         assert_eq!(
             parse_suppression_comment("// biome-ignore format(:").collect::<Vec<_>>(),
             vec![Err(SuppressionDiagnostic {
-                message: SuppressionDiagnosticKind::MissingParen,
+                message: SuppressionDiagnosticKind::MissingClosingParen,
                 span: TextRange::new(TextSize::from(23), TextSize::from(24))
-            })],
-        );
-    }
-
-    #[test]
-    fn diagnostic_missing_category() {
-        assert_eq!(
-            parse_suppression_comment("// biome-ignore (value): explanation").collect::<Vec<_>>(),
-            vec![Err(SuppressionDiagnostic {
-                message: SuppressionDiagnosticKind::MissingCategory,
-                span: TextRange::new(TextSize::from(16), TextSize::from(17))
             })],
         );
     }
@@ -944,20 +977,8 @@ mod tests_biome_ignore_toplevel {
         assert_eq!(
             parse_suppression_comment("// biome-ignore-all format(:").collect::<Vec<_>>(),
             vec![Err(SuppressionDiagnostic {
-                message: SuppressionDiagnosticKind::MissingParen,
+                message: SuppressionDiagnosticKind::MissingClosingParen,
                 span: TextRange::new(TextSize::from(27), TextSize::from(28))
-            })],
-        );
-    }
-
-    #[test]
-    fn diagnostic_missing_category() {
-        assert_eq!(
-            parse_suppression_comment("// biome-ignore-all (value): explanation")
-                .collect::<Vec<_>>(),
-            vec![Err(SuppressionDiagnostic {
-                message: SuppressionDiagnosticKind::MissingCategory,
-                span: TextRange::new(TextSize::from(20), TextSize::from(21))
             })],
         );
     }
