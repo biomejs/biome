@@ -193,7 +193,7 @@ impl Advices for SuppressionDiagnostic {
             SuppressionDiagnosticKind::MissingColon => {
                 visitor.record_log(
                     LogCategory::Info,
-                    &"A semicolon is required after the category.",
+                    &"A colon is required after the category.",
                 )?;
             }
             SuppressionDiagnosticKind::ParseCategory(_) => {
