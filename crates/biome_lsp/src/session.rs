@@ -424,7 +424,6 @@ impl Session {
                 enabled_rules: Vec::new(),
             })?;
 
-            tracing::debug!("biome diagnostics: {:#?}", result.diagnostics);
             let content = self.workspace.get_file_content(GetFileContentParams {
                 project_key: doc.project_key,
                 path: biome_path.clone(),
