@@ -230,51 +230,6 @@ pub struct HtmlClosingElementFields {
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct HtmlComment {
-    pub(crate) syntax: SyntaxNode,
-}
-impl HtmlComment {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> HtmlCommentFields {
-        HtmlCommentFields {
-            comment_start_token: self.comment_start_token(),
-            content_token: self.content_token(),
-            comment_end_token: self.comment_end_token(),
-        }
-    }
-    pub fn comment_start_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn content_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn comment_end_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for HtmlComment {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct HtmlCommentFields {
-    pub comment_start_token: SyntaxResult<SyntaxToken>,
-    pub content_token: SyntaxResult<SyntaxToken>,
-    pub comment_end_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlContent {
     pub(crate) syntax: SyntaxNode,
 }
@@ -672,7 +627,6 @@ impl AnyHtmlAttribute {
 pub enum AnyHtmlElement {
     HtmlBogusElement(HtmlBogusElement),
     HtmlCdataSection(HtmlCdataSection),
-    HtmlComment(HtmlComment),
     HtmlContent(HtmlContent),
     HtmlElement(HtmlElement),
     HtmlSelfClosingElement(HtmlSelfClosingElement),
@@ -687,12 +641,6 @@ impl AnyHtmlElement {
     pub fn as_html_cdata_section(&self) -> Option<&HtmlCdataSection> {
         match &self {
             AnyHtmlElement::HtmlCdataSection(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_html_comment(&self) -> Option<&HtmlComment> {
-        match &self {
-            AnyHtmlElement::HtmlComment(item) => Some(item),
             _ => None,
         }
     }
@@ -978,64 +926,6 @@ impl From<HtmlClosingElement> for SyntaxNode {
 }
 impl From<HtmlClosingElement> for SyntaxElement {
     fn from(n: HtmlClosingElement) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for HtmlComment {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_COMMENT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == HTML_COMMENT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for HtmlComment {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("HtmlComment")
-                .field(
-                    "comment_start_token",
-                    &support::DebugSyntaxResult(self.comment_start_token()),
-                )
-                .field(
-                    "content_token",
-                    &support::DebugSyntaxResult(self.content_token()),
-                )
-                .field(
-                    "comment_end_token",
-                    &support::DebugSyntaxResult(self.comment_end_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("HtmlComment").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<HtmlComment> for SyntaxNode {
-    fn from(n: HtmlComment) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<HtmlComment> for SyntaxElement {
-    fn from(n: HtmlComment) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -1563,11 +1453,6 @@ impl From<HtmlCdataSection> for AnyHtmlElement {
         AnyHtmlElement::HtmlCdataSection(node)
     }
 }
-impl From<HtmlComment> for AnyHtmlElement {
-    fn from(node: HtmlComment) -> AnyHtmlElement {
-        AnyHtmlElement::HtmlComment(node)
-    }
-}
 impl From<HtmlContent> for AnyHtmlElement {
     fn from(node: HtmlContent) -> AnyHtmlElement {
         AnyHtmlElement::HtmlContent(node)
@@ -1587,7 +1472,6 @@ impl AstNode for AnyHtmlElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = HtmlBogusElement::KIND_SET
         .union(HtmlCdataSection::KIND_SET)
-        .union(HtmlComment::KIND_SET)
         .union(HtmlContent::KIND_SET)
         .union(HtmlElement::KIND_SET)
         .union(HtmlSelfClosingElement::KIND_SET);
@@ -1596,7 +1480,6 @@ impl AstNode for AnyHtmlElement {
             kind,
             HTML_BOGUS_ELEMENT
                 | HTML_CDATA_SECTION
-                | HTML_COMMENT
                 | HTML_CONTENT
                 | HTML_ELEMENT
                 | HTML_SELF_CLOSING_ELEMENT
@@ -1606,7 +1489,6 @@ impl AstNode for AnyHtmlElement {
         let res = match syntax.kind() {
             HTML_BOGUS_ELEMENT => AnyHtmlElement::HtmlBogusElement(HtmlBogusElement { syntax }),
             HTML_CDATA_SECTION => AnyHtmlElement::HtmlCdataSection(HtmlCdataSection { syntax }),
-            HTML_COMMENT => AnyHtmlElement::HtmlComment(HtmlComment { syntax }),
             HTML_CONTENT => AnyHtmlElement::HtmlContent(HtmlContent { syntax }),
             HTML_ELEMENT => AnyHtmlElement::HtmlElement(HtmlElement { syntax }),
             HTML_SELF_CLOSING_ELEMENT => {
@@ -1620,7 +1502,6 @@ impl AstNode for AnyHtmlElement {
         match self {
             AnyHtmlElement::HtmlBogusElement(it) => &it.syntax,
             AnyHtmlElement::HtmlCdataSection(it) => &it.syntax,
-            AnyHtmlElement::HtmlComment(it) => &it.syntax,
             AnyHtmlElement::HtmlContent(it) => &it.syntax,
             AnyHtmlElement::HtmlElement(it) => &it.syntax,
             AnyHtmlElement::HtmlSelfClosingElement(it) => &it.syntax,
@@ -1630,7 +1511,6 @@ impl AstNode for AnyHtmlElement {
         match self {
             AnyHtmlElement::HtmlBogusElement(it) => it.syntax,
             AnyHtmlElement::HtmlCdataSection(it) => it.syntax,
-            AnyHtmlElement::HtmlComment(it) => it.syntax,
             AnyHtmlElement::HtmlContent(it) => it.syntax,
             AnyHtmlElement::HtmlElement(it) => it.syntax,
             AnyHtmlElement::HtmlSelfClosingElement(it) => it.syntax,
@@ -1642,7 +1522,6 @@ impl std::fmt::Debug for AnyHtmlElement {
         match self {
             AnyHtmlElement::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
             AnyHtmlElement::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
-            AnyHtmlElement::HtmlComment(it) => std::fmt::Debug::fmt(it, f),
             AnyHtmlElement::HtmlContent(it) => std::fmt::Debug::fmt(it, f),
             AnyHtmlElement::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
             AnyHtmlElement::HtmlSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
@@ -1654,7 +1533,6 @@ impl From<AnyHtmlElement> for SyntaxNode {
         match n {
             AnyHtmlElement::HtmlBogusElement(it) => it.into(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into(),
-            AnyHtmlElement::HtmlComment(it) => it.into(),
             AnyHtmlElement::HtmlContent(it) => it.into(),
             AnyHtmlElement::HtmlElement(it) => it.into(),
             AnyHtmlElement::HtmlSelfClosingElement(it) => it.into(),
@@ -1698,11 +1576,6 @@ impl std::fmt::Display for HtmlCdataSection {
     }
 }
 impl std::fmt::Display for HtmlClosingElement {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for HtmlComment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
