@@ -703,6 +703,17 @@ mod tests_biome_ignore_inline {
     }
 
     #[test]
+    fn diagnostic_missing_category() {
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore (value): explanation").collect::<Vec<_>>(),
+            vec![Err(SuppressionDiagnostic {
+                message: SuppressionDiagnosticKind::MissingCategory,
+                span: TextRange::new(TextSize::from(16), TextSize::from(17))
+            })],
+        );
+    }
+
+    #[test]
     fn check_parse_category() {
         assert_eq!(
             parse_category("// biome-ignore: reason", ""),
@@ -941,6 +952,18 @@ mod tests_biome_ignore_toplevel {
                 reason: "explanation",
                 kind: SuppressionKind::All,
                 range: TextRange::new(TextSize::from(50), TextSize::from(66))
+            })],
+        );
+    }
+
+    #[test]
+    fn diagnostic_missing_category() {
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore-all (value): explanation")
+                .collect::<Vec<_>>(),
+            vec![Err(SuppressionDiagnostic {
+                message: SuppressionDiagnosticKind::MissingCategory,
+                span: TextRange::new(TextSize::from(20), TextSize::from(21))
             })],
         );
     }
