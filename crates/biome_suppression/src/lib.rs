@@ -1,4 +1,6 @@
-use biome_diagnostics::{Advices, Category, Diagnostic, LogCategory, Visit};
+use biome_console::fmt::Formatter;
+use biome_console::markup;
+use biome_diagnostics::{Category, Diagnostic, Location, LogCategory, Visit, category};
 use biome_rowan::{TextLen, TextRange, TextSize};
 use std::ops::Add;
 
@@ -177,18 +179,26 @@ pub fn parse_suppression_comment(
     })
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Diagnostic)]
-#[diagnostic(category = "suppressions/parse")]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SuppressionDiagnostic {
-    #[message]
-    #[description]
     message: SuppressionDiagnosticKind,
-    #[location(span)]
     span: TextRange,
 }
 
-impl Advices for SuppressionDiagnostic {
-    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+impl Diagnostic for SuppressionDiagnostic {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("suppressions/parse"))
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(fmt, "{}", self.message)
+    }
+
+    fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup! { {self.message} })
+    }
+
+    fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
         match self.message {
             SuppressionDiagnosticKind::MissingColon => {
                 visitor.record_log(
@@ -215,6 +225,10 @@ impl Advices for SuppressionDiagnostic {
             LogCategory::Info,
             &"Example of suppression: // biome-ignore lint: reason",
         )
+    }
+
+    fn location(&self) -> Location<'_> {
+        Location::builder().span(&self.span).build()
     }
 }
 
