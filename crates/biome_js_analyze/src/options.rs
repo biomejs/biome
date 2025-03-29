@@ -6,6 +6,7 @@ use crate::assist;
 use crate::lint;
 pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze::Rule>::Options;
 pub type NoAccumulatingSpread = < lint :: performance :: no_accumulating_spread :: NoAccumulatingSpread as biome_analyze :: Rule > :: Options ;
+pub type NoAdjacentSpacesInRegex = < lint :: complexity :: no_adjacent_spaces_in_regex :: NoAdjacentSpacesInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoApproximativeNumericConstant = < lint :: suspicious :: no_approximative_numeric_constant :: NoApproximativeNumericConstant as biome_analyze :: Rule > :: Options ;
 pub type NoArguments = <lint::style::no_arguments::NoArguments as biome_analyze::Rule>::Options;
 pub type NoAriaHiddenOnFocusable = < lint :: a11y :: no_aria_hidden_on_focusable :: NoAriaHiddenOnFocusable as biome_analyze :: Rule > :: Options ;
@@ -156,7 +157,6 @@ pub type NoMisleadingCharacterClass = < lint :: suspicious :: no_misleading_char
 pub type NoMisleadingInstantiator = < lint :: suspicious :: no_misleading_instantiator :: NoMisleadingInstantiator as biome_analyze :: Rule > :: Options ;
 pub type NoMisplacedAssertion = < lint :: suspicious :: no_misplaced_assertion :: NoMisplacedAssertion as biome_analyze :: Rule > :: Options ;
 pub type NoMisrefactoredShorthandAssign = < lint :: suspicious :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign as biome_analyze :: Rule > :: Options ;
-pub type NoMultipleSpacesInRegex = < lint :: complexity :: no_multiple_spaces_in_regex :: NoMultipleSpacesInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoNamespace = <lint::style::no_namespace::NoNamespace as biome_analyze::Rule>::Options;
 pub type NoNamespaceImport =
     <lint::style::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
@@ -176,7 +176,6 @@ pub type NoNoninteractiveTabindex = < lint :: a11y :: no_noninteractive_tabindex
 pub type NoNonoctalDecimalEscape = < lint :: correctness :: no_nonoctal_decimal_escape :: NoNonoctalDecimalEscape as biome_analyze :: Rule > :: Options ;
 pub type NoOctalEscape =
     <lint::nursery::no_octal_escape::NoOctalEscape as biome_analyze::Rule>::Options;
-pub type NoPackagePrivateImports = < lint :: nursery :: no_package_private_imports :: NoPackagePrivateImports as biome_analyze :: Rule > :: Options ;
 pub type NoParameterAssign =
     <lint::style::no_parameter_assign::NoParameterAssign as biome_analyze::Rule>::Options;
 pub type NoParameterProperties =
@@ -185,6 +184,8 @@ pub type NoPositiveTabindex =
     <lint::a11y::no_positive_tabindex::NoPositiveTabindex as biome_analyze::Rule>::Options;
 pub type NoPrecisionLoss =
     <lint::correctness::no_precision_loss::NoPrecisionLoss as biome_analyze::Rule>::Options;
+pub type NoPrivateImports =
+    <lint::correctness::no_private_imports::NoPrivateImports as biome_analyze::Rule>::Options;
 pub type NoProcessEnv =
     <lint::nursery::no_process_env::NoProcessEnv as biome_analyze::Rule>::Options;
 pub type NoProcessGlobal =
@@ -239,7 +240,6 @@ pub type NoThisInStatic =
 pub type NoTsIgnore = <lint::nursery::no_ts_ignore::NoTsIgnore as biome_analyze::Rule>::Options;
 pub type NoUndeclaredDependencies = < lint :: correctness :: no_undeclared_dependencies :: NoUndeclaredDependencies as biome_analyze :: Rule > :: Options ;
 pub type NoUndeclaredVariables = < lint :: correctness :: no_undeclared_variables :: NoUndeclaredVariables as biome_analyze :: Rule > :: Options ;
-pub type NoUnnecessaryContinue = < lint :: correctness :: no_unnecessary_continue :: NoUnnecessaryContinue as biome_analyze :: Rule > :: Options ;
 pub type NoUnreachable =
     <lint::correctness::no_unreachable::NoUnreachable as biome_analyze::Rule>::Options;
 pub type NoUnreachableSuper =
@@ -264,6 +264,8 @@ pub type NoUnwantedPolyfillio =
 pub type NoUselessCatch =
     <lint::complexity::no_useless_catch::NoUselessCatch as biome_analyze::Rule>::Options;
 pub type NoUselessConstructor = < lint :: complexity :: no_useless_constructor :: NoUselessConstructor as biome_analyze :: Rule > :: Options ;
+pub type NoUselessContinue =
+    <lint::correctness::no_useless_continue::NoUselessContinue as biome_analyze::Rule>::Options;
 pub type NoUselessElse =
     <lint::style::no_useless_else::NoUselessElse as biome_analyze::Rule>::Options;
 pub type NoUselessEmptyExport = < lint :: complexity :: no_useless_empty_export :: NoUselessEmptyExport as biome_analyze :: Rule > :: Options ;
@@ -421,6 +423,8 @@ pub type UseSortedAttributes =
     <assist::source::use_sorted_attributes::UseSortedAttributes as biome_analyze::Rule>::Options;
 pub type UseSortedClasses =
     <lint::nursery::use_sorted_classes::UseSortedClasses as biome_analyze::Rule>::Options;
+pub type UseSortedKeys =
+    <assist::source::use_sorted_keys::UseSortedKeys as biome_analyze::Rule>::Options;
 pub type UseStrictMode =
     <lint::nursery::use_strict_mode::UseStrictMode as biome_analyze::Rule>::Options;
 pub type UseSymbolDescription =

@@ -1,144 +1,518 @@
 use biome_analyze::{
     ActionCategory, Ast, FixKind, Rule, SourceActionKind, context::RuleContext, declare_source_rule,
 };
-use biome_console::markup;
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext};
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::JsModule;
-use biome_rowan::BatchMutationExt;
+use biome_js_syntax::{AnyJsExportClause, AnyJsModuleItem, JsModule, JsSyntaxKind, JsSyntaxNode};
+use biome_rowan::{AstNode, TriviaPieceKind};
+use biome_rowan::{BatchMutationExt, chain_trivia_pieces};
+use import_key::{ImportInfo, ImportKey};
+use rustc_hash::FxHashMap;
+use specifiers_attributes::{
+    are_import_attributes_sorted, sort_attributes, sort_export_specifiers, sort_import_specifiers,
+};
 
 use crate::JsRuleAction;
+use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
-pub mod legacy;
-pub mod util;
+pub mod comparable_token;
+pub mod import_groups;
+pub mod import_key;
+pub mod import_source;
+pub mod specifiers_attributes;
+mod util;
 
 declare_source_rule! {
-    /// Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.
+    /// Provides a code action to sort the imports and exports in the file using a built-in or custom order.
     ///
-    /// ## How imports are sorted
+    /// Imports and exports are first separated into chunks, before being sorted.
+    /// Imports or exports of a chunk are then grouped according to the user-defined groups.
+    /// Within a group, imports are sorted using a built-in order that depends on the import/export kind, whether the import/export has attributes and the source being imported from.
     ///
-    /// Import statements are sorted by "distance". Modules that are "farther" from the user are put on the top, modules "closer" to the user are put on the bottom:
+    /// ```js,ignore
+    /// import A from "@my/lib" with { "attribute1": "value" };
+    /// ^^^^^^^^       ^^^^^^^         ^^^^^^^^^^^^^^^^^^^^^
+    ///   kind         source                attributes
     ///
-    /// 1. modules imported via `bun:` protocol. This is applicable when writing code run by Bun;
-    /// 1. built-in Node.js modules that are explicitly imported using the `node:` protocol and common Node built-ins such as `assert`;
-    /// 1. modules imported via `npm:` protocol. This is applicable when writing code run by Deno;
-    /// 1. modules that contain the protocol `:`. These are usually considered "virtual modules", modules that are injected by your working environment, e.g. `vite`;
-    /// 1. modules imported via URL;
-    /// 1. modules imported from libraries;
-    /// 1. modules imported via absolute imports;
-    /// 1. modules imported from a name prefixed by `#`. This is applicable when using [Node's subpath imports](https://nodejs.org/api/packages.html#subpath-imports);
-    /// 1. modules imported via relative imports;
-    /// 1. modules that couldn't be identified by the previous criteria;
-    ///
-    /// For example, given the following code:
-    ///
-    /// ```ts
-    /// import uncle from "../uncle";
-    /// import sibling from "./sibling";
-    /// import express from "npm:express";
-    /// import imageUrl from "url:./image.png";
-    /// import { sortBy } from "virtual:utils";
-    /// import assert from "node:assert";
-    /// import aunt from "../aunt";
-    /// import { VERSION } from "https://deno.land/std/version.ts";
-    /// import { mock, test } from "node:test";
-    /// import { expect } from "bun:test";
-    /// import { internal } from "#internal";
-    /// import { secret } from "/absolute/path";
-    /// import React from "react";
+    /// export * from "@my/lib" with { "attribute1": "value" };
+    /// ^^^^^^^^       ^^^^^^^         ^^^^^^^^^^^^^^^^^^^^^
+    ///   kind         source                attributes
     /// ```
     ///
-    /// They will be sorted like this:
+    /// Note that **source** is also often called **specifier** in the JavaScript ecosystem.
     ///
-    /// ```ts
-    /// import { expect } from "bun:test";
-    /// import assert from "node:assert";
-    /// import { mock, test } from "node:test";
-    /// import express from "npm:express";
-    /// import { sortBy } from "virtual:utils";
-    /// import { VERSION } from "https://deno.land/std/version.ts";
-    /// import React from "react";
-    /// import { secret } from "/absolute/path";
-    /// import { internal } from "#internal";
-    /// import aunt from "../aunt";
-    /// import uncle from "../uncle";
-    /// import sibling from "./sibling";
-    /// import imageUrl from "url:./image.png";
+    ///
+    /// ## Chunk of imports and chunks of exports
+    ///
+    /// A **chunk** is a sequence of adjacent imports or exports.
+    /// A chunk contains only imports or exports, not both at the same time.
+    /// The following example includes two chunks.
+    /// The first chunk consists of the three imports and the second chunk consists of the three exports.
+    /// The first `export` that appears ends the first chunk and starts a new one.
+    ///
+    /// ```js,ignore
+    /// import A from "a";
+    /// import * as B from "b";
+    /// import { C } from "c";
+    /// export * from "d";
+    /// export * as F from "e";
+    /// export { F } from "f";
     /// ```
     ///
-    /// You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VSCode extension](#import-sorting-via-vscode-extension).
+    /// Chunks also end as soon as a statement or a **side-effect import** (also called _bare import_) is encountered.
+    /// Every side-effect import forms an independent chunk.
+    /// The following example contains six chunks:
     ///
-    /// ## Grouped imports
+    /// ```js,ignore
+    /// // chunk 1
+    /// import A from "a";
+    /// import * as B from "b";
+    /// // chunk 2
+    /// import "x";
+    /// // chunk 3
+    /// import "y";
+    /// // chunk 4
+    /// import { C } from "c";
+    /// // chunk 5
+    /// export * from "d";
+    /// function f() {}
+    /// // chunk 6
+    /// export * as E from "e";
+    /// export { F } from "f";
+    /// ```
     ///
-    /// It's widespread to have import statements in a certain order, primarily when you work on a frontend project, and you import CSS files:
+    /// 1. The first chunk contains the two first `import` and ends with the appearance of the first side-effect import `import "x"`.
+    /// 2. The second chunk contains only the side-effect import `import "x"`.
+    /// 3. The third chunk contains only the side-effect import `import "y"`.
+    /// 4. The fourth chunk contains a single `import`; The first `export` ends it.
+    /// 5. The fifth chunk contains the first `export`; The function declaration ends it.
+    /// 6. The sixth chunk contains the last two `export`.
+    ///
+    /// Chunks are also delimited by detached comments.
+    /// A **detached comment** is a comment followed by a blank line.
+    /// Comments not followed by a blank line are **attached comments**.
+    /// Note that blank lines alone are not taken into account when chunking imports and exports.
+    /// The following example contains a detached comment that splits the imports into two chunks:
+    ///
+    /// ```js,ignore
+    /// // Attached comment 1
+    /// import A from "a";
+    ///
+    /// // Attached comment 2
+    /// import * as B from "b";
+    /// // Detached comment
+    ///
+    /// import { C } from "c";
+    /// ```
+    ///
+    /// The line `import { C } from "c"` forms the second chunk.
+    /// The blank line between the first two imports is ignored so they form a single chunk.
+    ///
+    /// The sorter ensures that chunks are separated from each other with a blank lines.
+    /// Only side-effect imports adjacent to a chunk of imports are not separated by a blank line.
+    /// The following code...
+    ///
+    /// ```js,ignore
+    /// import A from "a";
+    /// import * as B from "b";
+    /// import "x";
+    /// import { C } from "c";
+    /// export * from "d";
+    /// // Detached comment
+    ///
+    /// export * as F from "e";
+    /// // Attached comment
+    /// export { F } from "f";
+    /// ```
+    ///
+    /// is sorted as:
+    ///
+    /// ```js,ignore
+    /// import A from "a";
+    /// import * as B from "b";
+    /// import "x";
+    /// import { C } from "c";
+    ///
+    /// export * from "d";
+    ///
+    /// // Detached comment
+    ///
+    /// export * as F from "e";
+    /// // Attached comment
+    /// export { F } from "f";
+    /// ```
+    ///
+    /// Also, note that blank lines inside a chunk are ignored and preserved.
+    /// They can be removed by explicitly defining groups as demonstrated in the next section.
+    ///
+    ///
+    /// ## Import and export sorting
+    ///
+    /// Once chunks are formed, imports and exports of each chunk are sorted.
+    /// Imports and exports are sorted by their source.
+    /// Sources are ordered by "distance".
+    /// Sources that are "farther" from the current module are put on the top, sources "closer" to the user are put on the bottom.
+    /// This leads to the following order:
+    ///
+    /// 1. URLs such as `https://example.org`.
+    /// 2. Packages with a protocol such as `node:path`, `bun:test`, `jsr:@my?lib`, or `npm:lib`.
+    /// 3. Packages such as `mylib` or `@my/lib`.
+    /// 4. Aliases: sources starting with `@/`, `#`, `~`, or `%`.
+    ///    They usually are [Node.js subpath imports](https://nodejs.org/api/packages.html#subpath-imports) or [TypeScript path aliases](https://www.typescriptlang.org/tsconfig/#paths).
+    /// 5. Absolute and relative paths.
+    ///
+    /// Two imports/exports with the same source category are sorted using a [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order) tailored to URLs, packages, and paths.
+    /// Notably, the order ensures that `A < a < B < b`.
+    /// The order takes also numbers into account, e.g. `a9 < a10`.
+    ///
+    /// For example, the following code...
+    ///
+    /// ```js,ignore
+    /// import sibling from "./file.js";
+    /// import internal from "#alias";
+    /// import fs from "fs";
+    /// import { test } from "node:test";
+    /// import path from "node:path";
+    /// import parent from "../parent.js";
+    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
+    /// import data from "https://example.org";
+    /// import lib from "lib";
+    /// import scopedLib from "@scoped/lib";
+    /// ```
+    ///
+    /// ...is sorted as follows:
+    ///
+    /// ```js,ignore
+    /// import data from "https://example.org";
+    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
+    /// import path from "node:path";
+    /// import { test } from "node:test";
+    /// import scopedLib from "@scoped/lib";
+    /// import fs from "fs";
+    /// import lib from "lib";
+    /// import internal from "#alias";
+    /// import parent from "../parent.js";
+    /// import sibling from "./file.js";
+    /// ```
+    ///
+    /// If two imports or exports share the same source and are in the same chunk, then they are ordered according to their kind as follows:
+    ///
+    /// 1. Default type import
+    /// 2. Default import
+    /// 3. Combined default and namespace import
+    /// 4. Combined default and named import
+    /// 5. Namespace type import / Namespace type export
+    /// 6. Namespace import / Namespace export
+    /// 7. Named type import / Named type export
+    /// 8. Named import / Named export
+    ///
+    /// Also, import and exports with attributes are always placed first.
+    /// For example, the following code...
+    ///
+    /// ```ts,expect_diagnostic
+    /// import * as namespaceImport from "same-source";
+    /// import type * as namespaceTypeImport from "same-source";
+    /// import { namedImport } from "same-source";
+    /// import type { namedTypeImport } from "same-source";
+    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
+    /// import defaultNamedCombined, { namedCombined } from "same-source";
+    /// import defaultImport from "same-source";
+    /// import type defaultTypeImport from "same-source";
+    /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
+    /// ```
+    ///
+    /// is sorted as follows:
+    ///
+    /// ```ts,ignore
+    /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
+    /// import type defaultTypeImport from "same-source";
+    /// import defaultImport from "same-source";
+    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
+    /// import defaultNamedCombined, { namedCombined } from "same-source";
+    /// import type * as namespaceTypeImport from "same-source";
+    /// import * as namespaceImport from "same-source";
+    /// import type { namedTypeImport } from "same-source";
+    /// import { namedImport } from "same-source";
+    /// ```
+    ///
+    /// This default order cannot be changed.
+    /// However, users can still customize how imports and exports are sorted using the concept of groups.
+    ///
+    ///
+    /// ## Import and export groups
+    ///
+    /// Imports or exports of a chunk are divided into groups before being sorted with the built-in order described in the previous section.
+    /// By default every chunk consists of a single group.
+    /// These default groups and their order may not be to your taste.
+    /// The sorter provides a `groups` option that allows you to customize how the chunks are divided into groups.
+    /// The `groups` option is a list of group matchers.
+    /// A group matcher is:
+    ///
+    /// - A predefined group matcher, or
+    /// - A glob pattern, or
+    /// - A list of glob patterns.
+    ///
+    /// Predefined group matchers are strings in `CONSTANT_CASE` prefixed and suffixed by `:`.
+    /// The sorter provides several predefined group matchers:
+    ///
+    /// - `:ALIAS:`: sources starting with `#`, `@/`, `~`, or `%`.
+    /// - `:BUN:`: sources starting with the protocol `bun:` or that correspond to a built-in Bun module such as `bun`.
+    /// - `:NODE:`: sources starting with the protocol `node:` or that correspond to a built-in Node.js module such as `fs` or `path`.
+    /// - `:PACKAGE:`: Scoped and bare packages.
+    /// - `:PACKAGE_WITH_PROTOCOL:`: Scoped and bare packages with a protocol.
+    /// - `:PATH:`: absolute and relative paths.
+    /// - `:URL:`
+    ///
+    /// Let's take an example.
+    /// In the default configuration, Node.js modules without the `node:` protocols are separated from those with a protocol.
+    /// To groups them together, you can use the predefined group `:NODE:`.
+    /// Given the following configuration...
+    ///
+    /// ```json,full_options
+    /// {
+    ///     "assist": {
+    ///         "actions": {
+    ///             "source": {
+    ///                 "organizeImports": {
+    ///                     "level": "on",
+    ///                     "options": {
+    ///                         "groups": [
+    ///                             ":URL:",
+    ///                             ":NODE:"
+    ///                         ]
+    ///                     }
+    ///                 }
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ...and the following code...
     ///
     /// ```js
-    /// import "../styles/reset.css";
-    /// import "../styles/layout.css";
-    /// import { Grid } from "../components/Grid.jsx";
+    /// import sibling from "./file.js";
+    /// import internal from "#alias";
+    /// import fs from "fs";
+    /// import { test } from "node:test";
+    /// import path from "node:path";
+    /// import parent from "../parent.js";
+    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
+    /// import data from "https://example.org";
+    /// import lib from "lib";
+    /// import scopedLib from "@scoped/lib";
     /// ```
     ///
-    /// Another common case is import polyfills or shim files, that needs to stay at the top file:
+    /// ...we end up with the following sorted result where the imports of `node:path` and the `fs` Node.js module are grouped together:
+    ///
+    /// ```js,ignore
+    /// import data from "https://example.org";
+    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
+    /// import path from "node:path";
+    /// import fs from "fs";
+    /// import { test } from "node:test";
+    /// import scopedLib from "@scoped/lib";
+    /// import lib from "lib";
+    /// import internal from "#alias";
+    /// import parent from "../parent.js";
+    /// import sibling from "./file.js";
+    /// ```
+    ///
+    /// Note that all imports that don't match a group matcher are always placed at the end.
+    ///
+    ///
+    /// Groups matchers can also be glob patterns and list of glob patterns.
+    /// Glob patterns selects imports and exports with a source that matches the pattern.
+    /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/speciaal` and the other that gathers imports/exports starting with `@/`.
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             ["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**"],
+    ///             "@/**"
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// By applying this configuration to the following code...
     ///
     /// ```js
-    /// import "../polyfills/array/flatMap";
-    /// import { functionThatUsesFlatMap } from "./utils.js";
+    /// import lib from "@my/lib";
+    /// import aliased from "@/alias";
+    /// import path from "@my/lib/special";
+    /// import test from "@my/lib/path";
     /// ```
     ///
-    /// In these cases, Biome will sort all these three imports, and it might happen that the order will **break** your application.
+    /// ...we obtain the following sorted result.
+    /// Imports with the sources `@my/lib` and `@my/lib/path` form the first group.
+    /// They match the glob patterns `@my/lib` and `@my/lib/**` respectively.
+    /// The import with the source `@my/lib/special` is not placed in this first group because it is rejected by the exception `!@my/lib/special`.
+    /// The import with the source `@/alias` is placed in a second group because it matches the glob pattern `@/**`.
+    /// Finally, other imports are placed at the end.
     ///
-    /// To avoid this, create a "group" of imports. You create a "group" by adding a **new line** to separate the groups.
+    /// ```js,ignore
+    /// import lib from "@my/lib";
+    /// import test from "@my/lib/path";
+    /// import aliased from "@/alias";
+    /// import path from "@my/lib/special";
+    /// ```
     ///
-    /// By doing so, Biome will limit the sorting only to the import statements that belong to the same group:
+    /// Note that `@my/lib` matches `@my/lib` but not `@my/lib/**`.
+    /// Conversely, `@my/lib/subpath` matches `@my/lib/**`, but not `@my/lib`.
+    /// So, you have to specify both glob patterns if you want to accept all imports/exports that start with `@my/lib`.
+    /// The prefix `!` indicates an exception.
+    /// You can create exceptions of exceptions by following an exception by a regular glob pattern.
+    /// For example `["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**", "@my/lib/special/*/accepted/**"]` allows you to accepts all sources matching `@my/lib/special/*/accepted/**`.
+    /// For more details on the supported glob patterns, see the dedicated section.
+    ///
+    /// For now, it is not possible to mix predefined group matchers and glob patterns inside a list of globs.
+    /// This is a limitation that we are working to remove.
+    ///
+    /// The sorter allows the separation of two groups with a blank line using the predefined string `:BLANK_LINE:`.
+    /// Given the following configuration...
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             ":NODE:",
+    ///             ":BLANK_LINE:",
+    ///             ["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**"],
+    ///             "@/**"
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ...the following code...
     ///
     /// ```js
-    /// // group 1, only these two files will be sorted
-    /// import "../styles/reset.css";
-    /// import "../styles/layout.css";
-    ///
-    /// // group 2, only this one is sorted
-    /// import { Grid } from "../components/Grid.jsx";
+    /// import path from "node:path";
+    /// import lib from "@my/lib";
+    /// import test from "@my/lib/path";
+    /// import path from "@my/lib/special";
+    /// import aliased from "@/alias";
     /// ```
     ///
-    /// ```js
-    /// // group 1, the polyfill/shim
-    /// import "../polyfills/array/flatMap";
+    /// ...is sorted as:
     ///
-    /// // group 2, the files that require the polyfill/shim
-    /// import { functionThatUsesFlatMap } from "./utils.js";
+    /// ```js,ignore
+    /// import path from "node:path";
+    ///
+    /// import lib from "@my/lib";
+    /// import test from "@my/lib/path";
+    /// import aliased from "@/alias";
+    /// import path from "@my/lib/special";
     /// ```
     ///
-    /// ## Side effect imports
     ///
-    /// [Side effect imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#forms_of_import_declarations) are import statements that usually don't import any name:
+    /// ## Comment handling
     ///
-    /// ```js
-    /// import "./global.js"
+    /// When sorting imports and exports, attached comments are moved with their import or export,
+    /// and detached comments (comments followed by a blank line) are left where they are.
+    ///
+    /// However, there is an exception to the rule.
+    /// If a comment appears at the top of the file, it is considered as detached even if no blank line follows.
+    /// This ensures that copyright notice and file header comments stay at the top of the file.
+    ///
+    /// For example, the following code...
+    ///
+    /// ```js,expect_diagnostic
+    /// // Copyright notice and file header comment
+    /// import F from "f";
+    /// // Attached comment for `e`
+    /// import E from "e";
+    /// // Attached comment for `d`
+    /// import D from "d";
+    /// // Detached comment (new chunk)
+    ///
+    /// // Attached comment for `b`
+    /// import B from "b";
+    /// // Attached comment for `a`
+    /// import A from "a";
     /// ```
     ///
-    /// Since it is difficult to determine which side effects a module triggers, the import sorter assumes that each side effect import forms its own import group.
+    /// ...is sorted as follows.
+    /// A blank line is automatically added after the header comment to ensure that the attached comment doesn't merge with the header comment.
     ///
-    /// For example, the following imports form 4 import groups.
+    /// ```js,ignore
+    /// // Copyright notice and file header comment
     ///
-    /// ```js
-    /// import sibling from "./sibling";       // Import group 1
-    /// import { internal } from "#internal";  // Import group 1
-    /// import "z";  // Import group 2
-    /// import "a";  // Import group 3
-    /// import React from "react";         // Import group 4
-    /// import assert from "node:assert";  // Import group 4
+    /// // Attached comment for `d`
+    /// import D from "d";
+    /// // Attached comment for `e`
+    /// import E from "e";
+    /// import F from "f";
+    ///
+    /// // Detached comment (new chunk)
+    ///
+    /// // Attached comment for `a`
+    /// import A from "a";
+    /// // Attached comment for `b`
+    /// import B from "b";
     /// ```
     ///
-    /// Each group is independently sorted as follows:
     ///
-    /// ```js
-    /// import { internal } from "#internal";  // Import group 1
-    /// import sibling from "./sibling";      // Import group 1
-    /// import "z";  // Import group 2
-    /// import "a";  // Import group 3
-    /// import assert from "node:assert";  // Import group 4
-    /// import React from "react";         // Import group 4
+    /// ## Named imports, named exports and attributes sorting
+    ///
+    /// The sorter also sorts named imports, named exports, as well as attributes.
+    /// It uses a natural sort order for comparing numbers.
+    ///
+    /// The following code...
+    ///
+    /// ```js,expect_diagnostic
+    /// import { a, b, A, B, c10, c9 } from "a";
+    ///
+    /// export { a, b, A, B, c10, c9 } from "a";
+    ///
+    /// import special from  "special" with { "type": "ty", "metadata": "data" };
     /// ```
+    ///
+    /// ...is sorted as follows:
+    ///
+    /// ```js,ignore
+    /// import { A, a, B, b, c9, c10 } from "a";
+    ///
+    /// export { A, a, B, b, c9, c10 } from "a";
+    ///
+    /// import special from  "special" with { "metadata": "data", "type": "ty" };
+    /// ```
+    ///
+    ///
+    /// ## Supported glob patterns
+    ///
+    /// You need to understand the structure of a source to understand which source matches a glob.
+    /// A source is divided in source segments.
+    /// Every source segment is delimited by the separator `/` or the start/end of the source.
+    /// For instance `src/file.js` consists of two source segments: `src` and `file.js`.
+    ///
+    /// - star `*` that matches zero or more characters inside a source segment
+    ///
+    ///   `file.js` matches `*.js`.
+    ///   Conversely, `src/file.js` doesn't match `*.js`
+    ///
+    /// - globstar `**` that matches zero or more source segments
+    ///   `**` must be enclosed by separators `/` or the start/end of the glob.
+    ///   For example, `**a` is not a valid glob.
+    ///   Also, `**` must not be followed by another globstar.
+    ///   For example, `**/**` is not a valid glob.
+    ///
+    ///   `file.js` and `src/file.js` match `**` and `**/*.js`
+    ///   Conversely, `README.txt` doesn't match `**/*.js` because the source ends with `.txt`.
+    ///
+    /// - Use `\*` to escape `*`
+    ///
+    ///   `\*` matches the literal `*` character in a source.
+    ///
+    /// - `?`, `[`, `]`, `{`, and `}` must be escaped using `\`.
+    ///   These characters are reserved for possible future use.
+    ///
+    /// - Use `!` as first character to negate a glob
+    ///
+    ///   `file.js` matches `!*.test.js`.
+    ///   `src/file.js` matches `!*.js` because the source contains several segments.
+    ///
     pub OrganizeImports {
         version: "1.0.0",
         name: "organizeImports",
@@ -150,36 +524,318 @@ declare_source_rule! {
 
 impl Rule for OrganizeImports {
     type Query = Ast<JsModule>;
-    type State = State;
+    type State = Box<[Issue]>;
     type Signals = Option<Self::State>;
     type Options = Options;
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        struct ChunkBuilder {
+            slot_indexes: std::ops::Range<u32>,
+            max_key: ImportKey,
+        }
+        impl ChunkBuilder {
+            fn new(key: ImportKey) -> Self {
+                Self {
+                    slot_indexes: key.slot_index..key.slot_index,
+                    max_key: key,
+                }
+            }
+        }
+
+        fn report_unsorted_chunk(chunk: Option<ChunkBuilder>, result: &mut Vec<Issue>) {
+            if let Some(chunk) = chunk {
+                if !chunk.slot_indexes.is_empty() {
+                    result.push(Issue::UnsortedChunkPrefix {
+                        slot_indexes: chunk.slot_indexes,
+                    });
+                }
+            }
+        }
+
         let root = ctx.query();
-        legacy::run(root).map(State::Legacy)
+        let mut result = Vec::new();
+        let options = ctx.options();
+        let mut chunk: Option<ChunkBuilder> = None;
+        let mut prev_kind: Option<JsSyntaxKind> = None;
+        let mut prev_group = 0;
+        for item in root.items() {
+            if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
+                let prev_is_distinct = prev_kind.is_some_and(|kind| kind != item.syntax().kind());
+                // A detached comment marks the start of a new chunk
+                if prev_is_distinct || has_detached_leading_comment(item.syntax()) {
+                    // The chunk ends, here
+                    report_unsorted_chunk(chunk.take(), &mut result);
+                    prev_group = 0;
+                }
+                let key = ImportKey::new(info, &options.groups);
+                let blank_line_separated_groups = options
+                    .groups
+                    .separated_by_blank_line(prev_group, key.group);
+                let starts_chunk = chunk.is_none();
+                let leading_newline_count = leading_newlines(item.syntax()).count();
+                let are_specifiers_unsorted =
+                    specifiers.is_some_and(|specifiers| !specifiers.are_sorted());
+                let are_attributes_unsorted = attributes.is_some_and(|attributes| {
+                    !(are_import_attributes_sorted(&attributes).unwrap_or_default())
+                });
+                let newline_issue = if leading_newline_count == 1
+                    // A chunk must start with a blank line (two newlines)
+                    // if an export or a statement precedes it.
+                    && ((starts_chunk && prev_is_distinct) ||
+                    // Some groups must be separated by a blank line
+                    blank_line_separated_groups)
+                {
+                    NewLineIssue::MissingNewLine
+                } else if leading_newline_count > 1
+                    && !starts_chunk
+                    // Ignore blank lines when groups are not explicitly set
+                    && !options.groups.is_empty()
+                    && !blank_line_separated_groups
+                {
+                    // An import inside a chunk must not start with a blank line
+                    // if groups are explicitly set
+                    NewLineIssue::ExtraNewLine
+                } else {
+                    NewLineIssue::None
+                };
+                if are_specifiers_unsorted
+                    || are_attributes_unsorted
+                    || !matches!(newline_issue, NewLineIssue::None)
+                {
+                    // Report the violation of one of the previous requirement
+                    result.push(Issue::UnorganizedItem {
+                        slot_index: key.slot_index,
+                        are_specifiers_unsorted,
+                        are_attributes_unsorted,
+                        newline_issue,
+                    });
+                }
+                if let Some(chunk) = &mut chunk {
+                    // Check if the items are in order
+                    if chunk.max_key > key {
+                        chunk.slot_indexes.end = key.slot_index + 1;
+                    } else {
+                        prev_group = key.group;
+                        chunk.max_key = key;
+                    }
+                } else {
+                    // New chunk
+                    prev_group = key.group;
+                    chunk = Some(ChunkBuilder::new(key));
+                }
+            } else if chunk.is_some() {
+                // This is either
+                // - a bare (side-effect) import
+                // - a buggy import or export
+                // a statement
+                //
+                // In any case, the chunk ends here
+                report_unsorted_chunk(chunk.take(), &mut result);
+                prev_group = 0;
+                // A statement must be separated of a chunk with a blank line
+                if let AnyJsModuleItem::AnyJsStatement(statement) = &item {
+                    if leading_newlines(statement.syntax()).count() == 1 {
+                        result.push(Issue::AddLeadingNewline {
+                            slot_index: statement.syntax().index() as u32,
+                        });
+                    }
+                }
+            }
+            prev_kind = Some(item.syntax().kind());
+        }
+        // Report the last chunk
+        report_unsorted_chunk(chunk.take(), &mut result);
+        if result.is_empty() {
+            None
+        } else {
+            Some(result.into())
+        }
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let options = ctx.options();
+        let root = ctx.query();
+        let mut organized_items: FxHashMap<u32, JsSyntaxNode> = FxHashMap::default();
+        let mut import_keys: Vec<ImportKey> = Vec::new();
         let mut mutation = ctx.root().begin();
-        match state {
-            State::Legacy(groups) => {
-                legacy::action(ctx.query(), groups, &mut mutation)?;
+        for issue in state {
+            match issue {
+                Issue::AddLeadingNewline { slot_index } => {
+                    let item = root
+                        .items()
+                        .into_iter()
+                        .nth(*slot_index as usize)?
+                        .into_syntax();
+                    if leading_newlines(&item).count() >= 1 {
+                        let newline = item.first_leading_trivia()?.pieces().next();
+                        let new_item = item.clone().prepend_trivia_pieces(newline)?;
+                        mutation.replace_element_discard_trivia(item.into(), new_item.into());
+                    }
+                }
+                Issue::UnorganizedItem {
+                    slot_index,
+                    are_attributes_unsorted,
+                    are_specifiers_unsorted,
+                    newline_issue,
+                } => {
+                    let item = root.items().into_iter().nth(*slot_index as usize)?;
+                    let item: AnyJsModuleItem = match item {
+                        AnyJsModuleItem::AnyJsStatement(_) => {
+                            continue;
+                        }
+                        AnyJsModuleItem::JsExport(export) => {
+                            let mut clause = export.export_clause().ok()?;
+                            if *are_specifiers_unsorted {
+                                // Sort named specifiers
+                                if let AnyJsExportClause::JsExportNamedFromClause(cast) = &clause {
+                                    if let Some(sorted_specifiers) =
+                                        sort_export_specifiers(&cast.specifiers())
+                                    {
+                                        clause =
+                                            cast.clone().with_specifiers(sorted_specifiers).into();
+                                    }
+                                }
+                            }
+                            if *are_attributes_unsorted {
+                                // Sort import attributes
+                                let sorted_attrs = clause.attribute().and_then(sort_attributes);
+                                clause = clause.with_attribute(sorted_attrs);
+                            }
+                            export.with_export_clause(clause).into()
+                        }
+                        AnyJsModuleItem::JsImport(import) => {
+                            let mut clause = import.import_clause().ok()?;
+                            if *are_specifiers_unsorted {
+                                // Sort named specifiers
+                                if let Some(sorted_specifiers) =
+                                    clause.named_specifiers().and_then(sort_import_specifiers)
+                                {
+                                    clause = clause.with_named_specifiers(sorted_specifiers)
+                                }
+                            }
+                            if *are_attributes_unsorted {
+                                // Sort import attributes
+                                let sorted_attrs = clause.attribute().and_then(sort_attributes);
+                                clause = clause.with_attribute(sorted_attrs);
+                            }
+                            import.with_import_clause(clause).into()
+                        }
+                    };
+                    let mut item = item.into_syntax();
+                    // Fix newlines
+                    match newline_issue {
+                        NewLineIssue::None => {}
+                        NewLineIssue::ExtraNewLine => {
+                            // Remove extra newlines
+                            let leading_trivia = item
+                                .first_leading_trivia()?
+                                .pieces()
+                                .skip(leading_newlines(&item).count() - 1);
+                            item = item.with_leading_trivia_pieces(leading_trivia)?;
+                        }
+                        NewLineIssue::MissingNewLine => {
+                            // Add missing newline
+                            let newline = leading_newlines(&item).next();
+                            item = item.prepend_trivia_pieces(newline.into_iter())?
+                        }
+                    }
+                    // Save the node
+                    organized_items.insert(*slot_index, item);
+                }
+                Issue::UnsortedChunkPrefix { slot_indexes } => {
+                    debug_assert!(import_keys.is_empty(), "import_keys was previously drained");
+                    // Collect all import keys.
+                    import_keys.reserve(slot_indexes.len());
+                    import_keys.extend(
+                        ctx.query()
+                            .items()
+                            .into_iter()
+                            .skip(slot_indexes.start as usize)
+                            .take(slot_indexes.len())
+                            .filter_map(|item| ImportInfo::from_module_item(&item))
+                            .map(|(info, _, _)| ImportKey::new(info, &options.groups)),
+                    );
+                    // Sort imports based on their import key
+                    import_keys.sort_unstable();
+                    // Swap the items to obtain a sorted chunk
+                    let items = ctx.query().items().into_syntax();
+                    let mut prev_group: u16 = 0;
+                    for (index, key) in (slot_indexes.start..).zip(import_keys.drain(..)) {
+                        let blank_line_separated_groups = options
+                            .groups
+                            .separated_by_blank_line(prev_group, key.group);
+                        // Don't make any change if it is the same node and no change have to be done
+                        if !blank_line_separated_groups && index == key.slot_index {
+                            continue;
+                        }
+                        let old_item = items.element_in_slot(index)?.into_node()?;
+                        let mut new_item =
+                            if let Some(item) = organized_items.remove(&key.slot_index) {
+                                item
+                            } else {
+                                items.element_in_slot(key.slot_index)?.into_node()?
+                            };
+                        if index == slot_indexes.start {
+                            if let Some(detached) = detached_trivia(&old_item) {
+                                if leading_newlines(&old_item).count() == 1 {
+                                    let newline = old_item.first_leading_trivia()?.pieces().take(1);
+                                    new_item = new_item.prepend_trivia_pieces(
+                                        chain_trivia_pieces(newline, detached),
+                                    )?;
+                                } else {
+                                    new_item = new_item.prepend_trivia_pieces(detached)?;
+                                }
+                            } else if index == 0 && leading_newlines(&old_item).count() == 0 {
+                                // We are at the top of the file.
+                                // Keep header (possibly Copyright notice)
+                                let header_trivia = old_item.first_leading_trivia()?;
+                                if header_trivia.is_empty() {
+                                    new_item = new_item.trim_leading_trivia()?;
+                                } else {
+                                    new_item =
+                                        new_item.prepend_trivia_pieces(header_trivia.pieces())?;
+                                }
+                            }
+                        } else if let Some(attached) = attached_trivia(&new_item) {
+                            // Transfer attached comment
+                            new_item = new_item.with_leading_trivia_pieces(attached)?;
+                        } else if key.slot_index == 0 && leading_newlines(&new_item).count() == 0 {
+                            // Don't copy the header trivia
+                            let first_token = new_item.first_token()?;
+                            let new_first_token = first_token
+                                .clone()
+                                .with_leading_trivia([(TriviaPieceKind::Newline, "\n")]);
+                            new_item = new_item
+                                .replace_child(first_token.into(), new_first_token.into())?;
+                        }
+                        // Add newline for group separation
+                        if index != 0
+                            && blank_line_separated_groups
+                            && leading_newlines(&new_item).count() == 1
+                        {
+                            let newline = leading_newlines(&new_item).next();
+                            new_item = new_item.prepend_trivia_pieces(newline)?;
+                        }
+                        mutation.replace_element_discard_trivia(old_item.into(), new_item.into());
+                        prev_group = key.group;
+                    }
+                }
             }
-            State::Modern => {}
+        }
+        let items = ctx.query().items().into_syntax();
+        for (slot_index, item) in organized_items {
+            let Some(replaced_import) = items.element_in_slot(slot_index) else {
+                continue;
+            };
+            mutation.replace_element_discard_trivia(replaced_import, item.into());
         }
         Some(JsRuleAction::new(
             ActionCategory::Source(SourceActionKind::OrganizeImports),
             ctx.metadata().applicability(),
-            markup! { "Organize Imports (Biome)" },
+            "Organize Imports (Biome)",
             mutation,
         ))
     }
-}
-
-#[derive(Debug)]
-pub enum State {
-    Legacy(legacy::ImportGroups),
-    Modern,
 }
 
 #[derive(
@@ -188,42 +844,37 @@ pub enum State {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct Options {
-    legacy: bool,
-    import_groups: Box<[ImportGroup]>,
+    groups: import_groups::ImportGroups,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(untagged)]
-pub enum ImportGroup {
-    Predefined(PredefinedImportGroup),
-    Custom(biome_glob::Glob),
-}
-impl Deserializable for ImportGroup {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
-        name: &str,
-    ) -> Option<Self> {
-        Some(
-            if let Some(predefined) = Deserializable::deserialize(ctx, value, name) {
-                ImportGroup::Predefined(predefined)
-            } else {
-                ImportGroup::Custom(Deserializable::deserialize(ctx, value, name)?)
-            },
-        )
-    }
+#[derive(Debug)]
+pub enum Issue {
+    AddLeadingNewline {
+        // Slot index of a statement that must starts with a blank line
+        slot_index: u32,
+    },
+    /// Prefix of an unsorted chunk of imports or exports
+    UnsortedChunkPrefix {
+        /// Slot indexes of all the first imports or exports.
+        slot_indexes: std::ops::Range<u32>,
+    },
+    /// Import or export with one or several of the following issues:
+    /// - has unsorted specifiers
+    /// - has unsorted attributes
+    /// - has too many or not enough leading newlines
+    UnorganizedItem {
+        /// Slot index of the import or export
+        slot_index: u32,
+        are_attributes_unsorted: bool,
+        are_specifiers_unsorted: bool,
+        newline_issue: NewLineIssue,
+    },
 }
 
-#[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum PredefinedImportGroup {
-    #[serde(rename = ":blank-line:")]
-    BlankLine,
-    #[serde(rename = ":bun:")]
-    Bun,
-    #[serde(rename = ":node:")]
-    Node,
-    #[serde(rename = ":types:")]
-    Types,
+#[derive(Debug)]
+pub enum NewLineIssue {
+    /// No issue
+    None,
+    ExtraNewLine,
+    MissingNewLine,
 }

@@ -4,7 +4,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_dependency_graph::ModuleDependencyData;
 use biome_diagnostics::Severity;
-use biome_js_syntax::inner_string_text;
+use biome_js_syntax::AnyJsImportLike;
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -89,7 +89,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoImportCycles {
-    type Query = ResolvedImports;
+    type Query = ResolvedImports<AnyJsImportLike>;
     type State = Vec<String>;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -98,14 +98,7 @@ impl Rule for NoImportCycles {
         let file_imports = ctx.imports_for_path(ctx.file_path())?;
 
         let node = ctx.query();
-        let name_token = node.module_name_token()?;
-        let specifier_text = inner_string_text(&name_token);
-        let specifier = specifier_text.text();
-        let import = if node.is_static_import() {
-            file_imports.static_imports.get(specifier)
-        } else {
-            file_imports.dynamic_imports.get(specifier)
-        }?;
+        let import = file_imports.get_import_by_node(node)?;
         let resolved_path = import.resolved_path.as_ref().ok()?;
 
         let imports = ctx.imports_for_path(resolved_path)?;

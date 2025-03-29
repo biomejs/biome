@@ -1,0 +1,43 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnnecessaryContinue": "on"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noUnnecessaryContinue has been renamed noUselessContinue.
+  
+    3 │     "rules": {
+    4 │       "correctness": {
+  > 5 │         "noUnnecessaryContinue": "on"
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │       }
+    7 │     }
+  
+  i Safe fix: Rename the rule.
+  
+     3  3 │       "rules": {
+     4  4 │         "correctness": {
+     5    │ - ········"noUnnecessaryContinue":·"on"
+        5 │ + ········"noUselessContinue":·"on"
+     6  6 │         }
+     7  7 │       }
+  
+
+```

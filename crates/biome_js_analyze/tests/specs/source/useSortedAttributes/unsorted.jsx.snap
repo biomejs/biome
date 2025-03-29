@@ -1,35 +1,60 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: unsorted.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
-<Hello lastName="Smith" firstName="John" />;
+<Hello
+	lastName="Smith"
+	firstName="John"
+/>;
 <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+<Hello a10="" a9="" A="" />;
 
 ```
 
 # Actions
 ```diff
-@@ -1,2 +1,2 @@
--<Hello lastName="Smith" firstName="John" />;
-+<Hello firstName="John" lastName="Smith" />;
+@@ -1,6 +1,6 @@
+ <Hello
++	firstName="John"
+ 	lastName="Smith"
+-	firstName="John"
+ />;
  <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+ <Hello a10="" a9="" A="" />;
 
 ```
 
 ```diff
-@@ -1,2 +1,2 @@
- <Hello lastName="Smith" firstName="John" />;
+@@ -2,5 +2,5 @@
+ 	lastName="Smith"
+ 	firstName="John"
+ />;
 -<Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
 +<Hello address="NY" tel={5555555} {...this.props} lastName="Smith" firstName="John" />;
+ <Hello a10="" a9="" A="" />;
 
 ```
 
 ```diff
-@@ -1,2 +1,2 @@
- <Hello lastName="Smith" firstName="John" />;
+@@ -2,5 +2,5 @@
+ 	lastName="Smith"
+ 	firstName="John"
+ />;
 -<Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
 +<Hello tel={5555555} address="NY" {...this.props} firstName="John" lastName="Smith" />;
+ <Hello a10="" a9="" A="" />;
+
+```
+
+```diff
+@@ -3,4 +3,4 @@
+ 	firstName="John"
+ />;
+ <Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
+-<Hello a10="" a9="" A="" />;
++<Hello A="" a9="" a10="" />;
 
 ```

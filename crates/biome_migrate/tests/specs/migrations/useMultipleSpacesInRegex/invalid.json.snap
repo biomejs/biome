@@ -21,7 +21,7 @@ snapshot_kind: text
 ```
 invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The rule noMultipleSpacesInRegularExpressionLiterals has been renamed noMultipleSpacesInRegex.
+  ! The rule noMultipleSpacesInRegularExpressionLiterals has been renamed noAdjacentSpacesInRegex.
   
     3 │     "rules": {
     4 │       "complexity": {
@@ -35,7 +35,7 @@ invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
      3  3 │       "rules": {
      4  4 │         "complexity": {
      5    │ - ········"noMultipleSpacesInRegularExpressionLiterals":·"off"
-        5 │ + ········"noMultipleSpacesInRegex":·"off"
+        5 │ + ········"noAdjacentSpacesInRegex":·"off"
      6  6 │         }
      7  7 │       }
   

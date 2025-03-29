@@ -3,8 +3,8 @@ use biome_rowan::{AstNode, SyntaxResult, Text, declare_node_union};
 use crate::{
     AnyJsBindingPattern, AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportDefaultDeclaration,
     AnyJsExportNamedSpecifier, AnyJsExpression, AnyTsIdentifierBinding, AnyTsType, JsExport,
-    JsExportNamedClause, JsIdentifierExpression, JsLiteralExportName, JsReferenceIdentifier,
-    JsSyntaxToken, TsEnumDeclaration, unescape_js_string,
+    JsExportNamedClause, JsIdentifierExpression, JsImportAssertion, JsLiteralExportName,
+    JsReferenceIdentifier, JsSyntaxToken, TsEnumDeclaration, unescape_js_string,
 };
 
 declare_node_union! {
@@ -242,6 +242,37 @@ impl JsExport {
                 _ => None,
             })
             .unwrap_or_default()
+    }
+}
+
+impl AnyJsExportClause {
+    pub fn attribute(&self) -> Option<JsImportAssertion> {
+        match self {
+            Self::JsExportFromClause(clause) => clause.assertion(),
+            Self::JsExportNamedFromClause(clause) => clause.assertion(),
+            Self::AnyJsDeclarationClause(_)
+            | Self::JsExportDefaultDeclarationClause(_)
+            | Self::JsExportDefaultExpressionClause(_)
+            | Self::JsExportNamedClause(_)
+            | Self::TsExportAsNamespaceClause(_)
+            | Self::TsExportAssignmentClause(_)
+            | Self::TsExportDeclareClause(_) => None,
+        }
+    }
+
+    /// Returns an export clause with `attribute` as import attribute if the export has import attribute.
+    pub fn with_attribute(self, attriobutes: Option<JsImportAssertion>) -> Self {
+        match self {
+            Self::AnyJsDeclarationClause(_) => self,
+            Self::JsExportDefaultDeclarationClause(_) => self,
+            Self::JsExportDefaultExpressionClause(_) => self,
+            Self::JsExportFromClause(clause) => clause.with_assertion(attriobutes).into(),
+            Self::JsExportNamedClause(_) => self,
+            Self::JsExportNamedFromClause(clause) => clause.with_assertion(attriobutes).into(),
+            Self::TsExportAsNamespaceClause(_) => self,
+            Self::TsExportAssignmentClause(_) => self,
+            Self::TsExportDeclareClause(_) => self,
+        }
     }
 }
 

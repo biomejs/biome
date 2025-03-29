@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -70,6 +69,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noNodejsModules
   - noNonoctalDecimalEscape
   - noPrecisionLoss
+  - noPrivateImports
   - noRenderReturnValue
   - noSelfAssign
   - noSetterReturn
@@ -82,7 +82,6 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnknownProperty
   - noUnknownUnit
   - noUnmatchableAnbSelector
-  - noUnnecessaryContinue
   - noUnreachable
   - noUnreachableSuper
   - noUnsafeFinally
@@ -92,6 +91,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnusedLabels
   - noUnusedPrivateClassMembers
   - noUnusedVariables
+  - noUselessContinue
   - noVoidElementsWithChildren
   - noVoidTypeReturn
   - useArrayLiterals

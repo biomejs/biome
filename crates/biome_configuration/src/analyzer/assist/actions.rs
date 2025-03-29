@@ -119,7 +119,7 @@ pub struct Source {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering."]
+    #[doc = "Provides a code action to sort the imports and exports in the file using a built-in or custom order."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub organize_imports:
         Option<RuleAssistConfiguration<biome_js_analyze::options::OrganizeImports>>,

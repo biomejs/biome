@@ -430,6 +430,13 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 ## Releasing
 
+### Beta releases
+
+1. [ ] Run the `beta` workflow.
+   Input the _upcoming_ version with an incremented number for each release (e.g. `2.0.0-beta.1`).
+
+### Regular releases
+
 When releasing a new version of a Biome, follow these steps:
 
 1. [ ] Add a [changelog](./CHANGELOG.md) entry for every Pull Request that lacks one.
@@ -447,6 +454,8 @@ When releasing a new version of a Biome, follow these steps:
 1. [ ] Open a new PR in the [website repository](https://github.com/biomejs/website) to update the website with the new version number:
    `BIOME_VERSION=<version> pnpm run codegen:all`.
    This will also copy the configuration schema in the right place.
+
+1. [ ] After releasing a major version number, you may want to update the `update-preview-version.mjs` script to make sure that future previews indicate a version number with a higher patch version than is currently indicated in the `package.json` manifests.
 
 ## Resources
 

@@ -84,7 +84,7 @@ pub const LINE_HEIGHT_KEYWORDS: [&str; 1] = ["normal"];
 
 /// List of known CSS value functions sourced from [`css-functions-list`](https://www.npmjs.com/package/css-functions-list).
 /// See the original list [here](https://github.com/niksy/css-functions-list/blob/master/index.json).
-pub const FUNCTION_KEYWORDS: [&str; 685] = [
+pub const FUNCTION_KEYWORDS: &[&str] = &[
     "-moz-abs",
     "-moz-acos",
     "-moz-anchor",
@@ -756,6 +756,7 @@ pub const FUNCTION_KEYWORDS: [&str; 685] = [
     "target-counter",
     "target-counters",
     "target-text",
+    "tech",
     "to",
     "translate",
     "translate3d",
@@ -975,7 +976,7 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
     "window-inactive",
 ];
 // https://github.com/known-css/known-css-properties/blob/master/source/w3c.json
-pub const KNOWN_PROPERTIES: [&str; 600] = [
+pub const KNOWN_PROPERTIES: &[&str] = &[
     "-webkit-line-clamp",
     "accent-color",
     "align-content",

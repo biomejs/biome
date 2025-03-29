@@ -1165,9 +1165,11 @@ pub trait Rule: RuleMeta + Sized {
     where
         Self: 'static,
     {
-        if <Self::Group as RuleGroup>::Category::CATEGORY == RuleCategory::Lint {
+        let category = <Self::Group as RuleGroup>::Category::CATEGORY;
+        if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
             let rule_category = format!(
-                "lint/{}/{}",
+                "{}/{}/{}",
+                category.as_suppression_category(),
                 <Self::Group as RuleGroup>::NAME,
                 Self::METADATA.name
             );
@@ -1183,10 +1185,16 @@ pub trait Rule: RuleMeta + Sized {
                     first_token,
                     comment.as_str(),
                 );
+                let message = if category == RuleCategory::Action {
+                    "action"
+                } else {
+                    "rule"
+                };
                 return Some(SuppressAction {
                     mutation,
-                    message: markup! { "Suppress rule " {rule_category} " for the whole file."}
-                        .to_owned(),
+                    message:
+                        markup! { "Suppress " {message} " " {rule_category} " for the whole file."}
+                            .to_owned(),
                 });
             }
         }
@@ -1205,9 +1213,11 @@ pub trait Rule: RuleMeta + Sized {
         Self: 'static,
     {
         // if the rule belongs to `Lint`, we auto generate an action to suppress the rule
-        if <Self::Group as RuleGroup>::Category::CATEGORY == RuleCategory::Lint {
+        let category = <Self::Group as RuleGroup>::Category::CATEGORY;
+        if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
             let rule_category = format!(
-                "lint/{}/{}",
+                "{}/{}/{}",
+                category.as_suppression_category(),
                 <Self::Group as RuleGroup>::NAME,
                 Self::METADATA.name
             );
@@ -1223,9 +1233,16 @@ pub trait Rule: RuleMeta + Sized {
                 suppression_reason: suppression_reason.unwrap_or("<explanation>"),
             });
 
+            let message = if category == RuleCategory::Action {
+                "action"
+            } else {
+                "rule"
+            };
+
             Some(SuppressAction {
                 mutation,
-                message: markup! { "Suppress rule " {rule_category} " for this line."}.to_owned(),
+                message: markup! { "Suppress " {message} " " {rule_category} " for this line."}
+                    .to_owned(),
             })
         } else {
             None

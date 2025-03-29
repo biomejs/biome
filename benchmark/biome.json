@@ -18,7 +18,7 @@
       "recommended": false,
       "complexity": {
         "noExtraBooleanCast": "error",
-        "noMultipleSpacesInRegex": "error",
+        "noAdjacentSpacesInRegex": "error",
         "noUselessCatch": "error",
         "noUselessConstructor": "error",
         "noUselessLabel": "error",

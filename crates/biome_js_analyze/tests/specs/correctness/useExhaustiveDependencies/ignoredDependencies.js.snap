@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: ignoredDependencies.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -30,7 +29,7 @@ function IgnoredDependencies2() {
 
 # Diagnostics
 ```
-ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   × This hook does not specify all of its dependencies: a
   
@@ -52,6 +51,10 @@ ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies ━━━�
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    10 │ ····},·[a]);
+       │         +   
 
 ```
 

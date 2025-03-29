@@ -1,7 +1,6 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-
 import { createWorkspaceWithBinary } from "../dist/index.js";
 
 describe("Workspace API", () => {

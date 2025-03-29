@@ -831,7 +831,6 @@ dependencies = [
  "enumflags2",
  "globset",
  "insta",
- "natord",
  "regex",
  "roaring",
  "rustc-hash 2.1.1",
@@ -970,11 +969,11 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
+ "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
  "camino",
  "insta",
- "natord",
  "rustc-hash 2.1.1",
  "tests_macros",
 ]
@@ -2921,12 +2920,6 @@ dependencies = [
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.52.0",
 ]
-
-[[package]]
-name = "natord"
-version = "1.0.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "308d96db8debc727c3fd9744aac51751243420e46edf401010908da7f8d5e57c"
 
 [[package]]
 name = "new_debug_unreachable"

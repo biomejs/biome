@@ -5,15 +5,18 @@
 //!
 //! The dependency graph is instantiated and updated inside the Workspace
 //! Server.
-use std::{collections::BTreeMap, sync::Arc};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    sync::Arc,
+};
 
 use biome_fs::{BiomePath, FileSystem, PathKind};
-use biome_js_syntax::AnyJsRoot;
+use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{EnforceExtension, ResolveError, ResolveOptions, ResolverGeneric};
-use papaya::HashMap;
+use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::FxBuildHasher;
 
 use crate::{module_visitor::ModuleVisitor, resolver_cache::ResolverCache};
@@ -31,81 +34,6 @@ pub struct DependencyGraph {
     /// Cache that tracks the presence of files, directories, and symlinks
     /// across the project.
     path_info: HashMap<Utf8PathBuf, Option<PathKind>>,
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct ModuleDependencyData {
-    /// Map of all static imports found in the module.
-    ///
-    /// Maps from the identifier found in the import statement to the absolute
-    /// path it resolves to. The resolved path may be looked up as key in the
-    /// [DependencyGraphModel::modules] map, although it is not required to
-    /// exist (for instance, if the path is outside the project's scope).
-    ///
-    /// Note that re-exports may introduce additional dependencies, because they
-    /// import another module and immediately re-export from that module.
-    /// Re-exports are tracked as part of [Self::exports] and
-    /// [Self::blanket_reexports].
-    pub static_imports: BTreeMap<String, Import>,
-
-    /// Map of all dynamic imports found in the module for which the import
-    /// identifier could be statically determined.
-    ///
-    /// Dynamic imports for which the identifier cannot be statically determined
-    /// (for instance, because a template string with variables is used) will be
-    /// omitted from this map.
-    ///
-    /// Maps from the identifier found in the import expression to the absolute
-    /// path it resolves to. The resolved path may be looked up as key in the
-    /// [DependencyGraphModel::modules] map, although it is not required to
-    /// exist (for instance, if the path is outside the project's scope).
-    ///
-    /// `require()` expressions in CommonJS sources are also included with the
-    /// dynamic imports.
-    pub dynamic_imports: BTreeMap<String, Import>,
-
-    /// Map of exports from the module.
-    ///
-    /// The keys are the names of the exports, where "default" is used for the
-    /// default export. See [Export] for information tracked per export.
-    ///
-    /// Re-exports are tracked in this map as well. They exception are "blanket"
-    /// re-exports, such as `export * from "other-module"`. Those are tracked in
-    /// [Self::forwarding_exports] instead.
-    pub exports: BTreeMap<Text, Export>,
-
-    /// Re-exports that apply to all symbols from another module, without
-    /// assigning a name to them.
-    pub blanket_reexports: Vec<ReexportAll>,
-}
-
-impl ModuleDependencyData {
-    /// Allows draining a single entry from the imports.
-    ///
-    /// Returns a `(specifier, import)` pair from either the static or dynamic
-    /// imports, whichever is non-empty. Returns `None` if both are empty.
-    ///
-    /// Using this method allows for consuming the struct while iterating over
-    /// it, without necessarily turning the entire struct into an iterator at
-    /// once.
-    pub fn drain_one(&mut self) -> Option<(String, Import)> {
-        if self.static_imports.is_empty() {
-            self.dynamic_imports.pop_first()
-        } else {
-            self.static_imports.pop_first()
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Import {
-    /// Absolute path of the resource being imported, if it can be resolved.
-    ///
-    /// If the import statement referred to a package dependency, the path will
-    /// point towards the resolved entry point of the package.
-    ///
-    /// If `None`, import resolution failed.
-    pub resolved_path: Result<Utf8PathBuf, ResolveError>,
 }
 
 impl DependencyGraph {
@@ -207,6 +135,157 @@ impl DependencyGraph {
     pub(crate) fn path_kind(&self, path: &Utf8Path) -> Option<PathKind> {
         self.path_info.pin().get(path).copied().flatten()
     }
+
+    /// Finds an exported symbol by `symbol_name` as exported by `module`.
+    ///
+    /// Follows re-exports if necessary.
+    fn find_exported_symbol(
+        &self,
+        module: &ModuleDependencyData,
+        symbol_name: &str,
+    ) -> Option<OwnExport> {
+        let data = self.data.pin();
+        let mut seen_paths = BTreeSet::new();
+
+        fn find_exported_symbol_with_seen_paths<'a>(
+            data: &'a HashMapRef<Utf8PathBuf, ModuleDependencyData, FxBuildHasher, LocalGuard>,
+            module: &'a ModuleDependencyData,
+            symbol_name: &str,
+            seen_paths: &mut BTreeSet<&'a Utf8Path>,
+        ) -> Option<OwnExport> {
+            match module.exports.get(symbol_name) {
+                Some(Export::Own(own_export)) => Some(own_export.clone()),
+                Some(Export::Reexport(import)) => match &import.resolved_path {
+                    Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
+                        find_exported_symbol_with_seen_paths(data, module, symbol_name, seen_paths)
+                    }),
+                    _ => None,
+                },
+                // FIXME: We can create an `OwnExport` on the fly from a
+                //        `ReexportAll`, which sorta kinda makes sense,
+                //        because it does export the imported symbols under
+                //        its own name.
+                //        Still, it feels funny, and it means we always
+                //        ignore JSDoc comments added to such a re-export.
+                //        Should be fixed as part of #5312.
+                Some(Export::ReexportAll(_)) => Some(OwnExport {
+                    jsdoc_comment: None,
+                }),
+                None => module.blanket_reexports.iter().find_map(|reexport| {
+                    match &reexport.import.resolved_path {
+                        Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
+                            find_exported_symbol_with_seen_paths(
+                                data,
+                                module,
+                                symbol_name,
+                                seen_paths,
+                            )
+                        }),
+                        _ => None,
+                    }
+                }),
+            }
+        }
+
+        find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths)
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ModuleDependencyData {
+    /// Map of all static imports found in the module.
+    ///
+    /// Maps from the identifier found in the import statement to the absolute
+    /// path it resolves to. The resolved path may be looked up as key in the
+    /// [DependencyGraphModel::modules] map, although it is not required to
+    /// exist (for instance, if the path is outside the project's scope).
+    ///
+    /// Note that re-exports may introduce additional dependencies, because they
+    /// import another module and immediately re-export from that module.
+    /// Re-exports are tracked as part of [Self::exports] and
+    /// [Self::blanket_reexports].
+    pub static_imports: BTreeMap<String, Import>,
+
+    /// Map of all dynamic imports found in the module for which the import
+    /// identifier could be statically determined.
+    ///
+    /// Dynamic imports for which the identifier cannot be statically determined
+    /// (for instance, because a template string with variables is used) will be
+    /// omitted from this map.
+    ///
+    /// Maps from the identifier found in the import expression to the absolute
+    /// path it resolves to. The resolved path may be looked up as key in the
+    /// [DependencyGraphModel::modules] map, although it is not required to
+    /// exist (for instance, if the path is outside the project's scope).
+    ///
+    /// `require()` expressions in CommonJS sources are also included with the
+    /// dynamic imports.
+    pub dynamic_imports: BTreeMap<String, Import>,
+
+    /// Map of exports from the module.
+    ///
+    /// The keys are the names of the exports, where "default" is used for the
+    /// default export. See [Export] for information tracked per export.
+    ///
+    /// Re-exports are tracked in this map as well. They exception are "blanket"
+    /// re-exports, such as `export * from "other-module"`. Those are tracked in
+    /// [Self::forwarding_exports] instead.
+    pub exports: BTreeMap<Text, Export>,
+
+    /// Re-exports that apply to all symbols from another module, without
+    /// assigning a name to them.
+    pub blanket_reexports: Vec<ReexportAll>,
+}
+
+impl ModuleDependencyData {
+    /// Allows draining a single entry from the imports.
+    ///
+    /// Returns a `(specifier, import)` pair from either the static or dynamic
+    /// imports, whichever is non-empty. Returns `None` if both are empty.
+    ///
+    /// Using this method allows for consuming the struct while iterating over
+    /// it, without necessarily turning the entire struct into an iterator at
+    /// once.
+    pub fn drain_one(&mut self) -> Option<(String, Import)> {
+        if self.static_imports.is_empty() {
+            self.dynamic_imports.pop_first()
+        } else {
+            self.static_imports.pop_first()
+        }
+    }
+
+    /// Finds an exported symbol by `name`, using the `dependency_graph` to
+    /// lookup re-exports if necessary.
+    #[inline]
+    pub fn find_exported_symbol(
+        &self,
+        dependency_graph: &DependencyGraph,
+        name: &str,
+    ) -> Option<OwnExport> {
+        dependency_graph.find_exported_symbol(self, name)
+    }
+
+    /// Returns the information about a given import by its syntax node.
+    pub fn get_import_by_node(&self, node: &AnyJsImportLike) -> Option<&Import> {
+        let specifier_text = node.inner_string_text()?;
+        let specifier = specifier_text.text();
+        if node.is_static_import() {
+            self.static_imports.get(specifier)
+        } else {
+            self.dynamic_imports.get(specifier)
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Import {
+    /// Absolute path of the resource being imported, if it can be resolved.
+    ///
+    /// If the import statement referred to a package dependency, the path will
+    /// point towards the resolved entry point of the package.
+    ///
+    /// If `None`, import resolution failed.
+    pub resolved_path: Result<Utf8PathBuf, ResolveError>,
 }
 
 /// Information tracked for every export.

@@ -416,6 +416,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAdjacentSpacesInRegex": {
+					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
@@ -455,13 +462,6 @@
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoForEachConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noMultipleSpacesInRegex": {
-					"description": "Disallow unclear usage of consecutive space characters in regular expression literals",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -889,6 +889,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noPrivateImports": {
+					"description": "Restricts imports of private exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPrivateImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRenderReturnValue": {
 					"description": "Prevent the usage of the return value of React.render.",
 					"anyOf": [
@@ -973,13 +980,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnnecessaryContinue": {
-					"description": "Avoid using unnecessary continue.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUnreachable": {
 					"description": "Disallow unreachable code",
 					"anyOf": [
@@ -1038,6 +1038,13 @@
 				},
 				"noUnusedVariables": {
 					"description": "Disallow unused variables.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedVariablesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessContinue": {
+					"description": "Avoid using unnecessary continue.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -1670,6 +1677,12 @@
 			},
 			"additionalProperties": false
 		},
+		"GroupMatcher": {
+			"anyOf": [
+				{ "$ref": "#/definitions/PredefinedGroupMatcher" },
+				{ "$ref": "#/definitions/ImportSourceGlob" }
+			]
+		},
 		"GroupPlainConfiguration": {
 			"oneOf": [
 				{
@@ -1814,9 +1827,18 @@
 		},
 		"ImportGroup": {
 			"anyOf": [
-				{ "$ref": "#/definitions/PredefinedImportGroup" },
-				{ "$ref": "#/definitions/Glob" }
+				{ "type": "null" },
+				{ "$ref": "#/definitions/GroupMatcher" },
+				{ "type": "array", "items": { "$ref": "#/definitions/GroupMatcher" } }
 			]
+		},
+		"ImportGroups": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/ImportGroup" }
+		},
+		"ImportSourceGlob": {
+			"description": "Glob to match against import sources.",
+			"allOf": [{ "$ref": "#/definitions/Glob" }]
 		},
 		"IndentScriptAndStyle": {
 			"description": "Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).\n\nWhen true, the content of `<script>` and `<style>` tags will be indented one level.",
@@ -2432,6 +2454,24 @@
 			},
 			"additionalProperties": false
 		},
+		"NoPrivateImportsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPrivateImportsOptions" }
+			]
+		},
+		"NoPrivateImportsOptions": {
+			"description": "Options for the rule `noPrivateImports`.",
+			"type": "object",
+			"properties": {
+				"defaultVisibility": {
+					"description": "The default visibility to assume for symbols without visibility tag.\n\nDefault: **public**.",
+					"default": "public",
+					"allOf": [{ "$ref": "#/definitions/Visibility" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoRestrictedTypesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2493,6 +2533,23 @@
 					"description": "If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.",
 					"default": true,
 					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUnusedVariablesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnusedVariablesOptions" }
+			]
+		},
+		"NoUnusedVariablesOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreRestSiblings": {
+					"description": "Whether to ignore unused variables from an object destructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).",
+					"default": false,
+					"type": "boolean"
 				}
 			},
 			"additionalProperties": false
@@ -2571,15 +2628,15 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateProperties": {
-					"description": "Disallow duplicate properties within declaration blocks.",
+				"noDuplicateFields": {
+					"description": "No duplicated fields in GraphQL operations.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"noDuplicatedFields": {
-					"description": "No duplicated fields in GraphQL operations.",
+				"noDuplicateProperties": {
+					"description": "Disallow duplicate properties within declaration blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2680,13 +2737,6 @@
 					"description": "Disallow octal escape sequences in string literals",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPackagePrivateImports": {
-					"description": "Restricts imports of \"package private\" exports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3010,12 +3060,10 @@
 		"Options": {
 			"type": "object",
 			"properties": {
-				"importGroups": {
+				"groups": {
 					"default": [],
-					"type": "array",
-					"items": { "$ref": "#/definitions/ImportGroup" }
-				},
-				"legacy": { "default": false, "type": "boolean" }
+					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -3244,10 +3292,7 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
-		"PredefinedImportGroup": {
-			"type": "string",
-			"enum": [":blank-line:", ":bun:", ":node:", ":types:"]
-		},
+		"PredefinedGroupMatcher": { "type": "string" },
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -3658,6 +3703,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoPrivateImportsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoPrivateImportsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoRestrictedTypesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -3703,6 +3763,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUndeclaredDependenciesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUnusedVariablesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnusedVariablesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3790,6 +3869,10 @@
 			"type": "object",
 			"required": ["level"],
 			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
@@ -4058,7 +4141,7 @@
 			"type": "object",
 			"properties": {
 				"organizeImports": {
-					"description": "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.",
+					"description": "Provides a code action to sort the imports and exports in the file using a built-in or custom order.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
 						{ "type": "null" }
@@ -4983,7 +5066,7 @@
 			"properties": {
 				"checkTypes": {
 					"description": "Check undeclared types.",
-					"default": true,
+					"default": false,
 					"type": "boolean"
 				}
 			}
@@ -5183,6 +5266,10 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"Visibility": {
+			"type": "string",
+			"enum": ["public", "package", "private"]
 		},
 		"WhitespaceSensitivity": {
 			"description": "Whitespace sensitivity for HTML formatting.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    | | -------------- | :------------: | :----------: | | with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 | | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20): ```html <span>really long content</span> ``` as this, where the content hugs the tags: ```html <span >really long content</span > ```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",

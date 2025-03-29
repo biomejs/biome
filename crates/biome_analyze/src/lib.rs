@@ -484,7 +484,6 @@ where
                         suppression.line_index == *self.line_index
                             && suppression.text_range.start() <= start
                     });
-
             let suppression = match suppression {
                 Some(suppression) => Some(suppression),
                 None => {
@@ -671,9 +670,9 @@ impl From<&SuppressionKind> for AnalyzerSuppressionVariant {
 }
 
 impl<'a> AnalyzerSuppression<'a> {
-    pub fn everything() -> Self {
+    pub fn everything(category: &'a str) -> Self {
         Self {
-            kind: AnalyzerSuppressionKind::Everything,
+            kind: AnalyzerSuppressionKind::Everything(category),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
         }
@@ -689,6 +688,14 @@ impl<'a> AnalyzerSuppression<'a> {
     pub fn rule(rule: &'a str) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::Rule(rule),
+            ignore_range: None,
+            variant: AnalyzerSuppressionVariant::Line,
+        }
+    }
+
+    pub fn action(action: &'a str) -> Self {
+        Self {
+            kind: AnalyzerSuppressionKind::Action(action),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
         }
@@ -717,13 +724,28 @@ impl<'a> AnalyzerSuppression<'a> {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum AnalyzerSuppressionKind<'a> {
     /// A suppression disabling all lints eg. `// biome-ignore lint`
-    Everything,
+    Everything(&'a str),
     /// A suppression disabling a specific rule eg. `// biome-ignore lint/complexity/useWhile`
     Rule(&'a str),
+    /// A suppression disabling a specific rule eg. `// biome-ignore assist/source/organizeImports`
+    Action(&'a str),
     /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
     RuleInstance(&'a str, &'a str),
     /// A suppression disabling a plugin eg. `// lint/biome-ignore plugin/my-plugin`
     Plugin(Option<&'a str>),
+}
+
+impl AnalyzerSuppressionKind<'_> {
+    /// Whether this suppression is meant to suppress an action
+    pub fn is_action(&self) -> bool {
+        match self {
+            AnalyzerSuppressionKind::Everything(category) => *category == "assist",
+            AnalyzerSuppressionKind::Rule(_) => false,
+            AnalyzerSuppressionKind::Action(_) => true,
+            AnalyzerSuppressionKind::RuleInstance(_, _) => false,
+            AnalyzerSuppressionKind::Plugin(_) => false,
+        }
+    }
 }
 
 /// Takes a [Suppression] and returns a [AnalyzerSuppression]
@@ -737,8 +759,9 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().end()).start(),
     );
     for (key, subcategory, value) in suppression.categories {
-        if key == category!("lint") {
-            result.push(AnalyzerSuppression::everything().with_variant(&suppression.kind));
+        if key == category!("lint") || key == category!("assist") {
+            result
+                .push(AnalyzerSuppression::everything(key.name()).with_variant(&suppression.kind));
         } else if key == category!("lint/plugin") {
             let suppression = AnalyzerSuppression::plugin(subcategory)
                 .with_ignore_range(ignore_range)
@@ -754,6 +777,12 @@ pub fn to_analyzer_suppressions(
                     AnalyzerSuppression::rule(rule).with_ignore_range(ignore_range)
                 }
                 .with_variant(&suppression.kind);
+                result.push(suppression);
+            } else if let Some(action) = category.strip_prefix("assist/") {
+                // action instances aren't supported yet
+                let suppression = AnalyzerSuppression::action(action)
+                    .with_ignore_range(ignore_range)
+                    .with_variant(&suppression.kind);
                 result.push(suppression);
             }
         }

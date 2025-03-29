@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: chunk_newline.js
+---
+# Input
+```js
+import { C } from "c";
+import "a";
+import { B } from "b";
+f();
+import { A } from "a";
+
+```
+
+# Actions
+```diff
+@@ -1,5 +1,7 @@
+ import { C } from "c";
+ import "a";
+ import { B } from "b";
++
+ f();
++
+ import { A } from "a";
+
+```

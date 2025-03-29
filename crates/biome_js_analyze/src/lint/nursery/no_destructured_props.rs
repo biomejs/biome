@@ -7,8 +7,8 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern,
-    AnyJsObjectBindingPatternMember, JsLanguage, JsObjectBindingPattern, JsParameters,
-    JsVariableDeclarator, JsxExpressionAttributeValue,
+    AnyJsObjectBindingPatternMember, JsArrowFunctionExpression, JsLanguage, JsObjectBindingPattern,
+    JsParameters, JsVariableDeclarator, JsxExpressionAttributeValue,
 };
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListNodesIterator, TextRange};
 use biome_string_case::Case;
@@ -101,7 +101,7 @@ impl Rule for NoDestructuredProps {
         }
         let mut bindings = vec![];
 
-        if is_inside_jsx_component(binding_pattern).unwrap_or_default() {
+        if is_inside_jsx_component(&parameters).unwrap_or_default() {
             let properties = binding_pattern.properties();
             if properties.len() == 0 {
                 bindings.push(Violation::EmptyBinding(binding_pattern.range()));
@@ -159,11 +159,16 @@ impl Rule for NoDestructuredProps {
     }
 }
 
-fn is_inside_jsx_component(binding_pattern: &JsObjectBindingPattern) -> Option<bool> {
-    let variable_declarator = binding_pattern
+fn is_inside_jsx_component(parameters: &JsParameters) -> Option<bool> {
+    let arrow_function_expression = parameters
         .syntax()
-        .ancestors()
-        .find_map(JsVariableDeclarator::cast)?;
+        .parent()
+        .and_then(JsArrowFunctionExpression::cast)?;
+
+    let variable_declarator = arrow_function_expression
+        .syntax()
+        .grand_parent()
+        .and_then(JsVariableDeclarator::cast)?;
 
     let name = variable_declarator.id().ok()?;
     let name = name.as_any_js_binding()?.as_js_identifier_binding()?;

@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: default_package.js
+---
+# Input
+```js
+// Importing a symbol without any visibility from sub package is NOT allowed when the default visibility is package.
+import { fooDefaultVariable } from "./sub/foo.js";
+
+// Re-exporting widens the allowed import scope for package private, so this is allowed:
+import { fooDefaultVariable as fooDefault2 } from "./sub";
+
+// Looser visibility takes precedence over the default visibility, so these imports are allowed.
+import { fooPackageVariable } from "./foo.js";
+import { fooPublicVariable } from "./foo.js";
+import { fooPublicVariable as subPublic } from "./sub/foo.js";
+
+// Tighter visibility also takes precedence, so these imports are NOT allowed.
+import { fooPackageVariable as subPackage } from "./sub/foo.js";
+import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+
+```
+
+# Diagnostics
+```
+default_package.js:2:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i You may not import a symbol with package visibility from here.
+  
+    1 │ // Importing a symbol without any visibility from sub package is NOT allowed when the default visibility is package.
+  > 2 │ import { fooDefaultVariable } from "./sub/foo.js";
+      │          ^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ // Re-exporting widens the allowed import scope for package private, so this is allowed:
+  
+  i You may need to import an alternative symbol, or relax the visibility of this symbol.
+  
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/sub/foo.js.
+  
+
+```
+
+```
+default_package.js:13:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i You may not import a symbol with package visibility from here.
+  
+    12 │ // Tighter visibility also takes precedence, so these imports are NOT allowed.
+  > 13 │ import { fooPackageVariable as subPackage } from "./sub/foo.js";
+       │          ^^^^^^^^^^^^^^^^^^
+    14 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+    15 │ 
+  
+  i You may need to import an alternative symbol, or relax the visibility of this symbol.
+  
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/sub/foo.js.
+  
+
+```
+
+```
+default_package.js:14:10 lint/correctness/noPrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i You may not import a symbol with private visibility from here.
+  
+    12 │ // Tighter visibility also takes precedence, so these imports are NOT allowed.
+    13 │ import { fooPackageVariable as subPackage } from "./sub/foo.js";
+  > 14 │ import { fooPrivateVariable as subPrivate } from "./sub/foo.js";
+       │          ^^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+  i You may need to import an alternative symbol, or relax the visibility of this symbol.
+  
+  i This symbol was imported from tests/specs/correctness/noPrivateImports/sub/foo.js.
+  
+
+```

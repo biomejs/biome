@@ -53,7 +53,7 @@ define_categories! {
     "lint/complexity/noExcessiveNestedTestSuites": "https://biomejs.dev/linter/rules/no-excessive-nested-test-suites",
     "lint/complexity/noExtraBooleanCast": "https://biomejs.dev/linter/rules/no-extra-boolean-cast",
     "lint/complexity/noForEach": "https://biomejs.dev/linter/rules/no-for-each",
-    "lint/complexity/noMultipleSpacesInRegex": "https://biomejs.dev/linter/rules/no-multiple-spaces-in-regex",
+    "lint/complexity/noAdjacentSpacesInRegex": "https://biomejs.dev/linter/rules/no-adjacent-spaces-in-regex",
     "lint/complexity/noStaticOnlyClass": "https://biomejs.dev/linter/rules/no-static-only-class",
     "lint/complexity/noThisInStatic": "https://biomejs.dev/linter/rules/no-this-in-static",
     "lint/complexity/noUselessCatch": "https://biomejs.dev/linter/rules/no-useless-catch",
@@ -101,6 +101,7 @@ define_categories! {
     "lint/correctness/noNodejsModules": "https://biomejs.dev/linter/rules/no-nodejs-modules",
     "lint/correctness/noNonoctalDecimalEscape": "https://biomejs.dev/linter/rules/no-nonoctal-decimal-escape",
     "lint/correctness/noPrecisionLoss": "https://biomejs.dev/linter/rules/no-precision-loss",
+    "lint/correctness/noPrivateImports": "https://biomejs.dev/linter/rules/no-private-imports",
     "lint/correctness/noRenderReturnValue": "https://biomejs.dev/linter/rules/no-render-return-value",
     "lint/correctness/noSelfAssign": "https://biomejs.dev/linter/rules/no-self-assign",
     "lint/correctness/noSetterReturn": "https://biomejs.dev/linter/rules/no-setter-return",
@@ -113,7 +114,7 @@ define_categories! {
     "lint/correctness/noUnknownProperty": "https://biomejs.dev/linter/rules/no-unknown-property",
     "lint/correctness/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
     "lint/correctness/noUnmatchableAnbSelector": "https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
-    "lint/correctness/noUnnecessaryContinue": "https://biomejs.dev/linter/rules/no-unnecessary-continue",
+    "lint/correctness/noUselessContinue": "https://biomejs.dev/linter/rules/no-useless-continue",
     "lint/correctness/noUnreachable": "https://biomejs.dev/linter/rules/no-unreachable",
     "lint/correctness/noUnreachableSuper": "https://biomejs.dev/docs/linter/rules/no-unreachable-super",
     "lint/correctness/noUnsafeFinally": "https://biomejs.dev/linter/rules/no-unsafe-finally",
@@ -149,7 +150,7 @@ define_categories! {
     "lint/nursery/noDuplicateCustomProperties": "https://biomejs.dev/linter/rules/no-duplicate-custom-properties",
     "lint/nursery/noDuplicateElseIf": "https://biomejs.dev/linter/rules/no-duplicate-else-if",
     "lint/nursery/noDuplicateProperties": "https://biomejs.dev/linter/rules/no-duplicate-properties",
-    "lint/nursery/noDuplicatedFields": "https://biomejs.dev/linter/rules/no-duplicated-fields",
+    "lint/nursery/noDuplicateFields": "https://biomejs.dev/linter/rules/no-duplicate-fields",
     "lint/nursery/noDynamicNamespaceImportAccess": "https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access",
     "lint/nursery/noEnum": "https://biomejs.dev/linter/rules/no-enum",
     "lint/nursery/noExportedImports": "https://biomejs.dev/linter/rules/no-exported-imports",
@@ -169,7 +170,6 @@ define_categories! {
     "lint/nursery/noNestedTernary": "https://biomejs.dev/linter/rules/no-nested-ternary",
     "lint/nursery/noNoninteractiveElementInteractions": "https://biomejs.dev/linter/rules/no-noninteractive-element-interactions",
     "lint/nursery/noOctalEscape": "https://biomejs.dev/linter/rules/no-octal-escape",
-    "lint/nursery/noPackagePrivateImports": "https://biomejs.dev/linter/rules/no-package-private-imports",
     "lint/nursery/noProcessEnv": "https://biomejs.dev/linter/rules/no-process-env",
     "lint/nursery/noProcessGlobal": "https://biomejs.dev/linter/rules/no-process-global",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
@@ -354,6 +354,9 @@ define_categories! {
     // end lint rules
     // start assist actions
     "assist/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
+    "assist/source/useSortedProperties": "https://biomejs.dev/linter/actions/use-sorted-properties",
+    "assist/source/useSortedAttributes": "https://biomejs.dev/linter/actions/use-sorted-attributes",
+    "assist/source/organizeImports": "https://biomejs.dev/linter/actions/organize-imports",
     // end assist actions
     ; // start syntax rules
     "syntax/correctness/noTypeOnlyImportAttributes",
@@ -401,6 +404,7 @@ define_categories! {
     "suppressions/parse",
     "suppressions/unknownGroup",
     "suppressions/unknownRule",
+    "suppressions/unknownAction",
     "suppressions/unused",
     "suppressions/incorrect",
 

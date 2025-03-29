@@ -38,8 +38,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// **Since**: `v2`
-    ///
     /// ```json,options
     /// {
     ///     "options": {
@@ -173,8 +171,6 @@ declare_lint_rule! {
     ///     }
     /// }
     /// ```
-    ///
-    /// **Since**: `v2`
     ///
     /// Use the options to specify the import paths and/or specific import names within them that you want to restrict in your source code.
     ///
