@@ -26,6 +26,9 @@ const biome = await Biome.create({
 	distribution: Distribution.NODE, // Or BUNDLER / WEB depending on the distribution package you've installed
 });
 
+// Optionally apply a Biome configuration (instead of biome.json)
+biome.applyConfiguration({...});
+
 const formatted = biome.formatContent("function f   (a, b) { return a == b; }", {
 	filePath: "example.js",
 });
