@@ -52,11 +52,27 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": ["utils/*", "!utils/foo"]
+    ///     }
+    /// }
+    /// ```
+    ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic,use_options
     /// import "lodash";
-    /// import "allowed-import";
+    /// import "underscore";
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import Bar from "import-foo";
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import "utils/bar";
     /// ```
     ///
     /// ```js,expect_diagnostic,use_options
@@ -73,6 +89,10 @@ declare_lint_rule! {
     /// import "allowed-import";
     /// const myImport = await import("allowed-import");
     /// const myImport = require("allowed-import");
+    /// ```
+    ///
+    /// ```js,use_options
+    /// import "utils/foo";
     /// ```
     ///
     /// ## Supported Import Syntaxes
@@ -173,7 +193,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// Use the options to specify the import paths and/or specific import names within them that you want to restrict in your source code.
+    /// Use the options to specify import paths and/or patterns, including specific import names, that you want to restrict in your source code.
     ///
     /// ```json,options
     /// {
@@ -190,6 +210,14 @@ declare_lint_rule! {
     ///               "message": "Please use only Bar from import-bar."
     ///             }
     ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": ["utils/*", "!utils/foo"]
     ///     }
     /// }
     /// ```
@@ -314,6 +342,221 @@ declare_lint_rule! {
     ///
     /// ```js,use_options
     /// import { Bar } from 'import-bar';
+    /// ```
+    ///
+    /// ### `patterns`
+    ///
+    /// This option allows you to specify multiple modules to restrict using gitignore-style patterns or regular expressions.
+    ///
+    /// ```json,options
+    /// {
+    ///    "options": {
+    ///         "patterns": ["utils/*", "!utils/foo"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import foo from "utils/foo";
+    /// import bar from "utils/bar";
+    /// ```
+    ///
+    /// ### `group`
+    ///
+    /// The patterns array can also include objects. The group property is used to specify the gitignore-style patterns for restricting modules and the message property is used to specify a custom message.
+    /// **`group` cannot be used in combination with `regex`.**
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "patterns": [{
+    ///             "group": ["import-foo/*", "!import-foo/bar"],
+    ///             "message": "import-foo is deprecated, except the modules in import-foo/bar."
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import foo from 'import-foo/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import foo from 'import-foo';
+    /// import bar from 'import-foo/bar';
+    /// ```
+    ///
+    /// ### `regex`
+    ///
+    /// The regex property is used to specify the regex patterns for restricting modules.
+    /// **`regex` cannot be used in combination with `group`.**
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": [{
+    ///             "regex": "import-foo/(?!bar)",
+    ///             "message": "import-foo is deprecated, except the modules in import-foo/bar."
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { Foo } from 'import-foo/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import { Bar } from 'import-foo/bar';
+    /// ```
+    ///
+    /// ### `caseSensitive`
+    ///
+    /// This is a boolean option and sets the patterns specified in the group or regex properties to be case-sensitive when true. Default is false.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": [{
+    ///             "group": ["import-foo/prefix[A-Z]*"],
+    ///             "caseSensitive": true
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { Foo } from 'import-foo/prefixFoo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import { Foo } from 'import-foo/prefixfoo';
+    /// ```
+    ///
+    /// ### `importNames`
+    ///
+    /// You can also specify importNames within objects inside the patterns array. In this case, the specified names apply only to the associated group or regex property.
+    /// **`importNames` cannot be used in combination with `allowImportNames` and `allowImportNamePattern`.**
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": [{
+    ///             "group": ["utils/*"],
+    ///             "importNames": ["isEmpty"],
+    ///             "message": "Use 'isEmpty' from lodash instead."
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { isEmpty } from 'utils/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import { Foo } from 'utils/foo';
+    /// ```
+    ///
+    /// ### `allowImportNames`
+    ///
+    /// You can also specify allowImportNames within objects inside the patterns array. In this case, the specified names apply only to the associated group or regex property.
+    /// **`allowImportNames` cannot be used in combination with `importNames` , `importNamePattern` and `allowImportNamePattern`.**
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": [{
+    ///             "group": ["utils/*"],
+    ///             "allowImportNames": ["isEmpty"],
+    ///             "message": "Please use only 'isEmpty' from utils."}
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { Foo } from 'utils/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import { isEmpty } from 'utils/foo';
+    /// ```
+    ///
+    /// ### `importNamePattern`
+    ///
+    /// This option allows you to use regex patterns to restrict import names.
+    /// **`importNamePattern` cannot be used in combination with `allowImportNames` and `allowImportNamePattern`.**
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": [{
+    ///             "group": ["import-foo/*"],
+    ///             "importNamePattern": "^foo"
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { foo } from 'import-foo/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import { Foo } from 'import-foo/foo';
+    /// ```
+    ///
+    /// ### `allowImportNamePattern`
+    ///
+    /// Inverse of importNamePattern, this option allows imports that matches the specified regex pattern.
+    /// **`allowImportNamePattern` cannot be used in combination with `importNames` , `importNamePattern` and `allowImportNames`.**
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///        "patterns": [{
+    ///             "group": ["import-foo/*"],
+    ///             "allowImportNamePattern": "^foo"
+    ///         }]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import { Foo } from 'import-foo/foo';
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import { foo } from 'import-foo/foo';
     /// ```
     pub NoRestrictedImports {
         version: "1.6.0",
