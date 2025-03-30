@@ -1,13 +1,9 @@
-use std::borrow::Cow;
-
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use crate::{a11y::is_hidden_from_screen_reader, services::aria::Aria};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsxAttribute, AnyJsxElementName, jsx_ext::AnyJsxElement};
+use biome_js_syntax::{AnyJsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
-use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforce onClick is accompanied by at least one of the following: `onKeyUp`, `onKeyDown`, `onKeyPress`.
@@ -69,41 +65,29 @@ declare_lint_rule! {
 }
 
 impl Rule for UseKeyWithClickEvents {
-    type Query = Ast<AnyJsxElement>;
+    type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
+        let aria_roles = ctx.aria_roles();
 
-        match element.name() {
-            Ok(AnyJsxElementName::JsxName(name)) => {
-                let name_token = name.value_token().ok()?;
-                let element_name = name_token.text_trimmed().to_ascii_lowercase_cow();
-
-                // Don't handle interactive roles
-                // TODO Support aria roles https://github.com/rome/tools/issues/3640
-                if matches!(
-                    element_name,
-                    Cow::Borrowed("button" | "checkbox" | "combobox" | "a" | "input")
-                ) {
-                    return None;
-                }
-            }
-            _ => {
-                return None;
-            }
-        }
-
-        let attributes = element.attributes();
-
-        #[expect(clippy::question_mark)]
-        if attributes.find_by_name("onClick").is_none() {
+        // skip custom components for now
+        if element.is_custom_component() {
             return None;
         }
 
-        for attribute in attributes {
+        if is_hidden_from_screen_reader(element) || aria_roles.is_presentation_role(element) {
+            return None;
+        }
+
+        if !aria_roles.is_not_interactive_element(element) {
+            return None;
+        }
+
+        for attribute in element.attributes() {
             match attribute {
                 AnyJsxAttribute::JsxAttribute(attribute) => {
                     let attribute_name = attribute.name().ok()?;
