@@ -71,6 +71,31 @@ async function withoutForAwait () {
 	return sum;
 };
 
+function Sample(validator) {
+	return (
+		_,
+		__,
+		descriptor
+	) => {
+		const originalMethod = descriptor.value;
+		validator()
+		descriptor.value = async (...args) => originalMethod.apply(this, args);
+		return descriptor;
+	};
+}
+
+class Sample {
+	@Sample()
+	async decoratedBreaks() {
+		return true;
+	}
+
+	@Sample(() => true)
+	async decoratedWithCallbackBreaks() {
+		return true;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -474,13 +499,12 @@ invalid.js:59:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
   > 59 │ async function withoutForAwait () {
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   > 60 │ 	let sum = 0;
-  > 61 │ 	for (const n of [1, 2, 3]) {
-  > 62 │ 		sum += n
-  > 63 │ 	}
+        ...
   > 64 │ 	return sum;
   > 65 │ };
        │ ^
     66 │ 
+    67 │ function Sample(validator) {
   
   i Remove this async modifier, or add an await expression in the function.
   
@@ -489,13 +513,78 @@ invalid.js:59:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
   > 59 │ async function withoutForAwait () {
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   > 60 │ 	let sum = 0;
-  > 61 │ 	for (const n of [1, 2, 3]) {
-  > 62 │ 		sum += n
-  > 63 │ 	}
+        ...
   > 64 │ 	return sum;
   > 65 │ };
        │ ^
     66 │ 
+    67 │ function Sample(validator) {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+```
+
+```
+invalid.js:81:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function lacks an await expression.
+  
+    80 │ class Sample {
+  > 81 │ 	@Sample()
+       │ 	^^^^^^^^^
+  > 82 │ 	async decoratedBreaks() {
+  > 83 │ 		return true;
+  > 84 │ 	}
+       │ 	^
+    85 │ 
+    86 │ 	@Sample(() => true)
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    80 │ class Sample {
+  > 81 │ 	@Sample()
+       │ 	^^^^^^^^^
+  > 82 │ 	async decoratedBreaks() {
+  > 83 │ 		return true;
+  > 84 │ 	}
+       │ 	^
+    85 │ 
+    86 │ 	@Sample(() => true)
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+```
+
+```
+invalid.js:86:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function lacks an await expression.
+  
+    84 │ 	}
+    85 │ 
+  > 86 │ 	@Sample(() => true)
+       │ 	^^^^^^^^^^^^^^^^^^^
+  > 87 │ 	async decoratedWithCallbackBreaks() {
+  > 88 │ 		return true;
+  > 89 │ 	}
+       │ 	^
+    90 │ }
+    91 │ 
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    84 │ 	}
+    85 │ 
+  > 86 │ 	@Sample(() => true)
+       │ 	^^^^^^^^^^^^^^^^^^^
+  > 87 │ 	async decoratedWithCallbackBreaks() {
+  > 88 │ 		return true;
+  > 89 │ 	}
+       │ 	^
+    90 │ }
+    91 │ 
   
   i Async functions without await expressions may not need to be declared async.
   
