@@ -25,7 +25,7 @@ pub type NoBarrelFile =
 pub type NoBitwiseOperators =
     <lint::nursery::no_bitwise_operators::NoBitwiseOperators as biome_analyze::Rule>::Options;
 pub type NoBlankTarget =
-    <lint::a11y::no_blank_target::NoBlankTarget as biome_analyze::Rule>::Options;
+    <lint::security::no_blank_target::NoBlankTarget as biome_analyze::Rule>::Options;
 pub type NoCatchAssign =
     <lint::suspicious::no_catch_assign::NoCatchAssign as biome_analyze::Rule>::Options;
 pub type NoChildrenProp =

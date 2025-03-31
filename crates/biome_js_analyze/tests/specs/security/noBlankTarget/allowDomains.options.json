@@ -2,7 +2,7 @@
 	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
 	"linter": {
 		"rules": {
-			"a11y": {
+			"security": {
 				"noBlankTarget": {
 					"level": "error",
 					"options": {

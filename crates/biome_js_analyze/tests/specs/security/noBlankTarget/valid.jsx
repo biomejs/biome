@@ -6,6 +6,8 @@
     <a href="foobar" target="_blank" rel={"noopener noreferrer"}></a>
     <a href="foobar" target="_blank" rel="noreferrer"></a>
     <a href="foobar" target="_blank" rel={"noreferrer"}></a>
+    <a href="foobar" target="_blank" rel="noopener"></a>
+    <a href="foobar" target="_blank" rel={"noopener"}></a>
     <a href={"foobar"} target={"_blank"} rel={"noreferrer"}></a>
     <a href={'foobar'} target={'_blank'} rel={'noopener noreferrer'}></a>
     <a href={'foobar'} target={'_blank'} rel={'noreferrer'}></a>
@@ -29,5 +31,7 @@
     <a target={'targetValue'} href="/absolute/path"></a>
     <a target={"targetValue"} href="/absolute/path"></a>
     <a target={null} href="//example.com"></a>
+    <area target="_blank" rel="noopener" href="https://example.com"></area>
+    <form target="_blank" rel="noopener" action="https://example.com"></form>
     <Link href="foobar" target="_blank" />
 </>

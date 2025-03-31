@@ -374,9 +374,6 @@ pub struct A11y {
     #[doc = "Enforce that autoFocus prop is not used on elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_autofocus: Option<RuleFixConfiguration<biome_js_analyze::options::NoAutofocus>>,
-    #[doc = "Disallow target=\"_blank\" attribute without rel=\"noreferrer\""]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_blank_target: Option<RuleFixConfiguration<biome_js_analyze::options::NoBlankTarget>>,
     #[doc = "Enforces that no distracting elements are used."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_distracting_elements:
@@ -495,7 +492,6 @@ impl A11y {
         "noAriaHiddenOnFocusable",
         "noAriaUnsupportedElements",
         "noAutofocus",
-        "noBlankTarget",
         "noDistractingElements",
         "noHeaderScope",
         "noInteractiveElementToNoninteractiveRole",
@@ -560,7 +556,6 @@ impl A11y {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -596,7 +591,6 @@ impl A11y {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
     ];
 }
 impl RuleGroupExt for A11y {
@@ -628,154 +622,149 @@ impl RuleGroupExt for A11y {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_blank_target.as_ref() {
+        if let Some(rule) = self.no_distracting_elements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_distracting_elements.as_ref() {
+        if let Some(rule) = self.no_header_scope.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_header_scope.as_ref() {
+        if let Some(rule) = self.no_interactive_element_to_noninteractive_role.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_interactive_element_to_noninteractive_role.as_ref() {
+        if let Some(rule) = self.no_label_without_control.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_label_without_control.as_ref() {
+        if let Some(rule) = self.no_noninteractive_element_to_interactive_role.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_noninteractive_element_to_interactive_role.as_ref() {
+        if let Some(rule) = self.no_noninteractive_tabindex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_noninteractive_tabindex.as_ref() {
+        if let Some(rule) = self.no_positive_tabindex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_positive_tabindex.as_ref() {
+        if let Some(rule) = self.no_redundant_alt.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_redundant_alt.as_ref() {
+        if let Some(rule) = self.no_redundant_roles.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_redundant_roles.as_ref() {
+        if let Some(rule) = self.no_svg_without_title.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_svg_without_title.as_ref() {
+        if let Some(rule) = self.use_alt_text.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_alt_text.as_ref() {
+        if let Some(rule) = self.use_anchor_content.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_anchor_content.as_ref() {
+        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
+        if let Some(rule) = self.use_aria_props_for_role.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.use_aria_props_for_role.as_ref() {
+        if let Some(rule) = self.use_button_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_button_type.as_ref() {
+        if let Some(rule) = self.use_focusable_interactive.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_focusable_interactive.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_heading_content.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_heading_content.as_ref() {
+        if let Some(rule) = self.use_html_lang.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_html_lang.as_ref() {
+        if let Some(rule) = self.use_iframe_title.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_iframe_title.as_ref() {
+        if let Some(rule) = self.use_key_with_click_events.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_key_with_click_events.as_ref() {
+        if let Some(rule) = self.use_key_with_mouse_events.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_key_with_mouse_events.as_ref() {
+        if let Some(rule) = self.use_media_caption.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_media_caption.as_ref() {
+        if let Some(rule) = self.use_semantic_elements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_semantic_elements.as_ref() {
+        if let Some(rule) = self.use_valid_anchor.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_valid_anchor.as_ref() {
+        if let Some(rule) = self.use_valid_aria_props.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_props.as_ref() {
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+        if let Some(rule) = self.use_valid_aria_values.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_values.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
-            }
-        }
         if let Some(rule) = self.use_valid_lang.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
         index_set
@@ -802,154 +791,149 @@ impl RuleGroupExt for A11y {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
-        if let Some(rule) = self.no_blank_target.as_ref() {
+        if let Some(rule) = self.no_distracting_elements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_distracting_elements.as_ref() {
+        if let Some(rule) = self.no_header_scope.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_header_scope.as_ref() {
+        if let Some(rule) = self.no_interactive_element_to_noninteractive_role.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_interactive_element_to_noninteractive_role.as_ref() {
+        if let Some(rule) = self.no_label_without_control.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_label_without_control.as_ref() {
+        if let Some(rule) = self.no_noninteractive_element_to_interactive_role.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_noninteractive_element_to_interactive_role.as_ref() {
+        if let Some(rule) = self.no_noninteractive_tabindex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_noninteractive_tabindex.as_ref() {
+        if let Some(rule) = self.no_positive_tabindex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_positive_tabindex.as_ref() {
+        if let Some(rule) = self.no_redundant_alt.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.no_redundant_alt.as_ref() {
+        if let Some(rule) = self.no_redundant_roles.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.no_redundant_roles.as_ref() {
+        if let Some(rule) = self.no_svg_without_title.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.no_svg_without_title.as_ref() {
+        if let Some(rule) = self.use_alt_text.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_alt_text.as_ref() {
+        if let Some(rule) = self.use_anchor_content.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_anchor_content.as_ref() {
+        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_aria_activedescendant_with_tabindex.as_ref() {
+        if let Some(rule) = self.use_aria_props_for_role.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.use_aria_props_for_role.as_ref() {
+        if let Some(rule) = self.use_button_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_button_type.as_ref() {
+        if let Some(rule) = self.use_focusable_interactive.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_focusable_interactive.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_heading_content.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_heading_content.as_ref() {
+        if let Some(rule) = self.use_html_lang.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_html_lang.as_ref() {
+        if let Some(rule) = self.use_iframe_title.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_iframe_title.as_ref() {
+        if let Some(rule) = self.use_key_with_click_events.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_key_with_click_events.as_ref() {
+        if let Some(rule) = self.use_key_with_mouse_events.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_key_with_mouse_events.as_ref() {
+        if let Some(rule) = self.use_media_caption.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_media_caption.as_ref() {
+        if let Some(rule) = self.use_semantic_elements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_semantic_elements.as_ref() {
+        if let Some(rule) = self.use_valid_anchor.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_valid_anchor.as_ref() {
+        if let Some(rule) = self.use_valid_aria_props.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_props.as_ref() {
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+        if let Some(rule) = self.use_valid_aria_values.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_values.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
-            }
-        }
         if let Some(rule) = self.use_valid_lang.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
         index_set
@@ -996,10 +980,6 @@ impl RuleGroupExt for A11y {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noAutofocus" => self
                 .no_autofocus
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noBlankTarget" => self
-                .no_blank_target
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDistractingElements" => self
@@ -1130,7 +1110,6 @@ impl From<GroupPlainConfiguration> for A11y {
             no_aria_hidden_on_focusable: Some(value.into()),
             no_aria_unsupported_elements: Some(value.into()),
             no_autofocus: Some(value.into()),
-            no_blank_target: Some(value.into()),
             no_distracting_elements: Some(value.into()),
             no_header_scope: Some(value.into()),
             no_interactive_element_to_noninteractive_role: Some(value.into()),
@@ -4845,6 +4824,9 @@ pub struct Security {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
+    #[doc = "Disallow target=\"_blank\" attribute without rel=\"noopener\"."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_blank_target: Option<RuleFixConfiguration<biome_js_analyze::options::NoBlankTarget>>,
     #[doc = "Prevent the usage of dangerous JSX props"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_dangerously_set_inner_html:
@@ -4860,6 +4842,7 @@ pub struct Security {
 impl Security {
     const GROUP_NAME: &'static str = "security";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
+        "noBlankTarget",
         "noDangerouslySetInnerHtml",
         "noDangerouslySetInnerHtmlWithChildren",
         "noGlobalEval",
@@ -4868,11 +4851,13 @@ impl Security {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
     ];
 }
 impl RuleGroupExt for Security {
@@ -4884,38 +4869,48 @@ impl RuleGroupExt for Security {
     }
     fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
+        if let Some(rule) = self.no_blank_target.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
-        if let Some(rule) = self.no_dangerously_set_inner_html_with_children.as_ref() {
+        if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
-        if let Some(rule) = self.no_global_eval.as_ref() {
+        if let Some(rule) = self.no_dangerously_set_inner_html_with_children.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
+            }
+        }
+        if let Some(rule) = self.no_global_eval.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
         index_set
     }
     fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
+        if let Some(rule) = self.no_blank_target.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
-        if let Some(rule) = self.no_dangerously_set_inner_html_with_children.as_ref() {
+        if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
-        if let Some(rule) = self.no_global_eval.as_ref() {
+        if let Some(rule) = self.no_dangerously_set_inner_html_with_children.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
+            }
+        }
+        if let Some(rule) = self.no_global_eval.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
         index_set
@@ -4948,6 +4943,10 @@ impl RuleGroupExt for Security {
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
+            "noBlankTarget" => self
+                .no_blank_target
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noDangerouslySetInnerHtml" => self
                 .no_dangerously_set_inner_html
                 .as_ref()
@@ -4968,6 +4967,7 @@ impl From<GroupPlainConfiguration> for Security {
     fn from(value: GroupPlainConfiguration) -> Self {
         Self {
             recommended: None,
+            no_blank_target: Some(value.into()),
             no_dangerously_set_inner_html: Some(value.into()),
             no_dangerously_set_inner_html_with_children: Some(value.into()),
             no_global_eval: Some(value.into()),

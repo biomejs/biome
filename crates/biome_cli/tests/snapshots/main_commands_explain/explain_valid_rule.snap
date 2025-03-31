@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 # Emitted Messages
 
@@ -16,14 +15,14 @@ Summary
 
 Description
 
- Disallow `target="_blank"` attribute without `rel="noreferrer"`
+ Disallow `target="_blank"` attribute without `rel="noopener"`.
 
- When creating anchor `a` element, there are times when its link has to be opened in a new browser tab
- via `target="_blank"` attribute. This attribute has to paired with `rel="noreferrer"` or you're incur
- in a security issue.
+ When creating an anchor `a` element, there are times when its link has
+ to be opened in a new browser tab via the `target="_blank"` attribute.
+ This attribute has to be paired with `rel="noopener"` or you may run
+ into security issues.
 
- Refer to [the noreferrer documentation](https://html.spec.whatwg.org/multipage/links.html#link-type-noreferrer)
- and the [the noopener documentation](https://html.spec.whatwg.org/multipage/links.html#link-type-noopener)
+ See to the [`noopener` documentation](https://html.spec.whatwg.org/multipage/links.html#link-type-noopener).
 
 Examples
 
@@ -34,27 +33,61 @@ Invalid
  ```
 
  ```jsx,expect_diagnostic
- <a href='http://external.link' target='_blank' rel='noopener'>child</a>
+ <a href='http://external.link' target='_blank' rel='nofollow'>child</a>
  ```
 
  ```jsx,expect_diagnostic
- <a {...props} href='http://external.link' target='_blank' rel='noopener'>child</a>
+ <a {...props} href='http://external.link' target='_blank' rel='nofollow'>child</a>
  ```
 
 Valid
+
+ ```jsx
+ <a href='http://external.link' rel='noopener' target='_blank'>child</a>
+ ```
 
  ```jsx
  <a href='http://external.link' rel='noreferrer' target='_blank'>child</a>
  ```
 
  ```jsx
- <a href='http://external.link' target='_blank' rel='noopener' {...props}>child</a>
+ // The rule accepts elements with spread props, because the required
+ // attribute may be injected dynamically:
+ <a href='http://external.link' target='_blank' {...props}>child</a>
  ```
 
 Options
 
- The option `allowDomains` allows specific domains to use `target="_blank"` without `rel="noreferrer"`.
- In the following configuration, it's allowed to use the domains `https://example.com` and `example.org`:
+`allowNoReferrer`
+
+ When `rel="noreferrer"` is used, it _implies_ the use of
+ `rel="noopener"`, so it is allowed in combination with `target="_blank"`
+ as well. You can set this option to `false` if this is not what you
+ want.
+
+ See to the [`noreferrer` documentation](https://html.spec.whatwg.org/multipage/links.html#link-type-noreferrer).
+
+
+ ```json,options
+ {
+     "options": {
+         "allowNoReferrer": false
+     }
+ }
+ ```
+
+ ```jsx,use_options,expect_diagnostic
+ <a href='http://external.link' rel='noreferrer' target='_blank'>child</a>
+ ```
+
+ Default: `true`
+
+`allowDomains`
+
+ The option `allowDomains` allows specific domains to use
+ `target="_blank"` without `rel="noopener"`. In the following
+ configuration, it's allowed to use the domains `https://example.com` and
+ `example.org`:
 
  ```json,options
  {
