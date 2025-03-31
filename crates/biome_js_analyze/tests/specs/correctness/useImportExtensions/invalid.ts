@@ -20,3 +20,7 @@ import './sub?query=string&query2#hash'
 import('./sub/foo')
 import( /** A **/'./sub/foo'/** B **/ )
 require("./sub/foo")
+
+import "./sub/styles.css"
+import "./sub/component.svg.svelte";
+import "./sub/component.svg.svelte?query=string&query2#hash";
