@@ -56,12 +56,19 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build TypeScript code
+        # We use the `*-dev` builds below because release builds take very long.
+        # The main difference is that release builds run `wasm-opt`, which is
+        # responsible for the majority of the time of these builds, but regular
+        # PRs of ours don't influence that process anyway, so it feels like a
+        # waste of time to run on every PR. It does mean that if `wasm-opt`
+        # breaks something, we'll discover it later, possibly when creating a
+        # prerelease.
         run: |
           pnpm --filter @biomejs/backend-jsonrpc i
           pnpm --filter @biomejs/backend-jsonrpc run build
-          pnpm --filter @biomejs/js-api run build:wasm-bundler
-          pnpm --filter @biomejs/js-api run build:wasm-node
-          pnpm --filter @biomejs/js-api run build:wasm-web
+          pnpm --filter @biomejs/js-api run build:wasm-bundler-dev
+          pnpm --filter @biomejs/js-api run build:wasm-node-dev
+          pnpm --filter @biomejs/js-api run build:wasm-web-dev
           pnpm --filter @biomejs/js-api i
           pnpm --filter @biomejs/js-api run build
       - name: Run JS tests
