@@ -1435,7 +1435,8 @@ impl RuleDiagnostic {
         self.footer(LogCategory::Warn, msg)
     }
 
-    pub(crate) fn span(&self) -> Option<TextRange> {
+    #[inline]
+    pub fn span(&self) -> Option<TextRange> {
         self.span
     }
 
