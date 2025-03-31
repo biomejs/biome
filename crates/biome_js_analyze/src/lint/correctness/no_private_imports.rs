@@ -18,7 +18,7 @@ use crate::services::dependency_graph::ResolvedImports;
 const INDEX_BASENAMES: &[&str] = &["index", "mod"];
 
 declare_lint_rule! {
-    /// Restricts imports of private exports.
+    /// Restrict imports of private exports.
     ///
     /// In JavaScript and TypeScript, as soon as you `export` a symbol, such as
     /// a type, function, or anything else that can be exported, it is
@@ -86,6 +86,8 @@ declare_lint_rule! {
     /// * This rule only applies to imports from JavaScript and TypeScript
     ///   files. Imports for resources such as images or CSS files are exempted
     ///   regardless of the default visibility setting.
+    /// * This rule does not validate imports through dynamic `import()`
+    ///   expressions or CommonJS `require()` calls.
     ///
     /// ## Examples
     ///

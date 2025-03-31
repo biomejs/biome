@@ -890,7 +890,7 @@
 					]
 				},
 				"noPrivateImports": {
-					"description": "Restricts imports of private exports.",
+					"description": "Restrict imports of private exports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoPrivateImportsConfiguration" },
 						{ "type": "null" }
@@ -2826,6 +2826,13 @@
 				},
 				"noUnknownTypeSelector": {
 					"description": "Disallow unknown type selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnresolvedImports": {
+					"description": "Warn when importing non-existing exports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
