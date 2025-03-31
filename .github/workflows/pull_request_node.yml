@@ -12,6 +12,7 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "rust-toolchain.toml"
+      - ".github/workflows/pull_request_node.yml"
 
 # Cancel jobs when the PR is updated
 concurrency:
