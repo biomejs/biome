@@ -2,6 +2,7 @@ use std::ops::{Deref, Range};
 
 use crate::{
     JsRuleAction,
+    lint::correctness::no_unused_variables::is_unused,
     services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
     utils::{
         rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
@@ -25,7 +26,7 @@ use biome_js_syntax::{
     JsSyntaxToken, JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule,
     TsIdentifierBinding, TsIndexSignatureModifierList, TsLiteralEnumMemberName,
     TsMethodSignatureModifierList, TsPropertySignatureModifierList, TsTypeParameterName,
-    binding_ext::AnyJsBindingDeclaration,
+    binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{
     AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize, declare_node_union,
@@ -49,7 +50,9 @@ declare_lint_rule! {
     ///
     /// ## Naming conventions
     ///
-    /// All names can be prefixed and suffixed by underscores `_` and dollar signs `$`.
+    /// All names can be prefixed and suffixed with underscores `_` and dollar signs `$`.
+    /// Unused variables with a name prefixed with `_` are completely ignored.
+    /// This avoids conflicts with the `noUnusedVariables` rule.
     ///
     /// ### Variable and parameter names
     ///
@@ -703,6 +706,15 @@ impl Rule for UseNamingConvention {
                 return None;
             }
         }
+        if name.starts_with('_') {
+            if let Ok(binding) = &node.try_into() {
+                if is_unused(ctx.model(), binding) {
+                    // Always ignore unused variables prefixed with `_`.
+                    // This notably avoids a conflict with the `noUnusedVariables` lint rule.
+                    return None;
+                }
+            }
+        }
         if options.require_ascii && !name.is_ascii() {
             return Some(State {
                 convention_selector: Selector::default(),
@@ -939,7 +951,6 @@ declare_node_union! {
         TsLiteralEnumMemberName |
         TsTypeParameterName
 }
-
 impl AnyIdentifierBindingLike {
     fn name_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
@@ -954,6 +965,28 @@ impl AnyIdentifierBindingLike {
             AnyIdentifierBindingLike::TsTypeParameterName(type_parameter) => {
                 type_parameter.ident_token()
             }
+        }
+    }
+}
+impl TryFrom<&AnyIdentifierBindingLike> for AnyJsIdentifierBinding {
+    type Error = ();
+    fn try_from(value: &AnyIdentifierBindingLike) -> Result<Self, Self::Error> {
+        match value {
+            AnyIdentifierBindingLike::JsIdentifierBinding(binding) => {
+                Ok(Self::JsIdentifierBinding(binding.clone()))
+            }
+            AnyIdentifierBindingLike::TsIdentifierBinding(binding) => {
+                Ok(Self::TsIdentifierBinding(binding.clone()))
+            }
+            AnyIdentifierBindingLike::TsLiteralEnumMemberName(binding) => {
+                Ok(Self::TsLiteralEnumMemberName(binding.clone()))
+            }
+            AnyIdentifierBindingLike::TsTypeParameterName(binding) => {
+                Ok(Self::TsTypeParameterName(binding.clone()))
+            }
+            AnyIdentifierBindingLike::JsLiteralMemberName(_)
+            | AnyIdentifierBindingLike::JsPrivateClassMemberName(_)
+            | AnyIdentifierBindingLike::JsLiteralExportName(_) => Err(()),
         }
     }
 }

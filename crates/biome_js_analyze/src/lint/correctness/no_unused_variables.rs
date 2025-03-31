@@ -3,7 +3,7 @@ use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions}
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_semantic::ReferencesExtensions;
+use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
@@ -305,7 +305,7 @@ impl Rule for NoUnusedVariables {
                 .find_map(JsModuleItemList::cast)
             {
                 // A declaration file without top-level exports and imports is a global declaration file.
-                // All top-level types and variiables are available in every files of the project.
+                // All top-level types and variables are available in every files of the project.
                 // Thus, it is ok if top-level types are not used locally.
                 let is_top_level = items.parent::<TsDeclarationModule>().is_some();
                 if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
@@ -314,97 +314,13 @@ impl Rule for NoUnusedVariables {
             }
         }
 
-        if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
-            // Enum members can be unused.
-            return None;
+        // Ignore name prefixed with `_`
+        let is_underscore_prefixed = binding.name_token().ok()?.text_trimmed().starts_with('_');
+        if !is_underscore_prefixed && is_unused(model, binding) {
+            suggested_fix_if_unused(binding, ctx.options())
+        } else {
+            None
         }
-
-        if binding.name_token().ok()?.text_trimmed().starts_with('_') {
-            return None;
-        }
-
-        // Ignore expressions
-        if binding.parent::<JsFunctionExpression>().is_some()
-            || binding.parent::<JsClassExpression>().is_some()
-        {
-            return None;
-        }
-
-        let suggestion = suggested_fix_if_unused(binding, ctx.options())?;
-
-        if model.is_exported(binding) {
-            return None;
-        }
-
-        // We need to check if all uses of this binding are somehow recursive or unused
-        let declaration = binding.declaration()?;
-        let declaration = declaration.syntax();
-        binding
-            .all_references(model)
-            .filter_map(|reference| {
-                let ref_parent = reference.syntax().parent()?;
-                if reference.is_write() {
-                    // Skip self assignment such as `a += 1` and `a++`.
-                    // Ensure that the assignment is not used in an used expression.
-                    let is_statement_like = ref_parent
-                        .ancestors()
-                        .find(|x| {
-                            matches!(
-                                x.kind(),
-                                JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
-                                    | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
-                                    | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
-                            )
-                        })
-                        .and_then(|x| is_unused_expression(&x).ok())
-                        .unwrap_or(false);
-                    if is_statement_like {
-                        return None;
-                    }
-                } else if JsIdentifierExpression::can_cast(ref_parent.kind())
-                    && is_unused_expression(&ref_parent).ok()?
-                {
-                    // The reference is in an unused expression
-                    return None;
-                }
-                Some(ref_parent)
-            })
-            .all(|ref_parent| {
-                if matches!(
-                    declaration.kind(),
-                    JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::TS_MAPPED_TYPE
-                ) {
-                    // Expression in an return position inside an arrow function expression are used.
-                    // Type parameters declared in mapped types are only used in the mapped type.
-                    return false;
-                }
-                let mut is_unused = true;
-                for ancestor in ref_parent.ancestors() {
-                    if &ancestor == declaration {
-                        // inside the declaration
-                        return is_unused;
-                    }
-                    match ancestor.kind() {
-                        JsSyntaxKind::JS_FUNCTION_BODY => {
-                            // reset because we are inside a function
-                            is_unused = true;
-                        }
-                        JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
-                        | JsSyntaxKind::JS_CALL_EXPRESSION
-                        | JsSyntaxKind::JS_NEW_EXPRESSION
-                        // These can call a getter
-                        | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
-                        | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
-                            // The ref can be leaked or code can be executed
-                            is_unused = false;
-                        }
-                        _ => {}
-                    }
-                }
-                // Always false when the ref is outside the declaration
-                false
-            })
-            .then_some(suggestion)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -481,6 +397,96 @@ impl Rule for NoUnusedVariables {
             }
         }
     }
+}
+
+/// Returns `true` if `binding` is considered as unused.
+pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> bool {
+    if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
+        // Enum members can be unused.
+        return false;
+    }
+
+    // Ignore expressions
+    if binding.parent::<JsFunctionExpression>().is_some()
+        || binding.parent::<JsClassExpression>().is_some()
+    {
+        return false;
+    }
+
+    if model.is_exported(binding) {
+        return false;
+    }
+
+    // We need to check if all uses of this binding are somehow recursive or unused
+    let Some(declaration) = binding.declaration() else {
+        return false;
+    };
+    let declaration = declaration.syntax();
+    binding
+        .all_references(model)
+        .filter_map(|reference| {
+            let ref_parent = reference.syntax().parent()?;
+            if reference.is_write() {
+                // Skip self assignment such as `a += 1` and `a++`.
+                // Ensure that the assignment is not used in an used expression.
+                let is_statement_like = ref_parent
+                    .ancestors()
+                    .find(|x| {
+                        matches!(
+                            x.kind(),
+                            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                                | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
+                                | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
+                        )
+                    })
+                    .and_then(|x| is_unused_expression(&x).ok())
+                    .unwrap_or(false);
+                if is_statement_like {
+                    return None;
+                }
+            } else if JsIdentifierExpression::can_cast(ref_parent.kind())
+                && is_unused_expression(&ref_parent).ok()?
+            {
+                // The reference is in an unused expression
+                return None;
+            }
+            Some(ref_parent)
+        })
+        .all(|ref_parent| {
+            if matches!(
+                declaration.kind(),
+                JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::TS_MAPPED_TYPE
+            ) {
+                // Expression in an return position inside an arrow function expression are used.
+                // Type parameters declared in mapped types are only used in the mapped type.
+                return false;
+            }
+            let mut is_unused = true;
+            for ancestor in ref_parent.ancestors() {
+                if &ancestor == declaration {
+                    // inside the declaration
+                    return is_unused;
+                }
+                match ancestor.kind() {
+                    JsSyntaxKind::JS_FUNCTION_BODY => {
+                        // reset because we are inside a function
+                        is_unused = true;
+                    }
+                    JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                    | JsSyntaxKind::JS_CALL_EXPRESSION
+                    | JsSyntaxKind::JS_NEW_EXPRESSION
+                    // These can call a getter
+                    | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+                    | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
+                        // The ref can be leaked or code can be executed
+                        is_unused = false;
+                    }
+                    _ => {}
+                }
+            }
+            // Always false when the ref is outside the declaration
+            false
+        })
 }
 
 /// Returns `true` if `expr` is unused.
