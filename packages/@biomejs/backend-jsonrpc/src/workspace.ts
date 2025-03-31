@@ -963,10 +963,6 @@ export interface A11y {
 	 */
 	noAutofocus?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow target="_blank" attribute without rel="noreferrer"
-	 */
-	noBlankTarget?: RuleFixConfiguration_for_AllowDomainOptions;
-	/**
 	 * Enforces that no distracting elements are used.
 	 */
 	noDistractingElements?: RuleFixConfiguration_for_Null;
@@ -1768,6 +1764,10 @@ export interface Performance {
  */
 export interface Security {
 	/**
+	 * Disallow target="_blank" attribute without rel="noopener".
+	 */
+	noBlankTarget?: RuleFixConfiguration_for_NoBlankTargetOptions;
+	/**
 	 * Prevent the usage of dangerous JSX props
 	 */
 	noDangerouslySetInnerHtml?: RuleConfiguration_for_Null;
@@ -2286,9 +2286,6 @@ export interface RuleAssistWithOptions_for_Null {
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
-export type RuleFixConfiguration_for_AllowDomainOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_AllowDomainOptions;
 export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoLabelWithoutControlOptions;
@@ -2352,6 +2349,9 @@ export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 export type RuleConfiguration_for_UseValidAutocompleteOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseValidAutocompleteOptions;
+export type RuleFixConfiguration_for_NoBlankTargetOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoBlankTargetOptions;
 export type RuleConfiguration_for_RestrictedGlobalsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedGlobalsOptions;
@@ -2393,20 +2393,6 @@ export interface RuleWithFixOptions_for_Null {
 	 * Rule's options
 	 */
 	options: null;
-}
-export interface RuleWithFixOptions_for_AllowDomainOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: AllowDomainOptions;
 }
 export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
 	/**
@@ -2642,6 +2628,20 @@ export interface RuleWithOptions_for_UseValidAutocompleteOptions {
 	 */
 	options: UseValidAutocompleteOptions;
 }
+export interface RuleWithFixOptions_for_NoBlankTargetOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoBlankTargetOptions;
+}
 export interface RuleWithOptions_for_RestrictedGlobalsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -2747,12 +2747,6 @@ export type ImportGroups = ImportGroup[];
  * Used to identify the kind of code action emitted by a rule
  */
 export type FixKind = "none" | "safe" | "unsafe";
-export interface AllowDomainOptions {
-	/**
-	 * List of domains to allow `target="_blank"` without `rel="noreferrer"`
-	 */
-	allowDomains: string[];
-}
 export interface NoLabelWithoutControlOptions {
 	/**
 	 * Array of component names that should be considered the same as an `input` element.
@@ -2914,6 +2908,16 @@ export interface UseValidAutocompleteOptions {
 	 * `input` like custom components that should be checked.
 	 */
 	inputComponents?: string[];
+}
+export interface NoBlankTargetOptions {
+	/**
+	 * List of domains where `target="_blank"` is allowed without `rel="noopener"`.
+	 */
+	allowDomains: string[];
+	/**
+	 * Whether `noreferrer` is allowed in addition to `noopener`.
+	 */
+	allowNoReferrer?: boolean;
 }
 /**
  * Options for the rule `noRestrictedGlobals`.
@@ -3179,7 +3183,6 @@ export type Category =
 	| "lint/a11y/noAriaHiddenOnFocusable"
 	| "lint/a11y/noAriaUnsupportedElements"
 	| "lint/a11y/noAutofocus"
-	| "lint/a11y/noBlankTarget"
 	| "lint/a11y/noDistractingElements"
 	| "lint/a11y/noHeaderScope"
 	| "lint/a11y/noInteractiveElementToNoninteractiveRole"
@@ -3395,6 +3398,7 @@ export type Category =
 	| "lint/performance/noDelete"
 	| "lint/performance/noReExportAll"
 	| "lint/performance/useTopLevelRegex"
+	| "lint/security/noBlankTarget"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
