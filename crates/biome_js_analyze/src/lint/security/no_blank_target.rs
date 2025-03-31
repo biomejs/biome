@@ -1,6 +1,8 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_analyze::{
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
@@ -67,10 +69,14 @@ declare_lint_rule! {
     ///
     /// ### `allowNoReferrer`
     ///
-    /// When `rel="noreferrer"` is used, it _implies_ the use of
-    /// `rel="noopener"`, so it is allowed in combination with `target="_blank"`
-    /// as well. You can set this option to `false` if this is not what you
-    /// want.
+    /// By default, `noBlankTarget` accepts both `rel="noopener"` and
+    /// `rel="noreferrer"` with links that have `target="_blank"`. This is
+    /// because the latter _implies_ the former, so either one is sufficient to
+    /// mitigate the security risk.
+    ///
+    /// However, allowing `rel="noreferrer"` may still be undesirable, because
+    /// it can break tracking, which may be an undesirable side-effect. As such,
+    /// you can set `allowNoReferrer: false` to _only_ accept `rel="noopener"`.
     ///
     /// See to the [`noreferrer` documentation](https://html.spec.whatwg.org/multipage/links.html#link-type-noreferrer).
     ///
@@ -133,6 +139,7 @@ declare_lint_rule! {
         name: "noBlankTarget",
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-target-blank")],
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
