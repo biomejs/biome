@@ -64,24 +64,19 @@ impl JsSyntaxKind {
     /// Returns `true` for any contextual (await) or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
-        (self as u16) <= (Self::USING_KW as u16)
-            && (self as u16) >= (Self::BREAK_KW as u16)
+        (self as u16) <= (Self::USING_KW as u16) && (self as u16) >= (Self::BREAK_KW as u16)
     }
 
     /// Returns `true` for any kind representing a Grit metavariable.
     #[inline]
     pub fn is_metavariable(&self) -> bool {
-        matches!(
-            self,
-            Self::GRIT_METAVARIABLE | Self::JS_METAVARIABLE
-        )
+        matches!(self, Self::GRIT_METAVARIABLE | Self::JS_METAVARIABLE)
     }
 
     /// Returns `true` for contextual keywords (excluding strict mode contextual keywords)
     #[inline]
     pub const fn is_contextual_keyword(self) -> bool {
-        (self as u16) >= (Self::ABSTRACT_KW as u16)
-            && (self as u16) <= (Self::USING_KW as u16)
+        (self as u16) >= (Self::ABSTRACT_KW as u16) && (self as u16) <= (Self::USING_KW as u16)
     }
 
     /// Returns true for all non-contextual keywords (includes future reserved keywords)
@@ -92,8 +87,7 @@ impl JsSyntaxKind {
 
     #[inline]
     pub const fn is_future_reserved_keyword(self) -> bool {
-        (self as u16) >= (Self::IMPLEMENTS_KW as u16)
-            && (self as u16) <= (Self::YIELD_KW as u16)
+        (self as u16) >= (Self::IMPLEMENTS_KW as u16) && (self as u16) <= (Self::YIELD_KW as u16)
     }
 }
 
@@ -156,10 +150,7 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
     fn is_trivia(self) -> bool {
         matches!(
             self,
-            Self::NEWLINE
-                | Self::WHITESPACE
-                | Self::COMMENT
-                | Self::MULTILINE_COMMENT
+            Self::NEWLINE | Self::WHITESPACE | Self::COMMENT | Self::MULTILINE_COMMENT
         )
     }
 
@@ -230,11 +221,7 @@ impl OperatorPrecedence {
     pub fn is_right_to_left(&self) -> bool {
         matches!(
             self,
-            Self::Yield
-                | Self::Assignment
-                | Self::Conditional
-                | Self::Exponential
-                | Self::Update
+            Self::Yield | Self::Assignment | Self::Conditional | Self::Exponential | Self::Update
         )
     }
 
@@ -260,12 +247,7 @@ impl OperatorPrecedence {
     }
 
     pub const fn is_bitwise(&self) -> bool {
-        matches!(
-            self,
-            Self::BitwiseAnd
-                | Self::BitwiseOr
-                | Self::BitwiseXor
-        )
+        matches!(self, Self::BitwiseAnd | Self::BitwiseOr | Self::BitwiseXor)
     }
 
     pub const fn is_shift(&self) -> bool {

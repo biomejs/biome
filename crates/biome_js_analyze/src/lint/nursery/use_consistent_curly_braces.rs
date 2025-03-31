@@ -63,9 +63,7 @@ impl AnyJsxCurlyQuery {
     /// Returns the source range for the node. Used to tweak the range for the diagnostic that is emitted.
     fn source_range(&self) -> TextRange {
         match self {
-            Self::JsxAttributeInitializerClause(node) => {
-                node.value().map(|value| value.range())
-            }
+            Self::JsxAttributeInitializerClause(node) => node.value().map(|value| value.range()),
             Self::AnyJsxChild(_) => Ok(self.range()),
         }
         .unwrap_or(self.range())

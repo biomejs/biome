@@ -248,12 +248,7 @@ struct DiagnosticWriter<'a> {
 }
 
 impl<'a> DiagnosticWriter<'a> {
-    pub fn new(
-        group: &'a str,
-        rule: &'a str,
-        test: &'a CodeBlockTest,
-        code: &'a str,
-    ) -> Self {
+    pub fn new(group: &'a str, rule: &'a str, test: &'a CodeBlockTest, code: &'a str) -> Self {
         DiagnosticWriter {
             group,
             rule,

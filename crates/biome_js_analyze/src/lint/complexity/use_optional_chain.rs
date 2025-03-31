@@ -585,9 +585,7 @@ impl LogicalAndChain {
                 | AnyJsExpression::JsCallExpression(_) => expression,
                 _ => return None,
             };
-            let branch =
-                Self::from_expression(normalized_optional_chain_like(head).ok()?)
-                    .ok()?;
+            let branch = Self::from_expression(normalized_optional_chain_like(head).ok()?).ok()?;
             match self.cmp_chain(&branch).ok()? {
                 LogicalAndChainOrdering::SubChain => {
                     // If the previous branch had other expressions that already

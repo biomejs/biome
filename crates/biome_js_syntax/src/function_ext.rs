@@ -30,20 +30,14 @@ impl AnyFunctionLike {
                     None
                 }
             }
-            Self::JsMethodClassMember(_) | Self::JsMethodObjectMember(_) => {
-                None
-            }
+            Self::JsMethodClassMember(_) | Self::JsMethodObjectMember(_) => None,
         }
     }
 
     pub fn function_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            Self::AnyJsFunction(any_js_function) => {
-                any_js_function.function_token().ok().flatten()
-            }
-            Self::JsMethodClassMember(_) | Self::JsMethodObjectMember(_) => {
-                None
-            }
+            Self::AnyJsFunction(any_js_function) => any_js_function.function_token().ok().flatten(),
+            Self::JsMethodClassMember(_) | Self::JsMethodObjectMember(_) => None,
         }
     }
 

@@ -110,9 +110,7 @@ impl NoArrayIndexKeyQuery {
                 .as_jsx_expression_attribute_value()?
                 .expression()
                 .ok(),
-            Self::JsPropertyObjectMember(object_member) => {
-                object_member.value().ok()
-            }
+            Self::JsPropertyObjectMember(object_member) => object_member.value().ok(),
         }
     }
 }

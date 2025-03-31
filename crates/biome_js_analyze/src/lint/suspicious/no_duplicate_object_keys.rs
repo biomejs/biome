@@ -77,15 +77,9 @@ enum MemberDefinition {
 impl MemberDefinition {
     fn name(&self) -> Option<TokenText> {
         match self {
-            Self::Getter(getter) => {
-                getter.name().ok()?.as_js_literal_member_name()?.name().ok()
-            }
-            Self::Setter(setter) => {
-                setter.name().ok()?.as_js_literal_member_name()?.name().ok()
-            }
-            Self::Method(method) => {
-                method.name().ok()?.as_js_literal_member_name()?.name().ok()
-            }
+            Self::Getter(getter) => getter.name().ok()?.as_js_literal_member_name()?.name().ok(),
+            Self::Setter(setter) => setter.name().ok()?.as_js_literal_member_name()?.name().ok(),
+            Self::Method(method) => method.name().ok()?.as_js_literal_member_name()?.name().ok(),
             Self::Property(property) => property
                 .name()
                 .ok()?
@@ -119,9 +113,7 @@ impl MemberDefinition {
             Self::Setter(setter) => setter.clone().into(),
             Self::Method(method) => method.clone().into(),
             Self::Property(property) => property.clone().into(),
-            Self::ShorthandProperty(shorthand_property) => {
-                shorthand_property.clone().into()
-            }
+            Self::ShorthandProperty(shorthand_property) => shorthand_property.clone().into(),
         }
     }
 }
@@ -153,9 +145,7 @@ impl TryFrom<AnyJsObjectMember> for MemberDefinition {
             AnyJsObjectMember::JsGetterObjectMember(member) => Ok(Self::Getter(member)),
             AnyJsObjectMember::JsSetterObjectMember(member) => Ok(Self::Setter(member)),
             AnyJsObjectMember::JsMethodObjectMember(member) => Ok(Self::Method(member)),
-            AnyJsObjectMember::JsPropertyObjectMember(member) => {
-                Ok(Self::Property(member))
-            }
+            AnyJsObjectMember::JsPropertyObjectMember(member) => Ok(Self::Property(member)),
             AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
                 Ok(Self::ShorthandProperty(member))
             }
@@ -190,10 +180,7 @@ impl From<MemberDefinition> for DefinedProperty {
 
 pub struct PropertyConflict(DefinedProperty, MemberDefinition);
 impl DefinedProperty {
-    fn extend_with(
-        &self,
-        member_definition: MemberDefinition,
-    ) -> Result<Self, PropertyConflict> {
+    fn extend_with(&self, member_definition: MemberDefinition) -> Result<Self, PropertyConflict> {
         match (self, member_definition) {
             // Add missing get/set counterpart
             (Self::Set(set_range), MemberDefinition::Getter(getter)) => {

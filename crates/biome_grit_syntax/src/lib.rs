@@ -33,8 +33,7 @@ impl GritSyntaxKind {
     /// Returns `true` for any contextual (await) or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
-        (self as u16) <= (Self::RETURN_KW as u16)
-            && (self as u16) >= (Self::SEQUENTIAL_KW as u16)
+        (self as u16) <= (Self::RETURN_KW as u16) && (self as u16) >= (Self::SEQUENTIAL_KW as u16)
     }
 }
 
@@ -95,10 +94,7 @@ impl biome_rowan::SyntaxKind for GritSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            Self::NEWLINE | Self::WHITESPACE | Self::COMMENT
-        )
+        matches!(self, Self::NEWLINE | Self::WHITESPACE | Self::COMMENT)
     }
 
     fn to_string(&self) -> Option<&'static str> {

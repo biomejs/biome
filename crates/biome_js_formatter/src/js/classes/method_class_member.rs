@@ -94,9 +94,7 @@ impl FormatAnyJsMethodMember {
             Self::JsMethodClassMember(member) => member.async_token(),
             Self::JsMethodObjectMember(member) => member.async_token(),
             Self::JsConstructorClassMember(_) => None,
-            Self::TsMethodSignatureClassMember(signature) => {
-                signature.async_token()
-            }
+            Self::TsMethodSignatureClassMember(signature) => signature.async_token(),
             Self::TsMethodSignatureTypeMember(_) => None,
         }
     }
@@ -118,9 +116,7 @@ impl FormatAnyJsMethodMember {
             Self::JsConstructorClassMember(member) => {
                 AnyJsMemberName::from(AnyJsClassMemberName::from(member.name()?))
             }
-            Self::TsMethodSignatureClassMember(signature) => {
-                signature.name()?.into()
-            }
+            Self::TsMethodSignatureClassMember(signature) => signature.name()?.into(),
             Self::TsMethodSignatureTypeMember(member) => member.name()?.into(),
         })
     }
@@ -130,12 +126,8 @@ impl FormatAnyJsMethodMember {
             Self::JsMethodClassMember(member) => member.type_parameters(),
             Self::JsMethodObjectMember(member) => member.type_parameters(),
             Self::JsConstructorClassMember(_) => None,
-            Self::TsMethodSignatureClassMember(signature) => {
-                signature.type_parameters()
-            }
-            Self::TsMethodSignatureTypeMember(member) => {
-                member.type_parameters()
-            }
+            Self::TsMethodSignatureClassMember(signature) => signature.type_parameters(),
+            Self::TsMethodSignatureTypeMember(member) => member.type_parameters(),
         }
     }
 
@@ -143,31 +135,19 @@ impl FormatAnyJsMethodMember {
         Ok(match self {
             Self::JsMethodClassMember(member) => member.parameters()?.into(),
             Self::JsMethodObjectMember(member) => member.parameters()?.into(),
-            Self::JsConstructorClassMember(member) => {
-                member.parameters()?.into()
-            }
-            Self::TsMethodSignatureClassMember(signature) => {
-                signature.parameters()?.into()
-            }
-            Self::TsMethodSignatureTypeMember(member) => {
-                member.parameters()?.into()
-            }
+            Self::JsConstructorClassMember(member) => member.parameters()?.into(),
+            Self::TsMethodSignatureClassMember(signature) => signature.parameters()?.into(),
+            Self::TsMethodSignatureTypeMember(member) => member.parameters()?.into(),
         })
     }
 
     fn return_type_annotation(&self) -> Option<TsReturnTypeAnnotation> {
         match self {
             Self::JsMethodClassMember(member) => member.return_type_annotation(),
-            Self::JsMethodObjectMember(member) => {
-                member.return_type_annotation()
-            }
+            Self::JsMethodObjectMember(member) => member.return_type_annotation(),
             Self::JsConstructorClassMember(_) => None,
-            Self::TsMethodSignatureClassMember(signature) => {
-                signature.return_type_annotation()
-            }
-            Self::TsMethodSignatureTypeMember(member) => {
-                member.return_type_annotation()
-            }
+            Self::TsMethodSignatureClassMember(signature) => signature.return_type_annotation(),
+            Self::TsMethodSignatureTypeMember(member) => member.return_type_annotation(),
         }
     }
 
@@ -176,9 +156,7 @@ impl FormatAnyJsMethodMember {
             Self::JsMethodClassMember(member) => member.question_mark_token(),
             Self::JsMethodObjectMember(_) => None,
             Self::JsConstructorClassMember(_) => None,
-            Self::TsMethodSignatureClassMember(signature) => {
-                signature.question_mark_token()
-            }
+            Self::TsMethodSignatureClassMember(signature) => signature.question_mark_token(),
             Self::TsMethodSignatureTypeMember(member) => member.optional_token(),
         }
     }

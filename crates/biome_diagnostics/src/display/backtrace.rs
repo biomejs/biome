@@ -113,8 +113,7 @@ enum BacktraceKind {
 #[cfg(test)]
 impl PartialEq for BacktraceKind {
     fn eq(&self, _other: &Self) -> bool {
-        if let (Self::Serialized(this), Self::Serialized(other)) = (self, _other)
-        {
+        if let (Self::Serialized(this), Self::Serialized(other)) = (self, _other) {
             return this == other;
         }
 

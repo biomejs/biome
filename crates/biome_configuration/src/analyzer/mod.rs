@@ -729,9 +729,7 @@ where
                     enabled_rules.extend(G::all_rules_as_filters());
                 }
             }
-            Self::Group(group) => {
-                group.collect_preset_rules(parent_is_recommended, enabled_rules)
-            }
+            Self::Group(group) => group.collect_preset_rules(parent_is_recommended, enabled_rules),
         }
     }
 }

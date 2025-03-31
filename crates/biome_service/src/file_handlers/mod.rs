@@ -275,11 +275,7 @@ impl DocumentFileSource {
     /// assert_eq!(x.or(y), DocumentFileSource::Unknown);
     /// ```
     pub fn or(self, other: Self) -> Self {
-        if self != Self::Unknown {
-            self
-        } else {
-            other
-        }
+        if self != Self::Unknown { self } else { other }
     }
 
     pub const fn is_javascript_like(&self) -> bool {
@@ -341,11 +337,7 @@ impl DocumentFileSource {
         let file_source = Self::from(path);
         match file_source {
             Self::Js(_) => true,
-            Self::Css(_)
-            | Self::Graphql(_)
-            | Self::Json(_)
-            | Self::Html(_)
-            | Self::Grit(_) => true,
+            Self::Css(_) | Self::Graphql(_) | Self::Json(_) | Self::Html(_) | Self::Grit(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }

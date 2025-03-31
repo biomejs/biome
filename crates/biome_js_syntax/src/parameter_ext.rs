@@ -283,9 +283,7 @@ impl AnyJsParameterList {
     ///
     pub fn iter(&self) -> AnyJsParameterListNodeIter {
         match self {
-            Self::JsParameterList(list) => {
-                AnyJsParameterListNodeIter::JsParameterList(list.iter())
-            }
+            Self::JsParameterList(list) => AnyJsParameterListNodeIter::JsParameterList(list.iter()),
             Self::JsConstructorParameterList(list) => {
                 AnyJsParameterListNodeIter::JsConstructorParameterList(list.iter())
             }
@@ -434,12 +432,8 @@ impl Iterator for AnyJsParameterListNodeIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         Some(match self {
-            Self::JsParameterList(inner) => {
-                inner.next()?.map(AnyParameter::from)
-            }
-            Self::JsConstructorParameterList(inner) => {
-                inner.next()?.map(AnyParameter::from)
-            }
+            Self::JsParameterList(inner) => inner.next()?.map(AnyParameter::from),
+            Self::JsConstructorParameterList(inner) => inner.next()?.map(AnyParameter::from),
         })
     }
 }
@@ -490,9 +484,7 @@ impl AnyJsConstructorParameter {
         match self {
             Self::AnyJsFormalParameter(parameter) => parameter.decorators(),
             Self::JsRestParameter(parameter) => Some(parameter.decorators()),
-            Self::TsPropertyParameter(parameter) => {
-                Some(parameter.decorators())
-            }
+            Self::TsPropertyParameter(parameter) => Some(parameter.decorators()),
         }
     }
 
@@ -505,9 +497,7 @@ impl AnyJsConstructorParameter {
     /// Returns the type annotation of the parameter if any.
     pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
         match self {
-            Self::AnyJsFormalParameter(parameter) => {
-                parameter.type_annotation()
-            }
+            Self::AnyJsFormalParameter(parameter) => parameter.type_annotation(),
             Self::JsRestParameter(parameter) => parameter.type_annotation(),
             Self::TsPropertyParameter(parameter) => {
                 parameter.formal_parameter().ok()?.type_annotation()
@@ -537,9 +527,7 @@ impl AnyJsFormalParameter {
     /// Returns the list of decorators of the parameter if the parameter is decorated.
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
-            Self::JsBogusParameter(_) | Self::JsMetavariable(_) => {
-                None
-            }
+            Self::JsBogusParameter(_) | Self::JsMetavariable(_) => None,
             Self::JsFormalParameter(parameter) => Some(parameter.decorators()),
         }
     }
@@ -547,9 +535,7 @@ impl AnyJsFormalParameter {
     /// Returns the type annotation of the parameter if any.
     pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
         match self {
-            Self::JsBogusParameter(_) | Self::JsMetavariable(_) => {
-                None
-            }
+            Self::JsBogusParameter(_) | Self::JsMetavariable(_) => None,
             Self::JsFormalParameter(parameter) => parameter.type_annotation(),
         }
     }

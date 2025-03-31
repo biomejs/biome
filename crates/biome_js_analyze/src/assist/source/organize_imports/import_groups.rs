@@ -57,9 +57,7 @@ impl ImportGroup {
         match self {
             Self::BlankLine => false,
             Self::Matcher(glob) => glob.is_match(candidate),
-            Self::MatcherList(matchers) => {
-                candidate.matches_with_exceptions(matchers.iter())
-            }
+            Self::MatcherList(matchers) => candidate.matches_with_exceptions(matchers.iter()),
         }
     }
 }

@@ -956,15 +956,11 @@ impl AnyIdentifierBindingLike {
         match self {
             Self::JsIdentifierBinding(binding) => binding.name_token(),
             Self::JsLiteralMemberName(member_name) => member_name.value(),
-            Self::JsPrivateClassMemberName(member_name) => {
-                member_name.id_token()
-            }
+            Self::JsPrivateClassMemberName(member_name) => member_name.id_token(),
             Self::JsLiteralExportName(export_name) => export_name.value(),
             Self::TsIdentifierBinding(binding) => binding.name_token(),
             Self::TsLiteralEnumMemberName(member_name) => member_name.value(),
-            Self::TsTypeParameterName(type_parameter) => {
-                type_parameter.ident_token()
-            }
+            Self::TsTypeParameterName(type_parameter) => type_parameter.ident_token(),
         }
     }
 }

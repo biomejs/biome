@@ -34,8 +34,7 @@ impl AnyJsIdentifierUsage {
                         Some(JsSyntaxKind::TS_REFERENCE_TYPE | JsSyntaxKind::TS_TYPEOF_TYPE)
                     )
             }
-            Self::JsxReferenceIdentifier(_)
-            | Self::JsIdentifierAssignment(_) => false,
+            Self::JsxReferenceIdentifier(_) | Self::JsIdentifierAssignment(_) => false,
         }
     }
 }

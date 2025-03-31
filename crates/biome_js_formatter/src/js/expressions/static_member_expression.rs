@@ -91,9 +91,7 @@ impl AnyJsStaticMemberLike {
 
     fn operator_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            Self::JsStaticMemberExpression(expression) => {
-                expression.operator_token()
-            }
+            Self::JsStaticMemberExpression(expression) => expression.operator_token(),
             Self::JsStaticMemberAssignment(assignment) => assignment.dot_token(),
         }
     }
@@ -134,8 +132,7 @@ impl AnyJsStaticMemberLike {
                     }
                 }
 
-                Self::can_cast(parent.kind())
-                    || AnyJsComputedMember::can_cast(parent.kind())
+                Self::can_cast(parent.kind()) || AnyJsComputedMember::can_cast(parent.kind())
             }
             None => false,
         };
@@ -145,8 +142,7 @@ impl AnyJsStaticMemberLike {
         }
 
         let first_non_static_member_ancestor = self.syntax().ancestors().find(|parent| {
-            !(Self::can_cast(parent.kind())
-                || AnyJsComputedMember::can_cast(parent.kind()))
+            !(Self::can_cast(parent.kind()) || AnyJsComputedMember::can_cast(parent.kind()))
         });
 
         let layout = match first_non_static_member_ancestor.and_then(AnyJsExpression::cast) {

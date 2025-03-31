@@ -57,12 +57,10 @@ pub struct FileKinds(BitFlags<FileKind>);
 
 impl From<SmallVec<[FileKind; 5]>> for FileKinds {
     fn from(value: SmallVec<[FileKind; 5]>) -> Self {
-        value
-            .into_iter()
-            .fold(Self::default(), |mut acc, kind| {
-                acc.insert(kind);
-                acc
-            })
+        value.into_iter().fold(Self::default(), |mut acc, kind| {
+            acc.insert(kind);
+            acc
+        })
     }
 }
 

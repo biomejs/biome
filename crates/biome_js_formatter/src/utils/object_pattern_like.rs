@@ -77,41 +77,36 @@ impl JsObjectPatternLike {
         }
 
         match self {
-            Self::JsObjectAssignmentPattern(node) => {
-                node.properties().iter().any(|property| {
-                    if let Ok(
-                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(node),
-                    ) = property
-                    {
-                        let pattern = node.pattern();
-                        matches!(
-                            pattern,
-                            Ok(AnyJsAssignmentPattern::JsObjectAssignmentPattern(_)
-                                | AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
-                        )
-                    } else {
-                        false
-                    }
-                })
-            }
-            Self::JsObjectBindingPattern(node) => {
-                node.properties().iter().any(|property| {
-                    if let Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
-                        node,
-                    )) = property
-                    {
-                        let pattern = node.pattern();
+            Self::JsObjectAssignmentPattern(node) => node.properties().iter().any(|property| {
+                if let Ok(AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(
+                    node,
+                )) = property
+                {
+                    let pattern = node.pattern();
+                    matches!(
+                        pattern,
+                        Ok(AnyJsAssignmentPattern::JsObjectAssignmentPattern(_)
+                            | AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
+                    )
+                } else {
+                    false
+                }
+            }),
+            Self::JsObjectBindingPattern(node) => node.properties().iter().any(|property| {
+                if let Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(node)) =
+                    property
+                {
+                    let pattern = node.pattern();
 
-                        matches!(
-                            pattern,
-                            Ok(AnyJsBindingPattern::JsObjectBindingPattern(_)
-                                | AnyJsBindingPattern::JsArrayBindingPattern(_))
-                        )
-                    } else {
-                        false
-                    }
-                })
-            }
+                    matches!(
+                        pattern,
+                        Ok(AnyJsBindingPattern::JsObjectBindingPattern(_)
+                            | AnyJsBindingPattern::JsArrayBindingPattern(_))
+                    )
+                } else {
+                    false
+                }
+            }),
         }
     }
 

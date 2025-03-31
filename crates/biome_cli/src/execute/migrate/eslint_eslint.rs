@@ -295,9 +295,7 @@ impl<T> RuleConf<T, ()> {
 impl<T: Default, U: Default> RuleConf<T, U> {
     pub(crate) fn option_or_default(self) -> T {
         match self {
-            Self::Severity(_) | Self::Options(_, _, _) | Self::Spread(_, _) => {
-                T::default()
-            }
+            Self::Severity(_) | Self::Options(_, _, _) | Self::Spread(_, _) => T::default(),
             Self::Option(_, option) => option,
         }
     }

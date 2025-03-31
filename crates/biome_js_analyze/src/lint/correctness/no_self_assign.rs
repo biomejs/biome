@@ -564,18 +564,14 @@ declare_node_union! {
 impl AnyAssignmentExpressionLike {
     fn member(&self) -> Option<AnyNameLike> {
         match self {
-            Self::JsStaticMemberExpression(node) => {
-                node.member().ok().map(AnyNameLike::from)
-            }
-            Self::JsComputedMemberExpression(node) => {
-                node.member().ok().and_then(|node| {
-                    Some(match node {
-                        AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.into(),
-                        AnyJsExpression::AnyJsLiteralExpression(node) => node.into(),
-                        _ => return None,
-                    })
+            Self::JsStaticMemberExpression(node) => node.member().ok().map(AnyNameLike::from),
+            Self::JsComputedMemberExpression(node) => node.member().ok().and_then(|node| {
+                Some(match node {
+                    AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.into(),
+                    AnyJsExpression::AnyJsLiteralExpression(node) => node.into(),
+                    _ => return None,
                 })
-            }
+            }),
         }
     }
 
@@ -589,10 +585,7 @@ impl AnyAssignmentExpressionLike {
 
 impl AnyAssignmentLike {
     const fn has_sub_structures(&self) -> bool {
-        matches!(
-            self,
-            Self::Arrays { .. } | Self::Object { .. }
-        )
+        matches!(self, Self::Arrays { .. } | Self::Object { .. })
     }
 }
 
@@ -624,10 +617,7 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
                     left,
                 )),
                 AnyJsExpression::JsIdentifierExpression(right),
-            ) => Self::Identifiers(IdentifiersLike::IdentifierAndReference(
-                left,
-                right.name()?,
-            )),
+            ) => Self::Identifiers(IdentifiersLike::IdentifierAndReference(left, right.name()?)),
             (
                 AnyJsAssignmentPattern::AnyJsAssignment(AnyJsAssignment::JsStaticMemberAssignment(
                     left,

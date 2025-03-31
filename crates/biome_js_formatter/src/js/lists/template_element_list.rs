@@ -177,11 +177,7 @@ impl TemplateElementIndention {
     }
 
     /// Computes the indention after the last new line character.
-    fn after_last_new_line(
-        text: &str,
-        tab_width: TabWidth,
-        previous_indention: Self,
-    ) -> Self {
+    fn after_last_new_line(text: &str, tab_width: TabWidth, previous_indention: Self) -> Self {
         let by_new_line = text.rsplit_once('\n');
 
         let size = match by_new_line {

@@ -112,14 +112,12 @@ impl AnyJsBinaryLikeExpression {
 
     pub fn should_inline_logical_expression(&self) -> bool {
         match self {
-            Self::JsLogicalExpression(logical) => {
-                logical.right().is_ok_and(|right| match right {
-                    AnyJsExpression::JsObjectExpression(object) => !object.members().is_empty(),
-                    AnyJsExpression::JsArrayExpression(array) => !array.elements().is_empty(),
-                    AnyJsExpression::JsxTagExpression(_) => true,
-                    _ => false,
-                })
-            }
+            Self::JsLogicalExpression(logical) => logical.right().is_ok_and(|right| match right {
+                AnyJsExpression::JsObjectExpression(object) => !object.members().is_empty(),
+                AnyJsExpression::JsArrayExpression(array) => !array.elements().is_empty(),
+                AnyJsExpression::JsxTagExpression(_) => true,
+                _ => false,
+            }),
             _ => false,
         }
     }
@@ -129,10 +127,7 @@ impl AnyJsBinaryLikeExpression {
     /// There are some cases where the indentation is done by the parent, so if the parent is already doing
     /// the indentation, then there's no need to do a second indentation.
     /// [Prettier applies]: <https://github.com/prettier/prettier/blob/b0201e01ef99db799eb3716f15b7dfedb0a2e62b/src/language-js/print/binaryish.js#L122-L125>
-    pub fn should_not_indent_if_parent_indents(
-        &self,
-        parent: Option<JsSyntaxNode>,
-    ) -> bool {
+    pub fn should_not_indent_if_parent_indents(&self, parent: Option<JsSyntaxNode>) -> bool {
         parent.is_some_and(|parent| match parent.kind() {
             JsSyntaxKind::JS_RETURN_STATEMENT | JsSyntaxKind::JS_THROW_STATEMENT => true,
             JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE => true,

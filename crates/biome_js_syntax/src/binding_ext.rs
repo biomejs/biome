@@ -122,18 +122,14 @@ impl AnyJsBindingDeclaration {
         match (a, b) {
             (
                 Self::TsDeclareFunctionDeclaration(_),
-                Self::JsFunctionDeclaration(_)
-                | Self::TsDeclareFunctionDeclaration(_),
+                Self::JsFunctionDeclaration(_) | Self::TsDeclareFunctionDeclaration(_),
             ) => true,
             (
                 Self::TsDeclareFunctionExportDefaultDeclaration(_),
                 Self::JsFunctionExportDefaultDeclaration(_)
                 | Self::TsDeclareFunctionExportDefaultDeclaration(_),
             ) => true,
-            (
-                Self::TsEnumDeclaration(_),
-                Self::TsEnumDeclaration(_),
-            ) => true,
+            (Self::TsEnumDeclaration(_), Self::TsEnumDeclaration(_)) => true,
             (
                 Self::TsTypeAliasDeclaration(_)
                 | Self::TsInterfaceDeclaration(_)

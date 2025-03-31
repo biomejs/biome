@@ -225,21 +225,18 @@ impl JsBinaryOperator {
             | Self::LessThanOrEqual
             | Self::GreaterThanOrEqual => OperatorPrecedence::Relational,
 
-            Self::Equality
-            | Self::StrictEquality
-            | Self::Inequality
-            | Self::StrictInequality => OperatorPrecedence::Equality,
+            Self::Equality | Self::StrictEquality | Self::Inequality | Self::StrictInequality => {
+                OperatorPrecedence::Equality
+            }
 
             Self::Plus | Self::Minus => OperatorPrecedence::Additive,
 
-            Self::Times | Self::Divide | Self::Remainder => {
-                OperatorPrecedence::Multiplicative
-            }
+            Self::Times | Self::Divide | Self::Remainder => OperatorPrecedence::Multiplicative,
             Self::Exponent => OperatorPrecedence::Exponential,
 
-            Self::LeftShift
-            | Self::RightShift
-            | Self::UnsignedRightShift => OperatorPrecedence::Shift,
+            Self::LeftShift | Self::RightShift | Self::UnsignedRightShift => {
+                OperatorPrecedence::Shift
+            }
 
             Self::BitwiseAnd => OperatorPrecedence::BitwiseAnd,
             Self::BitwiseOr => OperatorPrecedence::BitwiseOr,
@@ -265,10 +262,7 @@ impl JsBinaryOperator {
     pub const fn is_commutative(&self) -> bool {
         matches!(
             self,
-            Self::Times
-                | Self::BitwiseAnd
-                | Self::BitwiseOr
-                | Self::BitwiseXor
+            Self::Times | Self::BitwiseAnd | Self::BitwiseOr | Self::BitwiseXor
         )
     }
 }
@@ -913,8 +907,9 @@ impl AnyJsExpression {
             | Self::TsNonNullAssertionExpression(_)
             | Self::JsUnaryExpression(_)
             | Self::JsAwaitExpression(_) => OperatorPrecedence::Unary,
-            Self::JsPostUpdateExpression(_)
-            | Self::JsPreUpdateExpression(_) => OperatorPrecedence::Update,
+            Self::JsPostUpdateExpression(_) | Self::JsPreUpdateExpression(_) => {
+                OperatorPrecedence::Update
+            }
             Self::JsCallExpression(_)
             | Self::JsImportCallExpression(_)
             | Self::JsSuperExpression(_) => OperatorPrecedence::LeftHandSide,
@@ -950,9 +945,7 @@ impl AnyJsExpression {
                 }
             }
 
-            Self::JsBogusExpression(_) | Self::JsMetavariable(_) => {
-                OperatorPrecedence::lowest()
-            }
+            Self::JsBogusExpression(_) | Self::JsMetavariable(_) => OperatorPrecedence::lowest(),
             Self::JsParenthesizedExpression(_) => OperatorPrecedence::highest(),
         };
 
@@ -1253,11 +1246,9 @@ impl AnyJsExpression {
             }
 
             // Parenthesized expression: (1)
-            Self::JsParenthesizedExpression(parenthesized_expression) => {
-                parenthesized_expression
-                    .expression()
-                    .is_ok_and(|expression| expression.is_literal_expression())
-            }
+            Self::JsParenthesizedExpression(parenthesized_expression) => parenthesized_expression
+                .expression()
+                .is_ok_and(|expression| expression.is_literal_expression()),
 
             _ => false,
         }
@@ -1312,22 +1303,12 @@ impl Iterator for CalleeNamesIterator {
 impl AnyJsLiteralExpression {
     pub fn value_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            Self::JsBigintLiteralExpression(expression) => {
-                expression.value_token()
-            }
-            Self::JsBooleanLiteralExpression(expression) => {
-                expression.value_token()
-            }
+            Self::JsBigintLiteralExpression(expression) => expression.value_token(),
+            Self::JsBooleanLiteralExpression(expression) => expression.value_token(),
             Self::JsNullLiteralExpression(expression) => expression.value_token(),
-            Self::JsNumberLiteralExpression(expression) => {
-                expression.value_token()
-            }
-            Self::JsRegexLiteralExpression(expression) => {
-                expression.value_token()
-            }
-            Self::JsStringLiteralExpression(expression) => {
-                expression.value_token()
-            }
+            Self::JsNumberLiteralExpression(expression) => expression.value_token(),
+            Self::JsRegexLiteralExpression(expression) => expression.value_token(),
+            Self::JsStringLiteralExpression(expression) => expression.value_token(),
         }
     }
 
@@ -1415,20 +1396,14 @@ impl AnyJsComputedMember {
 
     pub fn l_brack_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            Self::JsComputedMemberExpression(expression) => {
-                expression.l_brack_token()
-            }
-            Self::JsComputedMemberAssignment(assignment) => {
-                assignment.l_brack_token()
-            }
+            Self::JsComputedMemberExpression(expression) => expression.l_brack_token(),
+            Self::JsComputedMemberAssignment(assignment) => assignment.l_brack_token(),
         }
     }
 
     pub fn optional_chain_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            Self::JsComputedMemberExpression(expression) => {
-                expression.optional_chain_token()
-            }
+            Self::JsComputedMemberExpression(expression) => expression.optional_chain_token(),
             Self::JsComputedMemberAssignment(_) => None,
         }
     }
@@ -1442,12 +1417,8 @@ impl AnyJsComputedMember {
 
     pub fn r_brack_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            Self::JsComputedMemberExpression(expression) => {
-                expression.r_brack_token()
-            }
-            Self::JsComputedMemberAssignment(assignment) => {
-                assignment.r_brack_token()
-            }
+            Self::JsComputedMemberExpression(expression) => expression.r_brack_token(),
+            Self::JsComputedMemberAssignment(assignment) => assignment.r_brack_token(),
         }
     }
 }

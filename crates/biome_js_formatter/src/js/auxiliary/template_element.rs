@@ -194,12 +194,8 @@ impl AnyTemplateElement {
 
     fn inner_syntax(&self) -> SyntaxResult<JsSyntaxNode> {
         match self {
-            Self::JsTemplateElement(template) => {
-                template.expression().map(AstNode::into_syntax)
-            }
-            Self::TsTemplateElement(template) => {
-                template.ty().map(AstNode::into_syntax)
-            }
+            Self::JsTemplateElement(template) => template.expression().map(AstNode::into_syntax),
+            Self::TsTemplateElement(template) => template.ty().map(AstNode::into_syntax),
         }
     }
 

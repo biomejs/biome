@@ -27,10 +27,7 @@ impl From<JsonSyntaxKind> for u16 {
 
 impl JsonSyntaxKind {
     pub fn is_comments(self) -> bool {
-        matches!(
-            self,
-            Self::COMMENT | Self::MULTILINE_COMMENT
-        )
+        matches!(self, Self::COMMENT | Self::MULTILINE_COMMENT)
     }
 
     #[inline]
@@ -44,10 +41,7 @@ impl biome_rowan::SyntaxKind for JsonSyntaxKind {
     const EOF: Self = Self::EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(
-            self,
-            Self::JSON_BOGUS | Self::JSON_BOGUS_VALUE
-        )
+        matches!(self, Self::JSON_BOGUS | Self::JSON_BOGUS_VALUE)
     }
 
     fn to_bogus(&self) -> Self {

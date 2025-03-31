@@ -307,22 +307,20 @@ impl AnyMember {
                 AnyJsClassMember::JsSetterClassMember(member) => Some(member.name().ok()?.range()),
                 _ => None,
             },
-            Self::TsPropertyParameter(ts_property) => {
-                match ts_property.formal_parameter().ok()? {
-                    AnyJsFormalParameter::JsBogusParameter(_)
-                    | AnyJsFormalParameter::JsMetavariable(_) => None,
-                    AnyJsFormalParameter::JsFormalParameter(param) => Some(
-                        param
-                            .binding()
-                            .ok()?
-                            .as_any_js_binding()?
-                            .as_js_identifier_binding()?
-                            .name_token()
-                            .ok()?
-                            .text_range(),
-                    ),
-                }
-            }
+            Self::TsPropertyParameter(ts_property) => match ts_property.formal_parameter().ok()? {
+                AnyJsFormalParameter::JsBogusParameter(_)
+                | AnyJsFormalParameter::JsMetavariable(_) => None,
+                AnyJsFormalParameter::JsFormalParameter(param) => Some(
+                    param
+                        .binding()
+                        .ok()?
+                        .as_any_js_binding()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok()?
+                        .text_range(),
+                ),
+            },
         }
     }
 
@@ -346,23 +344,21 @@ impl AnyMember {
                 }
                 _ => None,
             },
-            Self::TsPropertyParameter(ts_property) => {
-                match ts_property.formal_parameter().ok()? {
-                    AnyJsFormalParameter::JsBogusParameter(_)
-                    | AnyJsFormalParameter::JsMetavariable(_) => None,
-                    AnyJsFormalParameter::JsFormalParameter(param) => Some(
-                        param
-                            .binding()
-                            .ok()?
-                            .as_any_js_binding()?
-                            .as_js_identifier_binding()?
-                            .name_token()
-                            .ok()?
-                            .text_trimmed()
-                            == token,
-                    ),
-                }
-            }
+            Self::TsPropertyParameter(ts_property) => match ts_property.formal_parameter().ok()? {
+                AnyJsFormalParameter::JsBogusParameter(_)
+                | AnyJsFormalParameter::JsMetavariable(_) => None,
+                AnyJsFormalParameter::JsFormalParameter(param) => Some(
+                    param
+                        .binding()
+                        .ok()?
+                        .as_any_js_binding()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok()?
+                        .text_trimmed()
+                        == token,
+                ),
+            },
         }
     }
 }

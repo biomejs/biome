@@ -26,10 +26,7 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
     const EOF: Self = Self::EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(
-            self,
-            Self::YAML_BOGUS | Self::YAML_BOGUS_VALUE
-        )
+        matches!(self, Self::YAML_BOGUS | Self::YAML_BOGUS_VALUE)
     }
 
     fn to_bogus(&self) -> Self {
@@ -58,10 +55,7 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            Self::NEWLINE | Self::WHITESPACE | Self::COMMENT
-        )
+        matches!(self, Self::NEWLINE | Self::WHITESPACE | Self::COMMENT)
     }
 
     fn to_string(&self) -> Option<&'static str> {

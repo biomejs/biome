@@ -70,9 +70,7 @@ impl Format<JsFormatContext> for AnyJsxTagWithChildren {
                 let opening_breaks = format_opening.inspect(f)?.will_break();
 
                 let multiple_attributes = match self {
-                    Self::JsxElement(element) => {
-                        element.opening_element()?.attributes().len() > 1
-                    }
+                    Self::JsxElement(element) => element.opening_element()?.attributes().len() > 1,
                     Self::JsxFragment(_) => false,
                 };
 

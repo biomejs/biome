@@ -36,9 +36,7 @@ impl AnyJsPropertyClassMember {
         match self {
             Self::JsPropertyClassMember(property) => property.name(),
             Self::TsPropertySignatureClassMember(property) => property.name(),
-            Self::TsInitializedPropertySignatureClassMember(property) => {
-                property.name()
-            }
+            Self::TsInitializedPropertySignatureClassMember(property) => property.name(),
         }
     }
 
@@ -46,17 +44,13 @@ impl AnyJsPropertyClassMember {
         match self {
             Self::JsPropertyClassMember(property) => property.value(),
             Self::TsPropertySignatureClassMember(_) => None,
-            Self::TsInitializedPropertySignatureClassMember(property) => {
-                property.value().ok()
-            }
+            Self::TsInitializedPropertySignatureClassMember(property) => property.value().ok(),
         }
     }
 
     fn has_property_annotation(&self) -> bool {
         match self {
-            Self::JsPropertyClassMember(property) => {
-                property.property_annotation().is_some()
-            }
+            Self::JsPropertyClassMember(property) => property.property_annotation().is_some(),
             Self::TsPropertySignatureClassMember(property) => {
                 property.property_annotation().is_some()
             }

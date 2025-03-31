@@ -19,11 +19,8 @@ impl FormatRule<biome_json_syntax::JsonArrayValue>
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonArrayValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::value::array_value::FormatJsonArrayValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::json::value::array_value::FormatJsonArrayValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -32,10 +29,7 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonArrayValue {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonArrayValue {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::value::array_value::FormatJsonArrayValue,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::json::value::array_value::FormatJsonArrayValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -57,11 +51,8 @@ impl FormatRule<biome_json_syntax::JsonBooleanValue>
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonBooleanValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::value::boolean_value::FormatJsonBooleanValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::json::value::boolean_value::FormatJsonBooleanValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -70,10 +61,8 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonBooleanValue {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonBooleanValue {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::value::boolean_value::FormatJsonBooleanValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::json::value::boolean_value::FormatJsonBooleanValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -91,11 +80,7 @@ impl FormatRule<biome_json_syntax::JsonMember>
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMember {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::auxiliary::member::FormatJsonMember,
-    >;
+    type Format<'a> = FormatRefWithRule<'a, Self, crate::json::auxiliary::member::FormatJsonMember>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -104,10 +89,7 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMember {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonMember {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::auxiliary::member::FormatJsonMember,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::json::auxiliary::member::FormatJsonMember>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -129,11 +111,8 @@ impl FormatRule<biome_json_syntax::JsonMemberName>
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMemberName {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::auxiliary::member_name::FormatJsonMemberName,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::json::auxiliary::member_name::FormatJsonMemberName>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -142,10 +121,8 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMemberName {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonMemberName {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::auxiliary::member_name::FormatJsonMemberName,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::json::auxiliary::member_name::FormatJsonMemberName>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -167,11 +144,8 @@ impl FormatRule<biome_json_syntax::JsonNullValue>
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonNullValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::value::null_value::FormatJsonNullValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::json::value::null_value::FormatJsonNullValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -180,10 +154,7 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonNullValue {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonNullValue {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::value::null_value::FormatJsonNullValue,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::json::value::null_value::FormatJsonNullValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -205,11 +176,8 @@ impl FormatRule<biome_json_syntax::JsonNumberValue>
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonNumberValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::value::number_value::FormatJsonNumberValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::json::value::number_value::FormatJsonNumberValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -218,10 +186,8 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonNumberValue {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonNumberValue {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::value::number_value::FormatJsonNumberValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::json::value::number_value::FormatJsonNumberValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -243,11 +209,8 @@ impl FormatRule<biome_json_syntax::JsonObjectValue>
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonObjectValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::value::object_value::FormatJsonObjectValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::json::value::object_value::FormatJsonObjectValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -256,10 +219,8 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonObjectValue {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonObjectValue {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::value::object_value::FormatJsonObjectValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::json::value::object_value::FormatJsonObjectValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -275,11 +236,7 @@ impl FormatRule<biome_json_syntax::JsonRoot> for crate::json::auxiliary::root::F
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonRoot {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::auxiliary::root::FormatJsonRoot,
-    >;
+    type Format<'a> = FormatRefWithRule<'a, Self, crate::json::auxiliary::root::FormatJsonRoot>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -288,10 +245,7 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonRoot {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonRoot {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::auxiliary::root::FormatJsonRoot,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::json::auxiliary::root::FormatJsonRoot>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -313,11 +267,8 @@ impl FormatRule<biome_json_syntax::JsonStringValue>
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonStringValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::value::string_value::FormatJsonStringValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::json::value::string_value::FormatJsonStringValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -326,10 +277,8 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonStringValue {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonStringValue {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::value::string_value::FormatJsonStringValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::json::value::string_value::FormatJsonStringValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -363,11 +312,8 @@ impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonArrayElementList {
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMemberList {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::lists::member_list::FormatJsonMemberList,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::json::lists::member_list::FormatJsonMemberList>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -376,10 +322,7 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonMemberList {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonMemberList {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::lists::member_list::FormatJsonMemberList,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::json::lists::member_list::FormatJsonMemberList>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -395,20 +338,13 @@ impl FormatRule<biome_json_syntax::JsonBogus> for crate::json::bogus::bogus::For
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonBogus {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::bogus::bogus::FormatJsonBogus,
-    >;
+    type Format<'a> = FormatRefWithRule<'a, Self, crate::json::bogus::bogus::FormatJsonBogus>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::json::bogus::bogus::FormatJsonBogus::default())
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonBogus {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::bogus::bogus::FormatJsonBogus,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::json::bogus::bogus::FormatJsonBogus>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::json::bogus::bogus::FormatJsonBogus::default())
     }
@@ -427,11 +363,8 @@ impl FormatRule<biome_json_syntax::JsonBogusValue>
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonBogusValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::bogus::bogus_value::FormatJsonBogusValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::json::bogus::bogus_value::FormatJsonBogusValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -440,10 +373,7 @@ impl AsFormat<JsonFormatContext> for biome_json_syntax::JsonBogusValue {
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonBogusValue {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::bogus::bogus_value::FormatJsonBogusValue,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::json::bogus::bogus_value::FormatJsonBogusValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -452,20 +382,13 @@ impl IntoFormat<JsonFormatContext> for biome_json_syntax::JsonBogusValue {
     }
 }
 impl AsFormat<JsonFormatContext> for biome_json_syntax::AnyJsonValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        Self,
-        crate::json::any::value::FormatAnyJsonValue,
-    >;
+    type Format<'a> = FormatRefWithRule<'a, Self, crate::json::any::value::FormatAnyJsonValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::json::any::value::FormatAnyJsonValue::default())
     }
 }
 impl IntoFormat<JsonFormatContext> for biome_json_syntax::AnyJsonValue {
-    type Format = FormatOwnedWithRule<
-        Self,
-        crate::json::any::value::FormatAnyJsonValue,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::json::any::value::FormatAnyJsonValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::json::any::value::FormatAnyJsonValue::default())
     }

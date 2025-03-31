@@ -349,11 +349,9 @@ impl SemanticAssertion {
                 range: token.parent().unwrap().text_trimmed_range(),
             }))
         } else if assertion_text.contains("/*?") {
-            Some(Self::UnresolvedReference(
-                UnresolvedReferenceAssertion {
-                    range: token.parent().unwrap().text_trimmed_range(),
-                },
-            ))
+            Some(Self::UnresolvedReference(UnresolvedReferenceAssertion {
+                range: token.parent().unwrap().text_trimmed_range(),
+            }))
         } else {
             None
         }

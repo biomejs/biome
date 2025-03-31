@@ -1398,10 +1398,7 @@ impl ClassMethodMemberKind {
     /// }
     /// ```
     const fn is_body_optional(&self) -> bool {
-        matches!(
-            self,
-            Self::Method(_) | Self::Constructor
-        )
+        matches!(self, Self::Method(_) | Self::Constructor)
     }
 
     const fn is_constructor(&self) -> bool {
@@ -1993,19 +1990,14 @@ enum ModifierKind {
 
 impl ModifierKind {
     const fn is_ts_modifier(&self) -> bool {
-        !matches!(
-            self,
-            Self::Static | Self::Accessor | Self::Decorator
-        )
+        !matches!(self, Self::Static | Self::Accessor | Self::Decorator)
     }
 
     const fn as_syntax_kind(&self) -> JsSyntaxKind {
         match self {
             Self::Declare => TS_DECLARE_MODIFIER,
             Self::Abstract => TS_ABSTRACT_MODIFIER,
-            Self::Private | Self::Protected | Self::Public => {
-                TS_ACCESSIBILITY_MODIFIER
-            }
+            Self::Private | Self::Protected | Self::Public => TS_ACCESSIBILITY_MODIFIER,
             Self::Static => JS_STATIC_MODIFIER,
             Self::Accessor => JS_ACCESSOR_MODIFIER,
             Self::Readonly => TS_READONLY_MODIFIER,

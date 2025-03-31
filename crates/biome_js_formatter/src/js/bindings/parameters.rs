@@ -118,17 +118,13 @@ impl FormatAnyJsParameters {
     fn l_paren_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
             Self::JsParameters(parameters) => parameters.l_paren_token(),
-            Self::JsConstructorParameters(parameters) => {
-                parameters.l_paren_token()
-            }
+            Self::JsConstructorParameters(parameters) => parameters.l_paren_token(),
         }
     }
 
     fn list(&self) -> AnyJsParameterList {
         match self {
-            Self::JsParameters(parameters) => {
-                AnyJsParameterList::from(parameters.items())
-            }
+            Self::JsParameters(parameters) => AnyJsParameterList::from(parameters.items()),
             Self::JsConstructorParameters(parameters) => {
                 AnyJsParameterList::from(parameters.parameters())
             }
@@ -138,9 +134,7 @@ impl FormatAnyJsParameters {
     fn r_paren_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
             Self::JsParameters(parameters) => parameters.r_paren_token(),
-            Self::JsConstructorParameters(parameters) => {
-                parameters.r_paren_token()
-            }
+            Self::JsConstructorParameters(parameters) => parameters.r_paren_token(),
         }
     }
 

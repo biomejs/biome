@@ -151,10 +151,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
     fn is_trivia(self) -> bool {
         matches!(
             self,
-            Self::NEWLINE
-                | Self::WHITESPACE
-                | Self::COMMENT
-                | Self::MULTILINE_COMMENT
+            Self::NEWLINE | Self::WHITESPACE | Self::COMMENT | Self::MULTILINE_COMMENT
         )
     }
 

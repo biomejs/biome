@@ -131,12 +131,8 @@ impl WeakGreenElement {
 
     fn to_owned(&self) -> GreenElement {
         match self {
-            Self::Node { ptr } => {
-                GreenElement::Node(unsafe { ptr.as_ref().to_owned() })
-            }
-            Self::Token { ptr } => {
-                GreenElement::Token(unsafe { ptr.as_ref().to_owned() })
-            }
+            Self::Node { ptr } => GreenElement::Node(unsafe { ptr.as_ref().to_owned() }),
+            Self::Token { ptr } => GreenElement::Token(unsafe { ptr.as_ref().to_owned() }),
         }
     }
 }

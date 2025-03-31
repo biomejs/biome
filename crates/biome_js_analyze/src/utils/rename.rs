@@ -56,18 +56,10 @@ pub enum AnyJsRenamableDeclaration {
 impl RenamableNode for AnyJsRenamableDeclaration {
     fn binding(&self, model: &SemanticModel) -> Option<JsSyntaxNode> {
         match self {
-            Self::JsIdentifierBinding(node) => {
-                RenamableNode::binding(node, model)
-            }
-            Self::JsReferenceIdentifier(node) => {
-                RenamableNode::binding(node, model)
-            }
-            Self::JsIdentifierAssignment(node) => {
-                RenamableNode::binding(node, model)
-            }
-            Self::TsIdentifierBinding(node) => {
-                RenamableNode::binding(node, model)
-            }
+            Self::JsIdentifierBinding(node) => RenamableNode::binding(node, model),
+            Self::JsReferenceIdentifier(node) => RenamableNode::binding(node, model),
+            Self::JsIdentifierAssignment(node) => RenamableNode::binding(node, model),
+            Self::TsIdentifierBinding(node) => RenamableNode::binding(node, model),
         }
     }
 }

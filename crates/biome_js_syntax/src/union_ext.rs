@@ -52,9 +52,7 @@ impl AnyJsClass {
         match self {
             Self::JsClassDeclaration(declaration) => declaration.extends_clause(),
             Self::JsClassExpression(expression) => expression.extends_clause(),
-            Self::JsClassExportDefaultDeclaration(declaration) => {
-                declaration.extends_clause()
-            }
+            Self::JsClassExportDefaultDeclaration(declaration) => declaration.extends_clause(),
         }
     }
 
@@ -62,9 +60,7 @@ impl AnyJsClass {
         match self {
             Self::JsClassDeclaration(declaration) => declaration.implements_clause(),
             Self::JsClassExpression(expression) => expression.implements_clause(),
-            Self::JsClassExportDefaultDeclaration(declaration) => {
-                declaration.implements_clause()
-            }
+            Self::JsClassExportDefaultDeclaration(declaration) => declaration.implements_clause(),
         }
     }
 
@@ -114,9 +110,7 @@ impl AnyJsClassMember {
             Self::TsIndexSignatureClassMember(_) => Ok(None),
             Self::TsMethodSignatureClassMember(method) => method.name().map(Some),
             Self::TsPropertySignatureClassMember(property) => property.name().map(Some),
-            Self::TsInitializedPropertySignatureClassMember(property) => {
-                property.name().map(Some)
-            }
+            Self::TsInitializedPropertySignatureClassMember(property) => property.name().map(Some),
             Self::TsSetterSignatureClassMember(setter) => setter.name().map(Some),
         }
     }
@@ -144,9 +138,7 @@ impl AnyJsFunction {
             Self::JsArrowFunctionExpression(expr) => expr.async_token(),
             Self::JsFunctionExpression(expr) => expr.async_token(),
             Self::JsFunctionDeclaration(declaration) => declaration.async_token(),
-            Self::JsFunctionExportDefaultDeclaration(declaration) => {
-                declaration.async_token()
-            }
+            Self::JsFunctionExportDefaultDeclaration(declaration) => declaration.async_token(),
         }
     }
 
@@ -158,8 +150,7 @@ impl AnyJsFunction {
         match self {
             Self::JsFunctionDeclaration(declaration) => declaration.id().ok(),
             Self::JsFunctionExportDefaultDeclaration(declaration) => declaration.id(),
-            Self::JsArrowFunctionExpression(_)
-            | Self::JsFunctionExpression(_) => {
+            Self::JsArrowFunctionExpression(_) | Self::JsFunctionExpression(_) => {
                 let parent = self
                     .parent::<JsInitializerClause>()?
                     .parent::<JsVariableDeclarator>()?;
@@ -176,9 +167,7 @@ impl AnyJsFunction {
         match self {
             Self::JsArrowFunctionExpression(_) => Ok(None),
             Self::JsFunctionExpression(expr) => expr.function_token().map(Some),
-            Self::JsFunctionDeclaration(declaration) => {
-                declaration.function_token().map(Some)
-            }
+            Self::JsFunctionDeclaration(declaration) => declaration.function_token().map(Some),
             Self::JsFunctionExportDefaultDeclaration(declaration) => {
                 declaration.function_token().map(Some)
             }
@@ -190,9 +179,7 @@ impl AnyJsFunction {
             Self::JsArrowFunctionExpression(_) => None,
             Self::JsFunctionExpression(expr) => expr.star_token(),
             Self::JsFunctionDeclaration(declaration) => declaration.star_token(),
-            Self::JsFunctionExportDefaultDeclaration(declaration) => {
-                declaration.star_token()
-            }
+            Self::JsFunctionExportDefaultDeclaration(declaration) => declaration.star_token(),
         }
     }
 
@@ -214,9 +201,7 @@ impl AnyJsFunction {
             Self::JsArrowFunctionExpression(expr) => expr.type_parameters(),
             Self::JsFunctionExpression(expr) => expr.type_parameters(),
             Self::JsFunctionDeclaration(declaration) => declaration.type_parameters(),
-            Self::JsFunctionExportDefaultDeclaration(declaration) => {
-                declaration.type_parameters()
-            }
+            Self::JsFunctionExportDefaultDeclaration(declaration) => declaration.type_parameters(),
         }
     }
 
@@ -239,9 +224,7 @@ impl AnyJsFunction {
         match self {
             Self::JsArrowFunctionExpression(expr) => expr.return_type_annotation(),
             Self::JsFunctionExpression(expr) => expr.return_type_annotation(),
-            Self::JsFunctionDeclaration(declaration) => {
-                declaration.return_type_annotation()
-            }
+            Self::JsFunctionDeclaration(declaration) => declaration.return_type_annotation(),
             Self::JsFunctionExportDefaultDeclaration(declaration) => {
                 declaration.return_type_annotation()
             }
@@ -251,9 +234,7 @@ impl AnyJsFunction {
     pub fn body(&self) -> SyntaxResult<AnyJsFunctionBody> {
         match self {
             Self::JsArrowFunctionExpression(expr) => expr.body(),
-            Self::JsFunctionExpression(expr) => {
-                expr.body().map(AnyJsFunctionBody::JsFunctionBody)
-            }
+            Self::JsFunctionExpression(expr) => expr.body().map(AnyJsFunctionBody::JsFunctionBody),
             Self::JsFunctionDeclaration(declaration) => {
                 declaration.body().map(AnyJsFunctionBody::JsFunctionBody)
             }
@@ -267,12 +248,8 @@ impl AnyJsFunction {
 impl AnyTsVariableAnnotation {
     pub fn type_annotation(&self) -> SyntaxResult<Option<TsTypeAnnotation>> {
         match self {
-            Self::TsDefiniteVariableAnnotation(definite) => {
-                definite.type_annotation().map(Some)
-            }
-            Self::TsTypeAnnotation(type_annotation) => {
-                Ok(Some(type_annotation.clone()))
-            }
+            Self::TsDefiniteVariableAnnotation(definite) => definite.type_annotation().map(Some),
+            Self::TsTypeAnnotation(type_annotation) => Ok(Some(type_annotation.clone())),
         }
     }
 }
@@ -280,15 +257,9 @@ impl AnyTsVariableAnnotation {
 impl AnyTsPropertyAnnotation {
     pub fn type_annotation(&self) -> SyntaxResult<Option<TsTypeAnnotation>> {
         match self {
-            Self::TsDefinitePropertyAnnotation(definite) => {
-                definite.type_annotation().map(Some)
-            }
-            Self::TsOptionalPropertyAnnotation(optional) => {
-                Ok(optional.type_annotation())
-            }
-            Self::TsTypeAnnotation(type_annotation) => {
-                Ok(Some(type_annotation.clone()))
-            }
+            Self::TsDefinitePropertyAnnotation(definite) => definite.type_annotation().map(Some),
+            Self::TsOptionalPropertyAnnotation(optional) => Ok(optional.type_annotation()),
+            Self::TsTypeAnnotation(type_annotation) => Ok(Some(type_annotation.clone())),
         }
     }
 }

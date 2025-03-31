@@ -37,9 +37,7 @@ impl From<ArrayType> for use_consistent_array_type::ConsistentArrayType {
     fn from(val: ArrayType) -> Self {
         match val {
             // NOTE: we translate `array-simple` to `array`.
-            ArrayType::Array | ArrayType::ArraySimple => {
-                Self::Shorthand
-            }
+            ArrayType::Array | ArrayType::ArraySimple => Self::Shorthand,
             ArrayType::Generic => Self::Generic,
         }
     }

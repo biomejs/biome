@@ -904,10 +904,7 @@ impl KeywordMatcher {
                 (b'e', 3) => Self::True,
                 _ => Self::None,
             },
-            Self::None
-            | Self::Null
-            | Self::False
-            | Self::True => Self::None,
+            Self::None | Self::Null | Self::False | Self::True => Self::None,
         }
     }
 }

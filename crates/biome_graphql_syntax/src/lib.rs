@@ -85,10 +85,7 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
     fn is_trivia(self) -> bool {
         matches!(
             self,
-            Self::NEWLINE
-                | Self::WHITESPACE
-                | Self::COMMENT
-                | Self::COMMA
+            Self::NEWLINE | Self::WHITESPACE | Self::COMMENT | Self::COMMA
         )
     }
 

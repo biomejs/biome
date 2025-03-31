@@ -132,29 +132,17 @@ impl ActionCategory {
             }
 
             Self::Refactor(RefactorKind::None) => Cow::Borrowed("refactor.biome"),
-            Self::Refactor(RefactorKind::Extract) => {
-                Cow::Borrowed("refactor.extract.biome")
-            }
-            Self::Refactor(RefactorKind::Inline) => {
-                Cow::Borrowed("refactor.inline.biome")
-            }
-            Self::Refactor(RefactorKind::Rewrite) => {
-                Cow::Borrowed("refactor.rewrite.biome")
-            }
-            Self::Refactor(RefactorKind::Other(tag)) => {
-                Cow::Owned(format!("refactor.{tag}.biome"))
-            }
+            Self::Refactor(RefactorKind::Extract) => Cow::Borrowed("refactor.extract.biome"),
+            Self::Refactor(RefactorKind::Inline) => Cow::Borrowed("refactor.inline.biome"),
+            Self::Refactor(RefactorKind::Rewrite) => Cow::Borrowed("refactor.rewrite.biome"),
+            Self::Refactor(RefactorKind::Other(tag)) => Cow::Owned(format!("refactor.{tag}.biome")),
 
             Self::Source(SourceActionKind::None) => Cow::Borrowed("source.biome"),
-            Self::Source(SourceActionKind::FixAll) => {
-                Cow::Borrowed("source.fixAll.biome")
-            }
+            Self::Source(SourceActionKind::FixAll) => Cow::Borrowed("source.fixAll.biome"),
             Self::Source(SourceActionKind::OrganizeImports) => {
                 Cow::Borrowed("source.organizeImports.biome")
             }
-            Self::Source(SourceActionKind::Other(tag)) => {
-                Cow::Owned(format!("source.biome.{tag}"))
-            }
+            Self::Source(SourceActionKind::Other(tag)) => Cow::Owned(format!("source.biome.{tag}")),
 
             Self::Other(other_action) => match other_action {
                 OtherActionCategory::InlineSuppression => {
@@ -310,9 +298,7 @@ impl From<RuleCategory> for RuleCategories {
             RuleCategory::Syntax => Self(BitFlags::from_flag(Categories::Syntax)),
             RuleCategory::Lint => Self(BitFlags::from_flag(Categories::Lint)),
             RuleCategory::Action => Self(BitFlags::from_flag(Categories::Assist)),
-            RuleCategory::Transformation => {
-                Self(BitFlags::from_flag(Categories::Transformation))
-            }
+            RuleCategory::Transformation => Self(BitFlags::from_flag(Categories::Transformation)),
         }
     }
 }

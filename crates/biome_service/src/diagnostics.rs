@@ -467,9 +467,7 @@ impl Diagnostic for TransportError {
             Self::ChannelClosed => fmt.write_str(
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
-            Self::Timeout => {
-                fmt.write_str("the request to the remote workspace timed out")
-            }
+            Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
             Self::RPCError(err) => fmt.write_str(err),
         }
     }
@@ -480,9 +478,7 @@ impl Diagnostic for TransportError {
             Self::ChannelClosed => fmt.write_str(
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
-            Self::Timeout => {
-                fmt.write_str("the request to the remote workspace timed out")
-            }
+            Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
             Self::RPCError(err) => fmt.write_str(err),
         }
     }

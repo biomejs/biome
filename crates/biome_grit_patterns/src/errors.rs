@@ -110,9 +110,7 @@ impl Diagnostic for CompileError {
             Self::DuplicateFunctionDefinition(name) => {
                 fmt.write_markup(markup! { "Duplicate function definition: "{{name}} })
             }
-            Self::DuplicateParameters => {
-                fmt.write_markup(markup! { "Duplicate parameters" })
-            }
+            Self::DuplicateParameters => fmt.write_markup(markup! { "Duplicate parameters" }),
             Self::DuplicatePatternDefinition(name) => {
                 fmt.write_markup(markup! { "Duplicate pattern definition: "{{name}} })
             }
@@ -153,18 +151,14 @@ impl Diagnostic for CompileError {
             Self::InvalidBracketedMetavariable => {
                 fmt.write_markup(markup! { "Invalid bracketed metavariable" })
             }
-            Self::FunctionArgument(_) => {
-                fmt.write_markup(markup! { "Invalid function argument" })
-            }
+            Self::FunctionArgument(_) => fmt.write_markup(markup! { "Invalid function argument" }),
             Self::UnknownFunctionOrPredicate(name) => {
                 fmt.write_markup(markup! { "Unknown function or predicate: "{{name}} })
             }
             Self::UnknownTargetLanguage(lang) => {
                 fmt.write_markup(markup! { "Unknown target language: "{{lang}} })
             }
-            Self::UnknownVariable(var) => {
-                fmt.write_markup(markup! { "Unknown variable: "{{var}} })
-            }
+            Self::UnknownVariable(var) => fmt.write_markup(markup! { "Unknown variable: "{{var}} }),
             Self::UnsupportedFunctionDefinition(name) => {
                 fmt.write_markup(markup! { "Unsupported foreign function definition: "{{name}} })
             }

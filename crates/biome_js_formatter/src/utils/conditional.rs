@@ -677,9 +677,7 @@ impl AnyJsConditional {
 
     pub(crate) fn question_mark_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            Self::JsConditionalExpression(conditional) => {
-                conditional.question_mark_token()
-            }
+            Self::JsConditionalExpression(conditional) => conditional.question_mark_token(),
             Self::TsConditionalType(conditional) => conditional.question_mark_token(),
         }
     }

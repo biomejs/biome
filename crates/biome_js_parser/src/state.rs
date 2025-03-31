@@ -47,11 +47,7 @@ impl ExportDefaultItemKind {
             // export default function a(v: number):void;
             // export default function a(v?: any){
             // }
-            (
-                Self::FunctionOverload,
-                Self::FunctionDeclaration
-                | Self::FunctionOverload,
-            ) => true,
+            (Self::FunctionOverload, Self::FunctionDeclaration | Self::FunctionOverload) => true,
             // test ts decorator_export_default_function_and_interface
             // export default interface A{};
             // export default interface A{};
@@ -67,9 +63,7 @@ impl ExportDefaultItemKind {
             // export default interface A{};
             (
                 Self::Interface,
-                Self::ClassDeclaration
-                | Self::FunctionDeclaration
-                | Self::Interface,
+                Self::ClassDeclaration | Self::FunctionDeclaration | Self::Interface,
             ) => true,
             (_, _) => false,
         }

@@ -356,27 +356,21 @@ impl AnyJsAssignmentLike {
     fn left(&self) -> SyntaxResult<LeftAssignmentLike> {
         match self {
             Self::JsPropertyObjectMember(property) => Ok(property.name()?.into()),
-            Self::JsAssignmentExpression(assignment) => {
-                Ok(assignment.left()?.into())
-            }
-            Self::JsObjectAssignmentPatternProperty(property) => {
-                Ok(property.pattern()?.into())
-            }
-            Self::JsVariableDeclarator(variable_declarator) => {
-                Ok(variable_declarator.id()?.into())
-            }
+            Self::JsAssignmentExpression(assignment) => Ok(assignment.left()?.into()),
+            Self::JsObjectAssignmentPatternProperty(property) => Ok(property.pattern()?.into()),
+            Self::JsVariableDeclarator(variable_declarator) => Ok(variable_declarator.id()?.into()),
             Self::TsTypeAliasDeclaration(type_alias_declaration) => {
                 Ok(type_alias_declaration.binding_identifier()?.into())
             }
             Self::JsPropertyClassMember(property_class_member) => {
                 Ok(property_class_member.name()?.into())
             }
-            Self::TsPropertySignatureClassMember(
-                property_signature_class_member,
-            ) => Ok(property_signature_class_member.name()?.into()),
-            Self::TsInitializedPropertySignatureClassMember(
-                property_signature_class_member,
-            ) => Ok(property_signature_class_member.name()?.into()),
+            Self::TsPropertySignatureClassMember(property_signature_class_member) => {
+                Ok(property_signature_class_member.name()?.into())
+            }
+            Self::TsInitializedPropertySignatureClassMember(property_signature_class_member) => {
+                Ok(property_signature_class_member.name()?.into())
+            }
         }
     }
 
@@ -473,9 +467,7 @@ impl AnyJsAssignmentLike {
 
                 Ok(false)
             }
-            Self::TsPropertySignatureClassMember(
-                property_signature_class_member,
-            ) => {
+            Self::TsPropertySignatureClassMember(property_signature_class_member) => {
                 let TsPropertySignatureClassMemberFields {
                     modifiers,
                     name,
@@ -492,9 +484,7 @@ impl AnyJsAssignmentLike {
                     (u8::from(f.options().tab_width()) + MIN_OVERLAP_FOR_BREAK) as usize;
                 Ok(width < text_width_for_break)
             }
-            Self::TsInitializedPropertySignatureClassMember(
-                property_signature_class_member,
-            ) => {
+            Self::TsInitializedPropertySignatureClassMember(property_signature_class_member) => {
                 let TsInitializedPropertySignatureClassMemberFields {
                     modifiers,
                     name,
@@ -549,9 +539,7 @@ impl AnyJsAssignmentLike {
             }
             // this variant doesn't have any operator
             Self::TsPropertySignatureClassMember(_) => Ok(()),
-            Self::TsInitializedPropertySignatureClassMember(
-                property_class_member,
-            ) => {
+            Self::TsInitializedPropertySignatureClassMember(property_class_member) => {
                 let initializer = property_class_member.value()?;
                 let eq_token = initializer.eq_token()?;
                 write!(f, [space(), eq_token.format()])
@@ -623,9 +611,7 @@ impl AnyJsAssignmentLike {
             }
             // this variant doesn't have any right part
             Self::TsPropertySignatureClassMember(_) => Ok(()),
-            Self::TsInitializedPropertySignatureClassMember(
-                property_class_member,
-            ) => {
+            Self::TsInitializedPropertySignatureClassMember(property_class_member) => {
                 let initializer = property_class_member.value()?;
                 let expression = initializer.expression()?;
                 write!(
@@ -647,9 +633,7 @@ impl AnyJsAssignmentLike {
             Self::TsInitializedPropertySignatureClassMember(class_member) => {
                 Some(class_member.value()?)
             }
-            Self::JsVariableDeclarator(variable_declarator) => {
-                variable_declarator.initializer()
-            }
+            Self::JsVariableDeclarator(variable_declarator) => variable_declarator.initializer(),
 
             Self::JsPropertyObjectMember(_)
             | Self::JsAssignmentExpression(_)
@@ -848,9 +832,7 @@ impl AnyJsAssignmentLike {
     }
 
     fn is_complex_type_alias(&self) -> SyntaxResult<bool> {
-        let result = if let Self::TsTypeAliasDeclaration(type_alias_declaration) =
-            self
-        {
+        let result = if let Self::TsTypeAliasDeclaration(type_alias_declaration) = self {
             let type_parameters = type_alias_declaration.type_parameters();
 
             if let Some(type_parameters) = type_parameters {

@@ -488,12 +488,10 @@ impl FeatureName {
 
 impl From<SmallVec<[FeatureKind; 6]>> for FeatureName {
     fn from(value: SmallVec<[FeatureKind; 6]>) -> Self {
-        value
-            .into_iter()
-            .fold(Self::empty(), |mut acc, kind| {
-                acc.insert(kind);
-                acc
-            })
+        value.into_iter().fold(Self::empty(), |mut acc, kind| {
+            acc.insert(kind);
+            acc
+        })
     }
 }
 

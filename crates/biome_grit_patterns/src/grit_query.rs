@@ -237,9 +237,7 @@ impl GritQueryEffect {
                 if ranges.suppressed {
                     None
                 } else {
-                    Some(Self::Match(Match::from_file_ranges(
-                        ranges, &file.name,
-                    )))
+                    Some(Self::Match(Match::from_file_ranges(ranges, &file.name)))
                 }
             } else {
                 None

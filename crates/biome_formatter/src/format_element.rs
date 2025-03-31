@@ -71,12 +71,8 @@ impl std::fmt::Debug for FormatElement {
             Self::Space | Self::HardSpace => write!(fmt, "Space"),
             Self::Line(mode) => fmt.debug_tuple("Line").field(mode).finish(),
             Self::ExpandParent => write!(fmt, "ExpandParent"),
-            Self::StaticText { text } => {
-                fmt.debug_tuple("StaticText").field(text).finish()
-            }
-            Self::DynamicText { text, .. } => {
-                fmt.debug_tuple("DynamicText").field(text).finish()
-            }
+            Self::StaticText { text } => fmt.debug_tuple("StaticText").field(text).finish(),
+            Self::DynamicText { text, .. } => fmt.debug_tuple("DynamicText").field(text).finish(),
             Self::LocatedTokenText { slice, .. } => {
                 fmt.debug_tuple("LocatedTokenText").field(slice).finish()
             }
@@ -84,9 +80,7 @@ impl std::fmt::Debug for FormatElement {
             Self::BestFitting(best_fitting) => {
                 fmt.debug_tuple("BestFitting").field(&best_fitting).finish()
             }
-            Self::Interned(interned) => {
-                fmt.debug_list().entries(interned.deref()).finish()
-            }
+            Self::Interned(interned) => fmt.debug_list().entries(interned.deref()).finish(),
             Self::Tag(tag) => fmt.debug_tuple("Tag").field(tag).finish(),
         }
     }
@@ -225,9 +219,7 @@ impl FormatElement {
     pub const fn is_text(&self) -> bool {
         matches!(
             self,
-            Self::LocatedTokenText { .. }
-                | Self::DynamicText { .. }
-                | Self::StaticText { .. }
+            Self::LocatedTokenText { .. } | Self::DynamicText { .. } | Self::StaticText { .. }
         )
     }
 
@@ -253,10 +245,7 @@ impl FormatElements for FormatElement {
             // Traverse into the most flat version because the content is guaranteed to expand when even
             // the most flat version contains some content that forces a break.
             Self::BestFitting(best_fitting) => best_fitting.most_flat().will_break(),
-            Self::LineSuffixBoundary
-            | Self::Space
-            | Self::Tag(_)
-            | Self::HardSpace => false,
+            Self::LineSuffixBoundary | Self::Space | Self::Tag(_) | Self::HardSpace => false,
         }
     }
 

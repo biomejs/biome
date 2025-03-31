@@ -44,9 +44,7 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
     fn is_bogus(&self) -> bool {
         matches!(
             self,
-            Self::HTML_BOGUS
-                | Self::HTML_BOGUS_ATTRIBUTE
-                | Self::HTML_BOGUS_ELEMENT
+            Self::HTML_BOGUS | Self::HTML_BOGUS_ATTRIBUTE | Self::HTML_BOGUS_ELEMENT
         )
     }
 

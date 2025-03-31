@@ -399,20 +399,14 @@ impl AnyJsxElement {
             Self::JsxSelfClosingElement(element) => {
                 element.has_trailing_spread_prop(current_attribute)
             }
-            Self::JsxOpeningElement(element) => {
-                element.has_trailing_spread_prop(current_attribute)
-            }
+            Self::JsxOpeningElement(element) => element.has_trailing_spread_prop(current_attribute),
         }
     }
 
     pub fn find_attribute_by_name(&self, name_to_lookup: &str) -> Option<JsxAttribute> {
         match self {
-            Self::JsxSelfClosingElement(element) => {
-                element.find_attribute_by_name(name_to_lookup)
-            }
-            Self::JsxOpeningElement(element) => {
-                element.find_attribute_by_name(name_to_lookup)
-            }
+            Self::JsxSelfClosingElement(element) => element.find_attribute_by_name(name_to_lookup),
+            Self::JsxOpeningElement(element) => element.find_attribute_by_name(name_to_lookup),
         }
     }
 
@@ -572,9 +566,7 @@ impl AnyJsxAttributeValue {
             Self::JsxExpressionAttributeValue(expression) => {
                 expression.expression().ok()?.as_static_value()
             }
-            Self::JsxString(string) => {
-                Some(StaticValue::String(string.value_token().ok()?))
-            }
+            Self::JsxString(string) => Some(StaticValue::String(string.value_token().ok()?)),
         }
     }
 }

@@ -43,10 +43,7 @@ impl SyntaxKind for MarkdownSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            Self::NEWLINE | Self::WHITESPACE | Self::TAB
-        )
+        matches!(self, Self::NEWLINE | Self::WHITESPACE | Self::TAB)
     }
 
     fn to_string(&self) -> Option<&'static str> {
