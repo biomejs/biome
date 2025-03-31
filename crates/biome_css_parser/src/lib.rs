@@ -54,8 +54,8 @@ pub struct CssParse {
 }
 
 impl CssParse {
-    pub fn new(root: CssSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> CssParse {
-        CssParse { root, diagnostics }
+    pub fn new(root: CssSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
     }
 
     /// The syntax node represented by this Parse result

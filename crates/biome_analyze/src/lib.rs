@@ -668,10 +668,10 @@ pub enum AnalyzerSuppressionVariant {
 impl From<&SuppressionKind> for AnalyzerSuppressionVariant {
     fn from(value: &SuppressionKind) -> Self {
         match value {
-            SuppressionKind::Classic => AnalyzerSuppressionVariant::Line,
-            SuppressionKind::All => AnalyzerSuppressionVariant::TopLevel,
-            SuppressionKind::RangeStart => AnalyzerSuppressionVariant::RangeStart,
-            SuppressionKind::RangeEnd => AnalyzerSuppressionVariant::RangeEnd,
+            SuppressionKind::Classic => Self::Line,
+            SuppressionKind::All => Self::TopLevel,
+            SuppressionKind::RangeStart => Self::RangeStart,
+            SuppressionKind::RangeEnd => Self::RangeEnd,
         }
     }
 }

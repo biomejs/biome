@@ -77,22 +77,22 @@ enum MemberDefinition {
 impl MemberDefinition {
     fn name(&self) -> Option<TokenText> {
         match self {
-            MemberDefinition::Getter(getter) => {
+            Self::Getter(getter) => {
                 getter.name().ok()?.as_js_literal_member_name()?.name().ok()
             }
-            MemberDefinition::Setter(setter) => {
+            Self::Setter(setter) => {
                 setter.name().ok()?.as_js_literal_member_name()?.name().ok()
             }
-            MemberDefinition::Method(method) => {
+            Self::Method(method) => {
                 method.name().ok()?.as_js_literal_member_name()?.name().ok()
             }
-            MemberDefinition::Property(property) => property
+            Self::Property(property) => property
                 .name()
                 .ok()?
                 .as_js_literal_member_name()?
                 .name()
                 .ok(),
-            MemberDefinition::ShorthandProperty(shorthand_property) => Some(
+            Self::ShorthandProperty(shorthand_property) => Some(
                 shorthand_property
                     .name()
                     .ok()?
@@ -105,21 +105,21 @@ impl MemberDefinition {
 
     fn range(&self) -> TextRange {
         match self {
-            MemberDefinition::Getter(getter) => getter.range(),
-            MemberDefinition::Setter(setter) => setter.range(),
-            MemberDefinition::Method(method) => method.range(),
-            MemberDefinition::Property(property) => property.range(),
-            MemberDefinition::ShorthandProperty(shorthand_property) => shorthand_property.range(),
+            Self::Getter(getter) => getter.range(),
+            Self::Setter(setter) => setter.range(),
+            Self::Method(method) => method.range(),
+            Self::Property(property) => property.range(),
+            Self::ShorthandProperty(shorthand_property) => shorthand_property.range(),
         }
     }
 
     fn node(&self) -> AnyJsObjectMember {
         match self {
-            MemberDefinition::Getter(getter) => getter.clone().into(),
-            MemberDefinition::Setter(setter) => setter.clone().into(),
-            MemberDefinition::Method(method) => method.clone().into(),
-            MemberDefinition::Property(property) => property.clone().into(),
-            MemberDefinition::ShorthandProperty(shorthand_property) => {
+            Self::Getter(getter) => getter.clone().into(),
+            Self::Setter(setter) => setter.clone().into(),
+            Self::Method(method) => method.clone().into(),
+            Self::Property(property) => property.clone().into(),
+            Self::ShorthandProperty(shorthand_property) => {
                 shorthand_property.clone().into()
             }
         }
@@ -150,14 +150,14 @@ impl TryFrom<AnyJsObjectMember> for MemberDefinition {
 
     fn try_from(member: AnyJsObjectMember) -> Result<Self, Self::Error> {
         match member {
-            AnyJsObjectMember::JsGetterObjectMember(member) => Ok(MemberDefinition::Getter(member)),
-            AnyJsObjectMember::JsSetterObjectMember(member) => Ok(MemberDefinition::Setter(member)),
-            AnyJsObjectMember::JsMethodObjectMember(member) => Ok(MemberDefinition::Method(member)),
+            AnyJsObjectMember::JsGetterObjectMember(member) => Ok(Self::Getter(member)),
+            AnyJsObjectMember::JsSetterObjectMember(member) => Ok(Self::Setter(member)),
+            AnyJsObjectMember::JsMethodObjectMember(member) => Ok(Self::Method(member)),
             AnyJsObjectMember::JsPropertyObjectMember(member) => {
-                Ok(MemberDefinition::Property(member))
+                Ok(Self::Property(member))
             }
             AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
-                Ok(MemberDefinition::ShorthandProperty(member))
+                Ok(Self::ShorthandProperty(member))
             }
             AnyJsObjectMember::JsSpread(_) => Err(MemberDefinitionError::NotASinglePropertyMember),
             AnyJsObjectMember::JsBogusMember(_) => Err(MemberDefinitionError::BogusMemberType),
@@ -177,12 +177,12 @@ enum DefinedProperty {
 impl From<MemberDefinition> for DefinedProperty {
     fn from(definition: MemberDefinition) -> Self {
         match definition {
-            MemberDefinition::Getter(getter) => DefinedProperty::Get(getter.range()),
-            MemberDefinition::Setter(setter) => DefinedProperty::Set(setter.range()),
-            MemberDefinition::Method(method) => DefinedProperty::Value(method.range()),
-            MemberDefinition::Property(property) => DefinedProperty::Value(property.range()),
+            MemberDefinition::Getter(getter) => Self::Get(getter.range()),
+            MemberDefinition::Setter(setter) => Self::Set(setter.range()),
+            MemberDefinition::Method(method) => Self::Value(method.range()),
+            MemberDefinition::Property(property) => Self::Value(property.range()),
             MemberDefinition::ShorthandProperty(shorthand_property) => {
-                DefinedProperty::Value(shorthand_property.range())
+                Self::Value(shorthand_property.range())
             }
         }
     }
@@ -193,15 +193,15 @@ impl DefinedProperty {
     fn extend_with(
         &self,
         member_definition: MemberDefinition,
-    ) -> Result<DefinedProperty, PropertyConflict> {
+    ) -> Result<Self, PropertyConflict> {
         match (self, member_definition) {
             // Add missing get/set counterpart
-            (DefinedProperty::Set(set_range), MemberDefinition::Getter(getter)) => {
-                Ok(DefinedProperty::GetSet(getter.range(), *set_range))
+            (Self::Set(set_range), MemberDefinition::Getter(getter)) => {
+                Ok(Self::GetSet(getter.range(), *set_range))
             }
 
-            (DefinedProperty::Get(get_range), MemberDefinition::Setter(setter)) => {
-                Ok(DefinedProperty::GetSet(*get_range, setter.range()))
+            (Self::Get(get_range), MemberDefinition::Setter(setter)) => {
+                Ok(Self::GetSet(*get_range, setter.range()))
             }
             // Else conflict
             (defined_property, member_definition) => Err(PropertyConflict(

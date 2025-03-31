@@ -18,31 +18,31 @@ declare_node_union! {
 impl JsObjectPatternLike {
     fn l_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => node.l_curly_token(),
-            JsObjectPatternLike::JsObjectBindingPattern(node) => node.l_curly_token(),
+            Self::JsObjectAssignmentPattern(node) => node.l_curly_token(),
+            Self::JsObjectBindingPattern(node) => node.l_curly_token(),
         }
     }
 
     fn r_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => node.r_curly_token(),
-            JsObjectPatternLike::JsObjectBindingPattern(node) => node.r_curly_token(),
+            Self::JsObjectAssignmentPattern(node) => node.r_curly_token(),
+            Self::JsObjectBindingPattern(node) => node.r_curly_token(),
         }
     }
 
     fn is_empty(&self) -> bool {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => node.properties().is_empty(),
-            JsObjectPatternLike::JsObjectBindingPattern(node) => node.properties().is_empty(),
+            Self::JsObjectAssignmentPattern(node) => node.properties().is_empty(),
+            Self::JsObjectBindingPattern(node) => node.properties().is_empty(),
         }
     }
 
     fn write_properties(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => {
+            Self::JsObjectAssignmentPattern(node) => {
                 write!(f, [node.properties().format()])
             }
-            JsObjectPatternLike::JsObjectBindingPattern(node) => {
+            Self::JsObjectBindingPattern(node) => {
                 write!(f, [node.properties().format()])
             }
         }
@@ -77,7 +77,7 @@ impl JsObjectPatternLike {
         }
 
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(node) => {
+            Self::JsObjectAssignmentPattern(node) => {
                 node.properties().iter().any(|property| {
                     if let Ok(
                         AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(node),
@@ -94,7 +94,7 @@ impl JsObjectPatternLike {
                     }
                 })
             }
-            JsObjectPatternLike::JsObjectBindingPattern(node) => {
+            Self::JsObjectBindingPattern(node) => {
                 node.properties().iter().any(|property| {
                     if let Ok(AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
                         node,
@@ -124,8 +124,8 @@ impl JsObjectPatternLike {
 
     fn is_hug_parameter(&self, comments: &JsComments) -> bool {
         match self {
-            JsObjectPatternLike::JsObjectAssignmentPattern(_) => false,
-            JsObjectPatternLike::JsObjectBindingPattern(binding) => binding
+            Self::JsObjectAssignmentPattern(_) => false,
+            Self::JsObjectBindingPattern(binding) => binding
                 .parent::<AnyJsFormalParameter>()
                 .and_then(|parameter| parameter.syntax().grand_parent())
                 .and_then(FormatAnyJsParameters::cast)

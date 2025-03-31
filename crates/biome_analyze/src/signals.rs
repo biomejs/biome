@@ -144,7 +144,7 @@ impl<L: Language> Default for AnalyzerActionIter<L> {
 impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionAdvice<MarkupBuf> {
     fn from(action: AnalyzerAction<L>) -> Self {
         let (_, suggestion) = action.mutation.as_text_range_and_edit().unwrap_or_default();
-        CodeSuggestionAdvice {
+        Self {
             applicability: action.applicability,
             msg: action.message,
             suggestion,
@@ -156,7 +156,7 @@ impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionItem {
     fn from(action: AnalyzerAction<L>) -> Self {
         let (range, suggestion) = action.mutation.as_text_range_and_edit().unwrap_or_default();
 
-        CodeSuggestionItem {
+        Self {
             rule_name: action.rule_name,
             category: action.category,
             suggestion: CodeSuggestion {

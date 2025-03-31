@@ -147,7 +147,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to this file name from well-known files
     pub fn from_well_known(path: &Utf8Path) -> Self {
-        Self::try_from_well_known(path).unwrap_or(DocumentFileSource::Unknown)
+        Self::try_from_well_known(path).unwrap_or(Self::Unknown)
     }
 
     fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
@@ -174,7 +174,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to this file extension
     pub fn from_extension(extension: &str) -> Self {
-        Self::try_from_extension(extension).unwrap_or(DocumentFileSource::Unknown)
+        Self::try_from_extension(extension).unwrap_or(Self::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -207,7 +207,7 @@ impl DocumentFileSource {
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn from_language_id(language_id: &str) -> Self {
-        Self::try_from_language_id(language_id).unwrap_or(DocumentFileSource::Unknown)
+        Self::try_from_language_id(language_id).unwrap_or(Self::Unknown)
     }
 
     pub(crate) fn try_from_path(path: &Utf8Path) -> Result<Self, FileSourceError> {
@@ -229,7 +229,7 @@ impl DocumentFileSource {
         let extension = &match filename {
             // Ignore files are extensionless files, so they need to be handled in particular way
             Some(filename) if filename == GIT_IGNORE_FILE_NAME || filename == IGNORE_FILE_NAME => {
-                return Ok(DocumentFileSource::Ignore);
+                return Ok(Self::Ignore);
             }
             Some(filename) if filename.ends_with(".d.ts") => Cow::Borrowed("d.ts"),
             Some(filename) if filename.ends_with(".d.mts") => Cow::Borrowed("d.mts"),
@@ -247,7 +247,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to the file path
     pub fn from_path(path: &Utf8Path) -> Self {
-        Self::try_from_path(path).unwrap_or(DocumentFileSource::Unknown)
+        Self::try_from_path(path).unwrap_or(Self::Unknown)
     }
 
     /// Returns the document file source if it's not unknown, otherwise returns `other`.
@@ -274,8 +274,8 @@ impl DocumentFileSource {
     /// let y = DocumentFileSource::Unknown;
     /// assert_eq!(x.or(y), DocumentFileSource::Unknown);
     /// ```
-    pub fn or(self, other: DocumentFileSource) -> DocumentFileSource {
-        if self != DocumentFileSource::Unknown {
+    pub fn or(self, other: Self) -> Self {
+        if self != Self::Unknown {
             self
         } else {
             other
@@ -283,86 +283,86 @@ impl DocumentFileSource {
     }
 
     pub const fn is_javascript_like(&self) -> bool {
-        matches!(self, DocumentFileSource::Js(_))
+        matches!(self, Self::Js(_))
     }
 
     pub const fn is_json_like(&self) -> bool {
-        matches!(self, DocumentFileSource::Json(_))
+        matches!(self, Self::Json(_))
     }
 
     pub const fn is_css_like(&self) -> bool {
-        matches!(self, DocumentFileSource::Css(_))
+        matches!(self, Self::Css(_))
     }
 
     pub fn to_js_file_source(&self) -> Option<JsFileSource> {
         match self {
-            DocumentFileSource::Js(file_source) => Some(*file_source),
+            Self::Js(file_source) => Some(*file_source),
             _ => None,
         }
     }
 
     pub fn to_json_file_source(&self) -> Option<JsonFileSource> {
         match self {
-            DocumentFileSource::Json(json) => Some(*json),
+            Self::Json(json) => Some(*json),
             _ => None,
         }
     }
 
     pub fn to_graphql_file_source(&self) -> Option<GraphqlFileSource> {
         match self {
-            DocumentFileSource::Graphql(graphql) => Some(*graphql),
+            Self::Graphql(graphql) => Some(*graphql),
             _ => None,
         }
     }
 
     pub fn to_grit_file_source(&self) -> Option<GritFileSource> {
         match self {
-            DocumentFileSource::Grit(grit) => Some(*grit),
+            Self::Grit(grit) => Some(*grit),
             _ => None,
         }
     }
 
     pub fn to_css_file_source(&self) -> Option<CssFileSource> {
         match self {
-            DocumentFileSource::Css(css) => Some(*css),
+            Self::Css(css) => Some(*css),
             _ => None,
         }
     }
 
     pub fn to_html_file_source(&self) -> Option<HtmlFileSource> {
         match self {
-            DocumentFileSource::Html(html) => Some(*html),
+            Self::Html(html) => Some(*html),
             _ => None,
         }
     }
 
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
-        let file_source = DocumentFileSource::from(path);
+        let file_source = Self::from(path);
         match file_source {
-            DocumentFileSource::Js(_) => true,
-            DocumentFileSource::Css(_)
-            | DocumentFileSource::Graphql(_)
-            | DocumentFileSource::Json(_)
-            | DocumentFileSource::Html(_)
-            | DocumentFileSource::Grit(_) => true,
-            DocumentFileSource::Ignore => false,
-            DocumentFileSource::Unknown => false,
+            Self::Js(_) => true,
+            Self::Css(_)
+            | Self::Graphql(_)
+            | Self::Json(_)
+            | Self::Html(_)
+            | Self::Grit(_) => true,
+            Self::Ignore => false,
+            Self::Unknown => false,
         }
     }
 
     /// The file can be read from the file system
     pub fn can_read(path: &Utf8Path) -> bool {
-        let file_source = DocumentFileSource::from(path);
+        let file_source = Self::from(path);
         match file_source {
-            DocumentFileSource::Js(_)
-            | DocumentFileSource::Css(_)
-            | DocumentFileSource::Graphql(_)
-            | DocumentFileSource::Json(_)
-            | DocumentFileSource::Html(_)
-            | DocumentFileSource::Grit(_) => true,
-            DocumentFileSource::Ignore => true,
-            DocumentFileSource::Unknown => false,
+            Self::Js(_)
+            | Self::Css(_)
+            | Self::Graphql(_)
+            | Self::Json(_)
+            | Self::Html(_)
+            | Self::Grit(_) => true,
+            Self::Ignore => true,
+            Self::Unknown => false,
         }
     }
 }
@@ -370,7 +370,7 @@ impl DocumentFileSource {
 impl biome_console::fmt::Display for DocumentFileSource {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
-            DocumentFileSource::Js(js) => {
+            Self::Js(js) => {
                 let is_jsx = js.is_jsx();
                 if js.is_typescript() {
                     if is_jsx {
@@ -384,19 +384,19 @@ impl biome_console::fmt::Display for DocumentFileSource {
                     fmt.write_markup(markup! { "JavaScript" })
                 }
             }
-            DocumentFileSource::Json(json) => {
+            Self::Json(json) => {
                 if json.allow_comments() {
                     fmt.write_markup(markup! { "JSONC" })
                 } else {
                     fmt.write_markup(markup! { "JSON" })
                 }
             }
-            DocumentFileSource::Css(_) => fmt.write_markup(markup! { "CSS" }),
-            DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
-            DocumentFileSource::Html(_) => fmt.write_markup(markup! { "HTML" }),
-            DocumentFileSource::Grit(_) => fmt.write_markup(markup! { "Grit" }),
-            DocumentFileSource::Ignore => fmt.write_markup(markup! { "Ignore" }),
-            DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
+            Self::Css(_) => fmt.write_markup(markup! { "CSS" }),
+            Self::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
+            Self::Html(_) => fmt.write_markup(markup! { "HTML" }),
+            Self::Grit(_) => fmt.write_markup(markup! { "Grit" }),
+            Self::Ignore => fmt.write_markup(markup! { "Ignore" }),
+            Self::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
 }
@@ -711,7 +711,7 @@ pub(crate) struct Features {
 
 impl Features {
     pub(crate) fn new() -> Self {
-        Features {
+        Self {
             js: JsFileHandler {},
             json: JsonFileHandler {},
             css: CssFileHandler {},

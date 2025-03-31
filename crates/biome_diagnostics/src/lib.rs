@@ -77,11 +77,11 @@ pub enum DiagnosticTag {
 
 impl DiagnosticTag {
     pub fn is_unnecessary(&self) -> bool {
-        matches!(self, DiagnosticTag::Unnecessary | DiagnosticTag::Both)
+        matches!(self, Self::Unnecessary | Self::Both)
     }
 
     pub fn is_deprecated(&self) -> bool {
-        matches!(self, DiagnosticTag::Deprecated | DiagnosticTag::Both)
+        matches!(self, Self::Deprecated | Self::Both)
     }
 }
 

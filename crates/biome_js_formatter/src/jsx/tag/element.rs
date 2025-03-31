@@ -70,10 +70,10 @@ impl Format<JsFormatContext> for AnyJsxTagWithChildren {
                 let opening_breaks = format_opening.inspect(f)?.will_break();
 
                 let multiple_attributes = match self {
-                    AnyJsxTagWithChildren::JsxElement(element) => {
+                    Self::JsxElement(element) => {
                         element.opening_element()?.attributes().len() > 1
                     }
-                    AnyJsxTagWithChildren::JsxFragment(_) => false,
+                    Self::JsxFragment(_) => false,
                 };
 
                 let list_layout = if multiple_attributes || opening_breaks {
@@ -113,10 +113,10 @@ impl Format<JsFormatContext> for AnyJsxTagWithChildren {
 impl AnyJsxTagWithChildren {
     fn fmt_opening(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
-            AnyJsxTagWithChildren::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 write!(f, [element.opening_element().format()])
             }
-            AnyJsxTagWithChildren::JsxFragment(fragment) => {
+            Self::JsxFragment(fragment) => {
                 write!(f, [fragment.opening_fragment().format()])
             }
         }
@@ -124,10 +124,10 @@ impl AnyJsxTagWithChildren {
 
     fn fmt_closing(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
-            AnyJsxTagWithChildren::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 write!(f, [element.closing_element().format()])
             }
-            AnyJsxTagWithChildren::JsxFragment(fragment) => {
+            Self::JsxFragment(fragment) => {
                 write!(f, [fragment.closing_fragment().format()])
             }
         }
@@ -135,8 +135,8 @@ impl AnyJsxTagWithChildren {
 
     fn children(&self) -> JsxChildList {
         match self {
-            AnyJsxTagWithChildren::JsxElement(element) => element.children(),
-            AnyJsxTagWithChildren::JsxFragment(fragment) => fragment.children(),
+            Self::JsxElement(element) => element.children(),
+            Self::JsxFragment(fragment) => fragment.children(),
         }
     }
 

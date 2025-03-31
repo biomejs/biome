@@ -201,7 +201,7 @@ impl TryFrom<JsonObjectValue> for State {
     type Error = ();
 
     fn try_from(value: JsonObjectValue) -> Result<Self, Self::Error> {
-        let mut result = State::default();
+        let mut result = Self::default();
         for member in value.json_member_list().into_iter().flatten() {
             let member_name = member.name().and_then(|name| name.inner_string_text());
             if member_name.as_ref().is_ok_and(|name| name == &"include") {

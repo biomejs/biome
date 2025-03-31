@@ -21,7 +21,7 @@ impl FormatRule<biome_grit_syntax::GritAddOperation>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritAddOperation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritAddOperation,
+        Self,
         crate::grit::patterns::add_operation::FormatGritAddOperation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -33,7 +33,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritAddOperation {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritAddOperation {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritAddOperation,
+        Self,
         crate::grit::patterns::add_operation::FormatGritAddOperation,
     >;
     fn into_format(self) -> Self::Format {
@@ -59,7 +59,7 @@ impl FormatRule<biome_grit_syntax::GritAnnotation>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritAnnotation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritAnnotation,
+        Self,
         crate::grit::auxiliary::annotation::FormatGritAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -71,7 +71,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritAnnotation {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritAnnotation {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritAnnotation,
+        Self,
         crate::grit::auxiliary::annotation::FormatGritAnnotation,
     >;
     fn into_format(self) -> Self::Format {
@@ -97,7 +97,7 @@ impl FormatRule<biome_grit_syntax::GritAssignmentAsPattern>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritAssignmentAsPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritAssignmentAsPattern,
+        Self,
         crate::grit::patterns::assignment_as_pattern::FormatGritAssignmentAsPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -109,7 +109,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritAssignmentAsPattern 
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritAssignmentAsPattern {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritAssignmentAsPattern,
+        Self,
         crate::grit::patterns::assignment_as_pattern::FormatGritAssignmentAsPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -135,7 +135,7 @@ impl FormatRule<biome_grit_syntax::GritBacktickSnippetLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBacktickSnippetLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBacktickSnippetLiteral,
+        Self,
         crate::grit::value::backtick_snippet_literal::FormatGritBacktickSnippetLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -148,7 +148,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBacktickSnippetLiter
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBacktickSnippetLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBacktickSnippetLiteral,
+        Self,
         crate::grit::value::backtick_snippet_literal::FormatGritBacktickSnippetLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -175,7 +175,7 @@ impl FormatRule<biome_grit_syntax::GritBooleanLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBooleanLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBooleanLiteral,
+        Self,
         crate::grit::value::boolean_literal::FormatGritBooleanLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -187,7 +187,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBooleanLiteral {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBooleanLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBooleanLiteral,
+        Self,
         crate::grit::value::boolean_literal::FormatGritBooleanLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -213,7 +213,7 @@ impl FormatRule<biome_grit_syntax::GritBracketedPattern>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBracketedPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBracketedPattern,
+        Self,
         crate::grit::patterns::bracketed_pattern::FormatGritBracketedPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -225,7 +225,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBracketedPattern {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBracketedPattern {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBracketedPattern,
+        Self,
         crate::grit::patterns::bracketed_pattern::FormatGritBracketedPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -251,7 +251,7 @@ impl FormatRule<biome_grit_syntax::GritBracketedPredicate>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBracketedPredicate {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBracketedPredicate,
+        Self,
         crate::grit::predicates::bracketed_predicate::FormatGritBracketedPredicate,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -263,7 +263,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBracketedPredicate {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBracketedPredicate {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBracketedPredicate,
+        Self,
         crate::grit::predicates::bracketed_predicate::FormatGritBracketedPredicate,
     >;
     fn into_format(self) -> Self::Format {
@@ -285,7 +285,7 @@ impl FormatRule<biome_grit_syntax::GritBubble>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBubble {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBubble,
+        Self,
         crate::grit::auxiliary::bubble::FormatGritBubble,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -297,7 +297,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBubble {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBubble {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBubble,
+        Self,
         crate::grit::auxiliary::bubble::FormatGritBubble,
     >;
     fn into_format(self) -> Self::Format {
@@ -323,7 +323,7 @@ impl FormatRule<biome_grit_syntax::GritBubbleScope>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBubbleScope {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBubbleScope,
+        Self,
         crate::grit::auxiliary::bubble_scope::FormatGritBubbleScope,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -335,7 +335,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBubbleScope {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBubbleScope {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBubbleScope,
+        Self,
         crate::grit::auxiliary::bubble_scope::FormatGritBubbleScope,
     >;
     fn into_format(self) -> Self::Format {
@@ -361,7 +361,7 @@ impl FormatRule<biome_grit_syntax::GritCodeSnippet>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritCodeSnippet {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritCodeSnippet,
+        Self,
         crate::grit::value::code_snippet::FormatGritCodeSnippet,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -373,7 +373,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritCodeSnippet {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritCodeSnippet {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritCodeSnippet,
+        Self,
         crate::grit::value::code_snippet::FormatGritCodeSnippet,
     >;
     fn into_format(self) -> Self::Format {
@@ -399,7 +399,7 @@ impl FormatRule<biome_grit_syntax::GritCurlyPattern>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritCurlyPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritCurlyPattern,
+        Self,
         crate::grit::patterns::curly_pattern::FormatGritCurlyPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -411,7 +411,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritCurlyPattern {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritCurlyPattern {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritCurlyPattern,
+        Self,
         crate::grit::patterns::curly_pattern::FormatGritCurlyPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -437,7 +437,7 @@ impl FormatRule<biome_grit_syntax::GritDivOperation>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDivOperation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritDivOperation,
+        Self,
         crate::grit::patterns::div_operation::FormatGritDivOperation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -449,7 +449,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDivOperation {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritDivOperation {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritDivOperation,
+        Self,
         crate::grit::patterns::div_operation::FormatGritDivOperation,
     >;
     fn into_format(self) -> Self::Format {
@@ -469,7 +469,7 @@ impl FormatRule<biome_grit_syntax::GritDot> for crate::grit::auxiliary::dot::For
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDot {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritDot,
+        Self,
         crate::grit::auxiliary::dot::FormatGritDot,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -478,7 +478,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDot {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritDot {
     type Format =
-        FormatOwnedWithRule<biome_grit_syntax::GritDot, crate::grit::auxiliary::dot::FormatGritDot>;
+        FormatOwnedWithRule<Self, crate::grit::auxiliary::dot::FormatGritDot>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::grit::auxiliary::dot::FormatGritDot::default())
     }
@@ -499,7 +499,7 @@ impl FormatRule<biome_grit_syntax::GritDotdotdot>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDotdotdot {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritDotdotdot,
+        Self,
         crate::grit::auxiliary::dotdotdot::FormatGritDotdotdot,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -511,7 +511,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDotdotdot {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritDotdotdot {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritDotdotdot,
+        Self,
         crate::grit::auxiliary::dotdotdot::FormatGritDotdotdot,
     >;
     fn into_format(self) -> Self::Format {
@@ -537,7 +537,7 @@ impl FormatRule<biome_grit_syntax::GritDoubleLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDoubleLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritDoubleLiteral,
+        Self,
         crate::grit::value::double_literal::FormatGritDoubleLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -549,7 +549,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDoubleLiteral {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritDoubleLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritDoubleLiteral,
+        Self,
         crate::grit::value::double_literal::FormatGritDoubleLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -575,7 +575,7 @@ impl FormatRule<biome_grit_syntax::GritEngineName>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritEngineName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritEngineName,
+        Self,
         crate::grit::auxiliary::engine_name::FormatGritEngineName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -587,7 +587,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritEngineName {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritEngineName {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritEngineName,
+        Self,
         crate::grit::auxiliary::engine_name::FormatGritEngineName,
     >;
     fn into_format(self) -> Self::Format {
@@ -607,7 +607,7 @@ impl FormatRule<biome_grit_syntax::GritEvery> for crate::grit::auxiliary::every:
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritEvery {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritEvery,
+        Self,
         crate::grit::auxiliary::every::FormatGritEvery,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -619,7 +619,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritEvery {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritEvery {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritEvery,
+        Self,
         crate::grit::auxiliary::every::FormatGritEvery,
     >;
     fn into_format(self) -> Self::Format {
@@ -639,7 +639,7 @@ impl FormatRule<biome_grit_syntax::GritFiles> for crate::grit::auxiliary::files:
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritFiles {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritFiles,
+        Self,
         crate::grit::auxiliary::files::FormatGritFiles,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -651,7 +651,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritFiles {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritFiles {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritFiles,
+        Self,
         crate::grit::auxiliary::files::FormatGritFiles,
     >;
     fn into_format(self) -> Self::Format {
@@ -677,7 +677,7 @@ impl FormatRule<biome_grit_syntax::GritFunctionDefinition>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritFunctionDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritFunctionDefinition,
+        Self,
         crate::grit::declarations::function_definition::FormatGritFunctionDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -689,7 +689,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritFunctionDefinition {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritFunctionDefinition {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritFunctionDefinition,
+        Self,
         crate::grit::declarations::function_definition::FormatGritFunctionDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -715,7 +715,7 @@ impl FormatRule<biome_grit_syntax::GritIntLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritIntLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritIntLiteral,
+        Self,
         crate::grit::value::int_literal::FormatGritIntLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -727,7 +727,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritIntLiteral {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritIntLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritIntLiteral,
+        Self,
         crate::grit::value::int_literal::FormatGritIntLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -753,7 +753,7 @@ impl FormatRule<biome_grit_syntax::GritJavascriptBodyWrapper>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptBodyWrapper {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritJavascriptBodyWrapper,
+        Self,
         crate::grit::auxiliary::javascript_body_wrapper::FormatGritJavascriptBodyWrapper,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -762,7 +762,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptBodyWrappe
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptBodyWrapper {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritJavascriptBodyWrapper,
+        Self,
         crate::grit::auxiliary::javascript_body_wrapper::FormatGritJavascriptBodyWrapper,
     >;
     fn into_format(self) -> Self::Format {
@@ -771,13 +771,13 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptBodyWrap
 }
 impl FormatRule < biome_grit_syntax :: GritJavascriptFunctionDefinition > for crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition { type Context = GritFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_grit_syntax :: GritJavascriptFunctionDefinition , f : & mut GritFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_grit_syntax :: GritJavascriptFunctionDefinition > :: fmt (self , node , f) } }
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptFunctionDefinition {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_grit_syntax :: GritJavascriptFunctionDefinition , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition :: default ())
     }
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptFunctionDefinition {
-    type Format = FormatOwnedWithRule < biome_grit_syntax :: GritJavascriptFunctionDefinition , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition > ;
+    type Format = FormatOwnedWithRule < Self , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition :: default ())
     }
@@ -798,7 +798,7 @@ impl FormatRule<biome_grit_syntax::GritLanguageDeclaration>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritLanguageDeclaration,
+        Self,
         crate::grit::auxiliary::language_declaration::FormatGritLanguageDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -810,7 +810,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageDeclaration 
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritLanguageDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritLanguageDeclaration,
+        Self,
         crate::grit::auxiliary::language_declaration::FormatGritLanguageDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -836,7 +836,7 @@ impl FormatRule<biome_grit_syntax::GritLanguageFlavor>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavor {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritLanguageFlavor,
+        Self,
         crate::grit::auxiliary::language_flavor::FormatGritLanguageFlavor,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -848,7 +848,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavor {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavor {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritLanguageFlavor,
+        Self,
         crate::grit::auxiliary::language_flavor::FormatGritLanguageFlavor,
     >;
     fn into_format(self) -> Self::Format {
@@ -874,7 +874,7 @@ impl FormatRule<biome_grit_syntax::GritLanguageFlavorKind>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavorKind {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritLanguageFlavorKind,
+        Self,
         crate::grit::auxiliary::language_flavor_kind::FormatGritLanguageFlavorKind,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -886,7 +886,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavorKind {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavorKind {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritLanguageFlavorKind,
+        Self,
         crate::grit::auxiliary::language_flavor_kind::FormatGritLanguageFlavorKind,
     >;
     fn into_format(self) -> Self::Format {
@@ -912,7 +912,7 @@ impl FormatRule<biome_grit_syntax::GritLanguageName>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritLanguageName,
+        Self,
         crate::grit::auxiliary::language_name::FormatGritLanguageName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -924,7 +924,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageName {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritLanguageName {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritLanguageName,
+        Self,
         crate::grit::auxiliary::language_name::FormatGritLanguageName,
     >;
     fn into_format(self) -> Self::Format {
@@ -950,7 +950,7 @@ impl FormatRule<biome_grit_syntax::GritLanguageSpecificSnippet>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageSpecificSnippet {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritLanguageSpecificSnippet,
+        Self,
         crate::grit::auxiliary::language_specific_snippet::FormatGritLanguageSpecificSnippet,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -959,7 +959,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageSpecificSnip
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritLanguageSpecificSnippet {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritLanguageSpecificSnippet,
+        Self,
         crate::grit::auxiliary::language_specific_snippet::FormatGritLanguageSpecificSnippet,
     >;
     fn into_format(self) -> Self::Format {
@@ -976,7 +976,7 @@ impl FormatRule<biome_grit_syntax::GritLike> for crate::grit::auxiliary::like::F
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLike {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritLike,
+        Self,
         crate::grit::auxiliary::like::FormatGritLike,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -988,7 +988,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLike {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritLike {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritLike,
+        Self,
         crate::grit::auxiliary::like::FormatGritLike,
     >;
     fn into_format(self) -> Self::Format {
@@ -1014,7 +1014,7 @@ impl FormatRule<biome_grit_syntax::GritLikeThreshold>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLikeThreshold {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritLikeThreshold,
+        Self,
         crate::grit::auxiliary::like_threshold::FormatGritLikeThreshold,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1026,7 +1026,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLikeThreshold {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritLikeThreshold {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritLikeThreshold,
+        Self,
         crate::grit::auxiliary::like_threshold::FormatGritLikeThreshold,
     >;
     fn into_format(self) -> Self::Format {
@@ -1046,7 +1046,7 @@ impl FormatRule<biome_grit_syntax::GritList> for crate::grit::auxiliary::list::F
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritList,
+        Self,
         crate::grit::auxiliary::list::FormatGritList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1058,7 +1058,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritList {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritList {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritList,
+        Self,
         crate::grit::auxiliary::list::FormatGritList,
     >;
     fn into_format(self) -> Self::Format {
@@ -1084,7 +1084,7 @@ impl FormatRule<biome_grit_syntax::GritListAccessor>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritListAccessor {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritListAccessor,
+        Self,
         crate::grit::auxiliary::list_accessor::FormatGritListAccessor,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1096,7 +1096,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritListAccessor {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritListAccessor {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritListAccessor,
+        Self,
         crate::grit::auxiliary::list_accessor::FormatGritListAccessor,
     >;
     fn into_format(self) -> Self::Format {
@@ -1116,7 +1116,7 @@ impl FormatRule<biome_grit_syntax::GritMap> for crate::grit::auxiliary::map::For
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMap {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritMap,
+        Self,
         crate::grit::auxiliary::map::FormatGritMap,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1125,7 +1125,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMap {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritMap {
     type Format =
-        FormatOwnedWithRule<biome_grit_syntax::GritMap, crate::grit::auxiliary::map::FormatGritMap>;
+        FormatOwnedWithRule<Self, crate::grit::auxiliary::map::FormatGritMap>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::grit::auxiliary::map::FormatGritMap::default())
     }
@@ -1146,7 +1146,7 @@ impl FormatRule<biome_grit_syntax::GritMapAccessor>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMapAccessor {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritMapAccessor,
+        Self,
         crate::grit::auxiliary::map_accessor::FormatGritMapAccessor,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1158,7 +1158,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMapAccessor {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritMapAccessor {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritMapAccessor,
+        Self,
         crate::grit::auxiliary::map_accessor::FormatGritMapAccessor,
     >;
     fn into_format(self) -> Self::Format {
@@ -1184,7 +1184,7 @@ impl FormatRule<biome_grit_syntax::GritMapElement>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMapElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritMapElement,
+        Self,
         crate::grit::auxiliary::map_element::FormatGritMapElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1196,7 +1196,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMapElement {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritMapElement {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritMapElement,
+        Self,
         crate::grit::auxiliary::map_element::FormatGritMapElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -1222,7 +1222,7 @@ impl FormatRule<biome_grit_syntax::GritModOperation>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritModOperation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritModOperation,
+        Self,
         crate::grit::patterns::mod_operation::FormatGritModOperation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1234,7 +1234,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritModOperation {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritModOperation {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritModOperation,
+        Self,
         crate::grit::patterns::mod_operation::FormatGritModOperation,
     >;
     fn into_format(self) -> Self::Format {
@@ -1260,7 +1260,7 @@ impl FormatRule<biome_grit_syntax::GritMulOperation>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMulOperation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritMulOperation,
+        Self,
         crate::grit::patterns::mul_operation::FormatGritMulOperation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1272,7 +1272,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMulOperation {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritMulOperation {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritMulOperation,
+        Self,
         crate::grit::patterns::mul_operation::FormatGritMulOperation,
     >;
     fn into_format(self) -> Self::Format {
@@ -1292,7 +1292,7 @@ impl FormatRule<biome_grit_syntax::GritName> for crate::grit::auxiliary::name::F
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritName,
+        Self,
         crate::grit::auxiliary::name::FormatGritName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1304,7 +1304,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritName {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritName {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritName,
+        Self,
         crate::grit::auxiliary::name::FormatGritName,
     >;
     fn into_format(self) -> Self::Format {
@@ -1330,7 +1330,7 @@ impl FormatRule<biome_grit_syntax::GritNamedArg>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNamedArg {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritNamedArg,
+        Self,
         crate::grit::auxiliary::named_arg::FormatGritNamedArg,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1342,7 +1342,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNamedArg {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritNamedArg {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritNamedArg,
+        Self,
         crate::grit::auxiliary::named_arg::FormatGritNamedArg,
     >;
     fn into_format(self) -> Self::Format {
@@ -1368,7 +1368,7 @@ impl FormatRule<biome_grit_syntax::GritNegativeIntLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNegativeIntLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritNegativeIntLiteral,
+        Self,
         crate::grit::value::negative_int_literal::FormatGritNegativeIntLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1380,7 +1380,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNegativeIntLiteral {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritNegativeIntLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritNegativeIntLiteral,
+        Self,
         crate::grit::value::negative_int_literal::FormatGritNegativeIntLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -1406,7 +1406,7 @@ impl FormatRule<biome_grit_syntax::GritNodeLike>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNodeLike {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritNodeLike,
+        Self,
         crate::grit::auxiliary::node_like::FormatGritNodeLike,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1418,7 +1418,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNodeLike {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritNodeLike {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritNodeLike,
+        Self,
         crate::grit::auxiliary::node_like::FormatGritNodeLike,
     >;
     fn into_format(self) -> Self::Format {
@@ -1438,7 +1438,7 @@ impl FormatRule<biome_grit_syntax::GritNot> for crate::grit::auxiliary::not::For
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNot {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritNot,
+        Self,
         crate::grit::auxiliary::not::FormatGritNot,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1447,7 +1447,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNot {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritNot {
     type Format =
-        FormatOwnedWithRule<biome_grit_syntax::GritNot, crate::grit::auxiliary::not::FormatGritNot>;
+        FormatOwnedWithRule<Self, crate::grit::auxiliary::not::FormatGritNot>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::grit::auxiliary::not::FormatGritNot::default())
     }
@@ -1468,7 +1468,7 @@ impl FormatRule<biome_grit_syntax::GritPatternAccumulate>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAccumulate {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternAccumulate,
+        Self,
         crate::grit::patterns::pattern_accumulate::FormatGritPatternAccumulate,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1480,7 +1480,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAccumulate {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternAccumulate {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternAccumulate,
+        Self,
         crate::grit::patterns::pattern_accumulate::FormatGritPatternAccumulate,
     >;
     fn into_format(self) -> Self::Format {
@@ -1506,7 +1506,7 @@ impl FormatRule<biome_grit_syntax::GritPatternAfter>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAfter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternAfter,
+        Self,
         crate::grit::patterns::pattern_after::FormatGritPatternAfter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1518,7 +1518,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAfter {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternAfter {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternAfter,
+        Self,
         crate::grit::patterns::pattern_after::FormatGritPatternAfter,
     >;
     fn into_format(self) -> Self::Format {
@@ -1544,7 +1544,7 @@ impl FormatRule<biome_grit_syntax::GritPatternAnd>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAnd {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternAnd,
+        Self,
         crate::grit::patterns::pattern_and::FormatGritPatternAnd,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1556,7 +1556,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAnd {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternAnd {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternAnd,
+        Self,
         crate::grit::patterns::pattern_and::FormatGritPatternAnd,
     >;
     fn into_format(self) -> Self::Format {
@@ -1582,7 +1582,7 @@ impl FormatRule<biome_grit_syntax::GritPatternAny>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAny {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternAny,
+        Self,
         crate::grit::patterns::pattern_any::FormatGritPatternAny,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1594,7 +1594,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAny {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternAny {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternAny,
+        Self,
         crate::grit::patterns::pattern_any::FormatGritPatternAny,
     >;
     fn into_format(self) -> Self::Format {
@@ -1620,7 +1620,7 @@ impl FormatRule<biome_grit_syntax::GritPatternAs>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAs {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternAs,
+        Self,
         crate::grit::patterns::pattern_as::FormatGritPatternAs,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1632,7 +1632,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternAs {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternAs {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternAs,
+        Self,
         crate::grit::patterns::pattern_as::FormatGritPatternAs,
     >;
     fn into_format(self) -> Self::Format {
@@ -1658,7 +1658,7 @@ impl FormatRule<biome_grit_syntax::GritPatternBefore>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternBefore {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternBefore,
+        Self,
         crate::grit::patterns::pattern_before::FormatGritPatternBefore,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1670,7 +1670,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternBefore {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternBefore {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternBefore,
+        Self,
         crate::grit::patterns::pattern_before::FormatGritPatternBefore,
     >;
     fn into_format(self) -> Self::Format {
@@ -1696,7 +1696,7 @@ impl FormatRule<biome_grit_syntax::GritPatternContains>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternContains {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternContains,
+        Self,
         crate::grit::patterns::pattern_contains::FormatGritPatternContains,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1708,7 +1708,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternContains {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternContains {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternContains,
+        Self,
         crate::grit::patterns::pattern_contains::FormatGritPatternContains,
     >;
     fn into_format(self) -> Self::Format {
@@ -1734,7 +1734,7 @@ impl FormatRule<biome_grit_syntax::GritPatternDefinition>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternDefinition,
+        Self,
         crate::grit::patterns::pattern_definition::FormatGritPatternDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1746,7 +1746,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternDefinition {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternDefinition {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternDefinition,
+        Self,
         crate::grit::patterns::pattern_definition::FormatGritPatternDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -1772,7 +1772,7 @@ impl FormatRule<biome_grit_syntax::GritPatternDefinitionBody>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternDefinitionBody {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternDefinitionBody,
+        Self,
         crate::grit::patterns::pattern_definition_body::FormatGritPatternDefinitionBody,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1781,7 +1781,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternDefinitionBod
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternDefinitionBody {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternDefinitionBody,
+        Self,
         crate::grit::patterns::pattern_definition_body::FormatGritPatternDefinitionBody,
     >;
     fn into_format(self) -> Self::Format {
@@ -1804,7 +1804,7 @@ impl FormatRule<biome_grit_syntax::GritPatternElseClause>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternElseClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternElseClause,
+        Self,
         crate::grit::patterns::pattern_else_clause::FormatGritPatternElseClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1816,7 +1816,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternElseClause {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternElseClause {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternElseClause,
+        Self,
         crate::grit::patterns::pattern_else_clause::FormatGritPatternElseClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1842,7 +1842,7 @@ impl FormatRule<biome_grit_syntax::GritPatternIfElse>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternIfElse {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternIfElse,
+        Self,
         crate::grit::patterns::pattern_if_else::FormatGritPatternIfElse,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1854,7 +1854,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternIfElse {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternIfElse {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternIfElse,
+        Self,
         crate::grit::patterns::pattern_if_else::FormatGritPatternIfElse,
     >;
     fn into_format(self) -> Self::Format {
@@ -1880,7 +1880,7 @@ impl FormatRule<biome_grit_syntax::GritPatternIncludes>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternIncludes {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternIncludes,
+        Self,
         crate::grit::patterns::pattern_includes::FormatGritPatternIncludes,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1892,7 +1892,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternIncludes {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternIncludes {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternIncludes,
+        Self,
         crate::grit::patterns::pattern_includes::FormatGritPatternIncludes,
     >;
     fn into_format(self) -> Self::Format {
@@ -1918,7 +1918,7 @@ impl FormatRule<biome_grit_syntax::GritPatternLimit>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternLimit {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternLimit,
+        Self,
         crate::grit::patterns::pattern_limit::FormatGritPatternLimit,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1930,7 +1930,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternLimit {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternLimit {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternLimit,
+        Self,
         crate::grit::patterns::pattern_limit::FormatGritPatternLimit,
     >;
     fn into_format(self) -> Self::Format {
@@ -1956,7 +1956,7 @@ impl FormatRule<biome_grit_syntax::GritPatternMaybe>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternMaybe {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternMaybe,
+        Self,
         crate::grit::patterns::pattern_maybe::FormatGritPatternMaybe,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1968,7 +1968,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternMaybe {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternMaybe {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternMaybe,
+        Self,
         crate::grit::patterns::pattern_maybe::FormatGritPatternMaybe,
     >;
     fn into_format(self) -> Self::Format {
@@ -1994,7 +1994,7 @@ impl FormatRule<biome_grit_syntax::GritPatternNot>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternNot {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternNot,
+        Self,
         crate::grit::patterns::pattern_not::FormatGritPatternNot,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2006,7 +2006,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternNot {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternNot {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternNot,
+        Self,
         crate::grit::patterns::pattern_not::FormatGritPatternNot,
     >;
     fn into_format(self) -> Self::Format {
@@ -2032,7 +2032,7 @@ impl FormatRule<biome_grit_syntax::GritPatternOr>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternOr {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternOr,
+        Self,
         crate::grit::patterns::pattern_or::FormatGritPatternOr,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2044,7 +2044,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternOr {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternOr {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternOr,
+        Self,
         crate::grit::patterns::pattern_or::FormatGritPatternOr,
     >;
     fn into_format(self) -> Self::Format {
@@ -2070,7 +2070,7 @@ impl FormatRule<biome_grit_syntax::GritPatternOrElse>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternOrElse {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternOrElse,
+        Self,
         crate::grit::patterns::pattern_or_else::FormatGritPatternOrElse,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2082,7 +2082,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternOrElse {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternOrElse {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternOrElse,
+        Self,
         crate::grit::patterns::pattern_or_else::FormatGritPatternOrElse,
     >;
     fn into_format(self) -> Self::Format {
@@ -2108,7 +2108,7 @@ impl FormatRule<biome_grit_syntax::GritPatternUntilClause>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternUntilClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternUntilClause,
+        Self,
         crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2120,7 +2120,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternUntilClause {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternUntilClause {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternUntilClause,
+        Self,
         crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -2146,7 +2146,7 @@ impl FormatRule<biome_grit_syntax::GritPatternWhere>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternWhere {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternWhere,
+        Self,
         crate::grit::patterns::pattern_where::FormatGritPatternWhere,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2158,7 +2158,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternWhere {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternWhere {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternWhere,
+        Self,
         crate::grit::patterns::pattern_where::FormatGritPatternWhere,
     >;
     fn into_format(self) -> Self::Format {
@@ -2184,7 +2184,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateAccumulate>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAccumulate {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateAccumulate,
+        Self,
         crate::grit::predicates::predicate_accumulate::FormatGritPredicateAccumulate,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2196,7 +2196,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAccumulate 
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAccumulate {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateAccumulate,
+        Self,
         crate::grit::predicates::predicate_accumulate::FormatGritPredicateAccumulate,
     >;
     fn into_format(self) -> Self::Format {
@@ -2222,7 +2222,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateAnd>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAnd {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateAnd,
+        Self,
         crate::grit::predicates::predicate_and::FormatGritPredicateAnd,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2234,7 +2234,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAnd {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAnd {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateAnd,
+        Self,
         crate::grit::predicates::predicate_and::FormatGritPredicateAnd,
     >;
     fn into_format(self) -> Self::Format {
@@ -2260,7 +2260,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateAny>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAny {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateAny,
+        Self,
         crate::grit::predicates::predicate_any::FormatGritPredicateAny,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2272,7 +2272,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAny {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAny {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateAny,
+        Self,
         crate::grit::predicates::predicate_any::FormatGritPredicateAny,
     >;
     fn into_format(self) -> Self::Format {
@@ -2298,7 +2298,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateAssignment>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateAssignment,
+        Self,
         crate::grit::predicates::predicate_assignment::FormatGritPredicateAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2310,7 +2310,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAssignment 
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateAssignment {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateAssignment,
+        Self,
         crate::grit::predicates::predicate_assignment::FormatGritPredicateAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -2336,7 +2336,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateCall>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateCall {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateCall,
+        Self,
         crate::grit::predicates::predicate_call::FormatGritPredicateCall,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2348,7 +2348,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateCall {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateCall {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateCall,
+        Self,
         crate::grit::predicates::predicate_call::FormatGritPredicateCall,
     >;
     fn into_format(self) -> Self::Format {
@@ -2374,7 +2374,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateCurly>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateCurly {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateCurly,
+        Self,
         crate::grit::predicates::predicate_curly::FormatGritPredicateCurly,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2386,7 +2386,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateCurly {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateCurly {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateCurly,
+        Self,
         crate::grit::predicates::predicate_curly::FormatGritPredicateCurly,
     >;
     fn into_format(self) -> Self::Format {
@@ -2412,7 +2412,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateDefinition>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateDefinition,
+        Self,
         crate::grit::predicates::predicate_definition::FormatGritPredicateDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2424,7 +2424,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateDefinition 
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateDefinition {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateDefinition,
+        Self,
         crate::grit::predicates::predicate_definition::FormatGritPredicateDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -2450,7 +2450,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateElseClause>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateElseClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateElseClause,
+        Self,
         crate::grit::predicates::predicate_else_clause::FormatGritPredicateElseClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2463,7 +2463,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateElseClause 
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateElseClause {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateElseClause,
+        Self,
         crate::grit::predicates::predicate_else_clause::FormatGritPredicateElseClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -2490,7 +2490,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateEqual>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateEqual {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateEqual,
+        Self,
         crate::grit::predicates::predicate_equal::FormatGritPredicateEqual,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2502,7 +2502,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateEqual {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateEqual {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateEqual,
+        Self,
         crate::grit::predicates::predicate_equal::FormatGritPredicateEqual,
     >;
     fn into_format(self) -> Self::Format {
@@ -2528,7 +2528,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateGreater>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateGreater {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateGreater,
+        Self,
         crate::grit::predicates::predicate_greater::FormatGritPredicateGreater,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2540,7 +2540,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateGreater {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateGreater {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateGreater,
+        Self,
         crate::grit::predicates::predicate_greater::FormatGritPredicateGreater,
     >;
     fn into_format(self) -> Self::Format {
@@ -2566,7 +2566,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateGreaterEqual>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateGreaterEqual {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateGreaterEqual,
+        Self,
         crate::grit::predicates::predicate_greater_equal::FormatGritPredicateGreaterEqual,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2575,7 +2575,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateGreaterEqua
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateGreaterEqual {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateGreaterEqual,
+        Self,
         crate::grit::predicates::predicate_greater_equal::FormatGritPredicateGreaterEqual,
     >;
     fn into_format(self) -> Self::Format {
@@ -2598,7 +2598,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateIfElse>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateIfElse {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateIfElse,
+        Self,
         crate::grit::predicates::predicate_if_else::FormatGritPredicateIfElse,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2610,7 +2610,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateIfElse {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateIfElse {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateIfElse,
+        Self,
         crate::grit::predicates::predicate_if_else::FormatGritPredicateIfElse,
     >;
     fn into_format(self) -> Self::Format {
@@ -2636,7 +2636,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateLess>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateLess {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateLess,
+        Self,
         crate::grit::predicates::predicate_less::FormatGritPredicateLess,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2648,7 +2648,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateLess {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateLess {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateLess,
+        Self,
         crate::grit::predicates::predicate_less::FormatGritPredicateLess,
     >;
     fn into_format(self) -> Self::Format {
@@ -2674,7 +2674,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateLessEqual>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateLessEqual {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateLessEqual,
+        Self,
         crate::grit::predicates::predicate_less_equal::FormatGritPredicateLessEqual,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2686,7 +2686,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateLessEqual {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateLessEqual {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateLessEqual,
+        Self,
         crate::grit::predicates::predicate_less_equal::FormatGritPredicateLessEqual,
     >;
     fn into_format(self) -> Self::Format {
@@ -2712,7 +2712,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateMatch>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateMatch {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateMatch,
+        Self,
         crate::grit::predicates::predicate_match::FormatGritPredicateMatch,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2724,7 +2724,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateMatch {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateMatch {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateMatch,
+        Self,
         crate::grit::predicates::predicate_match::FormatGritPredicateMatch,
     >;
     fn into_format(self) -> Self::Format {
@@ -2750,7 +2750,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateMaybe>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateMaybe {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateMaybe,
+        Self,
         crate::grit::predicates::predicate_maybe::FormatGritPredicateMaybe,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2762,7 +2762,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateMaybe {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateMaybe {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateMaybe,
+        Self,
         crate::grit::predicates::predicate_maybe::FormatGritPredicateMaybe,
     >;
     fn into_format(self) -> Self::Format {
@@ -2788,7 +2788,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateNot>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateNot {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateNot,
+        Self,
         crate::grit::predicates::predicate_not::FormatGritPredicateNot,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2800,7 +2800,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateNot {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateNot {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateNot,
+        Self,
         crate::grit::predicates::predicate_not::FormatGritPredicateNot,
     >;
     fn into_format(self) -> Self::Format {
@@ -2826,7 +2826,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateNotEqual>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateNotEqual {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateNotEqual,
+        Self,
         crate::grit::predicates::predicate_not_equal::FormatGritPredicateNotEqual,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2838,7 +2838,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateNotEqual {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateNotEqual {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateNotEqual,
+        Self,
         crate::grit::predicates::predicate_not_equal::FormatGritPredicateNotEqual,
     >;
     fn into_format(self) -> Self::Format {
@@ -2864,7 +2864,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateOr>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateOr {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateOr,
+        Self,
         crate::grit::predicates::predicate_or::FormatGritPredicateOr,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2876,7 +2876,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateOr {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateOr {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateOr,
+        Self,
         crate::grit::predicates::predicate_or::FormatGritPredicateOr,
     >;
     fn into_format(self) -> Self::Format {
@@ -2902,7 +2902,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateReturn>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateReturn {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateReturn,
+        Self,
         crate::grit::predicates::predicate_return::FormatGritPredicateReturn,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2914,7 +2914,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateReturn {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateReturn {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateReturn,
+        Self,
         crate::grit::predicates::predicate_return::FormatGritPredicateReturn,
     >;
     fn into_format(self) -> Self::Format {
@@ -2940,7 +2940,7 @@ impl FormatRule<biome_grit_syntax::GritPredicateRewrite>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateRewrite {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateRewrite,
+        Self,
         crate::grit::predicates::predicate_rewrite::FormatGritPredicateRewrite,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2952,7 +2952,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateRewrite {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateRewrite {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateRewrite,
+        Self,
         crate::grit::predicates::predicate_rewrite::FormatGritPredicateRewrite,
     >;
     fn into_format(self) -> Self::Format {
@@ -2978,7 +2978,7 @@ impl FormatRule<biome_grit_syntax::GritRawBacktickSnippetLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRawBacktickSnippetLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritRawBacktickSnippetLiteral,
+        Self,
         crate::grit::value::raw_backtick_snippet_literal::FormatGritRawBacktickSnippetLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2987,7 +2987,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRawBacktickSnippetLi
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritRawBacktickSnippetLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritRawBacktickSnippetLiteral,
+        Self,
         crate::grit::value::raw_backtick_snippet_literal::FormatGritRawBacktickSnippetLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -3010,7 +3010,7 @@ impl FormatRule<biome_grit_syntax::GritRegexLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRegexLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritRegexLiteral,
+        Self,
         crate::grit::value::regex_literal::FormatGritRegexLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3022,7 +3022,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRegexLiteral {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritRegexLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritRegexLiteral,
+        Self,
         crate::grit::value::regex_literal::FormatGritRegexLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -3048,7 +3048,7 @@ impl FormatRule<biome_grit_syntax::GritRegexPattern>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRegexPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritRegexPattern,
+        Self,
         crate::grit::patterns::regex_pattern::FormatGritRegexPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3060,7 +3060,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRegexPattern {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritRegexPattern {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritRegexPattern,
+        Self,
         crate::grit::patterns::regex_pattern::FormatGritRegexPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -3086,7 +3086,7 @@ impl FormatRule<biome_grit_syntax::GritRegexPatternVariables>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRegexPatternVariables {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritRegexPatternVariables,
+        Self,
         crate::grit::patterns::regex_pattern_variables::FormatGritRegexPatternVariables,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3095,7 +3095,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRegexPatternVariable
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritRegexPatternVariables {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritRegexPatternVariables,
+        Self,
         crate::grit::patterns::regex_pattern_variables::FormatGritRegexPatternVariables,
     >;
     fn into_format(self) -> Self::Format {
@@ -3118,7 +3118,7 @@ impl FormatRule<biome_grit_syntax::GritRewrite>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRewrite {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritRewrite,
+        Self,
         crate::grit::auxiliary::rewrite::FormatGritRewrite,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3130,7 +3130,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRewrite {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritRewrite {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritRewrite,
+        Self,
         crate::grit::auxiliary::rewrite::FormatGritRewrite,
     >;
     fn into_format(self) -> Self::Format {
@@ -3150,7 +3150,7 @@ impl FormatRule<biome_grit_syntax::GritRoot> for crate::grit::auxiliary::root::F
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRoot {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritRoot,
+        Self,
         crate::grit::auxiliary::root::FormatGritRoot,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3162,7 +3162,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritRoot {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritRoot {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritRoot,
+        Self,
         crate::grit::auxiliary::root::FormatGritRoot,
     >;
     fn into_format(self) -> Self::Format {
@@ -3188,7 +3188,7 @@ impl FormatRule<biome_grit_syntax::GritSequential>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritSequential {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritSequential,
+        Self,
         crate::grit::auxiliary::sequential::FormatGritSequential,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3200,7 +3200,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritSequential {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritSequential {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritSequential,
+        Self,
         crate::grit::auxiliary::sequential::FormatGritSequential,
     >;
     fn into_format(self) -> Self::Format {
@@ -3226,7 +3226,7 @@ impl FormatRule<biome_grit_syntax::GritSnippetRegexLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritSnippetRegexLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritSnippetRegexLiteral,
+        Self,
         crate::grit::value::snippet_regex_literal::FormatGritSnippetRegexLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3238,7 +3238,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritSnippetRegexLiteral 
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritSnippetRegexLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritSnippetRegexLiteral,
+        Self,
         crate::grit::value::snippet_regex_literal::FormatGritSnippetRegexLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -3258,7 +3258,7 @@ impl FormatRule<biome_grit_syntax::GritSome> for crate::grit::auxiliary::some::F
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritSome {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritSome,
+        Self,
         crate::grit::auxiliary::some::FormatGritSome,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3270,7 +3270,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritSome {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritSome {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritSome,
+        Self,
         crate::grit::auxiliary::some::FormatGritSome,
     >;
     fn into_format(self) -> Self::Format {
@@ -3296,7 +3296,7 @@ impl FormatRule<biome_grit_syntax::GritStringLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritStringLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritStringLiteral,
+        Self,
         crate::grit::value::string_literal::FormatGritStringLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3308,7 +3308,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritStringLiteral {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritStringLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritStringLiteral,
+        Self,
         crate::grit::value::string_literal::FormatGritStringLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -3334,7 +3334,7 @@ impl FormatRule<biome_grit_syntax::GritSubOperation>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritSubOperation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritSubOperation,
+        Self,
         crate::grit::patterns::sub_operation::FormatGritSubOperation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3346,7 +3346,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritSubOperation {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritSubOperation {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritSubOperation,
+        Self,
         crate::grit::patterns::sub_operation::FormatGritSubOperation,
     >;
     fn into_format(self) -> Self::Format {
@@ -3372,7 +3372,7 @@ impl FormatRule<biome_grit_syntax::GritUndefinedLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritUndefinedLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritUndefinedLiteral,
+        Self,
         crate::grit::value::undefined_literal::FormatGritUndefinedLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3384,7 +3384,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritUndefinedLiteral {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritUndefinedLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritUndefinedLiteral,
+        Self,
         crate::grit::value::undefined_literal::FormatGritUndefinedLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -3410,7 +3410,7 @@ impl FormatRule<biome_grit_syntax::GritUnderscore>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritUnderscore {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritUnderscore,
+        Self,
         crate::grit::auxiliary::underscore::FormatGritUnderscore,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3422,7 +3422,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritUnderscore {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritUnderscore {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritUnderscore,
+        Self,
         crate::grit::auxiliary::underscore::FormatGritUnderscore,
     >;
     fn into_format(self) -> Self::Format {
@@ -3448,7 +3448,7 @@ impl FormatRule<biome_grit_syntax::GritVariable>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritVariable {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritVariable,
+        Self,
         crate::grit::auxiliary::variable::FormatGritVariable,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3460,7 +3460,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritVariable {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritVariable {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritVariable,
+        Self,
         crate::grit::auxiliary::variable::FormatGritVariable,
     >;
     fn into_format(self) -> Self::Format {
@@ -3486,7 +3486,7 @@ impl FormatRule<biome_grit_syntax::GritVersion>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritVersion {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritVersion,
+        Self,
         crate::grit::auxiliary::version::FormatGritVersion,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3498,7 +3498,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritVersion {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritVersion {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritVersion,
+        Self,
         crate::grit::auxiliary::version::FormatGritVersion,
     >;
     fn into_format(self) -> Self::Format {
@@ -3520,7 +3520,7 @@ impl FormatRule<biome_grit_syntax::GritWithin>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritWithin {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritWithin,
+        Self,
         crate::grit::auxiliary::within::FormatGritWithin,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3532,7 +3532,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritWithin {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritWithin {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritWithin,
+        Self,
         crate::grit::auxiliary::within::FormatGritWithin,
     >;
     fn into_format(self) -> Self::Format {
@@ -3545,7 +3545,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritWithin {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDefinitionList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritDefinitionList,
+        Self,
         crate::grit::lists::definition_list::FormatGritDefinitionList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3557,7 +3557,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritDefinitionList {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritDefinitionList {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritDefinitionList,
+        Self,
         crate::grit::lists::definition_list::FormatGritDefinitionList,
     >;
     fn into_format(self) -> Self::Format {
@@ -3570,7 +3570,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritDefinitionList {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavorList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritLanguageFlavorList,
+        Self,
         crate::grit::lists::language_flavor_list::FormatGritLanguageFlavorList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3582,7 +3582,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavorList {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavorList {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritLanguageFlavorList,
+        Self,
         crate::grit::lists::language_flavor_list::FormatGritLanguageFlavorList,
     >;
     fn into_format(self) -> Self::Format {
@@ -3595,7 +3595,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritLanguageFlavorList
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritListPatternList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritListPatternList,
+        Self,
         crate::grit::lists::list_pattern_list::FormatGritListPatternList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3607,7 +3607,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritListPatternList {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritListPatternList {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritListPatternList,
+        Self,
         crate::grit::lists::list_pattern_list::FormatGritListPatternList,
     >;
     fn into_format(self) -> Self::Format {
@@ -3620,7 +3620,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritListPatternList {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMapElementList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritMapElementList,
+        Self,
         crate::grit::lists::map_element_list::FormatGritMapElementList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3632,7 +3632,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritMapElementList {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritMapElementList {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritMapElementList,
+        Self,
         crate::grit::lists::map_element_list::FormatGritMapElementList,
     >;
     fn into_format(self) -> Self::Format {
@@ -3645,7 +3645,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritMapElementList {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNamedArgList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritNamedArgList,
+        Self,
         crate::grit::lists::named_arg_list::FormatGritNamedArgList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3657,7 +3657,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritNamedArgList {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritNamedArgList {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritNamedArgList,
+        Self,
         crate::grit::lists::named_arg_list::FormatGritNamedArgList,
     >;
     fn into_format(self) -> Self::Format {
@@ -3670,7 +3670,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritNamedArgList {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPatternList,
+        Self,
         crate::grit::lists::pattern_list::FormatGritPatternList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3682,7 +3682,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternList {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternList {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternList,
+        Self,
         crate::grit::lists::pattern_list::FormatGritPatternList,
     >;
     fn into_format(self) -> Self::Format {
@@ -3695,7 +3695,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternList {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritPredicateList,
+        Self,
         crate::grit::lists::predicate_list::FormatGritPredicateList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3707,7 +3707,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateList {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateList {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPredicateList,
+        Self,
         crate::grit::lists::predicate_list::FormatGritPredicateList,
     >;
     fn into_format(self) -> Self::Format {
@@ -3720,7 +3720,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateList {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritVariableList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritVariableList,
+        Self,
         crate::grit::lists::variable_list::FormatGritVariableList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3732,7 +3732,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritVariableList {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritVariableList {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritVariableList,
+        Self,
         crate::grit::lists::variable_list::FormatGritVariableList,
     >;
     fn into_format(self) -> Self::Format {
@@ -3752,7 +3752,7 @@ impl FormatRule<biome_grit_syntax::GritBogus> for crate::grit::bogus::bogus::For
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogus {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogus,
+        Self,
         crate::grit::bogus::bogus::FormatGritBogus,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3761,7 +3761,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogus {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogus {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogus,
+        Self,
         crate::grit::bogus::bogus::FormatGritBogus,
     >;
     fn into_format(self) -> Self::Format {
@@ -3784,7 +3784,7 @@ impl FormatRule<biome_grit_syntax::GritBogusContainer>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusContainer {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusContainer,
+        Self,
         crate::grit::bogus::bogus_container::FormatGritBogusContainer,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3796,7 +3796,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusContainer {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusContainer {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusContainer,
+        Self,
         crate::grit::bogus::bogus_container::FormatGritBogusContainer,
     >;
     fn into_format(self) -> Self::Format {
@@ -3822,7 +3822,7 @@ impl FormatRule<biome_grit_syntax::GritBogusDefinition>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusDefinition,
+        Self,
         crate::grit::bogus::bogus_definition::FormatGritBogusDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3834,7 +3834,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusDefinition {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusDefinition {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusDefinition,
+        Self,
         crate::grit::bogus::bogus_definition::FormatGritBogusDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -3860,7 +3860,7 @@ impl FormatRule<biome_grit_syntax::GritBogusLanguageDeclaration>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusLanguageDeclaration,
+        Self,
         crate::grit::bogus::bogus_language_declaration::FormatGritBogusLanguageDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3869,7 +3869,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageDeclara
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusLanguageDeclaration,
+        Self,
         crate::grit::bogus::bogus_language_declaration::FormatGritBogusLanguageDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -3892,7 +3892,7 @@ impl FormatRule<biome_grit_syntax::GritBogusLanguageFlavorKind>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageFlavorKind {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusLanguageFlavorKind,
+        Self,
         crate::grit::bogus::bogus_language_flavor_kind::FormatGritBogusLanguageFlavorKind,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3901,7 +3901,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageFlavorK
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageFlavorKind {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusLanguageFlavorKind,
+        Self,
         crate::grit::bogus::bogus_language_flavor_kind::FormatGritBogusLanguageFlavorKind,
     >;
     fn into_format(self) -> Self::Format {
@@ -3924,7 +3924,7 @@ impl FormatRule<biome_grit_syntax::GritBogusLanguageName>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusLanguageName,
+        Self,
         crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3936,7 +3936,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageName {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageName {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusLanguageName,
+        Self,
         crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName,
     >;
     fn into_format(self) -> Self::Format {
@@ -3962,7 +3962,7 @@ impl FormatRule<biome_grit_syntax::GritBogusLiteral>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusLiteral,
+        Self,
         crate::grit::bogus::bogus_literal::FormatGritBogusLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3974,7 +3974,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLiteral {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusLiteral,
+        Self,
         crate::grit::bogus::bogus_literal::FormatGritBogusLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -4000,7 +4000,7 @@ impl FormatRule<biome_grit_syntax::GritBogusMapElement>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusMapElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusMapElement,
+        Self,
         crate::grit::bogus::bogus_map_element::FormatGritBogusMapElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4012,7 +4012,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusMapElement {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusMapElement {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusMapElement,
+        Self,
         crate::grit::bogus::bogus_map_element::FormatGritBogusMapElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -4038,7 +4038,7 @@ impl FormatRule<biome_grit_syntax::GritBogusNamedArg>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusNamedArg {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusNamedArg,
+        Self,
         crate::grit::bogus::bogus_named_arg::FormatGritBogusNamedArg,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4050,7 +4050,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusNamedArg {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusNamedArg {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusNamedArg,
+        Self,
         crate::grit::bogus::bogus_named_arg::FormatGritBogusNamedArg,
     >;
     fn into_format(self) -> Self::Format {
@@ -4076,7 +4076,7 @@ impl FormatRule<biome_grit_syntax::GritBogusPattern>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusPattern,
+        Self,
         crate::grit::bogus::bogus_pattern::FormatGritBogusPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4088,7 +4088,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusPattern {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusPattern {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusPattern,
+        Self,
         crate::grit::bogus::bogus_pattern::FormatGritBogusPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -4114,7 +4114,7 @@ impl FormatRule<biome_grit_syntax::GritBogusPredicate>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusPredicate {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusPredicate,
+        Self,
         crate::grit::bogus::bogus_predicate::FormatGritBogusPredicate,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4126,7 +4126,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusPredicate {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusPredicate {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusPredicate,
+        Self,
         crate::grit::bogus::bogus_predicate::FormatGritBogusPredicate,
     >;
     fn into_format(self) -> Self::Format {
@@ -4152,7 +4152,7 @@ impl FormatRule<biome_grit_syntax::GritBogusVersion>
 impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusVersion {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::GritBogusVersion,
+        Self,
         crate::grit::bogus::bogus_version::FormatGritBogusVersion,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4164,7 +4164,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusVersion {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusVersion {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusVersion,
+        Self,
         crate::grit::bogus::bogus_version::FormatGritBogusVersion,
     >;
     fn into_format(self) -> Self::Format {
@@ -4177,7 +4177,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusVersion {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritCodeSnippetSource {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritCodeSnippetSource,
+        Self,
         crate::grit::any::code_snippet_source::FormatAnyGritCodeSnippetSource,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4189,7 +4189,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritCodeSnippetSource
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritCodeSnippetSource {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritCodeSnippetSource,
+        Self,
         crate::grit::any::code_snippet_source::FormatAnyGritCodeSnippetSource,
     >;
     fn into_format(self) -> Self::Format {
@@ -4202,7 +4202,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritCodeSnippetSour
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritContainer {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritContainer,
+        Self,
         crate::grit::any::container::FormatAnyGritContainer,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4214,7 +4214,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritContainer {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritContainer {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritContainer,
+        Self,
         crate::grit::any::container::FormatAnyGritContainer,
     >;
     fn into_format(self) -> Self::Format {
@@ -4227,7 +4227,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritContainer {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritDefinition,
+        Self,
         crate::grit::any::definition::FormatAnyGritDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4239,7 +4239,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritDefinition {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritDefinition {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritDefinition,
+        Self,
         crate::grit::any::definition::FormatAnyGritDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -4252,7 +4252,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritDefinition {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritLanguageDeclaration,
+        Self,
         crate::grit::any::language_declaration::FormatAnyGritLanguageDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4264,7 +4264,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageDeclarati
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritLanguageDeclaration,
+        Self,
         crate::grit::any::language_declaration::FormatAnyGritLanguageDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -4277,7 +4277,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageDeclara
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageFlavorKind {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritLanguageFlavorKind,
+        Self,
         crate::grit::any::language_flavor_kind::FormatAnyGritLanguageFlavorKind,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4289,7 +4289,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageFlavorKin
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageFlavorKind {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritLanguageFlavorKind,
+        Self,
         crate::grit::any::language_flavor_kind::FormatAnyGritLanguageFlavorKind,
     >;
     fn into_format(self) -> Self::Format {
@@ -4302,7 +4302,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageFlavorK
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritLanguageName,
+        Self,
         crate::grit::any::language_name::FormatAnyGritLanguageName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4314,7 +4314,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageName {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageName {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritLanguageName,
+        Self,
         crate::grit::any::language_name::FormatAnyGritLanguageName,
     >;
     fn into_format(self) -> Self::Format {
@@ -4327,7 +4327,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageName {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritListAccessorSubject {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritListAccessorSubject,
+        Self,
         crate::grit::any::list_accessor_subject::FormatAnyGritListAccessorSubject,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4339,7 +4339,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritListAccessorSubje
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritListAccessorSubject {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritListAccessorSubject,
+        Self,
         crate::grit::any::list_accessor_subject::FormatAnyGritListAccessorSubject,
     >;
     fn into_format(self) -> Self::Format {
@@ -4352,7 +4352,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritListAccessorSub
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritListIndex {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritListIndex,
+        Self,
         crate::grit::any::list_index::FormatAnyGritListIndex,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4364,7 +4364,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritListIndex {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritListIndex {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritListIndex,
+        Self,
         crate::grit::any::list_index::FormatAnyGritListIndex,
     >;
     fn into_format(self) -> Self::Format {
@@ -4377,7 +4377,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritListIndex {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritListPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritListPattern,
+        Self,
         crate::grit::any::list_pattern::FormatAnyGritListPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4389,7 +4389,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritListPattern {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritListPattern {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritListPattern,
+        Self,
         crate::grit::any::list_pattern::FormatAnyGritListPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -4402,7 +4402,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritListPattern {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLiteral {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritLiteral,
+        Self,
         crate::grit::any::literal::FormatAnyGritLiteral,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4414,7 +4414,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLiteral {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLiteral {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritLiteral,
+        Self,
         crate::grit::any::literal::FormatAnyGritLiteral,
     >;
     fn into_format(self) -> Self::Format {
@@ -4427,7 +4427,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLiteral {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapAccessorSubject {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritMapAccessorSubject,
+        Self,
         crate::grit::any::map_accessor_subject::FormatAnyGritMapAccessorSubject,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4439,7 +4439,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapAccessorSubjec
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapAccessorSubject {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritMapAccessorSubject,
+        Self,
         crate::grit::any::map_accessor_subject::FormatAnyGritMapAccessorSubject,
     >;
     fn into_format(self) -> Self::Format {
@@ -4452,7 +4452,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapAccessorSubj
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritMapElement,
+        Self,
         crate::grit::any::map_element::FormatAnyGritMapElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4464,7 +4464,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapElement {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapElement {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritMapElement,
+        Self,
         crate::grit::any::map_element::FormatAnyGritMapElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -4477,7 +4477,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapElement {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapKey {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritMapKey,
+        Self,
         crate::grit::any::map_key::FormatAnyGritMapKey,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4489,7 +4489,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapKey {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapKey {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritMapKey,
+        Self,
         crate::grit::any::map_key::FormatAnyGritMapKey,
     >;
     fn into_format(self) -> Self::Format {
@@ -4502,7 +4502,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMapKey {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMaybeCurlyPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritMaybeCurlyPattern,
+        Self,
         crate::grit::any::maybe_curly_pattern::FormatAnyGritMaybeCurlyPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4514,7 +4514,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMaybeCurlyPattern
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMaybeCurlyPattern {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritMaybeCurlyPattern,
+        Self,
         crate::grit::any::maybe_curly_pattern::FormatAnyGritMaybeCurlyPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -4527,7 +4527,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMaybeCurlyPatte
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMaybeNamedArg {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritMaybeNamedArg,
+        Self,
         crate::grit::any::maybe_named_arg::FormatAnyGritMaybeNamedArg,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4539,7 +4539,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritMaybeNamedArg {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMaybeNamedArg {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritMaybeNamedArg,
+        Self,
         crate::grit::any::maybe_named_arg::FormatAnyGritMaybeNamedArg,
     >;
     fn into_format(self) -> Self::Format {
@@ -4552,7 +4552,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritMaybeNamedArg {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritPattern,
+        Self,
         crate::grit::any::pattern::FormatAnyGritPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4564,7 +4564,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritPattern {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritPattern {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritPattern,
+        Self,
         crate::grit::any::pattern::FormatAnyGritPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -4577,7 +4577,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritPattern {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritPredicate {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritPredicate,
+        Self,
         crate::grit::any::predicate::FormatAnyGritPredicate,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4589,7 +4589,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritPredicate {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritPredicate {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritPredicate,
+        Self,
         crate::grit::any::predicate::FormatAnyGritPredicate,
     >;
     fn into_format(self) -> Self::Format {
@@ -4602,7 +4602,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritPredicate {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritPredicateMatchSubject {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritPredicateMatchSubject,
+        Self,
         crate::grit::any::predicate_match_subject::FormatAnyGritPredicateMatchSubject,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4615,7 +4615,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritPredicateMatchSub
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritPredicateMatchSubject {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritPredicateMatchSubject,
+        Self,
         crate::grit::any::predicate_match_subject::FormatAnyGritPredicateMatchSubject,
     >;
     fn into_format(self) -> Self::Format {
@@ -4629,7 +4629,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritPredicateMatchS
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritRegex {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritRegex,
+        Self,
         crate::grit::any::regex::FormatAnyGritRegex,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4638,7 +4638,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritRegex {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritRegex {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritRegex,
+        Self,
         crate::grit::any::regex::FormatAnyGritRegex,
     >;
     fn into_format(self) -> Self::Format {
@@ -4648,7 +4648,7 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritRegex {
 impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritVersion {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_grit_syntax::AnyGritVersion,
+        Self,
         crate::grit::any::version::FormatAnyGritVersion,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4660,7 +4660,7 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritVersion {
 }
 impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritVersion {
     type Format = FormatOwnedWithRule<
-        biome_grit_syntax::AnyGritVersion,
+        Self,
         crate::grit::any::version::FormatAnyGritVersion,
     >;
     fn into_format(self) -> Self::Format {

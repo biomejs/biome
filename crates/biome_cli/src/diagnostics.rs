@@ -445,13 +445,13 @@ impl CliDiagnostic {
 
 impl From<WorkspaceError> for CliDiagnostic {
     fn from(error: WorkspaceError) -> Self {
-        CliDiagnostic::workspace_error(error)
+        Self::workspace_error(error)
     }
 }
 
 impl From<std::io::Error> for CliDiagnostic {
     fn from(error: std::io::Error) -> Self {
-        CliDiagnostic::io_error(error)
+        Self::io_error(error)
     }
 }
 

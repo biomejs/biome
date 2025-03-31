@@ -48,7 +48,7 @@ pub enum NoDangerState {
 impl NoDangerState {
     fn range(&self) -> TextRange {
         match self {
-            NoDangerState::Attribute(range) | NoDangerState::Property(range) => *range,
+            Self::Attribute(range) | Self::Property(range) => *range,
         }
     }
 }

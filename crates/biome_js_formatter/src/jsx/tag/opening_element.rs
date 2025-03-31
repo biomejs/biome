@@ -29,7 +29,7 @@ impl Format<JsFormatContext> for AnyJsxOpeningElement {
         let attributes = self.attributes();
 
         let format_close = format_with(|f| {
-            if let AnyJsxOpeningElement::JsxSelfClosingElement(element) = self {
+            if let Self::JsxSelfClosingElement(element) = self {
                 write!(f, [element.slash_token().format()])?;
             }
 
@@ -112,41 +112,41 @@ impl Format<JsFormatContext> for AnyJsxOpeningElement {
 impl AnyJsxOpeningElement {
     fn l_angle_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsxOpeningElement::JsxSelfClosingElement(element) => element.l_angle_token(),
-            AnyJsxOpeningElement::JsxOpeningElement(element) => element.l_angle_token(),
+            Self::JsxSelfClosingElement(element) => element.l_angle_token(),
+            Self::JsxOpeningElement(element) => element.l_angle_token(),
         }
     }
 
     fn name(&self) -> SyntaxResult<AnyJsxElementName> {
         match self {
-            AnyJsxOpeningElement::JsxSelfClosingElement(element) => element.name(),
-            AnyJsxOpeningElement::JsxOpeningElement(element) => element.name(),
+            Self::JsxSelfClosingElement(element) => element.name(),
+            Self::JsxOpeningElement(element) => element.name(),
         }
     }
 
     fn type_arguments(&self) -> Option<TsTypeArguments> {
         match self {
-            AnyJsxOpeningElement::JsxSelfClosingElement(element) => element.type_arguments(),
-            AnyJsxOpeningElement::JsxOpeningElement(element) => element.type_arguments(),
+            Self::JsxSelfClosingElement(element) => element.type_arguments(),
+            Self::JsxOpeningElement(element) => element.type_arguments(),
         }
     }
 
     fn attributes(&self) -> JsxAttributeList {
         match self {
-            AnyJsxOpeningElement::JsxSelfClosingElement(element) => element.attributes(),
-            AnyJsxOpeningElement::JsxOpeningElement(element) => element.attributes(),
+            Self::JsxSelfClosingElement(element) => element.attributes(),
+            Self::JsxOpeningElement(element) => element.attributes(),
         }
     }
 
     fn r_angle_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsxOpeningElement::JsxSelfClosingElement(element) => element.r_angle_token(),
-            AnyJsxOpeningElement::JsxOpeningElement(element) => element.r_angle_token(),
+            Self::JsxSelfClosingElement(element) => element.r_angle_token(),
+            Self::JsxOpeningElement(element) => element.r_angle_token(),
         }
     }
 
     fn is_self_closing(&self) -> bool {
-        matches!(self, AnyJsxOpeningElement::JsxSelfClosingElement(_))
+        matches!(self, Self::JsxSelfClosingElement(_))
     }
 
     fn compute_layout(&self, comments: &JsComments) -> SyntaxResult<OpeningElementLayout> {

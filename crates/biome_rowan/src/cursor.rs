@@ -124,17 +124,17 @@ impl WeakGreenElement {
 
     fn as_deref(&self) -> GreenElementRef {
         match self {
-            WeakGreenElement::Node { ptr } => GreenElementRef::Node(unsafe { ptr.as_ref() }),
-            WeakGreenElement::Token { ptr } => GreenElementRef::Token(unsafe { ptr.as_ref() }),
+            Self::Node { ptr } => GreenElementRef::Node(unsafe { ptr.as_ref() }),
+            Self::Token { ptr } => GreenElementRef::Token(unsafe { ptr.as_ref() }),
         }
     }
 
     fn to_owned(&self) -> GreenElement {
         match self {
-            WeakGreenElement::Node { ptr } => {
+            Self::Node { ptr } => {
                 GreenElement::Node(unsafe { ptr.as_ref().to_owned() })
             }
-            WeakGreenElement::Token { ptr } => {
+            Self::Token { ptr } => {
                 GreenElement::Token(unsafe { ptr.as_ref().to_owned() })
             }
         }
@@ -143,8 +143,8 @@ impl WeakGreenElement {
 
 impl NodeData {
     #[inline]
-    fn new(kind: NodeKind, slot: u32, offset: TextSize) -> Rc<NodeData> {
-        let res = NodeData {
+    fn new(kind: NodeKind, slot: u32, offset: TextSize) -> Rc<Self> {
+        let res = Self {
             _c: Count::new(),
             kind,
             slot,
@@ -182,7 +182,7 @@ impl NodeData {
     }
 
     #[inline]
-    fn parent(&self) -> Option<&NodeData> {
+    fn parent(&self) -> Option<&Self> {
         match &self.kind {
             NodeKind::Child { parent, .. } => Some(&**parent),
             NodeKind::Root { .. } => None,

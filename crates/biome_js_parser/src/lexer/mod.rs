@@ -78,7 +78,7 @@ pub enum JsLexContext {
 impl LexContext for JsLexContext {
     /// Returns true if this is [JsLexContext::Regular]
     fn is_regular(&self) -> bool {
-        matches!(self, JsLexContext::Regular)
+        matches!(self, Self::Regular)
     }
 }
 
@@ -1482,7 +1482,7 @@ impl<'src> JsLexer<'src> {
                 Self(BitFlags::EMPTY)
             }
 
-            pub fn contains(&self, other: impl Into<RegexFlags>) -> bool {
+            pub fn contains(&self, other: impl Into<Self>) -> bool {
                 self.0.contains(other.into().0)
             }
         }
@@ -1491,7 +1491,7 @@ impl<'src> JsLexer<'src> {
             type Output = Self;
 
             fn bitor(self, rhs: Self) -> Self::Output {
-                RegexFlags(self.0 | rhs.0)
+                Self(self.0 | rhs.0)
             }
         }
 

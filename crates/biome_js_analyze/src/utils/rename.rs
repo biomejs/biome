@@ -56,16 +56,16 @@ pub enum AnyJsRenamableDeclaration {
 impl RenamableNode for AnyJsRenamableDeclaration {
     fn binding(&self, model: &SemanticModel) -> Option<JsSyntaxNode> {
         match self {
-            AnyJsRenamableDeclaration::JsIdentifierBinding(node) => {
+            Self::JsIdentifierBinding(node) => {
                 RenamableNode::binding(node, model)
             }
-            AnyJsRenamableDeclaration::JsReferenceIdentifier(node) => {
+            Self::JsReferenceIdentifier(node) => {
                 RenamableNode::binding(node, model)
             }
-            AnyJsRenamableDeclaration::JsIdentifierAssignment(node) => {
+            Self::JsIdentifierAssignment(node) => {
                 RenamableNode::binding(node, model)
             }
-            AnyJsRenamableDeclaration::TsIdentifierBinding(node) => {
+            Self::TsIdentifierBinding(node) => {
                 RenamableNode::binding(node, model)
             }
         }
@@ -85,7 +85,7 @@ pub enum RenameError {
 impl std::fmt::Display for RenameError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            RenameError::CannotBeRenamed {
+            Self::CannotBeRenamed {
                 original_name,
                 new_name,
                 ..
@@ -95,7 +95,7 @@ impl std::fmt::Display for RenameError {
                     "encountered an error while renaming the symbol \"{original_name}\" to \"{new_name}\""
                 )
             }
-            RenameError::CannotFindDeclaration(_) => {
+            Self::CannotFindDeclaration(_) => {
                 write!(
                     f,
                     "encountered an error finding a declaration at the specified position"
@@ -112,12 +112,12 @@ impl Diagnostic for RenameError {
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         match self {
-            RenameError::CannotFindDeclaration(node) => {
+            Self::CannotFindDeclaration(node) => {
                 fmt.write_markup(
                     markup! { "Can't find the declaration. Found node "{{node}} }
                 )
             }
-            RenameError::CannotBeRenamed { original_name, new_name, .. } => {
+            Self::CannotBeRenamed { original_name, new_name, .. } => {
                 fmt.write_markup(
                     markup! { "Can't rename from "<Emphasis>{{original_name}}</Emphasis>" to "<Emphasis>{{new_name}}</Emphasis>"" }
                 )
@@ -127,7 +127,7 @@ impl Diagnostic for RenameError {
 
     fn location(&self) -> Location<'_> {
         let location = Location::builder();
-        if let RenameError::CannotBeRenamed { original_range, .. } = self {
+        if let Self::CannotBeRenamed { original_range, .. } = self {
             location.span(original_range).build()
         } else {
             location.build()

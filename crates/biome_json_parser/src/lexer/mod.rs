@@ -870,44 +870,44 @@ enum KeywordMatcher {
 }
 
 impl KeywordMatcher {
-    fn from_byte(c: u8) -> KeywordMatcher {
+    fn from_byte(c: u8) -> Self {
         if c.is_ascii() {
             match c {
-                b'n' => KeywordMatcher::MaybeNull(1),
-                b't' => KeywordMatcher::MaybeTrue(1),
-                b'f' => KeywordMatcher::MaybeFalse(1),
-                _ => KeywordMatcher::None,
+                b'n' => Self::MaybeNull(1),
+                b't' => Self::MaybeTrue(1),
+                b'f' => Self::MaybeFalse(1),
+                _ => Self::None,
             }
         } else {
-            KeywordMatcher::None
+            Self::None
         }
     }
 
-    fn next_character(self, next: u8) -> KeywordMatcher {
+    fn next_character(self, next: u8) -> Self {
         match self {
-            KeywordMatcher::MaybeNull(position) => match (next, position) {
-                (b'u', 1) => KeywordMatcher::MaybeNull(2),
-                (b'l', 2) => KeywordMatcher::MaybeNull(3),
-                (b'l', 3) => KeywordMatcher::Null,
-                _ => KeywordMatcher::None,
+            Self::MaybeNull(position) => match (next, position) {
+                (b'u', 1) => Self::MaybeNull(2),
+                (b'l', 2) => Self::MaybeNull(3),
+                (b'l', 3) => Self::Null,
+                _ => Self::None,
             },
-            KeywordMatcher::MaybeFalse(position) => match (next, position) {
-                (b'a', 1) => KeywordMatcher::MaybeFalse(2),
-                (b'l', 2) => KeywordMatcher::MaybeFalse(3),
-                (b's', 3) => KeywordMatcher::MaybeFalse(4),
-                (b'e', 4) => KeywordMatcher::False,
-                _ => KeywordMatcher::None,
+            Self::MaybeFalse(position) => match (next, position) {
+                (b'a', 1) => Self::MaybeFalse(2),
+                (b'l', 2) => Self::MaybeFalse(3),
+                (b's', 3) => Self::MaybeFalse(4),
+                (b'e', 4) => Self::False,
+                _ => Self::None,
             },
-            KeywordMatcher::MaybeTrue(position) => match (next, position) {
-                (b'r', 1) => KeywordMatcher::MaybeTrue(2),
-                (b'u', 2) => KeywordMatcher::MaybeTrue(3),
-                (b'e', 3) => KeywordMatcher::True,
-                _ => KeywordMatcher::None,
+            Self::MaybeTrue(position) => match (next, position) {
+                (b'r', 1) => Self::MaybeTrue(2),
+                (b'u', 2) => Self::MaybeTrue(3),
+                (b'e', 3) => Self::True,
+                _ => Self::None,
             },
-            KeywordMatcher::None
-            | KeywordMatcher::Null
-            | KeywordMatcher::False
-            | KeywordMatcher::True => KeywordMatcher::None,
+            Self::None
+            | Self::Null
+            | Self::False
+            | Self::True => Self::None,
         }
     }
 }

@@ -625,7 +625,7 @@ pub struct AstEnumSrc {
 impl Field {
     pub fn method_name(&self, language_kind: LanguageKind) -> proc_macro2::Ident {
         match self {
-            Field::Token { name, .. } => {
+            Self::Token { name, .. } => {
                 let name = match (name.as_str(), language_kind) {
                     (";", _) => "semicolon",
                     ("'{'", _) => "l_curly",
@@ -710,7 +710,7 @@ impl Field {
                     format_ident!("{}_token", name)
                 }
             }
-            Field::Node { name, .. } => {
+            Self::Node { name, .. } => {
                 let (prefix, tail) = name.split_once('_').unwrap_or(("", name));
                 let final_name = if LANGUAGE_PREFIXES.contains(&prefix) {
                     tail
@@ -731,22 +731,22 @@ impl Field {
 
     pub fn ty(&self) -> proc_macro2::Ident {
         match self {
-            Field::Token { .. } => format_ident!("SyntaxToken"),
-            Field::Node { ty, .. } => format_ident!("{}", ty),
+            Self::Token { .. } => format_ident!("SyntaxToken"),
+            Self::Node { ty, .. } => format_ident!("{}", ty),
         }
     }
 
     pub fn is_optional(&self) -> bool {
         match self {
-            Field::Node { optional, .. } => *optional,
-            Field::Token { optional, .. } => *optional,
+            Self::Node { optional, .. } => *optional,
+            Self::Token { optional, .. } => *optional,
         }
     }
 
     pub fn is_unordered(&self) -> bool {
         match self {
-            Field::Node { unordered, .. } => *unordered,
-            Field::Token { unordered, .. } => *unordered,
+            Self::Node { unordered, .. } => *unordered,
+            Self::Token { unordered, .. } => *unordered,
         }
     }
 }

@@ -109,11 +109,11 @@ impl IntoRawPointer for GreenToken {
     type Pointee = GreenTokenData;
 
     fn into_raw(self) -> *mut Self::Pointee {
-        GreenToken::into_raw(self).as_ptr()
+        Self::into_raw(self).as_ptr()
     }
 
     unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
-        unsafe { GreenToken::from_raw(NonNull::new(ptr).unwrap()) }
+        unsafe { Self::from_raw(NonNull::new(ptr).unwrap()) }
     }
 }
 
@@ -136,11 +136,11 @@ impl IntoRawPointer for GreenNode {
     type Pointee = GreenNodeData;
 
     fn into_raw(self) -> *mut Self::Pointee {
-        GreenNode::into_raw(self).as_ptr()
+        Self::into_raw(self).as_ptr()
     }
 
     unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
-        unsafe { GreenNode::from_raw(NonNull::new(ptr).unwrap()) }
+        unsafe { Self::from_raw(NonNull::new(ptr).unwrap()) }
     }
 }
 
@@ -187,8 +187,8 @@ impl Not for Generation {
 
     fn not(self) -> Self::Output {
         match self {
-            Generation::A => Generation::B,
-            Generation::B => Generation::A,
+            Self::A => Self::B,
+            Self::B => Self::A,
         }
     }
 }
@@ -430,11 +430,11 @@ impl IntoRawPointer for GreenTrivia {
     type Pointee = GreenTriviaData;
 
     fn into_raw(self) -> *mut Self::Pointee {
-        GreenTrivia::into_raw(self)
+        Self::into_raw(self)
     }
 
     unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
-        unsafe { GreenTrivia::from_raw(ptr) }
+        unsafe { Self::from_raw(ptr) }
     }
 }
 

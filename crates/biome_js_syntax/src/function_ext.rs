@@ -11,11 +11,11 @@ declare_node_union! {
 impl AnyFunctionLike {
     pub fn body(&self) -> SyntaxResult<AnyJsFunctionBody> {
         match self {
-            AnyFunctionLike::AnyJsFunction(js_function) => js_function.body(),
-            AnyFunctionLike::JsMethodObjectMember(js_object_method) => js_object_method
+            Self::AnyJsFunction(js_function) => js_function.body(),
+            Self::JsMethodObjectMember(js_object_method) => js_object_method
                 .body()
                 .map(AnyJsFunctionBody::JsFunctionBody),
-            AnyFunctionLike::JsMethodClassMember(js_class_method) => js_class_method
+            Self::JsMethodClassMember(js_class_method) => js_class_method
                 .body()
                 .map(AnyJsFunctionBody::JsFunctionBody),
         }
@@ -23,14 +23,14 @@ impl AnyFunctionLike {
 
     pub fn fat_arrow_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyFunctionLike::AnyJsFunction(any_js_function) => {
+            Self::AnyJsFunction(any_js_function) => {
                 if let Some(arrow_expression) = any_js_function.as_js_arrow_function_expression() {
                     arrow_expression.fat_arrow_token().ok()
                 } else {
                     None
                 }
             }
-            AnyFunctionLike::JsMethodClassMember(_) | AnyFunctionLike::JsMethodObjectMember(_) => {
+            Self::JsMethodClassMember(_) | Self::JsMethodObjectMember(_) => {
                 None
             }
         }
@@ -38,10 +38,10 @@ impl AnyFunctionLike {
 
     pub fn function_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyFunctionLike::AnyJsFunction(any_js_function) => {
+            Self::AnyJsFunction(any_js_function) => {
                 any_js_function.function_token().ok().flatten()
             }
-            AnyFunctionLike::JsMethodClassMember(_) | AnyFunctionLike::JsMethodObjectMember(_) => {
+            Self::JsMethodClassMember(_) | Self::JsMethodObjectMember(_) => {
                 None
             }
         }
@@ -49,11 +49,11 @@ impl AnyFunctionLike {
 
     pub fn is_generator(&self) -> bool {
         match self {
-            AnyFunctionLike::AnyJsFunction(any_js_function) => any_js_function.is_generator(),
-            AnyFunctionLike::JsMethodClassMember(method_class_member) => {
+            Self::AnyJsFunction(any_js_function) => any_js_function.is_generator(),
+            Self::JsMethodClassMember(method_class_member) => {
                 method_class_member.star_token().is_some()
             }
-            AnyFunctionLike::JsMethodObjectMember(method_obj_member) => {
+            Self::JsMethodObjectMember(method_obj_member) => {
                 method_obj_member.star_token().is_some()
             }
         }
@@ -61,11 +61,11 @@ impl AnyFunctionLike {
 
     pub fn is_async(&self) -> bool {
         match self {
-            AnyFunctionLike::AnyJsFunction(any_js_function) => any_js_function.is_async(),
-            AnyFunctionLike::JsMethodClassMember(method_class_member) => {
+            Self::AnyJsFunction(any_js_function) => any_js_function.is_async(),
+            Self::JsMethodClassMember(method_class_member) => {
                 method_class_member.async_token().is_some()
             }
-            AnyFunctionLike::JsMethodObjectMember(method_obj_member) => {
+            Self::JsMethodObjectMember(method_obj_member) => {
                 method_obj_member.async_token().is_some()
             }
         }
@@ -73,13 +73,13 @@ impl AnyFunctionLike {
 
     pub fn name_range(&self) -> Option<TextRange> {
         match self {
-            AnyFunctionLike::AnyJsFunction(js_function) => {
+            Self::AnyJsFunction(js_function) => {
                 js_function.id().ok().flatten().map(|id| id.range())
             }
-            AnyFunctionLike::JsMethodObjectMember(js_object_method) => {
+            Self::JsMethodObjectMember(js_object_method) => {
                 js_object_method.name().ok().map(|name| name.range())
             }
-            AnyFunctionLike::JsMethodClassMember(js_class_method) => {
+            Self::JsMethodClassMember(js_class_method) => {
                 js_class_method.name().ok().map(|name| name.range())
             }
         }
@@ -87,15 +87,15 @@ impl AnyFunctionLike {
 
     pub fn statements(&self) -> Option<JsStatementList> {
         Some(match self {
-            AnyFunctionLike::AnyJsFunction(any_js_function) => any_js_function
+            Self::AnyJsFunction(any_js_function) => any_js_function
                 .body()
                 .ok()?
                 .as_js_function_body()?
                 .statements(),
-            AnyFunctionLike::JsMethodClassMember(method_class_member) => {
+            Self::JsMethodClassMember(method_class_member) => {
                 method_class_member.body().ok()?.statements()
             }
-            AnyFunctionLike::JsMethodObjectMember(method_obj_member) => {
+            Self::JsMethodObjectMember(method_obj_member) => {
                 method_obj_member.body().ok()?.statements()
             }
         })

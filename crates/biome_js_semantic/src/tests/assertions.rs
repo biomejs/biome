@@ -279,7 +279,7 @@ impl SemanticAssertion {
                 .trim()
                 .to_string();
 
-            Some(SemanticAssertion::Declaration(DeclarationAssertion {
+            Some(Self::Declaration(DeclarationAssertion {
                 range: token.parent().unwrap().text_trimmed_range(),
                 declaration_name: name,
             }))
@@ -291,7 +291,7 @@ impl SemanticAssertion {
                 .trim()
                 .to_string();
 
-            Some(SemanticAssertion::Read(ReadAssertion {
+            Some(Self::Read(ReadAssertion {
                 range: token.parent().unwrap().text_trimmed_range(),
                 declaration_assertion_name: symbol_name,
             }))
@@ -303,7 +303,7 @@ impl SemanticAssertion {
                 .trim()
                 .to_string();
 
-            Some(SemanticAssertion::Write(WriteAssertion {
+            Some(Self::Write(WriteAssertion {
                 range: token.parent().unwrap().text_trimmed_range(),
                 declaration_assertion_name: symbol_name,
             }))
@@ -314,7 +314,7 @@ impl SemanticAssertion {
                 .trim_end_matches("*/")
                 .trim()
                 .to_string();
-            Some(SemanticAssertion::ScopeStart(ScopeStartAssertion {
+            Some(Self::ScopeStart(ScopeStartAssertion {
                 range: token.parent().unwrap().text_trimmed_range(),
                 scope_name,
             }))
@@ -325,7 +325,7 @@ impl SemanticAssertion {
                 .trim_end_matches("*/")
                 .trim()
                 .to_string();
-            Some(SemanticAssertion::ScopeEnd(ScopeEndAssertion {
+            Some(Self::ScopeEnd(ScopeEndAssertion {
                 range: token.parent().unwrap().text_trimmed_range(),
                 scope_name,
             }))
@@ -336,20 +336,20 @@ impl SemanticAssertion {
                 .trim_end_matches("*/")
                 .trim()
                 .to_string();
-            Some(SemanticAssertion::AtScope(AtScopeAssertion {
+            Some(Self::AtScope(AtScopeAssertion {
                 range: token.parent().unwrap().text_trimmed_range(),
                 scope_name,
             }))
         } else if assertion_text.contains("/*NOEVENT") {
-            Some(SemanticAssertion::NoEvent(NoEventAssertion {
+            Some(Self::NoEvent(NoEventAssertion {
                 range: token.parent().unwrap().text_trimmed_range(),
             }))
         } else if assertion_text.contains("/*UNIQUE") {
-            Some(SemanticAssertion::Unique(UniqueAssertion {
+            Some(Self::Unique(UniqueAssertion {
                 range: token.parent().unwrap().text_trimmed_range(),
             }))
         } else if assertion_text.contains("/*?") {
-            Some(SemanticAssertion::UnresolvedReference(
+            Some(Self::UnresolvedReference(
                 UnresolvedReferenceAssertion {
                     range: token.parent().unwrap().text_trimmed_range(),
                 },

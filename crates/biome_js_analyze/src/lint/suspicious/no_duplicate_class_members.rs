@@ -129,25 +129,25 @@ enum MemberType {
 impl AnyClassMemberDefinition {
     fn name(&self) -> Option<AnyJsClassMemberName> {
         match self {
-            AnyClassMemberDefinition::JsGetterClassMember(node) => node.name().ok(),
-            AnyClassMemberDefinition::JsMethodClassMember(node) => node.name().ok(),
-            AnyClassMemberDefinition::JsPropertyClassMember(node) => node.name().ok(),
-            AnyClassMemberDefinition::JsSetterClassMember(node) => node.name().ok(),
+            Self::JsGetterClassMember(node) => node.name().ok(),
+            Self::JsMethodClassMember(node) => node.name().ok(),
+            Self::JsPropertyClassMember(node) => node.name().ok(),
+            Self::JsSetterClassMember(node) => node.name().ok(),
         }
     }
 
     fn modifiers_list(&self) -> JsSyntaxList {
         match self {
-            AnyClassMemberDefinition::JsGetterClassMember(node) => {
+            Self::JsGetterClassMember(node) => {
                 node.modifiers().into_syntax_list()
             }
-            AnyClassMemberDefinition::JsMethodClassMember(node) => {
+            Self::JsMethodClassMember(node) => {
                 node.modifiers().into_syntax_list()
             }
-            AnyClassMemberDefinition::JsPropertyClassMember(node) => {
+            Self::JsPropertyClassMember(node) => {
                 node.modifiers().into_syntax_list()
             }
-            AnyClassMemberDefinition::JsSetterClassMember(node) => {
+            Self::JsSetterClassMember(node) => {
                 node.modifiers().into_syntax_list()
             }
         }
@@ -155,19 +155,19 @@ impl AnyClassMemberDefinition {
 
     fn range(&self) -> TextRange {
         match self {
-            AnyClassMemberDefinition::JsGetterClassMember(node) => node.range(),
-            AnyClassMemberDefinition::JsMethodClassMember(node) => node.range(),
-            AnyClassMemberDefinition::JsPropertyClassMember(node) => node.range(),
-            AnyClassMemberDefinition::JsSetterClassMember(node) => node.range(),
+            Self::JsGetterClassMember(node) => node.range(),
+            Self::JsMethodClassMember(node) => node.range(),
+            Self::JsPropertyClassMember(node) => node.range(),
+            Self::JsSetterClassMember(node) => node.range(),
         }
     }
 
     fn member_type(&self) -> MemberType {
         match self {
-            AnyClassMemberDefinition::JsGetterClassMember(_) => MemberType::Getter,
-            AnyClassMemberDefinition::JsMethodClassMember(_) => MemberType::Normal,
-            AnyClassMemberDefinition::JsPropertyClassMember(_) => MemberType::Normal,
-            AnyClassMemberDefinition::JsSetterClassMember(_) => MemberType::Setter,
+            Self::JsGetterClassMember(_) => MemberType::Getter,
+            Self::JsMethodClassMember(_) => MemberType::Normal,
+            Self::JsPropertyClassMember(_) => MemberType::Normal,
+            Self::JsSetterClassMember(_) => MemberType::Setter,
         }
     }
 }

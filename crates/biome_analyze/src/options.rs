@@ -17,7 +17,7 @@ impl RuleOptions {
 
     /// It returns the deserialized rule option
     pub fn value<O: 'static>(&self) -> &O {
-        let RuleOptions(type_id, value, _) = &self;
+        let Self(type_id, value, _) = &self;
         let current_id = TypeId::of::<O>();
         debug_assert_eq!(type_id, &current_id);
         // SAFETY: the code should fail when asserting the types.

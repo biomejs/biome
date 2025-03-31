@@ -100,7 +100,7 @@ impl AnyJsBinaryLikeExpression {
     pub fn can_flatten(&self) -> SyntaxResult<bool> {
         let left = self.left()?.into_expression();
         let left_expression = left.map(|expression| expression.into_syntax());
-        if let Some(left_binary_like) = left_expression.and_then(AnyJsBinaryLikeExpression::cast) {
+        if let Some(left_binary_like) = left_expression.and_then(Self::cast) {
             Ok(should_flatten(
                 self.operator()?,
                 left_binary_like.operator()?,
@@ -112,7 +112,7 @@ impl AnyJsBinaryLikeExpression {
 
     pub fn should_inline_logical_expression(&self) -> bool {
         match self {
-            AnyJsBinaryLikeExpression::JsLogicalExpression(logical) => {
+            Self::JsLogicalExpression(logical) => {
                 logical.right().is_ok_and(|right| match right {
                     AnyJsExpression::JsObjectExpression(object) => !object.members().is_empty(),
                     AnyJsExpression::JsArrayExpression(array) => !array.elements().is_empty(),
@@ -130,7 +130,7 @@ impl AnyJsBinaryLikeExpression {
     /// the indentation, then there's no need to do a second indentation.
     /// [Prettier applies]: <https://github.com/prettier/prettier/blob/b0201e01ef99db799eb3716f15b7dfedb0a2e62b/src/language-js/print/binaryish.js#L122-L125>
     pub fn should_not_indent_if_parent_indents(
-        self: &AnyJsBinaryLikeExpression,
+        &self,
         parent: Option<JsSyntaxNode>,
     ) -> bool {
         parent.is_some_and(|parent| match parent.kind() {

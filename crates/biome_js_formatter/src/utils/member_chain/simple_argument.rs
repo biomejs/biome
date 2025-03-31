@@ -85,19 +85,19 @@ impl SimpleArgument {
     }
 
     fn is_simple_call_like_expression(&self, depth: u8) -> SyntaxResult<bool> {
-        let result = if let SimpleArgument::Expression(any_expression) = self {
+        let result = if let Self::Expression(any_expression) = self {
             if is_call_like_expression(any_expression) {
                 let mut is_import_call_expression = false;
                 let mut is_simple_callee = false;
                 let arguments = match any_expression {
                     AnyJsExpression::JsNewExpression(expr) => {
                         let callee = expr.callee()?;
-                        is_simple_callee = SimpleArgument::from(callee).is_simple_impl(depth);
+                        is_simple_callee = Self::from(callee).is_simple_impl(depth);
                         expr.arguments()
                     }
                     AnyJsExpression::JsCallExpression(expr) => {
                         let callee = expr.callee()?;
-                        is_simple_callee = SimpleArgument::from(callee).is_simple_impl(depth);
+                        is_simple_callee = Self::from(callee).is_simple_impl(depth);
                         expr.arguments().ok()
                     }
                     AnyJsExpression::JsImportCallExpression(expr) => {
@@ -118,7 +118,7 @@ impl SimpleArgument {
                     arguments.args().len() + usize::from(depth) <= 2
                         && arguments.args().iter().all(|argument| {
                             argument.map_or(true, |argument| {
-                                SimpleArgument::from(argument).is_simple_impl(depth + 1)
+                                Self::from(argument).is_simple_impl(depth + 1)
                             })
                         })
                 } else {
@@ -135,20 +135,20 @@ impl SimpleArgument {
     }
 
     fn is_simple_member_expression(&self, depth: u8) -> SyntaxResult<bool> {
-        if let SimpleArgument::Expression(expression) = self {
+        if let Self::Expression(expression) = self {
             match expression {
                 AnyJsExpression::JsStaticMemberExpression(static_expression) => {
                     let JsStaticMemberExpressionFields { member, object, .. } =
                         static_expression.as_fields();
 
-                    Ok(member.is_ok() && SimpleArgument::from(object?).is_simple_impl(depth))
+                    Ok(member.is_ok() && Self::from(object?).is_simple_impl(depth))
                 }
                 AnyJsExpression::JsComputedMemberExpression(computed_expression) => {
                     let JsComputedMemberExpressionFields { member, object, .. } =
                         computed_expression.as_fields();
 
-                    Ok(SimpleArgument::from(member?).is_simple_impl(depth)
-                        && SimpleArgument::from(object?).is_simple_impl(depth))
+                    Ok(Self::from(member?).is_simple_impl(depth)
+                        && Self::from(object?).is_simple_impl(depth))
                 }
                 _ => Ok(false),
             }
@@ -158,18 +158,18 @@ impl SimpleArgument {
     }
 
     fn is_simple_non_null_assertion_expression(&self, depth: u8) -> SyntaxResult<bool> {
-        if let SimpleArgument::Expression(AnyJsExpression::TsNonNullAssertionExpression(
+        if let Self::Expression(AnyJsExpression::TsNonNullAssertionExpression(
             assertion,
         )) = self
         {
-            Ok(SimpleArgument::from(assertion.expression()?).is_simple_impl(depth))
+            Ok(Self::from(assertion.expression()?).is_simple_impl(depth))
         } else {
             Ok(false)
         }
     }
 
     fn is_simple_unary_expression(&self, depth: u8) -> SyntaxResult<bool> {
-        if let SimpleArgument::Expression(AnyJsExpression::JsUnaryExpression(unary_expression)) =
+        if let Self::Expression(AnyJsExpression::JsUnaryExpression(unary_expression)) =
             self
         {
             if matches!(
@@ -179,7 +179,7 @@ impl SimpleArgument {
                     | JsUnaryOperator::Plus
                     | JsUnaryOperator::BitwiseNot
             ) {
-                Ok(SimpleArgument::from(unary_expression.argument()?).is_simple_impl(depth))
+                Ok(Self::from(unary_expression.argument()?).is_simple_impl(depth))
             } else {
                 Ok(false)
             }
@@ -193,26 +193,26 @@ impl SimpleArgument {
         // operators, but they are typed separately, so must be handled that way.
         // These arms should be equivalent.
         match self {
-            SimpleArgument::Expression(AnyJsExpression::JsPreUpdateExpression(
+            Self::Expression(AnyJsExpression::JsPreUpdateExpression(
                 update_expression,
             )) => {
                 if matches!(
                     update_expression.operator()?,
                     JsPreUpdateOperator::Decrement | JsPreUpdateOperator::Increment
                 ) {
-                    Ok(SimpleArgument::from(update_expression.operand()?).is_simple_impl(depth))
+                    Ok(Self::from(update_expression.operand()?).is_simple_impl(depth))
                 } else {
                     Ok(false)
                 }
             }
-            SimpleArgument::Expression(AnyJsExpression::JsPostUpdateExpression(
+            Self::Expression(AnyJsExpression::JsPostUpdateExpression(
                 update_expression,
             )) => {
                 if matches!(
                     update_expression.operator()?,
                     JsPostUpdateOperator::Decrement | JsPostUpdateOperator::Increment
                 ) {
-                    Ok(SimpleArgument::from(update_expression.operand()?).is_simple_impl(depth))
+                    Ok(Self::from(update_expression.operand()?).is_simple_impl(depth))
                 } else {
                     Ok(false)
                 }
@@ -222,7 +222,7 @@ impl SimpleArgument {
     }
 
     fn is_simple_regex_expression(&self) -> bool {
-        if let SimpleArgument::Expression(AnyJsExpression::AnyJsLiteralExpression(
+        if let Self::Expression(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsRegexLiteralExpression(regex),
         )) = self
         {
@@ -235,7 +235,7 @@ impl SimpleArgument {
     }
 
     fn is_simple_array_expression(&self, depth: u8) -> bool {
-        if let SimpleArgument::Expression(AnyJsExpression::JsArrayExpression(array_expression)) =
+        if let Self::Expression(AnyJsExpression::JsArrayExpression(array_expression)) =
             self
         {
             array_expression
@@ -244,7 +244,7 @@ impl SimpleArgument {
                 .filter_map(|element| element.ok())
                 .all(|element| match element {
                     AnyJsArrayElement::AnyJsExpression(expression) => {
-                        SimpleArgument::from(expression).is_simple_impl(depth + 1)
+                        Self::from(expression).is_simple_impl(depth + 1)
                     }
                     AnyJsArrayElement::JsArrayHole(_) => true,
                     _ => false,
@@ -255,7 +255,7 @@ impl SimpleArgument {
     }
 
     fn is_simple_template(&self, depth: u8) -> bool {
-        if let SimpleArgument::Expression(AnyJsExpression::JsTemplateExpression(template)) = self {
+        if let Self::Expression(AnyJsExpression::JsTemplateExpression(template)) = self {
             is_simple_template_literal(template, depth + 1).unwrap_or(false)
         } else {
             false
@@ -263,11 +263,11 @@ impl SimpleArgument {
     }
 
     const fn is_simple_literal(&self) -> bool {
-        if let SimpleArgument::Name(AnyJsName::JsPrivateName(_)) = self {
+        if let Self::Name(AnyJsName::JsPrivateName(_)) = self {
             return true;
         }
 
-        if let SimpleArgument::Expression(AnyJsExpression::AnyJsLiteralExpression(
+        if let Self::Expression(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsRegexLiteralExpression(_),
         )) = self
         {
@@ -276,17 +276,17 @@ impl SimpleArgument {
 
         matches!(
             self,
-            SimpleArgument::Expression(
+            Self::Expression(
                 AnyJsExpression::AnyJsLiteralExpression(_)
                     | AnyJsExpression::JsThisExpression(_)
                     | AnyJsExpression::JsIdentifierExpression(_)
                     | AnyJsExpression::JsSuperExpression(_)
-            ) | SimpleArgument::Assignment(AnyJsAssignment::JsIdentifierAssignment(_))
+            ) | Self::Assignment(AnyJsAssignment::JsIdentifierAssignment(_))
         )
     }
 
     fn is_simple_object_expression(&self, depth: u8) -> bool {
-        if let SimpleArgument::Expression(AnyJsExpression::JsObjectExpression(object_expression)) =
+        if let Self::Expression(AnyJsExpression::JsObjectExpression(object_expression)) =
             self
         {
             object_expression
@@ -305,7 +305,7 @@ impl SimpleArgument {
                             );
 
                             let is_simple = property.value().is_ok_and(|value| {
-                                SimpleArgument::from(value).is_simple_impl(depth + 1)
+                                Self::from(value).is_simple_impl(depth + 1)
                             });
 
                             !is_computed && is_simple
@@ -346,8 +346,8 @@ impl From<JsSpread> for SimpleArgument {
 impl From<AnyJsCallArgument> for SimpleArgument {
     fn from(call_argument: AnyJsCallArgument) -> Self {
         match call_argument {
-            AnyJsCallArgument::AnyJsExpression(expr) => SimpleArgument::from(expr),
-            AnyJsCallArgument::JsSpread(spread) => SimpleArgument::from(spread),
+            AnyJsCallArgument::AnyJsExpression(expr) => Self::from(expr),
+            AnyJsCallArgument::JsSpread(spread) => Self::from(spread),
         }
     }
 }

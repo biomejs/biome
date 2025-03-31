@@ -48,15 +48,15 @@ use crate::JsSyntaxKind::*;
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, SyntaxResult};
 
 impl From<u16> for JsSyntaxKind {
-    fn from(d: u16) -> JsSyntaxKind {
-        assert!(d <= (JsSyntaxKind::__LAST as u16));
-        unsafe { std::mem::transmute::<u16, JsSyntaxKind>(d) }
+    fn from(d: u16) -> Self {
+        assert!(d <= (Self::__LAST as u16));
+        unsafe { std::mem::transmute::<u16, Self>(d) }
     }
 }
 
 impl From<JsSyntaxKind> for u16 {
-    fn from(k: JsSyntaxKind) -> u16 {
-        k as u16
+    fn from(k: JsSyntaxKind) -> Self {
+        k as Self
     }
 }
 
@@ -64,8 +64,8 @@ impl JsSyntaxKind {
     /// Returns `true` for any contextual (await) or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
-        (self as u16) <= (JsSyntaxKind::USING_KW as u16)
-            && (self as u16) >= (JsSyntaxKind::BREAK_KW as u16)
+        (self as u16) <= (Self::USING_KW as u16)
+            && (self as u16) >= (Self::BREAK_KW as u16)
     }
 
     /// Returns `true` for any kind representing a Grit metavariable.
@@ -73,15 +73,15 @@ impl JsSyntaxKind {
     pub fn is_metavariable(&self) -> bool {
         matches!(
             self,
-            JsSyntaxKind::GRIT_METAVARIABLE | JsSyntaxKind::JS_METAVARIABLE
+            Self::GRIT_METAVARIABLE | Self::JS_METAVARIABLE
         )
     }
 
     /// Returns `true` for contextual keywords (excluding strict mode contextual keywords)
     #[inline]
     pub const fn is_contextual_keyword(self) -> bool {
-        (self as u16) >= (JsSyntaxKind::ABSTRACT_KW as u16)
-            && (self as u16) <= (JsSyntaxKind::USING_KW as u16)
+        (self as u16) >= (Self::ABSTRACT_KW as u16)
+            && (self as u16) <= (Self::USING_KW as u16)
     }
 
     /// Returns true for all non-contextual keywords (includes future reserved keywords)
@@ -92,8 +92,8 @@ impl JsSyntaxKind {
 
     #[inline]
     pub const fn is_future_reserved_keyword(self) -> bool {
-        (self as u16) >= (JsSyntaxKind::IMPLEMENTS_KW as u16)
-            && (self as u16) <= (JsSyntaxKind::YIELD_KW as u16)
+        (self as u16) >= (Self::IMPLEMENTS_KW as u16)
+            && (self as u16) <= (Self::YIELD_KW as u16)
     }
 }
 
@@ -117,7 +117,7 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
         )
     }
 
-    fn to_bogus(&self) -> JsSyntaxKind {
+    fn to_bogus(&self) -> Self {
         match self {
             kind if AnyJsModuleItem::can_cast(*kind) => JS_BOGUS_STATEMENT,
             kind if AnyJsExpression::can_cast(*kind) => JS_BOGUS_EXPRESSION,
@@ -150,21 +150,21 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
     }
 
     fn is_list(&self) -> bool {
-        JsSyntaxKind::is_list(*self)
+        Self::is_list(*self)
     }
 
     fn is_trivia(self) -> bool {
         matches!(
             self,
-            JsSyntaxKind::NEWLINE
-                | JsSyntaxKind::WHITESPACE
-                | JsSyntaxKind::COMMENT
-                | JsSyntaxKind::MULTILINE_COMMENT
+            Self::NEWLINE
+                | Self::WHITESPACE
+                | Self::COMMENT
+                | Self::MULTILINE_COMMENT
         )
     }
 
     fn to_string(&self) -> Option<&'static str> {
-        JsSyntaxKind::to_string(self)
+        Self::to_string(self)
     }
 }
 
@@ -174,10 +174,10 @@ impl TryFrom<JsSyntaxKind> for TriviaPieceKind {
     fn try_from(value: JsSyntaxKind) -> Result<Self, Self::Error> {
         if value.is_trivia() {
             match value {
-                JsSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
-                JsSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
-                JsSyntaxKind::COMMENT => Ok(TriviaPieceKind::SingleLineComment),
-                JsSyntaxKind::MULTILINE_COMMENT => Ok(TriviaPieceKind::MultiLineComment),
+                JsSyntaxKind::NEWLINE => Ok(Self::Newline),
+                JsSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
+                JsSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
+                JsSyntaxKind::MULTILINE_COMMENT => Ok(Self::MultiLineComment),
                 _ => unreachable!("Not Trivia"),
             }
         } else {
@@ -218,43 +218,43 @@ pub enum OperatorPrecedence {
 impl OperatorPrecedence {
     /// Returns the operator with the lowest precedence
     pub fn lowest() -> Self {
-        OperatorPrecedence::Comma
+        Self::Comma
     }
 
     /// Returns the operator with the highest precedence
     pub fn highest() -> Self {
-        OperatorPrecedence::Primary
+        Self::Primary
     }
 
     /// Returns `true` if this operator has right to left associativity
     pub fn is_right_to_left(&self) -> bool {
         matches!(
             self,
-            OperatorPrecedence::Yield
-                | OperatorPrecedence::Assignment
-                | OperatorPrecedence::Conditional
-                | OperatorPrecedence::Exponential
-                | OperatorPrecedence::Update
+            Self::Yield
+                | Self::Assignment
+                | Self::Conditional
+                | Self::Exponential
+                | Self::Update
         )
     }
 
     /// Returns the precedence for a binary operator token or [None] if the token isn't a binary operator
-    pub fn try_from_binary_operator(kind: JsSyntaxKind) -> Option<OperatorPrecedence> {
+    pub fn try_from_binary_operator(kind: JsSyntaxKind) -> Option<Self> {
         Some(match kind {
-            T![??] => OperatorPrecedence::Coalesce,
-            T![||] => OperatorPrecedence::LogicalOr,
-            T![&&] => OperatorPrecedence::LogicalAnd,
-            T![|] => OperatorPrecedence::BitwiseOr,
-            T![^] => OperatorPrecedence::BitwiseXor,
-            T![&] => OperatorPrecedence::BitwiseAnd,
-            T![==] | T![!=] | T![===] | T![!==] => OperatorPrecedence::Equality,
+            T![??] => Self::Coalesce,
+            T![||] => Self::LogicalOr,
+            T![&&] => Self::LogicalAnd,
+            T![|] => Self::BitwiseOr,
+            T![^] => Self::BitwiseXor,
+            T![&] => Self::BitwiseAnd,
+            T![==] | T![!=] | T![===] | T![!==] => Self::Equality,
             T![<] | T![>] | T![<=] | T![>=] | T![instanceof] | T![in] | T![as] | T![satisfies] => {
-                OperatorPrecedence::Relational
+                Self::Relational
             }
-            T![<<] | T![>>] | T![>>>] => OperatorPrecedence::Shift,
-            T![+] | T![-] => OperatorPrecedence::Additive,
-            T![*] | T![/] | T![%] => OperatorPrecedence::Multiplicative,
-            T![**] => OperatorPrecedence::Exponential,
+            T![<<] | T![>>] | T![>>>] => Self::Shift,
+            T![+] | T![-] => Self::Additive,
+            T![*] | T![/] | T![%] => Self::Multiplicative,
+            T![**] => Self::Exponential,
             _ => return None,
         })
     }
@@ -262,30 +262,30 @@ impl OperatorPrecedence {
     pub const fn is_bitwise(&self) -> bool {
         matches!(
             self,
-            OperatorPrecedence::BitwiseAnd
-                | OperatorPrecedence::BitwiseOr
-                | OperatorPrecedence::BitwiseXor
+            Self::BitwiseAnd
+                | Self::BitwiseOr
+                | Self::BitwiseXor
         )
     }
 
     pub const fn is_shift(&self) -> bool {
-        matches!(self, OperatorPrecedence::Shift)
+        matches!(self, Self::Shift)
     }
 
     pub const fn is_additive(&self) -> bool {
-        matches!(self, OperatorPrecedence::Additive)
+        matches!(self, Self::Additive)
     }
 
     pub const fn is_equality(&self) -> bool {
-        matches!(self, OperatorPrecedence::Equality)
+        matches!(self, Self::Equality)
     }
 
     pub const fn is_multiplicative(&self) -> bool {
-        matches!(self, OperatorPrecedence::Multiplicative)
+        matches!(self, Self::Multiplicative)
     }
 
     pub const fn is_exponential(&self) -> bool {
-        matches!(self, OperatorPrecedence::Exponential)
+        matches!(self, Self::Exponential)
     }
 }
 

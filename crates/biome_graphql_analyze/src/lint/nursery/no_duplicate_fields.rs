@@ -102,9 +102,9 @@ pub enum DuplicatedFieldType {
 impl DuplicatedFieldType {
     fn as_str(&self) -> &str {
         match self {
-            DuplicatedFieldType::SelectionField => "Field",
-            DuplicatedFieldType::Argument => "Argument",
-            DuplicatedFieldType::Variable => "Variable",
+            Self::SelectionField => "Field",
+            Self::Argument => "Argument",
+            Self::Variable => "Variable",
         }
     }
 }

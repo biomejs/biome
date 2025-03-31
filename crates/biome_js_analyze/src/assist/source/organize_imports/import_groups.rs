@@ -55,9 +55,9 @@ pub enum ImportGroup {
 impl ImportGroup {
     pub fn contains(&self, candidate: &ImportSourceCandidate) -> bool {
         match self {
-            ImportGroup::BlankLine => false,
-            ImportGroup::Matcher(glob) => glob.is_match(candidate),
-            ImportGroup::MatcherList(matchers) => {
+            Self::BlankLine => false,
+            Self::Matcher(glob) => glob.is_match(candidate),
+            Self::MatcherList(matchers) => {
                 candidate.matches_with_exceptions(matchers.iter())
             }
         }
@@ -72,7 +72,7 @@ impl Deserializable for ImportGroup {
         if value.visitable_type() == Some(biome_deserialize::DeserializableType::Str) {
             let value_text = Text::deserialize(ctx, value, name)?;
             if value_text.text() == ":BLANK_LINE:" {
-                Some(ImportGroup::BlankLine)
+                Some(Self::BlankLine)
             } else {
                 Deserializable::deserialize(ctx, value, name).map(ImportGroup::Matcher)
             }
@@ -241,13 +241,13 @@ impl std::fmt::Display for PredefinedGroupMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
             // Don't forget to update `impl std::str::FromStr for PredefinedImportGroup`
-            PredefinedGroupMatcher::Alias => "ALIAS",
-            PredefinedGroupMatcher::Bun => "BUN",
-            PredefinedGroupMatcher::Node => "NODE",
-            PredefinedGroupMatcher::Package => "PACKAGE",
-            PredefinedGroupMatcher::ProtocolPackage => "PACKAGE_WITH_PROTOCOL",
-            PredefinedGroupMatcher::Path => "PATH",
-            PredefinedGroupMatcher::Url => "URL",
+            Self::Alias => "ALIAS",
+            Self::Bun => "BUN",
+            Self::Node => "NODE",
+            Self::Package => "PACKAGE",
+            Self::ProtocolPackage => "PACKAGE_WITH_PROTOCOL",
+            Self::Path => "PATH",
+            Self::Url => "URL",
         };
         f.write_str(repr)
     }

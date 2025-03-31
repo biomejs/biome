@@ -255,7 +255,7 @@ impl AnyMember {
 
     fn is_private(&self) -> Option<bool> {
         match self {
-            AnyMember::AnyJsClassMember(member) => {
+            Self::AnyJsClassMember(member) => {
                 let is_es_private = matches!(
                     member.name().ok()??,
                     AnyJsClassMemberName::JsPrivateClassMemberName(_)
@@ -286,7 +286,7 @@ impl AnyMember {
 
                 Some(is_es_private || is_ts_private)
             }
-            AnyMember::TsPropertyParameter(param) => Some(
+            Self::TsPropertyParameter(param) => Some(
                 param
                     .modifiers()
                     .iter()
@@ -298,7 +298,7 @@ impl AnyMember {
 
     fn property_range(&self) -> Option<TextRange> {
         match self {
-            AnyMember::AnyJsClassMember(member) => match member {
+            Self::AnyJsClassMember(member) => match member {
                 AnyJsClassMember::JsGetterClassMember(member) => Some(member.name().ok()?.range()),
                 AnyJsClassMember::JsMethodClassMember(member) => Some(member.name().ok()?.range()),
                 AnyJsClassMember::JsPropertyClassMember(member) => {
@@ -307,7 +307,7 @@ impl AnyMember {
                 AnyJsClassMember::JsSetterClassMember(member) => Some(member.name().ok()?.range()),
                 _ => None,
             },
-            AnyMember::TsPropertyParameter(ts_property) => {
+            Self::TsPropertyParameter(ts_property) => {
                 match ts_property.formal_parameter().ok()? {
                     AnyJsFormalParameter::JsBogusParameter(_)
                     | AnyJsFormalParameter::JsMetavariable(_) => None,
@@ -331,7 +331,7 @@ impl AnyMember {
         let token = value_token.text_trimmed();
 
         match self {
-            AnyMember::AnyJsClassMember(member) => match member {
+            Self::AnyJsClassMember(member) => match member {
                 AnyJsClassMember::JsGetterClassMember(member) => {
                     Some(member.name().ok()?.name()?.text() == token)
                 }
@@ -346,7 +346,7 @@ impl AnyMember {
                 }
                 _ => None,
             },
-            AnyMember::TsPropertyParameter(ts_property) => {
+            Self::TsPropertyParameter(ts_property) => {
                 match ts_property.formal_parameter().ok()? {
                     AnyJsFormalParameter::JsBogusParameter(_)
                     | AnyJsFormalParameter::JsMetavariable(_) => None,

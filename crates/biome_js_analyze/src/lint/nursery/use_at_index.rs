@@ -194,13 +194,13 @@ impl Rule for UseAtIndex {
 
 impl ErrorType {
     /// Return the error message corresponding to the ErrorType.
-    fn get_error_message(self: &ErrorType) -> MarkupBuf {
+    fn get_error_message(&self) -> MarkupBuf {
         match self {
-            ErrorType::Index { is_negative } | ErrorType::StringCharAt { is_negative } => {
+            Self::Index { is_negative } | Self::StringCharAt { is_negative } => {
                 let (method, old_method) = if *is_negative {
                     (
                         "X.at(-Y)",
-                        if matches!(self, ErrorType::StringCharAt { .. }) {
+                        if matches!(self, Self::StringCharAt { .. }) {
                             "X.charAt(X.length - Y)"
                         } else {
                             "X[X.length - Y]"
@@ -209,7 +209,7 @@ impl ErrorType {
                 } else {
                     (
                         "X.at(Y)",
-                        if matches!(self, ErrorType::StringCharAt { .. }) {
+                        if matches!(self, Self::StringCharAt { .. }) {
                             "X.charAt(Y)"
                         } else {
                             "X[Y]"
@@ -218,7 +218,7 @@ impl ErrorType {
                 };
                 markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
             }
-            ErrorType::Slice {
+            Self::Slice {
                 arg_type,
                 extract_type,
             } => {

@@ -37,21 +37,21 @@ enum UtilityMatch {
 
 impl From<(&str, &str)> for UtilityMatch {
     /// Checks if a utility matches a target, and returns the result.
-    fn from((target, utility_text): (&str, &str)) -> UtilityMatch {
+    fn from((target, utility_text): (&str, &str)) -> Self {
         // If the target ends with `$`, then it's an exact target.
         if target.ends_with('$') {
             // Check if the utility matches the target (without the final `$`) exactly.
             if utility_text == &target[..target.len() - 1] {
-                return UtilityMatch::Exact;
+                return Self::Exact;
             }
-            return UtilityMatch::None;
+            return Self::None;
         }
         // Check if the utility starts with the (partial) target.
         if utility_text.starts_with(target) && utility_text != target {
-            return UtilityMatch::Partial;
+            return Self::Partial;
         }
         // If all of the above checks fail, there is no match.
-        UtilityMatch::None
+        Self::None
     }
 }
 
@@ -299,10 +299,10 @@ enum VariantMatch {
 
 impl From<(&str, &str)> for VariantMatch {
     /// Checks if a variant matches a target, and returns the result.
-    fn from((target, variant_text): (&str, &str)) -> VariantMatch {
+    fn from((target, variant_text): (&str, &str)) -> Self {
         // If the target matched exactly the variant text.
         if target == variant_text {
-            return VariantMatch::Exact;
+            return Self::Exact;
         };
 
         let mut target_chars = target.bytes();
@@ -335,15 +335,15 @@ impl From<(&str, &str)> for VariantMatch {
         }
 
         if target_found && dash_found && bracket_found {
-            return VariantMatch::Exact;
+            return Self::Exact;
         }
 
         // Check if the variant starts with the (partial) target.
         if variant_text.starts_with(target) && variant_text != target {
-            return VariantMatch::Partial;
+            return Self::Partial;
         }
         // If all of the above checks fail, there is no match.
-        VariantMatch::None
+        Self::None
     }
 }
 

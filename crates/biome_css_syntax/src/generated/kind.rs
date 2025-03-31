@@ -592,7 +592,7 @@ impl CssSyntaxKind {
                 | CSS_UNKNOWN_AT_RULE_COMPONENT_LIST
         )
     }
-    pub fn from_keyword(ident: &str) -> Option<CssSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "media" => MEDIA_KW,
             "keyframes" => KEYFRAMES_KW,

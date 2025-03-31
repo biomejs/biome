@@ -31,15 +31,15 @@ declare_node_union! {
 impl JsNewOrCallExpression {
     pub fn callee(&self) -> SyntaxResult<AnyJsExpression> {
         match self {
-            JsNewOrCallExpression::JsNewExpression(node) => node.callee(),
-            JsNewOrCallExpression::JsCallExpression(node) => node.callee(),
+            Self::JsNewExpression(node) => node.callee(),
+            Self::JsCallExpression(node) => node.callee(),
         }
     }
 
     pub fn arguments(&self) -> Option<JsCallArguments> {
         match self {
-            JsNewOrCallExpression::JsNewExpression(node) => node.arguments(),
-            JsNewOrCallExpression::JsCallExpression(node) => node.arguments().ok(),
+            Self::JsNewExpression(node) => node.arguments(),
+            Self::JsCallExpression(node) => node.arguments().ok(),
         }
     }
 }
@@ -220,30 +220,30 @@ pub enum JsBinaryOperator {
 impl JsBinaryOperator {
     pub const fn precedence(&self) -> OperatorPrecedence {
         match self {
-            JsBinaryOperator::LessThan
-            | JsBinaryOperator::GreaterThan
-            | JsBinaryOperator::LessThanOrEqual
-            | JsBinaryOperator::GreaterThanOrEqual => OperatorPrecedence::Relational,
+            Self::LessThan
+            | Self::GreaterThan
+            | Self::LessThanOrEqual
+            | Self::GreaterThanOrEqual => OperatorPrecedence::Relational,
 
-            JsBinaryOperator::Equality
-            | JsBinaryOperator::StrictEquality
-            | JsBinaryOperator::Inequality
-            | JsBinaryOperator::StrictInequality => OperatorPrecedence::Equality,
+            Self::Equality
+            | Self::StrictEquality
+            | Self::Inequality
+            | Self::StrictInequality => OperatorPrecedence::Equality,
 
-            JsBinaryOperator::Plus | JsBinaryOperator::Minus => OperatorPrecedence::Additive,
+            Self::Plus | Self::Minus => OperatorPrecedence::Additive,
 
-            JsBinaryOperator::Times | JsBinaryOperator::Divide | JsBinaryOperator::Remainder => {
+            Self::Times | Self::Divide | Self::Remainder => {
                 OperatorPrecedence::Multiplicative
             }
-            JsBinaryOperator::Exponent => OperatorPrecedence::Exponential,
+            Self::Exponent => OperatorPrecedence::Exponential,
 
-            JsBinaryOperator::LeftShift
-            | JsBinaryOperator::RightShift
-            | JsBinaryOperator::UnsignedRightShift => OperatorPrecedence::Shift,
+            Self::LeftShift
+            | Self::RightShift
+            | Self::UnsignedRightShift => OperatorPrecedence::Shift,
 
-            JsBinaryOperator::BitwiseAnd => OperatorPrecedence::BitwiseAnd,
-            JsBinaryOperator::BitwiseOr => OperatorPrecedence::BitwiseOr,
-            JsBinaryOperator::BitwiseXor => OperatorPrecedence::BitwiseXor,
+            Self::BitwiseAnd => OperatorPrecedence::BitwiseAnd,
+            Self::BitwiseOr => OperatorPrecedence::BitwiseOr,
+            Self::BitwiseXor => OperatorPrecedence::BitwiseXor,
         }
     }
 
@@ -265,10 +265,10 @@ impl JsBinaryOperator {
     pub const fn is_commutative(&self) -> bool {
         matches!(
             self,
-            JsBinaryOperator::Times
-                | JsBinaryOperator::BitwiseAnd
-                | JsBinaryOperator::BitwiseOr
-                | JsBinaryOperator::BitwiseXor
+            Self::Times
+                | Self::BitwiseAnd
+                | Self::BitwiseOr
+                | Self::BitwiseXor
         )
     }
 }
@@ -361,9 +361,9 @@ pub enum JsLogicalOperator {
 impl JsLogicalOperator {
     pub const fn precedence(&self) -> OperatorPrecedence {
         match self {
-            JsLogicalOperator::NullishCoalescing => OperatorPrecedence::Coalesce,
-            JsLogicalOperator::LogicalOr => OperatorPrecedence::LogicalOr,
-            JsLogicalOperator::LogicalAnd => OperatorPrecedence::LogicalAnd,
+            Self::NullishCoalescing => OperatorPrecedence::Coalesce,
+            Self::LogicalOr => OperatorPrecedence::LogicalOr,
+            Self::LogicalAnd => OperatorPrecedence::LogicalAnd,
         }
     }
 }
@@ -884,7 +884,7 @@ impl JsRegexLiteralExpression {
 
 impl AnyJsExpression {
     /// Try to extract non `JsParenthesizedExpression` from `JsAnyExpression`
-    pub fn omit_parentheses(self) -> AnyJsExpression {
+    pub fn omit_parentheses(self) -> Self {
         let first = self
             .as_js_parenthesized_expression()
             .and_then(|expression| expression.expression().ok());
@@ -899,50 +899,50 @@ impl AnyJsExpression {
 
     pub fn precedence(&self) -> SyntaxResult<OperatorPrecedence> {
         let precedence = match self {
-            AnyJsExpression::JsSequenceExpression(_) => OperatorPrecedence::Comma,
-            AnyJsExpression::JsYieldExpression(_) => OperatorPrecedence::Yield,
-            AnyJsExpression::JsConditionalExpression(_) => OperatorPrecedence::Conditional,
-            AnyJsExpression::JsAssignmentExpression(_) => OperatorPrecedence::Assignment,
-            AnyJsExpression::JsInExpression(_)
-            | AnyJsExpression::JsInstanceofExpression(_)
-            | AnyJsExpression::TsAsExpression(_)
-            | AnyJsExpression::TsSatisfiesExpression(_) => OperatorPrecedence::Relational,
-            AnyJsExpression::JsLogicalExpression(expression) => expression.operator()?.precedence(),
-            AnyJsExpression::JsBinaryExpression(expression) => expression.operator()?.precedence(),
-            AnyJsExpression::TsTypeAssertionExpression(_)
-            | AnyJsExpression::TsNonNullAssertionExpression(_)
-            | AnyJsExpression::JsUnaryExpression(_)
-            | AnyJsExpression::JsAwaitExpression(_) => OperatorPrecedence::Unary,
-            AnyJsExpression::JsPostUpdateExpression(_)
-            | AnyJsExpression::JsPreUpdateExpression(_) => OperatorPrecedence::Update,
-            AnyJsExpression::JsCallExpression(_)
-            | AnyJsExpression::JsImportCallExpression(_)
-            | AnyJsExpression::JsSuperExpression(_) => OperatorPrecedence::LeftHandSide,
+            Self::JsSequenceExpression(_) => OperatorPrecedence::Comma,
+            Self::JsYieldExpression(_) => OperatorPrecedence::Yield,
+            Self::JsConditionalExpression(_) => OperatorPrecedence::Conditional,
+            Self::JsAssignmentExpression(_) => OperatorPrecedence::Assignment,
+            Self::JsInExpression(_)
+            | Self::JsInstanceofExpression(_)
+            | Self::TsAsExpression(_)
+            | Self::TsSatisfiesExpression(_) => OperatorPrecedence::Relational,
+            Self::JsLogicalExpression(expression) => expression.operator()?.precedence(),
+            Self::JsBinaryExpression(expression) => expression.operator()?.precedence(),
+            Self::TsTypeAssertionExpression(_)
+            | Self::TsNonNullAssertionExpression(_)
+            | Self::JsUnaryExpression(_)
+            | Self::JsAwaitExpression(_) => OperatorPrecedence::Unary,
+            Self::JsPostUpdateExpression(_)
+            | Self::JsPreUpdateExpression(_) => OperatorPrecedence::Update,
+            Self::JsCallExpression(_)
+            | Self::JsImportCallExpression(_)
+            | Self::JsSuperExpression(_) => OperatorPrecedence::LeftHandSide,
 
-            AnyJsExpression::JsNewExpression(expression) => {
+            Self::JsNewExpression(expression) => {
                 if expression.arguments().is_none() {
                     OperatorPrecedence::NewWithoutArguments
                 } else {
                     OperatorPrecedence::LeftHandSide
                 }
             }
-            AnyJsExpression::JsComputedMemberExpression(_)
-            | AnyJsExpression::JsStaticMemberExpression(_)
-            | AnyJsExpression::JsImportMetaExpression(_)
-            | AnyJsExpression::TsInstantiationExpression(_)
-            | AnyJsExpression::JsNewTargetExpression(_) => OperatorPrecedence::Member,
+            Self::JsComputedMemberExpression(_)
+            | Self::JsStaticMemberExpression(_)
+            | Self::JsImportMetaExpression(_)
+            | Self::TsInstantiationExpression(_)
+            | Self::JsNewTargetExpression(_) => OperatorPrecedence::Member,
 
-            AnyJsExpression::JsThisExpression(_)
-            | AnyJsExpression::AnyJsLiteralExpression(_)
-            | AnyJsExpression::JsArrayExpression(_)
-            | AnyJsExpression::JsArrowFunctionExpression(_)
-            | AnyJsExpression::JsClassExpression(_)
-            | AnyJsExpression::JsFunctionExpression(_)
-            | AnyJsExpression::JsIdentifierExpression(_)
-            | AnyJsExpression::JsObjectExpression(_)
-            | AnyJsExpression::JsxTagExpression(_) => OperatorPrecedence::Primary,
+            Self::JsThisExpression(_)
+            | Self::AnyJsLiteralExpression(_)
+            | Self::JsArrayExpression(_)
+            | Self::JsArrowFunctionExpression(_)
+            | Self::JsClassExpression(_)
+            | Self::JsFunctionExpression(_)
+            | Self::JsIdentifierExpression(_)
+            | Self::JsObjectExpression(_)
+            | Self::JsxTagExpression(_) => OperatorPrecedence::Primary,
 
-            AnyJsExpression::JsTemplateExpression(template) => {
+            Self::JsTemplateExpression(template) => {
                 if template.tag().is_some() {
                     OperatorPrecedence::Member
                 } else {
@@ -950,10 +950,10 @@ impl AnyJsExpression {
                 }
             }
 
-            AnyJsExpression::JsBogusExpression(_) | AnyJsExpression::JsMetavariable(_) => {
+            Self::JsBogusExpression(_) | Self::JsMetavariable(_) => {
                 OperatorPrecedence::lowest()
             }
-            AnyJsExpression::JsParenthesizedExpression(_) => OperatorPrecedence::highest(),
+            Self::JsParenthesizedExpression(_) => OperatorPrecedence::highest(),
         };
 
         Ok(precedence)
@@ -966,8 +966,8 @@ impl AnyJsExpression {
 
     pub fn as_static_value(&self) -> Option<StaticValue> {
         match self {
-            AnyJsExpression::AnyJsLiteralExpression(literal) => literal.as_static_value(),
-            AnyJsExpression::JsTemplateExpression(template) => {
+            Self::AnyJsLiteralExpression(literal) => literal.as_static_value(),
+            Self::JsTemplateExpression(template) => {
                 let element_list = template.elements();
                 if element_list.len() == 0 {
                     let range = template
@@ -987,7 +987,7 @@ impl AnyJsExpression {
                     _ => None,
                 }
             }
-            AnyJsExpression::JsIdentifierExpression(identifier) => {
+            Self::JsIdentifierExpression(identifier) => {
                 let identifier_token = identifier.name().ok()?.value_token().ok()?;
                 match identifier_token.text_trimmed() {
                     UNDEFINED => Some(StaticValue::Undefined(identifier_token)),
@@ -1005,36 +1005,36 @@ impl AnyJsExpression {
 
     pub fn get_callee_object_identifier(&self) -> Option<JsReferenceIdentifier> {
         match self {
-            AnyJsExpression::JsStaticMemberExpression(node) => {
+            Self::JsStaticMemberExpression(node) => {
                 let member = node.object().ok()?;
                 member.as_js_identifier_expression()?.name().ok()
             }
-            AnyJsExpression::JsTemplateExpression(node) => {
+            Self::JsTemplateExpression(node) => {
                 let tag = node.tag()?;
                 let tag = tag.as_js_static_member_expression()?;
                 let member = tag.object().ok()?;
                 member.as_js_identifier_expression()?.name().ok()
             }
-            AnyJsExpression::JsIdentifierExpression(node) => node.name().ok(),
+            Self::JsIdentifierExpression(node) => node.name().ok(),
             _ => None,
         }
     }
 
     pub fn get_callee_member_name(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsExpression::JsStaticMemberExpression(node) => {
+            Self::JsStaticMemberExpression(node) => {
                 let member = node.member().ok()?;
                 let member = member.as_js_name()?;
                 member.value_token().ok()
             }
-            AnyJsExpression::JsTemplateExpression(node) => {
+            Self::JsTemplateExpression(node) => {
                 let tag = node.tag()?;
                 let tag = tag.as_js_static_member_expression()?;
                 let member = tag.member().ok()?;
                 let member = member.as_js_name()?;
                 member.value_token().ok()
             }
-            AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.value_token().ok(),
+            Self::JsIdentifierExpression(node) => node.name().ok()?.value_token().ok(),
             _ => None,
         }
     }
@@ -1230,21 +1230,21 @@ impl AnyJsExpression {
     pub fn is_literal_expression(&self) -> bool {
         match self {
             // Any literal: 1, true, null, etc
-            AnyJsExpression::AnyJsLiteralExpression(_) => true,
+            Self::AnyJsLiteralExpression(_) => true,
 
             // Static template literals: `foo`
-            AnyJsExpression::JsTemplateExpression(template_expression) => template_expression
+            Self::JsTemplateExpression(template_expression) => template_expression
                 .elements()
                 .into_iter()
                 .all(|element| element.as_js_template_chunk_element().is_some()),
 
             // Negative numeric literal: -1
-            AnyJsExpression::JsUnaryExpression(unary_expression) => {
+            Self::JsUnaryExpression(unary_expression) => {
                 let is_minus_operator =
                     matches!(unary_expression.operator(), Ok(JsUnaryOperator::Minus));
                 let is_number_expression = matches!(
                     unary_expression.argument(),
-                    Ok(AnyJsExpression::AnyJsLiteralExpression(
+                    Ok(Self::AnyJsLiteralExpression(
                         AnyJsLiteralExpression::JsNumberLiteralExpression(_)
                     ))
                 );
@@ -1253,7 +1253,7 @@ impl AnyJsExpression {
             }
 
             // Parenthesized expression: (1)
-            AnyJsExpression::JsParenthesizedExpression(parenthesized_expression) => {
+            Self::JsParenthesizedExpression(parenthesized_expression) => {
                 parenthesized_expression
                     .expression()
                     .is_ok_and(|expression| expression.is_literal_expression())
@@ -1312,20 +1312,20 @@ impl Iterator for CalleeNamesIterator {
 impl AnyJsLiteralExpression {
     pub fn value_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsLiteralExpression::JsBigintLiteralExpression(expression) => {
+            Self::JsBigintLiteralExpression(expression) => {
                 expression.value_token()
             }
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(expression) => {
+            Self::JsBooleanLiteralExpression(expression) => {
                 expression.value_token()
             }
-            AnyJsLiteralExpression::JsNullLiteralExpression(expression) => expression.value_token(),
-            AnyJsLiteralExpression::JsNumberLiteralExpression(expression) => {
+            Self::JsNullLiteralExpression(expression) => expression.value_token(),
+            Self::JsNumberLiteralExpression(expression) => {
                 expression.value_token()
             }
-            AnyJsLiteralExpression::JsRegexLiteralExpression(expression) => {
+            Self::JsRegexLiteralExpression(expression) => {
                 expression.value_token()
             }
-            AnyJsLiteralExpression::JsStringLiteralExpression(expression) => {
+            Self::JsStringLiteralExpression(expression) => {
                 expression.value_token()
             }
         }
@@ -1333,20 +1333,20 @@ impl AnyJsLiteralExpression {
 
     pub fn as_static_value(&self) -> Option<StaticValue> {
         match self {
-            AnyJsLiteralExpression::JsBigintLiteralExpression(bigint) => {
+            Self::JsBigintLiteralExpression(bigint) => {
                 Some(StaticValue::BigInt(bigint.value_token().ok()?))
             }
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(boolean) => {
+            Self::JsBooleanLiteralExpression(boolean) => {
                 Some(StaticValue::Boolean(boolean.value_token().ok()?))
             }
-            AnyJsLiteralExpression::JsNullLiteralExpression(null) => {
+            Self::JsNullLiteralExpression(null) => {
                 Some(StaticValue::Null(null.value_token().ok()?))
             }
-            AnyJsLiteralExpression::JsNumberLiteralExpression(number) => {
+            Self::JsNumberLiteralExpression(number) => {
                 Some(StaticValue::Number(number.value_token().ok()?))
             }
-            AnyJsLiteralExpression::JsRegexLiteralExpression(_) => None,
-            AnyJsLiteralExpression::JsStringLiteralExpression(string) => {
+            Self::JsRegexLiteralExpression(_) => None,
+            Self::JsStringLiteralExpression(string) => {
                 Some(StaticValue::String(string.value_token().ok()?))
             }
         }
@@ -1408,17 +1408,17 @@ declare_node_union! {
 impl AnyJsComputedMember {
     pub fn object(&self) -> SyntaxResult<AnyJsExpression> {
         match self {
-            AnyJsComputedMember::JsComputedMemberExpression(expression) => expression.object(),
-            AnyJsComputedMember::JsComputedMemberAssignment(assignment) => assignment.object(),
+            Self::JsComputedMemberExpression(expression) => expression.object(),
+            Self::JsComputedMemberAssignment(assignment) => assignment.object(),
         }
     }
 
     pub fn l_brack_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsComputedMember::JsComputedMemberExpression(expression) => {
+            Self::JsComputedMemberExpression(expression) => {
                 expression.l_brack_token()
             }
-            AnyJsComputedMember::JsComputedMemberAssignment(assignment) => {
+            Self::JsComputedMemberAssignment(assignment) => {
                 assignment.l_brack_token()
             }
         }
@@ -1426,26 +1426,26 @@ impl AnyJsComputedMember {
 
     pub fn optional_chain_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsComputedMember::JsComputedMemberExpression(expression) => {
+            Self::JsComputedMemberExpression(expression) => {
                 expression.optional_chain_token()
             }
-            AnyJsComputedMember::JsComputedMemberAssignment(_) => None,
+            Self::JsComputedMemberAssignment(_) => None,
         }
     }
 
     pub fn member(&self) -> SyntaxResult<AnyJsExpression> {
         match self {
-            AnyJsComputedMember::JsComputedMemberExpression(expression) => expression.member(),
-            AnyJsComputedMember::JsComputedMemberAssignment(assignment) => assignment.member(),
+            Self::JsComputedMemberExpression(expression) => expression.member(),
+            Self::JsComputedMemberAssignment(assignment) => assignment.member(),
         }
     }
 
     pub fn r_brack_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsComputedMember::JsComputedMemberExpression(expression) => {
+            Self::JsComputedMemberExpression(expression) => {
                 expression.r_brack_token()
             }
-            AnyJsComputedMember::JsComputedMemberAssignment(assignment) => {
+            Self::JsComputedMemberAssignment(assignment) => {
                 assignment.r_brack_token()
             }
         }
@@ -1459,15 +1459,15 @@ declare_node_union! {
 impl AnyJsMemberExpression {
     pub fn object(&self) -> SyntaxResult<AnyJsExpression> {
         match self {
-            AnyJsMemberExpression::JsStaticMemberExpression(expr) => expr.object(),
-            AnyJsMemberExpression::JsComputedMemberExpression(expr) => expr.object(),
+            Self::JsStaticMemberExpression(expr) => expr.object(),
+            Self::JsComputedMemberExpression(expr) => expr.object(),
         }
     }
 
     pub fn is_optional_chain(&self) -> bool {
         match self {
-            AnyJsMemberExpression::JsComputedMemberExpression(e) => e.is_optional_chain(),
-            AnyJsMemberExpression::JsStaticMemberExpression(e) => e.is_optional_chain(),
+            Self::JsComputedMemberExpression(e) => e.is_optional_chain(),
+            Self::JsStaticMemberExpression(e) => e.is_optional_chain(),
         }
     }
 
@@ -1498,10 +1498,10 @@ impl AnyJsMemberExpression {
     /// ```
     pub fn member_name(&self) -> Option<StaticValue> {
         let value = match self {
-            AnyJsMemberExpression::JsStaticMemberExpression(e) => {
+            Self::JsStaticMemberExpression(e) => {
                 StaticValue::String(e.member().ok()?.as_js_name()?.value_token().ok()?)
             }
-            AnyJsMemberExpression::JsComputedMemberExpression(e) => {
+            Self::JsComputedMemberExpression(e) => {
                 let member = e.member().ok()?.omit_parentheses();
                 let result = member.as_static_value()?;
                 if !matches!(result, StaticValue::String(_) | StaticValue::EmptyString(_)) {
@@ -1580,7 +1580,7 @@ impl AnyJsOptionalChainExpression {
 }
 
 impl From<AnyJsOptionalChainExpression> for AnyJsExpression {
-    fn from(node: AnyJsOptionalChainExpression) -> AnyJsExpression {
+    fn from(node: AnyJsOptionalChainExpression) -> Self {
         match node {
             AnyJsOptionalChainExpression::JsStaticMemberExpression(expression) => expression.into(),
             AnyJsOptionalChainExpression::JsComputedMemberExpression(expression) => {
@@ -1621,7 +1621,7 @@ impl AnyJsObjectMemberName {
     /// ```
     pub fn name(&self) -> Option<TokenText> {
         let token = match self {
-            AnyJsObjectMemberName::JsComputedMemberName(expr) => {
+            Self::JsComputedMemberName(expr) => {
                 let expr = expr.expression().ok()?;
                 match expr.omit_parentheses() {
                     AnyJsExpression::AnyJsLiteralExpression(expr) => expr.value_token().ok()?,
@@ -1636,8 +1636,8 @@ impl AnyJsObjectMemberName {
                     _ => return None,
                 }
             }
-            AnyJsObjectMemberName::JsLiteralMemberName(expr) => expr.value().ok()?,
-            AnyJsObjectMemberName::JsMetavariable(_) => return None,
+            Self::JsLiteralMemberName(expr) => expr.value().ok()?,
+            Self::JsMetavariable(_) => return None,
         };
         Some(inner_string_text(&token))
     }
@@ -1673,7 +1673,7 @@ impl AnyTsEnumMemberName {
     /// ```
     pub fn name(&self) -> Option<TokenText> {
         let token = match self {
-            AnyTsEnumMemberName::JsComputedMemberName(expr) => {
+            Self::JsComputedMemberName(expr) => {
                 let expr = expr.expression().ok()?;
                 match expr.omit_parentheses() {
                     AnyJsExpression::AnyJsLiteralExpression(expr) => expr.value_token().ok()?,
@@ -1688,7 +1688,7 @@ impl AnyTsEnumMemberName {
                     _ => return None,
                 }
             }
-            AnyTsEnumMemberName::TsLiteralEnumMemberName(expr) => expr.value().ok()?,
+            Self::TsLiteralEnumMemberName(expr) => expr.value().ok()?,
         };
         Some(inner_string_text(&token))
     }
@@ -1750,7 +1750,7 @@ impl AnyJsClassMemberName {
     /// ```
     pub fn name(&self) -> Option<ClassMemberName> {
         let token = match self {
-            AnyJsClassMemberName::JsComputedMemberName(expr) => {
+            Self::JsComputedMemberName(expr) => {
                 let expr = expr.expression().ok()?;
                 match expr.omit_parentheses() {
                     AnyJsExpression::AnyJsLiteralExpression(expr) => expr.value_token().ok()?,
@@ -1765,13 +1765,13 @@ impl AnyJsClassMemberName {
                     _ => return None,
                 }
             }
-            AnyJsClassMemberName::JsLiteralMemberName(expr) => expr.value().ok()?,
-            AnyJsClassMemberName::JsPrivateClassMemberName(expr) => {
+            Self::JsLiteralMemberName(expr) => expr.value().ok()?,
+            Self::JsPrivateClassMemberName(expr) => {
                 return Some(ClassMemberName::Private(inner_string_text(
                     &expr.id_token().ok()?,
                 )));
             }
-            AnyJsClassMemberName::JsMetavariable(_) => return None,
+            Self::JsMetavariable(_) => return None,
         };
         Some(ClassMemberName::Public(inner_string_text(&token)))
     }
@@ -1901,7 +1901,7 @@ impl JsCallExpression {
                     && self
                         .parent::<JsCallArgumentList>()
                         .and_then(|arguments_list| arguments_list.parent::<JsCallArguments>())
-                        .and_then(|arguments| arguments.parent::<self::JsCallExpression>())
+                        .and_then(|arguments| arguments.parent::<Self>())
                         .is_some_and(|parent| parent.is_test_call_expression().unwrap_or(false))
                 {
                     return Ok(matches!(
@@ -2385,13 +2385,13 @@ impl AnyNumberLikeExpression {
     /// returns the value for signed numeric expressions.
     pub fn value(&self) -> Option<String> {
         match self {
-            AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
+            Self::JsStringLiteralExpression(string_literal) => {
                 return Some(string_literal.inner_string_text().ok()?.to_string());
             }
-            AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
+            Self::JsNumberLiteralExpression(number_literal) => {
                 return Some(number_literal.value_token().ok()?.to_string());
             }
-            AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
+            Self::JsUnaryExpression(unary_expression) => {
                 if unary_expression.is_signed_numeric_literal().ok()? {
                     return Some(unary_expression.to_trimmed_string());
                 }

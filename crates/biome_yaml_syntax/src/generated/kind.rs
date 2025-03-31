@@ -108,7 +108,7 @@ impl YamlSyntaxKind {
                 | YAML_ARRAY_ITEM_LIST
         )
     }
-    pub fn from_keyword(ident: &str) -> Option<YamlSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "null" => NULL_KW,
             _ => return None,

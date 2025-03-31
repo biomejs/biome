@@ -53,17 +53,17 @@ pub enum DiffOp {
 impl DiffOp {
     pub fn tag(self) -> ChangeTag {
         match self {
-            DiffOp::Equal { .. } => ChangeTag::Equal,
-            DiffOp::Insert { .. } => ChangeTag::Insert,
-            DiffOp::Delete { .. } => ChangeTag::Delete,
+            Self::Equal { .. } => ChangeTag::Equal,
+            Self::Insert { .. } => ChangeTag::Insert,
+            Self::Delete { .. } => ChangeTag::Delete,
         }
     }
 
     pub fn text(self, diff: &TextEdit) -> &str {
         let range = match self {
-            DiffOp::Equal { range } => range,
-            DiffOp::Insert { range } => range,
-            DiffOp::Delete { range } => range,
+            Self::Equal { range } => range,
+            Self::Insert { range } => range,
+            Self::Delete { range } => range,
         };
 
         diff.get_text(range)

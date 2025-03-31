@@ -18,15 +18,15 @@ pub use syntax_node::*;
 use GraphqlSyntaxKind::*;
 
 impl From<u16> for GraphqlSyntaxKind {
-    fn from(d: u16) -> GraphqlSyntaxKind {
-        assert!(d <= (GraphqlSyntaxKind::__LAST as u16));
-        unsafe { std::mem::transmute::<u16, GraphqlSyntaxKind>(d) }
+    fn from(d: u16) -> Self {
+        assert!(d <= (Self::__LAST as u16));
+        unsafe { std::mem::transmute::<u16, Self>(d) }
     }
 }
 
 impl From<GraphqlSyntaxKind> for u16 {
-    fn from(k: GraphqlSyntaxKind) -> u16 {
-        k as u16
+    fn from(k: GraphqlSyntaxKind) -> Self {
+        k as Self
     }
 }
 
@@ -34,8 +34,8 @@ impl GraphqlSyntaxKind {
     /// Returns `true` for any contextual (await) or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
-        (self as u16) <= (GraphqlSyntaxKind::INPUT_FIELD_DEFINITION_KW as u16)
-            && (self as u16) >= (GraphqlSyntaxKind::TRUE_KW as u16)
+        (self as u16) <= (Self::INPUT_FIELD_DEFINITION_KW as u16)
+            && (self as u16) >= (Self::TRUE_KW as u16)
     }
 }
 
@@ -54,7 +54,7 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
         )
     }
 
-    fn to_bogus(&self) -> GraphqlSyntaxKind {
+    fn to_bogus(&self) -> Self {
         match self {
             kind if AnyGraphqlDefinition::can_cast(*kind) => GRAPHQL_BOGUS_DEFINITION,
             kind if AnyGraphqlSelection::can_cast(*kind) => GRAPHQL_BOGUS_SELECTION,
@@ -79,21 +79,21 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
     }
 
     fn is_list(&self) -> bool {
-        GraphqlSyntaxKind::is_list(*self)
+        Self::is_list(*self)
     }
 
     fn is_trivia(self) -> bool {
         matches!(
             self,
-            GraphqlSyntaxKind::NEWLINE
-                | GraphqlSyntaxKind::WHITESPACE
-                | GraphqlSyntaxKind::COMMENT
-                | GraphqlSyntaxKind::COMMA
+            Self::NEWLINE
+                | Self::WHITESPACE
+                | Self::COMMENT
+                | Self::COMMA
         )
     }
 
     fn to_string(&self) -> Option<&'static str> {
-        GraphqlSyntaxKind::to_string(self)
+        Self::to_string(self)
     }
 }
 
@@ -103,11 +103,11 @@ impl TryFrom<GraphqlSyntaxKind> for TriviaPieceKind {
     fn try_from(value: GraphqlSyntaxKind) -> Result<Self, Self::Error> {
         if value.is_trivia() {
             match value {
-                GraphqlSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
-                GraphqlSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
+                GraphqlSyntaxKind::NEWLINE => Ok(Self::Newline),
+                GraphqlSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
                 // https://spec.graphql.org/October2021/#sec-Insignificant-Commas
-                GraphqlSyntaxKind::COMMA => Ok(TriviaPieceKind::Skipped),
-                GraphqlSyntaxKind::COMMENT => Ok(TriviaPieceKind::SingleLineComment),
+                GraphqlSyntaxKind::COMMA => Ok(Self::Skipped),
+                GraphqlSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
                 _ => unreachable!("Not Trivia"),
             }
         } else {

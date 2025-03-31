@@ -52,8 +52,8 @@ pub struct JsonParse {
 }
 
 impl JsonParse {
-    pub fn new(root: JsonSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> JsonParse {
-        JsonParse { root, diagnostics }
+    pub fn new(root: JsonSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
     }
 
     /// The syntax node represented by this Parse result

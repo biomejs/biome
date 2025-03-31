@@ -118,7 +118,7 @@ impl WorkspaceError {
     pub fn is_editor_config_error(&self) -> bool {
         matches!(
             self,
-            WorkspaceError::Configuration(ConfigurationDiagnostic::EditorConfig(_))
+            Self::Configuration(ConfigurationDiagnostic::EditorConfig(_))
         )
     }
 }
@@ -181,13 +181,13 @@ impl From<EditorConfigDiagnostic> for WorkspaceError {
 
 impl From<CantLoadExtendFile> for WorkspaceError {
     fn from(value: CantLoadExtendFile) -> Self {
-        WorkspaceError::Configuration(BiomeDiagnostic::CantLoadExtendFile(value).into())
+        Self::Configuration(BiomeDiagnostic::CantLoadExtendFile(value).into())
     }
 }
 
 impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
     fn from(error: WorkspaceError) -> Self {
-        biome_diagnostics::serde::Diagnostic::new(error)
+        Self::new(error)
     }
 }
 
@@ -209,7 +209,7 @@ pub struct Panic {
 
 impl From<Panic> for biome_diagnostics::serde::Diagnostic {
     fn from(error: Panic) -> Self {
-        biome_diagnostics::serde::Diagnostic::new(error)
+        Self::new(error)
     }
 }
 
@@ -463,27 +463,27 @@ impl Diagnostic for TransportError {
 
     fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            TransportError::SerdeError(err) => write!(fmt, "serialization error: {err}"),
-            TransportError::ChannelClosed => fmt.write_str(
+            Self::SerdeError(err) => write!(fmt, "serialization error: {err}"),
+            Self::ChannelClosed => fmt.write_str(
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
-            TransportError::Timeout => {
+            Self::Timeout => {
                 fmt.write_str("the request to the remote workspace timed out")
             }
-            TransportError::RPCError(err) => fmt.write_str(err),
+            Self::RPCError(err) => fmt.write_str(err),
         }
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         match self {
-            TransportError::SerdeError(err) => write!(fmt, "serialization error: {err}"),
-            TransportError::ChannelClosed => fmt.write_str(
+            Self::SerdeError(err) => write!(fmt, "serialization error: {err}"),
+            Self::ChannelClosed => fmt.write_str(
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
-            TransportError::Timeout => {
+            Self::Timeout => {
                 fmt.write_str("the request to the remote workspace timed out")
             }
-            TransportError::RPCError(err) => fmt.write_str(err),
+            Self::RPCError(err) => fmt.write_str(err),
         }
     }
     fn tags(&self) -> DiagnosticTags {

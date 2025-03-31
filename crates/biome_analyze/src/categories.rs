@@ -28,10 +28,10 @@ impl RuleCategory {
     /// Returns a `str` that should be used for suppression comments
     pub const fn as_suppression_category(&self) -> &'static str {
         match self {
-            RuleCategory::Syntax => "syntax",
-            RuleCategory::Lint => "lint",
-            RuleCategory::Action => "assist",
-            RuleCategory::Transformation => "transformation",
+            Self::Syntax => "syntax",
+            Self::Lint => "lint",
+            Self::Action => "assist",
+            Self::Transformation => "transformation",
         }
     }
 }
@@ -39,10 +39,10 @@ impl RuleCategory {
 impl Display for RuleCategory {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            RuleCategory::Syntax => write!(f, "Syntax"),
-            RuleCategory::Lint => write!(f, "Lint"),
-            RuleCategory::Action => write!(f, "Action"),
-            RuleCategory::Transformation => write!(f, "Transformation"),
+            Self::Syntax => write!(f, "Syntax"),
+            Self::Lint => write!(f, "Lint"),
+            Self::Action => write!(f, "Action"),
+            Self::Transformation => write!(f, "Transformation"),
         }
     }
 }
@@ -123,7 +123,7 @@ impl ActionCategory {
     /// Returns the representation of this [ActionCategory] as a `CodeActionKind` string
     pub fn to_str(&self) -> Cow<'static, str> {
         match self {
-            ActionCategory::QuickFix(tag) => {
+            Self::QuickFix(tag) => {
                 if tag.is_empty() {
                     Cow::Borrowed("quickfix.biome")
                 } else {
@@ -131,32 +131,32 @@ impl ActionCategory {
                 }
             }
 
-            ActionCategory::Refactor(RefactorKind::None) => Cow::Borrowed("refactor.biome"),
-            ActionCategory::Refactor(RefactorKind::Extract) => {
+            Self::Refactor(RefactorKind::None) => Cow::Borrowed("refactor.biome"),
+            Self::Refactor(RefactorKind::Extract) => {
                 Cow::Borrowed("refactor.extract.biome")
             }
-            ActionCategory::Refactor(RefactorKind::Inline) => {
+            Self::Refactor(RefactorKind::Inline) => {
                 Cow::Borrowed("refactor.inline.biome")
             }
-            ActionCategory::Refactor(RefactorKind::Rewrite) => {
+            Self::Refactor(RefactorKind::Rewrite) => {
                 Cow::Borrowed("refactor.rewrite.biome")
             }
-            ActionCategory::Refactor(RefactorKind::Other(tag)) => {
+            Self::Refactor(RefactorKind::Other(tag)) => {
                 Cow::Owned(format!("refactor.{tag}.biome"))
             }
 
-            ActionCategory::Source(SourceActionKind::None) => Cow::Borrowed("source.biome"),
-            ActionCategory::Source(SourceActionKind::FixAll) => {
+            Self::Source(SourceActionKind::None) => Cow::Borrowed("source.biome"),
+            Self::Source(SourceActionKind::FixAll) => {
                 Cow::Borrowed("source.fixAll.biome")
             }
-            ActionCategory::Source(SourceActionKind::OrganizeImports) => {
+            Self::Source(SourceActionKind::OrganizeImports) => {
                 Cow::Borrowed("source.organizeImports.biome")
             }
-            ActionCategory::Source(SourceActionKind::Other(tag)) => {
+            Self::Source(SourceActionKind::Other(tag)) => {
                 Cow::Owned(format!("source.biome.{tag}"))
             }
 
-            ActionCategory::Other(other_action) => match other_action {
+            Self::Other(other_action) => match other_action {
                 OtherActionCategory::InlineSuppression => {
                     Cow::Borrowed("quickfix.suppressRule.inline.biome")
                 }
@@ -287,7 +287,7 @@ impl RuleCategories {
     }
 
     /// Checks whether the current categories contain a specific [RuleCategories]
-    pub fn contains(&self, other: impl Into<RuleCategories>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 }
@@ -307,11 +307,11 @@ impl RuleCategories {
 impl From<RuleCategory> for RuleCategories {
     fn from(input: RuleCategory) -> Self {
         match input {
-            RuleCategory::Syntax => RuleCategories(BitFlags::from_flag(Categories::Syntax)),
-            RuleCategory::Lint => RuleCategories(BitFlags::from_flag(Categories::Lint)),
-            RuleCategory::Action => RuleCategories(BitFlags::from_flag(Categories::Assist)),
+            RuleCategory::Syntax => Self(BitFlags::from_flag(Categories::Syntax)),
+            RuleCategory::Lint => Self(BitFlags::from_flag(Categories::Lint)),
+            RuleCategory::Action => Self(BitFlags::from_flag(Categories::Assist)),
             RuleCategory::Transformation => {
-                RuleCategories(BitFlags::from_flag(Categories::Transformation))
+                Self(BitFlags::from_flag(Categories::Transformation))
             }
         }
     }

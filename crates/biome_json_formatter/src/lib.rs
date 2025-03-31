@@ -272,7 +272,7 @@ impl FormatLanguage for JsonFormatLanguage {
 pub(crate) type FormatJsonSyntaxToken = FormatToken<JsonFormatContext>;
 
 impl AsFormat<JsonFormatContext> for JsonSyntaxToken {
-    type Format<'a> = FormatRefWithRule<'a, JsonSyntaxToken, FormatJsonSyntaxToken>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatJsonSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatJsonSyntaxToken::default())
@@ -280,7 +280,7 @@ impl AsFormat<JsonFormatContext> for JsonSyntaxToken {
 }
 
 impl IntoFormat<JsonFormatContext> for JsonSyntaxToken {
-    type Format = FormatOwnedWithRule<JsonSyntaxToken, FormatJsonSyntaxToken>;
+    type Format = FormatOwnedWithRule<Self, FormatJsonSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatJsonSyntaxToken::default())

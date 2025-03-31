@@ -187,8 +187,8 @@ declare_node_union! {
 impl JsThisSuperExpression {
     fn token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            JsThisSuperExpression::JsSuperExpression(expr) => expr.super_token(),
-            JsThisSuperExpression::JsThisExpression(expr) => expr.this_token(),
+            Self::JsSuperExpression(expr) => expr.super_token(),
+            Self::JsThisExpression(expr) => expr.this_token(),
         }
     }
 }

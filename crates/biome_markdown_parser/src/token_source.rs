@@ -20,7 +20,7 @@ impl<'source> MarkdownTokenSource<'source> {
     /// Creates a new token source.
     pub(crate) fn new(
         lexer: BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>>,
-    ) -> MarkdownTokenSource<'source> {
+    ) -> Self {
         MarkdownTokenSource {
             lexer,
             trivia_list: vec![],

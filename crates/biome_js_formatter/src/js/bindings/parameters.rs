@@ -117,8 +117,8 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
 impl FormatAnyJsParameters {
     fn l_paren_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => parameters.l_paren_token(),
-            FormatAnyJsParameters::JsConstructorParameters(parameters) => {
+            Self::JsParameters(parameters) => parameters.l_paren_token(),
+            Self::JsConstructorParameters(parameters) => {
                 parameters.l_paren_token()
             }
         }
@@ -126,10 +126,10 @@ impl FormatAnyJsParameters {
 
     fn list(&self) -> AnyJsParameterList {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => {
+            Self::JsParameters(parameters) => {
                 AnyJsParameterList::from(parameters.items())
             }
-            FormatAnyJsParameters::JsConstructorParameters(parameters) => {
+            Self::JsConstructorParameters(parameters) => {
                 AnyJsParameterList::from(parameters.parameters())
             }
         }
@@ -137,8 +137,8 @@ impl FormatAnyJsParameters {
 
     fn r_paren_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => parameters.r_paren_token(),
-            FormatAnyJsParameters::JsConstructorParameters(parameters) => {
+            Self::JsParameters(parameters) => parameters.r_paren_token(),
+            Self::JsConstructorParameters(parameters) => {
                 parameters.r_paren_token()
             }
         }
@@ -147,11 +147,11 @@ impl FormatAnyJsParameters {
     /// Returns `true` for function parameters if the function is an argument of a [test `CallExpression`](is_test_call_expression).
     fn is_in_test_call(&self) -> SyntaxResult<bool> {
         let result = match self {
-            FormatAnyJsParameters::JsParameters(parameters) => match parameters.syntax().parent() {
+            Self::JsParameters(parameters) => match parameters.syntax().parent() {
                 Some(function) => is_test_call_argument(&function)?,
                 None => false,
             },
-            FormatAnyJsParameters::JsConstructorParameters(_) => false,
+            Self::JsConstructorParameters(_) => false,
         };
 
         Ok(result)
@@ -159,18 +159,18 @@ impl FormatAnyJsParameters {
 
     fn as_arrow_function_expression(&self) -> Option<JsArrowFunctionExpression> {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => parameters
+            Self::JsParameters(parameters) => parameters
                 .syntax()
                 .parent()
                 .and_then(JsArrowFunctionExpression::cast),
-            FormatAnyJsParameters::JsConstructorParameters(_) => None,
+            Self::JsConstructorParameters(_) => None,
         }
     }
 
     fn syntax(&self) -> &JsSyntaxNode {
         match self {
-            FormatAnyJsParameters::JsParameters(parameters) => parameters.syntax(),
-            FormatAnyJsParameters::JsConstructorParameters(parameters) => parameters.syntax(),
+            Self::JsParameters(parameters) => parameters.syntax(),
+            Self::JsConstructorParameters(parameters) => parameters.syntax(),
         }
     }
 }

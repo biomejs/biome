@@ -540,29 +540,29 @@ pub enum MigrateSubCommand {
 
 impl MigrateSubCommand {
     pub const fn is_prettier(&self) -> bool {
-        matches!(self, MigrateSubCommand::Prettier)
+        matches!(self, Self::Prettier)
     }
 }
 
 impl BiomeCommand {
     const fn cli_options(&self) -> Option<&CliOptions> {
         match self {
-            BiomeCommand::Version(cli_options)
-            | BiomeCommand::Rage(cli_options, ..)
-            | BiomeCommand::Check { cli_options, .. }
-            | BiomeCommand::Lint { cli_options, .. }
-            | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Migrate { cli_options, .. }
-            | BiomeCommand::Search { cli_options, .. } => Some(cli_options),
-            BiomeCommand::LspProxy { .. }
-            | BiomeCommand::Start { .. }
-            | BiomeCommand::Stop
-            | BiomeCommand::Init(_)
-            | BiomeCommand::Explain { .. }
-            | BiomeCommand::RunServer { .. }
-            | BiomeCommand::Clean { .. }
-            | BiomeCommand::PrintSocket => None,
+            Self::Version(cli_options)
+            | Self::Rage(cli_options, ..)
+            | Self::Check { cli_options, .. }
+            | Self::Lint { cli_options, .. }
+            | Self::Ci { cli_options, .. }
+            | Self::Format { cli_options, .. }
+            | Self::Migrate { cli_options, .. }
+            | Self::Search { cli_options, .. } => Some(cli_options),
+            Self::LspProxy { .. }
+            | Self::Start { .. }
+            | Self::Stop
+            | Self::Init(_)
+            | Self::Explain { .. }
+            | Self::RunServer { .. }
+            | Self::Clean { .. }
+            | Self::PrintSocket => None,
         }
     }
 
@@ -575,7 +575,7 @@ impl BiomeCommand {
                 }
                 // We want force colors in CI, to give e better UX experience
                 // Unless users explicitly set the colors flag
-                if matches!(self, BiomeCommand::Ci { .. }) && cli_options.colors.is_none() {
+                if matches!(self, Self::Ci { .. }) && cli_options.colors.is_none() {
                     return Some(&ColorsArg::Force);
                 }
                 // Normal behaviors
@@ -587,7 +587,7 @@ impl BiomeCommand {
 
     pub const fn get_threads(&self) -> Option<usize> {
         match self {
-            BiomeCommand::Ci { threads, .. } => *threads,
+            Self::Ci { threads, .. } => *threads,
             _ => None,
         }
     }

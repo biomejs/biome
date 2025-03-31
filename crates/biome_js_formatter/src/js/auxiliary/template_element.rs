@@ -187,17 +187,17 @@ impl Format<JsFormatContext> for FormatTemplateElement {
 impl AnyTemplateElement {
     fn dollar_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyTemplateElement::JsTemplateElement(template) => template.dollar_curly_token(),
-            AnyTemplateElement::TsTemplateElement(template) => template.dollar_curly_token(),
+            Self::JsTemplateElement(template) => template.dollar_curly_token(),
+            Self::TsTemplateElement(template) => template.dollar_curly_token(),
         }
     }
 
     fn inner_syntax(&self) -> SyntaxResult<JsSyntaxNode> {
         match self {
-            AnyTemplateElement::JsTemplateElement(template) => {
+            Self::JsTemplateElement(template) => {
                 template.expression().map(AstNode::into_syntax)
             }
-            AnyTemplateElement::TsTemplateElement(template) => {
+            Self::TsTemplateElement(template) => {
                 template.ty().map(AstNode::into_syntax)
             }
         }
@@ -205,15 +205,15 @@ impl AnyTemplateElement {
 
     fn expression(&self) -> Option<AnyJsExpression> {
         match self {
-            AnyTemplateElement::JsTemplateElement(template) => template.expression().ok(),
-            AnyTemplateElement::TsTemplateElement(_) => None,
+            Self::JsTemplateElement(template) => template.expression().ok(),
+            Self::TsTemplateElement(_) => None,
         }
     }
 
     fn r_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyTemplateElement::JsTemplateElement(template) => template.r_curly_token(),
-            AnyTemplateElement::TsTemplateElement(template) => template.r_curly_token(),
+            Self::JsTemplateElement(template) => template.r_curly_token(),
+            Self::TsTemplateElement(template) => template.r_curly_token(),
         }
     }
 

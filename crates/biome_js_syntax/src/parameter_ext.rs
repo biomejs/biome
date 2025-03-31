@@ -67,13 +67,13 @@ pub enum AnyJsParameterList {
 
 impl From<JsParameterList> for AnyJsParameterList {
     fn from(list: JsParameterList) -> Self {
-        AnyJsParameterList::JsParameterList(list)
+        Self::JsParameterList(list)
     }
 }
 
 impl From<JsConstructorParameterList> for AnyJsParameterList {
     fn from(list: JsConstructorParameterList) -> Self {
-        AnyJsParameterList::JsConstructorParameterList(list)
+        Self::JsConstructorParameterList(list)
     }
 }
 
@@ -134,8 +134,8 @@ impl AnyJsParameterList {
     /// Returns the length of the parameter list.
     pub fn len(&self) -> usize {
         match self {
-            AnyJsParameterList::JsParameterList(parameters) => parameters.len(),
-            AnyJsParameterList::JsConstructorParameterList(parameters) => parameters.len(),
+            Self::JsParameterList(parameters) => parameters.len(),
+            Self::JsConstructorParameterList(parameters) => parameters.len(),
         }
     }
 
@@ -184,8 +184,8 @@ impl AnyJsParameterList {
     /// Returns `true` if the parameter list contains no parameters, false otherwise.
     pub fn is_empty(&self) -> bool {
         match self {
-            AnyJsParameterList::JsParameterList(parameters) => parameters.is_empty(),
-            AnyJsParameterList::JsConstructorParameterList(parameters) => parameters.is_empty(),
+            Self::JsParameterList(parameters) => parameters.is_empty(),
+            Self::JsConstructorParameterList(parameters) => parameters.is_empty(),
         }
     }
 
@@ -232,10 +232,10 @@ impl AnyJsParameterList {
     /// Returns the first parameter in the parameter list if it exists.
     pub fn first(&self) -> Option<SyntaxResult<AnyParameter>> {
         Some(match self {
-            AnyJsParameterList::JsParameterList(parameters) => {
+            Self::JsParameterList(parameters) => {
                 parameters.first()?.map(|parameter| parameter.into())
             }
-            AnyJsParameterList::JsConstructorParameterList(parameters) => {
+            Self::JsConstructorParameterList(parameters) => {
                 parameters.first()?.map(|parameter| parameter.into())
             }
         })
@@ -283,10 +283,10 @@ impl AnyJsParameterList {
     ///
     pub fn iter(&self) -> AnyJsParameterListNodeIter {
         match self {
-            AnyJsParameterList::JsParameterList(list) => {
+            Self::JsParameterList(list) => {
                 AnyJsParameterListNodeIter::JsParameterList(list.iter())
             }
-            AnyJsParameterList::JsConstructorParameterList(list) => {
+            Self::JsConstructorParameterList(list) => {
                 AnyJsParameterListNodeIter::JsConstructorParameterList(list.iter())
             }
         }
@@ -335,10 +335,10 @@ impl AnyJsParameterList {
     ///
     pub fn last(&self) -> Option<SyntaxResult<AnyParameter>> {
         Some(match self {
-            AnyJsParameterList::JsParameterList(parameters) => {
+            Self::JsParameterList(parameters) => {
                 parameters.last()?.map(|parameter| parameter.into())
             }
-            AnyJsParameterList::JsConstructorParameterList(parameters) => {
+            Self::JsConstructorParameterList(parameters) => {
                 parameters.last()?.map(|parameter| parameter.into())
             }
         })
@@ -434,10 +434,10 @@ impl Iterator for AnyJsParameterListNodeIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         Some(match self {
-            AnyJsParameterListNodeIter::JsParameterList(inner) => {
+            Self::JsParameterList(inner) => {
                 inner.next()?.map(AnyParameter::from)
             }
-            AnyJsParameterListNodeIter::JsConstructorParameterList(inner) => {
+            Self::JsConstructorParameterList(inner) => {
                 inner.next()?.map(AnyParameter::from)
             }
         })
@@ -454,7 +454,7 @@ declare_node_union! {
 impl AnyParameter {
     pub fn binding(&self) -> Option<AnyJsBindingPattern> {
         match self {
-            AnyParameter::AnyJsConstructorParameter(parameter) => match parameter {
+            Self::AnyJsConstructorParameter(parameter) => match parameter {
                 AnyJsConstructorParameter::AnyJsFormalParameter(parameter) => {
                     parameter.as_js_formal_parameter()?.binding().ok()
                 }
@@ -466,7 +466,7 @@ impl AnyParameter {
                     .binding()
                     .ok(),
             },
-            AnyParameter::AnyJsParameter(parameter) => match parameter {
+            Self::AnyJsParameter(parameter) => match parameter {
                 AnyJsParameter::AnyJsFormalParameter(parameter) => {
                     parameter.as_js_formal_parameter()?.binding().ok()
                 }
@@ -488,9 +488,9 @@ impl AnyJsConstructorParameter {
     /// Returns the list of decorators of the parameter if the parameter is decorated.
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
-            AnyJsConstructorParameter::AnyJsFormalParameter(parameter) => parameter.decorators(),
-            AnyJsConstructorParameter::JsRestParameter(parameter) => Some(parameter.decorators()),
-            AnyJsConstructorParameter::TsPropertyParameter(parameter) => {
+            Self::AnyJsFormalParameter(parameter) => parameter.decorators(),
+            Self::JsRestParameter(parameter) => Some(parameter.decorators()),
+            Self::TsPropertyParameter(parameter) => {
                 Some(parameter.decorators())
             }
         }
@@ -505,11 +505,11 @@ impl AnyJsConstructorParameter {
     /// Returns the type annotation of the parameter if any.
     pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
         match self {
-            AnyJsConstructorParameter::AnyJsFormalParameter(parameter) => {
+            Self::AnyJsFormalParameter(parameter) => {
                 parameter.type_annotation()
             }
-            AnyJsConstructorParameter::JsRestParameter(parameter) => parameter.type_annotation(),
-            AnyJsConstructorParameter::TsPropertyParameter(parameter) => {
+            Self::JsRestParameter(parameter) => parameter.type_annotation(),
+            Self::TsPropertyParameter(parameter) => {
                 parameter.formal_parameter().ok()?.type_annotation()
             }
         }
@@ -520,9 +520,9 @@ impl AnyJsParameter {
     /// Returns the list of decorators of the parameter if the parameter is decorated.
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
-            AnyJsParameter::AnyJsFormalParameter(parameter) => parameter.decorators(),
-            AnyJsParameter::JsRestParameter(parameter) => Some(parameter.decorators()),
-            AnyJsParameter::TsThisParameter(_) => None,
+            Self::AnyJsFormalParameter(parameter) => parameter.decorators(),
+            Self::JsRestParameter(parameter) => Some(parameter.decorators()),
+            Self::TsThisParameter(_) => None,
         }
     }
 
@@ -537,20 +537,20 @@ impl AnyJsFormalParameter {
     /// Returns the list of decorators of the parameter if the parameter is decorated.
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
-            AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
+            Self::JsBogusParameter(_) | Self::JsMetavariable(_) => {
                 None
             }
-            AnyJsFormalParameter::JsFormalParameter(parameter) => Some(parameter.decorators()),
+            Self::JsFormalParameter(parameter) => Some(parameter.decorators()),
         }
     }
 
     /// Returns the type annotation of the parameter if any.
     pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
         match self {
-            AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
+            Self::JsBogusParameter(_) | Self::JsMetavariable(_) => {
                 None
             }
-            AnyJsFormalParameter::JsFormalParameter(parameter) => parameter.type_annotation(),
+            Self::JsFormalParameter(parameter) => parameter.type_annotation(),
         }
     }
 }

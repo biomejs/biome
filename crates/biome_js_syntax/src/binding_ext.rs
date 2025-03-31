@@ -112,72 +112,72 @@ impl AnyJsBindingDeclaration {
     /// assert!(!class_decl.is_mergeable(&enum_decl));
     /// assert!(!enum_decl.is_mergeable(&class_decl));
     /// ```
-    pub const fn is_mergeable(&self, other: &AnyJsBindingDeclaration) -> bool {
+    pub const fn is_mergeable(&self, other: &Self) -> bool {
         Self::can_merge(self, other) || Self::can_merge(other, self)
     }
 
     /// Please use `is_mergeable`.
     /// `can_merge` is sensible to the order of arguments.
-    const fn can_merge(a: &AnyJsBindingDeclaration, b: &AnyJsBindingDeclaration) -> bool {
+    const fn can_merge(a: &Self, b: &Self) -> bool {
         match (a, b) {
             (
-                AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_),
-                AnyJsBindingDeclaration::JsFunctionDeclaration(_)
-                | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_),
+                Self::TsDeclareFunctionDeclaration(_),
+                Self::JsFunctionDeclaration(_)
+                | Self::TsDeclareFunctionDeclaration(_),
             ) => true,
             (
-                AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_),
-                AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
-                | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_),
+                Self::TsDeclareFunctionExportDefaultDeclaration(_),
+                Self::JsFunctionExportDefaultDeclaration(_)
+                | Self::TsDeclareFunctionExportDefaultDeclaration(_),
             ) => true,
             (
-                AnyJsBindingDeclaration::TsEnumDeclaration(_),
-                AnyJsBindingDeclaration::TsEnumDeclaration(_),
+                Self::TsEnumDeclaration(_),
+                Self::TsEnumDeclaration(_),
             ) => true,
             (
-                AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
-                | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
-                | AnyJsBindingDeclaration::TsModuleDeclaration(_)
-                | AnyJsBindingDeclaration::TsTypeParameter(_),
-                AnyJsBindingDeclaration::JsFunctionDeclaration(_)
-                | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
-                | AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
-                | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
-                | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
-                | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-                | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-                | AnyJsBindingDeclaration::JsVariableDeclarator(_)
-                | AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
-                | AnyJsBindingDeclaration::JsFormalParameter(_)
-                | AnyJsBindingDeclaration::JsRestParameter(_)
-                | AnyJsBindingDeclaration::TsPropertyParameter(_)
-                | AnyJsBindingDeclaration::JsCatchDeclaration(_)
-                | AnyJsBindingDeclaration::TsModuleDeclaration(_),
+                Self::TsTypeAliasDeclaration(_)
+                | Self::TsInterfaceDeclaration(_)
+                | Self::TsModuleDeclaration(_)
+                | Self::TsTypeParameter(_),
+                Self::JsFunctionDeclaration(_)
+                | Self::JsFunctionExportDefaultDeclaration(_)
+                | Self::JsArrayBindingPatternElement(_)
+                | Self::JsArrayBindingPatternRestElement(_)
+                | Self::JsObjectBindingPatternProperty(_)
+                | Self::JsObjectBindingPatternRest(_)
+                | Self::JsObjectBindingPatternShorthandProperty(_)
+                | Self::JsVariableDeclarator(_)
+                | Self::JsArrowFunctionExpression(_)
+                | Self::JsFormalParameter(_)
+                | Self::JsRestParameter(_)
+                | Self::TsPropertyParameter(_)
+                | Self::JsCatchDeclaration(_)
+                | Self::TsModuleDeclaration(_),
             ) => true,
             (
-                AnyJsBindingDeclaration::TsInterfaceDeclaration(_),
-                AnyJsBindingDeclaration::JsClassDeclaration(_)
-                | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-                | AnyJsBindingDeclaration::TsInterfaceDeclaration(_),
+                Self::TsInterfaceDeclaration(_),
+                Self::JsClassDeclaration(_)
+                | Self::TsDeclareFunctionDeclaration(_)
+                | Self::TsInterfaceDeclaration(_),
             ) => true,
             (
-                AnyJsBindingDeclaration::TsModuleDeclaration(_),
-                AnyJsBindingDeclaration::JsClassDeclaration(_)
-                | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-                | AnyJsBindingDeclaration::TsEnumDeclaration(_)
-                | AnyJsBindingDeclaration::TsInterfaceDeclaration(_),
+                Self::TsModuleDeclaration(_),
+                Self::JsClassDeclaration(_)
+                | Self::TsDeclareFunctionDeclaration(_)
+                | Self::TsEnumDeclaration(_)
+                | Self::TsInterfaceDeclaration(_),
             ) => true,
             (_, _) => false,
         }
     }
 
-    pub fn parent_binding_pattern_declaration(&self) -> Option<AnyJsBindingDeclaration> {
+    pub fn parent_binding_pattern_declaration(&self) -> Option<Self> {
         match self {
-            AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
-            | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+            Self::JsArrayBindingPatternElement(_)
+            | Self::JsArrayBindingPatternRestElement(_)
+            | Self::JsObjectBindingPatternProperty(_)
+            | Self::JsObjectBindingPatternRest(_)
+            | Self::JsObjectBindingPatternShorthandProperty(_) => {
                 parent_binding_pattern_declaration(self.syntax())
             }
             _ => None,
@@ -189,27 +189,27 @@ impl AnyJsBindingDeclaration {
     pub const fn is_parameter_like(&self) -> bool {
         matches!(
             self,
-            AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
-                | AnyJsBindingDeclaration::JsFormalParameter(_)
-                | AnyJsBindingDeclaration::JsRestParameter(_)
-                | AnyJsBindingDeclaration::JsBogusParameter(_)
-                | AnyJsBindingDeclaration::TsPropertyParameter(_)
+            Self::JsArrowFunctionExpression(_)
+                | Self::JsFormalParameter(_)
+                | Self::JsRestParameter(_)
+                | Self::JsBogusParameter(_)
+                | Self::TsPropertyParameter(_)
         )
     }
 
     /// Returns `true` if `self` is a type parameter.
     pub const fn is_type_parameter(&self) -> bool {
-        matches!(self, AnyJsBindingDeclaration::TsTypeParameter(_))
+        matches!(self, Self::TsTypeParameter(_))
     }
 
     /// Returns the export statement if this declaration is directly exported.
     pub fn export(&self) -> Option<JsExport> {
         let maybe_export = match self {
-            AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
-            | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+            Self::JsArrayBindingPatternElement(_)
+            | Self::JsArrayBindingPatternRestElement(_)
+            | Self::JsObjectBindingPatternProperty(_)
+            | Self::JsObjectBindingPatternRest(_)
+            | Self::JsObjectBindingPatternShorthandProperty(_) => {
                 return parent_binding_pattern_declaration(self.syntax())
                     .and_then(|decl| decl.export());
             }

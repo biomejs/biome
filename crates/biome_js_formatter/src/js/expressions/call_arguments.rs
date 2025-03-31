@@ -186,7 +186,7 @@ impl FormatCallArgument {
     /// Returns `true` if this argument contains any content that forces a group to [`break`](FormatElements::will_break).
     fn will_break(&mut self, f: &mut JsFormatter) -> bool {
         match &self {
-            FormatCallArgument::Default {
+            Self::Default {
                 element,
                 leading_lines,
                 ..
@@ -198,18 +198,18 @@ impl FormatCallArgument {
                     _ => false,
                 };
 
-                *self = FormatCallArgument::Inspected {
+                *self = Self::Inspected {
                     content: interned,
                     element: element.clone(),
                     leading_lines: *leading_lines,
                 };
                 breaks
             }
-            FormatCallArgument::Inspected {
+            Self::Inspected {
                 content: Ok(Some(result)),
                 ..
             } => result.will_break(),
-            FormatCallArgument::Inspected { .. } => false,
+            Self::Inspected { .. } => false,
         }
     }
 
@@ -222,7 +222,7 @@ impl FormatCallArgument {
     /// If [`cache_function_body`](Self::cache_function_body) or [`will_break`](Self::will_break) has been called on this argument before.
     fn cache_function_body(&mut self, f: &mut JsFormatter) {
         match &self {
-            FormatCallArgument::Default {
+            Self::Default {
                 element,
                 leading_lines,
                 ..
@@ -232,13 +232,13 @@ impl FormatCallArgument {
                     Ok(())
                 }));
 
-                *self = FormatCallArgument::Inspected {
+                *self = Self::Inspected {
                     content: interned,
                     element: element.clone(),
                     leading_lines: *leading_lines,
                 };
             }
-            FormatCallArgument::Inspected { .. } => {
+            Self::Inspected { .. } => {
                 panic!("`cache` must be called before inspecting or formatting the element.");
             }
         }
@@ -251,14 +251,14 @@ impl FormatCallArgument {
     ) -> FormatResult<()> {
         match self {
             // Re-use the cached formatted output if there is any.
-            FormatCallArgument::Inspected { content, .. } => match content.clone()? {
+            Self::Inspected { content, .. } => match content.clone()? {
                 Some(element) => {
                     f.write_element(element)?;
                     Ok(())
                 }
                 None => Ok(()),
             },
-            FormatCallArgument::Default {
+            Self::Default {
                 element, is_last, ..
             } => {
                 match element.node()? {
@@ -307,16 +307,16 @@ impl FormatCallArgument {
     /// Returns the number of leading lines before the argument's node
     fn leading_lines(&self) -> usize {
         match self {
-            FormatCallArgument::Default { leading_lines, .. } => *leading_lines,
-            FormatCallArgument::Inspected { leading_lines, .. } => *leading_lines,
+            Self::Default { leading_lines, .. } => *leading_lines,
+            Self::Inspected { leading_lines, .. } => *leading_lines,
         }
     }
 
     /// Returns the [`separated element`](AstSeparatedElement) of this argument.
     fn element(&self) -> &AstSeparatedElement<JsLanguage, AnyJsCallArgument> {
         match self {
-            FormatCallArgument::Default { element, .. } => element,
-            FormatCallArgument::Inspected { element, .. } => element,
+            Self::Default { element, .. } => element,
+            Self::Inspected { element, .. } => element,
         }
     }
 }

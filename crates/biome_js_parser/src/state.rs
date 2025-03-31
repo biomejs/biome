@@ -17,7 +17,7 @@ pub(crate) enum LabelledItem {
 impl LabelledItem {
     pub(crate) fn range(&self) -> &TextRange {
         match self {
-            LabelledItem::Iteration(range) | LabelledItem::Other(range) => range,
+            Self::Iteration(range) | Self::Other(range) => range,
         }
     }
 }
@@ -34,13 +34,13 @@ pub(crate) enum ExportDefaultItemKind {
 }
 impl ExportDefaultItemKind {
     pub(crate) fn is_interface(&self) -> bool {
-        matches!(self, ExportDefaultItemKind::Interface)
+        matches!(self, Self::Interface)
     }
 
-    pub const fn is_mergeable(&self, other: &ExportDefaultItemKind) -> bool {
+    pub const fn is_mergeable(&self, other: &Self) -> bool {
         Self::can_merge(self, other) || Self::can_merge(other, self)
     }
-    const fn can_merge(a: &ExportDefaultItemKind, b: &ExportDefaultItemKind) -> bool {
+    const fn can_merge(a: &Self, b: &Self) -> bool {
         match (a, b) {
             // test ts decorator_export_default_function_and_function_overload
             // export default function a():void;
@@ -48,9 +48,9 @@ impl ExportDefaultItemKind {
             // export default function a(v?: any){
             // }
             (
-                ExportDefaultItemKind::FunctionOverload,
-                ExportDefaultItemKind::FunctionDeclaration
-                | ExportDefaultItemKind::FunctionOverload,
+                Self::FunctionOverload,
+                Self::FunctionDeclaration
+                | Self::FunctionOverload,
             ) => true,
             // test ts decorator_export_default_function_and_interface
             // export default interface A{};
@@ -66,10 +66,10 @@ impl ExportDefaultItemKind {
             // export default interface A{};
             // export default interface A{};
             (
-                ExportDefaultItemKind::Interface,
-                ExportDefaultItemKind::ClassDeclaration
-                | ExportDefaultItemKind::FunctionDeclaration
-                | ExportDefaultItemKind::Interface,
+                Self::Interface,
+                Self::ClassDeclaration
+                | Self::FunctionDeclaration
+                | Self::Interface,
             ) => true,
             (_, _) => false,
         }
@@ -128,7 +128,7 @@ pub(crate) enum StrictMode {
 
 impl JsParserState {
     pub fn new(source_type: &JsFileSource) -> Self {
-        let mut state = JsParserState {
+        let mut state = Self {
             parsing_context: ParsingContextFlags::TOP_LEVEL,
             label_set: IndexMap::new(),
             strict: source_type
@@ -383,25 +383,25 @@ impl SignatureFlags {
         Self(BitFlags::EMPTY)
     }
 
-    pub fn contains(&self, other: impl Into<SignatureFlags>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 }
 
 impl From<SignatureFlags> for ParsingContextFlags {
     fn from(flags: SignatureFlags) -> Self {
-        let mut parsing_context = ParsingContextFlags::empty();
+        let mut parsing_context = Self::empty();
 
         if flags.contains(SignatureFlags::ASYNC) {
-            parsing_context |= ParsingContextFlags::IN_ASYNC;
+            parsing_context |= Self::IN_ASYNC;
         }
 
         if flags.contains(SignatureFlags::GENERATOR) {
-            parsing_context |= ParsingContextFlags::IN_GENERATOR;
+            parsing_context |= Self::IN_GENERATOR;
         }
 
         if flags.contains(SignatureFlags::CONSTRUCTOR) {
-            parsing_context |= ParsingContextFlags::IN_CONSTRUCTOR;
+            parsing_context |= Self::IN_CONSTRUCTOR;
         }
 
         parsing_context
@@ -412,7 +412,7 @@ impl BitOr for SignatureFlags {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        SignatureFlags(self.0 | rhs.0)
+        Self(self.0 | rhs.0)
     }
 }
 
@@ -486,7 +486,7 @@ impl ParsingContextFlags {
         Self(BitFlags::EMPTY)
     }
 
-    pub fn contains(&self, other: impl Into<ParsingContextFlags>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 }
@@ -495,7 +495,7 @@ impl BitOr for ParsingContextFlags {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        ParsingContextFlags(self.0 | rhs.0)
+        Self(self.0 | rhs.0)
     }
 }
 

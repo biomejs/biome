@@ -400,30 +400,30 @@ pub enum SupportKind {
 impl std::fmt::Display for SupportKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SupportKind::Supported => write!(f, "Supported"),
-            SupportKind::Ignored => write!(f, "Ignored"),
-            SupportKind::Protected => write!(f, "Protected"),
-            SupportKind::FeatureNotEnabled => write!(f, "FeatureNotEnabled"),
-            SupportKind::FileNotSupported => write!(f, "FileNotSupported"),
+            Self::Supported => write!(f, "Supported"),
+            Self::Ignored => write!(f, "Ignored"),
+            Self::Protected => write!(f, "Protected"),
+            Self::FeatureNotEnabled => write!(f, "FeatureNotEnabled"),
+            Self::FileNotSupported => write!(f, "FileNotSupported"),
         }
     }
 }
 
 impl SupportKind {
     pub const fn is_supported(&self) -> bool {
-        matches!(self, SupportKind::Supported)
+        matches!(self, Self::Supported)
     }
     pub const fn is_not_enabled(&self) -> bool {
-        matches!(self, SupportKind::FeatureNotEnabled)
+        matches!(self, Self::FeatureNotEnabled)
     }
     pub const fn is_not_supported(&self) -> bool {
-        matches!(self, SupportKind::FileNotSupported)
+        matches!(self, Self::FileNotSupported)
     }
     pub const fn is_ignored(&self) -> bool {
-        matches!(self, SupportKind::Ignored)
+        matches!(self, Self::Ignored)
     }
     pub const fn is_protected(&self) -> bool {
-        matches!(self, SupportKind::Protected)
+        matches!(self, Self::Protected)
     }
 }
 
@@ -443,11 +443,11 @@ pub enum FeatureKind {
 impl std::fmt::Display for FeatureKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FeatureKind::Format => write!(f, "Format"),
-            FeatureKind::Lint => write!(f, "Lint"),
-            FeatureKind::Search => write!(f, "Search"),
-            FeatureKind::Assist => write!(f, "Assist"),
-            FeatureKind::Debug => write!(f, "Debug"),
+            Self::Format => write!(f, "Format"),
+            Self::Lint => write!(f, "Lint"),
+            Self::Search => write!(f, "Search"),
+            Self::Assist => write!(f, "Assist"),
+            Self::Debug => write!(f, "Debug"),
         }
     }
 }
@@ -490,7 +490,7 @@ impl From<SmallVec<[FeatureKind; 6]>> for FeatureName {
     fn from(value: SmallVec<[FeatureKind; 6]>) -> Self {
         value
             .into_iter()
-            .fold(FeatureName::empty(), |mut acc, kind| {
+            .fold(Self::empty(), |mut acc, kind| {
                 acc.insert(kind);
                 acc
             })

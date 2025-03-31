@@ -229,7 +229,7 @@ impl GritQueryEffect {
         let result = if file.len() == 1 {
             let file = file.last().unwrap();
             if file.new {
-                Some(GritQueryEffect::CreateFile(CreateFile::new(
+                Some(Self::CreateFile(CreateFile::new(
                     &file.name,
                     &file.tree.source(),
                 )))
@@ -237,7 +237,7 @@ impl GritQueryEffect {
                 if ranges.suppressed {
                     None
                 } else {
-                    Some(GritQueryEffect::Match(Match::from_file_ranges(
+                    Some(Self::Match(Match::from_file_ranges(
                         ranges, &file.name,
                     )))
                 }
@@ -245,7 +245,7 @@ impl GritQueryEffect {
                 None
             }
         } else {
-            Some(GritQueryEffect::Rewrite(Rewrite::from_file(
+            Some(Self::Rewrite(Rewrite::from_file(
                 file.first().unwrap(),
                 file.last().unwrap(),
             )?))
@@ -309,7 +309,7 @@ pub struct Rewrite {
 
 impl From<Rewrite> for GritQueryEffect {
     fn from(value: Rewrite) -> Self {
-        GritQueryEffect::Rewrite(value)
+        Self::Rewrite(value)
     }
 }
 
@@ -331,7 +331,7 @@ impl Rewrite {
             return Err(GritPatternError::new("cannot have rewrite without matches"));
         };
         let rewritten = OutputFile::from_file(rewritten_file);
-        Ok(Rewrite::new(original, rewritten))
+        Ok(Self::new(original, rewritten))
     }
 }
 
@@ -343,13 +343,13 @@ pub struct CreateFile {
 
 impl From<CreateFile> for GritQueryEffect {
     fn from(value: CreateFile) -> Self {
-        GritQueryEffect::CreateFile(value)
+        Self::CreateFile(value)
     }
 }
 
 impl CreateFile {
     fn new(path: &Path, body: &str) -> Self {
-        CreateFile {
+        Self {
             rewritten: OutputFile::new(path, body, None),
             ranges: None,
         }
