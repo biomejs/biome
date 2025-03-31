@@ -1,14 +1,14 @@
 use super::{eslint_eslint::ShorthandVec, node};
 use crate::CliDiagnostic;
 use crate::diagnostics::MigrationDiagnostic;
+use anyhow::{Context, Error};
 use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, Expand, IndentWidth, LineEnding, LineWidth,
-    ParseFormatNumberError, QuoteStyle,
+    AttributePosition, BracketSpacing, Expand, IndentWidth, LineEnding, LineWidth, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
@@ -208,12 +208,14 @@ impl From<ObjectWrap> for Expand {
 }
 
 impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
-    type Error = ParseFormatNumberError;
-    fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
+    type Error = Error;
+    fn try_from(value: PrettierConfiguration) -> anyhow::Result<Self> {
         let mut result = biome_configuration::Configuration::default();
 
-        let line_width = LineWidth::try_from(value.print_width)?;
-        let indent_width = IndentWidth::try_from(value.tab_width)?;
+        let line_width = LineWidth::try_from(value.print_width)
+            .with_context(|| "top-level Prettier configuration")?;
+        let indent_width = IndentWidth::try_from(value.tab_width)
+            .with_context(|| "top-level Prettier configuration")?;
         let indent_style = if value.use_tabs {
             biome_formatter::IndentStyle::Tab
         } else {
@@ -278,7 +280,12 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
         if !value.overrides.is_empty() {
             let mut overrides = biome_configuration::Overrides::default();
             for override_elt in value.overrides {
-                overrides.0.push(override_elt.try_into()?);
+                let sources = override_elt.files.clone();
+                overrides.0.push(
+                    override_elt
+                        .try_into()
+                        .with_context(|| format!("override element matching {sources:?}"))?,
+                );
             }
             result.overrides = Some(overrides);
         }
@@ -287,8 +294,8 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
 }
 
 impl TryFrom<Override> for biome_configuration::OverridePattern {
-    type Error = ParseFormatNumberError;
-    fn try_from(Override { files, options }: Override) -> Result<Self, Self::Error> {
+    type Error = Error;
+    fn try_from(Override { files, options }: Override) -> anyhow::Result<Self> {
         let mut result = biome_configuration::OverridePattern {
             includes: Some(biome_configuration::OverrideGlobs::Globs(
                 files
@@ -389,7 +396,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
 /// A Prettier config can be embedded in `package.json`
 const PACKAGE_JSON: &str = "package.json";
 
-/// Prettie config files ordered by precedence
+/// Prettier config files ordered by precedence
 const CONFIG_FILES: [&str; 8] = [
     ".prettierrc",
     ".prettierrc.json",

@@ -67,6 +67,8 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
                     CodeActionKind::from(SUPPRESSION_INLINE_ACTION_CATEGORY),
                     // import sorting
                     CodeActionKind::from("source.organizeImports.biome"),
+                    // fix all
+                    CodeActionKind::from("source.fixAll.biome"),
                     // general refactors
                     CodeActionKind::from("refactor.biome"),
                     CodeActionKind::from("refactor.extract.biome"),

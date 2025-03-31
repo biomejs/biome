@@ -1,7 +1,8 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::analyzer::{
-    RuleConfiguration, RuleFixConfiguration, RuleGroupExt, RulePlainConfiguration, SeverityOrGroup,
+    GroupPlainConfiguration, RuleConfiguration, RuleFixConfiguration, RuleGroupExt,
+    RulePlainConfiguration, SeverityOrGroup,
 };
 use biome_analyze::{RuleFilter, options::RuleOptions};
 use biome_deserialize_macros::{Deserializable, Merge};
@@ -1121,6 +1122,47 @@ impl RuleGroupExt for A11y {
         }
     }
 }
+impl From<GroupPlainConfiguration> for A11y {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self {
+            recommended: None,
+            no_access_key: Some(value.into()),
+            no_aria_hidden_on_focusable: Some(value.into()),
+            no_aria_unsupported_elements: Some(value.into()),
+            no_autofocus: Some(value.into()),
+            no_blank_target: Some(value.into()),
+            no_distracting_elements: Some(value.into()),
+            no_header_scope: Some(value.into()),
+            no_interactive_element_to_noninteractive_role: Some(value.into()),
+            no_label_without_control: Some(value.into()),
+            no_noninteractive_element_to_interactive_role: Some(value.into()),
+            no_noninteractive_tabindex: Some(value.into()),
+            no_positive_tabindex: Some(value.into()),
+            no_redundant_alt: Some(value.into()),
+            no_redundant_roles: Some(value.into()),
+            no_svg_without_title: Some(value.into()),
+            use_alt_text: Some(value.into()),
+            use_anchor_content: Some(value.into()),
+            use_aria_activedescendant_with_tabindex: Some(value.into()),
+            use_aria_props_for_role: Some(value.into()),
+            use_button_type: Some(value.into()),
+            use_focusable_interactive: Some(value.into()),
+            use_generic_font_names: Some(value.into()),
+            use_heading_content: Some(value.into()),
+            use_html_lang: Some(value.into()),
+            use_iframe_title: Some(value.into()),
+            use_key_with_click_events: Some(value.into()),
+            use_key_with_mouse_events: Some(value.into()),
+            use_media_caption: Some(value.into()),
+            use_semantic_elements: Some(value.into()),
+            use_valid_anchor: Some(value.into()),
+            use_valid_aria_props: Some(value.into()),
+            use_valid_aria_role: Some(value.into()),
+            use_valid_aria_values: Some(value.into()),
+            use_valid_lang: Some(value.into()),
+        }
+    }
+}
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
@@ -1855,6 +1897,46 @@ impl RuleGroupExt for Complexity {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
+        }
+    }
+}
+impl From<GroupPlainConfiguration> for Complexity {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self {
+            recommended: None,
+            no_adjacent_spaces_in_regex: Some(value.into()),
+            no_banned_types: Some(value.into()),
+            no_empty_type_parameters: Some(value.into()),
+            no_excessive_cognitive_complexity: Some(value.into()),
+            no_excessive_nested_test_suites: Some(value.into()),
+            no_extra_boolean_cast: Some(value.into()),
+            no_for_each: Some(value.into()),
+            no_static_only_class: Some(value.into()),
+            no_this_in_static: Some(value.into()),
+            no_useless_catch: Some(value.into()),
+            no_useless_constructor: Some(value.into()),
+            no_useless_empty_export: Some(value.into()),
+            no_useless_fragments: Some(value.into()),
+            no_useless_label: Some(value.into()),
+            no_useless_lone_block_statements: Some(value.into()),
+            no_useless_rename: Some(value.into()),
+            no_useless_string_concat: Some(value.into()),
+            no_useless_switch_case: Some(value.into()),
+            no_useless_ternary: Some(value.into()),
+            no_useless_this_alias: Some(value.into()),
+            no_useless_type_constraint: Some(value.into()),
+            no_useless_undefined_initialization: Some(value.into()),
+            no_void: Some(value.into()),
+            no_with: Some(value.into()),
+            use_arrow_function: Some(value.into()),
+            use_date_now: Some(value.into()),
+            use_flat_map: Some(value.into()),
+            use_literal_keys: Some(value.into()),
+            use_optional_chain: Some(value.into()),
+            use_regex_literals: Some(value.into()),
+            use_simple_number_keys: Some(value.into()),
+            use_simplified_logic_expression: Some(value.into()),
+            use_while: Some(value.into()),
         }
     }
 }
@@ -3021,6 +3103,67 @@ impl RuleGroupExt for Correctness {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
+        }
+    }
+}
+impl From<GroupPlainConfiguration> for Correctness {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self {
+            recommended: None,
+            no_children_prop: Some(value.into()),
+            no_const_assign: Some(value.into()),
+            no_constant_condition: Some(value.into()),
+            no_constant_math_min_max_clamp: Some(value.into()),
+            no_constructor_return: Some(value.into()),
+            no_empty_character_class_in_regex: Some(value.into()),
+            no_empty_pattern: Some(value.into()),
+            no_flat_map_identity: Some(value.into()),
+            no_global_object_calls: Some(value.into()),
+            no_inner_declarations: Some(value.into()),
+            no_invalid_builtin_instantiation: Some(value.into()),
+            no_invalid_constructor_super: Some(value.into()),
+            no_invalid_direction_in_linear_gradient: Some(value.into()),
+            no_invalid_grid_areas: Some(value.into()),
+            no_invalid_new_builtin: Some(value.into()),
+            no_invalid_position_at_import_rule: Some(value.into()),
+            no_invalid_use_before_declaration: Some(value.into()),
+            no_new_symbol: Some(value.into()),
+            no_nodejs_modules: Some(value.into()),
+            no_nonoctal_decimal_escape: Some(value.into()),
+            no_precision_loss: Some(value.into()),
+            no_private_imports: Some(value.into()),
+            no_render_return_value: Some(value.into()),
+            no_self_assign: Some(value.into()),
+            no_setter_return: Some(value.into()),
+            no_string_case_mismatch: Some(value.into()),
+            no_switch_declarations: Some(value.into()),
+            no_undeclared_dependencies: Some(value.into()),
+            no_undeclared_variables: Some(value.into()),
+            no_unknown_function: Some(value.into()),
+            no_unknown_media_feature_name: Some(value.into()),
+            no_unknown_property: Some(value.into()),
+            no_unknown_unit: Some(value.into()),
+            no_unmatchable_anb_selector: Some(value.into()),
+            no_unreachable: Some(value.into()),
+            no_unreachable_super: Some(value.into()),
+            no_unsafe_finally: Some(value.into()),
+            no_unsafe_optional_chaining: Some(value.into()),
+            no_unused_function_parameters: Some(value.into()),
+            no_unused_imports: Some(value.into()),
+            no_unused_labels: Some(value.into()),
+            no_unused_private_class_members: Some(value.into()),
+            no_unused_variables: Some(value.into()),
+            no_useless_continue: Some(value.into()),
+            no_void_elements_with_children: Some(value.into()),
+            no_void_type_return: Some(value.into()),
+            use_array_literals: Some(value.into()),
+            use_exhaustive_dependencies: Some(value.into()),
+            use_hook_at_top_level: Some(value.into()),
+            use_import_extensions: Some(value.into()),
+            use_is_nan: Some(value.into()),
+            use_jsx_key_in_iterable: Some(value.into()),
+            use_valid_for_direction: Some(value.into()),
+            use_yield: Some(value.into()),
         }
     }
 }
@@ -4446,6 +4589,81 @@ impl RuleGroupExt for Nursery {
         }
     }
 }
+impl From<GroupPlainConfiguration> for Nursery {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self {
+            recommended: None,
+            no_await_in_loop: Some(value.into()),
+            no_bitwise_operators: Some(value.into()),
+            no_common_js: Some(value.into()),
+            no_constant_binary_expression: Some(value.into()),
+            no_descending_specificity: Some(value.into()),
+            no_destructured_props: Some(value.into()),
+            no_document_cookie: Some(value.into()),
+            no_document_import_in_page: Some(value.into()),
+            no_duplicate_custom_properties: Some(value.into()),
+            no_duplicate_else_if: Some(value.into()),
+            no_duplicate_fields: Some(value.into()),
+            no_duplicate_properties: Some(value.into()),
+            no_dynamic_namespace_import_access: Some(value.into()),
+            no_enum: Some(value.into()),
+            no_exported_imports: Some(value.into()),
+            no_floating_promises: Some(value.into()),
+            no_global_dirname_filename: Some(value.into()),
+            no_head_element: Some(value.into()),
+            no_head_import_in_document: Some(value.into()),
+            no_img_element: Some(value.into()),
+            no_import_cycles: Some(value.into()),
+            no_irregular_whitespace: Some(value.into()),
+            no_missing_var_function: Some(value.into()),
+            no_nested_ternary: Some(value.into()),
+            no_noninteractive_element_interactions: Some(value.into()),
+            no_octal_escape: Some(value.into()),
+            no_process_env: Some(value.into()),
+            no_process_global: Some(value.into()),
+            no_restricted_imports: Some(value.into()),
+            no_restricted_types: Some(value.into()),
+            no_secrets: Some(value.into()),
+            no_static_element_interactions: Some(value.into()),
+            no_substr: Some(value.into()),
+            no_template_curly_in_string: Some(value.into()),
+            no_ts_ignore: Some(value.into()),
+            no_unknown_at_rule: Some(value.into()),
+            no_unknown_pseudo_class: Some(value.into()),
+            no_unknown_pseudo_element: Some(value.into()),
+            no_unknown_type_selector: Some(value.into()),
+            no_unwanted_polyfillio: Some(value.into()),
+            no_useless_escape_in_regex: Some(value.into()),
+            no_useless_escape_in_string: Some(value.into()),
+            no_useless_string_raw: Some(value.into()),
+            no_useless_undefined: Some(value.into()),
+            no_value_at_rule: Some(value.into()),
+            use_adjacent_overload_signatures: Some(value.into()),
+            use_aria_props_supported_by_role: Some(value.into()),
+            use_at_index: Some(value.into()),
+            use_collapsed_if: Some(value.into()),
+            use_component_export_only_modules: Some(value.into()),
+            use_consistent_curly_braces: Some(value.into()),
+            use_consistent_member_accessibility: Some(value.into()),
+            use_consistent_object_definition: Some(value.into()),
+            use_deprecated_reason: Some(value.into()),
+            use_explicit_type: Some(value.into()),
+            use_exports_last: Some(value.into()),
+            use_for_component: Some(value.into()),
+            use_google_font_display: Some(value.into()),
+            use_google_font_preconnect: Some(value.into()),
+            use_guard_for_in: Some(value.into()),
+            use_named_operation: Some(value.into()),
+            use_naming_convention: Some(value.into()),
+            use_parse_int_radix: Some(value.into()),
+            use_sorted_classes: Some(value.into()),
+            use_strict_mode: Some(value.into()),
+            use_symbol_description: Some(value.into()),
+            use_trim_start_end: Some(value.into()),
+            use_valid_autocomplete: Some(value.into()),
+        }
+    }
+}
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
@@ -4607,6 +4825,18 @@ impl RuleGroupExt for Performance {
         }
     }
 }
+impl From<GroupPlainConfiguration> for Performance {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self {
+            recommended: None,
+            no_accumulating_spread: Some(value.into()),
+            no_barrel_file: Some(value.into()),
+            no_delete: Some(value.into()),
+            no_re_export_all: Some(value.into()),
+            use_top_level_regex: Some(value.into()),
+        }
+    }
+}
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
@@ -4731,6 +4961,16 @@ impl RuleGroupExt for Security {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
+        }
+    }
+}
+impl From<GroupPlainConfiguration> for Security {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self {
+            recommended: None,
+            no_dangerously_set_inner_html: Some(value.into()),
+            no_dangerously_set_inner_html_with_children: Some(value.into()),
+            no_global_eval: Some(value.into()),
         }
     }
 }
@@ -5743,6 +5983,61 @@ impl RuleGroupExt for Style {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
+        }
+    }
+}
+impl From<GroupPlainConfiguration> for Style {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self {
+            recommended: None,
+            no_arguments: Some(value.into()),
+            no_comma_operator: Some(value.into()),
+            no_default_export: Some(value.into()),
+            no_done_callback: Some(value.into()),
+            no_implicit_boolean: Some(value.into()),
+            no_inferrable_types: Some(value.into()),
+            no_namespace: Some(value.into()),
+            no_namespace_import: Some(value.into()),
+            no_negation_else: Some(value.into()),
+            no_non_null_assertion: Some(value.into()),
+            no_parameter_assign: Some(value.into()),
+            no_parameter_properties: Some(value.into()),
+            no_restricted_globals: Some(value.into()),
+            no_shouty_constants: Some(value.into()),
+            no_unused_template_literal: Some(value.into()),
+            no_useless_else: Some(value.into()),
+            no_yoda_expression: Some(value.into()),
+            use_as_const_assertion: Some(value.into()),
+            use_block_statements: Some(value.into()),
+            use_collapsed_else_if: Some(value.into()),
+            use_consistent_array_type: Some(value.into()),
+            use_consistent_builtin_instantiation: Some(value.into()),
+            use_const: Some(value.into()),
+            use_default_parameter_last: Some(value.into()),
+            use_default_switch_clause: Some(value.into()),
+            use_enum_initializers: Some(value.into()),
+            use_explicit_length_check: Some(value.into()),
+            use_exponentiation_operator: Some(value.into()),
+            use_export_type: Some(value.into()),
+            use_filenaming_convention: Some(value.into()),
+            use_for_of: Some(value.into()),
+            use_fragment_syntax: Some(value.into()),
+            use_import_type: Some(value.into()),
+            use_literal_enum_members: Some(value.into()),
+            use_naming_convention: Some(value.into()),
+            use_node_assert_strict: Some(value.into()),
+            use_nodejs_import_protocol: Some(value.into()),
+            use_number_namespace: Some(value.into()),
+            use_numeric_literals: Some(value.into()),
+            use_self_closing_elements: Some(value.into()),
+            use_shorthand_array_type: Some(value.into()),
+            use_shorthand_assign: Some(value.into()),
+            use_shorthand_function_type: Some(value.into()),
+            use_single_case_statement: Some(value.into()),
+            use_single_var_declarator: Some(value.into()),
+            use_template: Some(value.into()),
+            use_throw_new_error: Some(value.into()),
+            use_throw_only_error: Some(value.into()),
         }
     }
 }
@@ -7171,6 +7466,80 @@ impl RuleGroupExt for Suspicious {
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
+        }
+    }
+}
+impl From<GroupPlainConfiguration> for Suspicious {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        Self {
+            recommended: None,
+            no_approximative_numeric_constant: Some(value.into()),
+            no_array_index_key: Some(value.into()),
+            no_assign_in_expressions: Some(value.into()),
+            no_async_promise_executor: Some(value.into()),
+            no_catch_assign: Some(value.into()),
+            no_class_assign: Some(value.into()),
+            no_comment_text: Some(value.into()),
+            no_compare_neg_zero: Some(value.into()),
+            no_confusing_labels: Some(value.into()),
+            no_confusing_void_type: Some(value.into()),
+            no_console: Some(value.into()),
+            no_const_enum: Some(value.into()),
+            no_control_characters_in_regex: Some(value.into()),
+            no_debugger: Some(value.into()),
+            no_double_equals: Some(value.into()),
+            no_duplicate_at_import_rules: Some(value.into()),
+            no_duplicate_case: Some(value.into()),
+            no_duplicate_class_members: Some(value.into()),
+            no_duplicate_font_names: Some(value.into()),
+            no_duplicate_jsx_props: Some(value.into()),
+            no_duplicate_object_keys: Some(value.into()),
+            no_duplicate_parameters: Some(value.into()),
+            no_duplicate_selectors_keyframe_block: Some(value.into()),
+            no_duplicate_test_hooks: Some(value.into()),
+            no_empty_block: Some(value.into()),
+            no_empty_block_statements: Some(value.into()),
+            no_empty_interface: Some(value.into()),
+            no_evolving_types: Some(value.into()),
+            no_explicit_any: Some(value.into()),
+            no_exports_in_test: Some(value.into()),
+            no_extra_non_null_assertion: Some(value.into()),
+            no_fallthrough_switch_clause: Some(value.into()),
+            no_focused_tests: Some(value.into()),
+            no_function_assign: Some(value.into()),
+            no_global_assign: Some(value.into()),
+            no_global_is_finite: Some(value.into()),
+            no_global_is_nan: Some(value.into()),
+            no_implicit_any_let: Some(value.into()),
+            no_import_assign: Some(value.into()),
+            no_important_in_keyframe: Some(value.into()),
+            no_label_var: Some(value.into()),
+            no_misleading_character_class: Some(value.into()),
+            no_misleading_instantiator: Some(value.into()),
+            no_misplaced_assertion: Some(value.into()),
+            no_misrefactored_shorthand_assign: Some(value.into()),
+            no_prototype_builtins: Some(value.into()),
+            no_react_specific_props: Some(value.into()),
+            no_redeclare: Some(value.into()),
+            no_redundant_use_strict: Some(value.into()),
+            no_self_compare: Some(value.into()),
+            no_shadow_restricted_names: Some(value.into()),
+            no_shorthand_property_overrides: Some(value.into()),
+            no_skipped_tests: Some(value.into()),
+            no_sparse_array: Some(value.into()),
+            no_suspicious_semicolon_in_jsx: Some(value.into()),
+            no_then_property: Some(value.into()),
+            no_unsafe_declaration_merging: Some(value.into()),
+            no_unsafe_negation: Some(value.into()),
+            no_var: Some(value.into()),
+            use_await: Some(value.into()),
+            use_default_switch_clause_last: Some(value.into()),
+            use_error_message: Some(value.into()),
+            use_getter_return: Some(value.into()),
+            use_is_array: Some(value.into()),
+            use_namespace_keyword: Some(value.into()),
+            use_number_to_fixed_digits_argument: Some(value.into()),
+            use_valid_typeof: Some(value.into()),
         }
     }
 }

@@ -413,6 +413,8 @@ impl Debug for ParseFormatNumberError {
     }
 }
 
+impl std::error::Error for ParseFormatNumberError {}
+
 impl std::fmt::Display for ParseFormatNumberError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -453,12 +455,15 @@ impl std::fmt::Display for IndentWidthFromIntError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(
             f,
-            "The indent width should be between {} and {}",
+            "The indent width should be between {} and {}, got {}",
             LineWidth::MIN,
             LineWidth::MAX,
+            self.0,
         )
     }
 }
+
+impl std::error::Error for IndentWidthFromIntError {}
 
 /// Error type returned when converting a u16 to a [LineWidth] fails
 #[derive(Clone, Copy, Debug)]
@@ -468,12 +473,15 @@ impl std::fmt::Display for LineWidthFromIntError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(
             f,
-            "The line width should be between {} and {}",
+            "The line width should be between {} and {}, got {}",
             LineWidth::MIN,
             LineWidth::MAX,
+            self.0,
         )
     }
 }
+
+impl std::error::Error for LineWidthFromIntError {}
 
 impl From<LineWidth> for u16 {
     fn from(value: LineWidth) -> Self {

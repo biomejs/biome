@@ -1,0 +1,131 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: with_siblings.json
+---
+# Input
+```json
+{
+  "linter": {
+    "all": true,
+    "rules": {
+      "style": {
+        "all": true,
+        "noForOf": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "all": true
+      },
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "all": true,
+        "noUnusedImports": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+with_siblings.json:3:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property all has been removed.
+  
+    1 │ {
+    2 │   "linter": {
+  > 3 │     "all": true,
+      │     ^^^^^
+    4 │     "rules": {
+    5 │       "style": {
+  
+  i Due to the increasing number of rules that span in scope and use-case, certain rules can conflict with each other. The option has become more harmful than useful.
+  
+  i Safe fix: Remove the property.
+  
+     1  1 │   {
+     2  2 │     "linter": {
+     3    │ - ····"all":·true,
+     4  3 │       "rules": {
+     5  4 │         "style": {
+  
+
+```
+
+```
+with_siblings.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property all has been removed.
+  
+    4 │     "rules": {
+    5 │       "style": {
+  > 6 │         "all": true,
+      │         ^^^^^
+    7 │         "noForOf": "off"
+    8 │       },
+  
+  i Due to the increasing number of rules that span in scope and use-case, certain rules can conflict with each other. The option has become more harmful than useful.
+  
+  i Safe fix: Remove the property.
+  
+     4  4 │       "rules": {
+     5  5 │         "style": {
+     6    │ - ········"all":·true,
+     7  6 │           "noForOf": "off"
+     8  7 │         },
+  
+
+```
+
+```
+with_siblings.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property all has been removed.
+  
+     9 │       "suspicious": {
+    10 │         "noExplicitAny": "off",
+  > 11 │         "all": true
+       │         ^^^^^
+    12 │       },
+    13 │       "correctness": {
+  
+  i Due to the increasing number of rules that span in scope and use-case, certain rules can conflict with each other. The option has become more harmful than useful.
+  
+  i Safe fix: Remove the property.
+  
+     8  8 │         },
+     9  9 │         "suspicious": {
+    10    │ - ········"noExplicitAny":·"off",
+    11    │ - ········"all":·true
+       10 │ + ········"noExplicitAny":·"off"
+    12 11 │         },
+    13 12 │         "correctness": {
+  
+
+```
+
+```
+with_siblings.json:15:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property all has been removed.
+  
+    13 │       "correctness": {
+    14 │         "noUndeclaredVariables": "error",
+  > 15 │         "all": true,
+       │         ^^^^^
+    16 │         "noUnusedImports": "error"
+    17 │       }
+  
+  i Due to the increasing number of rules that span in scope and use-case, certain rules can conflict with each other. The option has become more harmful than useful.
+  
+  i Safe fix: Remove the property.
+  
+    13 13 │         "correctness": {
+    14 14 │           "noUndeclaredVariables": "error",
+    15    │ - ········"all":·true,
+    16 15 │           "noUnusedImports": "error"
+    17 16 │         }
+  
+
+```

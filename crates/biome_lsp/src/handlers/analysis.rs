@@ -43,6 +43,7 @@ pub(crate) fn code_actions(
     session: &Session,
     params: CodeActionParams,
 ) -> Result<Option<CodeActionResponse>, LspError> {
+    info!("Code actions request");
     let url = params.text_document.uri.clone();
     let path = session.file_path(&url)?;
     let doc = session.document(&url)?;
@@ -148,7 +149,7 @@ pub(crate) fn code_actions(
     };
 
     debug!("Filters: {:?}", &filters);
-
+    debug!("Has fix all: {}", has_fix_all);
     // Generate an additional code action to apply all safe fixes on the
     // document if the action category "source.fixAll" was explicitly requested
     // by the language client
@@ -159,6 +160,8 @@ pub(crate) fn code_actions(
     };
 
     let mut has_fixes = false;
+
+    debug!("Actions: {:?}", &result.actions.len());
 
     let mut actions: Vec<_> = result
         .actions

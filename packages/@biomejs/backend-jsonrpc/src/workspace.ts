@@ -2997,10 +2997,7 @@ If `false`, no such exception will be made.
 	 */
 	ignoreNull: boolean;
 }
-export type ImportGroup =
-	| PredefinedImportGroup
-	| ImportSourceGlob
-	| ImportSourceGlob[];
+export type ImportGroup = null | GroupMatcher | GroupMatcher[];
 export type Visibility = "public" | "package" | "private";
 export type DependencyAvailability = boolean | string[];
 export interface Hook {
@@ -3050,19 +3047,7 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
-export type PredefinedImportGroup =
-	| ":BLANK_LINE:"
-	| ":ALIAS:"
-	| ":BUN:"
-	| ":NODE:"
-	| ":PACKAGE:"
-	| ":PACKAGE_WITH_PROTOCOL:"
-	| ":PATH:"
-	| ":URL:";
-/**
- * Glob to match against import sources.
- */
-export type ImportSourceGlob = Glob;
+export type GroupMatcher = PredefinedGroupMatcher | ImportSourceGlob;
 export type StableHookResult = boolean | number[];
 export interface CustomRestrictedImportOptions {
 	/**
@@ -3106,6 +3091,11 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
+export type PredefinedGroupMatcher = string;
+/**
+ * Glob to match against import sources.
+ */
+export type ImportSourceGlob = Glob;
 /**
  * Supported cases.
  */
@@ -3524,6 +3514,9 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useValidTypeof"
 	| "assist/source/useSortedKeys"
+	| "assist/source/useSortedProperties"
+	| "assist/source/useSortedAttributes"
+	| "assist/source/organizeImports"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -3561,6 +3554,7 @@ export type Category =
 	| "suppressions/parse"
 	| "suppressions/unknownGroup"
 	| "suppressions/unknownRule"
+	| "suppressions/unknownAction"
 	| "suppressions/unused"
 	| "suppressions/incorrect"
 	| "args/fileNotFound"

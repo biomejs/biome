@@ -3,9 +3,12 @@ use std::cmp::Ordering;
 
 use biome_analyze::{Ast, Rule, RuleAction, context::RuleContext, declare_source_rule};
 use biome_console::markup;
+use biome_deserialize::TextRange;
 use biome_diagnostics::Applicability;
-use biome_js_syntax::{AnyJsObjectMember, AnyJsObjectMemberName, JsObjectMemberList};
-use biome_rowan::{AstSeparatedList, BatchMutationExt, SyntaxResult, TokenText};
+use biome_js_syntax::{
+    AnyJsObjectMember, AnyJsObjectMemberName, JsObjectExpression, JsObjectMemberList,
+};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxResult, TokenText};
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
@@ -130,6 +133,14 @@ impl Rule for UseSortedKeys {
         }
 
         groups.into_boxed_slice()
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        ctx.query()
+            .syntax()
+            .ancestors()
+            .find_map(JsObjectExpression::cast)
+            .map(|object| object.range())
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

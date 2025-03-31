@@ -2,6 +2,7 @@ use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use core::str;
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -25,6 +26,15 @@ pub enum JsonFileVariant {
     #[default]
     Standard,
     Jsonc,
+}
+
+impl Display for JsonFileVariant {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            JsonFileVariant::Standard => write!(f, "json"),
+            JsonFileVariant::Jsonc => write!(f, "jsonc"),
+        }
+    }
 }
 
 impl FromStr for JsonFileVariant {

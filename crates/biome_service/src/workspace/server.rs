@@ -587,10 +587,13 @@ impl WorkspaceServer {
                 .as_ref()
                 .is_some_and(|project_path| path.starts_with(project_path));
 
+            // We need to pass the **directory** that contains the ignore file.
+            let dir_ignore_file = path.parent().unwrap_or(path);
+
             if vcs_settings.is_ignore_file(path) && is_in_project_path {
                 let content = self.fs.read_file_from_path(path)?;
                 let patterns = content.lines().collect::<Vec<_>>();
-                vcs_settings.store_ignore_patterns(path.as_path(), patterns.as_slice())?;
+                vcs_settings.store_ignore_patterns(dir_ignore_file, patterns.as_slice())?;
             }
         }
 

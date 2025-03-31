@@ -380,11 +380,13 @@ impl<'analyzer> Suppressions<'analyzer> {
         text_range: TextRange,
     ) -> Result<Option<RuleFilter<'static>>, AnalyzerSuppressionDiagnostic> {
         let rule = match suppression_kind {
-            AnalyzerSuppressionKind::Everything => return Ok(None),
+            AnalyzerSuppressionKind::Everything(_) => return Ok(None),
             AnalyzerSuppressionKind::Rule(rule) => rule,
             AnalyzerSuppressionKind::RuleInstance(rule, _) => rule,
             AnalyzerSuppressionKind::Plugin(_) => return Ok(Some(PLUGIN_LINT_RULE_FILTER)),
+            AnalyzerSuppressionKind::Action(action) => action,
         };
+        let is_action = suppression_kind.is_action();
 
         let group_rule = rule.split_once('/');
 
@@ -394,17 +396,25 @@ impl<'analyzer> Suppressions<'analyzer> {
         };
         match filter {
             None => Err(match group_rule {
-                Some((group, rule)) => AnalyzerSuppressionDiagnostic::new(
-                    category!("suppressions/unknownRule"),
-                    text_range,
-                    format_args!("Unknown lint rule {group}/{rule} in suppression comment"),
-                ),
+                Some((group, rule)) => {
+                    if is_action {
+                        AnalyzerSuppressionDiagnostic::new_unknown_assist_action(
+                            group, rule, text_range,
+                        )
+                    } else {
+                        AnalyzerSuppressionDiagnostic::new_unknown_lint_rule(
+                            group, rule, text_range,
+                        )
+                    }
+                }
 
-                None => AnalyzerSuppressionDiagnostic::new(
-                    category!("suppressions/unknownGroup"),
-                    text_range,
-                    format_args!("Unknown lint rule group {rule} in suppression comment"),
-                ),
+                None => {
+                    if is_action {
+                        AnalyzerSuppressionDiagnostic::new_unknown_assist_group(rule, text_range)
+                    } else {
+                        AnalyzerSuppressionDiagnostic::new_unknown_lint_group(rule, text_range)
+                    }
+                }
             }),
             Some(filter) => Ok(Some(filter)),
         }
@@ -412,8 +422,9 @@ impl<'analyzer> Suppressions<'analyzer> {
 
     fn map_to_rule_instances(&self, suppression_kind: &AnalyzerSuppressionKind) -> Option<String> {
         match suppression_kind {
-            AnalyzerSuppressionKind::Everything
+            AnalyzerSuppressionKind::Everything(_)
             | AnalyzerSuppressionKind::Rule(_)
+            | AnalyzerSuppressionKind::Action(_)
             | AnalyzerSuppressionKind::Plugin(_) => None,
             AnalyzerSuppressionKind::RuleInstance(_, instances) => Some((*instances).to_string()),
         }

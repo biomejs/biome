@@ -46,6 +46,7 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<RulesAll>();
         registry.record_rule::<StyleRules>();
         registry.record_rule::<NoVar>();
+
         registry.record_rule::<DeletedRules>();
         registry.record_rule::<UseWhile>();
         registry.record_rule::<OrganizeImports>();

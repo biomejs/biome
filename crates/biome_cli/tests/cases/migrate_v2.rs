@@ -463,3 +463,144 @@ fn should_successfully_migrate_sentry() {
         result,
     ));
 }
+
+#[test]
+fn should_migrate_issue_5465() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(
+        configuration_path.into(),
+        r#"{
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"suspicious": {
+				"noDebugger": "error",
+				"noShadowRestrictedNames": "off",
+				"noExplicitAny": "off",
+				"useValidTypeof": "error",
+				"noAsyncPromiseExecutor": "off",
+				"noEmptyInterface": "error",
+				"noAssignInExpressions": "error",
+				"noConsole": {
+					"level": "error",
+					"options": {
+						"allow": ["info", "error", "warn", "time", "timeEnd"]
+					}
+				},
+				"noPrototypeBuiltins": "error"
+			},
+			"style": {
+				"noVar": "error",
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+						"strictCase": false
+					}
+				},
+				"noDefaultExport": "error"
+			},
+			"correctness": {
+				"noConstantCondition": "error",
+				"noInvalidConstructorSuper": "error",
+				"noUnusedVariables": "error",
+				"noUnreachable": "error",
+				"noUnsafeFinally": "error",
+				"noSwitchDeclarations": "off",
+				"noSelfAssign": "off"
+			}
+		}
+	}
+}
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_migrate_issue_5465",
+        fs,
+        console,
+        result,
+    ));
+}
+#[test]
+fn should_migrate_aws_config() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(
+        configuration_path.into(),
+        r#"{
+  "$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
+  "files": {
+    "maxSize": 5242880,
+    "ignore": ["**/__fixtures__/**", "package.json"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "lineWidth": 100
+  },
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noForEach": "off"
+      },
+      "correctness": {
+        "noNewSymbol": "error",
+        "noUndeclaredVariables": "error",
+        "noUnusedVariables": "error"
+      },
+      "style": {
+        "noNamespace": "error",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": { "syntax": "shorthand" }
+        }
+      },
+      "suspicious": {
+        "noEmptyBlockStatements": "error"
+      }
+    }
+  },
+  "javascript": { "formatter": { "trailingCommas": "es5" } },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_migrate_aws_config",
+        fs,
+        console,
+        result,
+    ));
+}

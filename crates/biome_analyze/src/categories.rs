@@ -24,6 +24,18 @@ pub enum RuleCategory {
     Transformation,
 }
 
+impl RuleCategory {
+    /// Returns a `str` that should be used for suppression comments
+    pub const fn as_suppression_category(&self) -> &'static str {
+        match self {
+            RuleCategory::Syntax => "syntax",
+            RuleCategory::Lint => "lint",
+            RuleCategory::Action => "assist",
+            RuleCategory::Transformation => "transformation",
+        }
+    }
+}
+
 impl Display for RuleCategory {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {

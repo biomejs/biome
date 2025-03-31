@@ -1,0 +1,41 @@
+/*
+  ERROR CASE 1: Missing parentheses after "not"
+  - "not" must be immediately followed by "("
+*/
+@container name style(not) {
+}
+
+/*
+  ERROR CASE 2: Empty parentheses
+  - "not()" is missing a valid query or declaration inside
+*/
+@container name style(not()) {
+}
+
+/*
+  ERROR CASE 3: Extra closing parenthesis
+  - The "(...)) )" leads to unbalanced parentheses
+*/
+@container name style(not((color: red)) ) ) {
+}
+
+/*
+  ERROR CASE 4: Incomplete logical operator
+  - "and" is started but no query follows
+*/
+@container name style(not((color: red) and )) {
+}
+
+/*
+  ERROR CASE 5: Unexpected token
+  - "???" doesn't fit a valid property or query expression
+*/
+@container name style(not((color: red) ??? (background: blue))) {
+}
+
+/*
+  ERROR CASE 6: Missing colon in declaration
+  - "not((color red))" should be "not((color: red))"
+*/
+@container name style(not((color red))) {
+}

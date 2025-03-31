@@ -145,6 +145,12 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
     let _name = parse_literal(p, HTML_TAG_NAME);
+
+    // There shouldn't be any attributes in a closing tag.
+    while p.at(HTML_LITERAL) {
+        p.error(closing_tag_should_not_have_attributes(p, p.cur_range()));
+        p.bump_remap(HTML_BOGUS);
+    }
     p.bump_with_context(T![>], HtmlLexContext::OutsideTag);
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }

@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: nonLiteralDependenciesArray.js
+---
+# Input
+```js
+import { useEffect, useState } from "react";
+
+function MyComponent() {
+	const [name, setName] = useState('');
+	const deps = [name];
+
+	useEffect(() => {
+		console.log(name); // we can't verify `name` is in the dependencies array
+	}, deps);
+}
+
+```
+
+# Diagnostics
+```
+nonLiteralDependenciesArray.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This dependencies list is not an array literal.
+  
+     7 │ 	useEffect(() => {
+     8 │ 		console.log(name); // we can't verify `name` is in the dependencies array
+   > 9 │ 	}, deps);
+       │ 	   ^^^^
+    10 │ }
+    11 │ 
+  
+  i Biome can't statically verify whether you've passed the correct dependencies.
+  
+  i Replace with an array literal and list your dependencies within it.
+  
+
+```

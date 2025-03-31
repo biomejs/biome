@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: custom-order-mixed-glob-groups.js
+---
+# Input
+```js
+import { A } from "@my/lib";
+import { B } from "@my/lib/subpath";
+import alias from "@/alias";
+import alias from "@scoped/package";
+import path from "./path";
+
+```
+
+# Actions
+```diff
+@@ -1,5 +1,7 @@
++import alias from "@scoped/package";
++
+ import { A } from "@my/lib";
+ import { B } from "@my/lib/subpath";
++import path from "./path";
++
+ import alias from "@/alias";
+-import alias from "@scoped/package";
+-import path from "./path";
+
+```
