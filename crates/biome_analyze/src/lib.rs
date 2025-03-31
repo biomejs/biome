@@ -192,43 +192,50 @@ where
         for plugin in plugins {
             let root: AnyParse = ctx.root.syntax().as_send().expect("not a root node").into();
             for diagnostic in plugin.evaluate(root, ctx.options.file_path.clone()) {
-                let name = diagnostic.subcategory.clone().expect("missing subcategory");
-                let text_range = diagnostic.span.expect("missing span");
+                let name = diagnostic
+                    .subcategory
+                    .clone()
+                    .unwrap_or_else(|| "anonymous".into());
 
-                // 1. check for top level suppression
+                // 1. Check for top level suppression:
                 if suppressions.top_level_suppression.suppressed_plugin(&name)
                     || suppressions.top_level_suppression.suppress_all
                 {
                     break;
                 }
 
-                // 2. check for range suppression is not supprted because:
-                // plugin is handled separately after basic analyze phases
-                // at this point, we have read to the end of file, all `// biome-ignore-end` is processed, thus all range suppressions is cleared
+                let suppression = diagnostic.span.and_then(|text_range| {
+                    // 2. Check for range suppression is not supported because
+                    //    plugins are handled separately after the basic analyze
+                    //    phases. At this point, we have read to the end of the
+                    //    file, all `// biome-ignore-end` comments are
+                    //    processed, thus all range suppressions are cleared.
 
-                // 3. check for line suppression
-                let suppression = {
-                    let index = suppressions
-                        .line_suppressions
-                        .binary_search_by(|suppression| {
-                            if suppression.text_range.end() < text_range.start() {
-                                Ordering::Less
-                            } else if text_range.end() < suppression.text_range.start() {
-                                Ordering::Greater
-                            } else {
-                                Ordering::Equal
-                            }
-                        });
+                    // 3. Check for line suppression:
+                    let suppression = {
+                        let index =
+                            suppressions
+                                .line_suppressions
+                                .binary_search_by(|suppression| {
+                                    if suppression.text_range.end() < text_range.start() {
+                                        Ordering::Less
+                                    } else if text_range.end() < suppression.text_range.start() {
+                                        Ordering::Greater
+                                    } else {
+                                        Ordering::Equal
+                                    }
+                                });
 
-                    index
-                        .ok()
-                        .map(|index| &mut suppressions.line_suppressions[index])
-                };
+                        index
+                            .ok()
+                            .map(|index| &mut suppressions.line_suppressions[index])
+                    };
 
-                let suppression = suppression.filter(|suppression| {
-                    suppression.suppress_all
-                        || suppression.suppress_all_plugins
-                        || suppression.suppressed_plugins.contains(&name)
+                    suppression.filter(|suppression| {
+                        suppression.suppress_all
+                            || suppression.suppress_all_plugins
+                            || suppression.suppressed_plugins.contains(&name)
+                    })
                 });
 
                 if let Some(suppression) = suppression {

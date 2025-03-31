@@ -558,6 +558,68 @@ language css;
 }
 
 #[test]
+fn plugins_may_use_invalid_span() {
+    const PLUGIN_CONTENT: &[u8] = br#"
+`Object.assign($args)` where {
+    register_diagnostic(
+        span = `Object.assign`,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}
+"#;
+
+    const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
+
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
+    fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
+
+    let workspace = server(Box::new(fs), None);
+    let project_key = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                    "./plugin.grit".to_string(),
+                )])),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+        })
+        .unwrap();
+
+    workspace
+        .scan_project_folder(ScanProjectFolderParams {
+            project_key,
+            path: None,
+            watch: false,
+            force: false,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new("/project/a.ts"),
+            categories: RuleCategories::default(),
+            max_diagnostics: 10,
+            only: Vec::new(),
+            skip: Vec::new(),
+            enabled_rules: Vec::new(),
+        })
+        .unwrap();
+    assert_debug_snapshot!(result.diagnostics);
+    assert_eq!(result.errors, 0);
+}
+
+#[test]
 fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
