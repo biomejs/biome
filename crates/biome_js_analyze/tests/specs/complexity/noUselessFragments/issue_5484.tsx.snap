@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_5484.tsx
+---
+# Input
+```tsx
+export const ChatSettings: Component<ChatProps> = (props) => {
+  return (
+    <div {...stylex.attrs(styles.base)}>
+      <>system prompt:{' '}</>
+      <BlockArray blockArray={props.chat.state.system_prompt} processMarkdown={false} />
+      <ModelSelector chat={props.chat} />
+    </div>
+  )
+}
+
+```
+
+# Diagnostics
+```
+issue_5484.tsx:4:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    2 │   return (
+    3 │     <div {...stylex.attrs(styles.base)}>
+  > 4 │       <>system prompt:{' '}</>
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │       <BlockArray blockArray={props.chat.state.system_prompt} processMarkdown={false} />
+    6 │       <ModelSelector chat={props.chat} />
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    4 │ ······<>system·prompt:{'·'}</>
+      │       --                   ---
+
+```
