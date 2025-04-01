@@ -22,9 +22,15 @@ fn test_diagnostics_collector_sorting() {
     let (sender, receiver) = unbounded();
 
     // Send diagnostics with different severities
-    let warning = SerdeDiagnostic::new(TestDiagnostic { severity: Severity::Warning });
-    let error = SerdeDiagnostic::new(TestDiagnostic { severity: Severity::Error });
-    let info = SerdeDiagnostic::new(TestDiagnostic { severity: Severity::Information });
+    let warning = SerdeDiagnostic::new(TestDiagnostic {
+        severity: Severity::Warning,
+    });
+    let error = SerdeDiagnostic::new(TestDiagnostic {
+        severity: Severity::Error,
+    });
+    let info = SerdeDiagnostic::new(TestDiagnostic {
+        severity: Severity::Information,
+    });
 
     // Send in an order different from severity
     sender.send(info).unwrap();
