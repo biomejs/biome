@@ -18,10 +18,7 @@ struct TestDiagnostic {
 
 #[test]
 fn test_diagnostics_collector_sorting() {
-    let collector = DiagnosticsCollector {
-        diagnostic_level: Severity::Hint,
-        verbose: false,
-    };
+    let collector = DiagnosticsCollector::new();
     let (sender, receiver) = unbounded();
 
     // Send diagnostics with different severities
