@@ -108,7 +108,7 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
 
 ## Sponsors
 
-### Gold Sponsors
+### Platinum Sponsor
 
 <table>
   <tbody>
@@ -118,7 +118,7 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
           <picture>
             <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" />
-            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" width="400" alt="Vercel" />
+            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" width="500" alt="Vercel" />
           </picture>
         </a>
       </td>
