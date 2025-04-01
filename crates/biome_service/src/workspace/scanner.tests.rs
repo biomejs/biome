@@ -1,6 +1,6 @@
-use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::diagnostic::Severity;
+use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use crossbeam::channel::unbounded;
 
 use super::*;
@@ -34,13 +34,11 @@ struct InformationDiagnostic {}
 
 #[test]
 fn test_diagnostics_collector_sorting() {
-    let collector = DiagnosticsCollector{
+    let collector = DiagnosticsCollector {
         diagnostic_level: Severity::Hint,
-        verbose: false
+        verbose: false,
     };
     let (sender, receiver) = unbounded();
-
-
 
     // Send diagnostics with different severities in random order
     let warning = SerdeDiagnostic::new(WarningDiagnostic {});
