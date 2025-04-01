@@ -27,6 +27,9 @@ import('./sub/foo')
 import( /** A **/'./sub/foo'/** B **/ )
 require("./sub/foo")
 
+import "./sub/styles.css"
+import "./sub/component.svg.svelte";
+import "./sub/component.svg.svelte?query=string&query2#hash";
 ```
 
 # Diagnostics
@@ -364,6 +367,7 @@ invalidWithForcedJsExtensions.ts:22:9 lint/correctness/useImportExtensions  FIXA
   > 22 │ require("./sub/foo")
        │         ^^^^^^^^^^^
     23 │ 
+    24 │ import "./sub/styles.css"
   
   i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
   
@@ -374,6 +378,71 @@ invalidWithForcedJsExtensions.ts:22:9 lint/correctness/useImportExtensions  FIXA
     22    │ - require("./sub/foo")
        22 │ + require("./sub/foo.js")
     23 23 │   
+    24 24 │   import "./sub/styles.css"
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:24:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i Add a file extension for relative imports.
+  
+    22 │ require("./sub/foo")
+    23 │ 
+  > 24 │ import "./sub/styles.css"
+       │        ^^^^^^^^^^^^^^^^^^
+    25 │ import "./sub/component.svg.svelte";
+    26 │ import "./sub/component.svg.svelte?query=string&query2#hash";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    22 22 │   require("./sub/foo")
+    23 23 │   
+    24    │ - import·"./sub/styles.css"
+       24 │ + import·"./sub/styles.css.js"
+    25 25 │   import "./sub/component.svg.svelte";
+    26 26 │   import "./sub/component.svg.svelte?query=string&query2#hash";
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:25:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i Add a file extension for relative imports.
+  
+    24 │ import "./sub/styles.css"
+  > 25 │ import "./sub/component.svg.svelte";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ import "./sub/component.svg.svelte?query=string&query2#hash";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    23 23 │   
+    24 24 │   import "./sub/styles.css"
+    25    │ - import·"./sub/component.svg.svelte";
+       25 │ + import·"./sub/component.svg.svelte.js";
+    26 26 │   import "./sub/component.svg.svelte?query=string&query2#hash";
+  
+
+```
+
+```
+invalidWithForcedJsExtensions.ts:26:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Add a file extension for relative imports.
+  
+    24 │ import "./sub/styles.css"
+    25 │ import "./sub/component.svg.svelte";
+  > 26 │ import "./sub/component.svg.svelte?query=string&query2#hash";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
   
 
 ```

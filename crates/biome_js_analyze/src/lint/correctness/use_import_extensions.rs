@@ -216,8 +216,17 @@ fn get_extensionless_import(
     if !matches!(
         first_component,
         Utf8Component::CurDir | Utf8Component::ParentDir
-    ) || path.extension().is_some()
-    {
+    ) {
+        return None;
+    }
+
+    // In cases like `./foo.css` -> `./foo.css.ts`
+    let resolved_path_has_sub_extension = resolved_path
+        .file_stem()
+        .is_some_and(|stem| stem.contains('.'));
+    let existing_extension = path.extension();
+
+    if !resolved_path_has_sub_extension && existing_extension.is_some() {
         return None;
     }
 
@@ -265,7 +274,18 @@ fn get_extensionless_import(
         new_path
     } else {
         let mut new_path = path.to_path_buf();
-        new_path.set_extension(extension);
+        let sub_extension = if resolved_path_has_sub_extension {
+            existing_extension
+        } else {
+            None
+        };
+
+        if let Some(sub_ext) = sub_extension {
+            new_path.set_extension(format!("{}.{}", sub_ext, extension));
+        } else {
+            new_path.set_extension(extension);
+        }
+
         new_path.to_string()
     };
 
