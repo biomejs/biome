@@ -421,7 +421,7 @@ Rule domains can unlock various perks in the Biome analyzer:
 - A domain can define a number of `package.json` dependencies. When a user has one or more of these dependencies, Biome will automatically enable the recommended rules that belong to the domain. To add/update/remove dependencies to a domain, check the function `RuleDomain::manifest_dependencies`.
 - A domain can define a number of "globals". These globals will be used by other rules, and improve the UX of them. To add/update/remove globals to a domain, check the function `RuleDomain::globals`.
 
-When a rule is **recommended** and _has domains_, the rule is enabled only when the user enables the relative domains via `"recommneded"` or `"all"`.
+When a rule is **recommended** and _has domains_, the rule is enabled only when the user enables the relative domains via `"recommended"` or `"all"`.
 Instead, if the rule is **recommended** but _doesn't have domains_, the rule is always enabled by default.
 
 > [!NOTE]
