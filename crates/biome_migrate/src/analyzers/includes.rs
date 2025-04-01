@@ -153,22 +153,23 @@ impl State {
                 let Ok(glob) = glob_value.inner_string_text() else {
                     continue;
                 };
-                // Skip globs that cannot be converted
-                if biome_glob::Glob::from_str(&glob).is_err() {
+                let new_glob = to_biome_glob(&glob, false);
+                // Skip globs that generate errors
+                if biome_glob::Glob::from_str(&new_glob).is_err() {
                     continue;
                 };
-                let mew_glob = make::json_string_value(make::json_string_literal(&to_biome_glob(
-                    &glob, false,
-                )));
-                globs.push(AnyJsonValue::JsonStringValue(mew_glob));
+                // JSON escape
+                let new_glob = new_glob.replace('\\', "\\\\");
+                let new_glob = make::json_string_value(make::json_string_literal(&new_glob));
+                globs.push(AnyJsonValue::JsonStringValue(new_glob));
             }
         }
         if let Some(AnyJsonValue::JsonArrayValue(array)) =
             self.ignore.as_ref().and_then(|x| x.value().ok())
         {
             if globs.is_empty() {
-                let mew_glob = make::json_string_value(make::json_string_literal("**"));
-                globs.push(AnyJsonValue::JsonStringValue(mew_glob));
+                let new_glob = make::json_string_value(make::json_string_literal("**"));
+                globs.push(AnyJsonValue::JsonStringValue(new_glob));
             }
             for glob in array.elements().into_iter().flatten() {
                 let AnyJsonValue::JsonStringValue(glob_value) = glob else {
@@ -177,13 +178,15 @@ impl State {
                 let Ok(glob) = glob_value.inner_string_text() else {
                     continue;
                 };
-                // Skip globs that cannot be converted
-                if biome_glob::Glob::from_str(&glob).is_err() {
+                let new_glob = to_biome_glob(&glob, true);
+                // Skip globs that generate errors
+                if biome_glob::Glob::from_str(&new_glob).is_err() {
                     continue;
                 };
-                let mew_glob =
-                    make::json_string_value(make::json_string_literal(&to_biome_glob(&glob, true)));
-                globs.push(AnyJsonValue::JsonStringValue(mew_glob));
+                // JSON escape
+                let new_glob = new_glob.replace('\\', "\\\\");
+                let new_glob = make::json_string_value(make::json_string_literal(&new_glob));
+                globs.push(AnyJsonValue::JsonStringValue(new_glob));
             }
         }
         let separator_count = globs.len().checked_sub(1).unwrap_or_default();
@@ -233,6 +236,12 @@ fn validate_globs(member: &JsonMember) -> Box<[(TextRange, biome_glob::GlobError
         let Err(glob_error) = biome_glob::Glob::from_str(&glob) else {
             continue;
         };
+        if let biome_glob::GlobError::Regular { kind, .. } = &glob_error {
+            if matches!(kind, biome_glob::GlobErrorKind::UnsupportedCharacterClass) {
+                // Ignore errors for characters classes because we escape them in `to_biome_glob`.
+                continue;
+            }
+        }
         let range = glob_value.range();
         let range = glob_error.index().map_or(range, |index| {
             TextRange::at(range.start() + TextSize::from(1 + index), 1u32.into())
@@ -244,13 +253,30 @@ fn validate_globs(member: &JsonMember) -> Box<[(TextRange, biome_glob::GlobError
 
 fn to_biome_glob(glob: &str, is_exception: bool) -> String {
     // Globs without any path separators are likely general globs that must be applied at every directory level.
-    let result = if let Some(tail) = glob.strip_prefix("./") {
+    let mut result = glob.to_string();
+    let mut bytes = glob.bytes().enumerate();
+    let mut escaped_count = 0;
+    while let Some((index, byte)) = bytes.next() {
+        match byte {
+            b'\\' => {
+                // Ignore escaped character
+                bytes.next();
+            }
+            b'[' | b']' => {
+                // Escape `[` and `]`.
+                result.insert(index + escaped_count, '\\');
+                escaped_count += 1;
+            }
+            _ => {}
+        }
+    }
+    let result = if let Some(tail) = result.strip_prefix("./") {
         // Biome globs doesn't support `./`
         tail.to_string()
-    } else if !glob.starts_with("**") {
-        format!("**/{glob}")
+    } else if !result.starts_with("**") {
+        format!("**/{result}")
     } else {
-        glob.to_string()
+        result
     };
     if !is_exception
         && !result.ends_with('*')
@@ -259,7 +285,7 @@ fn to_biome_glob(glob: &str, is_exception: bool) -> String {
         // The glob tries to match against a directory.
         // In this case we add `**` at the end.
         // For example, `src` is turned into `src/**`
-        if glob.ends_with('/') {
+        if result.ends_with('/') {
             format!("{result}**")
         } else {
             format!("{result}/**")
