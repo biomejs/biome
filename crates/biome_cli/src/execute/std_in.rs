@@ -15,6 +15,7 @@ use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DropPatternParams, FeaturesBuilder, FileContent,
     FixFileParams, FormatFileParams, OpenFileParams, SupportsFeatureParams,
 };
+use camino::Utf8PathBuf;
 use std::borrow::Cow;
 
 pub(crate) fn run<'a>(
@@ -31,7 +32,9 @@ pub(crate) fn run<'a>(
 
     let std_in_file = biome_path
         .extension()
-        .map(|ext| BiomePath::new(format!("{}.{}", TEMPORARY_INTERNAL_FILE_NAME, ext)))
+        .map(|ext| {
+            BiomePath::new(Utf8PathBuf::from(TEMPORARY_INTERNAL_FILE_NAME).with_extension(ext))
+        })
         .ok_or_else(|| CliDiagnostic::from(StdinDiagnostic::new_no_extension()))?;
 
     if mode.is_format() {
