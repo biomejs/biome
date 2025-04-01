@@ -191,6 +191,9 @@ impl DiagnosticsCollector {
             }
         }
 
+        // Sort diagnostics by severity to put the most severe diagnostics first.
+        diagnostics.sort_by(|a, b| b.severity().cmp(&a.severity()));
+
         diagnostics
     }
 }
