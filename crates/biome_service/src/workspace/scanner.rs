@@ -284,3 +284,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "scanner.tests.rs"]
+mod tests;
