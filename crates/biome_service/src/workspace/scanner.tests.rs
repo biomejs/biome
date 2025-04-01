@@ -9,28 +9,12 @@ use super::*;
 #[diagnostic(
     category = "lint/style/noShoutyConstants",
     tags(FIXABLE),
-    message = "Test diagnostic message",
-    severity = Warning
+    message = "Test diagnostic message"
 )]
-struct WarningDiagnostic {}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "lint/style/noShoutyConstants",
-    tags(FIXABLE),
-    message = "Test diagnostic message",
-    severity = Error
-)]
-struct ErrorDiagnostic {}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "lint/style/noShoutyConstants",
-    tags(FIXABLE),
-    message = "Test diagnostic message",
-    severity = Information
-)]
-struct InformationDiagnostic {}
+struct TestDiagnostic {
+    #[severity]
+    severity: Severity,
+}
 
 #[test]
 fn test_diagnostics_collector_sorting() {
@@ -40,10 +24,10 @@ fn test_diagnostics_collector_sorting() {
     };
     let (sender, receiver) = unbounded();
 
-    // Send diagnostics with different severities in random order
-    let warning = SerdeDiagnostic::new(WarningDiagnostic {});
-    let error = SerdeDiagnostic::new(ErrorDiagnostic {});
-    let info = SerdeDiagnostic::new(InformationDiagnostic {});
+    // Send diagnostics with different severities
+    let warning = SerdeDiagnostic::new(TestDiagnostic { severity: Severity::Warning });
+    let error = SerdeDiagnostic::new(TestDiagnostic { severity: Severity::Error });
+    let info = SerdeDiagnostic::new(TestDiagnostic { severity: Severity::Information });
 
     // Send in an order different from severity
     sender.send(info).unwrap();
