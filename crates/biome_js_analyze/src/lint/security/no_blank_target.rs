@@ -4,7 +4,6 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
@@ -15,7 +14,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
-use serde::{Deserialize, Serialize};
+use biome_rule_options::no_blank_target::NoBlankTargetOptions;
 
 // Elements to check, in the form of (node name, attribute name) tuples.
 //
@@ -288,33 +287,6 @@ impl Rule for NoBlankTarget {
             }
         ))
     }
-}
-
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoBlankTargetOptions {
-    /// List of domains where `target="_blank"` is allowed without
-    /// `rel="noopener"`.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub allow_domains: Vec<String>,
-
-    /// Whether `noreferrer` is allowed in addition to `noopener`.
-    #[serde(default = "default_allow_no_referrer")]
-    pub allow_no_referrer: bool,
-}
-
-impl Default for NoBlankTargetOptions {
-    fn default() -> Self {
-        Self {
-            allow_domains: Default::default(),
-            allow_no_referrer: default_allow_no_referrer(),
-        }
-    }
-}
-
-fn default_allow_no_referrer() -> bool {
-    true
 }
 
 fn is_allowed_domain(href: &str, allow_domains: &[&str]) -> bool {

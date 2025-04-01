@@ -15,7 +15,6 @@ version              = "0.0.1"
 [dependencies]
 biome_analyze            = { workspace = true, features = ["serde"] }
 biome_console            = { workspace = true }
-biome_css_analyze        = { workspace = true }
 biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
@@ -23,17 +22,15 @@ biome_diagnostics        = { workspace = true, features = ["oxc_resolver"] }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_glob               = { workspace = true }
-biome_graphql_analyze    = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
 biome_html_formatter     = { workspace = true, features = ["serde"] }
 biome_html_syntax        = { workspace = true }
-biome_js_analyze         = { workspace = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }
-biome_json_analyze       = { workspace = true }
 biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
+biome_rule_options       = { workspace = true }
 bpaf                     = { workspace = true }
 camino                   = { workspace = true }
 oxc_resolver             = { workspace = true }
@@ -46,8 +43,6 @@ serde                    = { workspace = true, features = ["derive"] }
 default = ["schema"]
 schema = [
   "dep:schemars",
-  "biome_js_analyze/schema",
-  "biome_css_analyze/schema",
   "biome_formatter/schema",
   "biome_json_syntax/schema",
   "biome_css_syntax/schema",
@@ -57,6 +52,7 @@ schema = [
   "biome_analyze/schema",
   "biome_json_formatter/schema",
   "biome_js_formatter/schema",
+  "biome_rule_options/schema",
 ]
 
 [dev-dependencies]
