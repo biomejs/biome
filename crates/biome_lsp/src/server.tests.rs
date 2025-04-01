@@ -2011,6 +2011,26 @@ if(a === -0) {}
         }],
     );
 
+    let mut inline_changes = HashMap::default();
+    inline_changes.insert(
+        url!("document.js"),
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 1,
+                    character: 0,
+                },
+                end: Position {
+                    line: 1,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                "// biome-ignore assist/source/organizeImports: <explanation>\n",
+            ),
+        }],
+    );
+
     let expected_toplevel_suppression_action =
         lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
             title: String::from(
@@ -2031,9 +2051,30 @@ if(a === -0) {}
             data: None,
         });
 
+    let expected_line_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+        title: String::from("Suppress action assist/source/organizeImports for this line."),
+        kind: Some(lsp::CodeActionKind::new(
+            "quickfix.suppressRule.inline.biome",
+        )),
+        diagnostics: None,
+        edit: Some(lsp::WorkspaceEdit {
+            changes: Some(inline_changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: None,
+        disabled: None,
+        data: None,
+    });
+
     assert_eq!(
         res,
-        vec![expected_code_action, expected_toplevel_suppression_action]
+        vec![
+            expected_code_action,
+            expected_line_suppression_action,
+            expected_toplevel_suppression_action
+        ]
     );
 
     server.close_document().await?;
