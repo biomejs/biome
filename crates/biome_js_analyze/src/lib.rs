@@ -22,7 +22,6 @@ mod ast_utils;
 pub mod globals;
 pub mod lint;
 mod nextjs;
-pub mod options;
 mod react;
 mod registry;
 mod services;

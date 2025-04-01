@@ -151,6 +151,7 @@ biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markd
 biome_markdown_syntax        = { version = "0.0.1", path = "./crates/biome_markdown_syntax" }
 biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugin_loader" }
 biome_project_layout         = { version = "0.0.1", path = "./crates/biome_project_layout" }
+biome_rule_options           = { version = "0.0.1", path = "./crates/biome_rule_options" }
 biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }

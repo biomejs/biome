@@ -1,7 +1,6 @@
 mod assist;
 mod keywords;
 mod lint;
-pub mod options;
 mod order;
 mod registry;
 mod services;

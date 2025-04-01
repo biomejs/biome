@@ -23,6 +23,7 @@ use crate::generate_migrate_eslint::generate_migrate_eslint;
 use crate::generate_schema::generate_configuration_schema;
 use crate::promote_rule::promote_rule;
 
+use crate::generate_configuration::generate_rule_options;
 use xtask::Mode::Overwrite;
 use xtask_codegen::{
     TaskCommand, generate_analyzer, generate_ast, generate_formatters, generate_new_analyzer_rule,
@@ -41,6 +42,8 @@ fn main() -> Result<()> {
             generate_analyzer()?;
         }
         TaskCommand::Configuration => {
+            #[cfg(feature = "configuration")]
+            generate_rule_options(Overwrite)?;
             #[cfg(feature = "configuration")]
             generate_rules_configuration(Overwrite)?;
         }

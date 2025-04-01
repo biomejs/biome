@@ -121,20 +121,27 @@ pub struct Source {
     pub recommended: Option<bool>,
     #[doc = "Provides a code action to sort the imports and exports in the file using a built-in or custom order."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub organize_imports:
-        Option<RuleAssistConfiguration<biome_js_analyze::options::OrganizeImports>>,
+    pub organize_imports: Option<
+        RuleAssistConfiguration<biome_rule_options::organize_imports::OrganizeImportsOptions>,
+    >,
     #[doc = "Enforce attribute sorting in JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_attributes:
-        Option<RuleAssistConfiguration<biome_js_analyze::options::UseSortedAttributes>>,
+    pub use_sorted_attributes: Option<
+        RuleAssistConfiguration<
+            biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions,
+        >,
+    >,
     #[doc = "Sorts the keys of a JSON object in natural order"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys:
-        Option<RuleAssistConfiguration<biome_json_analyze::options::UseSortedKeys>>,
+        Option<RuleAssistConfiguration<biome_rule_options::use_sorted_keys::UseSortedKeysOptions>>,
     #[doc = "Enforce ordering of CSS properties and nested rules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_properties:
-        Option<RuleAssistConfiguration<biome_css_analyze::options::UseSortedProperties>>,
+    pub use_sorted_properties: Option<
+        RuleAssistConfiguration<
+            biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions,
+        >,
+    >,
 }
 impl Source {
     const GROUP_NAME: &'static str = "source";

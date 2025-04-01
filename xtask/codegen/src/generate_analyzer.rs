@@ -22,8 +22,6 @@ fn generate_js_analyzer() -> Result<()> {
     generate_category("assist", &mut analyzers, &base_path)?;
     generate_category("syntax", &mut analyzers, &base_path)?;
 
-    generate_options(&base_path)?;
-
     update_js_registry_builder(analyzers)
 }
 
@@ -33,7 +31,6 @@ fn generate_json_analyzer() -> Result<()> {
     generate_category("lint", &mut analyzers, &base_path)?;
     generate_category("assist", &mut analyzers, &base_path)?;
 
-    generate_options(&base_path)?;
     update_json_registry_builder(analyzers)
 }
 
@@ -43,7 +40,6 @@ fn generate_css_analyzer() -> Result<()> {
     generate_category("lint", &mut analyzers, &base_path)?;
     generate_category("assist", &mut analyzers, &base_path)?;
 
-    generate_options(&base_path)?;
     update_css_registry_builder(analyzers)
 }
 
@@ -51,51 +47,8 @@ fn generate_graphql_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_graphql_analyze/src");
     let mut analyzers = BTreeMap::new();
     generate_category("lint", &mut analyzers, &base_path)?;
-    generate_options(&base_path)?;
+
     update_graphql_registry_builder(analyzers)
-}
-
-fn generate_options(base_path: &Path) -> Result<()> {
-    let mut rules_options = BTreeMap::new();
-    let mut crates = vec![];
-    for category in ["lint", "assist"] {
-        let category_path = base_path.join(category);
-        if !category_path.exists() {
-            continue;
-        }
-        let category_name = format_ident!("{}", filename(&category_path)?);
-        for group_path in list_entry_paths(&category_path)?.filter(|path| path.is_dir()) {
-            let group_name = format_ident!("{}", filename(&group_path)?.to_string());
-            for rule_path in list_entry_paths(&group_path)?.filter(|path| !path.is_dir()) {
-                let rule_filename = filename(&rule_path)?;
-                let rule_name = Case::Pascal.convert(rule_filename);
-                let rule_module_name = format_ident!("{}", rule_filename);
-                let rule_name = format_ident!("{}", rule_name);
-                rules_options.insert(rule_filename.to_string(), quote! {
-                    pub type #rule_name = <#category_name::#group_name::#rule_module_name::#rule_name as biome_analyze::Rule>::Options;
-                });
-            }
-        }
-        if category == "lint" {
-            crates.push(quote! {
-                use crate::lint;
-            })
-        } else if category == "assist" {
-            crates.push(quote! {
-                use crate::assist;
-            })
-        }
-    }
-    let rules_options = rules_options.values();
-    let tokens = xtask::reformat(quote! {
-        #( #crates )*
-
-        #( #rules_options )*
-    })?;
-    let tokens = reformat(tokens)?;
-    fs2::write(base_path.join("options.rs"), tokens)?;
-
-    Ok(())
 }
 
 fn generate_category(
@@ -331,20 +284,4 @@ fn update_graphql_registry_builder(analyzers: BTreeMap<&'static str, TokenStream
     fs2::write(path, tokens)?;
 
     Ok(())
-}
-
-/// Returns file paths of the given directory.
-fn list_entry_paths(dir: &Path) -> Result<impl Iterator<Item = PathBuf> + use<>> {
-    Ok(fs2::read_dir(dir)
-        .context("A directory is expected")?
-        .filter_map(|entry| entry.ok())
-        .map(|entry| entry.path()))
-}
-
-/// Returns filename if any.
-fn filename(file: &Path) -> Result<&str> {
-    file.file_stem()
-        .context("path has no file name")?
-        .to_str()
-        .context("could not convert file name to string")
 }

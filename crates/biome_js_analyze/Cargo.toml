@@ -27,6 +27,7 @@ biome_js_syntax          = { workspace = true }
 biome_package            = { workspace = true }
 biome_project_layout     = { workspace = true }
 biome_rowan              = { workspace = true }
+biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 biome_unicode_table      = { workspace = true }

@@ -1,4 +1,3 @@
-#[rustfmt::skip]
 mod rules;
 
 use crate::bool::Bool;
