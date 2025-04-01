@@ -2,4 +2,6 @@ mod dependency_graph;
 mod module_visitor;
 mod resolver_cache;
 
-pub use dependency_graph::{DependencyGraph, Export, Import, ModuleDependencyData};
+pub use dependency_graph::{
+    DependencyGraph, Export, Import, ModuleDependencyData, SUPPORTED_EXTENSIONS,
+};

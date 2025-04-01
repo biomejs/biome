@@ -1313,7 +1313,7 @@ export interface Correctness {
 	 */
 	noPrecisionLoss?: RuleConfiguration_for_Null;
 	/**
-	 * Restricts imports of private exports.
+	 * Restrict imports of private exports.
 	 */
 	noPrivateImports?: RuleConfiguration_for_NoPrivateImportsOptions;
 	/**
@@ -1609,6 +1609,10 @@ export interface Nursery {
 	 * Disallow unknown type selectors.
 	 */
 	noUnknownTypeSelector?: RuleConfiguration_for_Null;
+	/**
+	 * Warn when importing non-existing exports.
+	 */
+	noUnresolvedImports?: RuleConfiguration_for_Null;
 	/**
 	 * Prevent duplicate polyfills from Polyfill.io.
 	 */
@@ -3212,13 +3216,13 @@ export type Category =
 	| "lint/a11y/useValidAriaRole"
 	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useValidLang"
+	| "lint/complexity/noAdjacentSpacesInRegex"
 	| "lint/complexity/noBannedTypes"
 	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
-	| "lint/complexity/noAdjacentSpacesInRegex"
 	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"
@@ -3279,7 +3283,6 @@ export type Category =
 	| "lint/correctness/noUnknownProperty"
 	| "lint/correctness/noUnknownUnit"
 	| "lint/correctness/noUnmatchableAnbSelector"
-	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noUnreachable"
 	| "lint/correctness/noUnreachableSuper"
 	| "lint/correctness/noUnsafeFinally"
@@ -3289,6 +3292,7 @@ export type Category =
 	| "lint/correctness/noUnusedLabels"
 	| "lint/correctness/noUnusedPrivateClassMembers"
 	| "lint/correctness/noUnusedVariables"
+	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
 	| "lint/correctness/useArrayLiterals"
@@ -3314,8 +3318,8 @@ export type Category =
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicateElseIf"
-	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDuplicateFields"
+	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
@@ -3358,6 +3362,7 @@ export type Category =
 	| "lint/nursery/noUnknownTypeSelector"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessEscapeInRegex"

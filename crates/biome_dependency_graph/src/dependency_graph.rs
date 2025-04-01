@@ -15,11 +15,23 @@ use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::{EnforceExtension, ResolveError, ResolveOptions, ResolverGeneric};
+use oxc_resolver::{EnforceExtension, ResolveOptions, ResolverGeneric};
 use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::FxBuildHasher;
 
 use crate::{module_visitor::ModuleVisitor, resolver_cache::ResolverCache};
+
+pub const SUPPORTED_EXTENSIONS: &[&str] = &[
+    ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts", ".json", ".node",
+];
+
+fn supported_extensions_owned() -> Vec<String> {
+    let mut extensions = Vec::with_capacity(SUPPORTED_EXTENSIONS.len());
+    for extension in SUPPORTED_EXTENSIONS {
+        extensions.push((*extension).to_string());
+    }
+    extensions
+}
 
 /// Data structure for tracking imports and exports across files.
 ///
@@ -73,18 +85,7 @@ impl DependencyGraph {
         ));
         let resolve_options = ResolveOptions {
             enforce_extension: EnforceExtension::Disabled,
-            extensions: vec![
-                ".js".into(),
-                ".jsx".into(),
-                ".mjs".into(),
-                ".cjs".into(),
-                ".ts".into(),
-                ".tsx".into(),
-                ".mts".into(),
-                ".cts".into(),
-                ".json".into(),
-                ".node".into(),
-            ],
+            extensions: supported_extensions_owned(),
             ..Default::default()
         };
         let resolver = ResolverGeneric::new_with_cache(resolver_cache.clone(), resolve_options);
@@ -285,7 +286,7 @@ pub struct Import {
     /// point towards the resolved entry point of the package.
     ///
     /// If `None`, import resolution failed.
-    pub resolved_path: Result<Utf8PathBuf, ResolveError>,
+    pub resolved_path: Result<Utf8PathBuf, String>,
 }
 
 /// Information tracked for every export.

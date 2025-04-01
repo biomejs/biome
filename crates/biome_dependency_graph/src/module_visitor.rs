@@ -333,13 +333,14 @@ impl<'a> ModuleVisitor<'a> {
     }
 
     fn import_from_specifier(&self, specifier: &str) -> Import {
-        let resolved_path =
-            self.resolver
-                .resolve(self.directory, specifier)
-                .and_then(|resolution| {
-                    Utf8PathBuf::from_path_buf(resolution.into_path_buf())
-                        .map_err(|path| ResolveError::NotFound(path.to_string_lossy().to_string()))
-                });
+        let resolved_path = self
+            .resolver
+            .resolve(self.directory, specifier)
+            .and_then(|resolution| {
+                Utf8PathBuf::from_path_buf(resolution.into_path_buf())
+                    .map_err(|path| ResolveError::NotFound(path.to_string_lossy().to_string()))
+            })
+            .map_err(|error| error.to_string());
         Import { resolved_path }
     }
 }
