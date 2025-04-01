@@ -1,0 +1,147 @@
+---
+source: crates/biome_dependency_graph/src/dependency_graph.tests.rs
+expression: data.exports
+---
+{
+    Borrowed(
+        "a",
+    ): Own(
+        OwnExport {
+            jsdoc_comment: Some(
+                "TODO: No types can be detected on these yet.",
+            ),
+            ty: Unknown,
+        },
+    ),
+    Borrowed(
+        "b",
+    ): Own(
+        OwnExport {
+            jsdoc_comment: Some(
+                "TODO: No types can be detected on these yet.",
+            ),
+            ty: Unknown,
+        },
+    ),
+    Borrowed(
+        "bar",
+    ): Own(
+        OwnExport {
+            jsdoc_comment: Some(
+                "@package",
+            ),
+            ty: Function(
+                Function {
+                    is_async: false,
+                    type_parameters: [],
+                    name: Some(
+                        Borrowed(
+                            "bar",
+                        ),
+                    ),
+                    parameters: [],
+                    return_type: Type(
+                        Unknown,
+                    ),
+                },
+            ),
+        },
+    ),
+    Borrowed(
+        "baz",
+    ): Own(
+        OwnExport {
+            jsdoc_comment: None,
+            ty: Function(
+                Function {
+                    is_async: true,
+                    type_parameters: [],
+                    name: Some(
+                        Borrowed(
+                            "baz",
+                        ),
+                    ),
+                    parameters: [],
+                    return_type: Type(
+                        Unknown,
+                    ),
+                },
+            ),
+        },
+    ),
+    Borrowed(
+        "d",
+    ): Own(
+        OwnExport {
+            jsdoc_comment: Some(
+                "TODO: No types can be detected on these yet.",
+            ),
+            ty: Unknown,
+        },
+    ),
+    Static(
+        "default",
+    ): Own(
+        OwnExport {
+            jsdoc_comment: Some(
+                "@public\n@returns {JSX.Element}",
+            ),
+            ty: Function(
+                Function {
+                    is_async: false,
+                    type_parameters: [],
+                    name: Some(
+                        Borrowed(
+                            "Component",
+                        ),
+                    ),
+                    parameters: [],
+                    return_type: Type(
+                        Reference(
+                            TypeReference {
+                                qualifier: TypeReferenceQualifier(
+                                    [
+                                        Borrowed(
+                                            "JSX",
+                                        ),
+                                        Borrowed(
+                                            "Element",
+                                        ),
+                                    ],
+                                ),
+                                type_parameters: [],
+                            },
+                        ),
+                    ),
+                },
+            ),
+        },
+    ),
+    Borrowed(
+        "e",
+    ): Own(
+        OwnExport {
+            jsdoc_comment: Some(
+                "TODO: No types can be detected on these yet.",
+            ),
+            ty: Unknown,
+        },
+    ),
+    Borrowed(
+        "foo",
+    ): Own(
+        OwnExport {
+            jsdoc_comment: None,
+            ty: Unknown,
+        },
+    ),
+    Owned(
+        "oh\nno",
+    ): Reexport(
+        Import {
+            resolved_path: Ok(
+                "/src/renamed-reexports.ts",
+            ),
+        },
+    ),
+}

@@ -7,7 +7,7 @@ use biome_dependency_graph::DependencyGraph;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
-use biome_js_parser::{JsFileSource, JsParserOptions};
+use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
@@ -178,19 +178,34 @@ pub fn dependency_graph_for_test_file(
     let dir = input_file.parent().unwrap().to_path_buf();
     let paths = get_js_like_paths_in_dir(&dir);
     let fs = OsFileSystem::new(dir);
+    let paths = get_added_paths(&fs, &paths);
 
-    dependency_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[], |path| {
-        fs.read_file_from_path(path).ok().and_then(|content| {
-            let file_source = path
-                .extension()
-                .and_then(|extension| JsFileSource::try_from_extension(extension).ok())
-                .unwrap_or_default();
-            let parsed = biome_js_parser::parse(&content, file_source, JsParserOptions::default());
-            parsed.try_tree()
-        })
-    });
+    dependency_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[]);
 
     Arc::new(dependency_graph)
+}
+
+/// Loads and parses files from the file system to pass them to service methods.
+pub fn get_added_paths<'a>(
+    fs: &dyn FileSystem,
+    paths: &'a [BiomePath],
+) -> Vec<(&'a BiomePath, Option<AnyJsRoot>)> {
+    paths
+        .iter()
+        .map(|path| {
+            let root = fs.read_file_from_path(path).ok().and_then(|content| {
+                let file_source = path
+                    .extension()
+                    .and_then(|extension| JsFileSource::try_from_extension(extension).ok())
+                    .unwrap_or_default();
+                let parsed =
+                    biome_js_parser::parse(&content, file_source, JsParserOptions::default());
+                assert!(parsed.diagnostics().is_empty());
+                parsed.try_tree()
+            });
+            (path, root)
+        })
+        .collect()
 }
 
 fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {

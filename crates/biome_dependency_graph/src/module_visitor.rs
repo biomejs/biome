@@ -1,10 +1,11 @@
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsImportLike, AnyJsModuleSource, AnyJsObjectBindingPatternMember,
-    AnyJsRoot, AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause,
+    AnyJsRoot, AnyTsIdentifierBinding, AnyTsModuleName, AnyTsType, JsExport, JsExportFromClause,
     JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
     JsVariableDeclaratorList, unescape_js_string,
 };
+use biome_js_type_info::Type;
 use biome_rowan::{AstNode, Text, TokenText, TriviaPieceKind, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{ResolveError, ResolverGeneric};
@@ -98,8 +99,12 @@ impl<'a> ModuleVisitor<'a> {
             AnyJsExportClause::AnyJsDeclarationClause(node) => {
                 self.visit_export_declaration_clause(node, jsdoc_comment)
             }
-            AnyJsExportClause::JsExportDefaultDeclarationClause(_) => {
-                self.register_export_with_name_and_jsdoc_comment("default", jsdoc_comment)
+            AnyJsExportClause::JsExportDefaultDeclarationClause(node) => {
+                let ty = node
+                    .declaration()
+                    .map(|decl| Type::from_any_js_export_default_declaration(&decl))
+                    .unwrap_or_default();
+                self.register_export("default", Export::Own(OwnExport { jsdoc_comment, ty }))
             }
             AnyJsExportClause::JsExportDefaultExpressionClause(_) => {
                 self.register_export_with_name_and_jsdoc_comment("default", jsdoc_comment)
@@ -134,7 +139,7 @@ impl<'a> ModuleVisitor<'a> {
         node: AnyJsDeclarationClause,
         jsdoc_comment: Option<String>,
     ) -> Option<()> {
-        let name = match node {
+        let name = match &node {
             AnyJsDeclarationClause::JsClassDeclaration(node) => {
                 node.id().ok().and_then(get_name)?
             }
@@ -165,8 +170,9 @@ impl<'a> ModuleVisitor<'a> {
                 node.binding_identifier().ok().and_then(get_ts_name)?
             }
         };
+        let ty = Type::from_any_js_declaration_clause(&node);
 
-        self.register_export_with_name_and_jsdoc_comment(name, jsdoc_comment)
+        self.register_export(name, Export::Own(OwnExport { jsdoc_comment, ty }))
     }
 
     fn visit_export_from_clause(&mut self, node: JsExportFromClause) -> Option<()> {
@@ -237,7 +243,14 @@ impl<'a> ModuleVisitor<'a> {
     ) -> Option<()> {
         for declarator in declarators.into_iter().flatten() {
             if let Ok(binding) = declarator.id() {
-                self.visit_binding_pattern(binding, jsdoc_comment.clone());
+                self.visit_binding_pattern(
+                    binding,
+                    jsdoc_comment.clone(),
+                    declarator
+                        .variable_annotation()
+                        .and_then(|annotation| annotation.type_annotation().ok().flatten())
+                        .and_then(|annotation| annotation.ty().ok()),
+                );
             }
         }
 
@@ -248,49 +261,94 @@ impl<'a> ModuleVisitor<'a> {
         &mut self,
         binding: AnyJsBindingPattern,
         jsdoc_comment: Option<String>,
+        ty: Option<AnyTsType>,
     ) -> Option<()> {
         match binding {
             AnyJsBindingPattern::AnyJsBinding(node) => {
                 if let Some(binding) = node.as_js_identifier_binding() {
-                    self.visit_identifier_binding(binding, jsdoc_comment)?;
+                    self.visit_identifier_binding(binding, jsdoc_comment, ty)?;
                 }
             }
             AnyJsBindingPattern::JsArrayBindingPattern(node) => {
+                let mut tuple_elements = ty
+                    .as_ref()
+                    .and_then(|ty| ty.as_ts_tuple_type())
+                    .map(|ty| ty.elements().into_iter());
+                let mut get_next_element_type = || {
+                    if let Some(mut elements) = tuple_elements.take() {
+                        let next = elements.next();
+                        tuple_elements = Some(elements);
+                        next.and_then(|el| el.ok())
+                            .as_ref()
+                            .and_then(|el| el.as_any_ts_type())
+                            .cloned()
+                    } else {
+                        None
+                    }
+                };
+
                 for element in node.elements().into_iter().flatten() {
                     match element {
                         AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(node) => {
                             if let Ok(binding) = node.pattern() {
-                                self.visit_binding_pattern(binding, jsdoc_comment.clone());
+                                self.visit_binding_pattern(
+                                    binding,
+                                    jsdoc_comment.clone(),
+                                    get_next_element_type(),
+                                );
                             }
                         }
                         AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(node) => {
                             if let Ok(binding) = node.pattern() {
-                                self.visit_binding_pattern(binding, jsdoc_comment.clone());
+                                self.visit_binding_pattern(
+                                    binding,
+                                    jsdoc_comment.clone(),
+                                    get_next_element_type(),
+                                );
                             }
                         }
-                        AnyJsArrayBindingPatternElement::JsArrayHole(_) => {}
+                        AnyJsArrayBindingPatternElement::JsArrayHole(_) => {
+                            get_next_element_type();
+                        }
                     }
                 }
             }
             AnyJsBindingPattern::JsObjectBindingPattern(node) => {
+                let mut object_members = ty
+                    .as_ref()
+                    .and_then(|ty| ty.as_ts_object_type())
+                    .map(|ty| ty.members().into_iter());
+                let mut get_next_member_type = || {
+                    if let Some(mut elements) = object_members.take() {
+                        let next = elements.next();
+                        object_members = Some(elements);
+                        next.as_ref()
+                            .and_then(|member| member.as_ts_property_signature_type_member())
+                            .and_then(|property| property.type_annotation())
+                            .and_then(|annotation| annotation.ty().ok())
+                    } else {
+                        None
+                    }
+                };
+
                 for property in node.properties().into_iter().flatten() {
                     match property {
                         AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(node) => {
                             if let Ok(binding) = node.pattern() {
-                                self.visit_binding_pattern(binding, jsdoc_comment.clone());
+                                self.visit_binding_pattern(binding, jsdoc_comment.clone(), get_next_member_type());
                             }
                         },
                         AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(node) => {
                             if let Ok(binding) = node.binding() {
                                 if let Some(binding) = binding.as_js_identifier_binding() {
-                                   self.visit_identifier_binding(binding, jsdoc_comment.clone());
+                                   self.visit_identifier_binding(binding, jsdoc_comment.clone(), get_next_member_type());
                                 }
                             }
                         },
                         AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(node) => {
                             if let Ok(binding) = node.identifier() {
                                 if let Some(binding) = binding.as_js_identifier_binding() {
-                                   self.visit_identifier_binding(binding, jsdoc_comment.clone());
+                                   self.visit_identifier_binding(binding, jsdoc_comment.clone(), get_next_member_type());
                                 }
                             }
                         },
@@ -307,9 +365,22 @@ impl<'a> ModuleVisitor<'a> {
         &mut self,
         binding: &JsIdentifierBinding,
         jsdoc_comment: Option<String>,
+        ty: Option<AnyTsType>,
     ) -> Option<()> {
         let name = binding.name_token().ok()?.token_text_trimmed();
-        self.register_export_with_name_and_jsdoc_comment(name, jsdoc_comment)
+        self.register_export(
+            name,
+            Export::Own(OwnExport {
+                jsdoc_comment,
+                ty: ty.map(|ty| Type::from_any_ts_type(&ty)).unwrap_or_default(),
+            }),
+        )
+    }
+
+    fn register_export(&mut self, name: impl Into<Text>, export: Export) -> Option<()> {
+        self.data.exports.insert(name.into(), export);
+
+        Some(())
     }
 
     fn register_export_with_name_and_jsdoc_comment(
@@ -317,11 +388,13 @@ impl<'a> ModuleVisitor<'a> {
         name: impl Into<Text>,
         jsdoc_comment: Option<String>,
     ) -> Option<()> {
-        self.data
-            .exports
-            .insert(name.into(), Export::Own(OwnExport { jsdoc_comment }));
-
-        Some(())
+        self.register_export(
+            name,
+            Export::Own(OwnExport {
+                jsdoc_comment,
+                ty: Type::Unknown,
+            }),
+        )
     }
 
     fn import_from_module_source(&self, module_source: AnyJsModuleSource) -> Option<Import> {
