@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+# Input messages
+
+```block
+function f() {return{}}
+```
+
+# Termination Message
+
+```block
+stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file passed via --stdin-file-path doesn't have an extension. Biome needs a file extension to know how handle the file.
+  
+
+
+```
