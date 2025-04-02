@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed `noNoninteractiveElementToInteractiveRole` mistakenly flagging `<li role="treeitem">`
+Fixed [`noNoninteractiveElementToInteractiveRole`](https://biomejs.dev/linter/rules/no-noninteractive-element-to-interactive-role/) mistakenly flagging `<li role="treeitem">`,
