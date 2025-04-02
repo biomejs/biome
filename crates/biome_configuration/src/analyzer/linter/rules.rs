@@ -3234,7 +3234,7 @@ pub struct Nursery {
     #[doc = "Disallow the use of the !important style."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_important_styles:
-        Option<RuleConfiguration<biome_css_analyze::options::NoImportantStyles>>,
+        Option<RuleFixConfiguration<biome_css_analyze::options::NoImportantStyles>>,
     #[doc = "Disallows the use of irregular whitespace characters."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_irregular_whitespace:

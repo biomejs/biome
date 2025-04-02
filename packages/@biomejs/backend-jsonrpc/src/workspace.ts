@@ -1540,7 +1540,7 @@ export interface Nursery {
 	/**
 	 * Disallow the use of the !important style.
 	 */
-	noImportantStyles?: RuleConfiguration_for_Null;
+	noImportantStyles?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */

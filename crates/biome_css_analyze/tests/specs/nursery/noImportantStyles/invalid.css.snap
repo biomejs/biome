@@ -33,7 +33,7 @@ invalid.css:2:13 lint/nursery/noImportantStyles  FIXABLE  ━━━━━━━�
   
   i This style reverses the cascade logic, and precedence is reversed. This could lead to have styles with higher specificity being overridden by styles with lower specificity. 
   
-  i Safe fix: Remove the style.
+  i Unsafe fix: Remove the style.
   
     2 │ → color:·red·!important;
       │             ----------- 
@@ -53,7 +53,7 @@ invalid.css:6:13 lint/nursery/noImportantStyles  FIXABLE  ━━━━━━━�
   
   i This style reverses the cascade logic, and precedence is reversed. This could lead to have styles with higher specificity being overridden by styles with lower specificity. 
   
-  i Safe fix: Remove the style.
+  i Unsafe fix: Remove the style.
   
     6 │ → color:·red·!important·/*·some·comment·*/;
       │              -----------                   
@@ -73,7 +73,7 @@ invalid.css:10:12 lint/nursery/noImportantStyles  FIXABLE  ━━━━━━━
   
   i This style reverses the cascade logic, and precedence is reversed. This could lead to have styles with higher specificity being overridden by styles with lower specificity. 
   
-  i Safe fix: Remove the style.
+  i Unsafe fix: Remove the style.
   
     10 │ → color:·red!important·/*·some·comment·*/;
        │             ----------                    

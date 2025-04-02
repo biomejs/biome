@@ -2706,7 +2706,7 @@
 				"noImportantStyles": {
 					"description": "Disallow the use of the !important style.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
