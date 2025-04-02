@@ -135,13 +135,4 @@ expression: data.exports
             ty: Unknown,
         },
     ),
-    Owned(
-        "oh\nno",
-    ): Reexport(
-        Import {
-            resolved_path: Ok(
-                "/src/renamed-reexports.ts",
-            ),
-        },
-    ),
 }

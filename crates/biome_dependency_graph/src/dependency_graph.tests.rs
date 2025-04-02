@@ -280,7 +280,18 @@ fn test_resolve_exports() {
     dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
     let dependency_data = dependency_graph.data.pin();
-    let data = dependency_data.get(Utf8Path::new("/src/index.ts")).unwrap();
+    let mut data = dependency_data
+        .get(Utf8Path::new("/src/index.ts"))
+        .unwrap()
+        .clone();
+
+    // Remove this entry, or the Windows tests fail on the path in the snapshot below:
+    assert_eq!(
+        data.exports.remove(&Text::Static("oh\nno")),
+        Some(Export::Reexport(Import {
+            resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts"))
+        }))
+    );
 
     assert_debug_snapshot!(data.exports);
 

@@ -966,18 +966,8 @@ dependencies = [
 name = "biome_js_type_info"
 version = "0.0.1"
 dependencies = [
- "biome_deserialize",
- "biome_fs",
- "biome_js_parser",
  "biome_js_syntax",
- "biome_json_parser",
- "biome_json_value",
  "biome_rowan",
- "camino",
- "cfg-if",
- "once_cell",
- "rustc-hash 2.1.1",
- "serde_json",
  "static_assertions",
 ]
 
