@@ -96,7 +96,7 @@ pub enum Type {
 }
 
 // `Type` should not be bigger than 16 bytes.
-assert_eq_size!(Type, u128);
+assert_eq_size!(Type, [usize; 2]);
 
 /// A class definition.
 #[derive(Clone, Debug, PartialEq)]
