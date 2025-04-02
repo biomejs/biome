@@ -67,6 +67,28 @@ where
                         }
                     }
 
+                    // If the layout is OneGroupPerLine, insert a hard line break as a `separator`
+                    // between two adjacent groups.
+                    //
+                    // Consider the CSS example: `font: group one, group_two, group 3;`
+                    // The desired format is:
+                    // font:
+                    //   group one,
+                    //   group_two,
+                    //   group 3;
+                    //
+                    // A hard line break is inserted between:
+                    // 1. `group one,` and `group_two,`
+                    // 2. `group_two,` and `group 3;`
+                    //
+                    // Caveat:
+                    // We also need to add a hard line break before the first group,
+                    // but `FillBuilder.entry` will ignore any `separator` for the first item in the list,
+                    // To address this, we prepend the hard line break after composing `values`.
+                    //
+                    // This is also why `at_group_boundary` is initialized to `false` even when
+                    // the layout is OneGroupPerLine: because the line break would be ignored
+                    // if `at_group_boundary` were set to `true` initially.
                     at_group_boundary =
                         is_comma && matches!(layout, ValueListLayout::OneGroupPerLine);
 
@@ -177,6 +199,15 @@ pub(crate) enum ValueListLayout {
     ///     border-color 0.15s ease-in-out,
     ///     box-shadow 0.15s ease-in-out;
     /// ```
+    ///
+    /// This layout is only applied when following conditions are met:
+    /// 1. The value list is a direct child of a CSS property declaration
+    /// 2. The CSS property is not a custom property (i.e., does not start with "--").
+    /// 3. Values are separated into multiple groups by comma
+    /// 4. At least one of the groups contains two or more values
+    ///
+    /// These conditions are inherited from Prettier,
+    /// see https://github.com/biomejs/biome/pull/5334 for a detailed explanation
     OneGroupPerLine,
 }
 
@@ -251,6 +282,16 @@ where
     let mut group_count = 0;
     let mut group_size = 0;
     let mut max_group_size = 0;
+
+    // Iterate over the value list to determine the number of groups
+    // and the size of the largest group.
+    //
+    // There are two situations where we need to update the group count
+    // and the maximum group size:
+    // 1. When encountering a group separator (comma), as it signals the end of a group.
+    // 2. When finishing iteration, since the last group ends with a semicolon,
+    //    but the semicolon is not included in the value list.
+    //    Therefore, we update the last group after iterating through all items.
     for item in list.iter() {
         let token_kind = CssGenericDelimiter::cast_ref(item.syntax())
             .and_then(|node| node.value().ok())
