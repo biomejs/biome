@@ -51,16 +51,17 @@ impl Rule for NoVisibleTask {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         
-        // Get the callee and bind it to avoid temporary value issues
         let callee = node.callee().ok()?;
         let ident = callee.as_js_identifier_expression()?;
         
-        // Get the function name
         let name_token = ident.name().ok()?.value_token().ok()?;
         let function_name = name_token.text_trimmed();
 
-        // Return the range if it's useVisibleTask$
-        (function_name == "useVisibleTask$").then(|| node.syntax().text_trimmed_range())
+        if function_name == "useVisibleTask$" {
+            Some(node.syntax().text_trimmed_range())
+        } else {
+            None
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
