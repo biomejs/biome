@@ -15,7 +15,9 @@ use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
-use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
+use crate::{
+    CliDiagnostic, CliSession, DiagnosticsPayload, Reporter, TEMPORARY_INTERNAL_REPORTER_FILE,
+};
 use biome_configuration::analyzer::RuleSelector;
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::SerdeJsonError;
@@ -24,8 +26,8 @@ use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams, OpenFileParams,
-    PatternId,
+    CloseFileParams, FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams,
+    OpenFileParams, PatternId,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
@@ -604,7 +606,7 @@ pub fn execute_mode(
                         error,
                     )))
                 })?;
-                let report_file = BiomePath::new("_report_output.json");
+                let report_file = BiomePath::new(TEMPORARY_INTERNAL_REPORTER_FILE);
                 session.app.workspace.open_file(OpenFileParams {
                     project_key,
                     content: FileContent::from_client(content),
@@ -619,6 +621,10 @@ pub fn execute_mode(
                 console.log(markup! {
                     {code.as_code()}
                 });
+                session.app.workspace.close_file(CloseFileParams {
+                    project_key,
+                    path: report_file,
+                })?;
             } else {
                 console.log(markup! {
                     {buffer}

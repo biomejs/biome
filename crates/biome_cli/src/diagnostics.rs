@@ -1,6 +1,8 @@
+use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, Error, LogCategory, MessageAndDescription, Severity, Visit,
+    category,
 };
 use biome_diagnostics::{BpafError, IoError, SerdeJsonError};
 use biome_service::WorkspaceError;
@@ -408,10 +410,6 @@ impl CliDiagnostic {
         })
     }
 
-    pub fn stdin() -> Self {
-        Self::Stdin(StdinDiagnostic::default())
-    }
-
     /// Emitted when the server is not running
     pub fn server_not_running() -> Self {
         Self::ServerNotRunning(ServerNotRunning)
@@ -455,6 +453,12 @@ impl From<std::io::Error> for CliDiagnostic {
     }
 }
 
+impl From<StdinDiagnostic> for CliDiagnostic {
+    fn from(error: StdinDiagnostic) -> Self {
+        CliDiagnostic::Stdin(error)
+    }
+}
+
 impl Termination for CliDiagnostic {
     fn report(self) -> ExitCode {
         let severity = self.severity();
@@ -466,13 +470,44 @@ impl Termination for CliDiagnostic {
     }
 }
 
-#[derive(Debug, Default, Diagnostic)]
-#[diagnostic(
-    severity = Error,
-    category = "stdin",
-    message = "The contents aren't fixed. Use the `--fix` flag to fix them."
-)]
-pub struct StdinDiagnostic {}
+#[derive(Debug)]
+pub enum StdinDiagnostic {
+    NotFormatted,
+    NoExtension,
+}
+
+impl StdinDiagnostic {
+    pub(crate) fn new_not_formatted() -> Self {
+        Self::NotFormatted
+    }
+
+    pub(crate) fn new_no_extension() -> Self {
+        Self::NoExtension
+    }
+}
+
+impl Diagnostic for StdinDiagnostic {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("stdin"))
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+
+    fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
+        match self {
+            StdinDiagnostic::NotFormatted => {
+                fmt.write_str("The contents aren't fixed. Use the `--fix` flag to fix them.")
+            },
+            StdinDiagnostic::NoExtension => {
+                fmt.write_markup(markup!{
+                    "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how handle the file."
+                })
+            }
+        }
+    }
+}
 
 #[cfg(test)]
 mod test {
