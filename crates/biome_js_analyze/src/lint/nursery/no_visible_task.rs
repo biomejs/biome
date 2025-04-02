@@ -4,10 +4,11 @@ use biome_js_syntax::JsCallExpression;
 use biome_rowan::{TextRange, AstNode};
 
 declare_lint_rule! {
-    /// Disallow useVisibleTask$() which blocks the main thread.
+    /// Disallow useVisibleTask$() which can impact performance.
     ///
-    /// useVisibleTask$() runs eagerly and blocks the main thread, preventing user interaction 
-    /// until the task is finished.
+    /// useVisibleTask$() runs immediately when the user sees this component in the browser, which is an anti-pattern 
+    /// that can lead to poor user experience. Consider using alternative hooks that run tasks 
+    /// asynchronously or in response to user interactions.
     ///
     /// ## Examples
     ///
@@ -15,7 +16,7 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// useVisibleTask$(() => {
-    ///   // Heavy computation that blocks the main thread
+    ///   // Heavy computation that runs immediately on page load
     ///   browserOperation$();
     /// });
     /// ```
@@ -23,9 +24,11 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```js
-    /// // Use alternative hooks that don't block the main thread
+    /// // Use alternative hooks that run tasks asynchronously or in response to user interactions
     /// useTask$(async () => {
-    ///   await expensiveServerOperation$();
+    ///   track(() => interaction.value);
+    ///   if (isServer) return;
+    ///   await expensiveBrowserOperation$();
     /// });
     ///
     /// useOn('scroll', handleScroll$);
@@ -48,18 +51,16 @@ impl Rule for NoVisibleTask {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         
+        // Get the callee and bind it to avoid temporary value issues
         let callee = node.callee().ok()?;
-        if let Some(ident) = callee.as_js_identifier_expression() {
-            let name_token = ident.name().ok()?.value_token().ok()?;
-            let name = name_token.text_trimmed();
-            if name == "useVisibleTask$" {
-                Some(node.syntax().text_trimmed_range())
-            } else {
-                None
-            }
-        } else {
-            None
-        }
+        let ident = callee.as_js_identifier_expression()?;
+        
+        // Get the function name
+        let name_token = ident.name().ok()?.value_token().ok()?;
+        let function_name = name_token.text_trimmed();
+
+        // Return the range if it's useVisibleTask$
+        (function_name == "useVisibleTask$").then(|| node.syntax().text_trimmed_range())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -69,7 +70,7 @@ impl Rule for NoVisibleTask {
                 rule_category!(),
                 node.syntax().text_trimmed_range(),
                 markup! {
-                    "useVisibleTask$() runs eagerly and blocks the main thread, preventing user interaction until the task is finished"
+                    "useVisibleTask$() runs immediately and can temporarily make the user interface unresponsive, preventing user interactions until the task completes"
                 },
             )
             .note(markup! {
