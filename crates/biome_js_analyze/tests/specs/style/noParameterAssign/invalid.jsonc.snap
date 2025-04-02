@@ -458,4 +458,26 @@ invalid.jsonc:1:19 lint/style/noParameterAssign ━━━━━━━━━━�
 
 ```
 
+# Input
+```cjs
+const doSomething = req => { req = {}; };
+```
 
+# Diagnostics
+```
+invalid.jsonc:1:30 lint/style/noParameterAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Reassigning a function parameter is confusing.
+  
+  > 1 │ const doSomething = req => { req = {}; };
+      │                              ^^^
+  
+  i The parameter is declared here:
+  
+  > 1 │ const doSomething = req => { req = {}; };
+      │                     ^^^
+  
+  i Use a local variable instead.
+  
+
+```

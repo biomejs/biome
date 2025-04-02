@@ -17,5 +17,6 @@
 	"function foo(a) { ({...a} = obj); }",
 	"function foo(a) { a &&= b; }",
 	"function foo(a) { a ||= b; }",
-	"function foo(a) { a ??= b; }"
+	"function foo(a) { a ??= b; }",
+	"const doSomething = req => { req = {}; };"
 ]
