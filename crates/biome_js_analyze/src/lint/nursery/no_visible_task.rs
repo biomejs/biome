@@ -71,11 +71,11 @@ impl Rule for NoVisibleTask {
                 rule_category!(),
                 node.syntax().text_trimmed_range(),
                 markup! {
-                    "useVisibleTask$() runs immediately and can temporarily make the user interface unresponsive, preventing user interactions until the task completes"
+                    "useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern"
                 },
             )
             .note(markup! {
-                "Consider using useTask$(), useOn(), useOnDocument(), or useOnWindow() instead"
+                "Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations"
             }),
         )
     }
