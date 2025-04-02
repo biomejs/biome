@@ -499,6 +499,8 @@ pub enum RuleDomain {
     Solid,
     /// Next.js framework rules
     Next,
+    /// Qwik framework rules
+    Qwik,
 }
 
 impl Display for RuleDomain {
@@ -509,6 +511,7 @@ impl Display for RuleDomain {
             RuleDomain::Test => fmt.write_str("test"),
             RuleDomain::Solid => fmt.write_str("solid"),
             RuleDomain::Next => fmt.write_str("next"),
+            RuleDomain::Qwik => fmt.write_str("qwik"),
         }
     }
 }
@@ -541,6 +544,10 @@ impl RuleDomain {
             ],
             RuleDomain::Solid => &[&("solid", ">=1.0.0")],
             RuleDomain::Next => &[&("next", ">=14.0.0")],
+            RuleDomain::Qwik => &[
+                &("@builder.io/qwik", ">=1.0.0"),
+                &("@qwik.dev/core", ">=2.0.0"),
+            ],
         }
     }
 
@@ -562,6 +569,7 @@ impl RuleDomain {
             ],
             RuleDomain::Solid => &[],
             RuleDomain::Next => &[],
+            RuleDomain::Qwik => &[],
         }
     }
 }

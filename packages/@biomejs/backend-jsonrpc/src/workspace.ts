@@ -1634,6 +1634,10 @@ export interface Nursery {
 	 */
 	noValueAtRule?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noVisibleTask?: RuleConfiguration_for_Null;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -3212,13 +3216,13 @@ export type Category =
 	| "lint/a11y/useValidAriaRole"
 	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useValidLang"
+	| "lint/complexity/noAdjacentSpacesInRegex"
 	| "lint/complexity/noBannedTypes"
 	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noForEach"
-	| "lint/complexity/noAdjacentSpacesInRegex"
 	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"
@@ -3279,7 +3283,6 @@ export type Category =
 	| "lint/correctness/noUnknownProperty"
 	| "lint/correctness/noUnknownUnit"
 	| "lint/correctness/noUnmatchableAnbSelector"
-	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noUnreachable"
 	| "lint/correctness/noUnreachableSuper"
 	| "lint/correctness/noUnsafeFinally"
@@ -3289,6 +3292,7 @@ export type Category =
 	| "lint/correctness/noUnusedLabels"
 	| "lint/correctness/noUnusedPrivateClassMembers"
 	| "lint/correctness/noUnusedVariables"
+	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
 	| "lint/correctness/useArrayLiterals"
@@ -3314,8 +3318,8 @@ export type Category =
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicateElseIf"
-	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDuplicateFields"
+	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
@@ -3365,6 +3369,7 @@ export type Category =
 	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noValueAtRule"
+	| "lint/nursery/noVisibleTask"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useAtIndex"
