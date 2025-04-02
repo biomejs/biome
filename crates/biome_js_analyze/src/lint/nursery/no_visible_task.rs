@@ -33,7 +33,7 @@ declare_lint_rule! {
     ///
     /// useOn('scroll', handleScroll$);
     /// ```
-    pub(crate) NoVisibleTask {
+    pub NoVisibleTask {
         version: "next",
         name: "noVisibleTask",
         language: "js",
