@@ -30,7 +30,10 @@ pub use workspace_watcher::{WatcherInstruction, WorkspaceWatcher};
 const IGNORE_ENTRIES: &[&[u8]] = &[
     b".cache",
     b".git",
+    b".hg",
+    b".netlify",
     b".output",
+    b".svn",
     b".timestamp",
     b".turbo",
     b".vercel",
