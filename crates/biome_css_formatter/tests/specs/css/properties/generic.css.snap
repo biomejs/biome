@@ -10,7 +10,7 @@ div {
     unknown-property
     :
      one-value ;
-    unknown-property:    multiple   
+    unknown-property:    multiple
      values;
     unknown-property: delimited
     , values
@@ -43,8 +43,13 @@ div {
 	/* Custom property, always generic */
 	unknown-property: one-value;
 	unknown-property: multiple values;
-	unknown-property: delimited, values;
+	unknown-property:
+		delimited,
+		values;
 	unknown-property: delimited / slash / values;
-	unknown-property: mixed, delimiters / can be, used;
+	unknown-property:
+		mixed,
+		delimiters / can be,
+		used;
 }
 ```
