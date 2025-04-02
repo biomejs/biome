@@ -82,6 +82,14 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
                 .ok()?
                 .token_text_trimmed();
 
+            // Exception: role `treeitem` is allowed on `<li>`
+            // Reason: `treeitem` has the superclass role `listitem`, which means it is made to be used on `<li>`
+            // Ref: https://w3c.github.io/aria/#treeitem
+            // Ref: https://www.w3.org/WAI/ARIA/apg/patterns/treeview/examples/treeview-1a/
+            if element_name.text() == "li" && role_attribute_value == "treeitem" {
+                return None;
+            }
+
             if ctx.aria_roles().is_not_interactive_element(node)
                 && AriaRole::from_roles(role_attribute_value)
                     .is_some_and(|role| role.is_interactive())

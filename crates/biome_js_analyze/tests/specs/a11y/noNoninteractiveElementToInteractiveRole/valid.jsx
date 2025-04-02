@@ -107,3 +107,4 @@ let a = <tr role="tabpanel" />;
 let a = <tr role="tree" />;
 let a = <tr role="treegrid" />;
 let a = <tr role="treeitem" />;
+let a = <li role="treeitem" />;
