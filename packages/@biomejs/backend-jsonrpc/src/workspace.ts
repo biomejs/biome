@@ -1538,6 +1538,10 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of the !important style.
+	 */
+	noImportantStyles?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
@@ -3330,6 +3334,7 @@ export type Category =
 	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noImportantInKeyframe"
+	| "lint/nursery/noImportantStyles"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
