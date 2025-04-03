@@ -542,7 +542,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         workspace,
         path,
-        dependency_graph: _,
+        module_graph: _,
         project_layout,
         language,
         only,

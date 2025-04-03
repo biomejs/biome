@@ -5,7 +5,7 @@ The Biome Service is where we implement the [Workspace](src/workspace.rs).
 The workspace is where Biome keeps all internal state of projects, such as open
 documents, but also more advanced service data, such as the instances of our
 [project layout](../biome_project_layout/) and our
-[dependency graph](../biome_dependency_graph/).
+[module graph](../biome_module_graph/).
 
 Note that there are two implementations of the `Workspace` trait:
 
@@ -36,7 +36,7 @@ you can use these CLI commands:
    `cargo run --bin=biome -- lint --use-server <path>`.
 
 The rule `noImportCycles` is currently the best candidate to observe the state
-in the project layout and the dependency graph.
+in the project layout and the module graph.
 
 ### Tests
 

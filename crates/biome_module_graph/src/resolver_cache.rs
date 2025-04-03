@@ -24,7 +24,7 @@ use oxc_resolver::{
 use papaya::{Equivalent, HashMap, HashSet};
 use rustc_hash::FxHasher;
 
-use crate::DependencyGraph;
+use crate::ModuleGraph;
 
 static THREAD_COUNT: AtomicU64 = AtomicU64::new(1);
 
@@ -40,20 +40,20 @@ thread_local! {
 /// This cache has a few unique requirements:
 /// * During resolving, we may assume the project layout to be available, so we
 ///   can use it for resolving `package.json` and `tsconfig.json` files.
-/// * Results will be inserted into the dependency graph, so we _cannot_ assume
-///   the dependency graph to be complete when resolving regular files.
-/// * However, we _do_ want to use previously built dependency graphs to be
+/// * Results will be inserted into the module graph, so we _cannot_ assume
+///   the module graph to be complete when resolving regular files.
+/// * However, we _do_ want to use previously built module graphs to be
 ///   as a source for resolving files when calculating _updates_ to the
-///   dependency graph.
+///   module graph.
 /// * Fortunately, for non-manifests, we don't actually care about the contents
 ///   of those files. This means that in addition to the project layout, we only
 ///   need to know which *paths* there are. So we can create an up-to-date cache
-///   for resolving as long as we have a (possibly empty) previous dependency
-///   graph and a list of paths to be added and/or removed.
+///   for resolving as long as we have a (possibly empty) previous module graph
+///   and a list of paths to be added and/or removed.
 pub(crate) struct ResolverCache<'a> {
     fs: &'a dyn FileSystem,
     project_layout: &'a ProjectLayout,
-    dependency_graph: &'a DependencyGraph,
+    module_graph: &'a ModuleGraph,
     added_paths: BTreeSet<&'a Utf8Path>,
     removed_paths: BTreeSet<&'a Utf8Path>,
 
@@ -65,14 +65,14 @@ impl<'a> ResolverCache<'a> {
     pub fn new(
         fs: &'a dyn FileSystem,
         project_layout: &'a ProjectLayout,
-        dependency_graph: &'a DependencyGraph,
+        module_graph: &'a ModuleGraph,
         added_paths: &'a [(&BiomePath, Option<AnyJsRoot>)],
         removed_paths: &'a [BiomePath],
     ) -> Self {
         Self {
             fs,
             project_layout,
-            dependency_graph,
+            module_graph,
             added_paths: added_paths.iter().map(|(path, _)| path.as_path()).collect(),
             removed_paths: removed_paths.iter().map(|path| path.as_path()).collect(),
 
@@ -95,7 +95,7 @@ impl<'a> ResolverCache<'a> {
         if self.added_paths.contains(path) {
             self.fs.path_kind(path).ok()
         } else {
-            self.dependency_graph.path_kind(path)
+            self.module_graph.path_kind(path)
         }
     }
 

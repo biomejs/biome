@@ -1,10 +1,10 @@
-//! Dependency graph tracking imports across files.
+//! Module graph tracking inferred information such as imports and exports and
+//! their types across modules.
 //!
 //! This can be used by lint rules for things such as cycle detection, and
 //! detecting broken imports.
 //!
-//! The dependency graph is instantiated and updated inside the Workspace
-//! Server.
+//! The module graph is instantiated and updated inside the Workspace Server.
 use std::{
     collections::{BTreeMap, BTreeSet},
     sync::Arc,
@@ -36,32 +36,30 @@ fn supported_extensions_owned() -> Vec<String> {
 
 /// Data structure for tracking imports and exports across files.
 ///
-/// The dependency graph is also augmented with type information, allowing types
+/// The module graph is also augmented with type information, allowing types
 /// to be looked up from imports as well.
 ///
-/// TODO: Should we call it the `ModuleGraph` instead?
-///
-/// The dependency graph is simply a flat mapping from paths to module imports.
-/// This approach makes both lookups easy and makes it very easy for us to
-/// invalidate part of the graph when there are file system changes.
+/// The module graph is simply a flat mapping from paths to module info
+/// structures. This approach makes both lookups easy and makes it very easy for
+/// us to invalidate part of the graph when there are file system changes.
 #[derive(Debug, Default)]
-pub struct DependencyGraph {
-    /// Cached dependency data per file.
-    data: HashMap<Utf8PathBuf, ModuleDependencyData, FxBuildHasher>,
+pub struct ModuleGraph {
+    /// Cached module info per file.
+    data: HashMap<Utf8PathBuf, ModuleInfo, FxBuildHasher>,
 
     /// Cache that tracks the presence of files, directories, and symlinks
     /// across the project.
     path_info: HashMap<Utf8PathBuf, Option<PathKind>>,
 }
 
-impl DependencyGraph {
-    /// Returns the dependency data, such as imports and exports, for the
-    /// given `path`.
-    pub fn dependency_data_for_path(&self, path: &Utf8Path) -> Option<ModuleDependencyData> {
+impl ModuleGraph {
+    /// Returns the module info, such as imports and exports and their types,
+    /// for the given `path`.
+    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
         self.data.pin().get(path).cloned()
     }
 
-    /// Updates the dependency graph to add, update, or remove files.
+    /// Updates the module graph to add, update, or remove files.
     ///
     /// Only JavaScript/TypeScript files need to be provided as part of
     /// `added_or_updated_paths` and `removed_paths`. Manifests are expected to
@@ -137,17 +135,13 @@ impl DependencyGraph {
     /// Finds an exported symbol by `symbol_name` as exported by `module`.
     ///
     /// Follows re-exports if necessary.
-    fn find_exported_symbol(
-        &self,
-        module: &ModuleDependencyData,
-        symbol_name: &str,
-    ) -> Option<OwnExport> {
+    fn find_exported_symbol(&self, module: &ModuleInfo, symbol_name: &str) -> Option<OwnExport> {
         let data = self.data.pin();
         let mut seen_paths = BTreeSet::new();
 
         fn find_exported_symbol_with_seen_paths<'a>(
-            data: &'a HashMapRef<Utf8PathBuf, ModuleDependencyData, FxBuildHasher, LocalGuard>,
-            module: &'a ModuleDependencyData,
+            data: &'a HashMapRef<Utf8PathBuf, ModuleInfo, FxBuildHasher, LocalGuard>,
+            module: &'a ModuleInfo,
             symbol_name: &str,
             seen_paths: &mut BTreeSet<&'a Utf8Path>,
         ) -> Option<OwnExport> {
@@ -191,7 +185,7 @@ impl DependencyGraph {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct ModuleDependencyData {
+pub struct ModuleInfo {
     /// Map of all static imports found in the module.
     ///
     /// Maps from the identifier found in the import statement to the absolute
@@ -236,7 +230,7 @@ pub struct ModuleDependencyData {
     pub blanket_reexports: Vec<ReexportAll>,
 }
 
-impl ModuleDependencyData {
+impl ModuleInfo {
     /// Allows draining a single entry from the imports.
     ///
     /// Returns a `(specifier, import)` pair from either the static or dynamic
@@ -245,7 +239,7 @@ impl ModuleDependencyData {
     /// Using this method allows for consuming the struct while iterating over
     /// it, without necessarily turning the entire struct into an iterator at
     /// once.
-    pub fn drain_one(&mut self) -> Option<(String, Import)> {
+    pub fn drain_import(&mut self) -> Option<(String, Import)> {
         if self.static_imports.is_empty() {
             self.dynamic_imports.pop_first()
         } else {
@@ -253,15 +247,15 @@ impl ModuleDependencyData {
         }
     }
 
-    /// Finds an exported symbol by `name`, using the `dependency_graph` to
+    /// Finds an exported symbol by `name`, using the `module_graph` to
     /// lookup re-exports if necessary.
     #[inline]
     pub fn find_exported_symbol(
         &self,
-        dependency_graph: &DependencyGraph,
+        module_graph: &ModuleGraph,
         name: &str,
     ) -> Option<OwnExport> {
-        dependency_graph.find_exported_symbol(self, name)
+        module_graph.find_exported_symbol(self, name)
     }
 
     /// Returns the information about a given import by its syntax node.
@@ -345,5 +339,5 @@ pub struct ReexportAll {
 }
 
 #[cfg(test)]
-#[path = "dependency_graph.tests.rs"]
+#[path = "module_graph.tests.rs"]
 mod tests;

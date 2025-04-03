@@ -2,12 +2,12 @@
 [package]
 authors.workspace    = true
 categories.workspace = true
-description          = "Data structure for tracking imports across files"
+description          = "Data structure for tracking inferred information across modules"
 edition.workspace    = true
 homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
-name                 = "biome_dependency_graph"
+name                 = "biome_module_graph"
 repository.workspace = true
 version              = "0.0.1"
 

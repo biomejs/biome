@@ -2,13 +2,13 @@ use std::collections::HashSet;
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_dependency_graph::ModuleDependencyData;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
+use biome_module_graph::ModuleInfo;
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::services::dependency_graph::ResolvedImports;
+use crate::services::module_graph::ResolvedImports;
 
 declare_lint_rule! {
     /// Prevent import cycles.
@@ -95,13 +95,13 @@ impl Rule for NoImportCycles {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let file_imports = ctx.imports_for_path(ctx.file_path())?;
+        let module_info = ctx.module_info_for_path(ctx.file_path())?;
 
         let node = ctx.query();
-        let import = file_imports.get_import_by_node(node)?;
+        let import = module_info.get_import_by_node(node)?;
         let resolved_path = import.resolved_path.as_ref().ok()?;
 
-        let imports = ctx.imports_for_path(resolved_path)?;
+        let imports = ctx.module_info_for_path(resolved_path)?;
         find_cycle(ctx, resolved_path, imports)
     }
 
@@ -153,13 +153,13 @@ impl Rule for NoImportCycles {
 fn find_cycle(
     ctx: &RuleContext<NoImportCycles>,
     start_path: &Utf8Path,
-    mut imports: ModuleDependencyData,
+    mut module_info: ModuleInfo,
 ) -> Option<Vec<String>> {
     let mut seen = HashSet::new();
     let mut stack = Vec::new();
 
     'outer: loop {
-        while let Some((_specifier, import)) = imports.drain_one() {
+        while let Some((_specifier, import)) = module_info.drain_import() {
             let Ok(resolved_path) = import.resolved_path else {
                 continue;
             };
@@ -182,16 +182,16 @@ fn find_cycle(
 
             seen.insert(resolved_path.to_string());
 
-            if let Some(resolved_imports) = ctx.imports_for_path(&resolved_path) {
-                stack.push((resolved_path.into(), imports));
-                imports = resolved_imports;
+            if let Some(next_module_info) = ctx.module_info_for_path(&resolved_path) {
+                stack.push((resolved_path.into(), module_info));
+                module_info = next_module_info;
                 continue 'outer;
             }
         }
 
         match stack.pop() {
-            Some((_previous_path, previous_imports)) => {
-                imports = previous_imports;
+            Some((_previous_path, previous_module_info)) => {
+                module_info = previous_module_info;
             }
             None => break,
         }

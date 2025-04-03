@@ -7,9 +7,9 @@ use biome_analyze::{
     MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
 use biome_aria::AriaRoles;
-use biome_dependency_graph::DependencyGraph;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
@@ -43,21 +43,21 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 
 #[derive(Default)]
 pub struct JsAnalyzerServices {
-    dependency_graph: Arc<DependencyGraph>,
+    module_graph: Arc<ModuleGraph>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
 }
 
-impl From<(Arc<DependencyGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
+impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
     fn from(
-        (dependency_graph, project_layout, source_type): (
-            Arc<DependencyGraph>,
+        (module_graph, project_layout, source_type): (
+            Arc<ModuleGraph>,
             Arc<ProjectLayout>,
             JsFileSource,
         ),
     ) -> Self {
         Self {
-            dependency_graph,
+            module_graph,
             project_layout,
             source_type,
         }
@@ -114,7 +114,7 @@ where
     visit_registry(&mut registry);
 
     let JsAnalyzerServices {
-        dependency_graph,
+        module_graph,
         project_layout,
         source_type,
     } = services;
@@ -146,7 +146,7 @@ where
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(source_type);
-    services.insert_service(dependency_graph);
+    services.insert_service(module_graph);
     services.insert_service(project_layout.get_node_manifest_for_path(&options.file_path));
     services.insert_service(project_layout);
 

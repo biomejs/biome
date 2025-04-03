@@ -2,21 +2,21 @@ use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
     Queryable, RuleKey, ServiceBag, SyntaxVisitor,
 };
-use biome_dependency_graph::{DependencyGraph, ModuleDependencyData};
+use biome_module_graph::{ModuleGraph, ModuleInfo};
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
 use camino::Utf8Path;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub struct DependencyGraphService(Arc<DependencyGraph>);
+pub struct DependencyGraphService(Arc<ModuleGraph>);
 
 impl DependencyGraphService {
-    pub fn dependency_graph(&self) -> &DependencyGraph {
+    pub fn module_graph(&self) -> &ModuleGraph {
         self.0.as_ref()
     }
 
-    pub fn imports_for_path(&self, path: &Utf8Path) -> Option<ModuleDependencyData> {
-        self.0.dependency_data_for_path(path)
+    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.0.module_info_for_path(path)
     }
 }
 
@@ -25,10 +25,10 @@ impl FromServices for DependencyGraphService {
         rule_key: &RuleKey,
         services: &ServiceBag,
     ) -> Result<Self, MissingServicesDiagnostic> {
-        let dependency_graph: &Arc<DependencyGraph> = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["DependencyGraph"])
+        let module_graph: &Arc<ModuleGraph> = services.get_service().ok_or_else(|| {
+            MissingServicesDiagnostic::new(rule_key.rule_name(), &["ModuleGraph"])
         })?;
-        Ok(Self(dependency_graph.clone()))
+        Ok(Self(module_graph.clone()))
     }
 }
 
@@ -39,7 +39,7 @@ impl Phase for DependencyGraphService {
 }
 
 /// Query type usable by lint rules that matches import statements and uses the
-/// [DependencyGraph] to resolve their specifiers.
+/// [ModuleGraph] to resolve their specifiers.
 #[derive(Clone)]
 pub struct ResolvedImports<N>(N);
 

@@ -16,7 +16,6 @@ biome_aria               = { workspace = true }
 biome_aria_metadata      = { workspace = true }
 biome_console            = { workspace = true }
 biome_control_flow       = { workspace = true }
-biome_dependency_graph   = { workspace = true }
 biome_deserialize        = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
@@ -25,6 +24,7 @@ biome_js_factory         = { workspace = true }
 biome_js_semantic        = { workspace = true }
 biome_js_syntax          = { workspace = true }
 biome_js_type_info       = { workspace = true }
+biome_module_graph       = { workspace = true }
 biome_package            = { workspace = true }
 biome_project_layout     = { workspace = true }
 biome_rowan              = { workspace = true }

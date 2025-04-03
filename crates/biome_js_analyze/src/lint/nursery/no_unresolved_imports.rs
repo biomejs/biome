@@ -2,14 +2,14 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_dependency_graph::{DependencyGraph, ModuleDependencyData, SUPPORTED_EXTENSIONS};
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
+use biome_module_graph::{ModuleGraph, ModuleInfo, SUPPORTED_EXTENSIONS};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::services::dependency_graph::ResolvedImports;
+use crate::services::module_graph::ResolvedImports;
 
 declare_lint_rule! {
     /// Warn when importing non-existing exports.
@@ -94,12 +94,12 @@ impl Rule for NoUnresolvedImports {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(file_imports) = ctx.imports_for_path(ctx.file_path()) else {
+        let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {
             return Vec::new();
         };
 
         let node = ctx.query();
-        let Some(import) = file_imports.get_import_by_node(node) else {
+        let Some(import) = module_info.get_import_by_node(node) else {
             return Vec::new();
         };
 
@@ -125,14 +125,14 @@ impl Rule for NoUnresolvedImports {
             }
         };
 
-        let Some(target_data) = ctx.imports_for_path(resolved_path) else {
+        let Some(target_info) = ctx.module_info_for_path(resolved_path) else {
             return Vec::new();
         };
 
         let options = GetUnresolvedImportsOptions {
-            dependency_graph: ctx.dependency_graph(),
+            module_graph: ctx.module_graph(),
             specifier,
-            target_data,
+            target_info,
         };
 
         let result = match node {
@@ -230,14 +230,14 @@ impl Rule for NoUnresolvedImports {
 }
 
 struct GetUnresolvedImportsOptions<'a> {
-    /// The dependency graph to use for further lookups.
-    dependency_graph: &'a DependencyGraph,
+    /// The module graph to use for further lookups.
+    module_graph: &'a ModuleGraph,
 
     /// The path of the module we're importing from.
     specifier: TokenText,
 
-    /// Dependency data of the module we're importing from.
-    target_data: ModuleDependencyData,
+    /// Module info of the module we're importing from.
+    target_info: ModuleInfo,
 }
 
 fn get_unresolved_imports_from_module_source(
@@ -330,7 +330,7 @@ fn get_named_specifier_import_name(specifier: AnyJsNamedImportSpecifier) -> Opti
 
 fn has_exported_symbol(import_name: &Text, options: &GetUnresolvedImportsOptions) -> bool {
     options
-        .target_data
-        .find_exported_symbol(options.dependency_graph, import_name.text())
+        .target_info
+        .find_exported_symbol(options.module_graph, import_name.text())
         .is_some()
 }

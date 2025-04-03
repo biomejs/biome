@@ -23,7 +23,6 @@ use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
-use biome_dependency_graph::DependencyGraph;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, category};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
@@ -39,6 +38,7 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_module_graph::ModuleGraph;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache};
@@ -408,7 +408,7 @@ pub struct FixAllParams<'a> {
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
-    pub(crate) dependency_graph: Arc<DependencyGraph>,
+    pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
@@ -479,7 +479,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) categories: RuleCategories,
-    pub(crate) dependency_graph: Arc<DependencyGraph>,
+    pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
@@ -604,7 +604,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) range: Option<TextRange>,
     pub(crate) workspace: &'a WorkspaceSettingsHandle,
     pub(crate) path: &'a BiomePath,
-    pub(crate) dependency_graph: Arc<DependencyGraph>,
+    pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,

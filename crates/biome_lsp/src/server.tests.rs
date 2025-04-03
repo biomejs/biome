@@ -3097,7 +3097,7 @@ async fn pull_source_assist_action() -> Result<()> {
 }
 
 #[tokio::test]
-async fn watcher_updates_dependency_graph() -> Result<()> {
+async fn watcher_updates_module_graph() -> Result<()> {
     const FOO_CONTENT: &str = r#"import { bar } from "./bar.ts";
 
 export function foo() {
@@ -3118,7 +3118,7 @@ export function bar() {
 "#;
 
     // ARRANGE: Set up FS and LSP connection in order to test import cycles.
-    let mut fs = TemporaryFs::new("watcher_updates_dependency_graph");
+    let mut fs = TemporaryFs::new("watcher_updates_module_graph");
     fs.create_file(
         "biome.json",
         r#"{
@@ -3315,7 +3315,7 @@ export function bar() {
 }
 
 #[tokio::test]
-async fn watcher_updates_dependency_graph_with_directories() -> Result<()> {
+async fn watcher_updates_module_graph_with_directories() -> Result<()> {
     const FOO_CONTENT: &str = r#"import { bar } from "./utils/bar.ts";
 
 export function foo() {
@@ -3330,7 +3330,7 @@ export function bar() {
 "#;
 
     // ARRANGE: Set up FS and LSP connection in order to test import cycles.
-    let mut fs = TemporaryFs::new("watcher_updates_dependency_graph_with_directories");
+    let mut fs = TemporaryFs::new("watcher_updates_module_graph_with_directories");
     fs.create_file(
         "biome.json",
         r#"{

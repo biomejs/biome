@@ -8,7 +8,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{AnyJsImportLike, JsSyntaxToken, inner_string_text};
 use biome_rowan::BatchMutationExt;
 
-use crate::{JsRuleAction, services::dependency_graph::ResolvedImports};
+use crate::{JsRuleAction, services::module_graph::ResolvedImports};
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -145,11 +145,11 @@ impl Rule for UseImportExtensions {
     type Options = Box<UseImportExtensionsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let file_imports = ctx.imports_for_path(ctx.file_path())?;
+        let module_info = ctx.module_info_for_path(ctx.file_path())?;
         let force_js_extensions = ctx.options().force_js_extensions;
 
         let node = ctx.query();
-        let import = file_imports.get_import_by_node(node)?;
+        let import = module_info.get_import_by_node(node)?;
         let resolved_path = import.resolved_path.as_ref().ok()?;
 
         get_extensionless_import(node, resolved_path, force_js_extensions)

@@ -73,7 +73,7 @@ fn get_fixtures_path() -> Utf8PathBuf {
             .expect("couldn't find Cargo.lock")
             .to_path_buf();
     }
-    path.join("crates/biome_dependency_graph/fixtures")
+    path.join("crates/biome_module_graph/fixtures")
 }
 
 #[test]
@@ -85,10 +85,10 @@ fn test_resolve_relative_import() {
     ];
     let added_paths = get_added_paths(&fs, &added_paths);
 
-    let dependency_graph = DependencyGraph::default();
-    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
-    let imports = dependency_graph.data.pin();
+    let imports = module_graph.data.pin();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
 
     assert_eq!(file_imports.static_imports.len(), 2);
@@ -109,10 +109,10 @@ fn test_resolve_package_import() {
     ];
     let added_paths = get_added_paths(&fs, &added_paths);
 
-    let dependency_graph = DependencyGraph::default();
-    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
-    let imports = dependency_graph.data.pin();
+    let imports = module_graph.data.pin();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
 
     assert_eq!(file_imports.static_imports.len(), 2);
@@ -185,10 +185,10 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
     ];
     let added_paths = get_added_paths(&fs, &added_paths);
 
-    let dependency_graph = DependencyGraph::default();
-    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
-    let imports = dependency_graph.data.pin();
+    let imports = module_graph.data.pin();
     let file_imports = imports
         .get(Utf8Path::new(&format!(
             "{fixtures_path}/frontend/src/index.ts"
@@ -276,10 +276,10 @@ fn test_resolve_exports() {
     ];
     let added_paths = get_added_paths(&fs, &added_paths);
 
-    let dependency_graph = DependencyGraph::default();
-    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
-    let dependency_data = dependency_graph.data.pin();
+    let dependency_data = module_graph.data.pin();
     let mut data = dependency_data
         .get(Utf8Path::new("/src/index.ts"))
         .unwrap()
