@@ -1,10 +1,10 @@
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{MemoryFileSystem, OsFileSystem};
-use biome_js_parser::JsParserOptions;
-use biome_js_syntax::JsFileSource;
 use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
 use biome_package::{Dependencies, PackageJson, Version};
+use biome_test_utils::get_added_paths;
+use insta::assert_debug_snapshot;
 
 use super::*;
 
@@ -79,20 +79,14 @@ fn get_fixtures_path() -> Utf8PathBuf {
 #[test]
 fn test_resolve_relative_import() {
     let (fs, project_layout) = create_test_project_layout();
-    let added_paths = vec![
+    let added_paths = [
         BiomePath::new("/src/index.ts"),
         BiomePath::new("/src/bar.ts"),
     ];
+    let added_paths = get_added_paths(&fs, &added_paths);
 
     let dependency_graph = DependencyGraph::default();
-    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[], |path| {
-        fs.read_file_from_path(path).ok().and_then(|content| {
-            let parsed =
-                biome_js_parser::parse(&content, JsFileSource::tsx(), JsParserOptions::default());
-            assert!(parsed.diagnostics().is_empty());
-            parsed.try_tree()
-        })
-    });
+    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
     let imports = dependency_graph.data.pin();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
@@ -109,20 +103,14 @@ fn test_resolve_relative_import() {
 #[test]
 fn test_resolve_package_import() {
     let (fs, project_layout) = create_test_project_layout();
-    let added_paths = vec![
+    let added_paths = [
         BiomePath::new("/src/index.ts"),
         BiomePath::new("/node_modules/shared/dist/index.js"),
     ];
+    let added_paths = get_added_paths(&fs, &added_paths);
 
     let dependency_graph = DependencyGraph::default();
-    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[], |path| {
-        fs.read_file_from_path(path).ok().and_then(|content| {
-            let parsed =
-                biome_js_parser::parse(&content, JsFileSource::tsx(), JsParserOptions::default());
-            assert!(parsed.diagnostics().is_empty());
-            parsed.try_tree()
-        })
-    });
+    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
     let imports = dependency_graph.data.pin();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
@@ -187,7 +175,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         },
     );
 
-    let added_paths = vec![
+    let added_paths = [
         BiomePath::new(format!("{fixtures_path}/frontend/src/bar.ts")),
         BiomePath::new(format!("{fixtures_path}/frontend/src/index.ts")),
         BiomePath::new(format!(
@@ -195,16 +183,10 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         )),
         BiomePath::new(format!("{fixtures_path}/shared/dist/index.js")),
     ];
+    let added_paths = get_added_paths(&fs, &added_paths);
 
     let dependency_graph = DependencyGraph::default();
-    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[], |path| {
-        fs.read_file_from_path(path).ok().and_then(|content| {
-            let parsed =
-                biome_js_parser::parse(&content, JsFileSource::tsx(), JsParserOptions::default());
-            assert!(parsed.diagnostics().is_empty());
-            parsed.try_tree()
-        })
-    });
+    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
     let imports = dependency_graph.data.pin();
     let file_imports = imports
@@ -249,15 +231,18 @@ fn test_resolve_exports() {
             export function bar() {}
 
             /* @ignored because of incorrect amount of asterisks */
-            export function baz() {}
+            export async function baz() {}
 
+            /**
+             * TODO: No types can be detected on these yet.
+             */
             export const { a, b, c: [d, e] } = getObject();
 
             /**
              * @public
              * @returns {JSX.Element}
              */
-            export default function Component() {}
+            export default function Component(): JSX.Element {}
 
             export * from "./reexports";
             export { ohNo as "oh\x0Ano" } from "./renamed-reexports";
@@ -284,68 +269,31 @@ fn test_resolve_exports() {
             .with_version(Version::Literal("0.0.0".into())),
     );
 
-    let added_paths = vec![
+    let added_paths = [
         BiomePath::new("/src/index.ts"),
         BiomePath::new("/src/reexports.ts"),
         BiomePath::new("/src/renamed-reexports.ts"),
     ];
+    let added_paths = get_added_paths(&fs, &added_paths);
 
     let dependency_graph = DependencyGraph::default();
-    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[], |path| {
-        fs.read_file_from_path(path).ok().and_then(|content| {
-            let parsed =
-                biome_js_parser::parse(&content, JsFileSource::tsx(), JsParserOptions::default());
-            assert!(parsed.diagnostics().is_empty());
-            parsed.try_tree()
-        })
-    });
+    dependency_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
     let dependency_data = dependency_graph.data.pin();
-    let data = dependency_data.get(Utf8Path::new("/src/index.ts")).unwrap();
+    let mut data = dependency_data
+        .get(Utf8Path::new("/src/index.ts"))
+        .unwrap()
+        .clone();
 
-    assert_eq!(data.exports.len(), 9);
+    // Remove this entry, or the Windows tests fail on the path in the snapshot below:
     assert_eq!(
-        data.exports.get(&Text::Static("foo")),
-        Some(&Export::Own(OwnExport {
-            jsdoc_comment: None // FIXME: See above.
-        }))
-    );
-    assert_eq!(
-        data.exports.get(&Text::Static("bar")),
-        Some(&Export::Own(OwnExport {
-            jsdoc_comment: Some("@package".to_string())
-        }))
-    );
-    assert_eq!(
-        data.exports.get(&Text::Static("baz")),
-        Some(&Export::Own(OwnExport {
-            jsdoc_comment: None // block comment is not a JSDoc comment
-        }))
-    );
-
-    let destructured_exports = ["a", "b", "d", "e"];
-    for export in destructured_exports {
-        assert_eq!(
-            data.exports.get(&Text::Static(export)),
-            Some(&Export::Own(OwnExport {
-                jsdoc_comment: None
-            }))
-        );
-    }
-
-    assert_eq!(
-        data.exports.get(&Text::Static("default")),
-        Some(&Export::Own(OwnExport {
-            jsdoc_comment: Some("@public\n@returns {JSX.Element}".to_string())
-        }))
-    );
-
-    assert_eq!(
-        data.exports.get(&Text::Static("oh\nno")),
-        Some(&Export::Reexport(Import {
+        data.exports.remove(&Text::Static("oh\nno")),
+        Some(Export::Reexport(Import {
             resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts"))
         }))
     );
+
+    assert_debug_snapshot!(data.exports);
 
     assert_eq!(
         data.blanket_reexports,

@@ -17,6 +17,7 @@ workspace = true
 [dependencies]
 biome_fs             = { workspace = true }
 biome_js_syntax      = { workspace = true }
+biome_js_type_info   = { workspace = true }
 biome_package        = { workspace = true }
 biome_project_layout = { workspace = true }
 biome_rowan          = { workspace = true }
@@ -33,3 +34,5 @@ biome_deserialize = { workspace = true }
 biome_js_parser   = { workspace = true }
 biome_json_parser = { workspace = true }
 biome_json_value  = { workspace = true }
+biome_test_utils  = { workspace = true }
+insta             = { workspace = true }

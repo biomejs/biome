@@ -13,6 +13,7 @@ use std::{
 };
 
 use biome_fs::{BiomePath, FileSystem, PathKind};
+use biome_js_syntax::AnyJsRoot;
 use biome_package::{PackageJson, TsConfigJson};
 use biome_project_layout::ProjectLayout;
 use camino::{FromPathBufError, Utf8Component, Utf8Path, Utf8PathBuf};
@@ -65,14 +66,14 @@ impl<'a> ResolverCache<'a> {
         fs: &'a dyn FileSystem,
         project_layout: &'a ProjectLayout,
         dependency_graph: &'a DependencyGraph,
-        added_paths: &'a [BiomePath],
+        added_paths: &'a [(&BiomePath, Option<AnyJsRoot>)],
         removed_paths: &'a [BiomePath],
     ) -> Self {
         Self {
             fs,
             project_layout,
             dependency_graph,
-            added_paths: added_paths.iter().map(|path| path.as_path()).collect(),
+            added_paths: added_paths.iter().map(|(path, _)| path.as_path()).collect(),
             removed_paths: removed_paths.iter().map(|path| path.as_path()).collect(),
 
             paths: HashSet::builder()

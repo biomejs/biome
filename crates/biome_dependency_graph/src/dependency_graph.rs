@@ -12,6 +12,7 @@ use std::{
 
 use biome_fs::{BiomePath, FileSystem, PathKind};
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
+use biome_js_type_info::{Namespace, Type};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -34,6 +35,11 @@ fn supported_extensions_owned() -> Vec<String> {
 }
 
 /// Data structure for tracking imports and exports across files.
+///
+/// The dependency graph is also augmented with type information, allowing types
+/// to be looked up from imports as well.
+///
+/// TODO: Should we call it the `ModuleGraph` instead?
 ///
 /// The dependency graph is simply a flat mapping from paths to module imports.
 /// This approach makes both lookups easy and makes it very easy for us to
@@ -61,20 +67,12 @@ impl DependencyGraph {
     /// `added_or_updated_paths` and `removed_paths`. Manifests are expected to
     /// be resolved through the `project_layout`. As such, the `project_layout`
     /// must have been updated before calling this method.
-    ///
-    /// `get_js_syntax_for_path` is a callback that may be called for any of the
-    /// files given in `added_or_updated_paths`, and it should return the syntax
-    /// root for each of them. If a file is already removed, or is inaccessible,
-    /// by the time `get_js_syntax_for_path` is called for it, `None` must be
-    /// returned. Error reporting, if necessary, should be handled by the
-    /// workspace server instead.
     pub fn update_graph_for_js_paths(
         &self,
         fs: &dyn FileSystem,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[BiomePath],
+        added_or_updated_paths: &[(&BiomePath, Option<AnyJsRoot>)],
         removed_paths: &[BiomePath],
-        get_js_syntax_for_path: impl Fn(&Utf8Path) -> Option<AnyJsRoot>,
     ) {
         let resolver_cache = Arc::new(ResolverCache::new(
             fs,
@@ -92,7 +90,7 @@ impl DependencyGraph {
 
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
-        for path in added_or_updated_paths {
+        for (path, _) in added_or_updated_paths {
             let mut parent = path.parent();
             while let Some(path) = parent {
                 if path_info
@@ -108,11 +106,10 @@ impl DependencyGraph {
         // Traverse all the added and updated paths and insert their resolved
         // imports.
         let imports = self.data.pin();
-        for path in added_or_updated_paths {
-            let Some(root) = get_js_syntax_for_path(path) else {
-                continue;
-            };
-
+        for (path, root) in added_or_updated_paths
+            .iter()
+            .filter_map(|(path, root)| root.clone().map(|root| (path, root)))
+        {
             let directory = path.parent().unwrap_or(path);
             let visitor = ModuleVisitor::new(root, directory, &resolver);
             let module_imports = visitor.collect_data();
@@ -171,6 +168,7 @@ impl DependencyGraph {
                 //        Should be fixed as part of #5312.
                 Some(Export::ReexportAll(_)) => Some(OwnExport {
                     jsdoc_comment: None,
+                    ty: Type::Namespace(Box::new(Namespace(Box::new([])))),
                 }),
                 None => module.blanket_reexports.iter().find_map(|reexport| {
                     match &reexport.import.resolved_path {
@@ -333,6 +331,9 @@ pub struct OwnExport {
     /// The comment would be:
     /// `"Magic constant of fooness.\n\nFor if you want more ways to write 1."`.
     pub jsdoc_comment: Option<String>,
+
+    /// Type of the exported symbol.
+    pub ty: Type,
 }
 
 /// Information about an export statement that re-exports all symbols from

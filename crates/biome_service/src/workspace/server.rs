@@ -642,28 +642,34 @@ impl WorkspaceServer {
     ) {
         let no_paths: &[BiomePath] = &[];
         let (added_or_changed_paths, removed_paths) = match signal_kind {
-            WatcherSignalKind::AddedOrChanged => (paths, no_paths),
-            WatcherSignalKind::Removed => (no_paths, paths),
+            WatcherSignalKind::AddedOrChanged => {
+                let documents = self.documents.pin();
+                let mut added_or_changed_paths = Vec::with_capacity(paths.len());
+                for path in paths {
+                    let root = documents.get(path.as_path()).and_then(|doc| {
+                        let file_source = self.file_sources[doc.file_source_index];
+                        match file_source {
+                            DocumentFileSource::Js(_) => doc
+                                .syntax
+                                .as_ref()
+                                .and_then(|syntax| syntax.as_ref().ok())
+                                .map(AnyParse::tree),
+                            _ => None,
+                        }
+                    });
+                    added_or_changed_paths.push((path, root));
+                }
+
+                (added_or_changed_paths, no_paths)
+            }
+            WatcherSignalKind::Removed => (Vec::new(), paths),
         };
 
         self.dependency_graph.update_graph_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
-            added_or_changed_paths,
+            &added_or_changed_paths,
             removed_paths,
-            |path| {
-                let documents = self.documents.pin();
-                let doc = documents.get(path)?;
-                let file_source = self.file_sources[doc.file_source_index];
-                match file_source {
-                    DocumentFileSource::Js(_) => doc
-                        .syntax
-                        .as_ref()
-                        .and_then(|syntax| syntax.as_ref().ok())
-                        .map(AnyParse::tree),
-                    _ => None,
-                }
-            },
         );
     }
 

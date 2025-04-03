@@ -376,13 +376,16 @@ dependencies = [
  "biome_fs",
  "biome_js_parser",
  "biome_js_syntax",
+ "biome_js_type_info",
  "biome_json_parser",
  "biome_json_value",
  "biome_package",
  "biome_project_layout",
  "biome_rowan",
+ "biome_test_utils",
  "camino",
  "cfg-if",
+ "insta",
  "once_cell",
  "oxc_resolver",
  "papaya",
@@ -818,6 +821,7 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
+ "biome_js_type_info",
  "biome_package",
  "biome_plugin_loader",
  "biome_project_layout",
@@ -956,6 +960,15 @@ dependencies = [
  "camino",
  "insta",
  "tests_macros",
+]
+
+[[package]]
+name = "biome_js_type_info"
+version = "0.0.1"
+dependencies = [
+ "biome_js_syntax",
+ "biome_rowan",
+ "static_assertions",
 ]
 
 [[package]]
@@ -1286,6 +1299,7 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
+ "biome_js_type_info",
  "biome_json_analyze",
  "biome_json_formatter",
  "biome_json_parser",

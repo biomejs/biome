@@ -1,0 +1,20 @@
+
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Data structures for tracking type information"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_js_type_info"
+repository.workspace = true
+version              = "0.0.1"
+
+[lints]
+workspace = true
+
+[dependencies]
+biome_js_syntax   = { workspace = true }
+biome_rowan       = { workspace = true }
+static_assertions = { workspace = true }

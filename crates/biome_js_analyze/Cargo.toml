@@ -24,6 +24,7 @@ biome_glob               = { workspace = true, features = ["biome_deserialize", 
 biome_js_factory         = { workspace = true }
 biome_js_semantic        = { workspace = true }
 biome_js_syntax          = { workspace = true }
+biome_js_type_info       = { workspace = true }
 biome_package            = { workspace = true }
 biome_project_layout     = { workspace = true }
 biome_rowan              = { workspace = true }
