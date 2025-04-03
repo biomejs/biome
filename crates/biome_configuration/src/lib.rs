@@ -58,7 +58,7 @@ pub use javascript::{JsConfiguration, js_configuration};
 pub use json::{JsonConfiguration, json_configuration};
 pub use overrides::{
     OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
-    OverrideLinterConfiguration, OverridePattern, Overrides,
+    OverrideLinterConfiguration, OverridePattern, Overrides, OverrideFilesConfiguration,
 };
 use plugins::Plugins;
 use regex::Regex;

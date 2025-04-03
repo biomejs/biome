@@ -2962,6 +2962,14 @@
 			},
 			"additionalProperties": false
 		},
+		"OverrideFilesConfiguration": {
+			"type": "object",
+			"properties": {
+				"max_size": {
+					"anyOf": [{ "$ref": "#/definitions/MaxSize" }, { "type": "null" }]
+				}
+			}
+		},
 		"OverrideFormatterConfiguration": {
 			"type": "object",
 			"properties": {
@@ -3056,6 +3064,13 @@
 					"description": "Specific configuration for the CSS language",
 					"anyOf": [
 						{ "$ref": "#/definitions/CssConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"files": {
+					"description": "File size limit in bytes",
+					"anyOf": [
+						{ "$ref": "#/definitions/OverrideFilesConfiguration" },
 						{ "type": "null" }
 					]
 				},
