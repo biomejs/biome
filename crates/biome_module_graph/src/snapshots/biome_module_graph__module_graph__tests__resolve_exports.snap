@@ -1,5 +1,5 @@
 ---
-source: crates/biome_dependency_graph/src/dependency_graph.tests.rs
+source: crates/biome_module_graph/src/module_graph.tests.rs
 expression: data.exports
 ---
 {

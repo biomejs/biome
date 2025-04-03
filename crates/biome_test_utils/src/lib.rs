@@ -3,12 +3,12 @@ use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
-use biome_dependency_graph::DependencyGraph;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
+use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
@@ -161,7 +161,7 @@ where
     }
 }
 
-/// Creates a dependency graph that is initialized for the given `input_file`.
+/// Creates a module graph that is initialized for the given `input_file`.
 ///
 /// It uses an [OsFileSystem] initialized for the directory in which the test
 /// file resides and inserts all files from that directory, so that files
@@ -169,20 +169,20 @@ where
 ///
 /// The `project_layout` should be initialized in advance if you want any
 /// manifest files to be discovered.
-pub fn dependency_graph_for_test_file(
+pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
     project_layout: &ProjectLayout,
-) -> Arc<DependencyGraph> {
-    let dependency_graph = DependencyGraph::default();
+) -> Arc<ModuleGraph> {
+    let module_graph = ModuleGraph::default();
 
     let dir = input_file.parent().unwrap().to_path_buf();
     let paths = get_js_like_paths_in_dir(&dir);
     let fs = OsFileSystem::new(dir);
     let paths = get_added_paths(&fs, &paths);
 
-    dependency_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[]);
+    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths, &[]);
 
-    Arc::new(dependency_graph)
+    Arc::new(module_graph)
 }
 
 /// Loads and parses files from the file system to pass them to service methods.

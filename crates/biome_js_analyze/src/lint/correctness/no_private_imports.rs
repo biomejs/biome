@@ -1,10 +1,10 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::{fmt::Display, markup};
-use biome_dependency_graph::{DependencyGraph, ModuleDependencyData};
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
+use biome_module_graph::{ModuleGraph, ModuleInfo};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
@@ -13,7 +13,7 @@ use std::str::FromStr;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
-use crate::services::dependency_graph::ResolvedImports;
+use crate::services::module_graph::ResolvedImports;
 
 const INDEX_BASENAMES: &[&str] = &["index", "mod"];
 
@@ -216,27 +216,27 @@ impl Rule for NoPrivateImports {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let self_path = ctx.file_path();
-        let Some(file_imports) = ctx.imports_for_path(ctx.file_path()) else {
+        let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {
             return Vec::new();
         };
 
         let node = ctx.query();
-        let Some(target_path) = file_imports
+        let Some(target_path) = module_info
             .get_import_by_node(node)
             .and_then(|import| import.resolved_path.as_ref().ok())
         else {
             return Vec::new();
         };
 
-        let Some(target_data) = ctx.imports_for_path(target_path) else {
+        let Some(target_info) = ctx.module_info_for_path(target_path) else {
             return Vec::new();
         };
 
         let options = GetRestrictedImportOptions {
-            dependency_graph: ctx.dependency_graph(),
+            module_graph: ctx.module_graph(),
             self_path,
             target_path,
-            target_data,
+            target_info,
             default_visibility: ctx.options().default_visibility,
         };
 
@@ -284,8 +284,8 @@ impl Rule for NoPrivateImports {
 }
 
 struct GetRestrictedImportOptions<'a> {
-    /// The dependency graph to use for further lookups.
-    dependency_graph: &'a DependencyGraph,
+    /// The module graph to use for further lookups.
+    module_graph: &'a ModuleGraph,
 
     /// The self module path we're importing to.
     self_path: &'a Utf8Path,
@@ -293,8 +293,8 @@ struct GetRestrictedImportOptions<'a> {
     /// The target module path we're importing from.
     target_path: &'a Utf8Path,
 
-    /// Dependency data of the target module we're importing from.
-    target_data: ModuleDependencyData,
+    /// Module info of the target module we're importing from.
+    target_info: ModuleInfo,
 
     /// The visibility to assume for symbols without explicit visibility tag.
     default_visibility: Visibility,
@@ -411,8 +411,8 @@ fn get_restricted_import_visibility(
     options: &GetRestrictedImportOptions,
 ) -> Option<Visibility> {
     let visibility = options
-        .target_data
-        .find_exported_symbol(options.dependency_graph, import_name.text())
+        .target_info
+        .find_exported_symbol(options.module_graph, import_name.text())
         .and_then(|export| export.jsdoc_comment.as_deref().and_then(parse_visibility))
         .unwrap_or(options.default_visibility);
 

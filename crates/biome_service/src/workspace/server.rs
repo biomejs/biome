@@ -7,7 +7,6 @@ use append_only_vec::AppendOnlyVec;
 use biome_analyze::AnalyzerPluginVec;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration};
-use biome_dependency_graph::DependencyGraph;
 use biome_deserialize::Deserialized;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_diagnostics::print_diagnostic_to_string;
@@ -20,6 +19,7 @@ use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with
 use biome_js_syntax::ModuleKind;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
+use biome_module_graph::ModuleGraph;
 use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
@@ -69,8 +69,8 @@ pub struct WorkspaceServer {
     /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
 
-    /// Dependency graph tracking imports across source files.
-    dependency_graph: Arc<DependencyGraph>,
+    /// Module graph tracking inferred information across modules.
+    module_graph: Arc<ModuleGraph>,
 
     /// Keeps all loaded plugins in memory, per project.
     plugin_caches: Arc<HashMap<ProjectKey, PluginCache>>,
@@ -139,7 +139,7 @@ impl WorkspaceServer {
             features: Features::new(),
             projects: Default::default(),
             project_layout: Default::default(),
-            dependency_graph: Default::default(),
+            module_graph: Default::default(),
             plugin_caches: Default::default(),
             documents: Default::default(),
             file_sources: AppendOnlyVec::default(),
@@ -633,13 +633,9 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Updates the [DependencyGraph] for the given `paths`.
+    /// Updates the [ModuleGraph] for the given `paths`.
     #[instrument(level = "debug", skip(self))]
-    pub(super) fn update_dependency_graph(
-        &self,
-        signal_kind: WatcherSignalKind,
-        paths: &[BiomePath],
-    ) {
+    pub(super) fn update_module_graph(&self, signal_kind: WatcherSignalKind, paths: &[BiomePath]) {
         let no_paths: &[BiomePath] = &[];
         let (added_or_changed_paths, removed_paths) = match signal_kind {
             WatcherSignalKind::AddedOrChanged => {
@@ -665,7 +661,7 @@ impl WorkspaceServer {
             WatcherSignalKind::Removed => (Vec::new(), paths),
         };
 
-        self.dependency_graph.update_graph_for_js_paths(
+        self.module_graph.update_graph_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
             &added_or_changed_paths,
@@ -684,7 +680,7 @@ impl WorkspaceServer {
             self.update_project_layout(signal_kind, &path)?;
         }
 
-        self.update_dependency_graph(signal_kind, &[path]);
+        self.update_module_graph(signal_kind, &[path]);
 
         let _ = self.notification_tx.send(ServiceDataNotification::Updated);
 
@@ -1117,7 +1113,7 @@ impl Workspace for WorkspaceServer {
                     skip,
                     language,
                     categories,
-                    dependency_graph: self.dependency_graph.clone(),
+                    module_graph: self.module_graph.clone(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_rules,
@@ -1195,7 +1191,7 @@ impl Workspace for WorkspaceServer {
             range,
             workspace: &settings.into(),
             path: &path,
-            dependency_graph: self.dependency_graph.clone(),
+            module_graph: self.module_graph.clone(),
             project_layout: self.project_layout.clone(),
             language,
             only,
@@ -1336,7 +1332,7 @@ impl Workspace for WorkspaceServer {
             workspace: settings.into(),
             should_format,
             biome_path: &path,
-            dependency_graph: self.dependency_graph.clone(),
+            module_graph: self.module_graph.clone(),
             project_layout: self.project_layout.clone(),
             document_file_source: language,
             only,

@@ -11,7 +11,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{ResolveError, ResolverGeneric};
 
 use crate::{
-    dependency_graph::{Export, Import, ModuleDependencyData, OwnExport, ReexportAll},
+    module_graph::{Export, Import, ModuleInfo, OwnExport, ReexportAll},
     resolver_cache::ResolverCache,
 };
 
@@ -19,7 +19,7 @@ pub(crate) struct ModuleVisitor<'a> {
     root: AnyJsRoot,
     directory: &'a Utf8Path,
     resolver: &'a ResolverGeneric<ResolverCache<'a>>,
-    data: ModuleDependencyData,
+    data: ModuleInfo,
 }
 
 impl<'a> ModuleVisitor<'a> {
@@ -36,7 +36,7 @@ impl<'a> ModuleVisitor<'a> {
         }
     }
 
-    pub fn collect_data(mut self) -> ModuleDependencyData {
+    pub fn collect_data(mut self) -> ModuleInfo {
         let iter = self.root.syntax().preorder();
         for event in iter {
             match event {

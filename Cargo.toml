@@ -109,7 +109,6 @@ biome_css_formatter          = { version = "0.5.7", path = "./crates/biome_css_f
 biome_css_parser             = { version = "0.5.7", path = "./crates/biome_css_parser" }
 biome_css_semantic           = { version = "0.0.0", path = "./crates/biome_css_semantic" }
 biome_css_syntax             = { version = "0.5.7", path = "./crates/biome_css_syntax" }
-biome_dependency_graph       = { version = "0.0.1", path = "./crates/biome_dependency_graph" }
 biome_deserialize            = { version = "0.6.0", path = "./crates/biome_deserialize" }
 biome_deserialize_macros     = { version = "0.6.0", path = "./crates/biome_deserialize_macros" }
 biome_diagnostics            = { version = "0.5.7", path = "./crates/biome_diagnostics" }
@@ -150,6 +149,7 @@ biome_lsp_converters         = { version = "0.1.0", path = "./crates/biome_lsp_c
 biome_markdown_factory       = { version = "0.0.1", path = "./crates/biome_markdown_factory" }
 biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markdown_parser" }
 biome_markdown_syntax        = { version = "0.0.1", path = "./crates/biome_markdown_syntax" }
+biome_module_graph           = { version = "0.0.1", path = "./crates/biome_module_graph" }
 biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugin_loader" }
 biome_project_layout         = { version = "0.0.1", path = "./crates/biome_project_layout" }
 biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
