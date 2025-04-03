@@ -5,8 +5,8 @@ use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 use biome_test_utils::{
-    code_fix_to_string, create_analyzer_options, module_graph_for_test_file,
-    diagnostic_to_string, parse_test_path, project_layout_with_node_manifest, scripts_from_json,
+    code_fix_to_string, create_analyzer_options, diagnostic_to_string, module_graph_for_test_file,
+    parse_test_path, project_layout_with_node_manifest, scripts_from_json,
 };
 use camino::Utf8Path;
 use std::ops::Deref;

@@ -7,9 +7,9 @@ use biome_analyze::{
     MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
 use biome_aria::AriaRoles;
-use biome_module_graph::ModuleGraph;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
