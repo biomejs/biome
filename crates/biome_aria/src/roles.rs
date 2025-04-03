@@ -204,10 +204,8 @@ impl AriaRoles {
             //
             // Check: https://www.w3.org/TR/wai-aria-practices/examples/landmarks/banner.html
             Some("header") => false,
-            // FIXME: this differs from `get_implicit_role`, is it intentional?
-            //
             // Always consider `a` and `area` as interactive even if `href` is not set.
-            Some("a" | "area") => false,
+            Some("a" | "area") => element.find_attribute_by_name(|n| n == "href").is_none(),
             // SVG elements, by default, do not have interactive semantics.
             // They are primarily used for graphics and visual rendering. While they can be made interactive with additional
             // attributes and JavaScript, inherently they don't provide user interaction capabilities.

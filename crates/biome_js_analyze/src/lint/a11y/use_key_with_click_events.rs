@@ -2,7 +2,7 @@ use crate::{a11y::is_hidden_from_screen_reader, services::aria::Aria};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsxAttribute, jsx_ext::AnyJsxElement};
+use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -74,6 +74,8 @@ impl Rule for UseKeyWithClickEvents {
         let element = ctx.query();
         let aria_roles = ctx.aria_roles();
 
+        element.find_attribute_by_name("onClick")?;
+
         // skip custom components for now
         if element.is_custom_component() {
             return None;
@@ -87,24 +89,11 @@ impl Rule for UseKeyWithClickEvents {
             return None;
         }
 
-        for attribute in element.attributes() {
-            match attribute {
-                AnyJsxAttribute::JsxAttribute(attribute) => {
-                    let attribute_name = attribute.name().ok()?;
-                    let name = attribute_name.as_jsx_name()?;
-                    let name_token = name.value_token().ok()?;
-
-                    if matches!(
-                        name_token.text_trimmed(),
-                        "onKeyDown" | "onKeyUp" | "onKeyPress"
-                    ) {
-                        return None;
-                    }
-                }
-                AnyJsxAttribute::JsxSpreadAttribute(_) | AnyJsxAttribute::JsMetavariable(_) => {
-                    return None;
-                }
-            }
+        if element.find_attribute_by_name("onKeyDown").is_some()
+            || element.find_attribute_by_name("onKeyUp").is_some()
+            || element.find_attribute_by_name("onKeyPress").is_some()
+        {
+            return None;
         }
 
         Some(())
