@@ -292,7 +292,7 @@ impl Type {
             }
             AnyTsType::TsThisType(_) => Self::ThisKeyword,
             AnyTsType::TsTupleType(ty) => {
-                let elements: SyntaxResult<Vec<_>> = ty
+                let elements: SyntaxResult<Box<_>> = ty
                     .elements()
                     .into_iter()
                     .map(|el| el.map(|el| TupleElementType::from_any_ts_tuple_type_element(&el)))
@@ -354,7 +354,7 @@ impl Type {
             .unwrap_or_default()
     }
 
-    pub fn types_from_ts_type_arguments(arguments: Option<TsTypeArguments>) -> Vec<Self> {
+    pub fn types_from_ts_type_arguments(arguments: Option<TsTypeArguments>) -> Box<[Self]> {
         arguments
             .map(|args| {
                 args.ts_type_argument_list()
@@ -470,7 +470,7 @@ impl FunctionParameter {
         }
     }
 
-    pub fn params_from_js_parameters(params: &JsParameters) -> Vec<Self> {
+    pub fn params_from_js_parameters(params: &JsParameters) -> Box<[Self]> {
         params
             .as_fields()
             .items
@@ -496,7 +496,7 @@ impl GenericTypeParameter {
             .ok()
     }
 
-    pub fn params_from_ts_type_parameters(params: &TsTypeParameters) -> Vec<Self> {
+    pub fn params_from_ts_type_parameters(params: &TsTypeParameters) -> Box<[Self]> {
         params
             .items()
             .into_iter()
@@ -683,7 +683,7 @@ impl TypeReferenceQualifier {
     pub fn from_any_ts_name(name: &AnyTsName) -> Option<Self> {
         match name {
             AnyTsName::JsReferenceIdentifier(identifier) => {
-                text_from_value_token(identifier.value_token()).map(|text| Self(vec![text]))
+                text_from_value_token(identifier.value_token()).map(|text| Self(Box::new([text])))
             }
             AnyTsName::TsQualifiedName(name) => {
                 let mut fields = name.as_fields();
@@ -701,7 +701,7 @@ impl TypeReferenceQualifier {
                         }
                     }
                 }
-                Some(Self(identifiers))
+                Some(Self(identifiers.into()))
             }
         }
     }

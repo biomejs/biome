@@ -168,7 +168,7 @@ impl DependencyGraph {
                 //        Should be fixed as part of #5312.
                 Some(Export::ReexportAll(_)) => Some(OwnExport {
                     jsdoc_comment: None,
-                    ty: Type::Namespace(Box::new(Namespace(Vec::new()))),
+                    ty: Type::Namespace(Box::new(Namespace(Box::new([])))),
                 }),
                 None => module.blanket_reexports.iter().find_map(|reexport| {
                     match &reexport.import.resolved_path {

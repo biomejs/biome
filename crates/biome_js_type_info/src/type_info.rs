@@ -105,7 +105,7 @@ pub struct Class {
     pub name: Option<Text>,
 
     /// Class members.
-    pub members: Vec<ClassMember>,
+    pub members: Box<[ClassMember]>,
 }
 
 /// Members of a class definition.
@@ -121,10 +121,10 @@ pub enum ClassMember {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Constructor {
     /// Generic type parameters used in the call signature.
-    pub type_parameters: Vec<GenericTypeParameter>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Call parameter of the constructor.
-    pub parameters: Vec<FunctionParameter>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// Return type when the constructor is called.
     pub return_type: Option<Type>,
@@ -137,13 +137,13 @@ pub struct Function {
     pub is_async: bool,
 
     /// Generic type parameters defined in the function signature.
-    pub type_parameters: Vec<GenericTypeParameter>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Name of the function, if specified in the definition.
     pub name: Option<Text>,
 
     /// Call parameters of the function.
-    pub parameters: Vec<FunctionParameter>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// The function's return type.
     pub return_type: ReturnType,
@@ -178,7 +178,7 @@ pub struct GenericTypeParameter {
 
 /// The intersection between other types.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Intersection(pub Vec<Type>);
+pub struct Intersection(pub Box<[Type]>);
 
 /// Literal value used as a type.
 #[derive(Clone, Debug, PartialEq)]
@@ -194,21 +194,21 @@ pub enum Literal {
 
 /// A namespace definition.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Namespace(pub Vec<TypeMember>);
+pub struct Namespace(pub Box<[TypeMember]>);
 
 /// An object definition.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Object(pub Vec<TypeMember>);
+pub struct Object(pub Box<[TypeMember]>);
 
 /// Object literal used as a type.
 #[derive(Clone, Debug, PartialEq)]
-pub struct ObjectLiteral(pub Vec<TypeMember>);
+pub struct ObjectLiteral(pub Box<[TypeMember]>);
 
 /// Tuple type.
 ///
 /// Tuples in TypeScript are created using `Array`s of a fixed size.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Tuple(pub Vec<TupleElementType>);
+pub struct Tuple(pub Box<[TupleElementType]>);
 
 /// An individual element within a tuple.
 #[derive(Clone, Debug, PartialEq)]
@@ -240,10 +240,10 @@ pub enum TypeMember {
 #[derive(Clone, Debug, PartialEq)]
 pub struct CallSignatureTypeMember {
     /// Generic type parameters defined in the call signature.
-    pub type_parameters: Vec<GenericTypeParameter>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Call parameters of the signature.
-    pub parameters: Vec<FunctionParameter>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// Return type when the object is called.
     pub return_type: ReturnType,
@@ -253,10 +253,10 @@ pub struct CallSignatureTypeMember {
 #[derive(Clone, Debug, PartialEq)]
 pub struct ConstructorTypeMember {
     /// Generic type parameters defined in the constructor.
-    pub type_parameters: Vec<GenericTypeParameter>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Call parameters of the constructor.
-    pub parameters: Vec<FunctionParameter>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// Return type when the constructor is called.
     pub return_type: Option<Type>,
@@ -267,13 +267,13 @@ pub struct ConstructorTypeMember {
 #[derive(Clone, Debug, PartialEq)]
 pub struct MethodTypeMember {
     /// Generic type parameters defined in the method.
-    pub type_parameters: Vec<GenericTypeParameter>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Name of the method.
     pub name: Text,
 
     /// Call parameters of the method.
-    pub parameters: Vec<FunctionParameter>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// Return type of the method.
     pub return_type: ReturnType,
@@ -359,16 +359,16 @@ pub struct TypeReference {
     pub qualifier: TypeReferenceQualifier,
 
     /// Generic type parameters specified in the reference.
-    pub type_parameters: Vec<Type>,
+    pub type_parameters: Box<[Type]>,
 }
 
 /// Path of identifiers to the type to a referenced type.
 #[derive(Clone, Debug, PartialEq)]
-pub struct TypeReferenceQualifier(pub Vec<Text>);
+pub struct TypeReferenceQualifier(pub Box<[Text]>);
 
 /// A union of types.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Union(pub Vec<Type>);
+pub struct Union(pub Box<[Type]>);
 
 #[cfg(test)]
 #[path = "type_info.tests.rs"]
