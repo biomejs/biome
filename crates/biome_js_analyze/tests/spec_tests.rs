@@ -11,7 +11,7 @@ use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_errors_are_absent, code_fix_to_string, create_analyzer_options,
-    dependency_graph_for_test_file, diagnostic_to_string, has_bogus_nodes_or_empty_slots,
+    diagnostic_to_string, has_bogus_nodes_or_empty_slots, module_graph_for_test_file,
     parse_test_path, project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
@@ -19,6 +19,13 @@ use camino::{Utf8Component, Utf8Path};
 use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
+
+const TESTS_WITH_MODULE_GRAPH: &[&str] = &[
+    "noImportCycles",
+    "noPrivateImports",
+    "noUnresolvedImports",
+    "useImportExtensions",
+];
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
@@ -133,17 +140,17 @@ pub(crate) fn analyze_and_snap(
 
     // FIXME: We probably want to enable it for all rules? Right now it seems to
     //        trigger a leak panic...
-    let dependency_graph = if input_file.components().any(|component| {
-        component == Utf8Component::Normal("noImportCycles")
-            || component == Utf8Component::Normal("noPrivateImports")
-            || component == Utf8Component::Normal("useImportExtensions")
+    let module_graph = if input_file.components().any(|component| {
+        TESTS_WITH_MODULE_GRAPH
+            .iter()
+            .any(|test_name| component == Utf8Component::Normal(test_name))
     }) {
-        dependency_graph_for_test_file(input_file, &project_layout)
+        module_graph_for_test_file(input_file, &project_layout)
     } else {
         Default::default()
     };
 
-    let services = JsAnalyzerServices::from((dependency_graph, project_layout, source_type));
+    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
@@ -224,8 +231,9 @@ pub(crate) fn analyze_and_snap(
     //        Maybe there's a regular expression that could work, but it feels
     //        flimsy too...
     if input_file.components().any(|component| {
-        component == Utf8Component::Normal("noImportCycles")
-            || component == Utf8Component::Normal("noPrivateImports")
+        TESTS_WITH_MODULE_GRAPH
+            .iter()
+            .any(|test_name| component == Utf8Component::Normal(test_name))
     }) {
         // Normalize Windows paths.
         *snapshot = snapshot.replace('\\', "/");

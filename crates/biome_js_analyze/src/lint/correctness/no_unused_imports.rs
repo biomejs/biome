@@ -9,6 +9,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
+use biome_js_factory::make::{js_module, js_module_item_list};
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsCombinedSpecifier, AnyJsImportClause, AnyJsNamedImportSpecifier,
@@ -212,7 +213,8 @@ impl Rule for NoUnusedImports {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-        let mut mutation = ctx.root().begin();
+        let root = ctx.root();
+        let mut mutation = root.clone().begin();
         match state {
             Unused::EmptyStatement(_) | Unused::AllImports(_) => {
                 let parent = node.syntax().parent()?;
@@ -240,6 +242,23 @@ impl Rule for NoUnusedImports {
                             next_sibling.into(),
                             new_next_sibling.into(),
                         );
+                    } else if let Some(root) = root.as_js_module() {
+                        mutation.remove_element(parent.clone().into());
+                        let mut new_root = js_module(
+                            root.directives(),
+                            js_module_item_list(vec![]),
+                            root.eof_token().ok()?,
+                        );
+                        if let Some(bom_token) = root.bom_token() {
+                            new_root = new_root.with_bom_token(bom_token);
+                        }
+                        if let Some(interpreter_token) = root.interpreter_token() {
+                            new_root = new_root.with_interpreter_token(interpreter_token);
+                        }
+                        let new_root = new_root
+                            .build()
+                            .prepend_trivia_pieces(leading_trivia_pieces)?;
+                        mutation.replace_node_discard_trivia(root.clone(), new_root);
                     }
                 }
                 mutation.remove_element(parent.into());

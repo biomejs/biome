@@ -1,1 +1,1 @@
-function f(_snake_case, CONSTANT_CASE) {}
+export function f(_snake_case, CONSTANT_CASE) { return _snake_case }

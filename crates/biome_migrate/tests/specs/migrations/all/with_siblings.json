@@ -1,0 +1,20 @@
+{
+  "linter": {
+    "all": true,
+    "rules": {
+      "style": {
+        "all": true,
+        "noForOf": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "all": true
+      },
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "all": true,
+        "noUnusedImports": "error"
+      }
+    }
+  }
+}

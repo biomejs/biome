@@ -1,0 +1,27 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "formatter": { "enabled": true } }
+```
+
+## `.prettierrc`
+
+```prettierrc
+{ "printWidth": 666 }
+```
+
+# Termination Message
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Migration has encountered an error: top-level Prettier configuration: The line width should be between 1 and 320, got 666
+  
+  
+
+
+```

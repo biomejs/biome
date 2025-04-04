@@ -23,7 +23,7 @@ A-Project:
   - any-glob-to-any-file:
     - crates/biome_service/**
     - crates/biome_configuration/**
-    - crates/biome_dependency_graph/**
+    - crates/biome_module_graph/**
     - crates/biome_package/**
     - crates/biome_plugin_loader/**
     - crates/biome_project_layout/**

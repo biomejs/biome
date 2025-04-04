@@ -13,19 +13,6 @@ function f3() {
     g();
 }
 
-// parameter a is not used
-{(function (a) { })}
-{(function ({a}) { })}
-{(function ([a]) { })}
-(function (a, b) {
-    console.log(b);
-})
-
-// parameter b is not used
-(function (a, b) {
-    console.log(a);
-})
-
 // f5 is not used
 const f5 = () => { };
 

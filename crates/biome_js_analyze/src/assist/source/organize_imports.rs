@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{AnyJsExportClause, AnyJsModuleItem, JsModule, JsSyntaxKind, JsSyntaxNode};
-use biome_rowan::{AstNode, TriviaPieceKind};
+use biome_rowan::{AstNode, TextRange, TriviaPieceKind};
 use biome_rowan::{BatchMutationExt, chain_trivia_pieces};
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
@@ -527,6 +527,19 @@ impl Rule for OrganizeImports {
     type State = Box<[Issue]>;
     type Signals = Option<Self::State>;
     type Options = Options;
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        ctx.query()
+            .items()
+            .into_iter()
+            .find(|item| {
+                matches!(
+                    item,
+                    AnyJsModuleItem::JsImport(_) | AnyJsModuleItem::JsExport(_)
+                )
+            })
+            .map(|item| item.range())
+    }
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         struct ChunkBuilder {

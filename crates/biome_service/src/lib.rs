@@ -27,7 +27,18 @@ pub use workspace_watcher::{WatcherInstruction, WorkspaceWatcher};
 /// Path entries that should be ignored in the workspace, even by the scanner.
 ///
 /// These cannot (yet) be configured.
-const IGNORE_ENTRIES: &[&[u8]] = &[b".git", b".timestamp", b".DS_Store"];
+const IGNORE_ENTRIES: &[&[u8]] = &[
+    b".cache",
+    b".git",
+    b".hg",
+    b".netlify",
+    b".output",
+    b".svn",
+    b".timestamp",
+    b".turbo",
+    b".vercel",
+    b".DS_Store",
+];
 
 /// This is the main entrypoint of the application.
 pub struct App<'app> {

@@ -134,13 +134,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noBlankTarget": {
-					"description": "Disallow target=\"_blank\" attribute without rel=\"noreferrer\"",
-					"anyOf": [
-						{ "$ref": "#/definitions/AllowDomainConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDistractingElements": {
 					"description": "Enforces that no distracting elements are used.",
 					"anyOf": [
@@ -364,23 +357,6 @@
 				},
 				"source": {
 					"anyOf": [{ "$ref": "#/definitions/Source" }, { "type": "null" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"AllowDomainConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithAllowDomainOptions" }
-			]
-		},
-		"AllowDomainOptions": {
-			"type": "object",
-			"properties": {
-				"allowDomains": {
-					"description": "List of domains to allow `target=\"_blank\"` without `rel=\"noreferrer\"`",
-					"type": "array",
-					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -890,7 +866,7 @@
 					]
 				},
 				"noPrivateImports": {
-					"description": "Restricts imports of private exports.",
+					"description": "Restrict imports of private exports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoPrivateImportsConfiguration" },
 						{ "type": "null" }
@@ -1677,6 +1653,12 @@
 			},
 			"additionalProperties": false
 		},
+		"GroupMatcher": {
+			"anyOf": [
+				{ "$ref": "#/definitions/PredefinedGroupMatcher" },
+				{ "$ref": "#/definitions/ImportSourceGlob" }
+			]
+		},
 		"GroupPlainConfiguration": {
 			"oneOf": [
 				{
@@ -1821,12 +1803,9 @@
 		},
 		"ImportGroup": {
 			"anyOf": [
-				{ "$ref": "#/definitions/PredefinedImportGroup" },
-				{ "$ref": "#/definitions/ImportSourceGlob" },
-				{
-					"type": "array",
-					"items": { "$ref": "#/definitions/ImportSourceGlob" }
-				}
+				{ "type": "null" },
+				{ "$ref": "#/definitions/GroupMatcher" },
+				{ "type": "array", "items": { "$ref": "#/definitions/GroupMatcher" } }
 			]
 		},
 		"ImportGroups": {
@@ -2351,6 +2330,28 @@
 			},
 			"additionalProperties": false
 		},
+		"NoBlankTargetConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoBlankTargetOptions" }
+			]
+		},
+		"NoBlankTargetOptions": {
+			"type": "object",
+			"properties": {
+				"allowDomains": {
+					"description": "List of domains where `target=\"_blank\"` is allowed without `rel=\"noopener\"`.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowNoReferrer": {
+					"description": "Whether `noreferrer` is allowed in addition to `noopener`.",
+					"default": true,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoConfusingLabelsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2828,6 +2829,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnresolvedImports": {
+					"description": "Warn when importing non-existing exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnwantedPolyfillio": {
 					"description": "Prevent duplicate polyfills from Polyfill.io.",
 					"anyOf": [
@@ -3289,19 +3297,7 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
-		"PredefinedImportGroup": {
-			"type": "string",
-			"enum": [
-				":BLANK_LINE:",
-				":ALIAS:",
-				":BUN:",
-				":NODE:",
-				":PACKAGE:",
-				":PACKAGE_WITH_PROTOCOL:",
-				":PATH:",
-				":URL:"
-			]
-		},
+		"PredefinedGroupMatcher": { "type": "string" },
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -3469,25 +3465,6 @@
 				}
 			]
 		},
-		"RuleWithAllowDomainOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"fix": {
-					"description": "The kind of the code actions emitted by the rule",
-					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
-				},
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/AllowDomainOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithComplexityOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -3614,6 +3591,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoBitwiseOperatorsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoBlankTargetOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoBlankTargetOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4050,6 +4046,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noBlankTarget": {
+					"description": "Disallow target=\"_blank\" attribute without rel=\"noopener\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoBlankTargetConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDangerouslySetInnerHtml": {
 					"description": "Prevent the usage of dangerous JSX props",
 					"anyOf": [

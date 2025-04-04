@@ -4,9 +4,12 @@ use biome_analyze::{
     Ast, Rule, RuleAction, RuleSource, RuleSourceKind, context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
+use biome_deserialize::TextRange;
 use biome_diagnostics::Applicability;
-use biome_js_syntax::{AnyJsxAttribute, JsxAttribute, JsxAttributeList};
-use biome_rowan::BatchMutationExt;
+use biome_js_syntax::{
+    AnyJsxAttribute, JsxAttribute, JsxAttributeList, JsxOpeningElement, JsxSelfClosingElement,
+};
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
@@ -75,6 +78,14 @@ impl Rule for UseSortedAttributes {
             prop_groups.push(current_prop_group);
         }
         prop_groups.into_boxed_slice()
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        ctx.query().syntax().ancestors().find_map(|node| {
+            JsxOpeningElement::cast_ref(&node)
+                .map(|element| element.range())
+                .or_else(|| JsxSelfClosingElement::cast_ref(&node).map(|element| element.range()))
+        })
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

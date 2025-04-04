@@ -25,7 +25,7 @@ pub type NoBarrelFile =
 pub type NoBitwiseOperators =
     <lint::nursery::no_bitwise_operators::NoBitwiseOperators as biome_analyze::Rule>::Options;
 pub type NoBlankTarget =
-    <lint::a11y::no_blank_target::NoBlankTarget as biome_analyze::Rule>::Options;
+    <lint::security::no_blank_target::NoBlankTarget as biome_analyze::Rule>::Options;
 pub type NoCatchAssign =
     <lint::suspicious::no_catch_assign::NoCatchAssign as biome_analyze::Rule>::Options;
 pub type NoChildrenProp =
@@ -244,6 +244,8 @@ pub type NoUnreachable =
     <lint::correctness::no_unreachable::NoUnreachable as biome_analyze::Rule>::Options;
 pub type NoUnreachableSuper =
     <lint::correctness::no_unreachable_super::NoUnreachableSuper as biome_analyze::Rule>::Options;
+pub type NoUnresolvedImports =
+    <lint::nursery::no_unresolved_imports::NoUnresolvedImports as biome_analyze::Rule>::Options;
 pub type NoUnsafeDeclarationMerging = < lint :: suspicious :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging as biome_analyze :: Rule > :: Options ;
 pub type NoUnsafeFinally =
     <lint::correctness::no_unsafe_finally::NoUnsafeFinally as biome_analyze::Rule>::Options;

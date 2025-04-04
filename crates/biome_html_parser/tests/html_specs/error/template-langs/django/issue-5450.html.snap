@@ -1,0 +1,133 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<h{{ heading_level|default:2 }}>name</h{{ heading_level|default:2 }}>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@0..1 "<" [] [],
+                    name: HtmlTagName {
+                        value_token: HTML_LITERAL@1..2 "h" [] [],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@2..5 "{{" [] [Whitespace(" ")],
+                            },
+                            initializer: missing (optional),
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@5..29 "heading_level|default:2" [] [Whitespace(" ")],
+                            },
+                            initializer: missing (optional),
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@29..31 "}}" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@31..32 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@32..36 "name" [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@36..37 "<" [] [],
+                        SLASH@37..38 "/" [] [],
+                        HtmlTagName {
+                            value_token: HTML_LITERAL@38..42 "h{{" [] [Whitespace(" ")],
+                        },
+                        HTML_BOGUS@42..66 "heading_level|default:2" [] [Whitespace(" ")],
+                        HTML_BOGUS@66..68 "}}" [] [],
+                        R_ANGLE@68..69 ">" [] [],
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@69..70 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..70
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..69
+    0: HTML_BOGUS_ELEMENT@0..69
+      0: HTML_OPENING_ELEMENT@0..32
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..2
+          0: HTML_LITERAL@1..2 "h" [] []
+        2: HTML_ATTRIBUTE_LIST@2..31
+          0: HTML_ATTRIBUTE@2..5
+            0: HTML_ATTRIBUTE_NAME@2..5
+              0: HTML_LITERAL@2..5 "{{" [] [Whitespace(" ")]
+            1: (empty)
+          1: HTML_ATTRIBUTE@5..29
+            0: HTML_ATTRIBUTE_NAME@5..29
+              0: HTML_LITERAL@5..29 "heading_level|default:2" [] [Whitespace(" ")]
+            1: (empty)
+          2: HTML_ATTRIBUTE@29..31
+            0: HTML_ATTRIBUTE_NAME@29..31
+              0: HTML_LITERAL@29..31 "}}" [] []
+            1: (empty)
+        3: R_ANGLE@31..32 ">" [] []
+      1: HTML_ELEMENT_LIST@32..36
+        0: HTML_CONTENT@32..36
+          0: HTML_LITERAL@32..36 "name" [] []
+      2: HTML_BOGUS_ELEMENT@36..69
+        0: L_ANGLE@36..37 "<" [] []
+        1: SLASH@37..38 "/" [] []
+        2: HTML_TAG_NAME@38..42
+          0: HTML_LITERAL@38..42 "h{{" [] [Whitespace(" ")]
+        3: HTML_BOGUS@42..66 "heading_level|default:2" [] [Whitespace(" ")]
+        4: HTML_BOGUS@66..68 "}}" [] []
+        5: R_ANGLE@68..69 ">" [] []
+  3: EOF@69..70 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+issue-5450.html:1:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Closing tags should not have attributes.
+  
+  > 1 │ <h{{ heading_level|default:2 }}>name</h{{ heading_level|default:2 }}>
+      │                                           ^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+issue-5450.html:1:67 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Closing tags should not have attributes.
+  
+  > 1 │ <h{{ heading_level|default:2 }}>name</h{{ heading_level|default:2 }}>
+      │                                                                   ^^
+    2 │ 
+  
+```

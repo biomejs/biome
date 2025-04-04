@@ -421,7 +421,7 @@ Rule domains can unlock various perks in the Biome analyzer:
 - A domain can define a number of `package.json` dependencies. When a user has one or more of these dependencies, Biome will automatically enable the recommended rules that belong to the domain. To add/update/remove dependencies to a domain, check the function `RuleDomain::manifest_dependencies`.
 - A domain can define a number of "globals". These globals will be used by other rules, and improve the UX of them. To add/update/remove globals to a domain, check the function `RuleDomain::globals`.
 
-When a rule is **recommended** and _has domains_, the rule is enabled only when the user enables the relative domains via `"recommneded"` or `"all"`.
+When a rule is **recommended** and _has domains_, the rule is enabled only when the user enables the relative domains via `"recommended"` or `"all"`.
 Instead, if the rule is **recommended** but _doesn't have domains_, the rule is always enabled by default.
 
 > [!NOTE]
@@ -874,7 +874,7 @@ To avoid this, you should consult the semantic model to check if the variable is
 
 #### Quick Test
 
-A swift way to test your rule is to go inside the `biome_js_analyze/src/lib.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
+A swift way to test your rule is to go inside the `biome_js_analyze/tests/quick_test.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
 
 Usually this test is ignored, so remove/_comment_ the `#[ignore]` macro and change the `let SOURCE` variable to whatever source code you need to test. Then update the rule filter, and add your rule:
 

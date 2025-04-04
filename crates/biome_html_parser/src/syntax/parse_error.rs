@@ -56,3 +56,10 @@ pub(crate) fn void_element_should_not_have_closing_tag(
 ) -> ParseDiagnostic {
     ParseDiagnostic::new("Void elements should not have a closing tag.", range)
 }
+
+pub(crate) fn closing_tag_should_not_have_attributes(
+    _p: &HtmlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    ParseDiagnostic::new("Closing tags should not have attributes.", range)
+}

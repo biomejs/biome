@@ -150,7 +150,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     }));
 
     ctx.workspace
-        .update_dependency_graph(WatcherSignalKind::AddedOrChanged, &handleable_paths);
+        .update_module_graph(WatcherSignalKind::AddedOrChanged, &handleable_paths);
 
     let _ = ctx
         .workspace

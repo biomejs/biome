@@ -1,0 +1,27 @@
+/* No valid container query after `and` */
+@container (width > 300px) and {
+}
+
+/* No valid container query after `and missing {` */
+@container (width > 300px) and
+}
+
+/* 200px is not a valid container query start */
+@container (width > 300px) and 200px {
+}
+
+/* The final `and` is missing its sub-query */
+@container (width > 300px) and (height > 200px) and {
+}
+
+/* Missing parenthesis  */
+@container (width > 300px) and width > 200px and (height > 200px) {
+}
+
+/* There's an extra `and` that has no query immediately following it. */
+@container (width > 300px) and and (height > 200px) {
+}
+
+/* Invalid query name */
+@container (width > 300px) and randomname and (height > 200px) {
+}

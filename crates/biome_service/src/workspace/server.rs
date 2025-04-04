@@ -7,7 +7,6 @@ use append_only_vec::AppendOnlyVec;
 use biome_analyze::AnalyzerPluginVec;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration};
-use biome_dependency_graph::DependencyGraph;
 use biome_deserialize::Deserialized;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_diagnostics::print_diagnostic_to_string;
@@ -20,6 +19,7 @@ use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with
 use biome_js_syntax::ModuleKind;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
+use biome_module_graph::ModuleGraph;
 use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
@@ -69,8 +69,8 @@ pub struct WorkspaceServer {
     /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
 
-    /// Dependency graph tracking imports across source files.
-    dependency_graph: Arc<DependencyGraph>,
+    /// Module graph tracking inferred information across modules.
+    module_graph: Arc<ModuleGraph>,
 
     /// Keeps all loaded plugins in memory, per project.
     plugin_caches: Arc<HashMap<ProjectKey, PluginCache>>,
@@ -139,7 +139,7 @@ impl WorkspaceServer {
             features: Features::new(),
             projects: Default::default(),
             project_layout: Default::default(),
-            dependency_graph: Default::default(),
+            module_graph: Default::default(),
             plugin_caches: Default::default(),
             documents: Default::default(),
             file_sources: AppendOnlyVec::default(),
@@ -587,10 +587,13 @@ impl WorkspaceServer {
                 .as_ref()
                 .is_some_and(|project_path| path.starts_with(project_path));
 
+            // We need to pass the **directory** that contains the ignore file.
+            let dir_ignore_file = path.parent().unwrap_or(path);
+
             if vcs_settings.is_ignore_file(path) && is_in_project_path {
                 let content = self.fs.read_file_from_path(path)?;
                 let patterns = content.lines().collect::<Vec<_>>();
-                vcs_settings.store_ignore_patterns(path.as_path(), patterns.as_slice())?;
+                vcs_settings.store_ignore_patterns(dir_ignore_file, patterns.as_slice())?;
             }
         }
 
@@ -630,37 +633,39 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Updates the [DependencyGraph] for the given `paths`.
+    /// Updates the [ModuleGraph] for the given `paths`.
     #[instrument(level = "debug", skip(self))]
-    pub(super) fn update_dependency_graph(
-        &self,
-        signal_kind: WatcherSignalKind,
-        paths: &[BiomePath],
-    ) {
+    pub(super) fn update_module_graph(&self, signal_kind: WatcherSignalKind, paths: &[BiomePath]) {
         let no_paths: &[BiomePath] = &[];
         let (added_or_changed_paths, removed_paths) = match signal_kind {
-            WatcherSignalKind::AddedOrChanged => (paths, no_paths),
-            WatcherSignalKind::Removed => (no_paths, paths),
+            WatcherSignalKind::AddedOrChanged => {
+                let documents = self.documents.pin();
+                let mut added_or_changed_paths = Vec::with_capacity(paths.len());
+                for path in paths {
+                    let root = documents.get(path.as_path()).and_then(|doc| {
+                        let file_source = self.file_sources[doc.file_source_index];
+                        match file_source {
+                            DocumentFileSource::Js(_) => doc
+                                .syntax
+                                .as_ref()
+                                .and_then(|syntax| syntax.as_ref().ok())
+                                .map(AnyParse::tree),
+                            _ => None,
+                        }
+                    });
+                    added_or_changed_paths.push((path, root));
+                }
+
+                (added_or_changed_paths, no_paths)
+            }
+            WatcherSignalKind::Removed => (Vec::new(), paths),
         };
 
-        self.dependency_graph.update_graph_for_js_paths(
+        self.module_graph.update_graph_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
-            added_or_changed_paths,
+            &added_or_changed_paths,
             removed_paths,
-            |path| {
-                let documents = self.documents.pin();
-                let doc = documents.get(path)?;
-                let file_source = self.file_sources[doc.file_source_index];
-                match file_source {
-                    DocumentFileSource::Js(_) => doc
-                        .syntax
-                        .as_ref()
-                        .and_then(|syntax| syntax.as_ref().ok())
-                        .map(AnyParse::tree),
-                    _ => None,
-                }
-            },
         );
     }
 
@@ -675,7 +680,7 @@ impl WorkspaceServer {
             self.update_project_layout(signal_kind, &path)?;
         }
 
-        self.update_dependency_graph(signal_kind, &[path]);
+        self.update_module_graph(signal_kind, &[path]);
 
         let _ = self.notification_tx.send(ServiceDataNotification::Updated);
 
@@ -1108,7 +1113,7 @@ impl Workspace for WorkspaceServer {
                     skip,
                     language,
                     categories,
-                    dependency_graph: self.dependency_graph.clone(),
+                    module_graph: self.module_graph.clone(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_rules,
@@ -1186,7 +1191,7 @@ impl Workspace for WorkspaceServer {
             range,
             workspace: &settings.into(),
             path: &path,
-            dependency_graph: self.dependency_graph.clone(),
+            module_graph: self.module_graph.clone(),
             project_layout: self.project_layout.clone(),
             language,
             only,
@@ -1327,7 +1332,7 @@ impl Workspace for WorkspaceServer {
             workspace: settings.into(),
             should_format,
             biome_path: &path,
-            dependency_graph: self.dependency_graph.clone(),
+            module_graph: self.module_graph.clone(),
             project_layout: self.project_layout.clone(),
             document_file_source: language,
             only,
@@ -1417,20 +1422,21 @@ impl Workspace for WorkspaceServer {
 /// Sets up the global Rayon thread pool the first time it's called.
 ///
 /// This is used to assign friendly debug names to the threads of the pool.
+#[cfg(not(target_family = "wasm"))]
 fn init_thread_pool(threads: Option<usize>) {
-    #[cfg(not(target_family = "wasm"))]
-    {
-        static INIT_ONCE: std::sync::Once = std::sync::Once::new();
-        INIT_ONCE.call_once(|| {
-            rayon::ThreadPoolBuilder::new()
-                .thread_name(|index| format!("biome::workspace_worker_{index}"))
-                // When zero is passed, rayon decides the number of threads
-                .num_threads(threads.unwrap_or(0))
-                .build_global()
-                .expect("failed to initialize the global thread pool");
-        });
-    }
+    static INIT_ONCE: std::sync::Once = std::sync::Once::new();
+    INIT_ONCE.call_once(|| {
+        rayon::ThreadPoolBuilder::new()
+            .thread_name(|index| format!("biome::workspace_worker_{index}"))
+            // When zero is passed, rayon decides the number of threads
+            .num_threads(threads.unwrap_or(0))
+            .build_global()
+            .expect("failed to initialize the global thread pool");
+    });
 }
+
+#[cfg(target_family = "wasm")]
+fn init_thread_pool(_threads: Option<usize>) {}
 
 /// Generates a pattern ID that we can use as "handle" for referencing
 /// previously parsed search queries.

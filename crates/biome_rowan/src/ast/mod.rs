@@ -250,7 +250,7 @@ pub trait AstNode: Clone {
         Self::cast(self.into_syntax().with_trailing_trivia_pieces(trivia)?)
     }
 
-    // Return a new version of this node with `trivia` prepended to the leading trivia of the first token.
+    /// Return a new version of this node with `trivia` prepended to the leading trivia of the first token.
     fn prepend_trivia_pieces<I>(self, trivia: I) -> Option<Self>
     where
         I: IntoIterator<Item = SyntaxTriviaPiece<Self::Language>>,
@@ -259,7 +259,7 @@ pub trait AstNode: Clone {
         Self::cast(self.into_syntax().prepend_trivia_pieces(trivia)?)
     }
 
-    // Return a new version of this node with `trivia` appended to the trailing trivia of the last token.
+    /// Return a new version of this node with `trivia` appended to the trailing trivia of the last token.
     fn append_trivia_pieces<I>(self, trivia: I) -> Option<Self>
     where
         I: IntoIterator<Item = SyntaxTriviaPiece<Self::Language>>,

@@ -1236,6 +1236,32 @@ fn format_stdin_with_errors() {
 }
 
 #[test]
+fn format_stdin_errors_with_no_file_extension() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    console
+        .in_buffer
+        .push("function f() {return{}}".to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path", "mock"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_stdin_errors_with_no_file_extension",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_not_format_if_disabled() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

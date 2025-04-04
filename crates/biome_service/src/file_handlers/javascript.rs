@@ -669,7 +669,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
     let services =
-        JsAnalyzerServices::from((params.dependency_graph, params.project_layout, file_source));
+        JsAnalyzerServices::from((params.module_graph, params.project_layout, file_source));
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
@@ -689,7 +689,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         workspace,
         path,
-        dependency_graph,
+        module_graph,
         project_layout,
         language,
         only,
@@ -731,7 +731,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         };
     };
 
-    let services = JsAnalyzerServices::from((dependency_graph, project_layout, source_type));
+    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
 
     debug!("Javascript runs the analyzer");
     analyze(
@@ -808,7 +808,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     loop {
         let services = JsAnalyzerServices::from((
-            params.dependency_graph.clone(),
+            params.module_graph.clone(),
             params.project_layout.clone(),
             file_source,
         ));

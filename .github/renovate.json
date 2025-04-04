@@ -38,7 +38,8 @@
         "tower",
         "hashbrown",
         "grit-pattern-matcher",
-        "grit-util"
+        "grit-util",
+        "getrandom"
       ]
     },
     {
