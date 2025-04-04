@@ -2703,6 +2703,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImportantStyles": {
+					"description": "Disallow the use of the !important style.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [

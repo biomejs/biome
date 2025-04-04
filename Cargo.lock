@@ -272,6 +272,7 @@ version = "0.5.7"
 dependencies = [
  "biome_analyze",
  "biome_console",
+ "biome_css_factory",
  "biome_css_parser",
  "biome_css_semantic",
  "biome_css_syntax",
