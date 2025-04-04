@@ -38,14 +38,6 @@ declare_lint_rule! {
     /// <MyComponent onClick={() => {}} />
     ///```
     ///
-    /// ```jsx,
-    /// <div onClick={() => {}} {...spread}></div>
-    /// ```
-    ///
-    /// ```jsx
-    /// <div {...spread} onClick={() => {}} ></div>
-    /// ```
-    ///
     /// ```jsx
     /// <button onClick={() => console.log("test")}>Submit</button>
     /// ```
