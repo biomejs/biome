@@ -1,0 +1,81 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+snapshot_kind: text
+---
+# Input
+```css
+.style {
+	color: red !important;
+}
+
+.style1 {
+	color: red !important /* some comment */;
+}
+
+.style1 {
+	color: red!important /* some comment */;
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:2:13 lint/nursery/noImportantStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of the !important style.
+  
+    1 │ .style {
+  > 2 │ 	color: red !important;
+      │ 	           ^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i This style reverses the cascade logic, and precedence is reversed. This could lead to having styles with higher specificity being overridden by styles with lower specificity.
+  
+  i Unsafe fix: Remove the style.
+  
+    2 │ → color:·red·!important;
+      │             ----------- 
+
+```
+
+```
+invalid.css:6:13 lint/nursery/noImportantStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of the !important style.
+  
+    5 │ .style1 {
+  > 6 │ 	color: red !important /* some comment */;
+      │ 	           ^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i This style reverses the cascade logic, and precedence is reversed. This could lead to having styles with higher specificity being overridden by styles with lower specificity.
+  
+  i Unsafe fix: Remove the style.
+  
+    6 │ → color:·red·!important·/*·some·comment·*/;
+      │              -----------                   
+
+```
+
+```
+invalid.css:10:12 lint/nursery/noImportantStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of the !important style.
+  
+     9 │ .style1 {
+  > 10 │ 	color: red!important /* some comment */;
+       │ 	          ^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i This style reverses the cascade logic, and precedence is reversed. This could lead to having styles with higher specificity being overridden by styles with lower specificity.
+  
+  i Unsafe fix: Remove the style.
+  
+    10 │ → color:·red!important·/*·some·comment·*/;
+       │             ----------                    
+
+```

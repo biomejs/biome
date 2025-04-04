@@ -14,6 +14,8 @@ pub type NoDuplicateSelectorsKeyframeBlock = < lint :: suspicious :: no_duplicat
 pub type NoEmptyBlock =
     <lint::suspicious::no_empty_block::NoEmptyBlock as biome_analyze::Rule>::Options;
 pub type NoImportantInKeyframe = < lint :: suspicious :: no_important_in_keyframe :: NoImportantInKeyframe as biome_analyze :: Rule > :: Options ;
+pub type NoImportantStyles =
+    <lint::nursery::no_important_styles::NoImportantStyles as biome_analyze::Rule>::Options;
 pub type NoInvalidDirectionInLinearGradient = < lint :: correctness :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradient as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidGridAreas =
     <lint::correctness::no_invalid_grid_areas::NoInvalidGridAreas as biome_analyze::Rule>::Options;
