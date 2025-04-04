@@ -62,6 +62,13 @@ pub enum Type {
     /// Reference to another type through the `typeof` operator.
     TypeofType(Box<TypeReference>),
 
+    /// Reference to the type of a named JavaScript value.
+    ///
+    /// We explicitly do not allow full expressions to be used as values,
+    /// meaning our inference needs to break down expressions into parts before
+    /// deciding the values to reference.
+    TypeofValue(Box<Text>),
+
     /// The `any` keyword.
     ///
     /// This variant may also be used if the `any` keyword is implied.
@@ -97,6 +104,24 @@ pub enum Type {
 
 // `Type` should not be bigger than 16 bytes.
 assert_eq_size!(Type, [usize; 2]);
+
+impl Type {
+    /// Returns whether the given type is known to reference a `Promise`.
+    pub fn is_promise(&self) -> bool {
+        matches!(self, Self::Promise(_))
+    }
+
+    /// Returns whether the given type is known to reference a function that
+    /// returns a `Promise`.
+    pub fn is_function_that_returns_promise(&self) -> bool {
+        match self {
+            Self::Function(function) => {
+                function.return_type.as_type().is_some_and(Type::is_promise)
+            }
+            _ => false,
+        }
+    }
+}
 
 /// A class definition.
 #[derive(Clone, Debug, PartialEq)]
@@ -188,6 +213,7 @@ pub enum Literal {
     Null,
     Number(Text),
     Object(ObjectLiteral),
+    RegExp(Text),
     String(Text),
     Template(Text),
 }
@@ -199,6 +225,12 @@ pub struct Namespace(pub Box<[TypeMember]>);
 /// An object definition.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Object(pub Box<[TypeMember]>);
+
+impl Object {
+    pub fn members(&self) -> &[TypeMember] {
+        &self.0
+    }
+}
 
 /// Object literal used as a type.
 #[derive(Clone, Debug, PartialEq)]
@@ -266,6 +298,9 @@ pub struct ConstructorTypeMember {
 // TODO: Include modifiers.
 #[derive(Clone, Debug, PartialEq)]
 pub struct MethodTypeMember {
+    /// Whether the function has an `async` specifier or not.
+    pub is_async: bool,
+
     /// Generic type parameters defined in the method.
     pub type_parameters: Box<[GenericTypeParameter]>,
 
@@ -301,6 +336,15 @@ pub enum ReturnType {
 impl Default for ReturnType {
     fn default() -> Self {
         Self::Type(Type::Unknown)
+    }
+}
+
+impl ReturnType {
+    pub fn as_type(&self) -> Option<&Type> {
+        match self {
+            Self::Type(ty) => Some(ty),
+            _ => None,
+        }
     }
 }
 
@@ -365,6 +409,16 @@ pub struct TypeReference {
 /// Path of identifiers to the type to a referenced type.
 #[derive(Clone, Debug, PartialEq)]
 pub struct TypeReferenceQualifier(pub Box<[Text]>);
+
+impl TypeReferenceQualifier {
+    /// HACK: This method simply checks whether the reference is for a literal
+    ///       `Promise`, without considering whether another symbol named
+    ///       `Promise` is in scope. It's a shortcut for getting
+    ///       `noFloatingPromises` to work, but we'd like a
+    pub fn is_promise(&self) -> bool {
+        self.0.len() == 1 && self.0[0] == "Promise"
+    }
+}
 
 /// A union of types.
 #[derive(Clone, Debug, PartialEq)]

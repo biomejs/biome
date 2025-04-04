@@ -5,17 +5,17 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsExpression, AnyJsObjectMember, AnyTsType, JsArrowFunctionExpression,
-    JsCallExpression, JsClassDeclaration, JsClassExpression, JsClassMemberList,
-    JsExpressionStatement, JsExtendsClause, JsFormalParameter, JsFunctionDeclaration,
-    JsIdentifierExpression, JsInitializerClause, JsLanguage, JsMethodClassMember,
-    JsMethodObjectMember, JsObjectMemberList, JsStaticMemberExpression, JsSyntaxKind,
-    JsSyntaxToken, JsThisExpression, JsVariableDeclarator, TsReturnTypeAnnotation,
-    binding_ext::AnyJsBindingDeclaration, global_identifier,
+    AnyJsClassMember, AnyJsExpression, AnyTsType, JsArrowFunctionExpression, JsCallExpression,
+    JsClassDeclaration, JsClassExpression, JsClassMemberList, JsExpressionStatement,
+    JsExtendsClause, JsFormalParameter, JsFunctionDeclaration, JsIdentifierExpression,
+    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsObjectExpression,
+    JsStaticMemberExpression, JsSyntaxKind, JsThisExpression, JsVariableDeclarator,
+    TsReturnTypeAnnotation, binding_ext::AnyJsBindingDeclaration, global_identifier,
 };
+use biome_js_type_info::{Type, TypeMember};
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNode, SyntaxNodeCast,
-    TokenText, TriviaPieceKind,
+    TriviaPieceKind,
 };
 
 use crate::{JsRuleAction, services::semantic::Semantic};
@@ -678,7 +678,7 @@ fn is_initializer_a_promise(
             find_and_check_class_member(&class_expr.members(), target_method_name?, model)
         }
         AnyJsExpression::JsObjectExpression(object_expr) => {
-            find_and_check_object_member(&object_expr.members(), target_method_name?)
+            find_promise_in_object(&object_expr, target_method_name?)
         }
         _ => Some(false),
     }
@@ -827,8 +827,8 @@ fn check_this_expression(
                 find_and_check_class_member(&class_member_list, target_name, model)
             }
             JsSyntaxKind::JS_OBJECT_MEMBER_LIST => {
-                let object_member_list = JsObjectMemberList::cast(ancestor)?;
-                find_and_check_object_member(&object_member_list, target_name)
+                let object = ancestor.parent().and_then(JsObjectExpression::cast)?;
+                find_promise_in_object(&object, target_name)
             }
             _ => None,
         })
@@ -997,70 +997,28 @@ fn is_ts_type_a_promise(
     }
 }
 
-/// Finds a object method or property by matching the given name and checks if it is a promise.
-///
-/// This function searches for a object method or property in the given `JsObjectMemberList`
-/// by matching the provided `target_name`. If a matching member is found, it checks if the member
-/// is a promise.
-///
-/// # Arguments
-///
-/// * `object_member_list` - A reference to a `JsObjectMemberList` representing the object members to search in.
-/// * `target_name` - The name of the method or property to search for.
-/// * `model` - A reference to the `SemanticModel` used for resolving bindings.
-///
-/// # Returns
-///
-/// * `Some(true)` if the class member is a promise.
-/// * `Some(false)` if the class member is not a promise.
-/// * `None` if there is an error in the process or if the class member is not found.
-///
-fn find_and_check_object_member(
-    object_member_list: &JsObjectMemberList,
-    target_name: &str,
-) -> Option<bool> {
-    fn extract_member_name(member: &AnyJsObjectMember) -> Option<TokenText> {
-        match member {
-            AnyJsObjectMember::JsPropertyObjectMember(property) => property.name().ok()?.name(),
-            AnyJsObjectMember::JsMethodObjectMember(method) => method.name().ok()?.name(),
-            _ => None,
-        }
-    }
-
-    fn is_async_or_promise(
-        async_token: &Option<JsSyntaxToken>,
-        return_type: Option<TsReturnTypeAnnotation>,
-    ) -> bool {
-        async_token.is_some() || is_return_type_a_promise(return_type).unwrap_or_default()
-    }
-
-    let object_member = object_member_list.iter().find_map(|member| {
-        let member = member.ok()?;
-        (extract_member_name(&member)? == target_name).then_some(member)
-    })?;
-
-    match object_member {
-        AnyJsObjectMember::JsMethodObjectMember(method) => Some(is_async_or_promise(
-            &method.async_token(),
-            method.return_type_annotation(),
-        )),
-        AnyJsObjectMember::JsPropertyObjectMember(property) => {
-            let value = property.value().ok()?;
-            match value {
-                AnyJsExpression::JsArrowFunctionExpression(arrow_func) => {
-                    Some(is_async_or_promise(
-                        &arrow_func.async_token(),
-                        arrow_func.return_type_annotation(),
-                    ))
+fn find_promise_in_object(object: &JsObjectExpression, member_name: &str) -> Option<bool> {
+    let ty = Type::from_js_object_expression(object);
+    match ty {
+        Type::Object(object) => object.members().iter().find_map(|member| match member {
+            TypeMember::CallSignature(_) | TypeMember::Constructor(_) => None,
+            TypeMember::Method(member) => match member.name == member_name {
+                true => Some(
+                    member
+                        .return_type
+                        .as_type()
+                        .is_some_and(|ty| ty.is_promise()),
+                ),
+                false => None,
+            },
+            TypeMember::Property(member) => match member.name == member_name {
+                true => {
+                    Some(member.ty.is_promise() || member.ty.is_function_that_returns_promise())
                 }
-                AnyJsExpression::JsFunctionExpression(func_expr) => Some(is_async_or_promise(
-                    &func_expr.async_token(),
-                    func_expr.return_type_annotation(),
-                )),
-                _ => None,
-            }
-        }
-        _ => None,
+                false => None,
+            },
+        }),
+        _ => Some(false),
     }
 }
 

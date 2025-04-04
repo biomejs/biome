@@ -1,12 +1,14 @@
 use std::str::FromStr;
 
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsFormalParameter,
-    AnyJsParameter, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, JsLanguage, JsParameters, TsReferenceType, TsTypeArguments,
+    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsClassMember, AnyJsDeclarationClause,
+    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsLiteralExpression,
+    AnyJsObjectMember, AnyJsParameter, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
+    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, JsObjectExpression, JsParameters,
+    JsSyntaxToken, TsReferenceType, TsReturnTypeAnnotation, TsTypeAnnotation, TsTypeArguments,
     TsTypeParameter, TsTypeParameters, TsTypeofType,
 };
-use biome_rowan::{SyntaxResult, SyntaxToken, Text, TokenText};
+use biome_rowan::{SyntaxResult, Text, TokenText};
 
 use crate::{
     AssertsReturnType, CallSignatureTypeMember, Class, ClassMember, Constructor,
@@ -36,10 +38,7 @@ impl Type {
             AnyJsDeclarationClause::JsFunctionDeclaration(decl) => {
                 Self::Function(Box::new(Function {
                     is_async: decl.async_token().is_some(),
-                    type_parameters: decl
-                        .type_parameters()
-                        .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
-                        .unwrap_or_default(),
+                    type_parameters: generic_params_from_ts_type_params(decl.type_parameters()),
                     name: decl
                         .id()
                         .ok()
@@ -47,16 +46,9 @@ impl Type {
                         .and_then(|id| id.as_js_identifier_binding())
                         .and_then(|id| id.name_token().ok())
                         .map(|token| token.token_text_trimmed().into()),
-                    parameters: decl
-                        .parameters()
-                        .ok()
-                        .map(|params| FunctionParameter::params_from_js_parameters(&params))
-                        .unwrap_or_default(),
-                    return_type: decl
-                        .return_type_annotation()
-                        .and_then(|annotation| annotation.ty().ok())
-                        .and_then(|ty| ReturnType::from_any_ts_return_type(&ty))
-                        .unwrap_or_default(),
+                    parameters: function_params_from_js_params(decl.parameters()),
+                    return_type: return_type_from_annotation(decl.return_type_annotation())
+                        .unwrap_or_else(|| return_type_from_async_token(decl.async_token())),
                 }))
             }
             AnyJsDeclarationClause::JsVariableDeclarationClause(_) => {
@@ -119,51 +111,31 @@ impl Type {
             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(decl) => {
                 Self::Function(Box::new(Function {
                     is_async: decl.async_token().is_some(),
-                    type_parameters: decl
-                        .type_parameters()
-                        .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
-                        .unwrap_or_default(),
+                    type_parameters: generic_params_from_ts_type_params(decl.type_parameters()),
                     name: decl
                         .id()
                         .as_ref()
                         .and_then(|id| id.as_js_identifier_binding())
                         .and_then(|id| id.name_token().ok())
                         .map(|token| token.token_text_trimmed().into()),
-                    parameters: decl
-                        .parameters()
-                        .ok()
-                        .map(|params| FunctionParameter::params_from_js_parameters(&params))
-                        .unwrap_or_default(),
-                    return_type: decl
-                        .return_type_annotation()
-                        .and_then(|annotation| annotation.ty().ok())
-                        .and_then(|ty| ReturnType::from_any_ts_return_type(&ty))
-                        .unwrap_or_default(),
+                    parameters: function_params_from_js_params(decl.parameters()),
+                    return_type: return_type_from_annotation(decl.return_type_annotation())
+                        .unwrap_or_else(|| return_type_from_async_token(decl.async_token())),
                 }))
             }
             AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(decl) => {
                 Self::Function(Box::new(Function {
                     is_async: decl.async_token().is_some(),
-                    type_parameters: decl
-                        .type_parameters()
-                        .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
-                        .unwrap_or_default(),
+                    type_parameters: generic_params_from_ts_type_params(decl.type_parameters()),
                     name: decl
                         .id()
                         .as_ref()
                         .and_then(|id| id.as_js_identifier_binding())
                         .and_then(|id| id.name_token().ok())
                         .map(|token| token.token_text_trimmed().into()),
-                    parameters: decl
-                        .parameters()
-                        .ok()
-                        .map(|params| FunctionParameter::params_from_js_parameters(&params))
-                        .unwrap_or_default(),
-                    return_type: decl
-                        .return_type_annotation()
-                        .and_then(|annotation| annotation.ty().ok())
-                        .and_then(|ty| ReturnType::from_any_ts_return_type(&ty))
-                        .unwrap_or_default(),
+                    parameters: function_params_from_js_params(decl.parameters()),
+                    return_type: return_type_from_annotation(decl.return_type_annotation())
+                        .unwrap_or_else(|| return_type_from_async_token(decl.async_token())),
                 }))
             }
             AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(_decl) => {
@@ -171,6 +143,125 @@ impl Type {
                 Self::Unknown
             }
         }
+    }
+
+    pub fn from_any_js_expression(expr: &AnyJsExpression) -> Self {
+        // TODO: Here is where we can do a lot of *real* inference.
+        //       However, to get there, we will need to think carefully about
+        //       how we invoke the inference. There's some static analysis we
+        //       can do here, but without access to the semantic model, the
+        //       inference will be very limited. And even the semantic model as
+        //       it exists today will be limited, because we'll want access to
+        //       the entire model graph to cross-reference imports.
+        //
+        //       My current thinking goes along these lines:
+        //       - I think we'll want to do a "thin" inference here, meaning
+        //         we extract all the information we can, but without following
+        //         type references and identifiers. For example: After the thin
+        //         inference, we may know that an expression evaluates to the
+        //         type of the return value of a function, and we know the
+        //         identifier of the function, but we don't necessarily know yet
+        //         where said function is defined, and therefore its actual
+        //         return type.
+        //       - Somewhere higher up, probably in the `ModuleGraph` or
+        //         somewhere related to it, we can invoke the full inference,
+        //         where all references get resolved, allowing us to resolve to
+        //         concrete types.
+        match expr {
+            AnyJsExpression::AnyJsLiteralExpression(expr) => {
+                Self::from_any_js_literal_expression(expr).unwrap_or_default()
+            }
+            AnyJsExpression::JsArrayExpression(expr) => Self::Tuple(Box::new(Tuple(
+                expr.elements()
+                    .into_iter()
+                    .map(|el| match el {
+                        Ok(AnyJsArrayElement::AnyJsExpression(expr)) => TupleElementType {
+                            ty: Self::from_any_js_expression(&expr),
+                            name: None,
+                            is_optional: false,
+                            is_rest: false,
+                        },
+                        Ok(AnyJsArrayElement::JsSpread(_spread)) => TupleElementType {
+                            // TODO: We can definitely be smarter about this one.
+                            ty: Type::Unknown,
+                            name: None,
+                            is_optional: false,
+                            is_rest: false,
+                        },
+                        Ok(AnyJsArrayElement::JsArrayHole(_)) | Err(_) => TupleElementType {
+                            ty: Type::Unknown,
+                            name: None,
+                            is_optional: false,
+                            is_rest: false,
+                        },
+                    })
+                    .collect(),
+            ))),
+            AnyJsExpression::JsArrowFunctionExpression(expr) => {
+                Type::Function(Box::new(Function {
+                    is_async: expr.async_token().is_some(),
+                    type_parameters: generic_params_from_ts_type_params(expr.type_parameters()),
+                    name: None,
+                    parameters: match expr.parameters() {
+                        Ok(AnyJsArrowFunctionParameters::AnyJsBinding(binding)) => {
+                            Box::new([FunctionParameter {
+                                name: binding
+                                    .as_js_identifier_binding()
+                                    .and_then(|binding| text_from_token(binding.name_token())),
+                                ty: Type::Unknown,
+                                is_optional: false,
+                                is_rest: false,
+                            }])
+                        }
+                        Ok(AnyJsArrowFunctionParameters::JsParameters(params)) => {
+                            function_params_from_js_params(Ok(params))
+                        }
+                        Err(_) => Box::default(),
+                    },
+                    return_type: return_type_from_annotation(expr.return_type_annotation())
+                        .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
+                }))
+            }
+            AnyJsExpression::JsFunctionExpression(expr) => Type::Function(Box::new(Function {
+                is_async: expr.async_token().is_some(),
+                type_parameters: generic_params_from_ts_type_params(expr.type_parameters()),
+                name: expr
+                    .id()
+                    .as_ref()
+                    .and_then(|binding| binding.as_js_identifier_binding())
+                    .and_then(|binding| text_from_token(binding.name_token())),
+                parameters: function_params_from_js_params(expr.parameters()),
+                return_type: return_type_from_annotation(expr.return_type_annotation())
+                    .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
+            })),
+            _ => {
+                // TODO: Much
+                Type::Unknown
+            }
+        }
+    }
+
+    pub fn from_any_js_literal_expression(expr: &AnyJsLiteralExpression) -> Option<Self> {
+        let literal = match expr {
+            AnyJsLiteralExpression::JsBigintLiteralExpression(expr) => {
+                Literal::BigInt(text_from_token(expr.value_token())?)
+            }
+            AnyJsLiteralExpression::JsBooleanLiteralExpression(expr) => {
+                Literal::Boolean(text_from_token(expr.value_token())?)
+            }
+            AnyJsLiteralExpression::JsNullLiteralExpression(_) => Literal::Null,
+            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => {
+                Literal::Number(text_from_token(expr.value_token())?)
+            }
+            AnyJsLiteralExpression::JsRegexLiteralExpression(expr) => {
+                Literal::RegExp(text_from_token(expr.value_token())?)
+            }
+            AnyJsLiteralExpression::JsStringLiteralExpression(expr) => {
+                Literal::String(text_from_token(expr.value_token())?)
+            }
+        };
+
+        Some(Self::Literal(Box::new(literal)))
     }
 
     pub fn from_any_ts_type(ty: &AnyTsType) -> Self {
@@ -205,27 +296,15 @@ impl Type {
                 Self::Unknown
             }
             AnyTsType::TsConstructorType(ty) => Self::Constructor(Box::new(Constructor {
-                type_parameters: ty
-                    .type_parameters()
-                    .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
-                    .unwrap_or_default(),
-                parameters: ty
-                    .parameters()
-                    .map(|params| FunctionParameter::params_from_js_parameters(&params))
-                    .unwrap_or_default(),
+                type_parameters: generic_params_from_ts_type_params(ty.type_parameters()),
+                parameters: function_params_from_js_params(ty.parameters()),
                 return_type: ty.return_type().ok().map(|ty| Type::from_any_ts_type(&ty)),
             })),
             AnyTsType::TsFunctionType(ty) => Self::Function(Box::new(Function {
                 is_async: false,
-                type_parameters: ty
-                    .type_parameters()
-                    .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
-                    .unwrap_or_default(),
+                type_parameters: generic_params_from_ts_type_params(ty.type_parameters()),
                 name: None,
-                parameters: ty
-                    .parameters()
-                    .map(|params| FunctionParameter::params_from_js_parameters(&params))
-                    .unwrap_or_default(),
+                parameters: function_params_from_js_params(ty.parameters()),
                 return_type: ty
                     .return_type()
                     .ok()
@@ -328,15 +407,46 @@ impl Type {
         }
     }
 
+    pub fn from_any_ts_type_result(ty: SyntaxResult<AnyTsType>) -> Self {
+        ty.map(|ty| Self::from_any_ts_type(&ty)).unwrap_or_default()
+    }
+
+    pub fn from_js_object_expression(expr: &JsObjectExpression) -> Self {
+        Self::Object(Box::new(Object(
+            expr.members()
+                .into_iter()
+                .filter_map(|member| {
+                    member
+                        .ok()
+                        .and_then(|member| TypeMember::from_any_js_object_member(&member))
+                })
+                .collect(),
+        )))
+    }
+
     pub fn from_ts_reference_type(ty: &TsReferenceType) -> Self {
         ty.name()
             .ok()
             .and_then(|name| TypeReferenceQualifier::from_any_ts_name(&name))
             .map(|qualifier| {
-                Self::Reference(Box::new(TypeReference {
-                    qualifier,
-                    type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
-                }))
+                if qualifier.is_promise() {
+                    Self::Promise(Box::new(
+                        ty.type_arguments()
+                            .and_then(|args| {
+                                args.ts_type_argument_list()
+                                    .into_iter()
+                                    .next()
+                                    .and_then(|ty| ty.ok())
+                                    .map(|ty| Self::from_any_ts_type(&ty))
+                            })
+                            .unwrap_or_default(),
+                    ))
+                } else {
+                    Self::Reference(Box::new(TypeReference {
+                        qualifier,
+                        type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
+                    }))
+                }
             })
             .unwrap_or_default()
     }
@@ -372,22 +482,14 @@ impl ClassMember {
             AnyJsClassMember::JsMethodClassMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     Self::Method(MethodTypeMember {
-                        type_parameters: member
-                            .type_parameters()
-                            .map(|params| {
-                                GenericTypeParameter::params_from_ts_type_parameters(&params)
-                            })
-                            .unwrap_or_default(),
+                        is_async: member.async_token().is_some(),
+                        type_parameters: generic_params_from_ts_type_params(
+                            member.type_parameters(),
+                        ),
                         name: TokenText::from(name).into(),
-                        parameters: member
-                            .parameters()
-                            .map(|params| FunctionParameter::params_from_js_parameters(&params))
-                            .unwrap_or_default(),
-                        return_type: member
-                            .return_type_annotation()
-                            .and_then(|annotation| annotation.ty().ok())
-                            .and_then(|ty| ReturnType::from_any_ts_return_type(&ty))
-                            .unwrap_or_default(),
+                        parameters: function_params_from_js_params(member.parameters()),
+                        return_type: return_type_from_annotation(member.return_type_annotation())
+                            .unwrap_or_else(|| return_type_from_async_token(member.async_token())),
                         is_optional: false,
                     })
                 })
@@ -515,7 +617,7 @@ impl ReturnType {
                     Some(Self::Asserts(AssertsReturnType {
                         parameter_name: match parameter_name {
                             AnyTsTypePredicateParameterName::JsReferenceIdentifier(identifier) => {
-                                text_from_value_token(identifier.value_token())?
+                                text_from_token(identifier.value_token())?
                             }
                             AnyTsTypePredicateParameterName::TsThisType(_) => Text::Static("text"),
                         },
@@ -532,7 +634,7 @@ impl ReturnType {
                     Some(Self::Predicate(PredicateReturnType {
                         parameter_name: match parameter_name {
                             AnyTsTypePredicateParameterName::JsReferenceIdentifier(identifier) => {
-                                text_from_value_token(identifier.value_token())?
+                                text_from_token(identifier.value_token())?
                             }
                             AnyTsTypePredicateParameterName::TsThisType(_) => Text::Static("text"),
                         },
@@ -564,7 +666,7 @@ impl TupleElementType {
                 name: el
                     .name()
                     .ok()
-                    .and_then(|name| text_from_value_token(name.value_token())),
+                    .and_then(|name| text_from_token(name.value_token())),
                 is_optional: el.question_mark_token().is_some(),
                 is_rest: el.dotdotdot_token().is_some(),
             },
@@ -591,40 +693,78 @@ impl TupleElementType {
 }
 
 impl TypeMember {
+    pub fn from_any_js_object_member(member: &AnyJsObjectMember) -> Option<Self> {
+        match member {
+            AnyJsObjectMember::JsBogusMember(_) => None,
+            AnyJsObjectMember::JsGetterObjectMember(_) => {
+                // TODO: Handle getters
+                None
+            }
+            AnyJsObjectMember::JsMethodObjectMember(member) => {
+                member.name().ok().and_then(|name| name.name()).map(|name| {
+                    TypeMember::Method(MethodTypeMember {
+                        is_async: member.async_token().is_some(),
+                        type_parameters: generic_params_from_ts_type_params(
+                            member.type_parameters(),
+                        ),
+                        name: name.into(),
+                        parameters: function_params_from_js_params(member.parameters()),
+                        return_type: return_type_from_annotation(member.return_type_annotation())
+                            .unwrap_or_else(|| return_type_from_async_token(member.async_token())),
+                        is_optional: false,
+                    })
+                })
+            }
+            AnyJsObjectMember::JsPropertyObjectMember(member) => {
+                member.name().ok().and_then(|name| name.name()).map(|name| {
+                    TypeMember::Property(PropertyTypeMember {
+                        name: name.into(),
+                        ty: member
+                            .value()
+                            .map(|value| Type::from_any_js_expression(&value))
+                            .unwrap_or_default(),
+                        is_optional: false,
+                    })
+                })
+            }
+            AnyJsObjectMember::JsSetterObjectMember(_) => {
+                // TODO: Handle setters
+                None
+            }
+            AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => member
+                .name()
+                .ok()
+                .and_then(|name| text_from_token(name.value_token()))
+                .map(|name| {
+                    TypeMember::Property(PropertyTypeMember {
+                        name: name.clone(),
+                        ty: Type::TypeofValue(Box::new(name)),
+                        is_optional: false,
+                    })
+                }),
+            AnyJsObjectMember::JsSpread(_) => {
+                // TODO: Handle spread operator
+                None
+            }
+        }
+    }
+
     pub fn from_any_ts_type_member(member: &AnyTsTypeMember) -> Option<Self> {
         match member {
             AnyTsTypeMember::JsBogusMember(_) => None,
             AnyTsTypeMember::TsCallSignatureTypeMember(member) => {
                 Some(Self::CallSignature(CallSignatureTypeMember {
-                    type_parameters: member
-                        .type_parameters()
-                        .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
-                        .unwrap_or_default(),
-                    parameters: member
-                        .parameters()
-                        .map(|params| FunctionParameter::params_from_js_parameters(&params))
-                        .unwrap_or_default(),
-                    return_type: member
-                        .return_type_annotation()
-                        .and_then(|annotation| annotation.ty().ok())
-                        .and_then(|ty| ReturnType::from_any_ts_return_type(&ty))
+                    type_parameters: generic_params_from_ts_type_params(member.type_parameters()),
+                    parameters: function_params_from_js_params(member.parameters()),
+                    return_type: return_type_from_annotation(member.return_type_annotation())
                         .unwrap_or_default(),
                 }))
             }
             AnyTsTypeMember::TsConstructSignatureTypeMember(member) => {
                 Some(Self::Constructor(ConstructorTypeMember {
-                    type_parameters: member
-                        .type_parameters()
-                        .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
-                        .unwrap_or_default(),
-                    parameters: member
-                        .parameters()
-                        .map(|params| FunctionParameter::params_from_js_parameters(&params))
-                        .unwrap_or_default(),
-                    return_type: member
-                        .type_annotation()
-                        .and_then(|annotation| annotation.ty().ok())
-                        .map(|ty| Type::from_any_ts_type(&ty)),
+                    type_parameters: generic_params_from_ts_type_params(member.type_parameters()),
+                    parameters: function_params_from_js_params(member.parameters()),
+                    return_type: type_from_annotation(member.type_annotation()),
                 }))
             }
             AnyTsTypeMember::TsGetterSignatureTypeMember(_member) => {
@@ -638,21 +778,13 @@ impl TypeMember {
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     Self::Method(MethodTypeMember {
-                        type_parameters: member
-                            .type_parameters()
-                            .map(|params| {
-                                GenericTypeParameter::params_from_ts_type_parameters(&params)
-                            })
-                            .unwrap_or_default(),
+                        is_async: false,
+                        type_parameters: generic_params_from_ts_type_params(
+                            member.type_parameters(),
+                        ),
                         name: name.into(),
-                        parameters: member
-                            .parameters()
-                            .map(|params| FunctionParameter::params_from_js_parameters(&params))
-                            .unwrap_or_default(),
-                        return_type: member
-                            .return_type_annotation()
-                            .and_then(|annotation| annotation.ty().ok())
-                            .and_then(|ty| ReturnType::from_any_ts_return_type(&ty))
+                        parameters: function_params_from_js_params(member.parameters()),
+                        return_type: return_type_from_annotation(member.return_type_annotation())
                             .unwrap_or_default(),
                         is_optional: member.optional_token().is_some(),
                     })
@@ -662,11 +794,7 @@ impl TypeMember {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     Self::Property(PropertyTypeMember {
                         name: name.into(),
-                        ty: member
-                            .type_annotation()
-                            .and_then(|annotation| annotation.ty().ok())
-                            .map(|ty| Type::from_any_ts_type(&ty))
-                            .unwrap_or_default(),
+                        ty: type_from_annotation(member.type_annotation()).unwrap_or_default(),
                         is_optional: member.optional_token().is_some(),
                     })
                 })
@@ -683,17 +811,17 @@ impl TypeReferenceQualifier {
     pub fn from_any_ts_name(name: &AnyTsName) -> Option<Self> {
         match name {
             AnyTsName::JsReferenceIdentifier(identifier) => {
-                text_from_value_token(identifier.value_token()).map(|text| Self(Box::new([text])))
+                text_from_token(identifier.value_token()).map(|text| Self(Box::new([text])))
             }
             AnyTsName::TsQualifiedName(name) => {
                 let mut fields = name.as_fields();
                 let mut identifiers = Vec::new();
                 loop {
-                    identifiers.insert(0, text_from_value_token(fields.right.ok()?.value_token())?);
+                    identifiers.insert(0, text_from_token(fields.right.ok()?.value_token())?);
 
                     match fields.left.ok()? {
                         AnyTsName::JsReferenceIdentifier(identifier) => {
-                            identifiers.insert(0, text_from_value_token(identifier.value_token())?);
+                            identifiers.insert(0, text_from_token(identifier.value_token())?);
                             break;
                         }
                         AnyTsName::TsQualifiedName(name) => {
@@ -707,6 +835,40 @@ impl TypeReferenceQualifier {
     }
 }
 
-fn text_from_value_token(value_token: SyntaxResult<SyntaxToken<JsLanguage>>) -> Option<Text> {
-    Some(value_token.ok()?.token_text_trimmed().into())
+fn function_params_from_js_params(params: SyntaxResult<JsParameters>) -> Box<[FunctionParameter]> {
+    params
+        .ok()
+        .map(|params| FunctionParameter::params_from_js_parameters(&params))
+        .unwrap_or_default()
+}
+
+fn generic_params_from_ts_type_params(
+    params: Option<TsTypeParameters>,
+) -> Box<[GenericTypeParameter]> {
+    params
+        .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
+        .unwrap_or_default()
+}
+
+fn return_type_from_annotation(annotation: Option<TsReturnTypeAnnotation>) -> Option<ReturnType> {
+    annotation
+        .and_then(|annotation| annotation.ty().ok())
+        .and_then(|ty| ReturnType::from_any_ts_return_type(&ty))
+}
+
+fn return_type_from_async_token(async_token: Option<JsSyntaxToken>) -> ReturnType {
+    ReturnType::Type(match async_token {
+        Some(_) => Type::Promise(Box::new(Type::Unknown)),
+        None => Type::Unknown,
+    })
+}
+
+fn text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
+    Some(token.ok()?.token_text_trimmed().into())
+}
+
+fn type_from_annotation(annotation: Option<TsTypeAnnotation>) -> Option<Type> {
+    annotation
+        .and_then(|annotation| annotation.ty().ok())
+        .map(|ty| Type::from_any_ts_type(&ty))
 }
