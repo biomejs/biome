@@ -31,7 +31,7 @@ invalid.css:2:13 lint/nursery/noImportantStyles  FIXABLE  ━━━━━━━�
     3 │ }
     4 │ 
   
-  i This style reverses the cascade logic, and precedence is reversed. This could lead to have styles with higher specificity being overridden by styles with lower specificity. 
+  i This style reverses the cascade logic, and precedence is reversed. This could lead to having styles with higher specificity being overridden by styles with lower specificity.
   
   i Unsafe fix: Remove the style.
   
@@ -51,7 +51,7 @@ invalid.css:6:13 lint/nursery/noImportantStyles  FIXABLE  ━━━━━━━�
     7 │ }
     8 │ 
   
-  i This style reverses the cascade logic, and precedence is reversed. This could lead to have styles with higher specificity being overridden by styles with lower specificity. 
+  i This style reverses the cascade logic, and precedence is reversed. This could lead to having styles with higher specificity being overridden by styles with lower specificity.
   
   i Unsafe fix: Remove the style.
   
@@ -71,7 +71,7 @@ invalid.css:10:12 lint/nursery/noImportantStyles  FIXABLE  ━━━━━━━
     11 │ }
     12 │ 
   
-  i This style reverses the cascade logic, and precedence is reversed. This could lead to have styles with higher specificity being overridden by styles with lower specificity. 
+  i This style reverses the cascade logic, and precedence is reversed. This could lead to having styles with higher specificity being overridden by styles with lower specificity.
   
   i Unsafe fix: Remove the style.
   
