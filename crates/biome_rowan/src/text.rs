@@ -71,6 +71,12 @@ impl PartialEq for Text {
     }
 }
 
+impl PartialEq<&'_ str> for Text {
+    fn eq(&self, other: &&str) -> bool {
+        self.text() == *other
+    }
+}
+
 impl PartialOrd for Text {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))

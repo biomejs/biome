@@ -13,6 +13,7 @@ use biome_js_syntax::{
     JsSyntaxToken, JsThisExpression, JsVariableDeclarator, TsReturnTypeAnnotation,
     binding_ext::AnyJsBindingDeclaration, global_identifier,
 };
+use biome_js_type_info::{Type, TypeMember};
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNode, SyntaxNodeCast,
     TokenText, TriviaPieceKind,
@@ -678,7 +679,32 @@ fn is_initializer_a_promise(
             find_and_check_class_member(&class_expr.members(), target_method_name?, model)
         }
         AnyJsExpression::JsObjectExpression(object_expr) => {
-            find_and_check_object_member(&object_expr.members(), target_method_name?)
+            let ty = Type::from_js_object_expression(&object_expr);
+            match ty {
+                Type::Object(object) => {
+                    let field_name = target_method_name?;
+                    object.members().iter().find_map(|member| match member {
+                        TypeMember::CallSignature(_) | TypeMember::Constructor(_) => None,
+                        TypeMember::Method(member) => match member.name == field_name {
+                            true => Some(
+                                member
+                                    .return_type
+                                    .as_type()
+                                    .is_some_and(|ty| ty.is_promise()),
+                            ),
+                            false => None,
+                        },
+                        TypeMember::Property(member) => match member.name == field_name {
+                            true => Some(
+                                member.ty.is_promise()
+                                    || member.ty.is_function_that_returns_promise(),
+                            ),
+                            false => None,
+                        },
+                    })
+                }
+                _ => Some(false),
+            }
         }
         _ => Some(false),
     }
