@@ -3,7 +3,9 @@ use biome_console::{
     HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode, Padding, fmt, markup,
 };
 use biome_text_edit::TextEdit;
+use std::env::current_dir;
 use std::path::Path;
+use std::sync::LazyLock;
 use std::{env, io, iter};
 use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
@@ -75,7 +77,7 @@ impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintDiagnostic<'_, D> {
 
         // Print the header for the diagnostic
         fmt.write_markup(markup! {
-            {PrintHeader(diagnostic)}"\n\n"
+            {PrintHeader { diagnostic, verbose: self.verbose }}"\n\n"
         })?;
         // Wrap the formatter with an indentation level and print the advices
         let mut slot = None;
@@ -92,11 +94,29 @@ impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintDiagnostic<'_, D> {
 }
 
 /// Display struct implementing the formatting of a diagnostic header.
-pub(crate) struct PrintHeader<'fmt, D: ?Sized>(pub(crate) &'fmt D);
+pub(crate) struct PrintHeader<'fmt, D: ?Sized> {
+    pub(crate) diagnostic: &'fmt D,
+    pub(crate) verbose: bool,
+}
+
+fn get_relative_file_path(path: &str) -> &str {
+    static WORKING_DIR_PREFIX: LazyLock<Option<String>> = LazyLock::new(|| {
+        current_dir()
+            .ok()
+            .and_then(|dir| dir.to_str().map(|dir| format!("{dir}/")))
+    });
+    WORKING_DIR_PREFIX
+        .as_ref()
+        .and_then(|prefix| path.strip_prefix(prefix))
+        .unwrap_or(path)
+}
 
 impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let Self(diagnostic) = *self;
+        let Self {
+            diagnostic,
+            verbose,
+        } = *self;
 
         // Wrap the formatter with a counter to measure the width of the printed text
         let mut slot = None;
@@ -121,6 +141,11 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
                     fmt.write_str(&format!(" at {name}"))?;
                 } else if path_name.is_absolute() {
                     let link = format!("file://{name}");
+                    let name = if verbose {
+                        name
+                    } else {
+                        get_relative_file_path(name)
+                    };
                     fmt.write_markup(markup! {
                         <Hyperlink href={link}>{name}</Hyperlink>
                     })?;

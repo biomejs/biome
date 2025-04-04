@@ -558,27 +558,25 @@ pub fn execute_mode(
     let processed = summary.changed + summary.unchanged;
     let should_exit_on_warnings = summary.warnings > 0 && cli_options.error_on_warnings;
 
+    let diagnostics_payload = DiagnosticsPayload {
+        verbose: cli_options.verbose,
+        diagnostic_level: cli_options.diagnostic_level,
+        diagnostics,
+    };
+
     match execution.report_mode {
         ReportMode::Terminal { with_summary } => {
             if with_summary {
                 let reporter = SummaryReporter {
                     summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
+                    diagnostics_payload,
                     execution: execution.clone(),
                 };
                 reporter.write(&mut SummaryReporterVisitor(console))?;
             } else {
                 let reporter = ConsoleReporter {
                     summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
+                    diagnostics_payload,
                     execution: execution.clone(),
                     evaluated_paths,
                 };
@@ -591,11 +589,7 @@ pub fn execute_mode(
                 });
             let reporter = JsonReporter {
                 summary,
-                diagnostics: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics: diagnostics_payload,
                 execution: execution.clone(),
             };
             let mut buffer = JsonReporterVisitor::new(summary);
@@ -633,22 +627,14 @@ pub fn execute_mode(
         }
         ReportMode::GitHub => {
             let reporter = GithubReporter {
-                diagnostics_payload: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics_payload,
                 execution: execution.clone(),
             };
             reporter.write(&mut GithubReporterVisitor(console))?;
         }
         ReportMode::GitLab => {
             let reporter = GitLabReporter {
-                diagnostics: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics: diagnostics_payload,
                 execution: execution.clone(),
             };
             reporter.write(&mut GitLabReporterVisitor::new(
@@ -659,11 +645,7 @@ pub fn execute_mode(
         ReportMode::Junit => {
             let reporter = JunitReporter {
                 summary,
-                diagnostics_payload: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics_payload,
                 execution: execution.clone(),
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;

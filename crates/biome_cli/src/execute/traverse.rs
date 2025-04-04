@@ -395,11 +395,6 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             diagnostics_to_print.push(diag);
                         }
                     } else {
-                        let working_directory_prefix = self.working_directory.and_then(|wd| {
-                            let mut working_directory = wd.to_string();
-                            working_directory.push(std::path::MAIN_SEPARATOR);
-                            Some(working_directory)
-                        });
                         for diag in diagnostics {
                             let severity = diag.severity();
                             if self.should_skip_diagnostic(severity, diag.tags()) {
@@ -415,12 +410,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             let should_print = self.should_print();
 
                             if should_print {
-                                let file_path = working_directory_prefix
-                                    .as_ref()
-                                    .and_then(|wd| file_path.strip_prefix(wd))
-                                    .unwrap_or(file_path.as_str());
                                 let diag = diag
-                                    .with_file_path(file_path)
+                                    .with_file_path(file_path.as_str())
                                     .with_file_source_code(&content);
                                 diagnostics_to_print.push(diag)
                             }
