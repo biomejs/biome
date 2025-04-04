@@ -320,7 +320,7 @@ impl FormatRule<CssSyntaxToken> for FormatCssSyntaxToken {
 }
 
 impl AsFormat<CssFormatContext> for CssSyntaxToken {
-    type Format<'a> = FormatRefWithRule<'a, CssSyntaxToken, FormatCssSyntaxToken>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatCssSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatCssSyntaxToken)
@@ -328,7 +328,7 @@ impl AsFormat<CssFormatContext> for CssSyntaxToken {
 }
 
 impl IntoFormat<CssFormatContext> for CssSyntaxToken {
-    type Format = FormatOwnedWithRule<CssSyntaxToken, FormatCssSyntaxToken>;
+    type Format = FormatOwnedWithRule<Self, FormatCssSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatCssSyntaxToken)

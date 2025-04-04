@@ -65,7 +65,7 @@ enum ChildrenKind {
 impl ChildrenKind {
     fn range(&self) -> &TextRange {
         match self {
-            ChildrenKind::Prop(range) | ChildrenKind::Direct(range) => range,
+            Self::Prop(range) | Self::Direct(range) => range,
         }
     }
 }
@@ -86,15 +86,15 @@ impl AnyJsCreateElement {
     /// If checks if the element has direct children (no children prop)
     fn has_children(&self, model: &SemanticModel) -> Option<JsSyntaxNode> {
         match self {
-            AnyJsCreateElement::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 if !element.children().is_empty() {
                     Some(element.children().syntax().clone())
                 } else {
                     None
                 }
             }
-            AnyJsCreateElement::JsxSelfClosingElement(_) => None,
-            AnyJsCreateElement::JsCallExpression(expression) => {
+            Self::JsxSelfClosingElement(_) => None,
+            Self::JsCallExpression(expression) => {
                 let react_create_element =
                     ReactCreateElementCall::from_call_expression(expression, model)?;
 
@@ -107,17 +107,17 @@ impl AnyJsCreateElement {
 
     fn find_dangerous_prop(&self, model: &SemanticModel) -> Option<DangerousProp> {
         match self {
-            AnyJsCreateElement::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;
 
                 opening_element
                     .find_attribute_by_name("dangerouslySetInnerHTML")
                     .map(DangerousProp::from)
             }
-            AnyJsCreateElement::JsxSelfClosingElement(element) => element
+            Self::JsxSelfClosingElement(element) => element
                 .find_attribute_by_name("dangerouslySetInnerHTML")
                 .map(DangerousProp::from),
-            AnyJsCreateElement::JsCallExpression(call_expression) => {
+            Self::JsCallExpression(call_expression) => {
                 let react_create_element =
                     ReactCreateElementCall::from_call_expression(call_expression, model)?;
 
@@ -130,17 +130,17 @@ impl AnyJsCreateElement {
 
     fn find_children_prop(&self, model: &SemanticModel) -> Option<DangerousProp> {
         match self {
-            AnyJsCreateElement::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;
 
                 opening_element
                     .find_attribute_by_name("children")
                     .map(DangerousProp::from)
             }
-            AnyJsCreateElement::JsxSelfClosingElement(element) => element
+            Self::JsxSelfClosingElement(element) => element
                 .find_attribute_by_name("children")
                 .map(DangerousProp::from),
-            AnyJsCreateElement::JsCallExpression(call_expression) => {
+            Self::JsCallExpression(call_expression) => {
                 let react_create_element =
                     ReactCreateElementCall::from_call_expression(call_expression, model)?;
 

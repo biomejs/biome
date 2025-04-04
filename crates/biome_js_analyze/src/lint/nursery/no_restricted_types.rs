@@ -155,7 +155,7 @@ pub enum CustomRestrictedType {
 impl From<CustomRestrictedType> for CustomRestrictedTypeOptions {
     fn from(options: CustomRestrictedType) -> Self {
         match options {
-            CustomRestrictedType::Plain(message) => CustomRestrictedTypeOptions {
+            CustomRestrictedType::Plain(message) => Self {
                 message,
                 use_instead: None,
             },

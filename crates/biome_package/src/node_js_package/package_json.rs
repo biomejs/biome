@@ -260,7 +260,7 @@ impl Manifest for PackageJson {
     type Language = JsonLanguage;
 
     fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self> {
-        deserialize_from_json_ast::<PackageJson>(root, "")
+        deserialize_from_json_ast::<Self>(root, "")
     }
 }
 
@@ -310,8 +310,8 @@ impl Version {
         let range = Range::from_str(other_range);
         if let Ok(other_range) = range {
             match self {
-                Version::SemVer(range) => range.allows_any(&other_range),
-                Version::Literal(_) => false,
+                Self::SemVer(range) => range.allows_any(&other_range),
+                Self::Literal(_) => false,
             }
         } else {
             false
@@ -421,8 +421,8 @@ impl Deserializable for Version {
     ) -> Option<Self> {
         let value = Text::deserialize(ctx, value, name)?;
         match node_semver::Range::parse(value.text()) {
-            Ok(version) => Some(Version::SemVer(version)),
-            Err(_) => Some(Version::Literal(value.text().to_string())),
+            Ok(version) => Some(Self::SemVer(version)),
+            Err(_) => Some(Self::Literal(value.text().to_string())),
         }
     }
 }

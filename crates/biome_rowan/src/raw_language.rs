@@ -42,15 +42,15 @@ pub enum RawLanguageKind {
 }
 
 impl SyntaxKind for RawLanguageKind {
-    const TOMBSTONE: Self = RawLanguageKind::TOMBSTONE;
-    const EOF: Self = RawLanguageKind::EOF;
+    const TOMBSTONE: Self = Self::TOMBSTONE;
+    const EOF: Self = Self::EOF;
 
     fn is_bogus(&self) -> bool {
-        self == &RawLanguageKind::BOGUS
+        self == &Self::BOGUS
     }
 
     fn to_bogus(&self) -> Self {
-        RawLanguageKind::BOGUS
+        Self::BOGUS
     }
 
     fn to_raw(&self) -> RawSyntaxKind {
@@ -59,36 +59,36 @@ impl SyntaxKind for RawLanguageKind {
 
     #[expect(unsafe_code)]
     fn from_raw(raw: RawSyntaxKind) -> Self {
-        assert!(raw.0 < RawLanguageKind::__LAST as u16);
+        assert!(raw.0 < Self::__LAST as u16);
 
-        unsafe { std::mem::transmute::<u16, RawLanguageKind>(raw.0) }
+        unsafe { std::mem::transmute::<u16, Self>(raw.0) }
     }
 
     fn is_root(&self) -> bool {
-        self == &RawLanguageKind::ROOT
+        self == &Self::ROOT
     }
 
     fn is_list(&self) -> bool {
         matches!(
             self,
-            RawLanguageKind::EXPRESSION_LIST | RawLanguageKind::SEPARATED_EXPRESSION_LIST
+            Self::EXPRESSION_LIST | Self::SEPARATED_EXPRESSION_LIST
         )
     }
 
     fn is_trivia(self) -> bool {
-        self == RawLanguageKind::WHITESPACE
+        self == Self::WHITESPACE
     }
 
     fn to_string(&self) -> Option<&'static str> {
         let str = match self {
             COMMA_TOKEN => ",",
-            RawLanguageKind::FOR_KW => "for",
-            RawLanguageKind::L_PAREN_TOKEN => "(",
-            RawLanguageKind::SEMICOLON_TOKEN => ";",
-            RawLanguageKind::R_PAREN_TOKEN => ")",
-            RawLanguageKind::EQUAL_TOKEN => "=",
-            RawLanguageKind::LET_TOKEN => "let",
-            RawLanguageKind::PLUS_TOKEN => "+",
+            Self::FOR_KW => "for",
+            Self::L_PAREN_TOKEN => "(",
+            Self::SEMICOLON_TOKEN => ";",
+            Self::R_PAREN_TOKEN => ")",
+            Self::EQUAL_TOKEN => "=",
+            Self::LET_TOKEN => "let",
+            Self::PLUS_TOKEN => "+",
             _ => return None,
         };
         Some(str)
@@ -116,7 +116,7 @@ impl AstNode for RawLanguageRoot {
         Self: Sized,
     {
         if syntax.kind() == ROOT {
-            Some(RawLanguageRoot { node: syntax })
+            Some(Self { node: syntax })
         } else {
             None
         }
@@ -152,7 +152,7 @@ impl AstNode for LiteralExpression {
         Self: Sized,
     {
         if syntax.kind() == LITERAL_EXPRESSION {
-            Some(LiteralExpression { node: syntax })
+            Some(Self { node: syntax })
         } else {
             None
         }

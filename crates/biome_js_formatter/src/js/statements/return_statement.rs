@@ -77,22 +77,22 @@ impl Format<JsFormatContext> for AnyJsStatementWithArgument {
 impl AnyJsStatementWithArgument {
     fn operation_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsStatementWithArgument::JsThrowStatement(throw) => throw.throw_token(),
-            AnyJsStatementWithArgument::JsReturnStatement(ret) => ret.return_token(),
+            Self::JsThrowStatement(throw) => throw.throw_token(),
+            Self::JsReturnStatement(ret) => ret.return_token(),
         }
     }
 
     fn argument(&self) -> SyntaxResult<Option<AnyJsExpression>> {
         match self {
-            AnyJsStatementWithArgument::JsThrowStatement(throw) => throw.argument().map(Some),
-            AnyJsStatementWithArgument::JsReturnStatement(ret) => Ok(ret.argument()),
+            Self::JsThrowStatement(throw) => throw.argument().map(Some),
+            Self::JsReturnStatement(ret) => Ok(ret.argument()),
         }
     }
 
     fn semicolon_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsStatementWithArgument::JsThrowStatement(throw) => throw.semicolon_token(),
-            AnyJsStatementWithArgument::JsReturnStatement(ret) => ret.semicolon_token(),
+            Self::JsThrowStatement(throw) => throw.semicolon_token(),
+            Self::JsReturnStatement(ret) => ret.semicolon_token(),
         }
     }
 }

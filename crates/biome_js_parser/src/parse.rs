@@ -18,16 +18,16 @@ pub struct Parse<T> {
 }
 
 impl<T> Parse<T> {
-    pub fn new_module(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Parse<T> {
+    pub fn new_module(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Self {
         Self::new(root, errors)
     }
 
-    pub fn new_script(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Parse<T> {
+    pub fn new_script(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Self {
         Self::new(root, errors)
     }
 
-    pub fn new(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Parse<T> {
-        Parse {
+    pub fn new(root: JsSyntaxNode, errors: Vec<ParseDiagnostic>) -> Self {
+        Self {
             root,
             errors,
             _ty: PhantomData,

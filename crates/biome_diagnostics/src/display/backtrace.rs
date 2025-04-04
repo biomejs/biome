@@ -20,7 +20,7 @@ impl Default for Backtrace {
     // backtrace is printed
     #[inline(never)]
     fn default() -> Self {
-        Self::capture(Backtrace::default as usize)
+        Self::capture(Self::default as usize)
     }
 }
 
@@ -113,8 +113,7 @@ enum BacktraceKind {
 #[cfg(test)]
 impl PartialEq for BacktraceKind {
     fn eq(&self, _other: &Self) -> bool {
-        if let (BacktraceKind::Serialized(this), BacktraceKind::Serialized(other)) = (self, _other)
-        {
+        if let (Self::Serialized(this), Self::Serialized(other)) = (self, _other) {
             return this == other;
         }
 

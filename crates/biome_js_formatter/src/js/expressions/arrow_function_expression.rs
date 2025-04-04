@@ -482,7 +482,7 @@ impl ArrowChain {
 
 impl Format<JsFormatContext> for ArrowChain {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
-        let ArrowChain {
+        let Self {
             head,
             tail,
             expand_signatures,
@@ -775,7 +775,7 @@ impl ArrowFunctionLayout {
         arrow: JsArrowFunctionExpression,
         comments: &JsComments,
         options: &FormatJsArrowFunctionExpressionOptions,
-    ) -> SyntaxResult<ArrowFunctionLayout> {
+    ) -> SyntaxResult<Self> {
         let mut head = None;
         let mut middle = Vec::new();
         let mut current = arrow;
@@ -806,8 +806,8 @@ impl ArrowFunctionLayout {
                 }
                 _ => {
                     break match head {
-                        None => ArrowFunctionLayout::Single(current),
-                        Some(head) => ArrowFunctionLayout::Chain(ArrowChain {
+                        None => Self::Single(current),
+                        Some(head) => Self::Chain(ArrowChain {
                             head,
                             middle,
                             tail: current,

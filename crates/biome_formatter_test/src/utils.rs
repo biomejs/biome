@@ -17,7 +17,7 @@ impl StripPlaceholders {
         range_start_placeholder: String,
         range_end_placeholder: String,
     ) -> Self {
-        StripPlaceholders {
+        Self {
             cursor,
             range_start_placeholder,
             range_end_placeholder,

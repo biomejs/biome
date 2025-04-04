@@ -27,12 +27,12 @@ pub(crate) enum AnyConfigData {
 }
 impl From<FlatConfigData> for AnyConfigData {
     fn from(value: FlatConfigData) -> Self {
-        AnyConfigData::Flat(value)
+        Self::Flat(value)
     }
 }
 impl From<LegacyConfigData> for AnyConfigData {
     fn from(value: LegacyConfigData) -> Self {
-        AnyConfigData::Legacy(value)
+        Self::Legacy(value)
     }
 }
 
@@ -175,8 +175,8 @@ pub(crate) enum GlobalConf {
 impl GlobalConf {
     pub(crate) fn is_enabled(&self) -> bool {
         match self {
-            GlobalConf::Flag(result) => *result,
-            GlobalConf::Qualifier(qualifier) => !matches!(qualifier, GlobalConfQualifier::Off),
+            Self::Flag(result) => *result,
+            Self::Qualifier(qualifier) => !matches!(qualifier, GlobalConfQualifier::Off),
         }
     }
 }
@@ -251,7 +251,7 @@ impl<T: Deserializable> Deserializable for ShorthandVec<T> {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        Some(ShorthandVec(
+        Some(Self(
             if value.visitable_type()? == DeserializableType::Array {
                 Deserializable::deserialize(ctx, value, name)?
             } else {
@@ -286,19 +286,17 @@ impl<T, U> RuleConf<T, U> {
 impl<T> RuleConf<T, ()> {
     pub(crate) fn into_vec(self) -> Vec<T> {
         match self {
-            RuleConf::Severity(_) => vec![],
-            RuleConf::Option(_, value) | RuleConf::Options(_, value, _) => vec![value],
-            RuleConf::Spread(_, result) => result,
+            Self::Severity(_) => vec![],
+            Self::Option(_, value) | Self::Options(_, value, _) => vec![value],
+            Self::Spread(_, result) => result,
         }
     }
 }
 impl<T: Default, U: Default> RuleConf<T, U> {
     pub(crate) fn option_or_default(self) -> T {
         match self {
-            RuleConf::Severity(_) | RuleConf::Options(_, _, _) | RuleConf::Spread(_, _) => {
-                T::default()
-            }
-            RuleConf::Option(_, option) => option,
+            Self::Severity(_) | Self::Options(_, _, _) | Self::Spread(_, _) => T::default(),
+            Self::Option(_, option) => option,
         }
     }
 }
@@ -385,26 +383,26 @@ impl TryFrom<NumberOrString> for Severity {
     fn try_from(value: NumberOrString) -> Result<Self, &'static str> {
         match value {
             NumberOrString::Number(n) => match n {
-                0 => Ok(Severity::Off),
-                1 => Ok(Severity::Warn),
-                2 => Ok(Severity::Error),
+                0 => Ok(Self::Off),
+                1 => Ok(Self::Warn),
+                2 => Ok(Self::Error),
                 _ => Err("Severity should be 0, 1 or 2."),
             },
             NumberOrString::String(s) => match s.as_ref() {
-                "off" => Ok(Severity::Off),
-                "warn" => Ok(Severity::Warn),
-                "error" => Ok(Severity::Error),
+                "off" => Ok(Self::Off),
+                "warn" => Ok(Self::Warn),
+                "error" => Ok(Self::Error),
                 _ => Err("Severity should be 'off', 'warn' or 'error'."),
             },
         }
     }
 }
 impl From<Severity> for biome_configuration::RulePlainConfiguration {
-    fn from(value: Severity) -> biome_configuration::RulePlainConfiguration {
+    fn from(value: Severity) -> Self {
         match value {
-            Severity::Off => biome_configuration::RulePlainConfiguration::Off,
-            Severity::Warn => biome_configuration::RulePlainConfiguration::Warn,
-            Severity::Error => biome_configuration::RulePlainConfiguration::Error,
+            Severity::Off => Self::Off,
+            Severity::Warn => Self::Warn,
+            Severity::Error => Self::Error,
         }
     }
 }
@@ -531,7 +529,7 @@ pub struct NoConsoleOptions {
 }
 impl From<NoConsoleOptions> for biome_js_analyze::lint::suspicious::no_console::NoConsoleOptions {
     fn from(val: NoConsoleOptions) -> Self {
-        biome_js_analyze::lint::suspicious::no_console::NoConsoleOptions { allow: val.allow }
+        Self { allow: val.allow }
     }
 }
 
@@ -543,8 +541,8 @@ pub(crate) enum NoRestrictedGlobal {
 impl NoRestrictedGlobal {
     pub(crate) fn into_name(self) -> String {
         match self {
-            NoRestrictedGlobal::Plain(name) => name,
-            NoRestrictedGlobal::WithMessage(named) => named.name,
+            Self::Plain(name) => name,
+            Self::WithMessage(named) => named.name,
         }
     }
 }
@@ -588,18 +586,18 @@ pub(crate) enum Rule {
 impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {
         match self {
-            Rule::Any(name, _) => name.clone(),
-            Rule::NoConsole(_) => Cow::Borrowed("no-console"),
-            Rule::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
-            Rule::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
-            Rule::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
-            Rule::TypeScriptExplicitMemberAccessibility(_) => {
+            Self::Any(name, _) => name.clone(),
+            Self::NoConsole(_) => Cow::Borrowed("no-console"),
+            Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
+            Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
+            Self::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
+            Self::TypeScriptExplicitMemberAccessibility(_) => {
                 Cow::Borrowed("@typescript-eslint/explicit-member-accessibility")
             }
-            Rule::TypeScriptNamingConvention(_) => {
+            Self::TypeScriptNamingConvention(_) => {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
-            Rule::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
+            Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
         }
     }
 }

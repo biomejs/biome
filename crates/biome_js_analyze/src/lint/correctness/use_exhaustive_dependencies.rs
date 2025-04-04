@@ -391,7 +391,7 @@ impl DeserializableValidator for Hook {
 
 impl HookConfigMaps {
     pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
-        let mut result = HookConfigMaps::default();
+        let mut result = Self::default();
         for hook in &hooks.hooks {
             if let Some(stable_result) = &hook.stable_result {
                 if *stable_result != StableHookResult::None {

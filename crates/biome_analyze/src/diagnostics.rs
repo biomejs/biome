@@ -247,7 +247,7 @@ impl Diagnostic for RuleError {}
 impl std::fmt::Display for RuleError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            RuleError::ReplacedRootWithNonRootError {
+            Self::ReplacedRootWithNonRootError {
                 rule_name: Some((group, rule)),
             } => {
                 std::write!(
@@ -255,7 +255,7 @@ impl std::fmt::Display for RuleError {
                     "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
                 )
             }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
+            Self::ReplacedRootWithNonRootError { rule_name: None } => {
                 std::write!(
                     fmt,
                     "a code action replaced the root of the file with a non-root node."
@@ -268,7 +268,7 @@ impl std::fmt::Display for RuleError {
 impl biome_console::fmt::Display for RuleError {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            RuleError::ReplacedRootWithNonRootError {
+            Self::ReplacedRootWithNonRootError {
                 rule_name: Some((group, rule)),
             } => {
                 std::write!(
@@ -276,7 +276,7 @@ impl biome_console::fmt::Display for RuleError {
                     "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
                 )
             }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
+            Self::ReplacedRootWithNonRootError { rule_name: None } => {
                 std::write!(
                     fmt,
                     "a code action replaced the root of the file with a non-root node."

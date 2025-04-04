@@ -97,10 +97,10 @@ impl SyntaxFeature for JsSyntaxFeature {
 
     fn is_supported(&self, p: &JsParser) -> bool {
         match self {
-            JsSyntaxFeature::SloppyMode => p.state().strict().is_none(),
-            JsSyntaxFeature::StrictMode => p.state().strict().is_some(),
-            JsSyntaxFeature::TypeScript => p.source_type().language().is_typescript(),
-            JsSyntaxFeature::Jsx => p.source_type().variant() == LanguageVariant::Jsx,
+            Self::SloppyMode => p.state().strict().is_none(),
+            Self::StrictMode => p.state().strict().is_some(),
+            Self::TypeScript => p.source_type().language().is_typescript(),
+            Self::Jsx => p.source_type().variant() == LanguageVariant::Jsx,
         }
     }
 }

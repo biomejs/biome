@@ -391,7 +391,7 @@ pub enum YamlLexContext {
 impl LexContext for YamlLexContext {
     /// Returns true if this is [YamlLexContext::Regular]
     fn is_regular(&self) -> bool {
-        matches!(self, YamlLexContext::Regular)
+        matches!(self, Self::Regular)
     }
 }
 

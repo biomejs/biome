@@ -177,7 +177,7 @@ pub struct ObjectMember {
 
 impl ObjectMember {
     fn new(member: AnyJsObjectMember, name: Option<TokenText>) -> Self {
-        ObjectMember { member, name }
+        Self { member, name }
     }
 }
 

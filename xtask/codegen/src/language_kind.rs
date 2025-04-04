@@ -40,14 +40,14 @@ pub enum LanguageKind {
 impl std::fmt::Display for LanguageKind {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            LanguageKind::Js => write!(f, "js"),
-            LanguageKind::Css => write!(f, "css"),
-            LanguageKind::Json => write!(f, "json"),
-            LanguageKind::Graphql => write!(f, "graphql"),
-            LanguageKind::Grit => write!(f, "grit"),
-            LanguageKind::Html => write!(f, "html"),
-            LanguageKind::Yaml => write!(f, "yaml"),
-            LanguageKind::Markdown => write!(f, "markdown"),
+            Self::Js => write!(f, "js"),
+            Self::Css => write!(f, "css"),
+            Self::Json => write!(f, "json"),
+            Self::Graphql => write!(f, "graphql"),
+            Self::Grit => write!(f, "grit"),
+            Self::Html => write!(f, "html"),
+            Self::Yaml => write!(f, "yaml"),
+            Self::Markdown => write!(f, "markdown"),
         }
     }
 }
@@ -68,14 +68,14 @@ impl FromStr for LanguageKind {
 
     fn from_str(kind: &str) -> Result<Self, Self::Err> {
         match kind {
-            "js" => Ok(LanguageKind::Js),
-            "css" => Ok(LanguageKind::Css),
-            "json" => Ok(LanguageKind::Json),
-            "graphql" => Ok(LanguageKind::Graphql),
-            "grit" => Ok(LanguageKind::Grit),
-            "html" => Ok(LanguageKind::Html),
-            "yaml" => Ok(LanguageKind::Yaml),
-            "markdown" => Ok(LanguageKind::Markdown),
+            "js" => Ok(Self::Js),
+            "css" => Ok(Self::Css),
+            "json" => Ok(Self::Json),
+            "graphql" => Ok(Self::Graphql),
+            "grit" => Ok(Self::Grit),
+            "html" => Ok(Self::Html),
+            "yaml" => Ok(Self::Yaml),
+            "markdown" => Ok(Self::Markdown),
             _ => Err(format!(
                 "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html`, `yaml` or `markdown`"
             )),
@@ -137,27 +137,27 @@ impl LanguageKind {
 
     pub fn kinds(&self) -> KindsSrc {
         match self {
-            LanguageKind::Js => JS_KINDS_SRC,
-            LanguageKind::Css => CSS_KINDS_SRC,
-            LanguageKind::Json => JSON_KINDS_SRC,
-            LanguageKind::Graphql => GRAPHQL_KINDS_SRC,
-            LanguageKind::Grit => GRIT_KINDS_SRC,
-            LanguageKind::Html => HTML_KINDS_SRC,
-            LanguageKind::Yaml => YAML_KINDS_SRC,
-            LanguageKind::Markdown => MARKDOWN_KINDS_SRC,
+            Self::Js => JS_KINDS_SRC,
+            Self::Css => CSS_KINDS_SRC,
+            Self::Json => JSON_KINDS_SRC,
+            Self::Graphql => GRAPHQL_KINDS_SRC,
+            Self::Grit => GRIT_KINDS_SRC,
+            Self::Html => HTML_KINDS_SRC,
+            Self::Yaml => YAML_KINDS_SRC,
+            Self::Markdown => MARKDOWN_KINDS_SRC,
         }
     }
 
     pub fn load_grammar(&self) -> &'static str {
         match self {
-            LanguageKind::Js => include_str!("../js.ungram"),
-            LanguageKind::Css => include_str!("../css.ungram"),
-            LanguageKind::Json => include_str!("../json.ungram"),
-            LanguageKind::Graphql => include_str!("../graphql.ungram"),
-            LanguageKind::Grit => include_str!("../gritql.ungram"),
-            LanguageKind::Html => include_str!("../html.ungram"),
-            LanguageKind::Yaml => include_str!("../yaml.ungram"),
-            LanguageKind::Markdown => include_str!("../markdown.ungram"),
+            Self::Js => include_str!("../js.ungram"),
+            Self::Css => include_str!("../css.ungram"),
+            Self::Json => include_str!("../json.ungram"),
+            Self::Graphql => include_str!("../graphql.ungram"),
+            Self::Grit => include_str!("../gritql.ungram"),
+            Self::Html => include_str!("../html.ungram"),
+            Self::Yaml => include_str!("../yaml.ungram"),
+            Self::Markdown => include_str!("../markdown.ungram"),
         }
     }
 

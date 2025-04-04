@@ -34,33 +34,27 @@ declare_node_union! {
 impl AnyJsPropertyClassMember {
     fn name(&self) -> SyntaxResult<AnyJsClassMemberName> {
         match self {
-            AnyJsPropertyClassMember::JsPropertyClassMember(property) => property.name(),
-            AnyJsPropertyClassMember::TsPropertySignatureClassMember(property) => property.name(),
-            AnyJsPropertyClassMember::TsInitializedPropertySignatureClassMember(property) => {
-                property.name()
-            }
+            Self::JsPropertyClassMember(property) => property.name(),
+            Self::TsPropertySignatureClassMember(property) => property.name(),
+            Self::TsInitializedPropertySignatureClassMember(property) => property.name(),
         }
     }
 
     fn value(&self) -> Option<JsInitializerClause> {
         match self {
-            AnyJsPropertyClassMember::JsPropertyClassMember(property) => property.value(),
-            AnyJsPropertyClassMember::TsPropertySignatureClassMember(_) => None,
-            AnyJsPropertyClassMember::TsInitializedPropertySignatureClassMember(property) => {
-                property.value().ok()
-            }
+            Self::JsPropertyClassMember(property) => property.value(),
+            Self::TsPropertySignatureClassMember(_) => None,
+            Self::TsInitializedPropertySignatureClassMember(property) => property.value().ok(),
         }
     }
 
     fn has_property_annotation(&self) -> bool {
         match self {
-            AnyJsPropertyClassMember::JsPropertyClassMember(property) => {
+            Self::JsPropertyClassMember(property) => property.property_annotation().is_some(),
+            Self::TsPropertySignatureClassMember(property) => {
                 property.property_annotation().is_some()
             }
-            AnyJsPropertyClassMember::TsPropertySignatureClassMember(property) => {
-                property.property_annotation().is_some()
-            }
-            AnyJsPropertyClassMember::TsInitializedPropertySignatureClassMember(_) => false,
+            Self::TsInitializedPropertySignatureClassMember(_) => false,
         }
     }
 }

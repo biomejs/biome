@@ -9,118 +9,118 @@ pub type SyntaxElement<L> = NodeOrToken<SyntaxNode<L>, SyntaxToken<L>>;
 impl<L: Language> SyntaxElement<L> {
     pub fn key(&self) -> SyntaxElementKey {
         match self {
-            NodeOrToken::Node(it) => it.key(),
-            NodeOrToken::Token(it) => it.key(),
+            Self::Node(it) => it.key(),
+            Self::Token(it) => it.key(),
         }
     }
 
     pub fn text_range(&self) -> TextRange {
         match self {
-            NodeOrToken::Node(it) => it.text_range_with_trivia(),
-            NodeOrToken::Token(it) => it.text_range(),
+            Self::Node(it) => it.text_range_with_trivia(),
+            Self::Token(it) => it.text_range(),
         }
     }
 
     pub fn text_trimmed_range(&self) -> TextRange {
         match self {
-            NodeOrToken::Node(it) => it.text_trimmed_range(),
-            NodeOrToken::Token(it) => it.text_trimmed_range(),
+            Self::Node(it) => it.text_trimmed_range(),
+            Self::Token(it) => it.text_trimmed_range(),
         }
     }
 
     pub fn leading_trivia(&self) -> Option<SyntaxTrivia<L>> {
         match self {
-            NodeOrToken::Node(it) => it.first_leading_trivia(),
-            NodeOrToken::Token(it) => Some(it.leading_trivia()),
+            Self::Node(it) => it.first_leading_trivia(),
+            Self::Token(it) => Some(it.leading_trivia()),
         }
     }
 
     pub fn trailing_trivia(&self) -> Option<SyntaxTrivia<L>> {
         match self {
-            NodeOrToken::Node(it) => it.last_trailing_trivia(),
-            NodeOrToken::Token(it) => Some(it.trailing_trivia()),
+            Self::Node(it) => it.last_trailing_trivia(),
+            Self::Token(it) => Some(it.trailing_trivia()),
         }
     }
 
     pub fn kind(&self) -> L::Kind {
         match self {
-            NodeOrToken::Node(it) => it.kind(),
-            NodeOrToken::Token(it) => it.kind(),
+            Self::Node(it) => it.kind(),
+            Self::Token(it) => it.kind(),
         }
     }
 
     pub fn parent(&self) -> Option<SyntaxNode<L>> {
         match self {
-            NodeOrToken::Node(it) => it.parent(),
-            NodeOrToken::Token(it) => it.parent(),
+            Self::Node(it) => it.parent(),
+            Self::Token(it) => it.parent(),
         }
     }
 
     pub(crate) fn index(&self) -> usize {
         match self {
-            NodeOrToken::Node(it) => it.index(),
-            NodeOrToken::Token(it) => it.index(),
+            Self::Node(it) => it.index(),
+            Self::Token(it) => it.index(),
         }
     }
 
     pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
         let first = match self {
-            NodeOrToken::Node(it) => Some(it.clone()),
-            NodeOrToken::Token(it) => it.parent(),
+            Self::Node(it) => Some(it.clone()),
+            Self::Token(it) => it.parent(),
         };
         iter::successors(first, SyntaxNode::parent)
     }
 
-    pub fn next_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
+    pub fn next_sibling_or_token(&self) -> Option<Self> {
         match self {
-            NodeOrToken::Node(it) => it.next_sibling_or_token(),
-            NodeOrToken::Token(it) => it.next_sibling_or_token(),
+            Self::Node(it) => it.next_sibling_or_token(),
+            Self::Token(it) => it.next_sibling_or_token(),
         }
     }
 
-    pub fn prev_sibling_or_token(&self) -> Option<SyntaxElement<L>> {
+    pub fn prev_sibling_or_token(&self) -> Option<Self> {
         match self {
-            NodeOrToken::Node(it) => it.prev_sibling_or_token(),
-            NodeOrToken::Token(it) => it.prev_sibling_or_token(),
+            Self::Node(it) => it.prev_sibling_or_token(),
+            Self::Token(it) => it.prev_sibling_or_token(),
         }
     }
 
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub fn detach(self) -> Self {
         match self {
-            NodeOrToken::Node(it) => Self::Node(it.detach()),
-            NodeOrToken::Token(it) => Self::Token(it.detach()),
+            Self::Node(it) => Self::Node(it.detach()),
+            Self::Token(it) => Self::Token(it.detach()),
         }
     }
 }
 
 impl<L: Language> From<cursor::SyntaxElement> for SyntaxElement<L> {
-    fn from(raw: cursor::SyntaxElement) -> SyntaxElement<L> {
+    fn from(raw: cursor::SyntaxElement) -> Self {
         match raw {
-            NodeOrToken::Node(it) => NodeOrToken::Node(it.into()),
-            NodeOrToken::Token(it) => NodeOrToken::Token(it.into()),
+            NodeOrToken::Node(it) => Self::Node(it.into()),
+            NodeOrToken::Token(it) => Self::Token(it.into()),
         }
     }
 }
 
 impl<L: Language> From<SyntaxElement<L>> for cursor::SyntaxElement {
-    fn from(element: SyntaxElement<L>) -> cursor::SyntaxElement {
+    fn from(element: SyntaxElement<L>) -> Self {
         match element {
-            NodeOrToken::Node(it) => NodeOrToken::Node(it.into()),
-            NodeOrToken::Token(it) => NodeOrToken::Token(it.into()),
+            NodeOrToken::Node(it) => Self::Node(it.into()),
+            NodeOrToken::Token(it) => Self::Token(it.into()),
         }
     }
 }
 
 impl<L: Language> From<SyntaxToken<L>> for SyntaxElement<L> {
-    fn from(token: SyntaxToken<L>) -> SyntaxElement<L> {
-        NodeOrToken::Token(token)
+    fn from(token: SyntaxToken<L>) -> Self {
+        Self::Token(token)
     }
 }
 
 impl<L: Language> From<SyntaxNode<L>> for SyntaxElement<L> {
-    fn from(node: SyntaxNode<L>) -> SyntaxElement<L> {
-        NodeOrToken::Node(node)
+    fn from(node: SyntaxNode<L>) -> Self {
+        Self::Node(node)
     }
 }
 

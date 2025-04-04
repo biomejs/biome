@@ -19,7 +19,7 @@ pub(crate) type CssTokenSourceCheckpoint = TokenSourceCheckpoint<CssSyntaxKind>;
 
 impl<'src> CssTokenSource<'src> {
     /// Creates a new token source.
-    pub(crate) fn new(lexer: BufferedLexer<CssSyntaxKind, CssLexer<'src>>) -> CssTokenSource<'src> {
+    pub(crate) fn new(lexer: BufferedLexer<CssSyntaxKind, CssLexer<'src>>) -> Self {
         CssTokenSource {
             lexer,
             trivia_list: vec![],

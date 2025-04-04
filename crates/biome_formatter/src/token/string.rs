@@ -9,8 +9,8 @@ pub enum Quote {
 impl Quote {
     pub fn as_char(&self) -> char {
         match self {
-            Quote::Double => '"',
-            Quote::Single => '\'',
+            Self::Double => '"',
+            Self::Single => '\'',
         }
     }
 
@@ -21,8 +21,8 @@ impl Quote {
     /// Given the current quote, it returns the other one
     pub fn other(&self) -> Self {
         match self {
-            Quote::Double => Quote::Single,
-            Quote::Single => Quote::Double,
+            Self::Double => Self::Single,
+            Self::Single => Self::Double,
         }
     }
 }

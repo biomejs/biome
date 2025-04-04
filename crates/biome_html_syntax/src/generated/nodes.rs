@@ -657,13 +657,13 @@ pub enum AnyHtmlAttribute {
 impl AnyHtmlAttribute {
     pub fn as_html_attribute(&self) -> Option<&HtmlAttribute> {
         match &self {
-            AnyHtmlAttribute::HtmlAttribute(item) => Some(item),
+            Self::HtmlAttribute(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_html_bogus_attribute(&self) -> Option<&HtmlBogusAttribute> {
         match &self {
-            AnyHtmlAttribute::HtmlBogusAttribute(item) => Some(item),
+            Self::HtmlBogusAttribute(item) => Some(item),
             _ => None,
         }
     }
@@ -680,37 +680,37 @@ pub enum AnyHtmlElement {
 impl AnyHtmlElement {
     pub fn as_html_bogus_element(&self) -> Option<&HtmlBogusElement> {
         match &self {
-            AnyHtmlElement::HtmlBogusElement(item) => Some(item),
+            Self::HtmlBogusElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_html_cdata_section(&self) -> Option<&HtmlCdataSection> {
         match &self {
-            AnyHtmlElement::HtmlCdataSection(item) => Some(item),
+            Self::HtmlCdataSection(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_html_comment(&self) -> Option<&HtmlComment> {
         match &self {
-            AnyHtmlElement::HtmlComment(item) => Some(item),
+            Self::HtmlComment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_html_content(&self) -> Option<&HtmlContent> {
         match &self {
-            AnyHtmlElement::HtmlContent(item) => Some(item),
+            Self::HtmlContent(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_html_element(&self) -> Option<&HtmlElement> {
         match &self {
-            AnyHtmlElement::HtmlElement(item) => Some(item),
+            Self::HtmlElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_html_self_closing_element(&self) -> Option<&HtmlSelfClosingElement> {
         match &self {
-            AnyHtmlElement::HtmlSelfClosingElement(item) => Some(item),
+            Self::HtmlSelfClosingElement(item) => Some(item),
             _ => None,
         }
     }
@@ -757,12 +757,12 @@ impl std::fmt::Debug for HtmlAttribute {
     }
 }
 impl From<HtmlAttribute> for SyntaxNode {
-    fn from(n: HtmlAttribute) -> SyntaxNode {
+    fn from(n: HtmlAttribute) -> Self {
         n.syntax
     }
 }
 impl From<HtmlAttribute> for SyntaxElement {
-    fn from(n: HtmlAttribute) -> SyntaxElement {
+    fn from(n: HtmlAttribute) -> Self {
         n.syntax.into()
     }
 }
@@ -805,12 +805,12 @@ impl std::fmt::Debug for HtmlAttributeInitializerClause {
     }
 }
 impl From<HtmlAttributeInitializerClause> for SyntaxNode {
-    fn from(n: HtmlAttributeInitializerClause) -> SyntaxNode {
+    fn from(n: HtmlAttributeInitializerClause) -> Self {
         n.syntax
     }
 }
 impl From<HtmlAttributeInitializerClause> for SyntaxElement {
-    fn from(n: HtmlAttributeInitializerClause) -> SyntaxElement {
+    fn from(n: HtmlAttributeInitializerClause) -> Self {
         n.syntax.into()
     }
 }
@@ -855,12 +855,12 @@ impl std::fmt::Debug for HtmlAttributeName {
     }
 }
 impl From<HtmlAttributeName> for SyntaxNode {
-    fn from(n: HtmlAttributeName) -> SyntaxNode {
+    fn from(n: HtmlAttributeName) -> Self {
         n.syntax
     }
 }
 impl From<HtmlAttributeName> for SyntaxElement {
-    fn from(n: HtmlAttributeName) -> SyntaxElement {
+    fn from(n: HtmlAttributeName) -> Self {
         n.syntax.into()
     }
 }
@@ -913,12 +913,12 @@ impl std::fmt::Debug for HtmlCdataSection {
     }
 }
 impl From<HtmlCdataSection> for SyntaxNode {
-    fn from(n: HtmlCdataSection) -> SyntaxNode {
+    fn from(n: HtmlCdataSection) -> Self {
         n.syntax
     }
 }
 impl From<HtmlCdataSection> for SyntaxElement {
-    fn from(n: HtmlCdataSection) -> SyntaxElement {
+    fn from(n: HtmlCdataSection) -> Self {
         n.syntax.into()
     }
 }
@@ -972,12 +972,12 @@ impl std::fmt::Debug for HtmlClosingElement {
     }
 }
 impl From<HtmlClosingElement> for SyntaxNode {
-    fn from(n: HtmlClosingElement) -> SyntaxNode {
+    fn from(n: HtmlClosingElement) -> Self {
         n.syntax
     }
 }
 impl From<HtmlClosingElement> for SyntaxElement {
-    fn from(n: HtmlClosingElement) -> SyntaxElement {
+    fn from(n: HtmlClosingElement) -> Self {
         n.syntax.into()
     }
 }
@@ -1030,12 +1030,12 @@ impl std::fmt::Debug for HtmlComment {
     }
 }
 impl From<HtmlComment> for SyntaxNode {
-    fn from(n: HtmlComment) -> SyntaxNode {
+    fn from(n: HtmlComment) -> Self {
         n.syntax
     }
 }
 impl From<HtmlComment> for SyntaxElement {
-    fn from(n: HtmlComment) -> SyntaxElement {
+    fn from(n: HtmlComment) -> Self {
         n.syntax.into()
     }
 }
@@ -1080,12 +1080,12 @@ impl std::fmt::Debug for HtmlContent {
     }
 }
 impl From<HtmlContent> for SyntaxNode {
-    fn from(n: HtmlContent) -> SyntaxNode {
+    fn from(n: HtmlContent) -> Self {
         n.syntax
     }
 }
 impl From<HtmlContent> for SyntaxElement {
-    fn from(n: HtmlContent) -> SyntaxElement {
+    fn from(n: HtmlContent) -> Self {
         n.syntax.into()
     }
 }
@@ -1155,12 +1155,12 @@ impl std::fmt::Debug for HtmlDirective {
     }
 }
 impl From<HtmlDirective> for SyntaxNode {
-    fn from(n: HtmlDirective) -> SyntaxNode {
+    fn from(n: HtmlDirective) -> Self {
         n.syntax
     }
 }
 impl From<HtmlDirective> for SyntaxElement {
-    fn from(n: HtmlDirective) -> SyntaxElement {
+    fn from(n: HtmlDirective) -> Self {
         n.syntax.into()
     }
 }
@@ -1210,12 +1210,12 @@ impl std::fmt::Debug for HtmlElement {
     }
 }
 impl From<HtmlElement> for SyntaxNode {
-    fn from(n: HtmlElement) -> SyntaxNode {
+    fn from(n: HtmlElement) -> Self {
         n.syntax
     }
 }
 impl From<HtmlElement> for SyntaxElement {
-    fn from(n: HtmlElement) -> SyntaxElement {
+    fn from(n: HtmlElement) -> Self {
         n.syntax.into()
     }
 }
@@ -1266,12 +1266,12 @@ impl std::fmt::Debug for HtmlOpeningElement {
     }
 }
 impl From<HtmlOpeningElement> for SyntaxNode {
-    fn from(n: HtmlOpeningElement) -> SyntaxNode {
+    fn from(n: HtmlOpeningElement) -> Self {
         n.syntax
     }
 }
 impl From<HtmlOpeningElement> for SyntaxElement {
-    fn from(n: HtmlOpeningElement) -> SyntaxElement {
+    fn from(n: HtmlOpeningElement) -> Self {
         n.syntax.into()
     }
 }
@@ -1322,12 +1322,12 @@ impl std::fmt::Debug for HtmlRoot {
     }
 }
 impl From<HtmlRoot> for SyntaxNode {
-    fn from(n: HtmlRoot) -> SyntaxNode {
+    fn from(n: HtmlRoot) -> Self {
         n.syntax
     }
 }
 impl From<HtmlRoot> for SyntaxElement {
-    fn from(n: HtmlRoot) -> SyntaxElement {
+    fn from(n: HtmlRoot) -> Self {
         n.syntax.into()
     }
 }
@@ -1382,12 +1382,12 @@ impl std::fmt::Debug for HtmlSelfClosingElement {
     }
 }
 impl From<HtmlSelfClosingElement> for SyntaxNode {
-    fn from(n: HtmlSelfClosingElement) -> SyntaxNode {
+    fn from(n: HtmlSelfClosingElement) -> Self {
         n.syntax
     }
 }
 impl From<HtmlSelfClosingElement> for SyntaxElement {
-    fn from(n: HtmlSelfClosingElement) -> SyntaxElement {
+    fn from(n: HtmlSelfClosingElement) -> Self {
         n.syntax.into()
     }
 }
@@ -1432,12 +1432,12 @@ impl std::fmt::Debug for HtmlString {
     }
 }
 impl From<HtmlString> for SyntaxNode {
-    fn from(n: HtmlString) -> SyntaxNode {
+    fn from(n: HtmlString) -> Self {
         n.syntax
     }
 }
 impl From<HtmlString> for SyntaxElement {
-    fn from(n: HtmlString) -> SyntaxElement {
+    fn from(n: HtmlString) -> Self {
         n.syntax.into()
     }
 }
@@ -1482,23 +1482,23 @@ impl std::fmt::Debug for HtmlTagName {
     }
 }
 impl From<HtmlTagName> for SyntaxNode {
-    fn from(n: HtmlTagName) -> SyntaxNode {
+    fn from(n: HtmlTagName) -> Self {
         n.syntax
     }
 }
 impl From<HtmlTagName> for SyntaxElement {
-    fn from(n: HtmlTagName) -> SyntaxElement {
+    fn from(n: HtmlTagName) -> Self {
         n.syntax.into()
     }
 }
 impl From<HtmlAttribute> for AnyHtmlAttribute {
-    fn from(node: HtmlAttribute) -> AnyHtmlAttribute {
-        AnyHtmlAttribute::HtmlAttribute(node)
+    fn from(node: HtmlAttribute) -> Self {
+        Self::HtmlAttribute(node)
     }
 }
 impl From<HtmlBogusAttribute> for AnyHtmlAttribute {
-    fn from(node: HtmlBogusAttribute) -> AnyHtmlAttribute {
-        AnyHtmlAttribute::HtmlBogusAttribute(node)
+    fn from(node: HtmlBogusAttribute) -> Self {
+        Self::HtmlBogusAttribute(node)
     }
 }
 impl AstNode for AnyHtmlAttribute {
@@ -1510,9 +1510,9 @@ impl AstNode for AnyHtmlAttribute {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            HTML_ATTRIBUTE => AnyHtmlAttribute::HtmlAttribute(HtmlAttribute { syntax }),
+            HTML_ATTRIBUTE => Self::HtmlAttribute(HtmlAttribute { syntax }),
             HTML_BOGUS_ATTRIBUTE => {
-                AnyHtmlAttribute::HtmlBogusAttribute(HtmlBogusAttribute { syntax })
+                Self::HtmlBogusAttribute(HtmlBogusAttribute { syntax })
             }
             _ => return None,
         };
@@ -1520,27 +1520,27 @@ impl AstNode for AnyHtmlAttribute {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyHtmlAttribute::HtmlAttribute(it) => &it.syntax,
-            AnyHtmlAttribute::HtmlBogusAttribute(it) => &it.syntax,
+            Self::HtmlAttribute(it) => &it.syntax,
+            Self::HtmlBogusAttribute(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyHtmlAttribute::HtmlAttribute(it) => it.syntax,
-            AnyHtmlAttribute::HtmlBogusAttribute(it) => it.syntax,
+            Self::HtmlAttribute(it) => it.syntax,
+            Self::HtmlBogusAttribute(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyHtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyHtmlAttribute::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
-            AnyHtmlAttribute::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyHtmlAttribute> for SyntaxNode {
-    fn from(n: AnyHtmlAttribute) -> SyntaxNode {
+    fn from(n: AnyHtmlAttribute) -> Self {
         match n {
             AnyHtmlAttribute::HtmlAttribute(it) => it.into(),
             AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into(),
@@ -1548,39 +1548,39 @@ impl From<AnyHtmlAttribute> for SyntaxNode {
     }
 }
 impl From<AnyHtmlAttribute> for SyntaxElement {
-    fn from(n: AnyHtmlAttribute) -> SyntaxElement {
+    fn from(n: AnyHtmlAttribute) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<HtmlBogusElement> for AnyHtmlElement {
-    fn from(node: HtmlBogusElement) -> AnyHtmlElement {
-        AnyHtmlElement::HtmlBogusElement(node)
+    fn from(node: HtmlBogusElement) -> Self {
+        Self::HtmlBogusElement(node)
     }
 }
 impl From<HtmlCdataSection> for AnyHtmlElement {
-    fn from(node: HtmlCdataSection) -> AnyHtmlElement {
-        AnyHtmlElement::HtmlCdataSection(node)
+    fn from(node: HtmlCdataSection) -> Self {
+        Self::HtmlCdataSection(node)
     }
 }
 impl From<HtmlComment> for AnyHtmlElement {
-    fn from(node: HtmlComment) -> AnyHtmlElement {
-        AnyHtmlElement::HtmlComment(node)
+    fn from(node: HtmlComment) -> Self {
+        Self::HtmlComment(node)
     }
 }
 impl From<HtmlContent> for AnyHtmlElement {
-    fn from(node: HtmlContent) -> AnyHtmlElement {
-        AnyHtmlElement::HtmlContent(node)
+    fn from(node: HtmlContent) -> Self {
+        Self::HtmlContent(node)
     }
 }
 impl From<HtmlElement> for AnyHtmlElement {
-    fn from(node: HtmlElement) -> AnyHtmlElement {
-        AnyHtmlElement::HtmlElement(node)
+    fn from(node: HtmlElement) -> Self {
+        Self::HtmlElement(node)
     }
 }
 impl From<HtmlSelfClosingElement> for AnyHtmlElement {
-    fn from(node: HtmlSelfClosingElement) -> AnyHtmlElement {
-        AnyHtmlElement::HtmlSelfClosingElement(node)
+    fn from(node: HtmlSelfClosingElement) -> Self {
+        Self::HtmlSelfClosingElement(node)
     }
 }
 impl AstNode for AnyHtmlElement {
@@ -1604,13 +1604,13 @@ impl AstNode for AnyHtmlElement {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            HTML_BOGUS_ELEMENT => AnyHtmlElement::HtmlBogusElement(HtmlBogusElement { syntax }),
-            HTML_CDATA_SECTION => AnyHtmlElement::HtmlCdataSection(HtmlCdataSection { syntax }),
-            HTML_COMMENT => AnyHtmlElement::HtmlComment(HtmlComment { syntax }),
-            HTML_CONTENT => AnyHtmlElement::HtmlContent(HtmlContent { syntax }),
-            HTML_ELEMENT => AnyHtmlElement::HtmlElement(HtmlElement { syntax }),
+            HTML_BOGUS_ELEMENT => Self::HtmlBogusElement(HtmlBogusElement { syntax }),
+            HTML_CDATA_SECTION => Self::HtmlCdataSection(HtmlCdataSection { syntax }),
+            HTML_COMMENT => Self::HtmlComment(HtmlComment { syntax }),
+            HTML_CONTENT => Self::HtmlContent(HtmlContent { syntax }),
+            HTML_ELEMENT => Self::HtmlElement(HtmlElement { syntax }),
             HTML_SELF_CLOSING_ELEMENT => {
-                AnyHtmlElement::HtmlSelfClosingElement(HtmlSelfClosingElement { syntax })
+                Self::HtmlSelfClosingElement(HtmlSelfClosingElement { syntax })
             }
             _ => return None,
         };
@@ -1618,39 +1618,39 @@ impl AstNode for AnyHtmlElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyHtmlElement::HtmlBogusElement(it) => &it.syntax,
-            AnyHtmlElement::HtmlCdataSection(it) => &it.syntax,
-            AnyHtmlElement::HtmlComment(it) => &it.syntax,
-            AnyHtmlElement::HtmlContent(it) => &it.syntax,
-            AnyHtmlElement::HtmlElement(it) => &it.syntax,
-            AnyHtmlElement::HtmlSelfClosingElement(it) => &it.syntax,
+            Self::HtmlBogusElement(it) => &it.syntax,
+            Self::HtmlCdataSection(it) => &it.syntax,
+            Self::HtmlComment(it) => &it.syntax,
+            Self::HtmlContent(it) => &it.syntax,
+            Self::HtmlElement(it) => &it.syntax,
+            Self::HtmlSelfClosingElement(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyHtmlElement::HtmlBogusElement(it) => it.syntax,
-            AnyHtmlElement::HtmlCdataSection(it) => it.syntax,
-            AnyHtmlElement::HtmlComment(it) => it.syntax,
-            AnyHtmlElement::HtmlContent(it) => it.syntax,
-            AnyHtmlElement::HtmlElement(it) => it.syntax,
-            AnyHtmlElement::HtmlSelfClosingElement(it) => it.syntax,
+            Self::HtmlBogusElement(it) => it.syntax,
+            Self::HtmlCdataSection(it) => it.syntax,
+            Self::HtmlComment(it) => it.syntax,
+            Self::HtmlContent(it) => it.syntax,
+            Self::HtmlElement(it) => it.syntax,
+            Self::HtmlSelfClosingElement(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyHtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyHtmlElement::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
-            AnyHtmlElement::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
-            AnyHtmlElement::HtmlComment(it) => std::fmt::Debug::fmt(it, f),
-            AnyHtmlElement::HtmlContent(it) => std::fmt::Debug::fmt(it, f),
-            AnyHtmlElement::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
-            AnyHtmlElement::HtmlSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlComment(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlContent(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyHtmlElement> for SyntaxNode {
-    fn from(n: AnyHtmlElement) -> SyntaxNode {
+    fn from(n: AnyHtmlElement) -> Self {
         match n {
             AnyHtmlElement::HtmlBogusElement(it) => it.into(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into(),
@@ -1662,7 +1662,7 @@ impl From<AnyHtmlElement> for SyntaxNode {
     }
 }
 impl From<AnyHtmlElement> for SyntaxElement {
-    fn from(n: AnyHtmlElement) -> SyntaxElement {
+    fn from(n: AnyHtmlElement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -1794,12 +1794,12 @@ impl std::fmt::Debug for HtmlBogus {
     }
 }
 impl From<HtmlBogus> for SyntaxNode {
-    fn from(n: HtmlBogus) -> SyntaxNode {
+    fn from(n: HtmlBogus) -> Self {
         n.syntax
     }
 }
 impl From<HtmlBogus> for SyntaxElement {
-    fn from(n: HtmlBogus) -> SyntaxElement {
+    fn from(n: HtmlBogus) -> Self {
         n.syntax.into()
     }
 }
@@ -1850,12 +1850,12 @@ impl std::fmt::Debug for HtmlBogusAttribute {
     }
 }
 impl From<HtmlBogusAttribute> for SyntaxNode {
-    fn from(n: HtmlBogusAttribute) -> SyntaxNode {
+    fn from(n: HtmlBogusAttribute) -> Self {
         n.syntax
     }
 }
 impl From<HtmlBogusAttribute> for SyntaxElement {
-    fn from(n: HtmlBogusAttribute) -> SyntaxElement {
+    fn from(n: HtmlBogusAttribute) -> Self {
         n.syntax.into()
     }
 }
@@ -1906,12 +1906,12 @@ impl std::fmt::Debug for HtmlBogusElement {
     }
 }
 impl From<HtmlBogusElement> for SyntaxNode {
-    fn from(n: HtmlBogusElement) -> SyntaxNode {
+    fn from(n: HtmlBogusElement) -> Self {
         n.syntax
     }
 }
 impl From<HtmlBogusElement> for SyntaxElement {
-    fn from(n: HtmlBogusElement) -> SyntaxElement {
+    fn from(n: HtmlBogusElement) -> Self {
         n.syntax.into()
     }
 }
@@ -1940,9 +1940,9 @@ impl AstNode for HtmlAttributeList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == HTML_ATTRIBUTE_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<HtmlAttributeList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(HtmlAttributeList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -2022,9 +2022,9 @@ impl AstNode for HtmlElementList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == HTML_ELEMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<HtmlElementList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(HtmlElementList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {

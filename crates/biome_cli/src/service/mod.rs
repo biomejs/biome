@@ -463,7 +463,7 @@ impl FromStr for TransportHeader {
                     format!("could not parse Content-Length header value {value:?}")
                 })?;
 
-                Ok(TransportHeader::ContentLength(value))
+                Ok(Self::ContentLength(value))
             }
             "Content-Type" => {
                 ensure!(
@@ -471,9 +471,9 @@ impl FromStr for TransportHeader {
                     "invalid value for Content-Type expected \"application/vscode-jsonrpc\", got {value:?}"
                 );
 
-                Ok(TransportHeader::ContentType)
+                Ok(Self::ContentType)
             }
-            _ => Ok(TransportHeader::Unknown(name.into())),
+            _ => Ok(Self::Unknown(name.into())),
         }
     }
 }

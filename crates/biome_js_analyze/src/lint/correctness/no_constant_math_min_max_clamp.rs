@@ -127,8 +127,8 @@ impl FromStr for MinMaxKind {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "min" => Ok(MinMaxKind::Min),
-            "max" => Ok(MinMaxKind::Max),
+            "min" => Ok(Self::Min),
+            "max" => Ok(Self::Max),
             _ => Err("Value not supported for math min max kind"),
         }
     }

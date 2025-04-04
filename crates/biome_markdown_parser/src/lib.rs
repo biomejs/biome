@@ -42,8 +42,8 @@ pub struct MarkdownParse {
 }
 
 impl MarkdownParse {
-    pub fn new(root: MarkdownSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> MarkdownParse {
-        MarkdownParse { root, diagnostics }
+    pub fn new(root: MarkdownSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
     }
 
     pub fn syntax(&self) -> MarkdownSyntaxNode {

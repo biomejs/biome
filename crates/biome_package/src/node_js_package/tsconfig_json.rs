@@ -41,7 +41,7 @@ impl Manifest for TsConfigJson {
     type Language = JsonLanguage;
 
     fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self> {
-        deserialize_from_json_ast::<TsConfigJson>(root, "")
+        deserialize_from_json_ast::<Self>(root, "")
     }
 }
 
@@ -124,7 +124,7 @@ impl TsConfigJson {
         )
         .consume();
 
-        let mut tsconfig: TsConfigJson = tsconfig.unwrap_or_default();
+        let mut tsconfig: Self = tsconfig.unwrap_or_default();
         tsconfig.root = root;
         tsconfig.path = path.to_path_buf();
         let directory = tsconfig.directory().to_path_buf();

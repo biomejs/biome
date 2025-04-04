@@ -67,7 +67,7 @@ pub(crate) enum Message {
 
 impl Message {
     pub(crate) const fn is_failure(&self) -> bool {
-        matches!(self, Message::Failure)
+        matches!(self, Self::Failure)
     }
 }
 

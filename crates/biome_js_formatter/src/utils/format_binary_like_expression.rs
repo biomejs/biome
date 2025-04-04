@@ -239,13 +239,13 @@ enum BinaryLeftOrRightSide {
 impl BinaryLeftOrRightSide {
     fn is_jsx(&self) -> bool {
         match self {
-            BinaryLeftOrRightSide::Left { parent, .. } => matches!(
+            Self::Left { parent, .. } => matches!(
                 parent.left(),
                 Ok(AnyJsBinaryLikeLeftExpression::AnyJsExpression(
                     AnyJsExpression::JsxTagExpression(_),
                 ))
             ),
-            BinaryLeftOrRightSide::Right { parent, .. } => {
+            Self::Right { parent, .. } => {
                 matches!(parent.right(), Ok(AnyJsExpression::JsxTagExpression(_)))
             }
         }

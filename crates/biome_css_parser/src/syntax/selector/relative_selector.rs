@@ -37,7 +37,7 @@ impl RelativeSelectorList {
     ///
     /// * `end_kind` - A `CssSyntaxKind` that indicates the end of the selector list.
     pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
-        RelativeSelectorList {
+        Self {
             end_kind,
             is_recovery_disabled: false,
         }
@@ -71,7 +71,7 @@ impl RelativeSelectorListParseRecovery {
     ///
     /// * `end_kind` - A `CssSyntaxKind` used to determine the recovery point.
     pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
-        RelativeSelectorListParseRecovery { end_kind }
+        Self { end_kind }
     }
 }
 

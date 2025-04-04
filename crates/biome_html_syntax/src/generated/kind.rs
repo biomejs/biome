@@ -80,7 +80,7 @@ impl HtmlSyntaxKind {
     pub const fn is_list(self) -> bool {
         matches!(self, HTML_ELEMENT_LIST | HTML_ATTRIBUTE_LIST)
     }
-    pub fn from_keyword(ident: &str) -> Option<HtmlSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "null" => NULL_KW,
             "true" => TRUE_KW,

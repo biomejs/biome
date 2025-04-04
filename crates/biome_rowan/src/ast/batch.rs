@@ -357,7 +357,7 @@ where
         self,
         with_text_range_and_edit: bool,
     ) -> (SyntaxNode<L>, Option<(TextRange, TextEdit)>) {
-        let BatchMutation { root, mut changes } = self;
+        let Self { root, mut changes } = self;
 
         // Ordered text mutation list sorted by text range
         let mut text_mutation_list: Vec<(TextRange, Option<String>)> =

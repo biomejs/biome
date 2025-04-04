@@ -22,7 +22,7 @@ pub(crate) struct SemanticIndex(pub(crate) usize);
 
 impl From<usize> for SemanticIndex {
     fn from(v: usize) -> Self {
-        SemanticIndex(v)
+        Self(v)
     }
 }
 

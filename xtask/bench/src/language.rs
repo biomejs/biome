@@ -110,33 +110,33 @@ pub enum Parsed {
 impl Parsed {
     pub fn format_node(&self) -> Option<FormatNode> {
         match self {
-            Parsed::JavaScript(parse, source_type) => {
+            Self::JavaScript(parse, source_type) => {
                 Some(FormatNode::JavaScript(parse.syntax(), *source_type))
             }
-            Parsed::Json(parse) => Some(FormatNode::Json(parse.syntax())),
-            Parsed::Css(parse) => Some(FormatNode::Css(parse.syntax())),
-            Parsed::Graphql(parse) => Some(FormatNode::Graphql(parse.syntax())),
-            Parsed::Html(parse) => Some(FormatNode::Html(parse.syntax())),
+            Self::Json(parse) => Some(FormatNode::Json(parse.syntax())),
+            Self::Css(parse) => Some(FormatNode::Css(parse.syntax())),
+            Self::Graphql(parse) => Some(FormatNode::Graphql(parse.syntax())),
+            Self::Html(parse) => Some(FormatNode::Html(parse.syntax())),
         }
     }
 
     pub fn analyze(&self) -> Option<Analyze> {
         match self {
-            Parsed::JavaScript(parse, _) => Some(Analyze::JavaScript(parse.tree())),
-            Parsed::Json(_) => None,
-            Parsed::Graphql(_) => None,
-            Parsed::Css(parse) => Some(Analyze::Css(parse.tree())),
-            Parsed::Html(_) => None,
+            Self::JavaScript(parse, _) => Some(Analyze::JavaScript(parse.tree())),
+            Self::Json(_) => None,
+            Self::Graphql(_) => None,
+            Self::Css(parse) => Some(Analyze::Css(parse.tree())),
+            Self::Html(_) => None,
         }
     }
 
     pub fn into_diagnostics(self) -> Vec<ParseDiagnostic> {
         match self {
-            Parsed::JavaScript(parse, _) => parse.into_diagnostics(),
-            Parsed::Json(parse) => parse.into_diagnostics(),
-            Parsed::Css(parse) => parse.into_diagnostics(),
-            Parsed::Graphql(parse) => parse.into_diagnostics(),
-            Parsed::Html(parse) => parse.into_diagnostics(),
+            Self::JavaScript(parse, _) => parse.into_diagnostics(),
+            Self::Json(parse) => parse.into_diagnostics(),
+            Self::Css(parse) => parse.into_diagnostics(),
+            Self::Graphql(parse) => parse.into_diagnostics(),
+            Self::Html(parse) => parse.into_diagnostics(),
         }
     }
 }
@@ -162,11 +162,11 @@ impl FormatNode {
             }
             Self::Css(root) => biome_css_formatter::format_node(CssFormatOptions::default(), root)
                 .map(FormattedNode::Css),
-            FormatNode::Graphql(root) => {
+            Self::Graphql(root) => {
                 biome_graphql_formatter::format_node(GraphqlFormatOptions::default(), root)
                     .map(FormattedNode::Graphql)
             }
-            FormatNode::Html(root) => {
+            Self::Html(root) => {
                 biome_html_formatter::format_node(HtmlFormatOptions::default(), root)
                     .map(FormattedNode::Html)
             }
@@ -185,11 +185,11 @@ pub enum FormattedNode {
 impl FormattedNode {
     pub fn print(&self) -> PrintResult<Printed> {
         match self {
-            FormattedNode::JavaScript(formatted) => formatted.print(),
-            FormattedNode::Json(formatted) => formatted.print(),
-            FormattedNode::Css(formatted) => formatted.print(),
-            FormattedNode::Graphql(formatted) => formatted.print(),
-            FormattedNode::Html(formatted) => formatted.print(),
+            Self::JavaScript(formatted) => formatted.print(),
+            Self::Json(formatted) => formatted.print(),
+            Self::Css(formatted) => formatted.print(),
+            Self::Graphql(formatted) => formatted.print(),
+            Self::Html(formatted) => formatted.print(),
         }
     }
 }
@@ -202,7 +202,7 @@ pub enum Analyze {
 impl Analyze {
     pub fn analyze(&self) {
         match self {
-            Analyze::JavaScript(root) => {
+            Self::JavaScript(root) => {
                 let filter = AnalysisFilter {
                     categories: RuleCategoriesBuilder::default()
                         .with_syntax()
@@ -227,7 +227,7 @@ impl Analyze {
                     },
                 );
             }
-            Analyze::Css(root) => {
+            Self::Css(root) => {
                 let filter = AnalysisFilter {
                     categories: RuleCategoriesBuilder::default()
                         .with_syntax()

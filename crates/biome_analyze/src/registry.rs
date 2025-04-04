@@ -109,7 +109,7 @@ impl<L: Language + Default> RuleRegistry<L> {
         RuleRegistryBuilder {
             filter,
             root,
-            registry: RuleRegistry {
+            registry: Self {
                 phase_rules: Default::default(),
             },
             visitors: BTreeMap::default(),

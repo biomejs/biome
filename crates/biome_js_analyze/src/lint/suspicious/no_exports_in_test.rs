@@ -56,8 +56,8 @@ declare_node_union! {
 impl MaybeExport {
     fn is_export(&self) -> bool {
         match self {
-            MaybeExport::JsExport(_) => true,
-            MaybeExport::JsAssignmentExpression(assignment_expr) => {
+            Self::JsExport(_) => true,
+            Self::JsAssignmentExpression(assignment_expr) => {
                 let left = assignment_expr.left().ok();
                 left.and_then(|left| AnyJsMemberAssignment::cast(left.into_syntax()))
                     .is_some_and(|member_expr| {

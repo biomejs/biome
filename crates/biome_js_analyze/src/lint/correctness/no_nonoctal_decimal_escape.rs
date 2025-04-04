@@ -237,8 +237,8 @@ declare_node_union! {
 impl AnyJsStringLiteral {
     pub fn string_literal_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsStringLiteral::JsStringLiteralExpression(node) => node.value_token().ok(),
-            AnyJsStringLiteral::JsLiteralMemberName(node) => node
+            Self::JsStringLiteralExpression(node) => node.value_token().ok(),
+            Self::JsLiteralMemberName(node) => node
                 .value()
                 .ok()
                 .filter(|token| token.kind() == JsSyntaxKind::JS_STRING_LITERAL),

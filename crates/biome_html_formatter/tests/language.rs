@@ -17,7 +17,7 @@ pub struct HtmlTestFormatLanguage {
 
 impl HtmlTestFormatLanguage {
     pub fn new(source_type: HtmlFileSource) -> Self {
-        HtmlTestFormatLanguage { source_type }
+        Self { source_type }
     }
 }
 

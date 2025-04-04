@@ -46,7 +46,7 @@ pub trait IsEmpty {
 
 impl IsEmpty for String {
     fn is_empty(&self) -> bool {
-        String::is_empty(self)
+        Self::is_empty(self)
     }
 }
 
@@ -58,7 +58,7 @@ impl IsEmpty for Box<str> {
 
 impl<T> IsEmpty for Vec<T> {
     fn is_empty(&self) -> bool {
-        Vec::is_empty(self)
+        Self::is_empty(self)
     }
 }
 

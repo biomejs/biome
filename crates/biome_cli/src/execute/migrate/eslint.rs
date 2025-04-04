@@ -382,8 +382,8 @@ enum EslintPackage {
 impl EslintPackage {
     fn resolve_name<'a>(&self, name: &'a str) -> Cow<'a, str> {
         let artifact = match self {
-            EslintPackage::Config => "eslint-config-",
-            EslintPackage::Plugin => "eslint-plugin-",
+            Self::Config => "eslint-config-",
+            Self::Plugin => "eslint-plugin-",
         };
         if name.starts_with('@') {
             // handle scoped package

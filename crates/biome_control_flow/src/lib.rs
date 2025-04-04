@@ -22,7 +22,7 @@ pub struct ControlFlowGraph<L: Language> {
 
 impl<L: Language> ControlFlowGraph<L> {
     fn new(node: SyntaxNode<L>) -> Self {
-        ControlFlowGraph {
+        Self {
             blocks: vec![BasicBlock::new(None, None)],
             node,
         }

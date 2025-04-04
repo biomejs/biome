@@ -31,8 +31,8 @@ pub enum JsonFileVariant {
 impl Display for JsonFileVariant {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            JsonFileVariant::Standard => write!(f, "json"),
-            JsonFileVariant::Jsonc => write!(f, "jsonc"),
+            Self::Standard => write!(f, "json"),
+            Self::Jsonc => write!(f, "jsonc"),
         }
     }
 }
@@ -41,8 +41,8 @@ impl FromStr for JsonFileVariant {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "json" => Ok(JsonFileVariant::Standard),
-            "jsonc" => Ok(JsonFileVariant::Jsonc),
+            "json" => Ok(Self::Standard),
+            "jsonc" => Ok(Self::Jsonc),
             _ => Err(()),
         }
     }

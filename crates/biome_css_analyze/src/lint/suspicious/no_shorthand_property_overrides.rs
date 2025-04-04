@@ -158,7 +158,7 @@ impl QueryMatch for NoDeclarationBlockShorthandPropertyOverridesQuery {
 impl Queryable for NoDeclarationBlockShorthandPropertyOverridesQuery {
     type Input = Self;
     type Language = CssLanguage;
-    type Output = NoDeclarationBlockShorthandPropertyOverridesQuery;
+    type Output = Self;
     type Services = ();
 
     fn build_visitor(

@@ -94,13 +94,13 @@ declare_node_union! { AnyNodeWithDirectives = JsFunctionBody | JsScript }
 impl AnyNodeWithDirectives {
     fn directives(&self) -> JsDirectiveList {
         match self {
-            AnyNodeWithDirectives::JsFunctionBody(node) => node.directives(),
-            AnyNodeWithDirectives::JsScript(script) => script.directives(),
+            Self::JsFunctionBody(node) => node.directives(),
+            Self::JsScript(script) => script.directives(),
         }
     }
 
     const fn is_script(&self) -> bool {
-        matches!(self, AnyNodeWithDirectives::JsScript(_))
+        matches!(self, Self::JsScript(_))
     }
 }
 declare_node_union! { pub AnyJsStrictModeNode = AnyJsClass | JsModule | JsDirective  }

@@ -85,52 +85,52 @@ impl TypeContext {
     pub const TYPE_OR_INTERFACE_DECLARATION: Self =
         Self(make_bitflags!(ContextFlag::{TypeOrInterfaceDeclaration}));
 
-    pub fn contains(&self, other: impl Into<TypeContext>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 
     pub(crate) fn and_allow_conditional_types(self, allow: bool) -> Self {
-        self.and(TypeContext::DISALLOW_CONDITIONAL_TYPES, !allow)
+        self.and(Self::DISALLOW_CONDITIONAL_TYPES, !allow)
     }
 
     pub(crate) fn and_allow_in_out_modifier(self, allow: bool) -> Self {
-        self.and(TypeContext::ALLOW_IN_OUT_MODIFIER, allow)
+        self.and(Self::ALLOW_IN_OUT_MODIFIER, allow)
     }
 
     pub(crate) fn and_allow_const_modifier(self, allow: bool) -> Self {
-        self.and(TypeContext::ALLOW_CONST_MODIFIER, allow)
+        self.and(Self::ALLOW_CONST_MODIFIER, allow)
     }
 
     pub(crate) fn and_in_conditional_extends(self, allow: bool) -> Self {
-        self.and(TypeContext::IN_CONDITIONAL_EXTENDS, allow)
+        self.and(Self::IN_CONDITIONAL_EXTENDS, allow)
     }
 
     pub(crate) fn and_type_or_interface_declaration(self, allow: bool) -> Self {
-        self.and(TypeContext::TYPE_OR_INTERFACE_DECLARATION, allow)
+        self.and(Self::TYPE_OR_INTERFACE_DECLARATION, allow)
     }
 
     pub(crate) fn is_conditional_type_allowed(&self) -> bool {
-        !self.contains(TypeContext::DISALLOW_CONDITIONAL_TYPES)
+        !self.contains(Self::DISALLOW_CONDITIONAL_TYPES)
     }
 
     pub(crate) fn is_in_out_modifier_allowed(&self) -> bool {
-        self.contains(TypeContext::ALLOW_IN_OUT_MODIFIER)
+        self.contains(Self::ALLOW_IN_OUT_MODIFIER)
     }
 
     pub(crate) fn is_const_modifier_allowed(&self) -> bool {
-        self.contains(TypeContext::ALLOW_CONST_MODIFIER)
+        self.contains(Self::ALLOW_CONST_MODIFIER)
     }
 
     pub(crate) fn in_conditional_extends(&self) -> bool {
-        self.contains(TypeContext::IN_CONDITIONAL_EXTENDS)
+        self.contains(Self::IN_CONDITIONAL_EXTENDS)
     }
 
     pub(crate) fn is_in_type_or_interface_declaration(&self) -> bool {
-        self.contains(TypeContext::TYPE_OR_INTERFACE_DECLARATION)
+        self.contains(Self::TYPE_OR_INTERFACE_DECLARATION)
     }
 
     /// Adds the `flag` if `set` is `true`, otherwise removes the `flag`
-    fn and(self, flag: TypeContext, set: bool) -> Self {
+    fn and(self, flag: Self, set: bool) -> Self {
         if set { self | flag } else { self - flag }
     }
 }
@@ -641,32 +641,32 @@ impl IntersectionOrUnionType {
     #[inline]
     fn operator(&self) -> JsSyntaxKind {
         match self {
-            IntersectionOrUnionType::Union => T![|],
-            IntersectionOrUnionType::Intersection => T![&],
+            Self::Union => T![|],
+            Self::Intersection => T![&],
         }
     }
 
     #[inline]
     fn list_kind(&self) -> JsSyntaxKind {
         match self {
-            IntersectionOrUnionType::Union => TS_UNION_TYPE_VARIANT_LIST,
-            IntersectionOrUnionType::Intersection => TS_INTERSECTION_TYPE_ELEMENT_LIST,
+            Self::Union => TS_UNION_TYPE_VARIANT_LIST,
+            Self::Intersection => TS_INTERSECTION_TYPE_ELEMENT_LIST,
         }
     }
 
     #[inline]
     fn kind(&self) -> JsSyntaxKind {
         match self {
-            IntersectionOrUnionType::Union => TS_UNION_TYPE,
-            IntersectionOrUnionType::Intersection => TS_INTERSECTION_TYPE,
+            Self::Union => TS_UNION_TYPE,
+            Self::Intersection => TS_INTERSECTION_TYPE,
         }
     }
 
     #[inline]
     fn parse_element(&self, p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
         match self {
-            IntersectionOrUnionType::Union => parse_ts_intersection_type_or_higher(p, context),
-            IntersectionOrUnionType::Intersection => parse_ts_primary_type(p, context),
+            Self::Union => parse_ts_intersection_type_or_higher(p, context),
+            Self::Intersection => parse_ts_primary_type(p, context),
         }
     }
 }
