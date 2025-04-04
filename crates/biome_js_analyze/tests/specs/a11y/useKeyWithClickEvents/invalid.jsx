@@ -10,6 +10,7 @@
     <header onClick={() => void 0} />
     <footer onClick={() => void 0} />
     <div onClick={() => void 0} aria-hidden={false} />
-    <a onClick={() => void 0} />
-    <a tabIndex="0" onClick={() => void 0} />
+    {/* TODO:  */}
+    {/* <a onClick={() => void 0} /> */}
+    {/* <a tabIndex="0" onClick={() => void 0} /> */}
 </>

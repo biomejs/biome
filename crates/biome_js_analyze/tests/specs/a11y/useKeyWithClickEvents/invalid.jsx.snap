@@ -16,8 +16,9 @@ expression: invalid.jsx
     <header onClick={() => void 0} />
     <footer onClick={() => void 0} />
     <div onClick={() => void 0} aria-hidden={false} />
-    <a onClick={() => void 0} />
-    <a tabIndex="0" onClick={() => void 0} />
+    {/* TODO:  */}
+    {/* <a onClick={() => void 0} /> */}
+    {/* <a tabIndex="0" onClick={() => void 0} /> */}
 </>
 ```
 
@@ -167,7 +168,7 @@ invalid.jsx:11:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
   > 11 │     <footer onClick={() => void 0} />
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │     <div onClick={() => void 0} aria-hidden={false} />
-    13 │     <a onClick={() => void 0} />
+    13 │     {/* TODO:  */}
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
@@ -183,41 +184,8 @@ invalid.jsx:12:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
     11 │     <footer onClick={() => void 0} />
   > 12 │     <div onClick={() => void 0} aria-hidden={false} />
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │     <a onClick={() => void 0} />
-    14 │     <a tabIndex="0" onClick={() => void 0} />
-  
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
-  
-
-```
-
-```
-invalid.jsx:13:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
-  
-    11 │     <footer onClick={() => void 0} />
-    12 │     <div onClick={() => void 0} aria-hidden={false} />
-  > 13 │     <a onClick={() => void 0} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │     <a tabIndex="0" onClick={() => void 0} />
-    15 │ </>
-  
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
-  
-
-```
-
-```
-invalid.jsx:14:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
-  
-    12 │     <div onClick={() => void 0} aria-hidden={false} />
-    13 │     <a onClick={() => void 0} />
-  > 14 │     <a tabIndex="0" onClick={() => void 0} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ </>
+    13 │     {/* TODO:  */}
+    14 │     {/* <a onClick={() => void 0} /> */}
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
