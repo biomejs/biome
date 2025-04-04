@@ -2,8 +2,8 @@ mod tests;
 
 use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
-    DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
-    UNICODE_BOM, WHITESPACE,
+    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
+    TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -164,21 +164,37 @@ impl<'src> HtmlLexer<'src> {
     }
 
     /// Consume a token in the [HtmlLexContext::Comment] context.
-    fn consume_inside_comment(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'<' if self.at_start_comment() => self.consume_comment_start(),
-            b'-' if self.at_end_comment() => self.consume_comment_end(),
-            _ => {
-                while let Some(char) = self.current_byte() {
-                    if self.at_end_comment() {
-                        // eat -->
-                        break;
-                    }
-                    self.advance_byte_or_char(char);
-                }
-                HTML_LITERAL
+    // fn consume_inside_comment(&mut self, current: u8) -> HtmlSyntaxKind {
+    //     match current {
+    //         b'<' if self.at_start_comment() => self.consume_comment(),
+    //         b'-' if self.at_end_comment() => self.consume_comment_end(),
+    //         _ => {
+    //             while let Some(char) = self.current_byte() {
+    //                 if self.at_end_comment() {
+    //                     // eat -->
+    //                     break;
+    //                 }
+    //                 self.advance_byte_or_char(char);
+    //             }
+    //             HTML_LITERAL
+    //         }
+    //     }
+    // }
+
+    fn consume_comment(&mut self) -> HtmlSyntaxKind {
+        // eat <!--
+        self.advance(4);
+
+        while let Some(char) = self.current_byte() {
+            if self.at_end_comment() {
+                // eat -->
+                self.advance(3);
+                return COMMENT;
             }
+            self.advance_byte_or_char(char);
         }
+
+        COMMENT
     }
 
     /// Consume a token in the [HtmlLexContext::CdataSection] context.
@@ -397,7 +413,7 @@ impl<'src> HtmlLexer<'src> {
         self.assert_byte(b'<');
 
         if self.at_start_comment() {
-            self.consume_comment_start()
+            self.consume_comment()
         } else if self.at_start_cdata() {
             self.consume_cdata_start()
         } else {
@@ -434,20 +450,6 @@ impl<'src> HtmlLexer<'src> {
         self.current_byte() == Some(b']')
             && self.byte_at(1) == Some(b']')
             && self.byte_at(2) == Some(b'>')
-    }
-
-    fn consume_comment_start(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.at_start_comment());
-
-        self.advance(4);
-        T![<!--]
-    }
-
-    fn consume_comment_end(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.at_end_comment());
-
-        self.advance(3);
-        T![-->]
     }
 
     fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
@@ -590,7 +592,6 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang)
                     }
-                    HtmlLexContext::Comment => self.consume_inside_comment(current),
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                 },
                 None => EOF,
