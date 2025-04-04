@@ -79,7 +79,7 @@ impl Rule for NoImportantStyles {
                     "Avoid the use of the "<Emphasis>"!important"</Emphasis>" style."
                 },
             )
-            .note("This style reverses the cascade logic, and precedence is reversed. This could lead to have styles with higher specificity being overridden by styles with lower specificity. ")
+            .note("This style reverses the cascade logic, and precedence is reversed. This could lead to having styles with higher specificity being overridden by styles with lower specificity.")
 
         )
     }
