@@ -119,7 +119,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
             }
 
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
-                if diagnostic.tags().is_verbose() && diagnostics_payload.verbose {
+                if diagnostics_payload.verbose {
                     self.0
                         .error(markup! {{PrintDiagnostic::verbose(diagnostic)}});
                 } else {
