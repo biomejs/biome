@@ -410,12 +410,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             let should_print = self.should_print();
 
                             if should_print {
-                                let file_path = self
-                                    .working_directory
-                                    .and_then(|wd| file_path.strip_prefix(wd.as_str()))
-                                    .unwrap_or(file_path.as_str());
                                 let diag = diag
-                                    .with_file_path(file_path)
+                                    .with_file_path(file_path.as_str())
                                     .with_file_source_code(&content);
                                 diagnostics_to_print.push(diag)
                             }
