@@ -1570,6 +1570,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow user JSX elements.
+	 */
+	noRestrictedElements?: RuleConfiguration_for_NoRestrictedElementsOptions;
+	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
@@ -2333,6 +2337,9 @@ export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
+export type RuleConfiguration_for_NoRestrictedElementsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoRestrictedElementsOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -2547,6 +2554,16 @@ export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	 * Rule's options
 	 */
 	options: NoBitwiseOperatorsOptions;
+}
+export interface RuleWithOptions_for_NoRestrictedElementsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoRestrictedElementsOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -2864,6 +2881,9 @@ export interface NoBitwiseOperatorsOptions {
 	 */
 	allow: string[];
 }
+export interface NoRestrictedElementsOptions {
+	elements?: Record<string, CustomRestrictedElement>;
+}
 /**
  * Options for the rule `noRestrictedImports`.
  */
@@ -3038,6 +3058,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
+export type CustomRestrictedElement = string | CustomRestrictedElementOptions;
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type Accessibility = "noPublic" | "explicit" | "none";
@@ -3061,6 +3082,9 @@ export interface Convention {
 }
 export type GroupMatcher = PredefinedGroupMatcher | ImportSourceGlob;
 export type StableHookResult = boolean | number[];
+export interface CustomRestrictedElementOptions {
+	message?: string;
+}
 export interface CustomRestrictedImportOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
@@ -3325,6 +3349,7 @@ export type Category =
 	| "lint/nursery/noDuplicateFields"
 	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
+	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noFloatingPromises"

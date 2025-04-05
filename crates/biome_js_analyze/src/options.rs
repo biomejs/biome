@@ -203,6 +203,8 @@ pub type NoRedundantRoles =
     <lint::a11y::no_redundant_roles::NoRedundantRoles as biome_analyze::Rule>::Options;
 pub type NoRedundantUseStrict = < lint :: suspicious :: no_redundant_use_strict :: NoRedundantUseStrict as biome_analyze :: Rule > :: Options ;
 pub type NoRenderReturnValue = < lint :: correctness :: no_render_return_value :: NoRenderReturnValue as biome_analyze :: Rule > :: Options ;
+pub type NoRestrictedElements =
+    <lint::nursery::no_restricted_elements::NoRestrictedElements as biome_analyze::Rule>::Options;
 pub type NoRestrictedGlobals =
     <lint::style::no_restricted_globals::NoRestrictedGlobals as biome_analyze::Rule>::Options;
 pub type NoRestrictedImports =
