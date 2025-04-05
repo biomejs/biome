@@ -7,10 +7,9 @@ use biome_yaml_syntax::{
     YamlSyntaxToken as SyntaxToken, *,
 };
 pub fn yaml_array(items: YamlArrayItemList) -> YamlArray {
-    YamlArray::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_ARRAY,
-        [Some(SyntaxElement::Node(items.into_syntax()))],
-    ))
+    YamlArray::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_ARRAY, [
+        Some(SyntaxElement::Node(items.into_syntax())),
+    ]))
 }
 pub fn yaml_array_inline(
     l_brack_token: SyntaxToken,
@@ -27,13 +26,10 @@ pub fn yaml_array_inline(
     ))
 }
 pub fn yaml_array_item(minus_token: SyntaxToken, item: AnyYamlValue) -> YamlArrayItem {
-    YamlArrayItem::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_ARRAY_ITEM,
-        [
-            Some(SyntaxElement::Token(minus_token)),
-            Some(SyntaxElement::Node(item.into_syntax())),
-        ],
-    ))
+    YamlArrayItem::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_ARRAY_ITEM, [
+        Some(SyntaxElement::Token(minus_token)),
+        Some(SyntaxElement::Node(item.into_syntax())),
+    ]))
 }
 pub fn yaml_block_folded(r_angle_token: SyntaxToken, value: YamlBlockValue) -> YamlBlockFolded {
     YamlBlockFolded::unwrap_cast(SyntaxNode::new_detached(
@@ -90,29 +86,24 @@ impl YamlDocumentBuilder {
         self
     }
     pub fn build(self) -> YamlDocument {
-        YamlDocument::unwrap_cast(SyntaxNode::new_detached(
-            YamlSyntaxKind::YAML_DOCUMENT,
-            [
-                self.dashdashdash_token
-                    .map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.body.into_syntax())),
-                self.dotdotdot_token
-                    .map(|token| SyntaxElement::Token(token)),
-            ],
-        ))
+        YamlDocument::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_DOCUMENT, [
+            self.dashdashdash_token
+                .map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.body.into_syntax())),
+            self.dotdotdot_token
+                .map(|token| SyntaxElement::Token(token)),
+        ]))
     }
 }
 pub fn yaml_identifier(value_token: SyntaxToken) -> YamlIdentifier {
-    YamlIdentifier::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_IDENTIFIER,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    YamlIdentifier::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_IDENTIFIER, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn yaml_null_value(value_token: SyntaxToken) -> YamlNullValue {
-    YamlNullValue::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_NULL_VALUE,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    YamlNullValue::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_NULL_VALUE, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn yaml_number_value(value_token: SyntaxToken) -> YamlNumberValue {
     YamlNumberValue::unwrap_cast(SyntaxNode::new_detached(
@@ -121,10 +112,9 @@ pub fn yaml_number_value(value_token: SyntaxToken) -> YamlNumberValue {
     ))
 }
 pub fn yaml_object(members: YamlObjectMemberList) -> YamlObject {
-    YamlObject::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_OBJECT,
-        [Some(SyntaxElement::Node(members.into_syntax()))],
-    ))
+    YamlObject::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_OBJECT, [
+        Some(SyntaxElement::Node(members.into_syntax())),
+    ]))
 }
 pub fn yaml_object_member(
     key: YamlIdentifier,
@@ -158,14 +148,11 @@ impl YamlRootBuilder {
         self
     }
     pub fn build(self) -> YamlRoot {
-        YamlRoot::unwrap_cast(SyntaxNode::new_detached(
-            YamlSyntaxKind::YAML_ROOT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.documents.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
+        YamlRoot::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_ROOT, [
+            self.bom_token.map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Node(self.documents.into_syntax())),
+            Some(SyntaxElement::Token(self.eof_token)),
+        ]))
     }
 }
 pub fn yaml_string_value(value_token: SyntaxToken) -> YamlStringValue {

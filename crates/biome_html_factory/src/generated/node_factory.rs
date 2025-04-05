@@ -22,14 +22,11 @@ impl HtmlAttributeBuilder {
         self
     }
     pub fn build(self) -> HtmlAttribute {
-        HtmlAttribute::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::HTML_ATTRIBUTE,
-            [
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                self.initializer
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
+        HtmlAttribute::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_ATTRIBUTE, [
+            Some(SyntaxElement::Node(self.name.into_syntax())),
+            self.initializer
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+        ]))
     }
 }
 pub fn html_attribute_initializer_clause(
@@ -85,20 +82,16 @@ pub fn html_comment(
     content_token: SyntaxToken,
     comment_end_token: SyntaxToken,
 ) -> HtmlComment {
-    HtmlComment::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_COMMENT,
-        [
-            Some(SyntaxElement::Token(comment_start_token)),
-            Some(SyntaxElement::Token(content_token)),
-            Some(SyntaxElement::Token(comment_end_token)),
-        ],
-    ))
+    HtmlComment::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_COMMENT, [
+        Some(SyntaxElement::Token(comment_start_token)),
+        Some(SyntaxElement::Token(content_token)),
+        Some(SyntaxElement::Token(comment_end_token)),
+    ]))
 }
 pub fn html_content(value_token: SyntaxToken) -> HtmlContent {
-    HtmlContent::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_CONTENT,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    HtmlContent::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_CONTENT, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn html_directive(
     l_angle_token: SyntaxToken,
@@ -145,21 +138,18 @@ impl HtmlDirectiveBuilder {
         self
     }
     pub fn build(self) -> HtmlDirective {
-        HtmlDirective::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::HTML_DIRECTIVE,
-            [
-                Some(SyntaxElement::Token(self.l_angle_token)),
-                Some(SyntaxElement::Token(self.excl_token)),
-                Some(SyntaxElement::Token(self.doctype_token)),
-                self.html_token.map(|token| SyntaxElement::Token(token)),
-                self.quirk_token.map(|token| SyntaxElement::Token(token)),
-                self.public_id_token
-                    .map(|token| SyntaxElement::Token(token)),
-                self.system_id_token
-                    .map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Token(self.r_angle_token)),
-            ],
-        ))
+        HtmlDirective::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_DIRECTIVE, [
+            Some(SyntaxElement::Token(self.l_angle_token)),
+            Some(SyntaxElement::Token(self.excl_token)),
+            Some(SyntaxElement::Token(self.doctype_token)),
+            self.html_token.map(|token| SyntaxElement::Token(token)),
+            self.quirk_token.map(|token| SyntaxElement::Token(token)),
+            self.public_id_token
+                .map(|token| SyntaxElement::Token(token)),
+            self.system_id_token
+                .map(|token| SyntaxElement::Token(token)),
+            Some(SyntaxElement::Token(self.r_angle_token)),
+        ]))
     }
 }
 pub fn html_element(
@@ -167,14 +157,11 @@ pub fn html_element(
     children: HtmlElementList,
     closing_element: HtmlClosingElement,
 ) -> HtmlElement {
-    HtmlElement::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_ELEMENT,
-        [
-            Some(SyntaxElement::Node(opening_element.into_syntax())),
-            Some(SyntaxElement::Node(children.into_syntax())),
-            Some(SyntaxElement::Node(closing_element.into_syntax())),
-        ],
-    ))
+    HtmlElement::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_ELEMENT, [
+        Some(SyntaxElement::Node(opening_element.into_syntax())),
+        Some(SyntaxElement::Node(children.into_syntax())),
+        Some(SyntaxElement::Node(closing_element.into_syntax())),
+    ]))
 }
 pub fn html_opening_element(
     l_angle_token: SyntaxToken,
@@ -216,16 +203,13 @@ impl HtmlRootBuilder {
         self
     }
     pub fn build(self) -> HtmlRoot {
-        HtmlRoot::unwrap_cast(SyntaxNode::new_detached(
-            HtmlSyntaxKind::HTML_ROOT,
-            [
-                self.bom_token.map(|token| SyntaxElement::Token(token)),
-                self.directive
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.html.into_syntax())),
-                Some(SyntaxElement::Token(self.eof_token)),
-            ],
-        ))
+        HtmlRoot::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_ROOT, [
+            self.bom_token.map(|token| SyntaxElement::Token(token)),
+            self.directive
+                .map(|token| SyntaxElement::Node(token.into_syntax())),
+            Some(SyntaxElement::Node(self.html.into_syntax())),
+            Some(SyntaxElement::Token(self.eof_token)),
+        ]))
     }
 }
 pub fn html_self_closing_element(
@@ -268,16 +252,14 @@ impl HtmlSelfClosingElementBuilder {
     }
 }
 pub fn html_string(value_token: SyntaxToken) -> HtmlString {
-    HtmlString::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_STRING,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    HtmlString::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_STRING, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn html_tag_name(value_token: SyntaxToken) -> HtmlTagName {
-    HtmlTagName::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_TAG_NAME,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+    HtmlTagName::unwrap_cast(SyntaxNode::new_detached(HtmlSyntaxKind::HTML_TAG_NAME, [
+        Some(SyntaxElement::Token(value_token)),
+    ]))
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
 where

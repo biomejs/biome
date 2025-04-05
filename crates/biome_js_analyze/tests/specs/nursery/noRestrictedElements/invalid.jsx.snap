@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+(<input />);
+(<button />);
+(<MyNS.MyComponent />);
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:2 lint/nursery/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use TextField instead
+  
+  > 1 │ (<input />);
+      │  ^^^^^^^^^
+    2 │ (<button />);
+    3 │ (<MyNS.MyComponent />);
+  
+
+```
+
+```
+invalid.jsx:2:2 lint/nursery/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use Button instead
+  
+    1 │ (<input />);
+  > 2 │ (<button />);
+      │  ^^^^^^^^^^
+    3 │ (<MyNS.MyComponent />);
+    4 │ 
+  
+
+```
+
+```
+invalid.jsx:3:2 lint/nursery/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This component is deprecated
+  
+    1 │ (<input />);
+    2 │ (<button />);
+  > 3 │ (<MyNS.MyComponent />);
+      │  ^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+
+```
