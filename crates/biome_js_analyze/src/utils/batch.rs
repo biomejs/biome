@@ -52,6 +52,60 @@ pub trait JsBatchMutation {
     ) -> bool
     where
         I: IntoIterator<Item = AnyJsxChild>;
+
+    /// Adds a list of jsx elements replacing the given element.
+    ///
+    /// If you want to replace an element with it's children, use [`Self::unwrap_jsx_element`].
+    ///
+    /// ### Example:
+    ///
+    /// Before replacing the `<li>foo</li>`:
+    /// ```jsx
+    /// <ul>
+    ///     <li>foo</li>
+    ///     <li>bar</li>
+    /// </ul>
+    /// ```
+    /// After:
+    /// ```jsx
+    /// <div>
+    ///     <li>baz</li>
+    ///     <li>qux</li>
+    ///     <li>bar</li>
+    /// </div>
+    /// ```
+    fn add_jsx_elements_replacing_element<I>(
+        &mut self,
+        remove_element: &AnyJsxChild,
+        new_elements: I,
+    ) -> bool
+    where
+        I: IntoIterator<Item = AnyJsxChild>;
+
+    /// Remove a JSX element while preserving it's children.
+    ///
+    /// ### Example
+    ///
+    /// Before unwrapping the `<div>`
+    /// ```jsx
+    /// <div>
+    ///     <span>foo</span>
+    ///     <span>bar</span>
+    /// </div>
+    /// ```
+    /// After:
+    /// ```jsx
+    /// <span>foo</span>
+    /// <span>bar</span>
+    /// ```
+    fn replace_jsx_element_with_own_children(&mut self, element: &AnyJsxChild) -> bool {
+        let children = match element {
+            AnyJsxChild::JsxElement(element) => element.children(),
+            AnyJsxChild::JsxFragment(fragment) => fragment.children(),
+            _ => return false,
+        };
+        self.add_jsx_elements_replacing_element(element, children)
+    }
 }
 
 fn remove_js_formal_parameter_from_js_parameter_list(
@@ -293,6 +347,48 @@ impl JsBatchMutation for BatchMutation<JsLanguage> {
                     }
                     new_items.push(next_element.clone());
                     old_elements.next();
+                }
+
+                new_items.extend(new_elements);
+                new_items.extend(old_elements);
+
+                jsx_child_list(new_items)
+            };
+
+            self.replace_node_discard_trivia(old_list.clone(), jsx_child_list);
+            true
+        } else {
+            false
+        }
+    }
+
+    fn add_jsx_elements_replacing_element<I>(
+        &mut self,
+        remove_element: &AnyJsxChild,
+        new_elements: I,
+    ) -> bool
+    where
+        I: IntoIterator<Item = AnyJsxChild>,
+    {
+        let old_list = remove_element
+            .syntax()
+            .parent()
+            .and_then(JsxChildList::cast);
+        if let Some(old_list) = &old_list {
+            let jsx_child_list = {
+                let mut new_items = vec![];
+                let mut old_elements = old_list.into_iter();
+
+                #[expect(
+                    clippy::while_let_on_iterator,
+                    reason = "We do things with the remaining elements when the loop breaks, and this reads better than using a for loop."
+                )]
+                while let Some(next_element) = old_elements.next() {
+                    if &next_element == remove_element {
+                        // intentionally skip this element
+                        break;
+                    }
+                    new_items.push(next_element.clone());
                 }
 
                 new_items.extend(new_elements);

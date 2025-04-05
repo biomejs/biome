@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_4751.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -37,13 +36,13 @@ issue_4751.jsx:2:3 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
   
     1 1 │   <section>
     2   │ - ··<>
-    3 2 │       <div />
-    4 3 │       <div />
+      2 │ + ··
+    3 3 │       <div />
+    4 4 │       <div />
     5   │ - ··</>
-    6   │ - </section>;
-      4 │ + ··</section>;
-    7 5 │   
-    8 6 │   showFullName ? <>{fullName}</> : <>{firstName}</>;
+      5 │ + ··
+    6 6 │   </section>;
+    7 7 │   
   
 
 ```
