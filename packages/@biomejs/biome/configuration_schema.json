@@ -3146,6 +3146,60 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/OverridePattern" }
 		},
+		"PatternOptions": {
+			"type": "object",
+			"properties": {
+				"allowImportNamePattern": {
+					"description": "A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.",
+					"type": ["string", "null"]
+				},
+				"allowImportNames": {
+					"description": "An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"caseSensitive": {
+					"description": "Whether the patterns in `group` or `regex` are case-sensitive. Defaults to `false`.",
+					"default": false,
+					"type": "boolean"
+				},
+				"group": {
+					"description": "An array of gitignore-style patterns. Cannot be used with regex.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"importNamePattern": {
+					"description": "A regex pattern for import names to forbid within the matched modules. Cannot be used with allowImportNames and allowImportNamePattern.",
+					"type": ["string", "null"]
+				},
+				"importNames": {
+					"description": "An array of specific import names to forbid within the matched modules. Cannot be used with allowImportNames and allowImportNamePattern.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "A custom message for diagnostics related to this pattern.",
+					"type": ["string", "null"]
+				},
+				"regex": {
+					"description": "A regular expression pattern string. Cannot be used with group.",
+					"type": ["string", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"Patterns": {
+			"anyOf": [
+				{
+					"description": "A simple gitignore-style pattern string.",
+					"type": "string"
+				},
+				{
+					"description": "Additional options to configure the message and allowed/disallowed import names and modules.",
+					"allOf": [{ "$ref": "#/definitions/PatternOptions" }]
+				}
+			]
+		},
 		"Performance": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -3248,6 +3302,11 @@
 					"additionalProperties": {
 						"$ref": "#/definitions/CustomRestrictedImport"
 					}
+				},
+				"patterns": {
+					"description": "A list of gitignore-style patterns or regular expressions that should trigger the rule.",
+					"type": "array",
+					"items": { "$ref": "#/definitions/Patterns" }
 				}
 			},
 			"additionalProperties": false
