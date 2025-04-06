@@ -1,22 +1,40 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
-};
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
 use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
-
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
+use std::ops::Deref;
 
 declare_lint_rule! {
-    /// Disallow user JSX elements.
+    /// Disallow the use of configured elements.
     ///
-    /// This rule disallows the use of certain custom JSX elements as specified in the rule options.
+    /// This rule disallows the use of configured elements. Without elements configured,
+    /// this rule doesn't do anything.
+    ///
+    /// This rule is useful in situations where you want to enforce the use of specific components
+    /// instead of certain HTML or custom elements. For example, in a React project,
+    /// you might want to ensure that developers use a custom `TextField` component
+    /// instead of the native `<input>` element to maintain consistency and apply
+    /// custom styling or behavior.
+    ///
+    /// Here are some scenarios where this rule can be beneficial:
+    ///
+    /// * Consistency: Ensuring that all input fields use a custom component instead of the native
+    ///   element to maintain a consistent look and feel across the application.
+    /// * Accessibility: Enforcing the use of custom components that have built-in
+    ///   accessibility features, ensuring that the application is accessible to all users.
+    /// * Custom Behavior: Requiring the use of components that encapsulate specific business logic
+    ///   or validation, reducing the risk of errors and improving code maintainability.
+    /// * Styling: Ensuring that all elements adhere to the design system by using
+    ///   custom components that apply consistent styling.
+    ///
+    /// By disallowing certain elements and enforcing the use of custom components,
+    /// this rule helps maintain code quality and consistency across the codebase.
     ///
     /// ## Options
     ///
@@ -24,7 +42,8 @@ declare_lint_rule! {
     /// {
     ///     "options": {
     ///         "elements": {
-    ///             "button": "button is not allowed, use Button component instead"
+    ///             "input": "input is not allowed, use TextField component instead",
+    ///             "CustomComponent": "deprecated"
     ///         }
     ///     }
     /// }
@@ -34,15 +53,21 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```jsx
-    /// // {elements: {input: "input is not allowed, use TextField component instead"}}
+    /// Restricting the use of HTML elements:
+    ///
+    /// ```jsx,expect_diagnostic,use_options
     /// <input />
+    /// ```
+    ///
+    /// Restricting the use of custom components:
+    ///
+    /// ```jsx,expect_diagnostic,use_options
+    /// <CustomComponent />
     /// ```
     ///
     /// ### Valid
     ///
     /// ```jsx
-    /// // {elements: {input: "input is not allowed, use TextField component instead"}}
     /// <TextField />
     /// ```
     pub NoRestrictedElements {
@@ -52,67 +77,66 @@ declare_lint_rule! {
         sources: &[
             RuleSource::EslintReact("forbid-elements"),
         ],
-        recommended: true,
+        recommended: false,
     }
 }
 
 impl Rule for NoRestrictedElements {
     type Query = Ast<AnyJsxElement>;
-    type State = CustomRestrictedElementOptions;
+    type State = Box<str>;
     type Signals = Option<Self::State>;
     type Options = NoRestrictedElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let options = ctx.options();
-        if options.elements.is_empty() {
-            return None;
-        }
         let node = ctx.query();
-        let element_name = node.name().ok()?.to_trimmed_string();
-        let restricted_element = options.elements.get(element_name.as_str())?.clone();
-        Some(restricted_element.into())
+        let element_name = node.name().ok()?.syntax().text_trimmed().to_string();
+        options.elements.get(element_name.as_str()).cloned()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
             ctx.query().range(),
-            markup! { {state.message} }.to_owned(),
+            markup! { {state} }.to_owned(),
         ))
     }
 }
 
+type CustomRestrictedElementsBaseType = FxHashMap<Box<str>, Box<str>>;
+
 #[derive(
-    Debug,
     Clone,
+    Debug,
     Default,
     biome_deserialize_macros::Deserializable,
-    Deserialize,
-    Serialize,
     Eq,
     PartialEq,
+    Deserialize,
+    Serialize,
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct CustomRestrictedElementOptions {
-    message: String,
-    // We could add "use_instead" here later.
+struct CustomRestrictedElements(CustomRestrictedElementsBaseType);
+
+impl Deref for CustomRestrictedElements {
+    type Target = CustomRestrictedElementsBaseType;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(untagged)]
-pub enum CustomRestrictedElement {
-    Plain(String),
-    WithOptions(CustomRestrictedElementOptions),
-}
+#[cfg(feature = "schemars")]
+impl JsonSchema for CustomRestrictedElements {
+    fn schema_name() -> String {
+        "CustomRestrictedElements".to_owned()
+    }
 
-impl From<CustomRestrictedElement> for CustomRestrictedElementOptions {
-    fn from(options: CustomRestrictedElement) -> Self {
-        match options {
-            CustomRestrictedElement::Plain(message) => CustomRestrictedElementOptions { message },
-            CustomRestrictedElement::WithOptions(options) => options,
-        }
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::schema::Schema {
+        let mut schema = generator
+            .subschema_for::<CustomRestrictedElementsBaseType>()
+            .into_object();
+        schema.object().min_properties = Some(1);
+        schemars::schema::Schema::Object(schema)
     }
 }
 
@@ -129,19 +153,8 @@ impl From<CustomRestrictedElement> for CustomRestrictedElementOptions {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoRestrictedElementsOptions {
-    elements: FxHashMap<Box<str>, CustomRestrictedElement>,
-}
-
-impl Deserializable for CustomRestrictedElement {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
-        name: &str,
-    ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
-            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::Plain)
-        } else {
-            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::WithOptions)
-        }
-    }
+    /// Elements to restrict.
+    /// Each key is the element name, and the value is the message to show when the element is used.
+    #[serde(skip_serializing_if = "FxHashMap::is_empty")]
+    elements: CustomRestrictedElements,
 }

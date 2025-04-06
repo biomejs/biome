@@ -1578,7 +1578,7 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow user JSX elements.
+	 * Disallow the use of configured elements.
 	 */
 	noRestrictedElements?: RuleConfiguration_for_NoRestrictedElementsOptions;
 	/**
@@ -2892,7 +2892,10 @@ export interface NoBitwiseOperatorsOptions {
 	allow: string[];
 }
 export interface NoRestrictedElementsOptions {
-	elements?: Record<string, CustomRestrictedElement>;
+	/**
+	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
+	 */
+	elements: CustomRestrictedElements;
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -3068,7 +3071,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
-export type CustomRestrictedElement = string | CustomRestrictedElementOptions;
+export type CustomRestrictedElements = Record<string, string>;
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type Accessibility = "noPublic" | "explicit" | "none";
@@ -3092,9 +3095,6 @@ export interface Convention {
 }
 export type GroupMatcher = PredefinedGroupMatcher | ImportSourceGlob;
 export type StableHookResult = boolean | number[];
-export interface CustomRestrictedElementOptions {
-	message?: string;
-}
 export interface CustomRestrictedImportOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.

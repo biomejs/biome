@@ -3259,7 +3259,7 @@ pub struct Nursery {
     #[doc = "Disallow the use of process global."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_process_global: Option<RuleFixConfiguration<biome_js_analyze::options::NoProcessGlobal>>,
-    #[doc = "Disallow user JSX elements."]
+    #[doc = "Disallow the use of configured elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_elements:
         Option<RuleConfiguration<biome_js_analyze::options::NoRestrictedElements>>,
@@ -3500,7 +3500,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),

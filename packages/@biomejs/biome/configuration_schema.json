@@ -1218,16 +1218,10 @@
 			},
 			"additionalProperties": false
 		},
-		"CustomRestrictedElement": {
-			"anyOf": [
-				{ "type": "string" },
-				{ "$ref": "#/definitions/CustomRestrictedElementOptions" }
-			]
-		},
-		"CustomRestrictedElementOptions": {
+		"CustomRestrictedElements": {
 			"type": "object",
-			"properties": { "message": { "default": "", "type": "string" } },
-			"additionalProperties": false
+			"minProperties": 1,
+			"additionalProperties": { "type": "string" }
 		},
 		"CustomRestrictedImport": {
 			"anyOf": [
@@ -2498,11 +2492,8 @@
 			"type": "object",
 			"properties": {
 				"elements": {
-					"default": {},
-					"type": "object",
-					"additionalProperties": {
-						"$ref": "#/definitions/CustomRestrictedElement"
-					}
+					"description": "Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.",
+					"allOf": [{ "$ref": "#/definitions/CustomRestrictedElements" }]
 				}
 			},
 			"additionalProperties": false
@@ -2797,7 +2788,7 @@
 					]
 				},
 				"noRestrictedElements": {
-					"description": "Disallow user JSX elements.",
+					"description": "Disallow the use of configured elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoRestrictedElementsConfiguration" },
 						{ "type": "null" }
