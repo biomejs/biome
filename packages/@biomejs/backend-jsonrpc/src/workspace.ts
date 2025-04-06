@@ -2963,6 +2963,10 @@ export interface RestrictedImportsOptions {
 	 * A list of import paths that should trigger the rule.
 	 */
 	paths: Record<string, CustomRestrictedImport>;
+	/**
+	 * A list of gitignore-style patterns or regular expressions that should trigger the rule.
+	 */
+	patterns: Patterns[];
 }
 export interface NoRestrictedTypesOptions {
 	types?: Record<string, CustomRestrictedType>;
@@ -3137,6 +3141,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type CustomRestrictedElements = Record<string, string>;
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type Patterns = string | PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
@@ -3176,6 +3181,40 @@ export interface CustomRestrictedImportOptions {
 	 * The message to display when this module is imported.
 	 */
 	message: string;
+}
+export interface PatternOptions {
+	/**
+	 * A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.
+	 */
+	allowImportNamePattern?: string;
+	/**
+	 * An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern.
+	 */
+	allowImportNames?: string[];
+	/**
+	 * Whether the patterns in `group` or `regex` are case-sensitive. Defaults to `false`.
+	 */
+	caseSensitive?: boolean;
+	/**
+	 * An array of gitignore-style patterns. Cannot be used with regex.
+	 */
+	group?: string[];
+	/**
+	 * A regex pattern for import names to forbid within the matched modules. Cannot be used with allowImportNames and allowImportNamePattern.
+	 */
+	importNamePattern?: string;
+	/**
+	 * An array of specific import names to forbid within the matched modules. Cannot be used with allowImportNames and allowImportNamePattern.
+	 */
+	importNames?: string[];
+	/**
+	 * A custom message for diagnostics related to this pattern.
+	 */
+	message?: string;
+	/**
+	 * A regular expression pattern string. Cannot be used with group.
+	 */
+	regex?: string;
 }
 export interface CustomRestrictedTypeOptions {
 	message?: string;
