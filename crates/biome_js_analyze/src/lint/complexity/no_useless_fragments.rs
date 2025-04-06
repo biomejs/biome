@@ -1,6 +1,7 @@
 use crate::JsRuleAction;
 use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_is_fragment};
 use crate::services::semantic::Semantic;
+use crate::utils::batch::JsBatchMutation;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
@@ -113,6 +114,15 @@ impl NoUselessFragmentsQuery {
         match self {
             NoUselessFragmentsQuery::JsxFragment(element) => element.children(),
             NoUselessFragmentsQuery::JsxElement(element) => element.children(),
+        }
+    }
+}
+
+impl From<NoUselessFragmentsQuery> for AnyJsxChild {
+    fn from(value: NoUselessFragmentsQuery) -> Self {
+        match value {
+            NoUselessFragmentsQuery::JsxFragment(fragment) => AnyJsxChild::JsxFragment(fragment),
+            NoUselessFragmentsQuery::JsxElement(element) => AnyJsxChild::JsxElement(element),
         }
     }
 }
@@ -323,14 +333,8 @@ impl Rule for NoUselessFragments {
                 NoUselessFragmentsState::Child(child) => {
                     node.replace_node(&mut mutation, child.clone());
                 }
-                NoUselessFragmentsState::Children(children) => {
-                    if let Some(old_children) = node
-                        .syntax()
-                        .parent()
-                        .and_then(|parent| JsxChildList::cast(parent.clone()))
-                    {
-                        mutation.replace_node(old_children, children.clone());
-                    }
+                NoUselessFragmentsState::Children(_) => {
+                    mutation.replace_jsx_element_with_own_children(&node.clone().into());
                 }
                 _ => {
                     node.remove_node_from_list(&mut mutation);
