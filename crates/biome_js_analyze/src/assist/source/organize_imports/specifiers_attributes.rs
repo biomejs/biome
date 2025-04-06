@@ -90,6 +90,44 @@ pub fn sort_import_specifiers(
     Some(named_specifiers.with_specifiers(new_list))
 }
 
+pub fn merge_import_specifiers(
+    named_specifiers1: JsNamedImportSpecifiers,
+    named_specifiers2: &JsNamedImportSpecifiers,
+) -> Option<JsNamedImportSpecifiers> {
+    let specifiers1 = named_specifiers1.specifiers();
+    let specifiers2 = named_specifiers2.specifiers();
+    let mut nodes = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    let mut separators = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers1.elements()
+    {
+        let separator = trailing_separator.ok()?;
+        let mut node = node.ok()?;
+        if separator.is_none() {
+            node = node.trim_trailing_trivia()?;
+        }
+        let separator = separator.unwrap_or_else(|| {
+            make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+        });
+        nodes.push(node);
+        separators.push(separator);
+    }
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers2.elements()
+    {
+        nodes.push(node.ok()?);
+        if let Some(separator) = trailing_separator.ok()? {
+            separators.push(separator);
+        }
+    }
+    let new_list = make::js_named_import_specifier_list(nodes, separators);
+    sort_import_specifiers(named_specifiers1.with_specifiers(new_list))
+}
+
 pub fn are_export_specifiers_sorted(specifiers: &JsExportNamedFromSpecifierList) -> Option<bool> {
     let mut is_sorted = true;
     if specifiers.len() > 1 {
@@ -142,6 +180,43 @@ pub fn sort_export_specifiers(
         .collect();
     let nodes = sorted.into_iter().map(|(_, node, _)| node);
     Some(make::js_export_named_from_specifier_list(nodes, separators))
+}
+
+pub fn merge_export_specifiers(
+    specifiers1: &JsExportNamedFromSpecifierList,
+    specifiers2: &JsExportNamedFromSpecifierList,
+) -> Option<JsExportNamedFromSpecifierList> {
+    let mut nodes = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    let mut separators = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers1.elements()
+    {
+        let separator = trailing_separator.ok()?;
+        let mut node = node.ok()?;
+        if separator.is_none() {
+            node = node.trim_trailing_trivia()?;
+        }
+        let separator = separator.unwrap_or_else(|| {
+            make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+        });
+        nodes.push(node);
+        separators.push(separator);
+    }
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers2.elements()
+    {
+        nodes.push(node.ok()?);
+        if let Some(separator) = trailing_separator.ok()? {
+            separators.push(separator);
+        }
+    }
+    sort_export_specifiers(&make::js_export_named_from_specifier_list(
+        nodes, separators,
+    ))
 }
 
 pub fn are_import_attributes_sorted(attributes: &JsImportAssertion) -> Option<bool> {

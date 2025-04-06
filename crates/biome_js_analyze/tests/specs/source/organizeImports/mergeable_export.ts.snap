@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mergeable_export.ts
+---
+# Input
+```ts
+// Comment 1
+export type { T4, T2 } from "mod";
+// Comment 2
+export type { T3, T1 } from "mod";
+// Comment 3
+export { A, D } from "mod";
+// Comment 4
+export { B, C } from "mod";
+
+```
+
+# Actions
+```diff
+@@ -1,8 +1,6 @@
+ // Comment 1
+-export type { T4, T2 } from "mod";
+ // Comment 2
+-export type { T3, T1 } from "mod";
++export type { T1, T2, T3, T4 } from "mod";
+ // Comment 3
+-export { A, D } from "mod";
+ // Comment 4
+-export { B, C } from "mod";
++export { A, B, C, D } from "mod";
+
+```

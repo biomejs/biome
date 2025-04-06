@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mergeable_imports.ts
+---
+# Input
+```ts
+// Comment 1
+import type { T4, T2 } from "mod";
+// Comment 2
+import type { T3, T1 } from "mod";
+// Comment 3
+import { A, D } from "mod";
+// Comment 4
+import { B, C } from "mod";
+// Comment 5
+import { E, F } from "mod";
+// Comment 6
+import G, { H } from "mod";
+// Comment 7
+import I from "mod";
+import * as ns from "mod";
+
+```
+
+# Actions
+```diff
+@@ -1,15 +1,10 @@
+ // Comment 1
+-import type { T4, T2 } from "mod";
+ // Comment 2
+-import type { T3, T1 } from "mod";
++import type { T1, T2, T3, T4 } from "mod";
++// Comment 7
++import I, * as ns from "mod";
++// Comment 6
+ // Comment 3
+-import { A, D } from "mod";
+ // Comment 4
+-import { B, C } from "mod";
+ // Comment 5
+-import { E, F } from "mod";
+-// Comment 6
+-import G, { H } from "mod";
+-// Comment 7
+-import I from "mod";
+-import * as ns from "mod";
++import G, { A, B, C, D, E, F, H } from "mod";
+
+```

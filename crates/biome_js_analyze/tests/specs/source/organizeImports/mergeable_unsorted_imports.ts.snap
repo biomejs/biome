@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mergeable_unsorted_imports.ts
+---
+# Input
+```ts
+// File header comment
+import type { T1, T2 } from "mod";
+// Comment 2
+import type { U1 } from "package";
+// Comment 3
+import type { T3, T4 } from "mod";
+// Comment 4
+import { A, B } from "mod";
+// Comment 5
+import { X } from "package";
+// Comment 6
+import { C, D } from "mod";
+// Comment 7
+import { Y } from "package";
+// Comment 8
+import type { U2 } from "package";
+
+// Chunk 2
+
+// Comment 9
+import type { U3 } from "package";
+// Comment 10
+import { E } from "mod";
+
+```
+
+# Actions
+```diff
+@@ -1,23 +1,19 @@
+ // File header comment
+-import type { T1, T2 } from "mod";
+-// Comment 2
+-import type { U1 } from "package";
+ // Comment 3
+-import type { T3, T4 } from "mod";
++import type { T1, T2, T3, T4 } from "mod";
+ // Comment 4
+-import { A, B } from "mod";
++// Comment 6
++import { A, B, C, D } from "mod";
++// Comment 2
++// Comment 8
++import type { U1, U2 } from "package";
+ // Comment 5
+-import { X } from "package";
+-// Comment 6
+-import { C, D } from "mod";
+ // Comment 7
+-import { Y } from "package";
+-// Comment 8
+-import type { U2 } from "package";
++import { X, Y } from "package";
+ 
+ // Chunk 2
+ 
+-// Comment 9
+-import type { U3 } from "package";
+ // Comment 10
+ import { E } from "mod";
++// Comment 9
++import type { U3 } from "package";
+
+```

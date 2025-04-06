@@ -2,13 +2,17 @@ use biome_analyze::{
     ActionCategory, Ast, FixKind, Rule, SourceActionKind, context::RuleContext, declare_source_rule,
 };
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::{AnyJsExportClause, AnyJsModuleItem, JsModule, JsSyntaxKind, JsSyntaxNode};
-use biome_rowan::{AstNode, TextRange, TriviaPieceKind};
-use biome_rowan::{BatchMutationExt, chain_trivia_pieces};
+use biome_js_factory::make;
+use biome_js_syntax::{
+    AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsModule,
+    JsSyntaxKind, T,
+};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces};
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
-    are_import_attributes_sorted, sort_attributes, sort_export_specifiers, sort_import_specifiers,
+    are_import_attributes_sorted, merge_export_specifiers, merge_import_specifiers,
+    sort_attributes, sort_export_specifiers, sort_import_specifiers,
 };
 
 use crate::JsRuleAction;
@@ -625,7 +629,7 @@ impl Rule for OrganizeImports {
                 }
                 if let Some(chunk) = &mut chunk {
                     // Check if the items are in order
-                    if chunk.max_key > key {
+                    if chunk.max_key > key || chunk.max_key.is_mergeable(&key) {
                         chunk.slot_indexes.end = key.slot_index + 1;
                     } else {
                         prev_group = key.group;
@@ -668,8 +672,9 @@ impl Rule for OrganizeImports {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let options = ctx.options();
         let root = ctx.query();
-        let mut organized_items: FxHashMap<u32, JsSyntaxNode> = FxHashMap::default();
-        let mut import_keys: Vec<ImportKey> = Vec::new();
+        let items = root.items().into_syntax();
+        let mut organized_items: FxHashMap<u32, AnyJsModuleItem> = FxHashMap::default();
+        let mut import_keys: Vec<(ImportKey, bool, Option<AnyJsModuleItem>)> = Vec::new();
         let mut mutation = ctx.root().begin();
         for issue in state {
             match issue {
@@ -753,11 +758,11 @@ impl Rule for OrganizeImports {
                         }
                     }
                     // Save the node
-                    organized_items.insert(*slot_index, item);
+                    organized_items.insert(*slot_index, AnyJsModuleItem::cast(item)?);
                 }
                 Issue::UnsortedChunkPrefix { slot_indexes } => {
                     debug_assert!(import_keys.is_empty(), "import_keys was previously drained");
-                    // Collect all import keys.
+                    // Collect all import keys and the associated items.
                     import_keys.reserve(slot_indexes.len());
                     import_keys.extend(
                         ctx.query()
@@ -765,31 +770,52 @@ impl Rule for OrganizeImports {
                             .into_iter()
                             .skip(slot_indexes.start as usize)
                             .take(slot_indexes.len())
-                            .filter_map(|item| ImportInfo::from_module_item(&item))
-                            .map(|(info, _, _)| ImportKey::new(info, &options.groups)),
+                            .filter_map(|item| {
+                                let info = ImportInfo::from_module_item(&item)?.0;
+                                let item = organized_items.remove(&info.slot_index).unwrap_or(item);
+                                Some((ImportKey::new(info, &options.groups), false, Some(item)))
+                            }),
                     );
                     // Sort imports based on their import key
-                    import_keys.sort_unstable();
+                    import_keys.sort_unstable_by(|(key1, _, _), (key2, _, _)| key1.cmp(key2));
+                    // Merge imports/exports
+                    // We use `while` and indexing to allow both iteration and mutation of `import_keys`.
+                    let mut i = 0;
+                    while (i + 1) < import_keys.len() {
+                        let (key, _, item) = &import_keys[i];
+                        let (next_key, _, next_item) = &import_keys[i + 1];
+                        if key.is_mergeable(next_key) {
+                            if let Some(merged) = merge(item.as_ref(), next_item.as_ref()) {
+                                import_keys[i].2 = None;
+                                import_keys[i + 1].1 = true;
+                                import_keys[i + 1].2 = Some(merged);
+                            }
+                        }
+                        i += 1;
+                    }
                     // Swap the items to obtain a sorted chunk
-                    let items = ctx.query().items().into_syntax();
                     let mut prev_group: u16 = 0;
-                    for (index, key) in (slot_indexes.start..).zip(import_keys.drain(..)) {
+                    for (index, (key, was_merged, new_item)) in
+                        (slot_indexes.start..).zip(import_keys.drain(..))
+                    {
+                        let old_item = items.element_in_slot(index)?;
+                        let Some(new_item) = new_item else {
+                            mutation.remove_element(old_item);
+                            continue;
+                        };
+                        let mut new_item = new_item.into_syntax();
+                        let old_item = old_item.into_node()?;
                         let blank_line_separated_groups = options
                             .groups
                             .separated_by_blank_line(prev_group, key.group);
                         // Don't make any change if it is the same node and no change have to be done
-                        if !blank_line_separated_groups && index == key.slot_index {
+                        if !blank_line_separated_groups && index == key.slot_index && !was_merged {
                             continue;
                         }
-                        let old_item = items.element_in_slot(index)?.into_node()?;
-                        let mut new_item =
-                            if let Some(item) = organized_items.remove(&key.slot_index) {
-                                item
-                            } else {
-                                items.element_in_slot(key.slot_index)?.into_node()?
-                            };
                         if index == slot_indexes.start {
-                            if let Some(detached) = detached_trivia(&old_item) {
+                            if index == key.slot_index && was_merged {
+                                // DOn't change anything
+                            } else if let Some(detached) = detached_trivia(&old_item) {
                                 if leading_newlines(&old_item).count() == 1 {
                                     let newline = old_item.first_leading_trivia()?.pieces().take(1);
                                     new_item = new_item.prepend_trivia_pieces(
@@ -890,4 +916,111 @@ pub enum NewLineIssue {
     None,
     ExtraNewLine,
     MissingNewLine,
+}
+
+fn merge(
+    item1: Option<&AnyJsModuleItem>,
+    item2: Option<&AnyJsModuleItem>,
+) -> Option<AnyJsModuleItem> {
+    match (item1?, item2?) {
+        (AnyJsModuleItem::JsExport(item1), AnyJsModuleItem::JsExport(item2)) => {
+            let clause1 = item1.export_clause().ok()?;
+            let clause2 = item2.export_clause().ok()?;
+            let AnyJsExportClause::JsExportNamedFromClause(clause1) = clause1 else {
+                return None;
+            };
+            let AnyJsExportClause::JsExportNamedFromClause(clause2) = clause2 else {
+                return None;
+            };
+            let specifiers1 = clause1.specifiers();
+            let specifiers2 = clause2.specifiers();
+            if let Some(meregd_specifiers) = merge_export_specifiers(&specifiers1, &specifiers2) {
+                let meregd_clause = clause1.with_specifiers(meregd_specifiers);
+                let merged_item = item2.clone().with_export_clause(meregd_clause.into());
+                let merged_item = merged_item
+                    .trim_leading_trivia()?
+                    .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?;
+                return Some(merged_item.into());
+            }
+        }
+        (AnyJsModuleItem::JsImport(item1), AnyJsModuleItem::JsImport(item2)) => {
+            let clause1 = item1.import_clause().ok()?;
+            let clause2 = item2.import_clause().ok()?;
+            match (clause1, clause2) {
+                (
+                    AnyJsImportClause::JsImportDefaultClause(clause1),
+                    AnyJsImportClause::JsImportNamespaceClause(clause2),
+                )
+                | (
+                    AnyJsImportClause::JsImportNamespaceClause(clause2),
+                    AnyJsImportClause::JsImportDefaultClause(clause1),
+                ) => {
+                    let default_specifier = clause1.default_specifier().ok()?;
+                    let namespace_specifier = clause2.namespace_specifier().ok()?;
+                    let comma_token = make::token(T![,])
+                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let merged_clause = make::js_import_combined_clause(
+                        default_specifier.trim_trailing_trivia()?,
+                        comma_token,
+                        namespace_specifier.into(),
+                        clause2.from_token().ok()?,
+                        clause2.source().ok()?,
+                    )
+                    .build();
+                    let merged_item = item2.clone().with_import_clause(merged_clause.into());
+                    let merged_item = merged_item
+                        .trim_leading_trivia()?
+                        .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?;
+                    return Some(merged_item.into());
+                }
+                (
+                    AnyJsImportClause::JsImportCombinedClause(clause1),
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                )
+                | (
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                    AnyJsImportClause::JsImportCombinedClause(clause1),
+                ) => {
+                    let specifier1 = clause1.specifier().ok()?;
+                    let AnyJsCombinedSpecifier::JsNamedImportSpecifiers(specifiers1) = specifier1
+                    else {
+                        return None;
+                    };
+                    let specifiers2 = clause2.named_specifiers().ok()?;
+                    if let Some(meregd_specifiers) =
+                        merge_import_specifiers(specifiers1, &specifiers2)
+                    {
+                        let merged_clause = clause1.with_specifier(meregd_specifiers.into());
+                        let merged_item = item2.clone().with_import_clause(merged_clause.into());
+                        let merged_item =
+                            merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
+                                item1.syntax().first_leading_trivia()?.pieces(),
+                            )?;
+                        return Some(merged_item.into());
+                    }
+                }
+                (
+                    AnyJsImportClause::JsImportNamedClause(clause1),
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                ) => {
+                    let specifiers1 = clause1.named_specifiers().ok()?;
+                    let specifiers2 = clause2.named_specifiers().ok()?;
+                    if let Some(meregd_specifiers) =
+                        merge_import_specifiers(specifiers1, &specifiers2)
+                    {
+                        let merged_clause = clause1.with_named_specifiers(meregd_specifiers);
+                        let merged_item = item2.clone().with_import_clause(merged_clause.into());
+                        let merged_item =
+                            merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
+                                item1.syntax().first_leading_trivia()?.pieces(),
+                            )?;
+                        return Some(merged_item.into());
+                    }
+                }
+                _ => {}
+            }
+        }
+        _ => {}
+    }
+    None
 }
