@@ -670,11 +670,20 @@ impl Rule for OrganizeImports {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        struct KeyedItem {
+            /// Key associated to `item` before any merging.
+            key: ImportKey,
+            /// Was `item` obtained by merging it with previous items?
+            was_merged: bool,
+            /// None if the item has been merged with the next item.
+            item: Option<AnyJsModuleItem>,
+        }
+
         let options = ctx.options();
         let root = ctx.query();
         let items = root.items().into_syntax();
         let mut organized_items: FxHashMap<u32, AnyJsModuleItem> = FxHashMap::default();
-        let mut import_keys: Vec<(ImportKey, bool, Option<AnyJsModuleItem>)> = Vec::new();
+        let mut import_keys: Vec<KeyedItem> = Vec::new();
         let mut mutation = ctx.root().begin();
         for issue in state {
             match issue {
@@ -773,30 +782,46 @@ impl Rule for OrganizeImports {
                             .filter_map(|item| {
                                 let info = ImportInfo::from_module_item(&item)?.0;
                                 let item = organized_items.remove(&info.slot_index).unwrap_or(item);
-                                Some((ImportKey::new(info, &options.groups), false, Some(item)))
+                                Some(KeyedItem {
+                                    key: ImportKey::new(info, &options.groups),
+                                    was_merged: false,
+                                    item: Some(item),
+                                })
                             }),
                     );
                     // Sort imports based on their import key
-                    import_keys.sort_unstable_by(|(key1, _, _), (key2, _, _)| key1.cmp(key2));
+                    import_keys.sort_unstable_by(
+                        |KeyedItem { key: k1, .. }, KeyedItem { key: k2, .. }| k1.cmp(k2),
+                    );
                     // Merge imports/exports
                     // We use `while` and indexing to allow both iteration and mutation of `import_keys`.
                     let mut i = 0;
                     while (i + 1) < import_keys.len() {
-                        let (key, _, item) = &import_keys[i];
-                        let (next_key, _, next_item) = &import_keys[i + 1];
+                        let KeyedItem { key, item, .. } = &import_keys[i];
+                        let KeyedItem {
+                            key: next_key,
+                            item: next_item,
+                            ..
+                        } = &import_keys[i + 1];
                         if key.is_mergeable(next_key) {
                             if let Some(merged) = merge(item.as_ref(), next_item.as_ref()) {
-                                import_keys[i].2 = None;
-                                import_keys[i + 1].1 = true;
-                                import_keys[i + 1].2 = Some(merged);
+                                import_keys[i].item = None;
+                                import_keys[i + 1].was_merged = true;
+                                import_keys[i + 1].item = Some(merged);
                             }
                         }
                         i += 1;
                     }
                     // Swap the items to obtain a sorted chunk
                     let mut prev_group: u16 = 0;
-                    for (index, (key, was_merged, new_item)) in
-                        (slot_indexes.start..).zip(import_keys.drain(..))
+                    for (
+                        index,
+                        KeyedItem {
+                            key,
+                            was_merged,
+                            item: new_item,
+                        },
+                    ) in (slot_indexes.start..).zip(import_keys.drain(..))
                     {
                         let old_item = items.element_in_slot(index)?;
                         let Some(new_item) = new_item else {
@@ -929,9 +954,7 @@ fn merge(
             let AnyJsExportClause::JsExportNamedFromClause(clause1) = clause1 else {
                 return None;
             };
-            let AnyJsExportClause::JsExportNamedFromClause(clause2) = clause2 else {
-                return None;
-            };
+            let clause2 = clause2.as_js_export_named_from_clause()?;
             let specifiers1 = clause1.specifiers();
             let specifiers2 = clause2.specifiers();
             if let Some(meregd_specifiers) = merge_export_specifiers(&specifiers1, &specifiers2) {
