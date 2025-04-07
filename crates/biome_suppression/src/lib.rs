@@ -57,10 +57,10 @@ pub enum SuppressionKind {
 impl SuppressionKind {
     pub fn as_str(&self) -> &str {
         match self {
-            SuppressionKind::Classic => "biome-ignore",
-            SuppressionKind::All => "biome-ignore-all",
-            SuppressionKind::RangeStart => "biome-ignore-start",
-            SuppressionKind::RangeEnd => "biome-ignore-end",
+            Self::Classic => "biome-ignore",
+            Self::All => "biome-ignore-all",
+            Self::RangeStart => "biome-ignore-start",
+            Self::RangeEnd => "biome-ignore-end",
         }
     }
 
@@ -243,25 +243,25 @@ enum SuppressionDiagnosticKind {
 impl std::fmt::Display for SuppressionDiagnosticKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SuppressionDiagnosticKind::MissingColon => {
+            Self::MissingColon => {
                 write!(
                     f,
                     "Unexpected token, expected one of ':', '(' or whitespace. Example of suppression: // biome-ignore lint: reason"
                 )
             }
-            SuppressionDiagnosticKind::ParseCategory(category) => {
+            Self::ParseCategory(category) => {
                 write!(
                     f,
                     "Failed to parse category {category:?}. Example of suppression: // biome-ignore lint: reason"
                 )
             }
-            SuppressionDiagnosticKind::MissingCategory => {
+            Self::MissingCategory => {
                 write!(
                     f,
                     "Incorrect suppression: unexpected token, expected one of ':' or whitespace. Example of suppression: // biome-ignore lint: reason"
                 )
             }
-            SuppressionDiagnosticKind::MissingClosingParen => {
+            Self::MissingClosingParen => {
                 write!(
                     f,
                     "Unexpected token, expected ')'. Example of suppression: // biome-ignore lint: reason"
@@ -274,17 +274,17 @@ impl std::fmt::Display for SuppressionDiagnosticKind {
 impl biome_console::fmt::Display for SuppressionDiagnosticKind {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            SuppressionDiagnosticKind::MissingColon => write!(
+            Self::MissingColon => write!(
                 fmt,
                 "Unexpected token, expected one of ':', '(' or whitespace"
             ),
-            SuppressionDiagnosticKind::ParseCategory(category) => {
+            Self::ParseCategory(category) => {
                 write!(fmt, "Failed to parse category {category:?}")
             }
-            SuppressionDiagnosticKind::MissingCategory => {
+            Self::MissingCategory => {
                 write!(fmt, "Unexpected token, expected one of ':' or whitespace.")
             }
-            SuppressionDiagnosticKind::MissingClosingParen => {
+            Self::MissingClosingParen => {
                 write!(fmt, "Unexpected token, expected ')'.")
             }
         }

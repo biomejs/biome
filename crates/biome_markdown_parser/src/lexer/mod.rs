@@ -21,7 +21,7 @@ pub enum MarkdownLexContext {
 impl LexContext for MarkdownLexContext {
     /// Returns true if this is [MarkdownLexContext::Regular]
     fn is_regular(&self) -> bool {
-        matches!(self, MarkdownLexContext::Regular)
+        matches!(self, Self::Regular)
     }
 }
 

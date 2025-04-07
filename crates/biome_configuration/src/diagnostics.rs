@@ -64,13 +64,13 @@ pub enum BiomeDiagnostic {
 
 impl From<SyntaxError> for BiomeDiagnostic {
     fn from(_: SyntaxError) -> Self {
-        BiomeDiagnostic::Deserialization(DeserializationDiagnostic::new(markup! {"Syntax Error"}))
+        Self::Deserialization(DeserializationDiagnostic::new(markup! {"Syntax Error"}))
     }
 }
 
 impl From<DeserializationDiagnostic> for BiomeDiagnostic {
     fn from(value: DeserializationDiagnostic) -> Self {
-        BiomeDiagnostic::Deserialization(value)
+        Self::Deserialization(value)
     }
 }
 

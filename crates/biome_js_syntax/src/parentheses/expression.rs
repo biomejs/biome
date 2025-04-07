@@ -300,7 +300,7 @@ impl NeedsParentheses for JsConditionalExpression {
             | JsSyntaxKind::JS_INSTANCEOF_EXPRESSION
             | JsSyntaxKind::JS_IN_EXPRESSION => true,
             _ => {
-                match JsConditionalExpression::try_cast(parent) {
+                match Self::try_cast(parent) {
                     Ok(cond) => cond.test().is_ok_and(|test| test.syntax() == self.syntax()),
                     Err(parent) => update_or_lower_expression_needs_parens(self.syntax(), parent),
                 }
@@ -456,7 +456,7 @@ impl NeedsParentheses for JsInstanceofExpression {
 impl NeedsParentheses for JsLogicalExpression {
     #[inline]
     fn needs_parentheses(&self) -> bool {
-        if let Some(parent) = self.parent::<JsLogicalExpression>() {
+        if let Some(parent) = self.parent::<Self>() {
             parent.operator() != self.operator()
         } else if self
             .operator()

@@ -57,7 +57,7 @@ impl<P> Resource<P> {
     where
         P: Deref,
     {
-        if let Resource::File(file) = self {
+        if let Self::File(file) = self {
             Some(file)
         } else {
             None
@@ -70,9 +70,9 @@ impl<P> Resource<P> {
         P: Deref,
     {
         match self {
-            Resource::Argv => Resource::Argv,
-            Resource::Memory => Resource::Memory,
-            Resource::File(file) => Resource::File(file),
+            Self::Argv => Resource::Argv,
+            Self::Memory => Resource::Memory,
+            Self::File(file) => Resource::File(file),
         }
     }
 }

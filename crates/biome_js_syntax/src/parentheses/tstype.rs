@@ -14,7 +14,7 @@ impl NeedsParentheses for TsConditionalType {
         };
         match parent.kind() {
             JsSyntaxKind::TS_CONDITIONAL_TYPE => {
-                let conditional = TsConditionalType::unwrap_cast(parent.clone());
+                let conditional = Self::unwrap_cast(parent.clone());
                 let is_extends_type = conditional
                     .extends_type()
                     .is_ok_and(|extends_type| extends_type.syntax() == self.syntax());

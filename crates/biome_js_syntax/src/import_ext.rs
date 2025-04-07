@@ -220,7 +220,7 @@ impl AnyJsNamedImportSpecifier {
         }
     }
 
-    pub fn with_type_token(self, type_token: Option<JsSyntaxToken>) -> AnyJsNamedImportSpecifier {
+    pub fn with_type_token(self, type_token: Option<JsSyntaxToken>) -> Self {
         match self {
             Self::JsBogusNamedImportSpecifier(_) => self,
             Self::JsNamedImportSpecifier(specifier) => specifier.with_type_token(type_token).into(),
@@ -279,8 +279,8 @@ impl AnyJsImportLike {
     /// ```
     pub fn inner_string_text(&self) -> Option<TokenText> {
         match self {
-            AnyJsImportLike::JsModuleSource(source) => source.inner_string_text().ok(),
-            AnyJsImportLike::JsCallExpression(expression) => {
+            Self::JsModuleSource(source) => source.inner_string_text().ok(),
+            Self::JsCallExpression(expression) => {
                 let callee = expression.callee().ok()?;
                 let name = callee.as_js_reference_identifier()?.value_token().ok()?;
                 if name.text_trimmed() == "require" {
@@ -298,7 +298,7 @@ impl AnyJsImportLike {
                     None
                 }
             }
-            AnyJsImportLike::JsImportCallExpression(import_call) => {
+            Self::JsImportCallExpression(import_call) => {
                 let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
                 else {
                     return None;
@@ -327,8 +327,8 @@ impl AnyJsImportLike {
     /// ```
     pub fn module_name_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsImportLike::JsModuleSource(source) => source.value_token().ok(),
-            AnyJsImportLike::JsCallExpression(expression) => {
+            Self::JsModuleSource(source) => source.value_token().ok(),
+            Self::JsCallExpression(expression) => {
                 let callee = expression.callee().ok()?;
                 let name = callee.as_js_reference_identifier()?.value_token().ok()?;
                 if name.text_trimmed() == "require" {
@@ -346,7 +346,7 @@ impl AnyJsImportLike {
                     None
                 }
             }
-            AnyJsImportLike::JsImportCallExpression(import_call) => {
+            Self::JsImportCallExpression(import_call) => {
                 let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
                 else {
                     return None;
@@ -385,7 +385,7 @@ impl AnyJsImportLike {
     /// ```
     pub fn is_in_ts_module_declaration(&self) -> bool {
         // It first has to be a JsModuleSource
-        matches!(self, AnyJsImportLike::JsModuleSource(_))
+        matches!(self, Self::JsModuleSource(_))
             && matches!(
                 self.syntax().parent().kind(),
                 Some(JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION)
@@ -398,7 +398,7 @@ impl AnyJsImportLike {
     /// module specifier. Compare this to  `import()` and `require()`
     /// expressions, which are considered dynamic imports.
     pub fn is_static_import(&self) -> bool {
-        matches!(self, AnyJsImportLike::JsModuleSource(_))
+        matches!(self, Self::JsModuleSource(_))
     }
 }
 

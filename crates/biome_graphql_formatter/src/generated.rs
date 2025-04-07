@@ -20,11 +20,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlAlias>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlAlias {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlAlias,
-        crate::graphql::auxiliary::alias::FormatGraphqlAlias,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::auxiliary::alias::FormatGraphqlAlias>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -33,10 +30,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlAlias {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlAlias {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlAlias,
-        crate::graphql::auxiliary::alias::FormatGraphqlAlias,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::graphql::auxiliary::alias::FormatGraphqlAlias>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -58,11 +52,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlArgument>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgument {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlArgument,
-        crate::graphql::auxiliary::argument::FormatGraphqlArgument,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::auxiliary::argument::FormatGraphqlArgument>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -71,10 +62,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgument {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgument {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlArgument,
-        crate::graphql::auxiliary::argument::FormatGraphqlArgument,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::auxiliary::argument::FormatGraphqlArgument>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -96,11 +85,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlArguments>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArguments {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlArguments,
-        crate::graphql::auxiliary::arguments::FormatGraphqlArguments,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::auxiliary::arguments::FormatGraphqlArguments>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -109,10 +95,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArguments {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArguments {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlArguments,
-        crate::graphql::auxiliary::arguments::FormatGraphqlArguments,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::auxiliary::arguments::FormatGraphqlArguments>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -136,7 +120,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlArgumentsDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentsDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlArgumentsDefinition,
+        Self,
         crate::graphql::definitions::arguments_definition::FormatGraphqlArgumentsDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -145,7 +129,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentsDe
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentsDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlArgumentsDefinition,
+        Self,
         crate::graphql::definitions::arguments_definition::FormatGraphqlArgumentsDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -168,7 +152,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlBooleanValue>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBooleanValue {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlBooleanValue,
+        Self,
         crate::graphql::value::boolean_value::FormatGraphqlBooleanValue,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -179,10 +163,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBooleanValu
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBooleanValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlBooleanValue,
-        crate::graphql::value::boolean_value::FormatGraphqlBooleanValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::value::boolean_value::FormatGraphqlBooleanValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -206,7 +188,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlDefaultValue>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDefaultValue {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlDefaultValue,
+        Self,
         crate::graphql::value::default_value::FormatGraphqlDefaultValue,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -217,10 +199,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDefaultValu
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDefaultValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlDefaultValue,
-        crate::graphql::value::default_value::FormatGraphqlDefaultValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::value::default_value::FormatGraphqlDefaultValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -244,7 +224,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlDescription>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDescription {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlDescription,
+        Self,
         crate::graphql::auxiliary::description::FormatGraphqlDescription,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -255,10 +235,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDescription
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDescription {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlDescription,
-        crate::graphql::auxiliary::description::FormatGraphqlDescription,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::auxiliary::description::FormatGraphqlDescription>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -280,11 +258,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlDirective>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirective {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlDirective,
-        crate::graphql::auxiliary::directive::FormatGraphqlDirective,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::auxiliary::directive::FormatGraphqlDirective>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -293,10 +268,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirective {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirective {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlDirective,
-        crate::graphql::auxiliary::directive::FormatGraphqlDirective,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::auxiliary::directive::FormatGraphqlDirective>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -320,7 +293,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlDirectiveDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlDirectiveDefinition,
+        Self,
         crate::graphql::definitions::directive_definition::FormatGraphqlDirectiveDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -329,7 +302,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveDe
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlDirectiveDefinition,
+        Self,
         crate::graphql::definitions::directive_definition::FormatGraphqlDirectiveDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -352,7 +325,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlDirectiveLocation>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveLocation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlDirectiveLocation,
+        Self,
         crate::graphql::auxiliary::directive_location::FormatGraphqlDirectiveLocation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -365,7 +338,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveLo
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveLocation {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlDirectiveLocation,
+        Self,
         crate::graphql::auxiliary::directive_location::FormatGraphqlDirectiveLocation,
     >;
     fn into_format(self) -> Self::Format {
@@ -392,7 +365,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlEnumTypeDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumTypeDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlEnumTypeDefinition,
+        Self,
         crate::graphql::definitions::enum_type_definition::FormatGraphqlEnumTypeDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -401,7 +374,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumTypeDef
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumTypeDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlEnumTypeDefinition,
+        Self,
         crate::graphql::definitions::enum_type_definition::FormatGraphqlEnumTypeDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -424,7 +397,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlEnumTypeExtension>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumTypeExtension {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlEnumTypeExtension,
+        Self,
         crate::graphql::extensions::enum_type_extension::FormatGraphqlEnumTypeExtension,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -433,7 +406,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumTypeExt
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumTypeExtension {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlEnumTypeExtension,
+        Self,
         crate::graphql::extensions::enum_type_extension::FormatGraphqlEnumTypeExtension,
     >;
     fn into_format(self) -> Self::Format {
@@ -454,11 +427,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlEnumValue>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlEnumValue,
-        crate::graphql::value::enum_value::FormatGraphqlEnumValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::value::enum_value::FormatGraphqlEnumValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -467,10 +437,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValue {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlEnumValue,
-        crate::graphql::value::enum_value::FormatGraphqlEnumValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::value::enum_value::FormatGraphqlEnumValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -494,7 +462,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlEnumValueDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValueDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlEnumValueDefinition,
+        Self,
         crate::graphql::definitions::enum_value_definition::FormatGraphqlEnumValueDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -503,7 +471,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValueDe
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValueDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlEnumValueDefinition,
+        Self,
         crate::graphql::definitions::enum_value_definition::FormatGraphqlEnumValueDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -526,7 +494,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlEnumValuesDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValuesDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlEnumValuesDefinition,
+        Self,
         crate::graphql::definitions::enum_values_definition::FormatGraphqlEnumValuesDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -535,7 +503,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValuesD
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValuesDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlEnumValuesDefinition,
+        Self,
         crate::graphql::definitions::enum_values_definition::FormatGraphqlEnumValuesDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -556,11 +524,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlField>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlField {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlField,
-        crate::graphql::auxiliary::field::FormatGraphqlField,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::auxiliary::field::FormatGraphqlField>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -569,10 +534,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlField {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlField {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlField,
-        crate::graphql::auxiliary::field::FormatGraphqlField,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::graphql::auxiliary::field::FormatGraphqlField>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -596,7 +558,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlFieldDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlFieldDefinition,
+        Self,
         crate::graphql::definitions::field_definition::FormatGraphqlFieldDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -608,7 +570,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldDefini
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlFieldDefinition,
+        Self,
         crate::graphql::definitions::field_definition::FormatGraphqlFieldDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -634,7 +596,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlFieldsDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldsDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlFieldsDefinition,
+        Self,
         crate::graphql::definitions::fields_definition::FormatGraphqlFieldsDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -647,7 +609,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldsDefin
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldsDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlFieldsDefinition,
+        Self,
         crate::graphql::definitions::fields_definition::FormatGraphqlFieldsDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -672,11 +634,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlFloatValue>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFloatValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlFloatValue,
-        crate::graphql::value::float_value::FormatGraphqlFloatValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::value::float_value::FormatGraphqlFloatValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -685,10 +644,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFloatValue 
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFloatValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlFloatValue,
-        crate::graphql::value::float_value::FormatGraphqlFloatValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::value::float_value::FormatGraphqlFloatValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -712,7 +669,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlFragmentDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFragmentDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlFragmentDefinition,
+        Self,
         crate::graphql::definitions::fragment_definition::FormatGraphqlFragmentDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -721,7 +678,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFragmentDef
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFragmentDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlFragmentDefinition,
+        Self,
         crate::graphql::definitions::fragment_definition::FormatGraphqlFragmentDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -744,7 +701,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlFragmentSpread>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFragmentSpread {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlFragmentSpread,
+        Self,
         crate::graphql::auxiliary::fragment_spread::FormatGraphqlFragmentSpread,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -756,7 +713,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFragmentSpr
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFragmentSpread {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlFragmentSpread,
+        Self,
         crate::graphql::auxiliary::fragment_spread::FormatGraphqlFragmentSpread,
     >;
     fn into_format(self) -> Self::Format {
@@ -782,7 +739,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlImplementsInterfaces>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlImplementsInterfaces {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlImplementsInterfaces,
+        Self,
         crate::graphql::auxiliary::implements_interfaces::FormatGraphqlImplementsInterfaces,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -791,7 +748,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlImplementsI
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlImplementsInterfaces {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlImplementsInterfaces,
+        Self,
         crate::graphql::auxiliary::implements_interfaces::FormatGraphqlImplementsInterfaces,
     >;
     fn into_format(self) -> Self::Format {
@@ -814,7 +771,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlInlineFragment>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInlineFragment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlInlineFragment,
+        Self,
         crate::graphql::auxiliary::inline_fragment::FormatGraphqlInlineFragment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -826,7 +783,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInlineFragm
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInlineFragment {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlInlineFragment,
+        Self,
         crate::graphql::auxiliary::inline_fragment::FormatGraphqlInlineFragment,
     >;
     fn into_format(self) -> Self::Format {
@@ -852,7 +809,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlInputFieldsDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputFieldsDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlInputFieldsDefinition,
+        Self,
         crate::graphql::definitions::input_fields_definition::FormatGraphqlInputFieldsDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -861,7 +818,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputFields
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputFieldsDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlInputFieldsDefinition,
+        Self,
         crate::graphql::definitions::input_fields_definition::FormatGraphqlInputFieldsDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -870,26 +827,26 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputFiel
 }
 impl FormatRule < biome_graphql_syntax :: GraphqlInputObjectTypeDefinition > for crate :: graphql :: definitions :: input_object_type_definition :: FormatGraphqlInputObjectTypeDefinition { type Context = GraphqlFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_graphql_syntax :: GraphqlInputObjectTypeDefinition , f : & mut GraphqlFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_graphql_syntax :: GraphqlInputObjectTypeDefinition > :: fmt (self , node , f) } }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputObjectTypeDefinition {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_graphql_syntax :: GraphqlInputObjectTypeDefinition , crate :: graphql :: definitions :: input_object_type_definition :: FormatGraphqlInputObjectTypeDefinition > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: graphql :: definitions :: input_object_type_definition :: FormatGraphqlInputObjectTypeDefinition > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: graphql :: definitions :: input_object_type_definition :: FormatGraphqlInputObjectTypeDefinition :: default ())
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputObjectTypeDefinition {
-    type Format = FormatOwnedWithRule < biome_graphql_syntax :: GraphqlInputObjectTypeDefinition , crate :: graphql :: definitions :: input_object_type_definition :: FormatGraphqlInputObjectTypeDefinition > ;
+    type Format = FormatOwnedWithRule < Self , crate :: graphql :: definitions :: input_object_type_definition :: FormatGraphqlInputObjectTypeDefinition > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: graphql :: definitions :: input_object_type_definition :: FormatGraphqlInputObjectTypeDefinition :: default ())
     }
 }
 impl FormatRule < biome_graphql_syntax :: GraphqlInputObjectTypeExtension > for crate :: graphql :: extensions :: input_object_type_extension :: FormatGraphqlInputObjectTypeExtension { type Context = GraphqlFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_graphql_syntax :: GraphqlInputObjectTypeExtension , f : & mut GraphqlFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_graphql_syntax :: GraphqlInputObjectTypeExtension > :: fmt (self , node , f) } }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputObjectTypeExtension {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_graphql_syntax :: GraphqlInputObjectTypeExtension , crate :: graphql :: extensions :: input_object_type_extension :: FormatGraphqlInputObjectTypeExtension > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: graphql :: extensions :: input_object_type_extension :: FormatGraphqlInputObjectTypeExtension > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: graphql :: extensions :: input_object_type_extension :: FormatGraphqlInputObjectTypeExtension :: default ())
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputObjectTypeExtension {
-    type Format = FormatOwnedWithRule < biome_graphql_syntax :: GraphqlInputObjectTypeExtension , crate :: graphql :: extensions :: input_object_type_extension :: FormatGraphqlInputObjectTypeExtension > ;
+    type Format = FormatOwnedWithRule < Self , crate :: graphql :: extensions :: input_object_type_extension :: FormatGraphqlInputObjectTypeExtension > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: graphql :: extensions :: input_object_type_extension :: FormatGraphqlInputObjectTypeExtension :: default ())
     }
@@ -910,7 +867,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlInputValueDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputValueDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlInputValueDefinition,
+        Self,
         crate::graphql::definitions::input_value_definition::FormatGraphqlInputValueDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -919,7 +876,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputValueD
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputValueDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlInputValueDefinition,
+        Self,
         crate::graphql::definitions::input_value_definition::FormatGraphqlInputValueDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -940,11 +897,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlIntValue>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlIntValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlIntValue,
-        crate::graphql::value::int_value::FormatGraphqlIntValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::value::int_value::FormatGraphqlIntValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -953,10 +907,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlIntValue {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlIntValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlIntValue,
-        crate::graphql::value::int_value::FormatGraphqlIntValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::value::int_value::FormatGraphqlIntValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -978,13 +930,13 @@ impl FormatRule<biome_graphql_syntax::GraphqlInterfaceTypeDefinition>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInterfaceTypeDefinition {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_graphql_syntax :: GraphqlInterfaceTypeDefinition , crate :: graphql :: definitions :: interface_type_definition :: FormatGraphqlInterfaceTypeDefinition > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: graphql :: definitions :: interface_type_definition :: FormatGraphqlInterfaceTypeDefinition > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: graphql :: definitions :: interface_type_definition :: FormatGraphqlInterfaceTypeDefinition :: default ())
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInterfaceTypeDefinition {
-    type Format = FormatOwnedWithRule < biome_graphql_syntax :: GraphqlInterfaceTypeDefinition , crate :: graphql :: definitions :: interface_type_definition :: FormatGraphqlInterfaceTypeDefinition > ;
+    type Format = FormatOwnedWithRule < Self , crate :: graphql :: definitions :: interface_type_definition :: FormatGraphqlInterfaceTypeDefinition > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: graphql :: definitions :: interface_type_definition :: FormatGraphqlInterfaceTypeDefinition :: default ())
     }
@@ -1005,7 +957,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlInterfaceTypeExtension>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInterfaceTypeExtension {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlInterfaceTypeExtension,
+        Self,
         crate::graphql::extensions::interface_type_extension::FormatGraphqlInterfaceTypeExtension,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1014,7 +966,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInterfaceTy
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInterfaceTypeExtension {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlInterfaceTypeExtension,
+        Self,
         crate::graphql::extensions::interface_type_extension::FormatGraphqlInterfaceTypeExtension,
     >;
     fn into_format(self) -> Self::Format {
@@ -1035,11 +987,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlListType>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListType {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlListType,
-        crate::graphql::auxiliary::list_type::FormatGraphqlListType,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::auxiliary::list_type::FormatGraphqlListType>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -1048,10 +997,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListType {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListType {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlListType,
-        crate::graphql::auxiliary::list_type::FormatGraphqlListType,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::auxiliary::list_type::FormatGraphqlListType>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -1073,11 +1020,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlListValue>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlListValue,
-        crate::graphql::value::list_value::FormatGraphqlListValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::value::list_value::FormatGraphqlListValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -1086,10 +1030,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListValue {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlListValue,
-        crate::graphql::value::list_value::FormatGraphqlListValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::value::list_value::FormatGraphqlListValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -1113,7 +1055,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlLiteralName>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlLiteralName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlLiteralName,
+        Self,
         crate::graphql::auxiliary::literal_name::FormatGraphqlLiteralName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1125,7 +1067,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlLiteralName
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlLiteralName {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlLiteralName,
+        Self,
         crate::graphql::auxiliary::literal_name::FormatGraphqlLiteralName,
     >;
     fn into_format(self) -> Self::Format {
@@ -1151,7 +1093,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlNameBinding>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNameBinding {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlNameBinding,
+        Self,
         crate::graphql::auxiliary::name_binding::FormatGraphqlNameBinding,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1163,7 +1105,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNameBinding
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNameBinding {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlNameBinding,
+        Self,
         crate::graphql::auxiliary::name_binding::FormatGraphqlNameBinding,
     >;
     fn into_format(self) -> Self::Format {
@@ -1189,7 +1131,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlNameReference>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNameReference {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlNameReference,
+        Self,
         crate::graphql::auxiliary::name_reference::FormatGraphqlNameReference,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1201,7 +1143,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNameReferen
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNameReference {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlNameReference,
+        Self,
         crate::graphql::auxiliary::name_reference::FormatGraphqlNameReference,
     >;
     fn into_format(self) -> Self::Format {
@@ -1227,7 +1169,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlNonNullType>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNonNullType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlNonNullType,
+        Self,
         crate::graphql::auxiliary::non_null_type::FormatGraphqlNonNullType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1239,7 +1181,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNonNullType
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNonNullType {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlNonNullType,
+        Self,
         crate::graphql::auxiliary::non_null_type::FormatGraphqlNonNullType,
     >;
     fn into_format(self) -> Self::Format {
@@ -1263,11 +1205,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlNullValue>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNullValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlNullValue,
-        crate::graphql::value::null_value::FormatGraphqlNullValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::value::null_value::FormatGraphqlNullValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -1276,10 +1215,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNullValue {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlNullValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlNullValue,
-        crate::graphql::value::null_value::FormatGraphqlNullValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::value::null_value::FormatGraphqlNullValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -1303,7 +1240,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlObjectField>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectField {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlObjectField,
+        Self,
         crate::graphql::auxiliary::object_field::FormatGraphqlObjectField,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1315,7 +1252,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectField
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectField {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlObjectField,
+        Self,
         crate::graphql::auxiliary::object_field::FormatGraphqlObjectField,
     >;
     fn into_format(self) -> Self::Format {
@@ -1341,7 +1278,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlObjectTypeDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectTypeDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlObjectTypeDefinition,
+        Self,
         crate::graphql::definitions::object_type_definition::FormatGraphqlObjectTypeDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1350,7 +1287,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectTypeD
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectTypeDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlObjectTypeDefinition,
+        Self,
         crate::graphql::definitions::object_type_definition::FormatGraphqlObjectTypeDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -1373,7 +1310,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlObjectTypeExtension>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectTypeExtension {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlObjectTypeExtension,
+        Self,
         crate::graphql::extensions::object_type_extension::FormatGraphqlObjectTypeExtension,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1382,7 +1319,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectTypeE
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectTypeExtension {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlObjectTypeExtension,
+        Self,
         crate::graphql::extensions::object_type_extension::FormatGraphqlObjectTypeExtension,
     >;
     fn into_format(self) -> Self::Format {
@@ -1403,11 +1340,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlObjectValue>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlObjectValue,
-        crate::graphql::value::object_value::FormatGraphqlObjectValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::value::object_value::FormatGraphqlObjectValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -1416,10 +1350,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectValue
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlObjectValue,
-        crate::graphql::value::object_value::FormatGraphqlObjectValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::value::object_value::FormatGraphqlObjectValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -1443,7 +1375,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlOperationDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlOperationDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlOperationDefinition,
+        Self,
         crate::graphql::definitions::operation_definition::FormatGraphqlOperationDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1452,7 +1384,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlOperationDe
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlOperationDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlOperationDefinition,
+        Self,
         crate::graphql::definitions::operation_definition::FormatGraphqlOperationDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -1475,7 +1407,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlOperationType>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlOperationType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlOperationType,
+        Self,
         crate::graphql::auxiliary::operation_type::FormatGraphqlOperationType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1487,7 +1419,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlOperationTy
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlOperationType {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlOperationType,
+        Self,
         crate::graphql::auxiliary::operation_type::FormatGraphqlOperationType,
     >;
     fn into_format(self) -> Self::Format {
@@ -1511,11 +1443,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlRoot>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlRoot {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlRoot,
-        crate::graphql::auxiliary::root::FormatGraphqlRoot,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::auxiliary::root::FormatGraphqlRoot>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -1524,10 +1453,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlRoot {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlRoot {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlRoot,
-        crate::graphql::auxiliary::root::FormatGraphqlRoot,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::graphql::auxiliary::root::FormatGraphqlRoot>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -1537,13 +1463,13 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlRoot {
 }
 impl FormatRule < biome_graphql_syntax :: GraphqlRootOperationTypeDefinition > for crate :: graphql :: definitions :: root_operation_type_definition :: FormatGraphqlRootOperationTypeDefinition { type Context = GraphqlFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_graphql_syntax :: GraphqlRootOperationTypeDefinition , f : & mut GraphqlFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_graphql_syntax :: GraphqlRootOperationTypeDefinition > :: fmt (self , node , f) } }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlRootOperationTypeDefinition {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_graphql_syntax :: GraphqlRootOperationTypeDefinition , crate :: graphql :: definitions :: root_operation_type_definition :: FormatGraphqlRootOperationTypeDefinition > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: graphql :: definitions :: root_operation_type_definition :: FormatGraphqlRootOperationTypeDefinition > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: graphql :: definitions :: root_operation_type_definition :: FormatGraphqlRootOperationTypeDefinition :: default ())
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlRootOperationTypeDefinition {
-    type Format = FormatOwnedWithRule < biome_graphql_syntax :: GraphqlRootOperationTypeDefinition , crate :: graphql :: definitions :: root_operation_type_definition :: FormatGraphqlRootOperationTypeDefinition > ;
+    type Format = FormatOwnedWithRule < Self , crate :: graphql :: definitions :: root_operation_type_definition :: FormatGraphqlRootOperationTypeDefinition > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: graphql :: definitions :: root_operation_type_definition :: FormatGraphqlRootOperationTypeDefinition :: default ())
     }
@@ -1564,7 +1490,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlRootOperationTypes>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlRootOperationTypes {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlRootOperationTypes,
+        Self,
         crate::graphql::auxiliary::root_operation_types::FormatGraphqlRootOperationTypes,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1573,7 +1499,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlRootOperati
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlRootOperationTypes {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlRootOperationTypes,
+        Self,
         crate::graphql::auxiliary::root_operation_types::FormatGraphqlRootOperationTypes,
     >;
     fn into_format(self) -> Self::Format {
@@ -1596,7 +1522,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlScalarTypeDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlScalarTypeDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlScalarTypeDefinition,
+        Self,
         crate::graphql::definitions::scalar_type_definition::FormatGraphqlScalarTypeDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1605,7 +1531,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlScalarTypeD
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlScalarTypeDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlScalarTypeDefinition,
+        Self,
         crate::graphql::definitions::scalar_type_definition::FormatGraphqlScalarTypeDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -1628,7 +1554,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlScalarTypeExtension>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlScalarTypeExtension {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlScalarTypeExtension,
+        Self,
         crate::graphql::extensions::scalar_type_extension::FormatGraphqlScalarTypeExtension,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1637,7 +1563,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlScalarTypeE
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlScalarTypeExtension {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlScalarTypeExtension,
+        Self,
         crate::graphql::extensions::scalar_type_extension::FormatGraphqlScalarTypeExtension,
     >;
     fn into_format(self) -> Self::Format {
@@ -1660,7 +1586,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlSchemaDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSchemaDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlSchemaDefinition,
+        Self,
         crate::graphql::definitions::schema_definition::FormatGraphqlSchemaDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1673,7 +1599,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSchemaDefin
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSchemaDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlSchemaDefinition,
+        Self,
         crate::graphql::definitions::schema_definition::FormatGraphqlSchemaDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -1700,7 +1626,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlSchemaExtension>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSchemaExtension {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlSchemaExtension,
+        Self,
         crate::graphql::extensions::schema_extension::FormatGraphqlSchemaExtension,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1712,7 +1638,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSchemaExten
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSchemaExtension {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlSchemaExtension,
+        Self,
         crate::graphql::extensions::schema_extension::FormatGraphqlSchemaExtension,
     >;
     fn into_format(self) -> Self::Format {
@@ -1738,7 +1664,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlSelectionSet>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSelectionSet {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlSelectionSet,
+        Self,
         crate::graphql::auxiliary::selection_set::FormatGraphqlSelectionSet,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1750,7 +1676,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSelectionSe
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSelectionSet {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlSelectionSet,
+        Self,
         crate::graphql::auxiliary::selection_set::FormatGraphqlSelectionSet,
     >;
     fn into_format(self) -> Self::Format {
@@ -1774,11 +1700,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlStringValue>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlStringValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlStringValue,
-        crate::graphql::value::string_value::FormatGraphqlStringValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::value::string_value::FormatGraphqlStringValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -1787,10 +1710,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlStringValue
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlStringValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlStringValue,
-        crate::graphql::value::string_value::FormatGraphqlStringValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::value::string_value::FormatGraphqlStringValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -1814,7 +1735,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlTypeCondition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlTypeCondition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlTypeCondition,
+        Self,
         crate::graphql::auxiliary::type_condition::FormatGraphqlTypeCondition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1826,7 +1747,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlTypeConditi
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlTypeCondition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlTypeCondition,
+        Self,
         crate::graphql::auxiliary::type_condition::FormatGraphqlTypeCondition,
     >;
     fn into_format(self) -> Self::Format {
@@ -1852,7 +1773,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlUnionMemberTypes>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionMemberTypes {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlUnionMemberTypes,
+        Self,
         crate::graphql::auxiliary::union_member_types::FormatGraphqlUnionMemberTypes,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1864,7 +1785,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionMember
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionMemberTypes {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlUnionMemberTypes,
+        Self,
         crate::graphql::auxiliary::union_member_types::FormatGraphqlUnionMemberTypes,
     >;
     fn into_format(self) -> Self::Format {
@@ -1890,7 +1811,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlUnionTypeDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionTypeDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlUnionTypeDefinition,
+        Self,
         crate::graphql::definitions::union_type_definition::FormatGraphqlUnionTypeDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1899,7 +1820,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionTypeDe
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionTypeDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlUnionTypeDefinition,
+        Self,
         crate::graphql::definitions::union_type_definition::FormatGraphqlUnionTypeDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -1922,7 +1843,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlUnionTypeExtension>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionTypeExtension {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlUnionTypeExtension,
+        Self,
         crate::graphql::extensions::union_type_extension::FormatGraphqlUnionTypeExtension,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1931,7 +1852,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionTypeEx
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionTypeExtension {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlUnionTypeExtension,
+        Self,
         crate::graphql::extensions::union_type_extension::FormatGraphqlUnionTypeExtension,
     >;
     fn into_format(self) -> Self::Format {
@@ -1954,7 +1875,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlVariableBinding>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableBinding {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlVariableBinding,
+        Self,
         crate::graphql::auxiliary::variable_binding::FormatGraphqlVariableBinding,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1966,7 +1887,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableBin
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableBinding {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlVariableBinding,
+        Self,
         crate::graphql::auxiliary::variable_binding::FormatGraphqlVariableBinding,
     >;
     fn into_format(self) -> Self::Format {
@@ -1992,7 +1913,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlVariableDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlVariableDefinition,
+        Self,
         crate::graphql::definitions::variable_definition::FormatGraphqlVariableDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2001,7 +1922,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableDef
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlVariableDefinition,
+        Self,
         crate::graphql::definitions::variable_definition::FormatGraphqlVariableDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -2024,7 +1945,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlVariableDefinitions>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableDefinitions {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlVariableDefinitions,
+        Self,
         crate::graphql::auxiliary::variable_definitions::FormatGraphqlVariableDefinitions,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2033,7 +1954,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableDef
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableDefinitions {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlVariableDefinitions,
+        Self,
         crate::graphql::auxiliary::variable_definitions::FormatGraphqlVariableDefinitions,
     >;
     fn into_format(self) -> Self::Format {
@@ -2056,7 +1977,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlVariableReference>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableReference {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlVariableReference,
+        Self,
         crate::graphql::auxiliary::variable_reference::FormatGraphqlVariableReference,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2069,7 +1990,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableRef
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableReference {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlVariableReference,
+        Self,
         crate::graphql::auxiliary::variable_reference::FormatGraphqlVariableReference,
     >;
     fn into_format(self) -> Self::Format {
@@ -2083,7 +2004,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableR
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentDefinitionList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlArgumentDefinitionList,
+        Self,
         crate::graphql::lists::argument_definition_list::FormatGraphqlArgumentDefinitionList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2092,7 +2013,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentDef
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentDefinitionList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlArgumentDefinitionList,
+        Self,
         crate::graphql::lists::argument_definition_list::FormatGraphqlArgumentDefinitionList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2102,7 +2023,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentD
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlArgumentList,
+        Self,
         crate::graphql::lists::argument_list::FormatGraphqlArgumentList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2113,10 +2034,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentLis
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentList {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlArgumentList,
-        crate::graphql::lists::argument_list::FormatGraphqlArgumentList,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::lists::argument_list::FormatGraphqlArgumentList>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -2127,7 +2046,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlArgumentL
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDefinitionList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlDefinitionList,
+        Self,
         crate::graphql::lists::definition_list::FormatGraphqlDefinitionList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2139,7 +2058,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDefinitionL
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDefinitionList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlDefinitionList,
+        Self,
         crate::graphql::lists::definition_list::FormatGraphqlDefinitionList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2152,7 +2071,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDefinitio
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlDirectiveList,
+        Self,
         crate::graphql::lists::directive_list::FormatGraphqlDirectiveList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2164,7 +2083,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveLi
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlDirectiveList,
+        Self,
         crate::graphql::lists::directive_list::FormatGraphqlDirectiveList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2177,7 +2096,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirective
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveLocationList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlDirectiveLocationList,
+        Self,
         crate::graphql::lists::directive_location_list::FormatGraphqlDirectiveLocationList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2186,7 +2105,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveLo
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirectiveLocationList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlDirectiveLocationList,
+        Self,
         crate::graphql::lists::directive_location_list::FormatGraphqlDirectiveLocationList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2196,7 +2115,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlDirective
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValueList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlEnumValueList,
+        Self,
         crate::graphql::lists::enum_value_list::FormatGraphqlEnumValueList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2208,7 +2127,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValueLi
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValueList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlEnumValueList,
+        Self,
         crate::graphql::lists::enum_value_list::FormatGraphqlEnumValueList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2221,7 +2140,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlEnumValue
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldDefinitionList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlFieldDefinitionList,
+        Self,
         crate::graphql::lists::field_definition_list::FormatGraphqlFieldDefinitionList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2234,7 +2153,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldDefini
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldDefinitionList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlFieldDefinitionList,
+        Self,
         crate::graphql::lists::field_definition_list::FormatGraphqlFieldDefinitionList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2248,7 +2167,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlFieldDefi
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlImplementsInterfaceList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlImplementsInterfaceList,
+        Self,
         crate::graphql::lists::implements_interface_list::FormatGraphqlImplementsInterfaceList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2257,7 +2176,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlImplementsI
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlImplementsInterfaceList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlImplementsInterfaceList,
+        Self,
         crate::graphql::lists::implements_interface_list::FormatGraphqlImplementsInterfaceList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2267,7 +2186,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlImplement
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputFieldList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlInputFieldList,
+        Self,
         crate::graphql::lists::input_field_list::FormatGraphqlInputFieldList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2279,7 +2198,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputFieldL
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputFieldList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlInputFieldList,
+        Self,
         crate::graphql::lists::input_field_list::FormatGraphqlInputFieldList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2292,7 +2211,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlInputFiel
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListValueElementList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlListValueElementList,
+        Self,
         crate::graphql::lists::list_value_element_list::FormatGraphqlListValueElementList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2301,7 +2220,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListValueEl
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListValueElementList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlListValueElementList,
+        Self,
         crate::graphql::lists::list_value_element_list::FormatGraphqlListValueElementList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2311,7 +2230,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlListValue
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectValueMemberList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlObjectValueMemberList,
+        Self,
         crate::graphql::lists::object_value_member_list::FormatGraphqlObjectValueMemberList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2320,7 +2239,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectValue
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectValueMemberList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlObjectValueMemberList,
+        Self,
         crate::graphql::lists::object_value_member_list::FormatGraphqlObjectValueMemberList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2330,7 +2249,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlObjectVal
 impl AsFormat<GraphqlFormatContext>
     for biome_graphql_syntax::GraphqlRootOperationTypeDefinitionList
 {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_graphql_syntax :: GraphqlRootOperationTypeDefinitionList , crate :: graphql :: lists :: root_operation_type_definition_list :: FormatGraphqlRootOperationTypeDefinitionList > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: graphql :: lists :: root_operation_type_definition_list :: FormatGraphqlRootOperationTypeDefinitionList > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: graphql :: lists :: root_operation_type_definition_list :: FormatGraphqlRootOperationTypeDefinitionList :: default ())
     }
@@ -2338,7 +2257,7 @@ impl AsFormat<GraphqlFormatContext>
 impl IntoFormat<GraphqlFormatContext>
     for biome_graphql_syntax::GraphqlRootOperationTypeDefinitionList
 {
-    type Format = FormatOwnedWithRule < biome_graphql_syntax :: GraphqlRootOperationTypeDefinitionList , crate :: graphql :: lists :: root_operation_type_definition_list :: FormatGraphqlRootOperationTypeDefinitionList > ;
+    type Format = FormatOwnedWithRule < Self , crate :: graphql :: lists :: root_operation_type_definition_list :: FormatGraphqlRootOperationTypeDefinitionList > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: graphql :: lists :: root_operation_type_definition_list :: FormatGraphqlRootOperationTypeDefinitionList :: default ())
     }
@@ -2346,7 +2265,7 @@ impl IntoFormat<GraphqlFormatContext>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSelectionList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlSelectionList,
+        Self,
         crate::graphql::lists::selection_list::FormatGraphqlSelectionList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2358,7 +2277,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSelectionLi
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSelectionList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlSelectionList,
+        Self,
         crate::graphql::lists::selection_list::FormatGraphqlSelectionList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2371,7 +2290,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlSelection
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionMemberTypeList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlUnionMemberTypeList,
+        Self,
         crate::graphql::lists::union_member_type_list::FormatGraphqlUnionMemberTypeList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2380,7 +2299,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionMember
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionMemberTypeList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlUnionMemberTypeList,
+        Self,
         crate::graphql::lists::union_member_type_list::FormatGraphqlUnionMemberTypeList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2390,7 +2309,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlUnionMemb
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableDefinitionList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlVariableDefinitionList,
+        Self,
         crate::graphql::lists::variable_definition_list::FormatGraphqlVariableDefinitionList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2399,7 +2318,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableDef
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlVariableDefinitionList {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlVariableDefinitionList,
+        Self,
         crate::graphql::lists::variable_definition_list::FormatGraphqlVariableDefinitionList,
     >;
     fn into_format(self) -> Self::Format {
@@ -2420,11 +2339,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlBogus>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogus {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlBogus,
-        crate::graphql::bogus::bogus::FormatGraphqlBogus,
-    >;
+    type Format<'a> = FormatRefWithRule<'a, Self, crate::graphql::bogus::bogus::FormatGraphqlBogus>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -2433,10 +2348,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogus {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogus {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlBogus,
-        crate::graphql::bogus::bogus::FormatGraphqlBogus,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::graphql::bogus::bogus::FormatGraphqlBogus>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -2460,7 +2372,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlBogusDefinition>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlBogusDefinition,
+        Self,
         crate::graphql::bogus::bogus_definition::FormatGraphqlBogusDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2472,7 +2384,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusDefini
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlBogusDefinition,
+        Self,
         crate::graphql::bogus::bogus_definition::FormatGraphqlBogusDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -2498,7 +2410,7 @@ impl FormatRule<biome_graphql_syntax::GraphqlBogusSelection>
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusSelection {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::GraphqlBogusSelection,
+        Self,
         crate::graphql::bogus::bogus_selection::FormatGraphqlBogusSelection,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2510,7 +2422,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusSelect
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusSelection {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlBogusSelection,
+        Self,
         crate::graphql::bogus::bogus_selection::FormatGraphqlBogusSelection,
     >;
     fn into_format(self) -> Self::Format {
@@ -2534,11 +2446,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlBogusType>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusType {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlBogusType,
-        crate::graphql::bogus::bogus_type::FormatGraphqlBogusType,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::bogus::bogus_type::FormatGraphqlBogusType>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -2547,10 +2456,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusType {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusType {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlBogusType,
-        crate::graphql::bogus::bogus_type::FormatGraphqlBogusType,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::bogus::bogus_type::FormatGraphqlBogusType>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -2572,11 +2479,8 @@ impl FormatRule<biome_graphql_syntax::GraphqlBogusValue>
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::GraphqlBogusValue,
-        crate::graphql::bogus::bogus_value::FormatGraphqlBogusValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::bogus::bogus_value::FormatGraphqlBogusValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -2585,10 +2489,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusValue 
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::GraphqlBogusValue,
-        crate::graphql::bogus::bogus_value::FormatGraphqlBogusValue,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::bogus::bogus_value::FormatGraphqlBogusValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -2597,11 +2499,8 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::GraphqlBogusValu
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlDefinition {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::AnyGraphqlDefinition,
-        crate::graphql::any::definition::FormatAnyGraphqlDefinition,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::any::definition::FormatAnyGraphqlDefinition>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -2610,10 +2509,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlDefiniti
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlDefinition {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::AnyGraphqlDefinition,
-        crate::graphql::any::definition::FormatAnyGraphqlDefinition,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::any::definition::FormatAnyGraphqlDefinition>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -2624,7 +2521,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlDefini
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlOperationDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::AnyGraphqlOperationDefinition,
+        Self,
         crate::graphql::any::operation_definition::FormatAnyGraphqlOperationDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2637,7 +2534,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlOperatio
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlOperationDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::AnyGraphqlOperationDefinition,
+        Self,
         crate::graphql::any::operation_definition::FormatAnyGraphqlOperationDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -2651,7 +2548,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlOperat
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlPrimitiveType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::AnyGraphqlPrimitiveType,
+        Self,
         crate::graphql::any::primitive_type::FormatAnyGraphqlPrimitiveType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2663,7 +2560,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlPrimitiv
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlPrimitiveType {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::AnyGraphqlPrimitiveType,
+        Self,
         crate::graphql::any::primitive_type::FormatAnyGraphqlPrimitiveType,
     >;
     fn into_format(self) -> Self::Format {
@@ -2674,11 +2571,8 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlPrimit
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlSelection {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::AnyGraphqlSelection,
-        crate::graphql::any::selection::FormatAnyGraphqlSelection,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::any::selection::FormatAnyGraphqlSelection>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -2687,10 +2581,8 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlSelectio
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlSelection {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::AnyGraphqlSelection,
-        crate::graphql::any::selection::FormatAnyGraphqlSelection,
-    >;
+    type Format =
+        FormatOwnedWithRule<Self, crate::graphql::any::selection::FormatAnyGraphqlSelection>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -2699,11 +2591,8 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlSelect
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlType {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::AnyGraphqlType,
-        crate::graphql::any::ts_type::FormatAnyGraphqlType,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::any::ts_type::FormatAnyGraphqlType>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -2712,10 +2601,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlType {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlType {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::AnyGraphqlType,
-        crate::graphql::any::ts_type::FormatAnyGraphqlType,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::graphql::any::ts_type::FormatAnyGraphqlType>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -2726,7 +2612,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlType {
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlTypeDefinition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::AnyGraphqlTypeDefinition,
+        Self,
         crate::graphql::any::type_definition::FormatAnyGraphqlTypeDefinition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2738,7 +2624,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlTypeDefi
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlTypeDefinition {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::AnyGraphqlTypeDefinition,
+        Self,
         crate::graphql::any::type_definition::FormatAnyGraphqlTypeDefinition,
     >;
     fn into_format(self) -> Self::Format {
@@ -2751,7 +2637,7 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlTypeDe
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlTypeExtension {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_graphql_syntax::AnyGraphqlTypeExtension,
+        Self,
         crate::graphql::any::type_extension::FormatAnyGraphqlTypeExtension,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2763,7 +2649,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlTypeExte
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlTypeExtension {
     type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::AnyGraphqlTypeExtension,
+        Self,
         crate::graphql::any::type_extension::FormatAnyGraphqlTypeExtension,
     >;
     fn into_format(self) -> Self::Format {
@@ -2774,11 +2660,8 @@ impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlTypeEx
     }
 }
 impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlValue {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_graphql_syntax::AnyGraphqlValue,
-        crate::graphql::any::value::FormatAnyGraphqlValue,
-    >;
+    type Format<'a> =
+        FormatRefWithRule<'a, Self, crate::graphql::any::value::FormatAnyGraphqlValue>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -2787,10 +2670,7 @@ impl AsFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlValue {
     }
 }
 impl IntoFormat<GraphqlFormatContext> for biome_graphql_syntax::AnyGraphqlValue {
-    type Format = FormatOwnedWithRule<
-        biome_graphql_syntax::AnyGraphqlValue,
-        crate::graphql::any::value::FormatAnyGraphqlValue,
-    >;
+    type Format = FormatOwnedWithRule<Self, crate::graphql::any::value::FormatAnyGraphqlValue>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,

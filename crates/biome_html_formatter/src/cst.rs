@@ -15,7 +15,7 @@ impl biome_formatter::FormatRule<HtmlSyntaxNode> for FormatHtmlSyntaxNode {
 }
 
 impl AsFormat<HtmlFormatContext> for HtmlSyntaxNode {
-    type Format<'a> = FormatRefWithRule<'a, HtmlSyntaxNode, FormatHtmlSyntaxNode>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatHtmlSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatHtmlSyntaxNode)
@@ -23,7 +23,7 @@ impl AsFormat<HtmlFormatContext> for HtmlSyntaxNode {
 }
 
 impl IntoFormat<HtmlFormatContext> for HtmlSyntaxNode {
-    type Format = FormatOwnedWithRule<HtmlSyntaxNode, FormatHtmlSyntaxNode>;
+    type Format = FormatOwnedWithRule<Self, FormatHtmlSyntaxNode>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatHtmlSyntaxNode)

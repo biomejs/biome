@@ -52,17 +52,17 @@ impl std::fmt::Display for Modifier {
             f,
             "{}",
             match self {
-                Modifier::Decorator => "decorator",
-                Modifier::BogusAccessibility => "accessibility",
-                Modifier::Private => "private",
-                Modifier::Protected => "protected",
-                Modifier::Public => "public",
-                Modifier::Declare => "declare",
-                Modifier::Static => "static",
-                Modifier::Abstract => "abstract",
-                Modifier::Override => "override",
-                Modifier::Readonly => "readonly",
-                Modifier::Accessor => "accessor",
+                Self::Decorator => "decorator",
+                Self::BogusAccessibility => "accessibility",
+                Self::Private => "private",
+                Self::Protected => "protected",
+                Self::Public => "public",
+                Self::Declare => "declare",
+                Self::Static => "static",
+                Self::Abstract => "abstract",
+                Self::Override => "override",
+                Self::Readonly => "readonly",
+                Self::Accessor => "accessor",
             }
         )
     }
@@ -71,8 +71,8 @@ impl std::fmt::Display for Modifier {
 impl From<&AnyTsIndexSignatureModifier> for Modifier {
     fn from(modifier: &AnyTsIndexSignatureModifier) -> Self {
         match modifier {
-            AnyTsIndexSignatureModifier::JsStaticModifier(_) => Modifier::Static,
-            AnyTsIndexSignatureModifier::TsReadonlyModifier(_) => Modifier::Readonly,
+            AnyTsIndexSignatureModifier::JsStaticModifier(_) => Self::Static,
+            AnyTsIndexSignatureModifier::TsReadonlyModifier(_) => Self::Readonly,
         }
     }
 }
@@ -80,10 +80,10 @@ impl From<&AnyTsIndexSignatureModifier> for Modifier {
 impl From<&AnyJsMethodModifier> for Modifier {
     fn from(modifier: &AnyJsMethodModifier) -> Self {
         match modifier {
-            AnyJsMethodModifier::JsDecorator(_) => Modifier::Decorator,
-            AnyJsMethodModifier::JsStaticModifier(_) => Modifier::Static,
+            AnyJsMethodModifier::JsDecorator(_) => Self::Decorator,
+            AnyJsMethodModifier::JsStaticModifier(_) => Self::Static,
             AnyJsMethodModifier::TsAccessibilityModifier(accessibility) => accessibility.into(),
-            AnyJsMethodModifier::TsOverrideModifier(_) => Modifier::Override,
+            AnyJsMethodModifier::TsOverrideModifier(_) => Self::Override,
         }
     }
 }
@@ -91,13 +91,13 @@ impl From<&AnyJsMethodModifier> for Modifier {
 impl From<&AnyTsMethodSignatureModifier> for Modifier {
     fn from(modifier: &AnyTsMethodSignatureModifier) -> Self {
         match modifier {
-            AnyTsMethodSignatureModifier::JsDecorator(_) => Modifier::Decorator,
-            AnyTsMethodSignatureModifier::JsStaticModifier(_) => Modifier::Static,
-            AnyTsMethodSignatureModifier::TsAbstractModifier(_) => Modifier::Abstract,
+            AnyTsMethodSignatureModifier::JsDecorator(_) => Self::Decorator,
+            AnyTsMethodSignatureModifier::JsStaticModifier(_) => Self::Static,
+            AnyTsMethodSignatureModifier::TsAbstractModifier(_) => Self::Abstract,
             AnyTsMethodSignatureModifier::TsAccessibilityModifier(accessibility) => {
                 accessibility.into()
             }
-            AnyTsMethodSignatureModifier::TsOverrideModifier(_) => Modifier::Override,
+            AnyTsMethodSignatureModifier::TsOverrideModifier(_) => Self::Override,
         }
     }
 }
@@ -105,12 +105,12 @@ impl From<&AnyTsMethodSignatureModifier> for Modifier {
 impl From<&AnyJsPropertyModifier> for Modifier {
     fn from(modifier: &AnyJsPropertyModifier) -> Self {
         match modifier {
-            AnyJsPropertyModifier::JsDecorator(_) => Modifier::Decorator,
-            AnyJsPropertyModifier::JsStaticModifier(_) => Modifier::Static,
-            AnyJsPropertyModifier::JsAccessorModifier(_) => Modifier::Accessor,
+            AnyJsPropertyModifier::JsDecorator(_) => Self::Decorator,
+            AnyJsPropertyModifier::JsStaticModifier(_) => Self::Static,
+            AnyJsPropertyModifier::JsAccessorModifier(_) => Self::Accessor,
             AnyJsPropertyModifier::TsAccessibilityModifier(accessibility) => accessibility.into(),
-            AnyJsPropertyModifier::TsOverrideModifier(_) => Modifier::Override,
-            AnyJsPropertyModifier::TsReadonlyModifier(_) => Modifier::Readonly,
+            AnyJsPropertyModifier::TsOverrideModifier(_) => Self::Override,
+            AnyJsPropertyModifier::TsReadonlyModifier(_) => Self::Readonly,
         }
     }
 }
@@ -121,8 +121,8 @@ impl From<&AnyTsPropertyParameterModifier> for Modifier {
             AnyTsPropertyParameterModifier::TsAccessibilityModifier(accessibility) => {
                 accessibility.into()
             }
-            AnyTsPropertyParameterModifier::TsOverrideModifier(_) => Modifier::Override,
-            AnyTsPropertyParameterModifier::TsReadonlyModifier(_) => Modifier::Readonly,
+            AnyTsPropertyParameterModifier::TsOverrideModifier(_) => Self::Override,
+            AnyTsPropertyParameterModifier::TsReadonlyModifier(_) => Self::Readonly,
         }
     }
 }
@@ -130,16 +130,16 @@ impl From<&AnyTsPropertyParameterModifier> for Modifier {
 impl From<&AnyTsPropertySignatureModifier> for Modifier {
     fn from(modifier: &AnyTsPropertySignatureModifier) -> Self {
         match modifier {
-            AnyTsPropertySignatureModifier::JsDecorator(_) => Modifier::Decorator,
+            AnyTsPropertySignatureModifier::JsDecorator(_) => Self::Decorator,
             AnyTsPropertySignatureModifier::TsAccessibilityModifier(accessibility) => {
                 accessibility.into()
             }
-            AnyTsPropertySignatureModifier::TsDeclareModifier(_) => Modifier::Declare,
-            AnyTsPropertySignatureModifier::JsStaticModifier(_) => Modifier::Static,
-            AnyTsPropertySignatureModifier::JsAccessorModifier(_) => Modifier::Accessor,
-            AnyTsPropertySignatureModifier::TsAbstractModifier(_) => Modifier::Abstract,
-            AnyTsPropertySignatureModifier::TsOverrideModifier(_) => Modifier::Override,
-            AnyTsPropertySignatureModifier::TsReadonlyModifier(_) => Modifier::Readonly,
+            AnyTsPropertySignatureModifier::TsDeclareModifier(_) => Self::Declare,
+            AnyTsPropertySignatureModifier::JsStaticModifier(_) => Self::Static,
+            AnyTsPropertySignatureModifier::JsAccessorModifier(_) => Self::Accessor,
+            AnyTsPropertySignatureModifier::TsAbstractModifier(_) => Self::Abstract,
+            AnyTsPropertySignatureModifier::TsOverrideModifier(_) => Self::Override,
+            AnyTsPropertySignatureModifier::TsReadonlyModifier(_) => Self::Readonly,
         }
     }
 }

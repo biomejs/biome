@@ -16,7 +16,7 @@ pub struct JsTestFormatLanguage {
 
 impl JsTestFormatLanguage {
     pub fn new(source_type: JsFileSource) -> Self {
-        JsTestFormatLanguage { source_type }
+        Self { source_type }
     }
 }
 

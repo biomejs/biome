@@ -67,18 +67,18 @@ pub enum NoInvalidConstructorSuperState {
 impl NoInvalidConstructorSuperState {
     fn range(&self) -> &TextRange {
         match self {
-            NoInvalidConstructorSuperState::UnexpectedSuper(range) => range,
-            NoInvalidConstructorSuperState::BadExtends { super_range, .. } => super_range,
+            Self::UnexpectedSuper(range) => range,
+            Self::BadExtends { super_range, .. } => super_range,
         }
     }
 
     fn message(&self) -> MarkupBuf {
         match self {
-            NoInvalidConstructorSuperState::UnexpectedSuper(_) => {
+            Self::UnexpectedSuper(_) => {
                 (markup! { "This class should not have a "<Emphasis>"super()"</Emphasis>" call. You should remove it." }).to_owned()
             }
 
-            NoInvalidConstructorSuperState::BadExtends { .. } => {
+            Self::BadExtends { .. } => {
                 (markup! { "This class calls "<Emphasis>"super()"</Emphasis>", but the class extends from a non-constructor." }).to_owned()
             }
         }
@@ -86,7 +86,7 @@ impl NoInvalidConstructorSuperState {
 
     fn detail(&self) -> Option<(&TextRange, MarkupBuf)> {
         match self {
-            NoInvalidConstructorSuperState::BadExtends { extends_range, .. } => Some((
+            Self::BadExtends { extends_range, .. } => Some((
                 extends_range,
                 markup! { "This is where the non-constructor is used." }.to_owned(),
             )),

@@ -9,29 +9,29 @@ pub enum NodeOrToken<N, T> {
 impl<N, T> NodeOrToken<N, T> {
     pub fn into_node(self) -> Option<N> {
         match self {
-            NodeOrToken::Node(node) => Some(node),
-            NodeOrToken::Token(_) => None,
+            Self::Node(node) => Some(node),
+            Self::Token(_) => None,
         }
     }
 
     pub fn into_token(self) -> Option<T> {
         match self {
-            NodeOrToken::Node(_) => None,
-            NodeOrToken::Token(token) => Some(token),
+            Self::Node(_) => None,
+            Self::Token(token) => Some(token),
         }
     }
 
     pub fn as_node(&self) -> Option<&N> {
         match self {
-            NodeOrToken::Node(node) => Some(node),
-            NodeOrToken::Token(_) => None,
+            Self::Node(node) => Some(node),
+            Self::Token(_) => None,
         }
     }
 
     pub fn as_token(&self) -> Option<&T> {
         match self {
-            NodeOrToken::Node(_) => None,
-            NodeOrToken::Token(token) => Some(token),
+            Self::Node(_) => None,
+            Self::Token(token) => Some(token),
         }
     }
 }
@@ -39,8 +39,8 @@ impl<N, T> NodeOrToken<N, T> {
 impl<N: Deref, T: Deref> NodeOrToken<N, T> {
     pub(crate) fn as_deref(&self) -> NodeOrToken<&N::Target, &T::Target> {
         match self {
-            NodeOrToken::Node(node) => NodeOrToken::Node(&**node),
-            NodeOrToken::Token(token) => NodeOrToken::Token(&**token),
+            Self::Node(node) => NodeOrToken::Node(&**node),
+            Self::Token(token) => NodeOrToken::Token(&**token),
         }
     }
 }
@@ -48,8 +48,8 @@ impl<N: Deref, T: Deref> NodeOrToken<N, T> {
 impl<N: fmt::Display, T: fmt::Display> fmt::Display for NodeOrToken<N, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            NodeOrToken::Node(node) => fmt::Display::fmt(node, f),
-            NodeOrToken::Token(token) => fmt::Display::fmt(token, f),
+            Self::Node(node) => fmt::Display::fmt(node, f),
+            Self::Token(token) => fmt::Display::fmt(token, f),
         }
     }
 }
@@ -72,8 +72,8 @@ pub enum WalkEvent<T> {
 impl<T> WalkEvent<T> {
     pub fn map<F: FnOnce(T) -> U, U>(self, f: F) -> WalkEvent<U> {
         match self {
-            WalkEvent::Enter(it) => WalkEvent::Enter(f(it)),
-            WalkEvent::Leave(it) => WalkEvent::Leave(f(it)),
+            Self::Enter(it) => WalkEvent::Enter(f(it)),
+            Self::Leave(it) => WalkEvent::Leave(f(it)),
         }
     }
 }
@@ -92,27 +92,27 @@ pub enum TokenAtOffset<T> {
 impl<T> TokenAtOffset<T> {
     pub fn map<F: Fn(T) -> U, U>(self, f: F) -> TokenAtOffset<U> {
         match self {
-            TokenAtOffset::None => TokenAtOffset::None,
-            TokenAtOffset::Single(it) => TokenAtOffset::Single(f(it)),
-            TokenAtOffset::Between(l, r) => TokenAtOffset::Between(f(l), f(r)),
+            Self::None => TokenAtOffset::None,
+            Self::Single(it) => TokenAtOffset::Single(f(it)),
+            Self::Between(l, r) => TokenAtOffset::Between(f(l), f(r)),
         }
     }
 
     /// Convert to option, preferring the right leaf in case of a tie.
     pub fn right_biased(self) -> Option<T> {
         match self {
-            TokenAtOffset::None => None,
-            TokenAtOffset::Single(node) => Some(node),
-            TokenAtOffset::Between(_, right) => Some(right),
+            Self::None => None,
+            Self::Single(node) => Some(node),
+            Self::Between(_, right) => Some(right),
         }
     }
 
     /// Convert to option, preferring the left leaf in case of a tie.
     pub fn left_biased(self) -> Option<T> {
         match self {
-            TokenAtOffset::None => None,
-            TokenAtOffset::Single(node) => Some(node),
-            TokenAtOffset::Between(left, _) => Some(left),
+            Self::None => None,
+            Self::Single(node) => Some(node),
+            Self::Between(left, _) => Some(left),
         }
     }
 }
@@ -121,14 +121,14 @@ impl<T> Iterator for TokenAtOffset<T> {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        match std::mem::replace(self, TokenAtOffset::None) {
-            TokenAtOffset::None => None,
-            TokenAtOffset::Single(node) => {
-                *self = TokenAtOffset::None;
+        match std::mem::replace(self, Self::None) {
+            Self::None => None,
+            Self::Single(node) => {
+                *self = Self::None;
                 Some(node)
             }
-            TokenAtOffset::Between(left, right) => {
-                *self = TokenAtOffset::Single(right);
+            Self::Between(left, right) => {
+                *self = Self::Single(right);
                 Some(left)
             }
         }
@@ -136,9 +136,9 @@ impl<T> Iterator for TokenAtOffset<T> {
 
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self {
-            TokenAtOffset::None => (0, Some(0)),
-            TokenAtOffset::Single(_) => (1, Some(1)),
-            TokenAtOffset::Between(_, _) => (2, Some(2)),
+            Self::None => (0, Some(0)),
+            Self::Single(_) => (1, Some(1)),
+            Self::Between(_, _) => (2, Some(2)),
         }
     }
 }

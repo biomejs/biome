@@ -319,8 +319,8 @@ enum LengthCheck {
 impl LengthCheck {
     fn opposite(&self) -> Self {
         match self {
-            LengthCheck::Zero => LengthCheck::NonZero,
-            LengthCheck::NonZero => LengthCheck::Zero,
+            Self::Zero => Self::NonZero,
+            Self::NonZero => Self::Zero,
         }
     }
 }

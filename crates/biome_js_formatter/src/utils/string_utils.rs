@@ -402,13 +402,13 @@ mod tests {
     impl AsToken {
         fn into_token(self, token: &JsSyntaxToken) -> FormatLiteralStringToken {
             match self {
-                AsToken::Directive => {
+                Self::Directive => {
                     FormatLiteralStringToken::new(token, StringLiteralParentKind::Directive)
                 }
-                AsToken::String => {
+                Self::String => {
                     FormatLiteralStringToken::new(token, StringLiteralParentKind::Expression)
                 }
-                AsToken::Member => {
+                Self::Member => {
                     FormatLiteralStringToken::new(token, StringLiteralParentKind::Member)
                 }
             }

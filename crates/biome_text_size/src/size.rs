@@ -47,7 +47,7 @@ impl TextSize {
     /// assert_eq!(str_size, TextSize::from(13));
     /// ```
     #[inline]
-    pub fn of<T: TextLen>(text: T) -> TextSize {
+    pub fn of<T: TextLen>(text: T) -> Self {
         text.text_len()
     }
 }
@@ -57,21 +57,21 @@ impl TextSize {
 impl TextSize {
     /// Checked addition. Returns `None` if overflow occurred.
     #[inline]
-    pub fn checked_add(self, rhs: TextSize) -> Option<TextSize> {
-        self.raw.checked_add(rhs.raw).map(|raw| TextSize { raw })
+    pub fn checked_add(self, rhs: Self) -> Option<Self> {
+        self.raw.checked_add(rhs.raw).map(|raw| Self { raw })
     }
 
     /// Checked subtraction. Returns `None` if overflow occurred.
     #[inline]
-    pub fn checked_sub(self, rhs: TextSize) -> Option<TextSize> {
-        self.raw.checked_sub(rhs.raw).map(|raw| TextSize { raw })
+    pub fn checked_sub(self, rhs: Self) -> Option<Self> {
+        self.raw.checked_sub(rhs.raw).map(|raw| Self { raw })
     }
 }
 
 impl From<u32> for TextSize {
     #[inline]
     fn from(raw: u32) -> Self {
-        TextSize { raw }
+        Self { raw }
     }
 }
 
@@ -93,7 +93,7 @@ impl TryFrom<usize> for TextSize {
 impl From<TextSize> for usize {
     #[inline]
     fn from(value: TextSize) -> Self {
-        value.raw as usize
+        value.raw as Self
     }
 }
 
@@ -131,7 +131,7 @@ ops!(impl Sub for TextSize by fn sub = -);
 
 impl<A> AddAssign<A> for TextSize
 where
-    TextSize: Add<A, Output = TextSize>,
+    Self: Add<A, Output = Self>,
 {
     #[inline]
     fn add_assign(&mut self, rhs: A) {
@@ -141,7 +141,7 @@ where
 
 impl<S> SubAssign<S> for TextSize
 where
-    TextSize: Sub<S, Output = TextSize>,
+    Self: Sub<S, Output = Self>,
 {
     #[inline]
     fn sub_assign(&mut self, rhs: S) {
@@ -151,10 +151,10 @@ where
 
 impl<A> iter::Sum<A> for TextSize
 where
-    TextSize: Add<A, Output = TextSize>,
+    Self: Add<A, Output = Self>,
 {
     #[inline]
-    fn sum<I: Iterator<Item = A>>(iter: I) -> TextSize {
+    fn sum<I: Iterator<Item = A>>(iter: I) -> Self {
         iter.fold(0.into(), Add::add)
     }
 }

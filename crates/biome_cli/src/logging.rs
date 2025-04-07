@@ -54,11 +54,11 @@ pub enum LoggingLevel {
 impl LoggingLevel {
     fn to_filter_level(self) -> Option<LevelFilter> {
         match self {
-            LoggingLevel::None => None,
-            LoggingLevel::Info => Some(LevelFilter::INFO),
-            LoggingLevel::Warn => Some(LevelFilter::WARN),
-            LoggingLevel::Error => Some(LevelFilter::ERROR),
-            LoggingLevel::Debug => Some(LevelFilter::DEBUG),
+            Self::None => None,
+            Self::Info => Some(LevelFilter::INFO),
+            Self::Warn => Some(LevelFilter::WARN),
+            Self::Error => Some(LevelFilter::ERROR),
+            Self::Debug => Some(LevelFilter::DEBUG),
         }
     }
 }
@@ -80,11 +80,11 @@ impl FromStr for LoggingLevel {
 impl Display for LoggingLevel {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            LoggingLevel::None => write!(f, "none"),
-            LoggingLevel::Debug => write!(f, "debug"),
-            LoggingLevel::Info => write!(f, "info"),
-            LoggingLevel::Warn => write!(f, "warn"),
-            LoggingLevel::Error => write!(f, "error"),
+            Self::None => write!(f, "none"),
+            Self::Debug => write!(f, "debug"),
+            Self::Info => write!(f, "info"),
+            Self::Warn => write!(f, "warn"),
+            Self::Error => write!(f, "error"),
         }
     }
 }
@@ -152,9 +152,9 @@ pub enum LoggingKind {
 impl Display for LoggingKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            LoggingKind::Pretty => write!(f, "pretty"),
-            LoggingKind::Compact => write!(f, "compact"),
-            LoggingKind::Json => write!(f, "json"),
+            Self::Pretty => write!(f, "pretty"),
+            Self::Compact => write!(f, "compact"),
+            Self::Json => write!(f, "json"),
         }
     }
 }

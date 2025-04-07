@@ -43,7 +43,7 @@ struct JsFormatSyntaxRewriter {
 
 impl JsFormatSyntaxRewriter {
     pub fn with_offset(offset: TextSize) -> Self {
-        JsFormatSyntaxRewriter {
+        Self {
             source_map: TransformSourceMapBuilder::with_offset(offset),
             ..Default::default()
         }

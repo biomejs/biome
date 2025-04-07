@@ -609,25 +609,25 @@ pub enum AnyYamlScalar {
 impl AnyYamlScalar {
     pub fn as_yaml_boolean_value(&self) -> Option<&YamlBooleanValue> {
         match &self {
-            AnyYamlScalar::YamlBooleanValue(item) => Some(item),
+            Self::YamlBooleanValue(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_null_value(&self) -> Option<&YamlNullValue> {
         match &self {
-            AnyYamlScalar::YamlNullValue(item) => Some(item),
+            Self::YamlNullValue(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_number_value(&self) -> Option<&YamlNumberValue> {
         match &self {
-            AnyYamlScalar::YamlNumberValue(item) => Some(item),
+            Self::YamlNumberValue(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_string_value(&self) -> Option<&YamlStringValue> {
         match &self {
-            AnyYamlScalar::YamlStringValue(item) => Some(item),
+            Self::YamlStringValue(item) => Some(item),
             _ => None,
         }
     }
@@ -643,31 +643,31 @@ pub enum AnyYamlValue {
 impl AnyYamlValue {
     pub fn as_any_yaml_scalar(&self) -> Option<&AnyYamlScalar> {
         match &self {
-            AnyYamlValue::AnyYamlScalar(item) => Some(item),
+            Self::AnyYamlScalar(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_array(&self) -> Option<&YamlArray> {
         match &self {
-            AnyYamlValue::YamlArray(item) => Some(item),
+            Self::YamlArray(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_array_inline(&self) -> Option<&YamlArrayInline> {
         match &self {
-            AnyYamlValue::YamlArrayInline(item) => Some(item),
+            Self::YamlArrayInline(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_bogus_value(&self) -> Option<&YamlBogusValue> {
         match &self {
-            AnyYamlValue::YamlBogusValue(item) => Some(item),
+            Self::YamlBogusValue(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_object(&self) -> Option<&YamlObject> {
         match &self {
-            AnyYamlValue::YamlObject(item) => Some(item),
+            Self::YamlObject(item) => Some(item),
             _ => None,
         }
     }
@@ -710,12 +710,12 @@ impl std::fmt::Debug for YamlArray {
     }
 }
 impl From<YamlArray> for SyntaxNode {
-    fn from(n: YamlArray) -> SyntaxNode {
+    fn from(n: YamlArray) -> Self {
         n.syntax
     }
 }
 impl From<YamlArray> for SyntaxElement {
-    fn from(n: YamlArray) -> SyntaxElement {
+    fn from(n: YamlArray) -> Self {
         n.syntax.into()
     }
 }
@@ -765,12 +765,12 @@ impl std::fmt::Debug for YamlArrayInline {
     }
 }
 impl From<YamlArrayInline> for SyntaxNode {
-    fn from(n: YamlArrayInline) -> SyntaxNode {
+    fn from(n: YamlArrayInline) -> Self {
         n.syntax
     }
 }
 impl From<YamlArrayInline> for SyntaxElement {
-    fn from(n: YamlArrayInline) -> SyntaxElement {
+    fn from(n: YamlArrayInline) -> Self {
         n.syntax.into()
     }
 }
@@ -816,12 +816,12 @@ impl std::fmt::Debug for YamlArrayItem {
     }
 }
 impl From<YamlArrayItem> for SyntaxNode {
-    fn from(n: YamlArrayItem) -> SyntaxNode {
+    fn from(n: YamlArrayItem) -> Self {
         n.syntax
     }
 }
 impl From<YamlArrayItem> for SyntaxElement {
-    fn from(n: YamlArrayItem) -> SyntaxElement {
+    fn from(n: YamlArrayItem) -> Self {
         n.syntax.into()
     }
 }
@@ -867,12 +867,12 @@ impl std::fmt::Debug for YamlBlockFolded {
     }
 }
 impl From<YamlBlockFolded> for SyntaxNode {
-    fn from(n: YamlBlockFolded) -> SyntaxNode {
+    fn from(n: YamlBlockFolded) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockFolded> for SyntaxElement {
-    fn from(n: YamlBlockFolded) -> SyntaxElement {
+    fn from(n: YamlBlockFolded) -> Self {
         n.syntax.into()
     }
 }
@@ -918,12 +918,12 @@ impl std::fmt::Debug for YamlBlockLiteral {
     }
 }
 impl From<YamlBlockLiteral> for SyntaxNode {
-    fn from(n: YamlBlockLiteral) -> SyntaxNode {
+    fn from(n: YamlBlockLiteral) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockLiteral> for SyntaxElement {
-    fn from(n: YamlBlockLiteral) -> SyntaxElement {
+    fn from(n: YamlBlockLiteral) -> Self {
         n.syntax.into()
     }
 }
@@ -968,12 +968,12 @@ impl std::fmt::Debug for YamlBlockValue {
     }
 }
 impl From<YamlBlockValue> for SyntaxNode {
-    fn from(n: YamlBlockValue) -> SyntaxNode {
+    fn from(n: YamlBlockValue) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockValue> for SyntaxElement {
-    fn from(n: YamlBlockValue) -> SyntaxElement {
+    fn from(n: YamlBlockValue) -> Self {
         n.syntax.into()
     }
 }
@@ -1018,12 +1018,12 @@ impl std::fmt::Debug for YamlBooleanValue {
     }
 }
 impl From<YamlBooleanValue> for SyntaxNode {
-    fn from(n: YamlBooleanValue) -> SyntaxNode {
+    fn from(n: YamlBooleanValue) -> Self {
         n.syntax
     }
 }
 impl From<YamlBooleanValue> for SyntaxElement {
-    fn from(n: YamlBooleanValue) -> SyntaxElement {
+    fn from(n: YamlBooleanValue) -> Self {
         n.syntax.into()
     }
 }
@@ -1073,12 +1073,12 @@ impl std::fmt::Debug for YamlDocument {
     }
 }
 impl From<YamlDocument> for SyntaxNode {
-    fn from(n: YamlDocument) -> SyntaxNode {
+    fn from(n: YamlDocument) -> Self {
         n.syntax
     }
 }
 impl From<YamlDocument> for SyntaxElement {
-    fn from(n: YamlDocument) -> SyntaxElement {
+    fn from(n: YamlDocument) -> Self {
         n.syntax.into()
     }
 }
@@ -1123,12 +1123,12 @@ impl std::fmt::Debug for YamlIdentifier {
     }
 }
 impl From<YamlIdentifier> for SyntaxNode {
-    fn from(n: YamlIdentifier) -> SyntaxNode {
+    fn from(n: YamlIdentifier) -> Self {
         n.syntax
     }
 }
 impl From<YamlIdentifier> for SyntaxElement {
-    fn from(n: YamlIdentifier) -> SyntaxElement {
+    fn from(n: YamlIdentifier) -> Self {
         n.syntax.into()
     }
 }
@@ -1173,12 +1173,12 @@ impl std::fmt::Debug for YamlNullValue {
     }
 }
 impl From<YamlNullValue> for SyntaxNode {
-    fn from(n: YamlNullValue) -> SyntaxNode {
+    fn from(n: YamlNullValue) -> Self {
         n.syntax
     }
 }
 impl From<YamlNullValue> for SyntaxElement {
-    fn from(n: YamlNullValue) -> SyntaxElement {
+    fn from(n: YamlNullValue) -> Self {
         n.syntax.into()
     }
 }
@@ -1223,12 +1223,12 @@ impl std::fmt::Debug for YamlNumberValue {
     }
 }
 impl From<YamlNumberValue> for SyntaxNode {
-    fn from(n: YamlNumberValue) -> SyntaxNode {
+    fn from(n: YamlNumberValue) -> Self {
         n.syntax
     }
 }
 impl From<YamlNumberValue> for SyntaxElement {
-    fn from(n: YamlNumberValue) -> SyntaxElement {
+    fn from(n: YamlNumberValue) -> Self {
         n.syntax.into()
     }
 }
@@ -1270,12 +1270,12 @@ impl std::fmt::Debug for YamlObject {
     }
 }
 impl From<YamlObject> for SyntaxNode {
-    fn from(n: YamlObject) -> SyntaxNode {
+    fn from(n: YamlObject) -> Self {
         n.syntax
     }
 }
 impl From<YamlObject> for SyntaxElement {
-    fn from(n: YamlObject) -> SyntaxElement {
+    fn from(n: YamlObject) -> Self {
         n.syntax.into()
     }
 }
@@ -1322,12 +1322,12 @@ impl std::fmt::Debug for YamlObjectMember {
     }
 }
 impl From<YamlObjectMember> for SyntaxNode {
-    fn from(n: YamlObjectMember) -> SyntaxNode {
+    fn from(n: YamlObjectMember) -> Self {
         n.syntax
     }
 }
 impl From<YamlObjectMember> for SyntaxElement {
-    fn from(n: YamlObjectMember) -> SyntaxElement {
+    fn from(n: YamlObjectMember) -> Self {
         n.syntax.into()
     }
 }
@@ -1374,12 +1374,12 @@ impl std::fmt::Debug for YamlRoot {
     }
 }
 impl From<YamlRoot> for SyntaxNode {
-    fn from(n: YamlRoot) -> SyntaxNode {
+    fn from(n: YamlRoot) -> Self {
         n.syntax
     }
 }
 impl From<YamlRoot> for SyntaxElement {
-    fn from(n: YamlRoot) -> SyntaxElement {
+    fn from(n: YamlRoot) -> Self {
         n.syntax.into()
     }
 }
@@ -1424,33 +1424,33 @@ impl std::fmt::Debug for YamlStringValue {
     }
 }
 impl From<YamlStringValue> for SyntaxNode {
-    fn from(n: YamlStringValue) -> SyntaxNode {
+    fn from(n: YamlStringValue) -> Self {
         n.syntax
     }
 }
 impl From<YamlStringValue> for SyntaxElement {
-    fn from(n: YamlStringValue) -> SyntaxElement {
+    fn from(n: YamlStringValue) -> Self {
         n.syntax.into()
     }
 }
 impl From<YamlBooleanValue> for AnyYamlScalar {
-    fn from(node: YamlBooleanValue) -> AnyYamlScalar {
-        AnyYamlScalar::YamlBooleanValue(node)
+    fn from(node: YamlBooleanValue) -> Self {
+        Self::YamlBooleanValue(node)
     }
 }
 impl From<YamlNullValue> for AnyYamlScalar {
-    fn from(node: YamlNullValue) -> AnyYamlScalar {
-        AnyYamlScalar::YamlNullValue(node)
+    fn from(node: YamlNullValue) -> Self {
+        Self::YamlNullValue(node)
     }
 }
 impl From<YamlNumberValue> for AnyYamlScalar {
-    fn from(node: YamlNumberValue) -> AnyYamlScalar {
-        AnyYamlScalar::YamlNumberValue(node)
+    fn from(node: YamlNumberValue) -> Self {
+        Self::YamlNumberValue(node)
     }
 }
 impl From<YamlStringValue> for AnyYamlScalar {
-    fn from(node: YamlStringValue) -> AnyYamlScalar {
-        AnyYamlScalar::YamlStringValue(node)
+    fn from(node: YamlStringValue) -> Self {
+        Self::YamlStringValue(node)
     }
 }
 impl AstNode for AnyYamlScalar {
@@ -1467,43 +1467,43 @@ impl AstNode for AnyYamlScalar {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_BOOLEAN_VALUE => AnyYamlScalar::YamlBooleanValue(YamlBooleanValue { syntax }),
-            YAML_NULL_VALUE => AnyYamlScalar::YamlNullValue(YamlNullValue { syntax }),
-            YAML_NUMBER_VALUE => AnyYamlScalar::YamlNumberValue(YamlNumberValue { syntax }),
-            YAML_STRING_VALUE => AnyYamlScalar::YamlStringValue(YamlStringValue { syntax }),
+            YAML_BOOLEAN_VALUE => Self::YamlBooleanValue(YamlBooleanValue { syntax }),
+            YAML_NULL_VALUE => Self::YamlNullValue(YamlNullValue { syntax }),
+            YAML_NUMBER_VALUE => Self::YamlNumberValue(YamlNumberValue { syntax }),
+            YAML_STRING_VALUE => Self::YamlStringValue(YamlStringValue { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlScalar::YamlBooleanValue(it) => &it.syntax,
-            AnyYamlScalar::YamlNullValue(it) => &it.syntax,
-            AnyYamlScalar::YamlNumberValue(it) => &it.syntax,
-            AnyYamlScalar::YamlStringValue(it) => &it.syntax,
+            Self::YamlBooleanValue(it) => &it.syntax,
+            Self::YamlNullValue(it) => &it.syntax,
+            Self::YamlNumberValue(it) => &it.syntax,
+            Self::YamlStringValue(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlScalar::YamlBooleanValue(it) => it.syntax,
-            AnyYamlScalar::YamlNullValue(it) => it.syntax,
-            AnyYamlScalar::YamlNumberValue(it) => it.syntax,
-            AnyYamlScalar::YamlStringValue(it) => it.syntax,
+            Self::YamlBooleanValue(it) => it.syntax,
+            Self::YamlNullValue(it) => it.syntax,
+            Self::YamlNumberValue(it) => it.syntax,
+            Self::YamlStringValue(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlScalar {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlScalar::YamlBooleanValue(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlScalar::YamlNullValue(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlScalar::YamlNumberValue(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlScalar::YamlStringValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlBooleanValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlNullValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlNumberValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlStringValue(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlScalar> for SyntaxNode {
-    fn from(n: AnyYamlScalar) -> SyntaxNode {
+    fn from(n: AnyYamlScalar) -> Self {
         match n {
             AnyYamlScalar::YamlBooleanValue(it) => it.into(),
             AnyYamlScalar::YamlNullValue(it) => it.into(),
@@ -1513,29 +1513,29 @@ impl From<AnyYamlScalar> for SyntaxNode {
     }
 }
 impl From<AnyYamlScalar> for SyntaxElement {
-    fn from(n: AnyYamlScalar) -> SyntaxElement {
+    fn from(n: AnyYamlScalar) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlArray> for AnyYamlValue {
-    fn from(node: YamlArray) -> AnyYamlValue {
-        AnyYamlValue::YamlArray(node)
+    fn from(node: YamlArray) -> Self {
+        Self::YamlArray(node)
     }
 }
 impl From<YamlArrayInline> for AnyYamlValue {
-    fn from(node: YamlArrayInline) -> AnyYamlValue {
-        AnyYamlValue::YamlArrayInline(node)
+    fn from(node: YamlArrayInline) -> Self {
+        Self::YamlArrayInline(node)
     }
 }
 impl From<YamlBogusValue> for AnyYamlValue {
-    fn from(node: YamlBogusValue) -> AnyYamlValue {
-        AnyYamlValue::YamlBogusValue(node)
+    fn from(node: YamlBogusValue) -> Self {
+        Self::YamlBogusValue(node)
     }
 }
 impl From<YamlObject> for AnyYamlValue {
-    fn from(node: YamlObject) -> AnyYamlValue {
-        AnyYamlValue::YamlObject(node)
+    fn from(node: YamlObject) -> Self {
+        Self::YamlObject(node)
     }
 }
 impl AstNode for AnyYamlValue {
@@ -1554,13 +1554,13 @@ impl AstNode for AnyYamlValue {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_ARRAY => AnyYamlValue::YamlArray(YamlArray { syntax }),
-            YAML_ARRAY_INLINE => AnyYamlValue::YamlArrayInline(YamlArrayInline { syntax }),
-            YAML_BOGUS_VALUE => AnyYamlValue::YamlBogusValue(YamlBogusValue { syntax }),
-            YAML_OBJECT => AnyYamlValue::YamlObject(YamlObject { syntax }),
+            YAML_ARRAY => Self::YamlArray(YamlArray { syntax }),
+            YAML_ARRAY_INLINE => Self::YamlArrayInline(YamlArrayInline { syntax }),
+            YAML_BOGUS_VALUE => Self::YamlBogusValue(YamlBogusValue { syntax }),
+            YAML_OBJECT => Self::YamlObject(YamlObject { syntax }),
             _ => {
                 if let Some(any_yaml_scalar) = AnyYamlScalar::cast(syntax) {
-                    return Some(AnyYamlValue::AnyYamlScalar(any_yaml_scalar));
+                    return Some(Self::AnyYamlScalar(any_yaml_scalar));
                 }
                 return None;
             }
@@ -1569,36 +1569,36 @@ impl AstNode for AnyYamlValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlValue::YamlArray(it) => &it.syntax,
-            AnyYamlValue::YamlArrayInline(it) => &it.syntax,
-            AnyYamlValue::YamlBogusValue(it) => &it.syntax,
-            AnyYamlValue::YamlObject(it) => &it.syntax,
-            AnyYamlValue::AnyYamlScalar(it) => it.syntax(),
+            Self::YamlArray(it) => &it.syntax,
+            Self::YamlArrayInline(it) => &it.syntax,
+            Self::YamlBogusValue(it) => &it.syntax,
+            Self::YamlObject(it) => &it.syntax,
+            Self::AnyYamlScalar(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlValue::YamlArray(it) => it.syntax,
-            AnyYamlValue::YamlArrayInline(it) => it.syntax,
-            AnyYamlValue::YamlBogusValue(it) => it.syntax,
-            AnyYamlValue::YamlObject(it) => it.syntax,
-            AnyYamlValue::AnyYamlScalar(it) => it.into_syntax(),
+            Self::YamlArray(it) => it.syntax,
+            Self::YamlArrayInline(it) => it.syntax,
+            Self::YamlBogusValue(it) => it.syntax,
+            Self::YamlObject(it) => it.syntax,
+            Self::AnyYamlScalar(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyYamlValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlValue::AnyYamlScalar(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlValue::YamlArray(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlValue::YamlArrayInline(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlValue::YamlBogusValue(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlValue::YamlObject(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyYamlScalar(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlArray(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlArrayInline(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlBogusValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlObject(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlValue> for SyntaxNode {
-    fn from(n: AnyYamlValue) -> SyntaxNode {
+    fn from(n: AnyYamlValue) -> Self {
         match n {
             AnyYamlValue::AnyYamlScalar(it) => it.into(),
             AnyYamlValue::YamlArray(it) => it.into(),
@@ -1609,7 +1609,7 @@ impl From<AnyYamlValue> for SyntaxNode {
     }
 }
 impl From<AnyYamlValue> for SyntaxElement {
-    fn from(n: AnyYamlValue) -> SyntaxElement {
+    fn from(n: AnyYamlValue) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -1746,12 +1746,12 @@ impl std::fmt::Debug for YamlBogus {
     }
 }
 impl From<YamlBogus> for SyntaxNode {
-    fn from(n: YamlBogus) -> SyntaxNode {
+    fn from(n: YamlBogus) -> Self {
         n.syntax
     }
 }
 impl From<YamlBogus> for SyntaxElement {
-    fn from(n: YamlBogus) -> SyntaxElement {
+    fn from(n: YamlBogus) -> Self {
         n.syntax.into()
     }
 }
@@ -1802,12 +1802,12 @@ impl std::fmt::Debug for YamlBogusValue {
     }
 }
 impl From<YamlBogusValue> for SyntaxNode {
-    fn from(n: YamlBogusValue) -> SyntaxNode {
+    fn from(n: YamlBogusValue) -> Self {
         n.syntax
     }
 }
 impl From<YamlBogusValue> for SyntaxElement {
-    fn from(n: YamlBogusValue) -> SyntaxElement {
+    fn from(n: YamlBogusValue) -> Self {
         n.syntax.into()
     }
 }
@@ -1836,9 +1836,9 @@ impl AstNode for YamlArrayInlineList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_ARRAY_INLINE_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlArrayInlineList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlArrayInlineList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -1918,9 +1918,9 @@ impl AstNode for YamlArrayItemList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_ARRAY_ITEM_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlArrayItemList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlArrayItemList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -2000,9 +2000,9 @@ impl AstNode for YamlDocumentList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_DOCUMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlDocumentList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlDocumentList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -2082,9 +2082,9 @@ impl AstNode for YamlObjectMemberList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_OBJECT_MEMBER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlObjectMemberList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlObjectMemberList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {

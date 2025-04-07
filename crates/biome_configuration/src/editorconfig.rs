@@ -140,9 +140,9 @@ pub enum EditorconfigValue<T> {
 impl<T: Default> Into<Option<T>> for EditorconfigValue<T> {
     fn into(self) -> Option<T> {
         match self {
-            EditorconfigValue::Explicit(v) => Some(v),
-            EditorconfigValue::Default => Some(T::default()),
-            EditorconfigValue::None => None,
+            Self::Explicit(v) => Some(v),
+            Self::Default => Some(T::default()),
+            Self::None => None,
         }
     }
 }

@@ -63,11 +63,11 @@ enum Quote {
 }
 
 impl Quote {
-    fn from_char(c: char) -> Option<Quote> {
+    fn from_char(c: char) -> Option<Self> {
         match c {
-            '\'' => Some(Quote::Single),
-            '"' => Some(Quote::Double),
-            '`' => Some(Quote::Backtick),
+            '\'' => Some(Self::Single),
+            '"' => Some(Self::Double),
+            '`' => Some(Self::Backtick),
             _ => None,
         }
     }

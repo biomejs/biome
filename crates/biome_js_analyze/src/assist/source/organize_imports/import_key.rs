@@ -47,19 +47,14 @@ pub enum ImportStatementKind {
 }
 impl ImportStatementKind {
     pub fn has_type_token(self) -> bool {
-        (ImportStatementKind::DefaultType
-            | ImportStatementKind::NamespaceType
-            | ImportStatementKind::NamedType)
-            .contains(self)
+        (Self::DefaultType | Self::NamespaceType | Self::NamedType).contains(self)
     }
 
     pub fn is_mergeable(self, kinds: ImportStatementKinds) -> bool {
         match self {
-            ImportStatementKind::DefaultNamed => kinds.contains(ImportStatementKind::Named),
-            ImportStatementKind::Named => kinds
-                .0
-                .intersects(ImportStatementKind::DefaultNamed | ImportStatementKind::Named),
-            ImportStatementKind::NamedType => kinds.contains(ImportStatementKind::NamedType),
+            Self::DefaultNamed => kinds.contains(Self::Named),
+            Self::Named => kinds.0.intersects(Self::DefaultNamed | Self::Named),
+            Self::NamedType => kinds.contains(Self::NamedType),
             _ => false,
         }
     }

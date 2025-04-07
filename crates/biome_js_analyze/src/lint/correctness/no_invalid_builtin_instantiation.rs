@@ -199,8 +199,8 @@ enum BuiltinCreationRule {
 impl BuiltinCreationRule {
     const fn forbidden_builtins_list(&self) -> &[&str] {
         match self {
-            BuiltinCreationRule::MustUseNew => BUILTINS_REQUIRING_NEW,
-            BuiltinCreationRule::MustNotUseNew => BUILTINS_REQUIRING_NO_NEW,
+            Self::MustUseNew => BUILTINS_REQUIRING_NEW,
+            Self::MustNotUseNew => BUILTINS_REQUIRING_NO_NEW,
         }
     }
 }

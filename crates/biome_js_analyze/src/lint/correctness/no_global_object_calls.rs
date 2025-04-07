@@ -134,8 +134,8 @@ declare_node_union! {
 impl QueryNode {
     fn callee(&self) -> SyntaxResult<AnyJsExpression> {
         match self {
-            QueryNode::JsNewExpression(expression) => expression.callee(),
-            QueryNode::JsCallExpression(expression) => expression.callee(),
+            Self::JsNewExpression(expression) => expression.callee(),
+            Self::JsCallExpression(expression) => expression.callee(),
         }
     }
 }
@@ -153,11 +153,11 @@ impl FromStr for NonCallableGlobals {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Atomics" => Ok(NonCallableGlobals::Atomics),
-            "JSON" => Ok(NonCallableGlobals::Json),
-            "Math" => Ok(NonCallableGlobals::Math),
-            "Reflect" => Ok(NonCallableGlobals::Reflect),
-            "Intl" => Ok(NonCallableGlobals::Intl),
+            "Atomics" => Ok(Self::Atomics),
+            "JSON" => Ok(Self::Json),
+            "Math" => Ok(Self::Math),
+            "Reflect" => Ok(Self::Reflect),
+            "Intl" => Ok(Self::Intl),
             _ => Err("non callable globals not implemented".to_string()),
         }
     }
@@ -166,11 +166,11 @@ impl FromStr for NonCallableGlobals {
 impl Display for NonCallableGlobals {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
-            NonCallableGlobals::Atomics => "Atomics",
-            NonCallableGlobals::Json => "Json",
-            NonCallableGlobals::Math => "Math",
-            NonCallableGlobals::Reflect => "Reflect",
-            NonCallableGlobals::Intl => "Intl",
+            Self::Atomics => "Atomics",
+            Self::Json => "Json",
+            Self::Math => "Math",
+            Self::Reflect => "Reflect",
+            Self::Intl => "Intl",
         };
         write!(f, "{repr}")
     }

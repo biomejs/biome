@@ -59,8 +59,8 @@ impl AttributeKind {
     /// Converts an [AttributeKind] to a string.
     fn as_str(&self) -> &'static str {
         match self {
-            AttributeKind::Role => "role",
-            AttributeKind::Aria => "aria-*",
+            Self::Role => "role",
+            Self::Aria => "aria-*",
         }
     }
 }

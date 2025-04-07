@@ -45,28 +45,28 @@ impl Format<JsFormatContext> for AnyJsTemplate {
 impl AnyJsTemplate {
     fn tag(&self) -> Option<AnyJsExpression> {
         match self {
-            AnyJsTemplate::JsTemplateExpression(template) => template.tag(),
-            AnyJsTemplate::TsTemplateLiteralType(_) => None,
+            Self::JsTemplateExpression(template) => template.tag(),
+            Self::TsTemplateLiteralType(_) => None,
         }
     }
 
     fn type_arguments(&self) -> Option<TsTypeArguments> {
         match self {
-            AnyJsTemplate::JsTemplateExpression(template) => template.type_arguments(),
-            AnyJsTemplate::TsTemplateLiteralType(_) => None,
+            Self::JsTemplateExpression(template) => template.type_arguments(),
+            Self::TsTemplateLiteralType(_) => None,
         }
     }
 
     fn l_tick_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsTemplate::JsTemplateExpression(template) => template.l_tick_token(),
-            AnyJsTemplate::TsTemplateLiteralType(template) => template.l_tick_token(),
+            Self::JsTemplateExpression(template) => template.l_tick_token(),
+            Self::TsTemplateLiteralType(template) => template.l_tick_token(),
         }
     }
 
     fn write_elements(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
-            AnyJsTemplate::JsTemplateExpression(template) => {
+            Self::JsTemplateExpression(template) => {
                 let is_test_each_pattern = template.is_test_each_pattern();
                 let options = FormatJsTemplateElementListOptions {
                     is_test_each_pattern,
@@ -74,7 +74,7 @@ impl AnyJsTemplate {
 
                 write!(f, [template.elements().format().with_options(options)])
             }
-            AnyJsTemplate::TsTemplateLiteralType(template) => {
+            Self::TsTemplateLiteralType(template) => {
                 write!(f, [template.elements().format()])
             }
         }
@@ -82,8 +82,8 @@ impl AnyJsTemplate {
 
     fn r_tick_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyJsTemplate::JsTemplateExpression(template) => template.r_tick_token(),
-            AnyJsTemplate::TsTemplateLiteralType(template) => template.r_tick_token(),
+            Self::JsTemplateExpression(template) => template.r_tick_token(),
+            Self::TsTemplateLiteralType(template) => template.r_tick_token(),
         }
     }
 }

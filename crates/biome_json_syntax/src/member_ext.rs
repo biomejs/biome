@@ -10,7 +10,7 @@ impl JsonMemberName {
 impl JsonMember {
     /// If the value of the member is a [JsonObjectValue](crate::JsonObjectValue), it returns a tuple
     /// that contains a list of [JsonMember] and of its separators. Returns [None] otherwise
-    pub fn unzip_elements(&self) -> Option<(Vec<JsonMember>, Vec<JsonSyntaxToken>)> {
+    pub fn unzip_elements(&self) -> Option<(Vec<Self>, Vec<JsonSyntaxToken>)> {
         let value = self.value().ok()?;
         let AnyJsonValue::JsonObjectValue(value) = value else {
             return None;

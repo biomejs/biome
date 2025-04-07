@@ -37,7 +37,7 @@ pub enum PluginDiagnostic {
 impl From<CompileError> for PluginDiagnostic {
     fn from(value: CompileError) -> Self {
         println!("Compile Error: {value:?}");
-        PluginDiagnostic::Compile(CompileDiagnostic {
+        Self::Compile(CompileDiagnostic {
             source: Some(Error::from(value)),
         })
     }
@@ -45,19 +45,19 @@ impl From<CompileError> for PluginDiagnostic {
 
 impl From<DeserializationDiagnostic> for PluginDiagnostic {
     fn from(value: DeserializationDiagnostic) -> Self {
-        PluginDiagnostic::Deserialization(value)
+        Self::Deserialization(value)
     }
 }
 
 impl From<FileSystemDiagnostic> for PluginDiagnostic {
     fn from(value: FileSystemDiagnostic) -> Self {
-        PluginDiagnostic::FileSystem(value)
+        Self::FileSystem(value)
     }
 }
 
 impl From<SyntaxError> for PluginDiagnostic {
     fn from(_: SyntaxError) -> Self {
-        PluginDiagnostic::Deserialization(DeserializationDiagnostic::new(markup! {"Syntax Error"}))
+        Self::Deserialization(DeserializationDiagnostic::new(markup! {"Syntax Error"}))
     }
 }
 
@@ -102,7 +102,7 @@ impl std::fmt::Display for PluginDiagnostic {
 
 impl From<PluginDiagnostic> for biome_diagnostics::serde::Diagnostic {
     fn from(error: PluginDiagnostic) -> Self {
-        biome_diagnostics::serde::Diagnostic::new(error)
+        Self::new(error)
     }
 }
 

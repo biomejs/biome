@@ -98,7 +98,7 @@ pub struct TabWidth(u8);
 
 impl From<u8> for TabWidth {
     fn from(value: u8) -> Self {
-        TabWidth(value)
+        Self(value)
     }
 }
 
@@ -444,8 +444,8 @@ impl FromStr for QuoteProperties {
 impl fmt::Display for QuoteProperties {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            QuoteProperties::AsNeeded => write!(f, "As needed"),
-            QuoteProperties::Preserve => write!(f, "Preserve"),
+            Self::AsNeeded => write!(f, "As needed"),
+            Self::Preserve => write!(f, "Preserve"),
         }
     }
 }
@@ -490,8 +490,8 @@ impl FromStr for Semicolons {
 impl fmt::Display for Semicolons {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Semicolons::AsNeeded => write!(f, "As needed"),
-            Semicolons::Always => write!(f, "Always"),
+            Self::AsNeeded => write!(f, "As needed"),
+            Self::Always => write!(f, "Always"),
         }
     }
 }
@@ -537,8 +537,8 @@ impl FromStr for ArrowParentheses {
 impl fmt::Display for ArrowParentheses {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ArrowParentheses::AsNeeded => write!(f, "As needed"),
-            ArrowParentheses::Always => write!(f, "Always"),
+            Self::AsNeeded => write!(f, "As needed"),
+            Self::Always => write!(f, "Always"),
         }
     }
 }

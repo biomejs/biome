@@ -37,7 +37,7 @@ pub struct GritFormatterSettings {
 
 impl From<GritFormatterConfiguration> for GritFormatterSettings {
     fn from(config: GritFormatterConfiguration) -> Self {
-        GritFormatterSettings {
+        Self {
             line_ending: config.line_ending,
             line_width: config.line_width,
             indent_width: config.indent_width,
@@ -55,7 +55,7 @@ pub struct GritLinterSettings {
 
 impl From<GritLinterConfiguration> for GritLinterSettings {
     fn from(config: GritLinterConfiguration) -> Self {
-        GritLinterSettings {
+        Self {
             enabled: config.enabled,
         }
     }
@@ -69,7 +69,7 @@ pub struct GritAssistSettings {
 
 impl From<GritAssistConfiguration> for GritAssistSettings {
     fn from(config: GritAssistConfiguration) -> Self {
-        GritAssistSettings {
+        Self {
             enabled: config.enabled,
         }
     }

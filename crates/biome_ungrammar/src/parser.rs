@@ -34,11 +34,11 @@ struct Parser {
 const DUMMY_RULE: Rule = Rule::Node(Node(!0));
 
 impl Parser {
-    fn new(mut tokens: Vec<lexer::Token>) -> Parser {
+    fn new(mut tokens: Vec<lexer::Token>) -> Self {
         tokens.reverse();
-        Parser {
+        Self {
             tokens,
-            ..Parser::default()
+            ..Self::default()
         }
     }
 

@@ -97,17 +97,17 @@ pub enum UseValidAnchorState {
 impl UseValidAnchorState {
     fn message(&self) -> MarkupBuf {
         match self {
-            UseValidAnchorState::MissingHrefAttribute(_) => {
+            Self::MissingHrefAttribute(_) => {
                 (markup! {
                     "Provide a "<Emphasis>"href"</Emphasis>" attribute for the "<Emphasis>"a"</Emphasis>" element."
                 }).to_owned()
             },
-            UseValidAnchorState::IncorrectHref(_) => {
+            Self::IncorrectHref(_) => {
                 (markup! {
                     "Provide a valid value for the attribute "<Emphasis>"href"</Emphasis>"."
                 }).to_owned()
             }
-            UseValidAnchorState::CantBeAnchor(_) => {
+            Self::CantBeAnchor(_) => {
                 (markup! {
                     "Use a "<Emphasis>"button"</Emphasis>" element instead of an "<Emphasis>"a"</Emphasis>" element."
                 }).to_owned()
@@ -117,15 +117,15 @@ impl UseValidAnchorState {
 
     fn note(&self) -> MarkupBuf {
         match self {
-            UseValidAnchorState::MissingHrefAttribute(_) => (markup! {
+            Self::MissingHrefAttribute(_) => (markup! {
                 "An anchor element should always have a "<Emphasis>"href"</Emphasis>""
             })
             .to_owned(),
-            UseValidAnchorState::IncorrectHref(_) => (markup! {
+            Self::IncorrectHref(_) => (markup! {
                 "The href attribute should be a valid a URL"
             })
             .to_owned(),
-            UseValidAnchorState::CantBeAnchor(_) => (markup! {
+            Self::CantBeAnchor(_) => (markup! {
                 "Anchor elements should only be used for default sections or page navigation"
             })
             .to_owned(),
@@ -134,9 +134,9 @@ impl UseValidAnchorState {
 
     fn range(&self) -> &TextRange {
         match self {
-            UseValidAnchorState::MissingHrefAttribute(range)
-            | UseValidAnchorState::CantBeAnchor(range)
-            | UseValidAnchorState::IncorrectHref(range) => range,
+            Self::MissingHrefAttribute(range)
+            | Self::CantBeAnchor(range)
+            | Self::IncorrectHref(range) => range,
         }
     }
 }

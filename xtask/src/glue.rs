@@ -177,7 +177,7 @@ struct Env {
 }
 
 impl Env {
-    fn with<F: FnOnce(&mut Env) -> T, T>(f: F) -> T {
+    fn with<F: FnOnce(&mut Self) -> T, T>(f: F) -> T {
         thread_local! {
             static ENV: RefCell<Env> = RefCell::new(Env {
                 pushd_stack: vec![env::current_dir().unwrap()],

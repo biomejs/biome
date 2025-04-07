@@ -33,9 +33,9 @@ impl FromStr for Category {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Ok(group) = LinterGroup::from_str(s) {
-            Ok(Category::Linter(group))
+            Ok(Self::Linter(group))
         } else if let Ok(group) = AssistGroup::from_str(s) {
-            Ok(Category::Assist(group))
+            Ok(Self::Assist(group))
         } else {
             Err(())
         }
@@ -45,8 +45,8 @@ impl FromStr for Category {
 impl Category {
     pub(crate) fn as_str<'a>(&self) -> &'a str {
         match self {
-            Category::Linter(g) => g.as_str(),
-            Category::Assist(g) => g.as_str(),
+            Self::Linter(g) => g.as_str(),
+            Self::Assist(g) => g.as_str(),
         }
     }
 }
@@ -66,14 +66,14 @@ pub(crate) enum LinterGroup {
 impl LinterGroup {
     pub(crate) fn as_str<'a>(&self) -> &'a str {
         match self {
-            LinterGroup::Style => "style",
-            LinterGroup::Suspicious => "suspicious",
-            LinterGroup::Nursery => "nursery",
-            LinterGroup::A11y => "a11y",
-            LinterGroup::Security => "security",
-            LinterGroup::Complexity => "complexity",
-            LinterGroup::Correctness => "correctness",
-            LinterGroup::Performance => "performance",
+            Self::Style => "style",
+            Self::Suspicious => "suspicious",
+            Self::Nursery => "nursery",
+            Self::A11y => "a11y",
+            Self::Security => "security",
+            Self::Complexity => "complexity",
+            Self::Correctness => "correctness",
+            Self::Performance => "performance",
         }
     }
 }
@@ -83,14 +83,14 @@ impl FromStr for LinterGroup {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(match s {
-            "style" => LinterGroup::Style,
-            "suspicious" => LinterGroup::Suspicious,
-            "nursery" => LinterGroup::Nursery,
-            "a11y" => LinterGroup::A11y,
-            "security" => LinterGroup::Security,
-            "complexity" => LinterGroup::Complexity,
-            "correctness" => LinterGroup::Correctness,
-            "performance" => LinterGroup::Performance,
+            "style" => Self::Style,
+            "suspicious" => Self::Suspicious,
+            "nursery" => Self::Nursery,
+            "a11y" => Self::A11y,
+            "security" => Self::Security,
+            "complexity" => Self::Complexity,
+            "correctness" => Self::Correctness,
+            "performance" => Self::Performance,
             _ => return Err(()),
         })
     }
@@ -104,7 +104,7 @@ pub(crate) enum AssistGroup {
 impl AssistGroup {
     pub(crate) fn as_str<'a>(&self) -> &'a str {
         match self {
-            AssistGroup::Source => "source",
+            Self::Source => "source",
         }
     }
 }
@@ -114,7 +114,7 @@ impl FromStr for AssistGroup {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(match s {
-            "source" => AssistGroup::Source,
+            "source" => Self::Source,
             _ => return Err(()),
         })
     }
@@ -394,11 +394,11 @@ impl AnalyzerMover {
             };
             match kind {
                 QueryKind::Move(from, to) => {
-                    AnalyzerMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &from)?;
-                    AnalyzerMover::add_rule_to_group(&mut groups, rule_member, &to)?
+                    Self::remove_rule_from_group(&mut groups, rule_name.as_str(), &from)?;
+                    Self::add_rule_to_group(&mut groups, rule_member, &to)?
                 }
                 QueryKind::Remove(group) => {
-                    AnalyzerMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
+                    Self::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
                 }
             }
         }

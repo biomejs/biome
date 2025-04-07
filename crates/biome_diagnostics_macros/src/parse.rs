@@ -463,9 +463,9 @@ impl Parse for LocationAttr {
 impl ToTokens for LocationField {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
-            LocationField::Resource(ident) => ident.to_tokens(tokens),
-            LocationField::Span(ident) => ident.to_tokens(tokens),
-            LocationField::SourceCode(ident) => ident.to_tokens(tokens),
+            Self::Resource(ident) => ident.to_tokens(tokens),
+            Self::Span(ident) => ident.to_tokens(tokens),
+            Self::SourceCode(ident) => ident.to_tokens(tokens),
         }
     }
 }

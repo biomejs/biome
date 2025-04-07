@@ -227,19 +227,19 @@ pub struct Closure {
 }
 
 impl Closure {
-    pub(super) fn from_node(data: Rc<SemanticModelData>, node: &impl HasClosureAstNode) -> Closure {
+    pub(super) fn from_node(data: Rc<SemanticModelData>, node: &impl HasClosureAstNode) -> Self {
         let closure_range = node.node_text_range();
         let scope_id = data.scope(closure_range);
 
-        Closure { data, scope_id }
+        Self { data, scope_id }
     }
 
-    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: ScopeId) -> Option<Closure> {
+    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: ScopeId) -> Option<Self> {
         let node = &data.scope_node_by_range[&data.scopes[scope_id.index()].range];
         match node.kind() {
             JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Closure { data, scope_id }),
+            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => Some(Self { data, scope_id }),
             _ => None,
         }
     }
@@ -292,7 +292,7 @@ impl Closure {
     /// }";
     /// assert!(model.closure(function_f).children(), &["g"]);
     /// ```
-    pub fn children(&self) -> impl Iterator<Item = Closure> + use<> {
+    pub fn children(&self) -> impl Iterator<Item = Self> + use<> {
         let scope = &self.data.scopes[self.scope_id.index()];
         ChildrenIter {
             data: self.data.clone(),
@@ -315,7 +315,7 @@ impl Closure {
     /// }";
     /// assert!(model.closure(function_f).descendents(), &["f", "g", "h"]);
     /// ```
-    pub fn descendents(&self) -> impl Iterator<Item = Closure> + use<> {
+    pub fn descendents(&self) -> impl Iterator<Item = Self> + use<> {
         let scopes = vec![self.scope_id];
         DescendentsIter {
             data: self.data.clone(),

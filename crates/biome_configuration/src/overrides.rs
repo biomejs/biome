@@ -75,8 +75,8 @@ impl OverrideGlobs {
     /// Normalize `path` and match it against the list of globs.
     pub fn is_match_candidate(&self, path: &biome_glob::CandidatePath) -> bool {
         match self {
-            OverrideGlobs::Globs(globs) => path.matches_with_exceptions(globs),
-            OverrideGlobs::EditorconfigGlob(glob) => glob.is_match_candidate(path),
+            Self::Globs(globs) => path.matches_with_exceptions(globs),
+            Self::EditorconfigGlob(glob) => glob.is_match_candidate(path),
         }
     }
 }

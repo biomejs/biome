@@ -48,8 +48,8 @@ impl<T: Language> Span for SyntaxToken<T> {
 impl<T: Language> Span for SyntaxElement<T> {
     fn as_range(&self) -> TextRange {
         match self {
-            SyntaxElement::Node(n) => n.text_range_with_trivia(),
-            SyntaxElement::Token(t) => t.text_range(),
+            Self::Node(n) => n.text_range_with_trivia(),
+            Self::Token(t) => t.text_range(),
         }
     }
 }

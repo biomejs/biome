@@ -211,7 +211,7 @@ impl FromStr for CodeBlockTest {
             .map(str::trim)
             .filter(|token| !token.is_empty());
 
-        let mut test = CodeBlockTest {
+        let mut test = Self {
             tag: String::new(),
             expect_diagnostic: false,
             ignore: false,
@@ -248,12 +248,7 @@ struct DiagnosticWriter<'a> {
 }
 
 impl<'a> DiagnosticWriter<'a> {
-    pub fn new(
-        group: &'a str,
-        rule: &'a str,
-        test: &'a CodeBlockTest,
-        code: &'a str,
-    ) -> DiagnosticWriter<'a> {
+    pub fn new(group: &'a str, rule: &'a str, test: &'a CodeBlockTest, code: &'a str) -> Self {
         DiagnosticWriter {
             group,
             rule,

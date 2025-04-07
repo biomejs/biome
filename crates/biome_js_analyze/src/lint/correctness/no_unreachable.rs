@@ -628,7 +628,7 @@ pub struct UnreachableRanges {
 
 impl UnreachableRanges {
     fn new() -> Self {
-        UnreachableRanges { ranges: Vec::new() }
+        Self { ranges: Vec::new() }
     }
 
     fn push(&mut self, node: &JsSyntaxElement, terminator: Option<PathTerminator>) {

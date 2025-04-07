@@ -50,9 +50,9 @@ pub(crate) enum Slot {
 impl std::fmt::Display for Slot {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Slot::Empty { .. } => write!(f, "∅"),
-            Slot::Node { node, .. } => std::fmt::Display::fmt(node, f),
-            Slot::Token { token, .. } => std::fmt::Display::fmt(token, f),
+            Self::Empty { .. } => write!(f, "∅"),
+            Self::Node { node, .. } => std::fmt::Display::fmt(node, f),
+            Self::Token { token, .. } => std::fmt::Display::fmt(token, f),
         }
     }
 }
@@ -241,7 +241,7 @@ impl ops::Deref for GreenNode {
 impl GreenNode {
     /// Creates new Node.
     #[inline]
-    pub fn new<I>(kind: RawSyntaxKind, slots: I) -> GreenNode
+    pub fn new<I>(kind: RawSyntaxKind, slots: I) -> Self
     where
         I: IntoIterator<Item = Option<GreenElement>>,
         I::IntoIter: ExactSizeIterator,
@@ -278,7 +278,7 @@ impl GreenNode {
             Arc::into_thin(data)
         };
 
-        GreenNode { ptr: data }
+        Self { ptr: data }
     }
 
     #[inline]
@@ -289,12 +289,12 @@ impl GreenNode {
     }
 
     #[inline]
-    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<GreenNodeData>) -> GreenNode {
+    pub(crate) unsafe fn from_raw(ptr: ptr::NonNull<GreenNodeData>) -> Self {
         let arc = unsafe {
             let arc = Arc::from_raw(&ptr.as_ref().data as *const ReprThin);
             mem::transmute::<Arc<ReprThin>, ThinArc<GreenNodeHead, Slot>>(arc)
         };
-        GreenNode { ptr: arc }
+        Self { ptr: arc }
     }
 }
 
@@ -302,17 +302,17 @@ impl Slot {
     #[inline]
     pub(crate) fn as_ref(&self) -> Option<GreenElementRef> {
         match self {
-            Slot::Node { node, .. } => Some(NodeOrToken::Node(node)),
-            Slot::Token { token, .. } => Some(NodeOrToken::Token(token)),
-            Slot::Empty { .. } => None,
+            Self::Node { node, .. } => Some(NodeOrToken::Node(node)),
+            Self::Token { token, .. } => Some(NodeOrToken::Token(token)),
+            Self::Empty { .. } => None,
         }
     }
     #[inline]
     pub(crate) fn rel_offset(&self) -> TextSize {
         match self {
-            Slot::Node { rel_offset, .. }
-            | Slot::Token { rel_offset, .. }
-            | Slot::Empty { rel_offset } => *rel_offset,
+            Self::Node { rel_offset, .. }
+            | Self::Token { rel_offset, .. }
+            | Self::Empty { rel_offset } => *rel_offset,
         }
     }
     #[inline]

@@ -56,7 +56,7 @@ pub(crate) struct SelectorList {
 
 impl Default for SelectorList {
     fn default() -> Self {
-        SelectorList {
+        Self {
             end_kind_ts: token_set!(T!['{']),
             recovery_ts: token_set![T!['{']],
             is_recovery_disabled: false,
@@ -138,7 +138,7 @@ struct SelectorListParseRecovery {
 
 impl SelectorListParseRecovery {
     fn new(recovery_ts: TokenSet<CssSyntaxKind>) -> Self {
-        SelectorListParseRecovery { recovery_ts }
+        Self { recovery_ts }
     }
 }
 

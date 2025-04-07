@@ -436,7 +436,7 @@ where
 pub(crate) type FormatJsSyntaxToken = FormatToken<JsFormatContext>;
 
 impl AsFormat<JsFormatContext> for JsSyntaxToken {
-    type Format<'a> = FormatRefWithRule<'a, JsSyntaxToken, FormatJsSyntaxToken>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatJsSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatJsSyntaxToken::default())
@@ -444,7 +444,7 @@ impl AsFormat<JsFormatContext> for JsSyntaxToken {
 }
 
 impl IntoFormat<JsFormatContext> for JsSyntaxToken {
-    type Format = FormatOwnedWithRule<JsSyntaxToken, FormatJsSyntaxToken>;
+    type Format = FormatOwnedWithRule<Self, FormatJsSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatJsSyntaxToken::default())
@@ -558,7 +558,7 @@ impl Label for JsLabels {
 
     fn debug_name(&self) -> &'static str {
         match self {
-            JsLabels::MemberChain => "MemberChain",
+            Self::MemberChain => "MemberChain",
         }
     }
 }

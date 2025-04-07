@@ -30,8 +30,8 @@ pub struct Workspace {
 #[wasm_bindgen]
 impl Workspace {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Workspace {
-        Workspace {
+    pub fn new() -> Self {
+        Self {
             inner: workspace::server(Box::new(MemoryFileSystem::default()), None),
         }
     }

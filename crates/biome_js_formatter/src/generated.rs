@@ -21,7 +21,7 @@ impl FormatRule<biome_js_syntax::JsAccessorModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsAccessorModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsAccessorModifier,
+        Self,
         crate::js::auxiliary::accessor_modifier::FormatJsAccessorModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -33,7 +33,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsAccessorModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsAccessorModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsAccessorModifier,
+        Self,
         crate::js::auxiliary::accessor_modifier::FormatJsAccessorModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -59,7 +59,7 @@ impl FormatRule<biome_js_syntax::JsArrayAssignmentPattern>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsArrayAssignmentPattern,
+        Self,
         crate::js::assignments::array_assignment_pattern::FormatJsArrayAssignmentPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -68,7 +68,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPattern {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPattern {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsArrayAssignmentPattern,
+        Self,
         crate::js::assignments::array_assignment_pattern::FormatJsArrayAssignmentPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -77,26 +77,26 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPattern {
 }
 impl FormatRule < biome_js_syntax :: JsArrayAssignmentPatternElement > for crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsArrayAssignmentPatternElement , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsArrayAssignmentPatternElement > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPatternElement {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsArrayAssignmentPatternElement , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPatternElement {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsArrayAssignmentPatternElement , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern_element :: FormatJsArrayAssignmentPatternElement :: default ())
     }
 }
 impl FormatRule < biome_js_syntax :: JsArrayAssignmentPatternRestElement > for crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsArrayAssignmentPatternRestElement , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsArrayAssignmentPatternRestElement > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPatternRestElement {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsArrayAssignmentPatternRestElement , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPatternRestElement {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsArrayAssignmentPatternRestElement , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: assignments :: array_assignment_pattern_rest_element :: FormatJsArrayAssignmentPatternRestElement :: default ())
     }
@@ -117,7 +117,7 @@ impl FormatRule<biome_js_syntax::JsArrayBindingPattern>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsArrayBindingPattern,
+        Self,
         crate::js::bindings::array_binding_pattern::FormatJsArrayBindingPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -129,7 +129,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPattern {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPattern {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsArrayBindingPattern,
+        Self,
         crate::js::bindings::array_binding_pattern::FormatJsArrayBindingPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -155,7 +155,7 @@ impl FormatRule<biome_js_syntax::JsArrayBindingPatternElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsArrayBindingPatternElement,
+        Self,
         crate::js::bindings::array_binding_pattern_element::FormatJsArrayBindingPatternElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -164,7 +164,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternElement
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsArrayBindingPatternElement,
+        Self,
         crate::js::bindings::array_binding_pattern_element::FormatJsArrayBindingPatternElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -173,13 +173,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternEleme
 }
 impl FormatRule < biome_js_syntax :: JsArrayBindingPatternRestElement > for crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsArrayBindingPatternRestElement , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsArrayBindingPatternRestElement > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternRestElement {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsArrayBindingPatternRestElement , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternRestElement {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsArrayBindingPatternRestElement , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: bindings :: array_binding_pattern_rest_element :: FormatJsArrayBindingPatternRestElement :: default ())
     }
@@ -200,7 +200,7 @@ impl FormatRule<biome_js_syntax::JsArrayExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsArrayExpression,
+        Self,
         crate::js::expressions::array_expression::FormatJsArrayExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -212,7 +212,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsArrayExpression,
+        Self,
         crate::js::expressions::array_expression::FormatJsArrayExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -234,7 +234,7 @@ impl FormatRule<biome_js_syntax::JsArrayHole>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayHole {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsArrayHole,
+        Self,
         crate::js::auxiliary::array_hole::FormatJsArrayHole,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -246,7 +246,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayHole {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayHole {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsArrayHole,
+        Self,
         crate::js::auxiliary::array_hole::FormatJsArrayHole,
     >;
     fn into_format(self) -> Self::Format {
@@ -272,7 +272,7 @@ impl FormatRule<biome_js_syntax::JsArrowFunctionExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrowFunctionExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsArrowFunctionExpression,
+        Self,
         crate::js::expressions::arrow_function_expression::FormatJsArrowFunctionExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -281,7 +281,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrowFunctionExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrowFunctionExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsArrowFunctionExpression,
+        Self,
         crate::js::expressions::arrow_function_expression::FormatJsArrowFunctionExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -304,7 +304,7 @@ impl FormatRule<biome_js_syntax::JsAssignmentExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsAssignmentExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsAssignmentExpression,
+        Self,
         crate::js::expressions::assignment_expression::FormatJsAssignmentExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -316,7 +316,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsAssignmentExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsAssignmentExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsAssignmentExpression,
+        Self,
         crate::js::expressions::assignment_expression::FormatJsAssignmentExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -342,7 +342,7 @@ impl FormatRule<biome_js_syntax::JsAwaitExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsAwaitExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsAwaitExpression,
+        Self,
         crate::js::expressions::await_expression::FormatJsAwaitExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -354,7 +354,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsAwaitExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsAwaitExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsAwaitExpression,
+        Self,
         crate::js::expressions::await_expression::FormatJsAwaitExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -380,7 +380,7 @@ impl FormatRule<biome_js_syntax::JsBigintLiteralExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBigintLiteralExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBigintLiteralExpression,
+        Self,
         crate::js::expressions::bigint_literal_expression::FormatJsBigintLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -389,7 +389,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBigintLiteralExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBigintLiteralExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBigintLiteralExpression,
+        Self,
         crate::js::expressions::bigint_literal_expression::FormatJsBigintLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -412,7 +412,7 @@ impl FormatRule<biome_js_syntax::JsBinaryExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBinaryExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBinaryExpression,
+        Self,
         crate::js::expressions::binary_expression::FormatJsBinaryExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -424,7 +424,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBinaryExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBinaryExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBinaryExpression,
+        Self,
         crate::js::expressions::binary_expression::FormatJsBinaryExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -450,7 +450,7 @@ impl FormatRule<biome_js_syntax::JsBlockStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBlockStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBlockStatement,
+        Self,
         crate::js::statements::block_statement::FormatJsBlockStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -462,7 +462,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBlockStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBlockStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBlockStatement,
+        Self,
         crate::js::statements::block_statement::FormatJsBlockStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -488,7 +488,7 @@ impl FormatRule<biome_js_syntax::JsBooleanLiteralExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBooleanLiteralExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBooleanLiteralExpression,
+        Self,
         crate::js::expressions::boolean_literal_expression::FormatJsBooleanLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -497,7 +497,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBooleanLiteralExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBooleanLiteralExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBooleanLiteralExpression,
+        Self,
         crate::js::expressions::boolean_literal_expression::FormatJsBooleanLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -520,7 +520,7 @@ impl FormatRule<biome_js_syntax::JsBreakStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBreakStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBreakStatement,
+        Self,
         crate::js::statements::break_statement::FormatJsBreakStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -532,7 +532,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBreakStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBreakStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBreakStatement,
+        Self,
         crate::js::statements::break_statement::FormatJsBreakStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -558,7 +558,7 @@ impl FormatRule<biome_js_syntax::JsCallArguments>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsCallArguments {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsCallArguments,
+        Self,
         crate::js::expressions::call_arguments::FormatJsCallArguments,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -570,7 +570,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCallArguments {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCallArguments {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsCallArguments,
+        Self,
         crate::js::expressions::call_arguments::FormatJsCallArguments,
     >;
     fn into_format(self) -> Self::Format {
@@ -596,7 +596,7 @@ impl FormatRule<biome_js_syntax::JsCallExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsCallExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsCallExpression,
+        Self,
         crate::js::expressions::call_expression::FormatJsCallExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -608,7 +608,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCallExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCallExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsCallExpression,
+        Self,
         crate::js::expressions::call_expression::FormatJsCallExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -630,7 +630,7 @@ impl FormatRule<biome_js_syntax::JsCaseClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsCaseClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsCaseClause,
+        Self,
         crate::js::auxiliary::case_clause::FormatJsCaseClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -642,7 +642,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCaseClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCaseClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsCaseClause,
+        Self,
         crate::js::auxiliary::case_clause::FormatJsCaseClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -664,7 +664,7 @@ impl FormatRule<biome_js_syntax::JsCatchClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsCatchClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsCatchClause,
+        Self,
         crate::js::auxiliary::catch_clause::FormatJsCatchClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -676,7 +676,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCatchClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCatchClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsCatchClause,
+        Self,
         crate::js::auxiliary::catch_clause::FormatJsCatchClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -702,7 +702,7 @@ impl FormatRule<biome_js_syntax::JsCatchDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsCatchDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsCatchDeclaration,
+        Self,
         crate::js::declarations::catch_declaration::FormatJsCatchDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -714,7 +714,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCatchDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCatchDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsCatchDeclaration,
+        Self,
         crate::js::declarations::catch_declaration::FormatJsCatchDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -740,7 +740,7 @@ impl FormatRule<biome_js_syntax::JsClassDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsClassDeclaration,
+        Self,
         crate::js::declarations::class_declaration::FormatJsClassDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -752,7 +752,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsClassDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsClassDeclaration,
+        Self,
         crate::js::declarations::class_declaration::FormatJsClassDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -764,13 +764,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsClassDeclaration {
 }
 impl FormatRule < biome_js_syntax :: JsClassExportDefaultDeclaration > for crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsClassExportDefaultDeclaration , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsClassExportDefaultDeclaration > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassExportDefaultDeclaration {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsClassExportDefaultDeclaration , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsClassExportDefaultDeclaration {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsClassExportDefaultDeclaration , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: declarations :: class_export_default_declaration :: FormatJsClassExportDefaultDeclaration :: default ())
     }
@@ -791,7 +791,7 @@ impl FormatRule<biome_js_syntax::JsClassExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsClassExpression,
+        Self,
         crate::js::expressions::class_expression::FormatJsClassExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -803,7 +803,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsClassExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsClassExpression,
+        Self,
         crate::js::expressions::class_expression::FormatJsClassExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -829,7 +829,7 @@ impl FormatRule<biome_js_syntax::JsComputedMemberAssignment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsComputedMemberAssignment,
+        Self,
         crate::js::assignments::computed_member_assignment::FormatJsComputedMemberAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -838,7 +838,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberAssignment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsComputedMemberAssignment,
+        Self,
         crate::js::assignments::computed_member_assignment::FormatJsComputedMemberAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -861,7 +861,7 @@ impl FormatRule<biome_js_syntax::JsComputedMemberExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsComputedMemberExpression,
+        Self,
         crate::js::expressions::computed_member_expression::FormatJsComputedMemberExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -870,7 +870,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsComputedMemberExpression,
+        Self,
         crate::js::expressions::computed_member_expression::FormatJsComputedMemberExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -893,7 +893,7 @@ impl FormatRule<biome_js_syntax::JsComputedMemberName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsComputedMemberName,
+        Self,
         crate::js::objects::computed_member_name::FormatJsComputedMemberName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -905,7 +905,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsComputedMemberName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsComputedMemberName,
+        Self,
         crate::js::objects::computed_member_name::FormatJsComputedMemberName,
     >;
     fn into_format(self) -> Self::Format {
@@ -931,7 +931,7 @@ impl FormatRule<biome_js_syntax::JsConditionalExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsConditionalExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsConditionalExpression,
+        Self,
         crate::js::expressions::conditional_expression::FormatJsConditionalExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -944,7 +944,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsConditionalExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConditionalExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsConditionalExpression,
+        Self,
         crate::js::expressions::conditional_expression::FormatJsConditionalExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -971,7 +971,7 @@ impl FormatRule<biome_js_syntax::JsConstructorClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsConstructorClassMember,
+        Self,
         crate::js::classes::constructor_class_member::FormatJsConstructorClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -983,7 +983,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorClassMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsConstructorClassMember,
+        Self,
         crate::js::classes::constructor_class_member::FormatJsConstructorClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -1009,7 +1009,7 @@ impl FormatRule<biome_js_syntax::JsConstructorParameters>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameters {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsConstructorParameters,
+        Self,
         crate::js::bindings::constructor_parameters::FormatJsConstructorParameters,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1021,7 +1021,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameters {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameters {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsConstructorParameters,
+        Self,
         crate::js::bindings::constructor_parameters::FormatJsConstructorParameters,
     >;
     fn into_format(self) -> Self::Format {
@@ -1047,7 +1047,7 @@ impl FormatRule<biome_js_syntax::JsContinueStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsContinueStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsContinueStatement,
+        Self,
         crate::js::statements::continue_statement::FormatJsContinueStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1059,7 +1059,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsContinueStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsContinueStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsContinueStatement,
+        Self,
         crate::js::statements::continue_statement::FormatJsContinueStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -1085,7 +1085,7 @@ impl FormatRule<biome_js_syntax::JsDebuggerStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsDebuggerStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsDebuggerStatement,
+        Self,
         crate::js::statements::debugger_statement::FormatJsDebuggerStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1097,7 +1097,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDebuggerStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDebuggerStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsDebuggerStatement,
+        Self,
         crate::js::statements::debugger_statement::FormatJsDebuggerStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -1119,7 +1119,7 @@ impl FormatRule<biome_js_syntax::JsDecorator>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsDecorator {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsDecorator,
+        Self,
         crate::js::auxiliary::decorator::FormatJsDecorator,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1131,7 +1131,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDecorator {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDecorator {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsDecorator,
+        Self,
         crate::js::auxiliary::decorator::FormatJsDecorator,
     >;
     fn into_format(self) -> Self::Format {
@@ -1157,7 +1157,7 @@ impl FormatRule<biome_js_syntax::JsDefaultClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsDefaultClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsDefaultClause,
+        Self,
         crate::js::auxiliary::default_clause::FormatJsDefaultClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1169,7 +1169,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDefaultClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDefaultClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsDefaultClause,
+        Self,
         crate::js::auxiliary::default_clause::FormatJsDefaultClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1195,7 +1195,7 @@ impl FormatRule<biome_js_syntax::JsDefaultImportSpecifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsDefaultImportSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsDefaultImportSpecifier,
+        Self,
         crate::js::module::default_import_specifier::FormatJsDefaultImportSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1207,7 +1207,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDefaultImportSpecifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDefaultImportSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsDefaultImportSpecifier,
+        Self,
         crate::js::module::default_import_specifier::FormatJsDefaultImportSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -1229,7 +1229,7 @@ impl FormatRule<biome_js_syntax::JsDirective>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsDirective {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsDirective,
+        Self,
         crate::js::auxiliary::directive::FormatJsDirective,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1241,7 +1241,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDirective {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDirective {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsDirective,
+        Self,
         crate::js::auxiliary::directive::FormatJsDirective,
     >;
     fn into_format(self) -> Self::Format {
@@ -1267,7 +1267,7 @@ impl FormatRule<biome_js_syntax::JsDoWhileStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsDoWhileStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsDoWhileStatement,
+        Self,
         crate::js::statements::do_while_statement::FormatJsDoWhileStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1279,7 +1279,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDoWhileStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDoWhileStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsDoWhileStatement,
+        Self,
         crate::js::statements::do_while_statement::FormatJsDoWhileStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -1301,7 +1301,7 @@ impl FormatRule<biome_js_syntax::JsElseClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsElseClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsElseClause,
+        Self,
         crate::js::auxiliary::else_clause::FormatJsElseClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1313,7 +1313,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsElseClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsElseClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsElseClause,
+        Self,
         crate::js::auxiliary::else_clause::FormatJsElseClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1339,7 +1339,7 @@ impl FormatRule<biome_js_syntax::JsEmptyClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsEmptyClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsEmptyClassMember,
+        Self,
         crate::js::classes::empty_class_member::FormatJsEmptyClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1351,7 +1351,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsEmptyClassMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsEmptyClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsEmptyClassMember,
+        Self,
         crate::js::classes::empty_class_member::FormatJsEmptyClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -1377,7 +1377,7 @@ impl FormatRule<biome_js_syntax::JsEmptyStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsEmptyStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsEmptyStatement,
+        Self,
         crate::js::statements::empty_statement::FormatJsEmptyStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1389,7 +1389,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsEmptyStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsEmptyStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsEmptyStatement,
+        Self,
         crate::js::statements::empty_statement::FormatJsEmptyStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -1408,14 +1408,14 @@ impl FormatRule<biome_js_syntax::JsExport> for crate::js::module::export::Format
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExport {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::JsExport, crate::js::module::export::FormatJsExport>;
+        FormatRefWithRule<'a, Self, crate::js::module::export::FormatJsExport>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::js::module::export::FormatJsExport::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExport {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::JsExport, crate::js::module::export::FormatJsExport>;
+        FormatOwnedWithRule<Self, crate::js::module::export::FormatJsExport>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::js::module::export::FormatJsExport::default())
     }
@@ -1436,7 +1436,7 @@ impl FormatRule<biome_js_syntax::JsExportAsClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportAsClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportAsClause,
+        Self,
         crate::js::module::export_as_clause::FormatJsExportAsClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1448,7 +1448,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportAsClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportAsClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportAsClause,
+        Self,
         crate::js::module::export_as_clause::FormatJsExportAsClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1472,13 +1472,13 @@ impl FormatRule<biome_js_syntax::JsExportDefaultDeclarationClause>
     }
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportDefaultDeclarationClause {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsExportDefaultDeclarationClause , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportDefaultDeclarationClause {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsExportDefaultDeclarationClause , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: module :: export_default_declaration_clause :: FormatJsExportDefaultDeclarationClause :: default ())
     }
@@ -1499,7 +1499,7 @@ impl FormatRule<biome_js_syntax::JsExportDefaultExpressionClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportDefaultExpressionClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportDefaultExpressionClause,
+        Self,
         crate::js::module::export_default_expression_clause::FormatJsExportDefaultExpressionClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1508,7 +1508,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportDefaultExpressionCla
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportDefaultExpressionClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportDefaultExpressionClause,
+        Self,
         crate::js::module::export_default_expression_clause::FormatJsExportDefaultExpressionClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1531,7 +1531,7 @@ impl FormatRule<biome_js_syntax::JsExportFromClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportFromClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportFromClause,
+        Self,
         crate::js::module::export_from_clause::FormatJsExportFromClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1543,7 +1543,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportFromClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportFromClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportFromClause,
+        Self,
         crate::js::module::export_from_clause::FormatJsExportFromClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1569,7 +1569,7 @@ impl FormatRule<biome_js_syntax::JsExportNamedClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportNamedClause,
+        Self,
         crate::js::module::export_named_clause::FormatJsExportNamedClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1581,7 +1581,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportNamedClause,
+        Self,
         crate::js::module::export_named_clause::FormatJsExportNamedClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1607,7 +1607,7 @@ impl FormatRule<biome_js_syntax::JsExportNamedFromClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportNamedFromClause,
+        Self,
         crate::js::module::export_named_from_clause::FormatJsExportNamedFromClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1619,7 +1619,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportNamedFromClause,
+        Self,
         crate::js::module::export_named_from_clause::FormatJsExportNamedFromClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1645,7 +1645,7 @@ impl FormatRule<biome_js_syntax::JsExportNamedFromSpecifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportNamedFromSpecifier,
+        Self,
         crate::js::module::export_named_from_specifier::FormatJsExportNamedFromSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1654,7 +1654,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromSpecifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportNamedFromSpecifier,
+        Self,
         crate::js::module::export_named_from_specifier::FormatJsExportNamedFromSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -1677,7 +1677,7 @@ impl FormatRule<biome_js_syntax::JsExportNamedShorthandSpecifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedShorthandSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportNamedShorthandSpecifier,
+        Self,
         crate::js::module::export_named_shorthand_specifier::FormatJsExportNamedShorthandSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1686,7 +1686,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedShorthandSpecif
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedShorthandSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportNamedShorthandSpecifier,
+        Self,
         crate::js::module::export_named_shorthand_specifier::FormatJsExportNamedShorthandSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -1709,7 +1709,7 @@ impl FormatRule<biome_js_syntax::JsExportNamedSpecifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportNamedSpecifier,
+        Self,
         crate::js::module::export_named_specifier::FormatJsExportNamedSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1721,7 +1721,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportNamedSpecifier,
+        Self,
         crate::js::module::export_named_specifier::FormatJsExportNamedSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -1747,7 +1747,7 @@ impl FormatRule<biome_js_syntax::JsExpressionSnipped>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExpressionSnipped {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExpressionSnipped,
+        Self,
         crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1759,7 +1759,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExpressionSnipped {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExpressionSnipped {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExpressionSnipped,
+        Self,
         crate::js::auxiliary::expression_snipped::FormatJsExpressionSnipped,
     >;
     fn into_format(self) -> Self::Format {
@@ -1785,7 +1785,7 @@ impl FormatRule<biome_js_syntax::JsExpressionStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExpressionStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExpressionStatement,
+        Self,
         crate::js::statements::expression_statement::FormatJsExpressionStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1797,7 +1797,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExpressionStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExpressionStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExpressionStatement,
+        Self,
         crate::js::statements::expression_statement::FormatJsExpressionStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -1823,7 +1823,7 @@ impl FormatRule<biome_js_syntax::JsExtendsClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExtendsClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExtendsClause,
+        Self,
         crate::js::classes::extends_clause::FormatJsExtendsClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1835,7 +1835,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExtendsClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExtendsClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExtendsClause,
+        Self,
         crate::js::classes::extends_clause::FormatJsExtendsClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1861,7 +1861,7 @@ impl FormatRule<biome_js_syntax::JsFinallyClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsFinallyClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsFinallyClause,
+        Self,
         crate::js::auxiliary::finally_clause::FormatJsFinallyClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1873,7 +1873,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsFinallyClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFinallyClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsFinallyClause,
+        Self,
         crate::js::auxiliary::finally_clause::FormatJsFinallyClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -1899,7 +1899,7 @@ impl FormatRule<biome_js_syntax::JsForInStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsForInStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsForInStatement,
+        Self,
         crate::js::statements::for_in_statement::FormatJsForInStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1911,7 +1911,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsForInStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsForInStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsForInStatement,
+        Self,
         crate::js::statements::for_in_statement::FormatJsForInStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -1937,7 +1937,7 @@ impl FormatRule<biome_js_syntax::JsForOfStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsForOfStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsForOfStatement,
+        Self,
         crate::js::statements::for_of_statement::FormatJsForOfStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1949,7 +1949,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsForOfStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsForOfStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsForOfStatement,
+        Self,
         crate::js::statements::for_of_statement::FormatJsForOfStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -1971,7 +1971,7 @@ impl FormatRule<biome_js_syntax::JsForStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsForStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsForStatement,
+        Self,
         crate::js::statements::for_statement::FormatJsForStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -1983,7 +1983,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsForStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsForStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsForStatement,
+        Self,
         crate::js::statements::for_statement::FormatJsForStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -2009,7 +2009,7 @@ impl FormatRule<biome_js_syntax::JsForVariableDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsForVariableDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsForVariableDeclaration,
+        Self,
         crate::js::declarations::for_variable_declaration::FormatJsForVariableDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2018,7 +2018,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsForVariableDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsForVariableDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsForVariableDeclaration,
+        Self,
         crate::js::declarations::for_variable_declaration::FormatJsForVariableDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -2041,7 +2041,7 @@ impl FormatRule<biome_js_syntax::JsFormalParameter>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsFormalParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsFormalParameter,
+        Self,
         crate::js::bindings::formal_parameter::FormatJsFormalParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2053,7 +2053,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsFormalParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFormalParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsFormalParameter,
+        Self,
         crate::js::bindings::formal_parameter::FormatJsFormalParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -2075,7 +2075,7 @@ impl FormatRule<biome_js_syntax::JsFunctionBody>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsFunctionBody {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsFunctionBody,
+        Self,
         crate::js::auxiliary::function_body::FormatJsFunctionBody,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2087,7 +2087,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsFunctionBody {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFunctionBody {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsFunctionBody,
+        Self,
         crate::js::auxiliary::function_body::FormatJsFunctionBody,
     >;
     fn into_format(self) -> Self::Format {
@@ -2113,7 +2113,7 @@ impl FormatRule<biome_js_syntax::JsFunctionDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsFunctionDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsFunctionDeclaration,
+        Self,
         crate::js::declarations::function_declaration::FormatJsFunctionDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2125,7 +2125,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsFunctionDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFunctionDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsFunctionDeclaration,
+        Self,
         crate::js::declarations::function_declaration::FormatJsFunctionDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -2137,13 +2137,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFunctionDeclaration {
 }
 impl FormatRule < biome_js_syntax :: JsFunctionExportDefaultDeclaration > for crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsFunctionExportDefaultDeclaration , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsFunctionExportDefaultDeclaration > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsFunctionExportDefaultDeclaration {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsFunctionExportDefaultDeclaration , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFunctionExportDefaultDeclaration {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsFunctionExportDefaultDeclaration , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: declarations :: function_export_default_declaration :: FormatJsFunctionExportDefaultDeclaration :: default ())
     }
@@ -2164,7 +2164,7 @@ impl FormatRule<biome_js_syntax::JsFunctionExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsFunctionExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsFunctionExpression,
+        Self,
         crate::js::expressions::function_expression::FormatJsFunctionExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2176,7 +2176,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsFunctionExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsFunctionExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsFunctionExpression,
+        Self,
         crate::js::expressions::function_expression::FormatJsFunctionExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -2202,7 +2202,7 @@ impl FormatRule<biome_js_syntax::JsGetterClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsGetterClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsGetterClassMember,
+        Self,
         crate::js::classes::getter_class_member::FormatJsGetterClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2214,7 +2214,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsGetterClassMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsGetterClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsGetterClassMember,
+        Self,
         crate::js::classes::getter_class_member::FormatJsGetterClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -2240,7 +2240,7 @@ impl FormatRule<biome_js_syntax::JsGetterObjectMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsGetterObjectMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsGetterObjectMember,
+        Self,
         crate::js::objects::getter_object_member::FormatJsGetterObjectMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2252,7 +2252,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsGetterObjectMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsGetterObjectMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsGetterObjectMember,
+        Self,
         crate::js::objects::getter_object_member::FormatJsGetterObjectMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -2278,7 +2278,7 @@ impl FormatRule<biome_js_syntax::JsIdentifierAssignment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsIdentifierAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsIdentifierAssignment,
+        Self,
         crate::js::assignments::identifier_assignment::FormatJsIdentifierAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2290,7 +2290,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsIdentifierAssignment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsIdentifierAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsIdentifierAssignment,
+        Self,
         crate::js::assignments::identifier_assignment::FormatJsIdentifierAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -2316,7 +2316,7 @@ impl FormatRule<biome_js_syntax::JsIdentifierBinding>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsIdentifierBinding {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsIdentifierBinding,
+        Self,
         crate::js::bindings::identifier_binding::FormatJsIdentifierBinding,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2328,7 +2328,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsIdentifierBinding {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsIdentifierBinding {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsIdentifierBinding,
+        Self,
         crate::js::bindings::identifier_binding::FormatJsIdentifierBinding,
     >;
     fn into_format(self) -> Self::Format {
@@ -2354,7 +2354,7 @@ impl FormatRule<biome_js_syntax::JsIdentifierExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsIdentifierExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsIdentifierExpression,
+        Self,
         crate::js::expressions::identifier_expression::FormatJsIdentifierExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2366,7 +2366,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsIdentifierExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsIdentifierExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsIdentifierExpression,
+        Self,
         crate::js::expressions::identifier_expression::FormatJsIdentifierExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -2388,7 +2388,7 @@ impl FormatRule<biome_js_syntax::JsIfStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsIfStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsIfStatement,
+        Self,
         crate::js::statements::if_statement::FormatJsIfStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2400,7 +2400,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsIfStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsIfStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsIfStatement,
+        Self,
         crate::js::statements::if_statement::FormatJsIfStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -2419,14 +2419,14 @@ impl FormatRule<biome_js_syntax::JsImport> for crate::js::module::import::Format
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImport {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::JsImport, crate::js::module::import::FormatJsImport>;
+        FormatRefWithRule<'a, Self, crate::js::module::import::FormatJsImport>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::js::module::import::FormatJsImport::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImport {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::JsImport, crate::js::module::import::FormatJsImport>;
+        FormatOwnedWithRule<Self, crate::js::module::import::FormatJsImport>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::js::module::import::FormatJsImport::default())
     }
@@ -2447,7 +2447,7 @@ impl FormatRule<biome_js_syntax::JsImportAssertion>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertion {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportAssertion,
+        Self,
         crate::js::module::import_assertion::FormatJsImportAssertion,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2459,7 +2459,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertion {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAssertion {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportAssertion,
+        Self,
         crate::js::module::import_assertion::FormatJsImportAssertion,
     >;
     fn into_format(self) -> Self::Format {
@@ -2485,7 +2485,7 @@ impl FormatRule<biome_js_syntax::JsImportAssertionEntry>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntry {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportAssertionEntry,
+        Self,
         crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2497,7 +2497,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntry {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntry {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportAssertionEntry,
+        Self,
         crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry,
     >;
     fn into_format(self) -> Self::Format {
@@ -2523,7 +2523,7 @@ impl FormatRule<biome_js_syntax::JsImportBareClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportBareClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportBareClause,
+        Self,
         crate::js::module::import_bare_clause::FormatJsImportBareClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2535,7 +2535,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportBareClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportBareClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportBareClause,
+        Self,
         crate::js::module::import_bare_clause::FormatJsImportBareClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -2561,7 +2561,7 @@ impl FormatRule<biome_js_syntax::JsImportCallExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportCallExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportCallExpression,
+        Self,
         crate::js::expressions::import_call_expression::FormatJsImportCallExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2573,7 +2573,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportCallExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportCallExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportCallExpression,
+        Self,
         crate::js::expressions::import_call_expression::FormatJsImportCallExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -2599,7 +2599,7 @@ impl FormatRule<biome_js_syntax::JsImportCombinedClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportCombinedClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportCombinedClause,
+        Self,
         crate::js::module::import_combined_clause::FormatJsImportCombinedClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2611,7 +2611,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportCombinedClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportCombinedClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportCombinedClause,
+        Self,
         crate::js::module::import_combined_clause::FormatJsImportCombinedClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -2637,7 +2637,7 @@ impl FormatRule<biome_js_syntax::JsImportDefaultClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportDefaultClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportDefaultClause,
+        Self,
         crate::js::module::import_default_clause::FormatJsImportDefaultClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2649,7 +2649,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportDefaultClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportDefaultClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportDefaultClause,
+        Self,
         crate::js::module::import_default_clause::FormatJsImportDefaultClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -2675,7 +2675,7 @@ impl FormatRule<biome_js_syntax::JsImportMetaExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportMetaExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportMetaExpression,
+        Self,
         crate::js::expressions::import_meta_expression::FormatJsImportMetaExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2687,7 +2687,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportMetaExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportMetaExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportMetaExpression,
+        Self,
         crate::js::expressions::import_meta_expression::FormatJsImportMetaExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -2713,7 +2713,7 @@ impl FormatRule<biome_js_syntax::JsImportNamedClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportNamedClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportNamedClause,
+        Self,
         crate::js::module::import_named_clause::FormatJsImportNamedClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2725,7 +2725,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportNamedClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportNamedClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportNamedClause,
+        Self,
         crate::js::module::import_named_clause::FormatJsImportNamedClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -2751,7 +2751,7 @@ impl FormatRule<biome_js_syntax::JsImportNamespaceClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportNamespaceClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportNamespaceClause,
+        Self,
         crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2763,7 +2763,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportNamespaceClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportNamespaceClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportNamespaceClause,
+        Self,
         crate::js::module::import_namespace_clause::FormatJsImportNamespaceClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -2785,7 +2785,7 @@ impl FormatRule<biome_js_syntax::JsInExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsInExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsInExpression,
+        Self,
         crate::js::expressions::in_expression::FormatJsInExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2797,7 +2797,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsInExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsInExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsInExpression,
+        Self,
         crate::js::expressions::in_expression::FormatJsInExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -2823,7 +2823,7 @@ impl FormatRule<biome_js_syntax::JsInitializerClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsInitializerClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsInitializerClause,
+        Self,
         crate::js::auxiliary::initializer_clause::FormatJsInitializerClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2835,7 +2835,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsInitializerClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsInitializerClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsInitializerClause,
+        Self,
         crate::js::auxiliary::initializer_clause::FormatJsInitializerClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -2861,7 +2861,7 @@ impl FormatRule<biome_js_syntax::JsInstanceofExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsInstanceofExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsInstanceofExpression,
+        Self,
         crate::js::expressions::instanceof_expression::FormatJsInstanceofExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2873,7 +2873,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsInstanceofExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsInstanceofExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsInstanceofExpression,
+        Self,
         crate::js::expressions::instanceof_expression::FormatJsInstanceofExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -2892,14 +2892,14 @@ impl FormatRule<biome_js_syntax::JsLabel> for crate::js::auxiliary::label::Forma
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsLabel {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::JsLabel, crate::js::auxiliary::label::FormatJsLabel>;
+        FormatRefWithRule<'a, Self, crate::js::auxiliary::label::FormatJsLabel>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::js::auxiliary::label::FormatJsLabel::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLabel {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::JsLabel, crate::js::auxiliary::label::FormatJsLabel>;
+        FormatOwnedWithRule<Self, crate::js::auxiliary::label::FormatJsLabel>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::js::auxiliary::label::FormatJsLabel::default())
     }
@@ -2920,7 +2920,7 @@ impl FormatRule<biome_js_syntax::JsLabeledStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsLabeledStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsLabeledStatement,
+        Self,
         crate::js::statements::labeled_statement::FormatJsLabeledStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2932,7 +2932,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsLabeledStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLabeledStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsLabeledStatement,
+        Self,
         crate::js::statements::labeled_statement::FormatJsLabeledStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -2958,7 +2958,7 @@ impl FormatRule<biome_js_syntax::JsLiteralExportName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsLiteralExportName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsLiteralExportName,
+        Self,
         crate::js::module::literal_export_name::FormatJsLiteralExportName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -2970,7 +2970,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsLiteralExportName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLiteralExportName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsLiteralExportName,
+        Self,
         crate::js::module::literal_export_name::FormatJsLiteralExportName,
     >;
     fn into_format(self) -> Self::Format {
@@ -2996,7 +2996,7 @@ impl FormatRule<biome_js_syntax::JsLiteralMemberName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsLiteralMemberName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsLiteralMemberName,
+        Self,
         crate::js::objects::literal_member_name::FormatJsLiteralMemberName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3008,7 +3008,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsLiteralMemberName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLiteralMemberName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsLiteralMemberName,
+        Self,
         crate::js::objects::literal_member_name::FormatJsLiteralMemberName,
     >;
     fn into_format(self) -> Self::Format {
@@ -3034,7 +3034,7 @@ impl FormatRule<biome_js_syntax::JsLogicalExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsLogicalExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsLogicalExpression,
+        Self,
         crate::js::expressions::logical_expression::FormatJsLogicalExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3046,7 +3046,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsLogicalExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLogicalExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsLogicalExpression,
+        Self,
         crate::js::expressions::logical_expression::FormatJsLogicalExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -3068,7 +3068,7 @@ impl FormatRule<biome_js_syntax::JsMetavariable>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsMetavariable {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsMetavariable,
+        Self,
         crate::js::auxiliary::metavariable::FormatJsMetavariable,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3080,7 +3080,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsMetavariable {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMetavariable {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsMetavariable,
+        Self,
         crate::js::auxiliary::metavariable::FormatJsMetavariable,
     >;
     fn into_format(self) -> Self::Format {
@@ -3106,7 +3106,7 @@ impl FormatRule<biome_js_syntax::JsMethodClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsMethodClassMember,
+        Self,
         crate::js::classes::method_class_member::FormatJsMethodClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3118,7 +3118,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodClassMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMethodClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsMethodClassMember,
+        Self,
         crate::js::classes::method_class_member::FormatJsMethodClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -3144,7 +3144,7 @@ impl FormatRule<biome_js_syntax::JsMethodObjectMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodObjectMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsMethodObjectMember,
+        Self,
         crate::js::objects::method_object_member::FormatJsMethodObjectMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3156,7 +3156,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodObjectMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMethodObjectMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsMethodObjectMember,
+        Self,
         crate::js::objects::method_object_member::FormatJsMethodObjectMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -3176,7 +3176,7 @@ impl FormatRule<biome_js_syntax::JsModule> for crate::js::auxiliary::module::For
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsModule {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsModule,
+        Self,
         crate::js::auxiliary::module::FormatJsModule,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3188,7 +3188,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsModule {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsModule {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsModule,
+        Self,
         crate::js::auxiliary::module::FormatJsModule,
     >;
     fn into_format(self) -> Self::Format {
@@ -3210,7 +3210,7 @@ impl FormatRule<biome_js_syntax::JsModuleSource>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsModuleSource {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsModuleSource,
+        Self,
         crate::js::module::module_source::FormatJsModuleSource,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3222,7 +3222,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsModuleSource {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsModuleSource {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsModuleSource,
+        Self,
         crate::js::module::module_source::FormatJsModuleSource,
     >;
     fn into_format(self) -> Self::Format {
@@ -3241,14 +3241,14 @@ impl FormatRule<biome_js_syntax::JsName> for crate::js::auxiliary::name::FormatJ
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsName {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::JsName, crate::js::auxiliary::name::FormatJsName>;
+        FormatRefWithRule<'a, Self, crate::js::auxiliary::name::FormatJsName>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::js::auxiliary::name::FormatJsName::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsName {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::JsName, crate::js::auxiliary::name::FormatJsName>;
+        FormatOwnedWithRule<Self, crate::js::auxiliary::name::FormatJsName>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::js::auxiliary::name::FormatJsName::default())
     }
@@ -3269,7 +3269,7 @@ impl FormatRule<biome_js_syntax::JsNamedImportSpecifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsNamedImportSpecifier,
+        Self,
         crate::js::module::named_import_specifier::FormatJsNamedImportSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3281,7 +3281,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsNamedImportSpecifier,
+        Self,
         crate::js::module::named_import_specifier::FormatJsNamedImportSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -3307,7 +3307,7 @@ impl FormatRule<biome_js_syntax::JsNamedImportSpecifiers>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifiers {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsNamedImportSpecifiers,
+        Self,
         crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3319,7 +3319,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifiers {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifiers {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsNamedImportSpecifiers,
+        Self,
         crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers,
     >;
     fn into_format(self) -> Self::Format {
@@ -3345,7 +3345,7 @@ impl FormatRule<biome_js_syntax::JsNamespaceImportSpecifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamespaceImportSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsNamespaceImportSpecifier,
+        Self,
         crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3354,7 +3354,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamespaceImportSpecifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamespaceImportSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsNamespaceImportSpecifier,
+        Self,
         crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -3377,7 +3377,7 @@ impl FormatRule<biome_js_syntax::JsNewExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsNewExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsNewExpression,
+        Self,
         crate::js::expressions::new_expression::FormatJsNewExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3389,7 +3389,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNewExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNewExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsNewExpression,
+        Self,
         crate::js::expressions::new_expression::FormatJsNewExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -3415,7 +3415,7 @@ impl FormatRule<biome_js_syntax::JsNewTargetExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsNewTargetExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsNewTargetExpression,
+        Self,
         crate::js::expressions::new_target_expression::FormatJsNewTargetExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3427,7 +3427,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNewTargetExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNewTargetExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsNewTargetExpression,
+        Self,
         crate::js::expressions::new_target_expression::FormatJsNewTargetExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -3453,7 +3453,7 @@ impl FormatRule<biome_js_syntax::JsNullLiteralExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsNullLiteralExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsNullLiteralExpression,
+        Self,
         crate::js::expressions::null_literal_expression::FormatJsNullLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3466,7 +3466,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNullLiteralExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNullLiteralExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsNullLiteralExpression,
+        Self,
         crate::js::expressions::null_literal_expression::FormatJsNullLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -3493,7 +3493,7 @@ impl FormatRule<biome_js_syntax::JsNumberLiteralExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsNumberLiteralExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsNumberLiteralExpression,
+        Self,
         crate::js::expressions::number_literal_expression::FormatJsNumberLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3502,7 +3502,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNumberLiteralExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNumberLiteralExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsNumberLiteralExpression,
+        Self,
         crate::js::expressions::number_literal_expression::FormatJsNumberLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -3525,7 +3525,7 @@ impl FormatRule<biome_js_syntax::JsObjectAssignmentPattern>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsObjectAssignmentPattern,
+        Self,
         crate::js::assignments::object_assignment_pattern::FormatJsObjectAssignmentPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3534,7 +3534,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPattern {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPattern {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsObjectAssignmentPattern,
+        Self,
         crate::js::assignments::object_assignment_pattern::FormatJsObjectAssignmentPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -3543,13 +3543,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPattern 
 }
 impl FormatRule < biome_js_syntax :: JsObjectAssignmentPatternProperty > for crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsObjectAssignmentPatternProperty , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsObjectAssignmentPatternProperty > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternProperty {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsObjectAssignmentPatternProperty , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternProperty {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsObjectAssignmentPatternProperty , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_property :: FormatJsObjectAssignmentPatternProperty :: default ())
     }
@@ -3570,7 +3570,7 @@ impl FormatRule<biome_js_syntax::JsObjectAssignmentPatternRest>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternRest {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsObjectAssignmentPatternRest,
+        Self,
         crate::js::assignments::object_assignment_pattern_rest::FormatJsObjectAssignmentPatternRest,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3579,7 +3579,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternRes
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternRest {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsObjectAssignmentPatternRest,
+        Self,
         crate::js::assignments::object_assignment_pattern_rest::FormatJsObjectAssignmentPatternRest,
     >;
     fn into_format(self) -> Self::Format {
@@ -3588,13 +3588,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternR
 }
 impl FormatRule < biome_js_syntax :: JsObjectAssignmentPatternShorthandProperty > for crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsObjectAssignmentPatternShorthandProperty , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsObjectAssignmentPatternShorthandProperty > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternShorthandProperty {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsObjectAssignmentPatternShorthandProperty , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternShorthandProperty {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsObjectAssignmentPatternShorthandProperty , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: assignments :: object_assignment_pattern_shorthand_property :: FormatJsObjectAssignmentPatternShorthandProperty :: default ())
     }
@@ -3615,7 +3615,7 @@ impl FormatRule<biome_js_syntax::JsObjectBindingPattern>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsObjectBindingPattern,
+        Self,
         crate::js::bindings::object_binding_pattern::FormatJsObjectBindingPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3627,7 +3627,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPattern {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPattern {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsObjectBindingPattern,
+        Self,
         crate::js::bindings::object_binding_pattern::FormatJsObjectBindingPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -3653,7 +3653,7 @@ impl FormatRule<biome_js_syntax::JsObjectBindingPatternProperty>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternProperty {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsObjectBindingPatternProperty,
+        Self,
         crate::js::bindings::object_binding_pattern_property::FormatJsObjectBindingPatternProperty,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3662,7 +3662,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternProper
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternProperty {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsObjectBindingPatternProperty,
+        Self,
         crate::js::bindings::object_binding_pattern_property::FormatJsObjectBindingPatternProperty,
     >;
     fn into_format(self) -> Self::Format {
@@ -3685,7 +3685,7 @@ impl FormatRule<biome_js_syntax::JsObjectBindingPatternRest>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternRest {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsObjectBindingPatternRest,
+        Self,
         crate::js::bindings::object_binding_pattern_rest::FormatJsObjectBindingPatternRest,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3694,7 +3694,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternRest {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternRest {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsObjectBindingPatternRest,
+        Self,
         crate::js::bindings::object_binding_pattern_rest::FormatJsObjectBindingPatternRest,
     >;
     fn into_format(self) -> Self::Format {
@@ -3703,13 +3703,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternRest
 }
 impl FormatRule < biome_js_syntax :: JsObjectBindingPatternShorthandProperty > for crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsObjectBindingPatternShorthandProperty , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsObjectBindingPatternShorthandProperty > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternShorthandProperty {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsObjectBindingPatternShorthandProperty , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternShorthandProperty {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsObjectBindingPatternShorthandProperty , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: bindings :: object_binding_pattern_shorthand_property :: FormatJsObjectBindingPatternShorthandProperty :: default ())
     }
@@ -3730,7 +3730,7 @@ impl FormatRule<biome_js_syntax::JsObjectExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsObjectExpression,
+        Self,
         crate::js::expressions::object_expression::FormatJsObjectExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3742,7 +3742,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsObjectExpression,
+        Self,
         crate::js::expressions::object_expression::FormatJsObjectExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -3764,7 +3764,7 @@ impl FormatRule<biome_js_syntax::JsParameters>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsParameters {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsParameters,
+        Self,
         crate::js::bindings::parameters::FormatJsParameters,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3776,7 +3776,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsParameters {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsParameters {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsParameters,
+        Self,
         crate::js::bindings::parameters::FormatJsParameters,
     >;
     fn into_format(self) -> Self::Format {
@@ -3802,7 +3802,7 @@ impl FormatRule<biome_js_syntax::JsParenthesizedAssignment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsParenthesizedAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsParenthesizedAssignment,
+        Self,
         crate::js::assignments::parenthesized_assignment::FormatJsParenthesizedAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3811,7 +3811,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsParenthesizedAssignment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsParenthesizedAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsParenthesizedAssignment,
+        Self,
         crate::js::assignments::parenthesized_assignment::FormatJsParenthesizedAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -3834,7 +3834,7 @@ impl FormatRule<biome_js_syntax::JsParenthesizedExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsParenthesizedExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsParenthesizedExpression,
+        Self,
         crate::js::expressions::parenthesized_expression::FormatJsParenthesizedExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3843,7 +3843,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsParenthesizedExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsParenthesizedExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsParenthesizedExpression,
+        Self,
         crate::js::expressions::parenthesized_expression::FormatJsParenthesizedExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -3866,7 +3866,7 @@ impl FormatRule<biome_js_syntax::JsPostUpdateExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsPostUpdateExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsPostUpdateExpression,
+        Self,
         crate::js::expressions::post_update_expression::FormatJsPostUpdateExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3878,7 +3878,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPostUpdateExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPostUpdateExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsPostUpdateExpression,
+        Self,
         crate::js::expressions::post_update_expression::FormatJsPostUpdateExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -3904,7 +3904,7 @@ impl FormatRule<biome_js_syntax::JsPreUpdateExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsPreUpdateExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsPreUpdateExpression,
+        Self,
         crate::js::expressions::pre_update_expression::FormatJsPreUpdateExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3916,7 +3916,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPreUpdateExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPreUpdateExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsPreUpdateExpression,
+        Self,
         crate::js::expressions::pre_update_expression::FormatJsPreUpdateExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -3942,7 +3942,7 @@ impl FormatRule<biome_js_syntax::JsPrivateClassMemberName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsPrivateClassMemberName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsPrivateClassMemberName,
+        Self,
         crate::js::objects::private_class_member_name::FormatJsPrivateClassMemberName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3955,7 +3955,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPrivateClassMemberName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPrivateClassMemberName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsPrivateClassMemberName,
+        Self,
         crate::js::objects::private_class_member_name::FormatJsPrivateClassMemberName,
     >;
     fn into_format(self) -> Self::Format {
@@ -3978,7 +3978,7 @@ impl FormatRule<biome_js_syntax::JsPrivateName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsPrivateName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsPrivateName,
+        Self,
         crate::js::auxiliary::private_name::FormatJsPrivateName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -3990,7 +3990,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPrivateName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPrivateName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsPrivateName,
+        Self,
         crate::js::auxiliary::private_name::FormatJsPrivateName,
     >;
     fn into_format(self) -> Self::Format {
@@ -4016,7 +4016,7 @@ impl FormatRule<biome_js_syntax::JsPropertyClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsPropertyClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsPropertyClassMember,
+        Self,
         crate::js::classes::property_class_member::FormatJsPropertyClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4028,7 +4028,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPropertyClassMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPropertyClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsPropertyClassMember,
+        Self,
         crate::js::classes::property_class_member::FormatJsPropertyClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -4054,7 +4054,7 @@ impl FormatRule<biome_js_syntax::JsPropertyObjectMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsPropertyObjectMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsPropertyObjectMember,
+        Self,
         crate::js::objects::property_object_member::FormatJsPropertyObjectMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4066,7 +4066,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPropertyObjectMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPropertyObjectMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsPropertyObjectMember,
+        Self,
         crate::js::objects::property_object_member::FormatJsPropertyObjectMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -4092,7 +4092,7 @@ impl FormatRule<biome_js_syntax::JsReferenceIdentifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsReferenceIdentifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsReferenceIdentifier,
+        Self,
         crate::js::auxiliary::reference_identifier::FormatJsReferenceIdentifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4104,7 +4104,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsReferenceIdentifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsReferenceIdentifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsReferenceIdentifier,
+        Self,
         crate::js::auxiliary::reference_identifier::FormatJsReferenceIdentifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -4130,7 +4130,7 @@ impl FormatRule<biome_js_syntax::JsRegexLiteralExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsRegexLiteralExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsRegexLiteralExpression,
+        Self,
         crate::js::expressions::regex_literal_expression::FormatJsRegexLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4139,7 +4139,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsRegexLiteralExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsRegexLiteralExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsRegexLiteralExpression,
+        Self,
         crate::js::expressions::regex_literal_expression::FormatJsRegexLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -4162,7 +4162,7 @@ impl FormatRule<biome_js_syntax::JsRestParameter>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsRestParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsRestParameter,
+        Self,
         crate::js::bindings::rest_parameter::FormatJsRestParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4174,7 +4174,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsRestParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsRestParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsRestParameter,
+        Self,
         crate::js::bindings::rest_parameter::FormatJsRestParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -4200,7 +4200,7 @@ impl FormatRule<biome_js_syntax::JsReturnStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsReturnStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsReturnStatement,
+        Self,
         crate::js::statements::return_statement::FormatJsReturnStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4212,7 +4212,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsReturnStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsReturnStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsReturnStatement,
+        Self,
         crate::js::statements::return_statement::FormatJsReturnStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -4232,7 +4232,7 @@ impl FormatRule<biome_js_syntax::JsScript> for crate::js::auxiliary::script::For
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsScript {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsScript,
+        Self,
         crate::js::auxiliary::script::FormatJsScript,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4244,7 +4244,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsScript {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsScript {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsScript,
+        Self,
         crate::js::auxiliary::script::FormatJsScript,
     >;
     fn into_format(self) -> Self::Format {
@@ -4270,7 +4270,7 @@ impl FormatRule<biome_js_syntax::JsSequenceExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsSequenceExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsSequenceExpression,
+        Self,
         crate::js::expressions::sequence_expression::FormatJsSequenceExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4282,7 +4282,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSequenceExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSequenceExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsSequenceExpression,
+        Self,
         crate::js::expressions::sequence_expression::FormatJsSequenceExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -4308,7 +4308,7 @@ impl FormatRule<biome_js_syntax::JsSetterClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsSetterClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsSetterClassMember,
+        Self,
         crate::js::classes::setter_class_member::FormatJsSetterClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4320,7 +4320,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSetterClassMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSetterClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsSetterClassMember,
+        Self,
         crate::js::classes::setter_class_member::FormatJsSetterClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -4346,7 +4346,7 @@ impl FormatRule<biome_js_syntax::JsSetterObjectMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsSetterObjectMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsSetterObjectMember,
+        Self,
         crate::js::objects::setter_object_member::FormatJsSetterObjectMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4358,7 +4358,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSetterObjectMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSetterObjectMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsSetterObjectMember,
+        Self,
         crate::js::objects::setter_object_member::FormatJsSetterObjectMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -4384,7 +4384,7 @@ impl FormatRule<biome_js_syntax::JsShorthandNamedImportSpecifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsShorthandNamedImportSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsShorthandNamedImportSpecifier,
+        Self,
         crate::js::module::shorthand_named_import_specifier::FormatJsShorthandNamedImportSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4393,7 +4393,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsShorthandNamedImportSpecif
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsShorthandNamedImportSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsShorthandNamedImportSpecifier,
+        Self,
         crate::js::module::shorthand_named_import_specifier::FormatJsShorthandNamedImportSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -4416,7 +4416,7 @@ impl FormatRule<biome_js_syntax::JsShorthandPropertyObjectMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsShorthandPropertyObjectMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsShorthandPropertyObjectMember,
+        Self,
         crate::js::objects::shorthand_property_object_member::FormatJsShorthandPropertyObjectMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4425,7 +4425,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsShorthandPropertyObjectMem
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsShorthandPropertyObjectMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsShorthandPropertyObjectMember,
+        Self,
         crate::js::objects::shorthand_property_object_member::FormatJsShorthandPropertyObjectMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -4442,7 +4442,7 @@ impl FormatRule<biome_js_syntax::JsSpread> for crate::js::auxiliary::spread::For
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsSpread {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsSpread,
+        Self,
         crate::js::auxiliary::spread::FormatJsSpread,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4454,7 +4454,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSpread {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSpread {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsSpread,
+        Self,
         crate::js::auxiliary::spread::FormatJsSpread,
     >;
     fn into_format(self) -> Self::Format {
@@ -4466,13 +4466,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSpread {
 }
 impl FormatRule < biome_js_syntax :: JsStaticInitializationBlockClassMember > for crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: JsStaticInitializationBlockClassMember , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: JsStaticInitializationBlockClassMember > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsStaticInitializationBlockClassMember {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsStaticInitializationBlockClassMember , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsStaticInitializationBlockClassMember {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsStaticInitializationBlockClassMember , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: classes :: static_initialization_block_class_member :: FormatJsStaticInitializationBlockClassMember :: default ())
     }
@@ -4493,7 +4493,7 @@ impl FormatRule<biome_js_syntax::JsStaticMemberAssignment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsStaticMemberAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsStaticMemberAssignment,
+        Self,
         crate::js::assignments::static_member_assignment::FormatJsStaticMemberAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4502,7 +4502,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsStaticMemberAssignment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsStaticMemberAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsStaticMemberAssignment,
+        Self,
         crate::js::assignments::static_member_assignment::FormatJsStaticMemberAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -4525,7 +4525,7 @@ impl FormatRule<biome_js_syntax::JsStaticMemberExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsStaticMemberExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsStaticMemberExpression,
+        Self,
         crate::js::expressions::static_member_expression::FormatJsStaticMemberExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4534,7 +4534,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsStaticMemberExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsStaticMemberExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsStaticMemberExpression,
+        Self,
         crate::js::expressions::static_member_expression::FormatJsStaticMemberExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -4557,7 +4557,7 @@ impl FormatRule<biome_js_syntax::JsStaticModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsStaticModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsStaticModifier,
+        Self,
         crate::js::auxiliary::static_modifier::FormatJsStaticModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4569,7 +4569,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsStaticModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsStaticModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsStaticModifier,
+        Self,
         crate::js::auxiliary::static_modifier::FormatJsStaticModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -4595,7 +4595,7 @@ impl FormatRule<biome_js_syntax::JsStringLiteralExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsStringLiteralExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsStringLiteralExpression,
+        Self,
         crate::js::expressions::string_literal_expression::FormatJsStringLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4604,7 +4604,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsStringLiteralExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsStringLiteralExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsStringLiteralExpression,
+        Self,
         crate::js::expressions::string_literal_expression::FormatJsStringLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -4627,7 +4627,7 @@ impl FormatRule<biome_js_syntax::JsSuperExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsSuperExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsSuperExpression,
+        Self,
         crate::js::expressions::super_expression::FormatJsSuperExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4639,7 +4639,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSuperExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSuperExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsSuperExpression,
+        Self,
         crate::js::expressions::super_expression::FormatJsSuperExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -4665,7 +4665,7 @@ impl FormatRule<biome_js_syntax::JsSwitchStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsSwitchStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsSwitchStatement,
+        Self,
         crate::js::statements::switch_statement::FormatJsSwitchStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4677,7 +4677,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSwitchStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSwitchStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsSwitchStatement,
+        Self,
         crate::js::statements::switch_statement::FormatJsSwitchStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -4703,7 +4703,7 @@ impl FormatRule<biome_js_syntax::JsTemplateChunkElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateChunkElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsTemplateChunkElement,
+        Self,
         crate::js::auxiliary::template_chunk_element::FormatJsTemplateChunkElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4715,7 +4715,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateChunkElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTemplateChunkElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsTemplateChunkElement,
+        Self,
         crate::js::auxiliary::template_chunk_element::FormatJsTemplateChunkElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -4741,7 +4741,7 @@ impl FormatRule<biome_js_syntax::JsTemplateElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsTemplateElement,
+        Self,
         crate::js::auxiliary::template_element::FormatJsTemplateElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4753,7 +4753,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTemplateElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsTemplateElement,
+        Self,
         crate::js::auxiliary::template_element::FormatJsTemplateElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -4779,7 +4779,7 @@ impl FormatRule<biome_js_syntax::JsTemplateExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsTemplateExpression,
+        Self,
         crate::js::expressions::template_expression::FormatJsTemplateExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4791,7 +4791,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTemplateExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsTemplateExpression,
+        Self,
         crate::js::expressions::template_expression::FormatJsTemplateExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -4817,7 +4817,7 @@ impl FormatRule<biome_js_syntax::JsThisExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsThisExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsThisExpression,
+        Self,
         crate::js::expressions::this_expression::FormatJsThisExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4829,7 +4829,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsThisExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsThisExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsThisExpression,
+        Self,
         crate::js::expressions::this_expression::FormatJsThisExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -4855,7 +4855,7 @@ impl FormatRule<biome_js_syntax::JsThrowStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsThrowStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsThrowStatement,
+        Self,
         crate::js::statements::throw_statement::FormatJsThrowStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4867,7 +4867,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsThrowStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsThrowStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsThrowStatement,
+        Self,
         crate::js::statements::throw_statement::FormatJsThrowStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -4893,7 +4893,7 @@ impl FormatRule<biome_js_syntax::JsTryFinallyStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsTryFinallyStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsTryFinallyStatement,
+        Self,
         crate::js::statements::try_finally_statement::FormatJsTryFinallyStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4905,7 +4905,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTryFinallyStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTryFinallyStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsTryFinallyStatement,
+        Self,
         crate::js::statements::try_finally_statement::FormatJsTryFinallyStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -4927,7 +4927,7 @@ impl FormatRule<biome_js_syntax::JsTryStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsTryStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsTryStatement,
+        Self,
         crate::js::statements::try_statement::FormatJsTryStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4939,7 +4939,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTryStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTryStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsTryStatement,
+        Self,
         crate::js::statements::try_statement::FormatJsTryStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -4965,7 +4965,7 @@ impl FormatRule<biome_js_syntax::JsUnaryExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsUnaryExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsUnaryExpression,
+        Self,
         crate::js::expressions::unary_expression::FormatJsUnaryExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -4977,7 +4977,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsUnaryExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsUnaryExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsUnaryExpression,
+        Self,
         crate::js::expressions::unary_expression::FormatJsUnaryExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -5003,7 +5003,7 @@ impl FormatRule<biome_js_syntax::JsVariableDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsVariableDeclaration,
+        Self,
         crate::js::declarations::variable_declaration::FormatJsVariableDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5015,7 +5015,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsVariableDeclaration,
+        Self,
         crate::js::declarations::variable_declaration::FormatJsVariableDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -5041,7 +5041,7 @@ impl FormatRule<biome_js_syntax::JsVariableDeclarationClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarationClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsVariableDeclarationClause,
+        Self,
         crate::js::auxiliary::variable_declaration_clause::FormatJsVariableDeclarationClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5050,7 +5050,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarationClause 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarationClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsVariableDeclarationClause,
+        Self,
         crate::js::auxiliary::variable_declaration_clause::FormatJsVariableDeclarationClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -5073,7 +5073,7 @@ impl FormatRule<biome_js_syntax::JsVariableDeclarator>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarator {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsVariableDeclarator,
+        Self,
         crate::js::auxiliary::variable_declarator::FormatJsVariableDeclarator,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5085,7 +5085,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarator {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarator {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsVariableDeclarator,
+        Self,
         crate::js::auxiliary::variable_declarator::FormatJsVariableDeclarator,
     >;
     fn into_format(self) -> Self::Format {
@@ -5111,7 +5111,7 @@ impl FormatRule<biome_js_syntax::JsVariableStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsVariableStatement,
+        Self,
         crate::js::statements::variable_statement::FormatJsVariableStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5123,7 +5123,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsVariableStatement,
+        Self,
         crate::js::statements::variable_statement::FormatJsVariableStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -5149,7 +5149,7 @@ impl FormatRule<biome_js_syntax::JsWhileStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsWhileStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsWhileStatement,
+        Self,
         crate::js::statements::while_statement::FormatJsWhileStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5161,7 +5161,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsWhileStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsWhileStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsWhileStatement,
+        Self,
         crate::js::statements::while_statement::FormatJsWhileStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -5187,7 +5187,7 @@ impl FormatRule<biome_js_syntax::JsWithStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsWithStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsWithStatement,
+        Self,
         crate::js::statements::with_statement::FormatJsWithStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5199,7 +5199,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsWithStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsWithStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsWithStatement,
+        Self,
         crate::js::statements::with_statement::FormatJsWithStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -5225,7 +5225,7 @@ impl FormatRule<biome_js_syntax::JsYieldArgument>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsYieldArgument {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsYieldArgument,
+        Self,
         crate::js::expressions::yield_argument::FormatJsYieldArgument,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5237,7 +5237,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsYieldArgument {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsYieldArgument {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsYieldArgument,
+        Self,
         crate::js::expressions::yield_argument::FormatJsYieldArgument,
     >;
     fn into_format(self) -> Self::Format {
@@ -5263,7 +5263,7 @@ impl FormatRule<biome_js_syntax::JsYieldExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsYieldExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsYieldExpression,
+        Self,
         crate::js::expressions::yield_expression::FormatJsYieldExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5275,7 +5275,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsYieldExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsYieldExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsYieldExpression,
+        Self,
         crate::js::expressions::yield_expression::FormatJsYieldExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -5297,7 +5297,7 @@ impl FormatRule<biome_js_syntax::JsxAttribute>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxAttribute {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxAttribute,
+        Self,
         crate::jsx::attribute::attribute::FormatJsxAttribute,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5309,7 +5309,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxAttribute {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxAttribute {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxAttribute,
+        Self,
         crate::jsx::attribute::attribute::FormatJsxAttribute,
     >;
     fn into_format(self) -> Self::Format {
@@ -5335,7 +5335,7 @@ impl FormatRule<biome_js_syntax::JsxAttributeInitializerClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxAttributeInitializerClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxAttributeInitializerClause,
+        Self,
         crate::jsx::attribute::attribute_initializer_clause::FormatJsxAttributeInitializerClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5344,7 +5344,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxAttributeInitializerClaus
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxAttributeInitializerClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxAttributeInitializerClause,
+        Self,
         crate::jsx::attribute::attribute_initializer_clause::FormatJsxAttributeInitializerClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -5367,7 +5367,7 @@ impl FormatRule<biome_js_syntax::JsxClosingElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxClosingElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxClosingElement,
+        Self,
         crate::jsx::tag::closing_element::FormatJsxClosingElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5379,7 +5379,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxClosingElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxClosingElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxClosingElement,
+        Self,
         crate::jsx::tag::closing_element::FormatJsxClosingElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -5405,7 +5405,7 @@ impl FormatRule<biome_js_syntax::JsxClosingFragment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxClosingFragment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxClosingFragment,
+        Self,
         crate::jsx::tag::closing_fragment::FormatJsxClosingFragment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5417,7 +5417,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxClosingFragment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxClosingFragment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxClosingFragment,
+        Self,
         crate::jsx::tag::closing_fragment::FormatJsxClosingFragment,
     >;
     fn into_format(self) -> Self::Format {
@@ -5437,7 +5437,7 @@ impl FormatRule<biome_js_syntax::JsxElement> for crate::jsx::tag::element::Forma
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxElement,
+        Self,
         crate::jsx::tag::element::FormatJsxElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5446,7 +5446,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxElement,
+        Self,
         crate::jsx::tag::element::FormatJsxElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -5469,7 +5469,7 @@ impl FormatRule<biome_js_syntax::JsxExpressionAttributeValue>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxExpressionAttributeValue {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxExpressionAttributeValue,
+        Self,
         crate::jsx::attribute::expression_attribute_value::FormatJsxExpressionAttributeValue,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5478,7 +5478,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxExpressionAttributeValue 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxExpressionAttributeValue {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxExpressionAttributeValue,
+        Self,
         crate::jsx::attribute::expression_attribute_value::FormatJsxExpressionAttributeValue,
     >;
     fn into_format(self) -> Self::Format {
@@ -5501,7 +5501,7 @@ impl FormatRule<biome_js_syntax::JsxExpressionChild>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxExpressionChild {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxExpressionChild,
+        Self,
         crate::jsx::auxiliary::expression_child::FormatJsxExpressionChild,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5513,7 +5513,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxExpressionChild {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxExpressionChild {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxExpressionChild,
+        Self,
         crate::jsx::auxiliary::expression_child::FormatJsxExpressionChild,
     >;
     fn into_format(self) -> Self::Format {
@@ -5533,7 +5533,7 @@ impl FormatRule<biome_js_syntax::JsxFragment> for crate::jsx::tag::fragment::For
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxFragment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxFragment,
+        Self,
         crate::jsx::tag::fragment::FormatJsxFragment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5545,7 +5545,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxFragment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxFragment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxFragment,
+        Self,
         crate::jsx::tag::fragment::FormatJsxFragment,
     >;
     fn into_format(self) -> Self::Format {
@@ -5567,7 +5567,7 @@ impl FormatRule<biome_js_syntax::JsxMemberName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxMemberName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxMemberName,
+        Self,
         crate::jsx::objects::member_name::FormatJsxMemberName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5579,7 +5579,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxMemberName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxMemberName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxMemberName,
+        Self,
         crate::jsx::objects::member_name::FormatJsxMemberName,
     >;
     fn into_format(self) -> Self::Format {
@@ -5598,14 +5598,14 @@ impl FormatRule<biome_js_syntax::JsxName> for crate::jsx::auxiliary::name::Forma
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxName {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::JsxName, crate::jsx::auxiliary::name::FormatJsxName>;
+        FormatRefWithRule<'a, Self, crate::jsx::auxiliary::name::FormatJsxName>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::jsx::auxiliary::name::FormatJsxName::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxName {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::JsxName, crate::jsx::auxiliary::name::FormatJsxName>;
+        FormatOwnedWithRule<Self, crate::jsx::auxiliary::name::FormatJsxName>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::jsx::auxiliary::name::FormatJsxName::default())
     }
@@ -5626,7 +5626,7 @@ impl FormatRule<biome_js_syntax::JsxNamespaceName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxNamespaceName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxNamespaceName,
+        Self,
         crate::jsx::auxiliary::namespace_name::FormatJsxNamespaceName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5638,7 +5638,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxNamespaceName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxNamespaceName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxNamespaceName,
+        Self,
         crate::jsx::auxiliary::namespace_name::FormatJsxNamespaceName,
     >;
     fn into_format(self) -> Self::Format {
@@ -5664,7 +5664,7 @@ impl FormatRule<biome_js_syntax::JsxOpeningElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxOpeningElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxOpeningElement,
+        Self,
         crate::jsx::tag::opening_element::FormatJsxOpeningElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5676,7 +5676,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxOpeningElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxOpeningElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxOpeningElement,
+        Self,
         crate::jsx::tag::opening_element::FormatJsxOpeningElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -5702,7 +5702,7 @@ impl FormatRule<biome_js_syntax::JsxOpeningFragment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxOpeningFragment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxOpeningFragment,
+        Self,
         crate::jsx::tag::opening_fragment::FormatJsxOpeningFragment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5714,7 +5714,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxOpeningFragment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxOpeningFragment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxOpeningFragment,
+        Self,
         crate::jsx::tag::opening_fragment::FormatJsxOpeningFragment,
     >;
     fn into_format(self) -> Self::Format {
@@ -5740,7 +5740,7 @@ impl FormatRule<biome_js_syntax::JsxReferenceIdentifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxReferenceIdentifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxReferenceIdentifier,
+        Self,
         crate::jsx::auxiliary::reference_identifier::FormatJsxReferenceIdentifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5752,7 +5752,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxReferenceIdentifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxReferenceIdentifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxReferenceIdentifier,
+        Self,
         crate::jsx::auxiliary::reference_identifier::FormatJsxReferenceIdentifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -5778,7 +5778,7 @@ impl FormatRule<biome_js_syntax::JsxSelfClosingElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxSelfClosingElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxSelfClosingElement,
+        Self,
         crate::jsx::tag::self_closing_element::FormatJsxSelfClosingElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5790,7 +5790,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxSelfClosingElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxSelfClosingElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxSelfClosingElement,
+        Self,
         crate::jsx::tag::self_closing_element::FormatJsxSelfClosingElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -5816,7 +5816,7 @@ impl FormatRule<biome_js_syntax::JsxSpreadAttribute>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxSpreadAttribute {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxSpreadAttribute,
+        Self,
         crate::jsx::attribute::spread_attribute::FormatJsxSpreadAttribute,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5828,7 +5828,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxSpreadAttribute {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxSpreadAttribute {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxSpreadAttribute,
+        Self,
         crate::jsx::attribute::spread_attribute::FormatJsxSpreadAttribute,
     >;
     fn into_format(self) -> Self::Format {
@@ -5850,7 +5850,7 @@ impl FormatRule<biome_js_syntax::JsxSpreadChild>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxSpreadChild {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxSpreadChild,
+        Self,
         crate::jsx::auxiliary::spread_child::FormatJsxSpreadChild,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5862,7 +5862,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxSpreadChild {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxSpreadChild {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxSpreadChild,
+        Self,
         crate::jsx::auxiliary::spread_child::FormatJsxSpreadChild,
     >;
     fn into_format(self) -> Self::Format {
@@ -5882,7 +5882,7 @@ impl FormatRule<biome_js_syntax::JsxString> for crate::jsx::auxiliary::string::F
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxString {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxString,
+        Self,
         crate::jsx::auxiliary::string::FormatJsxString,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5894,7 +5894,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxString {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxString {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxString,
+        Self,
         crate::jsx::auxiliary::string::FormatJsxString,
     >;
     fn into_format(self) -> Self::Format {
@@ -5920,7 +5920,7 @@ impl FormatRule<biome_js_syntax::JsxTagExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxTagExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxTagExpression,
+        Self,
         crate::jsx::expressions::tag_expression::FormatJsxTagExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5932,7 +5932,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxTagExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxTagExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxTagExpression,
+        Self,
         crate::jsx::expressions::tag_expression::FormatJsxTagExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -5951,14 +5951,14 @@ impl FormatRule<biome_js_syntax::JsxText> for crate::jsx::auxiliary::text::Forma
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxText {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::JsxText, crate::jsx::auxiliary::text::FormatJsxText>;
+        FormatRefWithRule<'a, Self, crate::jsx::auxiliary::text::FormatJsxText>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::jsx::auxiliary::text::FormatJsxText::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxText {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::JsxText, crate::jsx::auxiliary::text::FormatJsxText>;
+        FormatOwnedWithRule<Self, crate::jsx::auxiliary::text::FormatJsxText>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::jsx::auxiliary::text::FormatJsxText::default())
     }
@@ -5979,7 +5979,7 @@ impl FormatRule<biome_js_syntax::TsAbstractModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsAbstractModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsAbstractModifier,
+        Self,
         crate::ts::auxiliary::abstract_modifier::FormatTsAbstractModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -5991,7 +5991,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAbstractModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAbstractModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsAbstractModifier,
+        Self,
         crate::ts::auxiliary::abstract_modifier::FormatTsAbstractModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -6017,7 +6017,7 @@ impl FormatRule<biome_js_syntax::TsAccessibilityModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsAccessibilityModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsAccessibilityModifier,
+        Self,
         crate::ts::auxiliary::accessibility_modifier::FormatTsAccessibilityModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6029,7 +6029,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAccessibilityModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAccessibilityModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsAccessibilityModifier,
+        Self,
         crate::ts::auxiliary::accessibility_modifier::FormatTsAccessibilityModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -6049,7 +6049,7 @@ impl FormatRule<biome_js_syntax::TsAnyType> for crate::ts::types::any_type::Form
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsAnyType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsAnyType,
+        Self,
         crate::ts::types::any_type::FormatTsAnyType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6058,7 +6058,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAnyType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAnyType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsAnyType,
+        Self,
         crate::ts::types::any_type::FormatTsAnyType,
     >;
     fn into_format(self) -> Self::Format {
@@ -6075,7 +6075,7 @@ impl FormatRule<biome_js_syntax::TsArrayType> for crate::ts::types::array_type::
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsArrayType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsArrayType,
+        Self,
         crate::ts::types::array_type::FormatTsArrayType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6087,7 +6087,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsArrayType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsArrayType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsArrayType,
+        Self,
         crate::ts::types::array_type::FormatTsArrayType,
     >;
     fn into_format(self) -> Self::Format {
@@ -6109,7 +6109,7 @@ impl FormatRule<biome_js_syntax::TsAsAssignment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsAsAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsAsAssignment,
+        Self,
         crate::ts::assignments::as_assignment::FormatTsAsAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6121,7 +6121,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAsAssignment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAsAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsAsAssignment,
+        Self,
         crate::ts::assignments::as_assignment::FormatTsAsAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -6143,7 +6143,7 @@ impl FormatRule<biome_js_syntax::TsAsExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsAsExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsAsExpression,
+        Self,
         crate::ts::expressions::as_expression::FormatTsAsExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6155,7 +6155,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAsExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAsExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsAsExpression,
+        Self,
         crate::ts::expressions::as_expression::FormatTsAsExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -6181,7 +6181,7 @@ impl FormatRule<biome_js_syntax::TsAssertsCondition>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsAssertsCondition {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsAssertsCondition,
+        Self,
         crate::ts::auxiliary::asserts_condition::FormatTsAssertsCondition,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6193,7 +6193,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAssertsCondition {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAssertsCondition {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsAssertsCondition,
+        Self,
         crate::ts::auxiliary::asserts_condition::FormatTsAssertsCondition,
     >;
     fn into_format(self) -> Self::Format {
@@ -6219,7 +6219,7 @@ impl FormatRule<biome_js_syntax::TsAssertsReturnType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsAssertsReturnType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsAssertsReturnType,
+        Self,
         crate::ts::types::asserts_return_type::FormatTsAssertsReturnType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6231,7 +6231,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsAssertsReturnType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsAssertsReturnType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsAssertsReturnType,
+        Self,
         crate::ts::types::asserts_return_type::FormatTsAssertsReturnType,
     >;
     fn into_format(self) -> Self::Format {
@@ -6257,7 +6257,7 @@ impl FormatRule<biome_js_syntax::TsBigintLiteralType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsBigintLiteralType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsBigintLiteralType,
+        Self,
         crate::ts::types::bigint_literal_type::FormatTsBigintLiteralType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6269,7 +6269,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsBigintLiteralType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsBigintLiteralType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsBigintLiteralType,
+        Self,
         crate::ts::types::bigint_literal_type::FormatTsBigintLiteralType,
     >;
     fn into_format(self) -> Self::Format {
@@ -6291,7 +6291,7 @@ impl FormatRule<biome_js_syntax::TsBigintType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsBigintType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsBigintType,
+        Self,
         crate::ts::types::bigint_type::FormatTsBigintType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6303,7 +6303,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsBigintType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsBigintType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsBigintType,
+        Self,
         crate::ts::types::bigint_type::FormatTsBigintType,
     >;
     fn into_format(self) -> Self::Format {
@@ -6329,7 +6329,7 @@ impl FormatRule<biome_js_syntax::TsBooleanLiteralType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsBooleanLiteralType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsBooleanLiteralType,
+        Self,
         crate::ts::types::boolean_literal_type::FormatTsBooleanLiteralType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6341,7 +6341,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsBooleanLiteralType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsBooleanLiteralType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsBooleanLiteralType,
+        Self,
         crate::ts::types::boolean_literal_type::FormatTsBooleanLiteralType,
     >;
     fn into_format(self) -> Self::Format {
@@ -6363,7 +6363,7 @@ impl FormatRule<biome_js_syntax::TsBooleanType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsBooleanType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsBooleanType,
+        Self,
         crate::ts::types::boolean_type::FormatTsBooleanType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6375,7 +6375,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsBooleanType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsBooleanType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsBooleanType,
+        Self,
         crate::ts::types::boolean_type::FormatTsBooleanType,
     >;
     fn into_format(self) -> Self::Format {
@@ -6401,7 +6401,7 @@ impl FormatRule<biome_js_syntax::TsCallSignatureTypeMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsCallSignatureTypeMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsCallSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::call_signature_type_member::FormatTsCallSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6410,7 +6410,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsCallSignatureTypeMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsCallSignatureTypeMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsCallSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::call_signature_type_member::FormatTsCallSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -6433,7 +6433,7 @@ impl FormatRule<biome_js_syntax::TsConditionalType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsConditionalType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsConditionalType,
+        Self,
         crate::ts::types::conditional_type::FormatTsConditionalType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6445,7 +6445,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsConditionalType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConditionalType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsConditionalType,
+        Self,
         crate::ts::types::conditional_type::FormatTsConditionalType,
     >;
     fn into_format(self) -> Self::Format {
@@ -6471,7 +6471,7 @@ impl FormatRule<biome_js_syntax::TsConstModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsConstModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsConstModifier,
+        Self,
         crate::ts::auxiliary::const_modifier::FormatTsConstModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6483,7 +6483,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsConstModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConstModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsConstModifier,
+        Self,
         crate::ts::auxiliary::const_modifier::FormatTsConstModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -6509,7 +6509,7 @@ impl FormatRule<biome_js_syntax::TsConstructSignatureTypeMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsConstructSignatureTypeMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsConstructSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::construct_signature_type_member::FormatTsConstructSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6518,7 +6518,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsConstructSignatureTypeMemb
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConstructSignatureTypeMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsConstructSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::construct_signature_type_member::FormatTsConstructSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -6527,13 +6527,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConstructSignatureTypeMe
 }
 impl FormatRule < biome_js_syntax :: TsConstructorSignatureClassMember > for crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: TsConstructorSignatureClassMember , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: TsConstructorSignatureClassMember > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsConstructorSignatureClassMember {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: TsConstructorSignatureClassMember , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConstructorSignatureClassMember {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: TsConstructorSignatureClassMember , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember > ;
+    type Format = FormatOwnedWithRule < Self , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: ts :: classes :: constructor_signature_class_member :: FormatTsConstructorSignatureClassMember :: default ())
     }
@@ -6554,7 +6554,7 @@ impl FormatRule<biome_js_syntax::TsConstructorType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsConstructorType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsConstructorType,
+        Self,
         crate::ts::types::constructor_type::FormatTsConstructorType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6566,7 +6566,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsConstructorType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConstructorType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsConstructorType,
+        Self,
         crate::ts::types::constructor_type::FormatTsConstructorType,
     >;
     fn into_format(self) -> Self::Format {
@@ -6592,7 +6592,7 @@ impl FormatRule<biome_js_syntax::TsDeclarationModule>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclarationModule {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsDeclarationModule,
+        Self,
         crate::ts::auxiliary::declaration_module::FormatTsDeclarationModule,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6604,7 +6604,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclarationModule {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDeclarationModule {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsDeclarationModule,
+        Self,
         crate::ts::auxiliary::declaration_module::FormatTsDeclarationModule,
     >;
     fn into_format(self) -> Self::Format {
@@ -6630,7 +6630,7 @@ impl FormatRule<biome_js_syntax::TsDeclareFunctionDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclareFunctionDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsDeclareFunctionDeclaration,
+        Self,
         crate::ts::declarations::declare_function_declaration::FormatTsDeclareFunctionDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6639,7 +6639,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclareFunctionDeclaration
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDeclareFunctionDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsDeclareFunctionDeclaration,
+        Self,
         crate::ts::declarations::declare_function_declaration::FormatTsDeclareFunctionDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -6648,13 +6648,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDeclareFunctionDeclarati
 }
 impl FormatRule < biome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration > for crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclareFunctionExportDefaultDeclaration {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDeclareFunctionExportDefaultDeclaration {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: TsDeclareFunctionExportDefaultDeclaration , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration > ;
+    type Format = FormatOwnedWithRule < Self , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: ts :: declarations :: declare_function_export_default_declaration :: FormatTsDeclareFunctionExportDefaultDeclaration :: default ())
     }
@@ -6675,7 +6675,7 @@ impl FormatRule<biome_js_syntax::TsDeclareModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclareModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsDeclareModifier,
+        Self,
         crate::ts::auxiliary::declare_modifier::FormatTsDeclareModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6687,7 +6687,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclareModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDeclareModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsDeclareModifier,
+        Self,
         crate::ts::auxiliary::declare_modifier::FormatTsDeclareModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -6713,7 +6713,7 @@ impl FormatRule<biome_js_syntax::TsDeclareStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclareStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsDeclareStatement,
+        Self,
         crate::ts::statements::declare_statement::FormatTsDeclareStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6725,7 +6725,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclareStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDeclareStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsDeclareStatement,
+        Self,
         crate::ts::statements::declare_statement::FormatTsDeclareStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -6751,7 +6751,7 @@ impl FormatRule<biome_js_syntax::TsDefaultTypeClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsDefaultTypeClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsDefaultTypeClause,
+        Self,
         crate::ts::auxiliary::default_type_clause::FormatTsDefaultTypeClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6763,7 +6763,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDefaultTypeClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDefaultTypeClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsDefaultTypeClause,
+        Self,
         crate::ts::auxiliary::default_type_clause::FormatTsDefaultTypeClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -6789,7 +6789,7 @@ impl FormatRule<biome_js_syntax::TsDefinitePropertyAnnotation>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsDefinitePropertyAnnotation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsDefinitePropertyAnnotation,
+        Self,
         crate::ts::auxiliary::definite_property_annotation::FormatTsDefinitePropertyAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6798,7 +6798,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDefinitePropertyAnnotation
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDefinitePropertyAnnotation {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsDefinitePropertyAnnotation,
+        Self,
         crate::ts::auxiliary::definite_property_annotation::FormatTsDefinitePropertyAnnotation,
     >;
     fn into_format(self) -> Self::Format {
@@ -6821,7 +6821,7 @@ impl FormatRule<biome_js_syntax::TsDefiniteVariableAnnotation>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsDefiniteVariableAnnotation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsDefiniteVariableAnnotation,
+        Self,
         crate::ts::auxiliary::definite_variable_annotation::FormatTsDefiniteVariableAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6830,7 +6830,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsDefiniteVariableAnnotation
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDefiniteVariableAnnotation {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsDefiniteVariableAnnotation,
+        Self,
         crate::ts::auxiliary::definite_variable_annotation::FormatTsDefiniteVariableAnnotation,
     >;
     fn into_format(self) -> Self::Format {
@@ -6839,13 +6839,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDefiniteVariableAnnotati
 }
 impl FormatRule < biome_js_syntax :: TsEmptyExternalModuleDeclarationBody > for crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: TsEmptyExternalModuleDeclarationBody , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: TsEmptyExternalModuleDeclarationBody > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsEmptyExternalModuleDeclarationBody {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: TsEmptyExternalModuleDeclarationBody , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsEmptyExternalModuleDeclarationBody {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: TsEmptyExternalModuleDeclarationBody , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody > ;
+    type Format = FormatOwnedWithRule < Self , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: empty_external_module_declaration_body :: FormatTsEmptyExternalModuleDeclarationBody :: default ())
     }
@@ -6866,7 +6866,7 @@ impl FormatRule<biome_js_syntax::TsEnumDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsEnumDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsEnumDeclaration,
+        Self,
         crate::ts::declarations::enum_declaration::FormatTsEnumDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6878,7 +6878,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsEnumDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsEnumDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsEnumDeclaration,
+        Self,
         crate::ts::declarations::enum_declaration::FormatTsEnumDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -6900,7 +6900,7 @@ impl FormatRule<biome_js_syntax::TsEnumMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsEnumMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsEnumMember,
+        Self,
         crate::ts::auxiliary::enum_member::FormatTsEnumMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6912,7 +6912,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsEnumMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsEnumMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsEnumMember,
+        Self,
         crate::ts::auxiliary::enum_member::FormatTsEnumMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -6938,7 +6938,7 @@ impl FormatRule<biome_js_syntax::TsExportAsNamespaceClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsExportAsNamespaceClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsExportAsNamespaceClause,
+        Self,
         crate::ts::module::export_as_namespace_clause::FormatTsExportAsNamespaceClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6951,7 +6951,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExportAsNamespaceClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExportAsNamespaceClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsExportAsNamespaceClause,
+        Self,
         crate::ts::module::export_as_namespace_clause::FormatTsExportAsNamespaceClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -6978,7 +6978,7 @@ impl FormatRule<biome_js_syntax::TsExportAssignmentClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsExportAssignmentClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsExportAssignmentClause,
+        Self,
         crate::ts::module::export_assignment_clause::FormatTsExportAssignmentClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -6990,7 +6990,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExportAssignmentClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExportAssignmentClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsExportAssignmentClause,
+        Self,
         crate::ts::module::export_assignment_clause::FormatTsExportAssignmentClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -7016,7 +7016,7 @@ impl FormatRule<biome_js_syntax::TsExportDeclareClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsExportDeclareClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsExportDeclareClause,
+        Self,
         crate::ts::module::export_declare_clause::FormatTsExportDeclareClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7028,7 +7028,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExportDeclareClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExportDeclareClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsExportDeclareClause,
+        Self,
         crate::ts::module::export_declare_clause::FormatTsExportDeclareClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -7054,7 +7054,7 @@ impl FormatRule<biome_js_syntax::TsExtendsClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsExtendsClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsExtendsClause,
+        Self,
         crate::ts::classes::extends_clause::FormatTsExtendsClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7066,7 +7066,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExtendsClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExtendsClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsExtendsClause,
+        Self,
         crate::ts::classes::extends_clause::FormatTsExtendsClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -7092,7 +7092,7 @@ impl FormatRule<biome_js_syntax::TsExternalModuleDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsExternalModuleDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsExternalModuleDeclaration,
+        Self,
         crate::ts::declarations::external_module_declaration::FormatTsExternalModuleDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7101,7 +7101,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExternalModuleDeclaration 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExternalModuleDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsExternalModuleDeclaration,
+        Self,
         crate::ts::declarations::external_module_declaration::FormatTsExternalModuleDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -7124,7 +7124,7 @@ impl FormatRule<biome_js_syntax::TsExternalModuleReference>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsExternalModuleReference {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsExternalModuleReference,
+        Self,
         crate::ts::auxiliary::external_module_reference::FormatTsExternalModuleReference,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7133,7 +7133,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsExternalModuleReference {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsExternalModuleReference {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsExternalModuleReference,
+        Self,
         crate::ts::auxiliary::external_module_reference::FormatTsExternalModuleReference,
     >;
     fn into_format(self) -> Self::Format {
@@ -7152,7 +7152,7 @@ impl FormatRule<biome_js_syntax::TsFunctionType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsFunctionType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsFunctionType,
+        Self,
         crate::ts::types::function_type::FormatTsFunctionType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7164,7 +7164,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsFunctionType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsFunctionType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsFunctionType,
+        Self,
         crate::ts::types::function_type::FormatTsFunctionType,
     >;
     fn into_format(self) -> Self::Format {
@@ -7190,7 +7190,7 @@ impl FormatRule<biome_js_syntax::TsGetterSignatureClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsGetterSignatureClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsGetterSignatureClassMember,
+        Self,
         crate::ts::classes::getter_signature_class_member::FormatTsGetterSignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7199,7 +7199,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsGetterSignatureClassMember
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsGetterSignatureClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsGetterSignatureClassMember,
+        Self,
         crate::ts::classes::getter_signature_class_member::FormatTsGetterSignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -7222,7 +7222,7 @@ impl FormatRule<biome_js_syntax::TsGetterSignatureTypeMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsGetterSignatureTypeMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsGetterSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::getter_signature_type_member::FormatTsGetterSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7231,7 +7231,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsGetterSignatureTypeMember 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsGetterSignatureTypeMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsGetterSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::getter_signature_type_member::FormatTsGetterSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -7254,7 +7254,7 @@ impl FormatRule<biome_js_syntax::TsGlobalDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsGlobalDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsGlobalDeclaration,
+        Self,
         crate::ts::declarations::global_declaration::FormatTsGlobalDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7266,7 +7266,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsGlobalDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsGlobalDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsGlobalDeclaration,
+        Self,
         crate::ts::declarations::global_declaration::FormatTsGlobalDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -7292,7 +7292,7 @@ impl FormatRule<biome_js_syntax::TsIdentifierBinding>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsIdentifierBinding {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsIdentifierBinding,
+        Self,
         crate::ts::bindings::identifier_binding::FormatTsIdentifierBinding,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7304,7 +7304,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIdentifierBinding {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIdentifierBinding {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsIdentifierBinding,
+        Self,
         crate::ts::bindings::identifier_binding::FormatTsIdentifierBinding,
     >;
     fn into_format(self) -> Self::Format {
@@ -7330,7 +7330,7 @@ impl FormatRule<biome_js_syntax::TsImplementsClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsImplementsClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsImplementsClause,
+        Self,
         crate::ts::auxiliary::implements_clause::FormatTsImplementsClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7342,7 +7342,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsImplementsClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsImplementsClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsImplementsClause,
+        Self,
         crate::ts::auxiliary::implements_clause::FormatTsImplementsClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -7368,7 +7368,7 @@ impl FormatRule<biome_js_syntax::TsImportEqualsDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportEqualsDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsImportEqualsDeclaration,
+        Self,
         crate::ts::declarations::import_equals_declaration::FormatTsImportEqualsDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7377,7 +7377,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportEqualsDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsImportEqualsDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsImportEqualsDeclaration,
+        Self,
         crate::ts::declarations::import_equals_declaration::FormatTsImportEqualsDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -7396,7 +7396,7 @@ impl FormatRule<biome_js_syntax::TsImportType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsImportType,
+        Self,
         crate::ts::module::import_type::FormatTsImportType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7408,7 +7408,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsImportType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsImportType,
+        Self,
         crate::ts::module::import_type::FormatTsImportType,
     >;
     fn into_format(self) -> Self::Format {
@@ -7434,7 +7434,7 @@ impl FormatRule<biome_js_syntax::TsImportTypeArguments>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportTypeArguments {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsImportTypeArguments,
+        Self,
         crate::ts::expressions::import_type_arguments::FormatTsImportTypeArguments,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7446,7 +7446,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportTypeArguments {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsImportTypeArguments {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsImportTypeArguments,
+        Self,
         crate::ts::expressions::import_type_arguments::FormatTsImportTypeArguments,
     >;
     fn into_format(self) -> Self::Format {
@@ -7472,7 +7472,7 @@ impl FormatRule<biome_js_syntax::TsImportTypeAssertion>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportTypeAssertion {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsImportTypeAssertion,
+        Self,
         crate::ts::module::import_type_assertion::FormatTsImportTypeAssertion,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7484,7 +7484,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportTypeAssertion {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsImportTypeAssertion {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsImportTypeAssertion,
+        Self,
         crate::ts::module::import_type_assertion::FormatTsImportTypeAssertion,
     >;
     fn into_format(self) -> Self::Format {
@@ -7510,7 +7510,7 @@ impl FormatRule<biome_js_syntax::TsImportTypeAssertionBlock>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportTypeAssertionBlock {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsImportTypeAssertionBlock,
+        Self,
         crate::ts::module::import_type_assertion_block::FormatTsImportTypeAssertionBlock,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7519,7 +7519,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportTypeAssertionBlock {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsImportTypeAssertionBlock {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsImportTypeAssertionBlock,
+        Self,
         crate::ts::module::import_type_assertion_block::FormatTsImportTypeAssertionBlock,
     >;
     fn into_format(self) -> Self::Format {
@@ -7542,7 +7542,7 @@ impl FormatRule<biome_js_syntax::TsImportTypeQualifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportTypeQualifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsImportTypeQualifier,
+        Self,
         crate::ts::module::import_type_qualifier::FormatTsImportTypeQualifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7554,7 +7554,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsImportTypeQualifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsImportTypeQualifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsImportTypeQualifier,
+        Self,
         crate::ts::module::import_type_qualifier::FormatTsImportTypeQualifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -7576,7 +7576,7 @@ impl FormatRule<biome_js_syntax::TsInModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsInModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsInModifier,
+        Self,
         crate::ts::auxiliary::in_modifier::FormatTsInModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7588,7 +7588,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsInModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsInModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsInModifier,
+        Self,
         crate::ts::auxiliary::in_modifier::FormatTsInModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -7614,7 +7614,7 @@ impl FormatRule<biome_js_syntax::TsIndexSignatureClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsIndexSignatureClassMember,
+        Self,
         crate::ts::classes::index_signature_class_member::FormatTsIndexSignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7623,7 +7623,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureClassMember 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsIndexSignatureClassMember,
+        Self,
         crate::ts::classes::index_signature_class_member::FormatTsIndexSignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -7646,7 +7646,7 @@ impl FormatRule<biome_js_syntax::TsIndexSignatureParameter>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsIndexSignatureParameter,
+        Self,
         crate::ts::bindings::index_signature_parameter::FormatTsIndexSignatureParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7655,7 +7655,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsIndexSignatureParameter,
+        Self,
         crate::ts::bindings::index_signature_parameter::FormatTsIndexSignatureParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -7678,7 +7678,7 @@ impl FormatRule<biome_js_syntax::TsIndexSignatureTypeMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureTypeMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsIndexSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::index_signature_type_member::FormatTsIndexSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7687,7 +7687,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureTypeMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureTypeMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsIndexSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::index_signature_type_member::FormatTsIndexSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -7710,7 +7710,7 @@ impl FormatRule<biome_js_syntax::TsIndexedAccessType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexedAccessType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsIndexedAccessType,
+        Self,
         crate::ts::types::indexed_access_type::FormatTsIndexedAccessType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7722,7 +7722,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexedAccessType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIndexedAccessType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsIndexedAccessType,
+        Self,
         crate::ts::types::indexed_access_type::FormatTsIndexedAccessType,
     >;
     fn into_format(self) -> Self::Format {
@@ -7742,7 +7742,7 @@ impl FormatRule<biome_js_syntax::TsInferType> for crate::ts::types::infer_type::
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsInferType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsInferType,
+        Self,
         crate::ts::types::infer_type::FormatTsInferType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7754,7 +7754,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsInferType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsInferType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsInferType,
+        Self,
         crate::ts::types::infer_type::FormatTsInferType,
     >;
     fn into_format(self) -> Self::Format {
@@ -7766,13 +7766,13 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsInferType {
 }
 impl FormatRule < biome_js_syntax :: TsInitializedPropertySignatureClassMember > for crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: TsInitializedPropertySignatureClassMember , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: TsInitializedPropertySignatureClassMember > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsInitializedPropertySignatureClassMember {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: TsInitializedPropertySignatureClassMember , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsInitializedPropertySignatureClassMember {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: TsInitializedPropertySignatureClassMember , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember > ;
+    type Format = FormatOwnedWithRule < Self , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: ts :: classes :: initialized_property_signature_class_member :: FormatTsInitializedPropertySignatureClassMember :: default ())
     }
@@ -7793,7 +7793,7 @@ impl FormatRule<biome_js_syntax::TsInstantiationExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsInstantiationExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsInstantiationExpression,
+        Self,
         crate::ts::expressions::instantiation_expression::FormatTsInstantiationExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7802,7 +7802,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsInstantiationExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsInstantiationExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsInstantiationExpression,
+        Self,
         crate::ts::expressions::instantiation_expression::FormatTsInstantiationExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -7825,7 +7825,7 @@ impl FormatRule<biome_js_syntax::TsInterfaceDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsInterfaceDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsInterfaceDeclaration,
+        Self,
         crate::ts::declarations::interface_declaration::FormatTsInterfaceDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7837,7 +7837,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsInterfaceDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsInterfaceDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsInterfaceDeclaration,
+        Self,
         crate::ts::declarations::interface_declaration::FormatTsInterfaceDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -7863,7 +7863,7 @@ impl FormatRule<biome_js_syntax::TsIntersectionType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsIntersectionType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsIntersectionType,
+        Self,
         crate::ts::types::intersection_type::FormatTsIntersectionType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7875,7 +7875,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIntersectionType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIntersectionType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsIntersectionType,
+        Self,
         crate::ts::types::intersection_type::FormatTsIntersectionType,
     >;
     fn into_format(self) -> Self::Format {
@@ -7901,7 +7901,7 @@ impl FormatRule<biome_js_syntax::TsLiteralEnumMemberName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsLiteralEnumMemberName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsLiteralEnumMemberName,
+        Self,
         crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7913,7 +7913,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsLiteralEnumMemberName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsLiteralEnumMemberName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsLiteralEnumMemberName,
+        Self,
         crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName,
     >;
     fn into_format(self) -> Self::Format {
@@ -7935,7 +7935,7 @@ impl FormatRule<biome_js_syntax::TsMappedType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsMappedType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsMappedType,
+        Self,
         crate::ts::types::mapped_type::FormatTsMappedType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7947,7 +7947,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsMappedType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMappedType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsMappedType,
+        Self,
         crate::ts::types::mapped_type::FormatTsMappedType,
     >;
     fn into_format(self) -> Self::Format {
@@ -7973,7 +7973,7 @@ impl FormatRule<biome_js_syntax::TsMappedTypeAsClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeAsClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsMappedTypeAsClause,
+        Self,
         crate::ts::auxiliary::mapped_type_as_clause::FormatTsMappedTypeAsClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -7985,7 +7985,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeAsClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeAsClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsMappedTypeAsClause,
+        Self,
         crate::ts::auxiliary::mapped_type_as_clause::FormatTsMappedTypeAsClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -7997,26 +7997,26 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeAsClause {
 }
 impl FormatRule < biome_js_syntax :: TsMappedTypeOptionalModifierClause > for crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: TsMappedTypeOptionalModifierClause , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: TsMappedTypeOptionalModifierClause > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeOptionalModifierClause {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: TsMappedTypeOptionalModifierClause , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeOptionalModifierClause {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: TsMappedTypeOptionalModifierClause , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause > ;
+    type Format = FormatOwnedWithRule < Self , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: mapped_type_optional_modifier_clause :: FormatTsMappedTypeOptionalModifierClause :: default ())
     }
 }
 impl FormatRule < biome_js_syntax :: TsMappedTypeReadonlyModifierClause > for crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause { type Context = JsFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_js_syntax :: TsMappedTypeReadonlyModifierClause , f : & mut JsFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_js_syntax :: TsMappedTypeReadonlyModifierClause > :: fmt (self , node , f) } }
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeReadonlyModifierClause {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: TsMappedTypeReadonlyModifierClause , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMappedTypeReadonlyModifierClause {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: TsMappedTypeReadonlyModifierClause , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause > ;
+    type Format = FormatOwnedWithRule < Self , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: ts :: auxiliary :: mapped_type_readonly_modifier_clause :: FormatTsMappedTypeReadonlyModifierClause :: default ())
     }
@@ -8037,7 +8037,7 @@ impl FormatRule<biome_js_syntax::TsMethodSignatureClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsMethodSignatureClassMember,
+        Self,
         crate::ts::classes::method_signature_class_member::FormatTsMethodSignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8046,7 +8046,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureClassMember
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsMethodSignatureClassMember,
+        Self,
         crate::ts::classes::method_signature_class_member::FormatTsMethodSignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -8069,7 +8069,7 @@ impl FormatRule<biome_js_syntax::TsMethodSignatureTypeMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureTypeMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsMethodSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::method_signature_type_member::FormatTsMethodSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8078,7 +8078,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureTypeMember 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureTypeMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsMethodSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::method_signature_type_member::FormatTsMethodSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -8097,7 +8097,7 @@ impl FormatRule<biome_js_syntax::TsModuleBlock>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsModuleBlock {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsModuleBlock,
+        Self,
         crate::ts::auxiliary::module_block::FormatTsModuleBlock,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8109,7 +8109,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsModuleBlock {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsModuleBlock {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsModuleBlock,
+        Self,
         crate::ts::auxiliary::module_block::FormatTsModuleBlock,
     >;
     fn into_format(self) -> Self::Format {
@@ -8135,7 +8135,7 @@ impl FormatRule<biome_js_syntax::TsModuleDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsModuleDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsModuleDeclaration,
+        Self,
         crate::ts::declarations::module_declaration::FormatTsModuleDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8147,7 +8147,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsModuleDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsModuleDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsModuleDeclaration,
+        Self,
         crate::ts::declarations::module_declaration::FormatTsModuleDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -8173,7 +8173,7 @@ impl FormatRule<biome_js_syntax::TsNamedTupleTypeElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsNamedTupleTypeElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsNamedTupleTypeElement,
+        Self,
         crate::ts::auxiliary::named_tuple_type_element::FormatTsNamedTupleTypeElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8186,7 +8186,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNamedTupleTypeElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNamedTupleTypeElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsNamedTupleTypeElement,
+        Self,
         crate::ts::auxiliary::named_tuple_type_element::FormatTsNamedTupleTypeElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -8207,7 +8207,7 @@ impl FormatRule<biome_js_syntax::TsNeverType> for crate::ts::types::never_type::
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsNeverType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsNeverType,
+        Self,
         crate::ts::types::never_type::FormatTsNeverType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8219,7 +8219,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNeverType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNeverType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsNeverType,
+        Self,
         crate::ts::types::never_type::FormatTsNeverType,
     >;
     fn into_format(self) -> Self::Format {
@@ -8245,7 +8245,7 @@ impl FormatRule<biome_js_syntax::TsNonNullAssertionAssignment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsNonNullAssertionAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsNonNullAssertionAssignment,
+        Self,
         crate::ts::assignments::non_null_assertion_assignment::FormatTsNonNullAssertionAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8254,7 +8254,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNonNullAssertionAssignment
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNonNullAssertionAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsNonNullAssertionAssignment,
+        Self,
         crate::ts::assignments::non_null_assertion_assignment::FormatTsNonNullAssertionAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -8277,7 +8277,7 @@ impl FormatRule<biome_js_syntax::TsNonNullAssertionExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsNonNullAssertionExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsNonNullAssertionExpression,
+        Self,
         crate::ts::expressions::non_null_assertion_expression::FormatTsNonNullAssertionExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8286,7 +8286,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNonNullAssertionExpression
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNonNullAssertionExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsNonNullAssertionExpression,
+        Self,
         crate::ts::expressions::non_null_assertion_expression::FormatTsNonNullAssertionExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -8309,7 +8309,7 @@ impl FormatRule<biome_js_syntax::TsNonPrimitiveType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsNonPrimitiveType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsNonPrimitiveType,
+        Self,
         crate::ts::types::non_primitive_type::FormatTsNonPrimitiveType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8321,7 +8321,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNonPrimitiveType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNonPrimitiveType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsNonPrimitiveType,
+        Self,
         crate::ts::types::non_primitive_type::FormatTsNonPrimitiveType,
     >;
     fn into_format(self) -> Self::Format {
@@ -8347,7 +8347,7 @@ impl FormatRule<biome_js_syntax::TsNullLiteralType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsNullLiteralType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsNullLiteralType,
+        Self,
         crate::ts::types::null_literal_type::FormatTsNullLiteralType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8359,7 +8359,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNullLiteralType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNullLiteralType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsNullLiteralType,
+        Self,
         crate::ts::types::null_literal_type::FormatTsNullLiteralType,
     >;
     fn into_format(self) -> Self::Format {
@@ -8385,7 +8385,7 @@ impl FormatRule<biome_js_syntax::TsNumberLiteralType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsNumberLiteralType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsNumberLiteralType,
+        Self,
         crate::ts::types::number_literal_type::FormatTsNumberLiteralType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8397,7 +8397,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNumberLiteralType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNumberLiteralType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsNumberLiteralType,
+        Self,
         crate::ts::types::number_literal_type::FormatTsNumberLiteralType,
     >;
     fn into_format(self) -> Self::Format {
@@ -8419,7 +8419,7 @@ impl FormatRule<biome_js_syntax::TsNumberType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsNumberType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsNumberType,
+        Self,
         crate::ts::types::number_type::FormatTsNumberType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8431,7 +8431,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsNumberType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsNumberType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsNumberType,
+        Self,
         crate::ts::types::number_type::FormatTsNumberType,
     >;
     fn into_format(self) -> Self::Format {
@@ -8453,7 +8453,7 @@ impl FormatRule<biome_js_syntax::TsObjectType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsObjectType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsObjectType,
+        Self,
         crate::ts::types::object_type::FormatTsObjectType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8465,7 +8465,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsObjectType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsObjectType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsObjectType,
+        Self,
         crate::ts::types::object_type::FormatTsObjectType,
     >;
     fn into_format(self) -> Self::Format {
@@ -8491,7 +8491,7 @@ impl FormatRule<biome_js_syntax::TsOptionalPropertyAnnotation>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsOptionalPropertyAnnotation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsOptionalPropertyAnnotation,
+        Self,
         crate::ts::auxiliary::optional_property_annotation::FormatTsOptionalPropertyAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8500,7 +8500,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsOptionalPropertyAnnotation
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsOptionalPropertyAnnotation {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsOptionalPropertyAnnotation,
+        Self,
         crate::ts::auxiliary::optional_property_annotation::FormatTsOptionalPropertyAnnotation,
     >;
     fn into_format(self) -> Self::Format {
@@ -8523,7 +8523,7 @@ impl FormatRule<biome_js_syntax::TsOptionalTupleTypeElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsOptionalTupleTypeElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsOptionalTupleTypeElement,
+        Self,
         crate::ts::auxiliary::optional_tuple_type_element::FormatTsOptionalTupleTypeElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8532,7 +8532,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsOptionalTupleTypeElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsOptionalTupleTypeElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsOptionalTupleTypeElement,
+        Self,
         crate::ts::auxiliary::optional_tuple_type_element::FormatTsOptionalTupleTypeElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -8551,7 +8551,7 @@ impl FormatRule<biome_js_syntax::TsOutModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsOutModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsOutModifier,
+        Self,
         crate::ts::auxiliary::out_modifier::FormatTsOutModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8563,7 +8563,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsOutModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsOutModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsOutModifier,
+        Self,
         crate::ts::auxiliary::out_modifier::FormatTsOutModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -8589,7 +8589,7 @@ impl FormatRule<biome_js_syntax::TsOverrideModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsOverrideModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsOverrideModifier,
+        Self,
         crate::ts::auxiliary::override_modifier::FormatTsOverrideModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8601,7 +8601,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsOverrideModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsOverrideModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsOverrideModifier,
+        Self,
         crate::ts::auxiliary::override_modifier::FormatTsOverrideModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -8627,7 +8627,7 @@ impl FormatRule<biome_js_syntax::TsParenthesizedType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsParenthesizedType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsParenthesizedType,
+        Self,
         crate::ts::types::parenthesized_type::FormatTsParenthesizedType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8639,7 +8639,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsParenthesizedType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsParenthesizedType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsParenthesizedType,
+        Self,
         crate::ts::types::parenthesized_type::FormatTsParenthesizedType,
     >;
     fn into_format(self) -> Self::Format {
@@ -8665,7 +8665,7 @@ impl FormatRule<biome_js_syntax::TsPredicateReturnType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsPredicateReturnType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsPredicateReturnType,
+        Self,
         crate::ts::types::predicate_return_type::FormatTsPredicateReturnType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8677,7 +8677,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsPredicateReturnType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPredicateReturnType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsPredicateReturnType,
+        Self,
         crate::ts::types::predicate_return_type::FormatTsPredicateReturnType,
     >;
     fn into_format(self) -> Self::Format {
@@ -8703,7 +8703,7 @@ impl FormatRule<biome_js_syntax::TsPropertyParameter>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertyParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsPropertyParameter,
+        Self,
         crate::ts::bindings::property_parameter::FormatTsPropertyParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8715,7 +8715,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertyParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPropertyParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsPropertyParameter,
+        Self,
         crate::ts::bindings::property_parameter::FormatTsPropertyParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -8741,7 +8741,7 @@ impl FormatRule<biome_js_syntax::TsPropertySignatureClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsPropertySignatureClassMember,
+        Self,
         crate::ts::classes::property_signature_class_member::FormatTsPropertySignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8750,7 +8750,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureClassMemb
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsPropertySignatureClassMember,
+        Self,
         crate::ts::classes::property_signature_class_member::FormatTsPropertySignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -8773,7 +8773,7 @@ impl FormatRule<biome_js_syntax::TsPropertySignatureTypeMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureTypeMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsPropertySignatureTypeMember,
+        Self,
         crate::ts::auxiliary::property_signature_type_member::FormatTsPropertySignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8782,7 +8782,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureTypeMembe
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureTypeMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsPropertySignatureTypeMember,
+        Self,
         crate::ts::auxiliary::property_signature_type_member::FormatTsPropertySignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -8805,7 +8805,7 @@ impl FormatRule<biome_js_syntax::TsQualifiedModuleName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsQualifiedModuleName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsQualifiedModuleName,
+        Self,
         crate::ts::auxiliary::qualified_module_name::FormatTsQualifiedModuleName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8817,7 +8817,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsQualifiedModuleName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsQualifiedModuleName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsQualifiedModuleName,
+        Self,
         crate::ts::auxiliary::qualified_module_name::FormatTsQualifiedModuleName,
     >;
     fn into_format(self) -> Self::Format {
@@ -8843,7 +8843,7 @@ impl FormatRule<biome_js_syntax::TsQualifiedName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsQualifiedName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsQualifiedName,
+        Self,
         crate::ts::auxiliary::qualified_name::FormatTsQualifiedName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8855,7 +8855,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsQualifiedName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsQualifiedName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsQualifiedName,
+        Self,
         crate::ts::auxiliary::qualified_name::FormatTsQualifiedName,
     >;
     fn into_format(self) -> Self::Format {
@@ -8881,7 +8881,7 @@ impl FormatRule<biome_js_syntax::TsReadonlyModifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsReadonlyModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsReadonlyModifier,
+        Self,
         crate::ts::auxiliary::readonly_modifier::FormatTsReadonlyModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8893,7 +8893,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsReadonlyModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsReadonlyModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsReadonlyModifier,
+        Self,
         crate::ts::auxiliary::readonly_modifier::FormatTsReadonlyModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -8919,7 +8919,7 @@ impl FormatRule<biome_js_syntax::TsReferenceType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsReferenceType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsReferenceType,
+        Self,
         crate::ts::types::reference_type::FormatTsReferenceType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8931,7 +8931,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsReferenceType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsReferenceType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsReferenceType,
+        Self,
         crate::ts::types::reference_type::FormatTsReferenceType,
     >;
     fn into_format(self) -> Self::Format {
@@ -8957,7 +8957,7 @@ impl FormatRule<biome_js_syntax::TsRestTupleTypeElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsRestTupleTypeElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsRestTupleTypeElement,
+        Self,
         crate::ts::auxiliary::rest_tuple_type_element::FormatTsRestTupleTypeElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -8969,7 +8969,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsRestTupleTypeElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsRestTupleTypeElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsRestTupleTypeElement,
+        Self,
         crate::ts::auxiliary::rest_tuple_type_element::FormatTsRestTupleTypeElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -8995,7 +8995,7 @@ impl FormatRule<biome_js_syntax::TsReturnTypeAnnotation>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsReturnTypeAnnotation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsReturnTypeAnnotation,
+        Self,
         crate::ts::auxiliary::return_type_annotation::FormatTsReturnTypeAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9007,7 +9007,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsReturnTypeAnnotation {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsReturnTypeAnnotation {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsReturnTypeAnnotation,
+        Self,
         crate::ts::auxiliary::return_type_annotation::FormatTsReturnTypeAnnotation,
     >;
     fn into_format(self) -> Self::Format {
@@ -9033,7 +9033,7 @@ impl FormatRule<biome_js_syntax::TsSatisfiesAssignment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsSatisfiesAssignment,
+        Self,
         crate::ts::assignments::satisfies_assignment::FormatTsSatisfiesAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9045,7 +9045,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesAssignment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsSatisfiesAssignment,
+        Self,
         crate::ts::assignments::satisfies_assignment::FormatTsSatisfiesAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -9071,7 +9071,7 @@ impl FormatRule<biome_js_syntax::TsSatisfiesExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsSatisfiesExpression,
+        Self,
         crate::ts::expressions::satisfies_expression::FormatTsSatisfiesExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9083,7 +9083,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsSatisfiesExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsSatisfiesExpression,
+        Self,
         crate::ts::expressions::satisfies_expression::FormatTsSatisfiesExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -9109,7 +9109,7 @@ impl FormatRule<biome_js_syntax::TsSetterSignatureClassMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsSetterSignatureClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsSetterSignatureClassMember,
+        Self,
         crate::ts::classes::setter_signature_class_member::FormatTsSetterSignatureClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9118,7 +9118,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsSetterSignatureClassMember
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsSetterSignatureClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsSetterSignatureClassMember,
+        Self,
         crate::ts::classes::setter_signature_class_member::FormatTsSetterSignatureClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -9141,7 +9141,7 @@ impl FormatRule<biome_js_syntax::TsSetterSignatureTypeMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsSetterSignatureTypeMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsSetterSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::setter_signature_type_member::FormatTsSetterSignatureTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9150,7 +9150,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsSetterSignatureTypeMember 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsSetterSignatureTypeMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsSetterSignatureTypeMember,
+        Self,
         crate::ts::auxiliary::setter_signature_type_member::FormatTsSetterSignatureTypeMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -9173,7 +9173,7 @@ impl FormatRule<biome_js_syntax::TsStringLiteralType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsStringLiteralType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsStringLiteralType,
+        Self,
         crate::ts::types::string_literal_type::FormatTsStringLiteralType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9185,7 +9185,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsStringLiteralType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsStringLiteralType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsStringLiteralType,
+        Self,
         crate::ts::types::string_literal_type::FormatTsStringLiteralType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9207,7 +9207,7 @@ impl FormatRule<biome_js_syntax::TsStringType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsStringType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsStringType,
+        Self,
         crate::ts::types::string_type::FormatTsStringType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9219,7 +9219,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsStringType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsStringType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsStringType,
+        Self,
         crate::ts::types::string_type::FormatTsStringType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9241,7 +9241,7 @@ impl FormatRule<biome_js_syntax::TsSymbolType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsSymbolType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsSymbolType,
+        Self,
         crate::ts::types::symbol_type::FormatTsSymbolType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9253,7 +9253,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsSymbolType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsSymbolType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsSymbolType,
+        Self,
         crate::ts::types::symbol_type::FormatTsSymbolType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9279,7 +9279,7 @@ impl FormatRule<biome_js_syntax::TsTemplateChunkElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateChunkElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTemplateChunkElement,
+        Self,
         crate::ts::auxiliary::template_chunk_element::FormatTsTemplateChunkElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9291,7 +9291,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateChunkElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTemplateChunkElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTemplateChunkElement,
+        Self,
         crate::ts::auxiliary::template_chunk_element::FormatTsTemplateChunkElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -9317,7 +9317,7 @@ impl FormatRule<biome_js_syntax::TsTemplateElement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTemplateElement,
+        Self,
         crate::ts::auxiliary::template_element::FormatTsTemplateElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9329,7 +9329,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTemplateElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTemplateElement,
+        Self,
         crate::ts::auxiliary::template_element::FormatTsTemplateElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -9355,7 +9355,7 @@ impl FormatRule<biome_js_syntax::TsTemplateLiteralType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateLiteralType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTemplateLiteralType,
+        Self,
         crate::ts::types::template_literal_type::FormatTsTemplateLiteralType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9367,7 +9367,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateLiteralType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTemplateLiteralType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTemplateLiteralType,
+        Self,
         crate::ts::types::template_literal_type::FormatTsTemplateLiteralType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9393,7 +9393,7 @@ impl FormatRule<biome_js_syntax::TsThisParameter>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsThisParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsThisParameter,
+        Self,
         crate::ts::bindings::this_parameter::FormatTsThisParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9405,7 +9405,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsThisParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsThisParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsThisParameter,
+        Self,
         crate::ts::bindings::this_parameter::FormatTsThisParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -9425,7 +9425,7 @@ impl FormatRule<biome_js_syntax::TsThisType> for crate::ts::types::this_type::Fo
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsThisType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsThisType,
+        Self,
         crate::ts::types::this_type::FormatTsThisType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9437,7 +9437,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsThisType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsThisType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsThisType,
+        Self,
         crate::ts::types::this_type::FormatTsThisType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9457,7 +9457,7 @@ impl FormatRule<biome_js_syntax::TsTupleType> for crate::ts::types::tuple_type::
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTupleType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTupleType,
+        Self,
         crate::ts::types::tuple_type::FormatTsTupleType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9469,7 +9469,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTupleType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTupleType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTupleType,
+        Self,
         crate::ts::types::tuple_type::FormatTsTupleType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9495,7 +9495,7 @@ impl FormatRule<biome_js_syntax::TsTypeAliasDeclaration>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAliasDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeAliasDeclaration,
+        Self,
         crate::ts::declarations::type_alias_declaration::FormatTsTypeAliasDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9508,7 +9508,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAliasDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeAliasDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeAliasDeclaration,
+        Self,
         crate::ts::declarations::type_alias_declaration::FormatTsTypeAliasDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -9535,7 +9535,7 @@ impl FormatRule<biome_js_syntax::TsTypeAnnotation>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAnnotation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeAnnotation,
+        Self,
         crate::ts::auxiliary::type_annotation::FormatTsTypeAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9547,7 +9547,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAnnotation {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeAnnotation {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeAnnotation,
+        Self,
         crate::ts::auxiliary::type_annotation::FormatTsTypeAnnotation,
     >;
     fn into_format(self) -> Self::Format {
@@ -9573,7 +9573,7 @@ impl FormatRule<biome_js_syntax::TsTypeArguments>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeArguments {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeArguments,
+        Self,
         crate::ts::expressions::type_arguments::FormatTsTypeArguments,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9585,7 +9585,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeArguments {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeArguments {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeArguments,
+        Self,
         crate::ts::expressions::type_arguments::FormatTsTypeArguments,
     >;
     fn into_format(self) -> Self::Format {
@@ -9611,7 +9611,7 @@ impl FormatRule<biome_js_syntax::TsTypeAssertionAssignment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAssertionAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeAssertionAssignment,
+        Self,
         crate::ts::assignments::type_assertion_assignment::FormatTsTypeAssertionAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9620,7 +9620,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAssertionAssignment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeAssertionAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeAssertionAssignment,
+        Self,
         crate::ts::assignments::type_assertion_assignment::FormatTsTypeAssertionAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -9643,7 +9643,7 @@ impl FormatRule<biome_js_syntax::TsTypeAssertionExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAssertionExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeAssertionExpression,
+        Self,
         crate::ts::expressions::type_assertion_expression::FormatTsTypeAssertionExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9652,7 +9652,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeAssertionExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeAssertionExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeAssertionExpression,
+        Self,
         crate::ts::expressions::type_assertion_expression::FormatTsTypeAssertionExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -9675,7 +9675,7 @@ impl FormatRule<biome_js_syntax::TsTypeConstraintClause>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeConstraintClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeConstraintClause,
+        Self,
         crate::ts::auxiliary::type_constraint_clause::FormatTsTypeConstraintClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9687,7 +9687,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeConstraintClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeConstraintClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeConstraintClause,
+        Self,
         crate::ts::auxiliary::type_constraint_clause::FormatTsTypeConstraintClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -9713,7 +9713,7 @@ impl FormatRule<biome_js_syntax::TsTypeOperatorType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeOperatorType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeOperatorType,
+        Self,
         crate::ts::types::type_operator_type::FormatTsTypeOperatorType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9725,7 +9725,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeOperatorType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeOperatorType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeOperatorType,
+        Self,
         crate::ts::types::type_operator_type::FormatTsTypeOperatorType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9751,7 +9751,7 @@ impl FormatRule<biome_js_syntax::TsTypeParameter>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeParameter,
+        Self,
         crate::ts::bindings::type_parameter::FormatTsTypeParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9763,7 +9763,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeParameter,
+        Self,
         crate::ts::bindings::type_parameter::FormatTsTypeParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -9789,7 +9789,7 @@ impl FormatRule<biome_js_syntax::TsTypeParameterName>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeParameterName,
+        Self,
         crate::ts::auxiliary::type_parameter_name::FormatTsTypeParameterName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9801,7 +9801,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeParameterName,
+        Self,
         crate::ts::auxiliary::type_parameter_name::FormatTsTypeParameterName,
     >;
     fn into_format(self) -> Self::Format {
@@ -9827,7 +9827,7 @@ impl FormatRule<biome_js_syntax::TsTypeParameters>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameters {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeParameters,
+        Self,
         crate::ts::bindings::type_parameters::FormatTsTypeParameters,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9839,7 +9839,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameters {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameters {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeParameters,
+        Self,
         crate::ts::bindings::type_parameters::FormatTsTypeParameters,
     >;
     fn into_format(self) -> Self::Format {
@@ -9861,7 +9861,7 @@ impl FormatRule<biome_js_syntax::TsTypeofType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeofType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeofType,
+        Self,
         crate::ts::types::typeof_type::FormatTsTypeofType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9873,7 +9873,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeofType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeofType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeofType,
+        Self,
         crate::ts::types::typeof_type::FormatTsTypeofType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9899,7 +9899,7 @@ impl FormatRule<biome_js_syntax::TsUndefinedType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsUndefinedType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsUndefinedType,
+        Self,
         crate::ts::types::undefined_type::FormatTsUndefinedType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9911,7 +9911,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsUndefinedType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsUndefinedType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsUndefinedType,
+        Self,
         crate::ts::types::undefined_type::FormatTsUndefinedType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9931,7 +9931,7 @@ impl FormatRule<biome_js_syntax::TsUnionType> for crate::ts::types::union_type::
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsUnionType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsUnionType,
+        Self,
         crate::ts::types::union_type::FormatTsUnionType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9943,7 +9943,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsUnionType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsUnionType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsUnionType,
+        Self,
         crate::ts::types::union_type::FormatTsUnionType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9965,7 +9965,7 @@ impl FormatRule<biome_js_syntax::TsUnknownType>
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsUnknownType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsUnknownType,
+        Self,
         crate::ts::types::unknown_type::FormatTsUnknownType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -9977,7 +9977,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsUnknownType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsUnknownType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsUnknownType,
+        Self,
         crate::ts::types::unknown_type::FormatTsUnknownType,
     >;
     fn into_format(self) -> Self::Format {
@@ -9997,7 +9997,7 @@ impl FormatRule<biome_js_syntax::TsVoidType> for crate::ts::types::void_type::Fo
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsVoidType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsVoidType,
+        Self,
         crate::ts::types::void_type::FormatTsVoidType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10009,7 +10009,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsVoidType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsVoidType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsVoidType,
+        Self,
         crate::ts::types::void_type::FormatTsVoidType,
     >;
     fn into_format(self) -> Self::Format {
@@ -10020,25 +10020,25 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsVoidType {
     }
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPatternElementList {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsArrayAssignmentPatternElementList , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayAssignmentPatternElementList {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsArrayAssignmentPatternElementList , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: lists :: array_assignment_pattern_element_list :: FormatJsArrayAssignmentPatternElementList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternElementList {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsArrayBindingPatternElementList , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternElementList {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsArrayBindingPatternElementList , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: lists :: array_binding_pattern_element_list :: FormatJsArrayBindingPatternElementList :: default ())
     }
@@ -10046,7 +10046,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayBindingPatternEleme
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayElementList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsArrayElementList,
+        Self,
         crate::js::lists::array_element_list::FormatJsArrayElementList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10058,7 +10058,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsArrayElementList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayElementList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsArrayElementList,
+        Self,
         crate::js::lists::array_element_list::FormatJsArrayElementList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10071,7 +10071,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsArrayElementList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsCallArgumentList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsCallArgumentList,
+        Self,
         crate::js::lists::call_argument_list::FormatJsCallArgumentList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10083,7 +10083,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsCallArgumentList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCallArgumentList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsCallArgumentList,
+        Self,
         crate::js::lists::call_argument_list::FormatJsCallArgumentList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10096,7 +10096,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsCallArgumentList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassMemberList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsClassMemberList,
+        Self,
         crate::js::lists::class_member_list::FormatJsClassMemberList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10108,7 +10108,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsClassMemberList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsClassMemberList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsClassMemberList,
+        Self,
         crate::js::lists::class_member_list::FormatJsClassMemberList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10121,7 +10121,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsClassMemberList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsConstructorModifierList,
+        Self,
         crate::js::lists::constructor_modifier_list::FormatJsConstructorModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10133,7 +10133,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorModifierList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorModifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsConstructorModifierList,
+        Self,
         crate::js::lists::constructor_modifier_list::FormatJsConstructorModifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10146,7 +10146,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorModifierList 
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameterList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsConstructorParameterList,
+        Self,
         crate::js::lists::constructor_parameter_list::FormatJsConstructorParameterList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10159,7 +10159,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameterList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameterList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsConstructorParameterList,
+        Self,
         crate::js::lists::constructor_parameter_list::FormatJsConstructorParameterList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10173,7 +10173,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsConstructorParameterList
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsDecoratorList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsDecoratorList,
+        Self,
         crate::js::lists::decorator_list::FormatJsDecoratorList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10185,7 +10185,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDecoratorList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDecoratorList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsDecoratorList,
+        Self,
         crate::js::lists::decorator_list::FormatJsDecoratorList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10198,7 +10198,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDecoratorList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsDirectiveList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsDirectiveList,
+        Self,
         crate::js::lists::directive_list::FormatJsDirectiveList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10210,7 +10210,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsDirectiveList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDirectiveList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsDirectiveList,
+        Self,
         crate::js::lists::directive_list::FormatJsDirectiveList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10223,7 +10223,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDirectiveList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromSpecifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportNamedFromSpecifierList,
+        Self,
         crate::js::lists::export_named_from_specifier_list::FormatJsExportNamedFromSpecifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10232,7 +10232,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromSpecifierLi
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromSpecifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportNamedFromSpecifierList,
+        Self,
         crate::js::lists::export_named_from_specifier_list::FormatJsExportNamedFromSpecifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10242,7 +10242,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedFromSpecifier
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsExportNamedSpecifierList,
+        Self,
         crate::js::lists::export_named_specifier_list::FormatJsExportNamedSpecifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10251,7 +10251,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifierList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsExportNamedSpecifierList,
+        Self,
         crate::js::lists::export_named_specifier_list::FormatJsExportNamedSpecifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10261,7 +10261,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifierList
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntryList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportAssertionEntryList,
+        Self,
         crate::js::lists::import_assertion_entry_list::FormatJsImportAssertionEntryList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10270,7 +10270,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntryList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntryList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportAssertionEntryList,
+        Self,
         crate::js::lists::import_assertion_entry_list::FormatJsImportAssertionEntryList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10280,7 +10280,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntryList
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsMethodModifierList,
+        Self,
         crate::js::lists::method_modifier_list::FormatJsMethodModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10292,7 +10292,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodModifierList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMethodModifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsMethodModifierList,
+        Self,
         crate::js::lists::method_modifier_list::FormatJsMethodModifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10305,7 +10305,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMethodModifierList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsModuleItemList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsModuleItemList,
+        Self,
         crate::js::lists::module_item_list::FormatJsModuleItemList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10317,7 +10317,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsModuleItemList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsModuleItemList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsModuleItemList,
+        Self,
         crate::js::lists::module_item_list::FormatJsModuleItemList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10330,7 +10330,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsModuleItemList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsNamedImportSpecifierList,
+        Self,
         crate::js::lists::named_import_specifier_list::FormatJsNamedImportSpecifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10339,7 +10339,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifierList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsNamedImportSpecifierList,
+        Self,
         crate::js::lists::named_import_specifier_list::FormatJsNamedImportSpecifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10347,25 +10347,25 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifierList
     }
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternPropertyList {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsObjectAssignmentPatternPropertyList , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectAssignmentPatternPropertyList {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsObjectAssignmentPatternPropertyList , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: lists :: object_assignment_pattern_property_list :: FormatJsObjectAssignmentPatternPropertyList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternPropertyList {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_js_syntax :: JsObjectBindingPatternPropertyList , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList > ;
+    type Format < 'a > = FormatRefWithRule < 'a , Self , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList > ;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule :: new (self , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList :: default ())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternPropertyList {
-    type Format = FormatOwnedWithRule < biome_js_syntax :: JsObjectBindingPatternPropertyList , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList > ;
+    type Format = FormatOwnedWithRule < Self , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList > ;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: js :: lists :: object_binding_pattern_property_list :: FormatJsObjectBindingPatternPropertyList :: default ())
     }
@@ -10373,7 +10373,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectBindingPatternProp
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectMemberList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsObjectMemberList,
+        Self,
         crate::js::lists::object_member_list::FormatJsObjectMemberList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10385,7 +10385,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsObjectMemberList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectMemberList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsObjectMemberList,
+        Self,
         crate::js::lists::object_member_list::FormatJsObjectMemberList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10398,7 +10398,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsObjectMemberList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsParameterList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsParameterList,
+        Self,
         crate::js::lists::parameter_list::FormatJsParameterList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10410,7 +10410,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsParameterList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsParameterList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsParameterList,
+        Self,
         crate::js::lists::parameter_list::FormatJsParameterList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10423,7 +10423,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsParameterList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsPropertyModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsPropertyModifierList,
+        Self,
         crate::js::lists::property_modifier_list::FormatJsPropertyModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10435,7 +10435,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsPropertyModifierList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPropertyModifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsPropertyModifierList,
+        Self,
         crate::js::lists::property_modifier_list::FormatJsPropertyModifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10448,7 +10448,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsPropertyModifierList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsStatementList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsStatementList,
+        Self,
         crate::js::lists::statement_list::FormatJsStatementList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10460,7 +10460,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsStatementList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsStatementList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsStatementList,
+        Self,
         crate::js::lists::statement_list::FormatJsStatementList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10473,7 +10473,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsStatementList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsSwitchCaseList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsSwitchCaseList,
+        Self,
         crate::js::lists::switch_case_list::FormatJsSwitchCaseList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10485,7 +10485,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsSwitchCaseList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSwitchCaseList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsSwitchCaseList,
+        Self,
         crate::js::lists::switch_case_list::FormatJsSwitchCaseList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10498,7 +10498,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsSwitchCaseList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateElementList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsTemplateElementList,
+        Self,
         crate::js::lists::template_element_list::FormatJsTemplateElementList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10510,7 +10510,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsTemplateElementList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTemplateElementList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsTemplateElementList,
+        Self,
         crate::js::lists::template_element_list::FormatJsTemplateElementList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10523,7 +10523,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsTemplateElementList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaratorList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsVariableDeclaratorList,
+        Self,
         crate::js::lists::variable_declarator_list::FormatJsVariableDeclaratorList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10535,7 +10535,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaratorList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaratorList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsVariableDeclaratorList,
+        Self,
         crate::js::lists::variable_declarator_list::FormatJsVariableDeclaratorList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10548,7 +10548,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclaratorList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxAttributeList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxAttributeList,
+        Self,
         crate::jsx::lists::attribute_list::FormatJsxAttributeList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10560,7 +10560,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxAttributeList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxAttributeList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxAttributeList,
+        Self,
         crate::jsx::lists::attribute_list::FormatJsxAttributeList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10573,7 +10573,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxAttributeList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsxChildList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsxChildList,
+        Self,
         crate::jsx::lists::child_list::FormatJsxChildList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10585,7 +10585,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsxChildList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxChildList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsxChildList,
+        Self,
         crate::jsx::lists::child_list::FormatJsxChildList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10598,7 +10598,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsxChildList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsEnumMemberList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsEnumMemberList,
+        Self,
         crate::ts::lists::enum_member_list::FormatTsEnumMemberList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10610,7 +10610,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsEnumMemberList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsEnumMemberList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsEnumMemberList,
+        Self,
         crate::ts::lists::enum_member_list::FormatTsEnumMemberList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10623,7 +10623,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsEnumMemberList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsIndexSignatureModifierList,
+        Self,
         crate::ts::lists::index_signature_modifier_list::FormatTsIndexSignatureModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10632,7 +10632,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureModifierList
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureModifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsIndexSignatureModifierList,
+        Self,
         crate::ts::lists::index_signature_modifier_list::FormatTsIndexSignatureModifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10642,7 +10642,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIndexSignatureModifierLi
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsIntersectionTypeElementList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsIntersectionTypeElementList,
+        Self,
         crate::ts::lists::intersection_type_element_list::FormatTsIntersectionTypeElementList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10651,7 +10651,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsIntersectionTypeElementLis
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIntersectionTypeElementList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsIntersectionTypeElementList,
+        Self,
         crate::ts::lists::intersection_type_element_list::FormatTsIntersectionTypeElementList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10661,7 +10661,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIntersectionTypeElementL
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsMethodSignatureModifierList,
+        Self,
         crate::ts::lists::method_signature_modifier_list::FormatTsMethodSignatureModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10670,7 +10670,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureModifierLis
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureModifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsMethodSignatureModifierList,
+        Self,
         crate::ts::lists::method_signature_modifier_list::FormatTsMethodSignatureModifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10680,7 +10680,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsMethodSignatureModifierL
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertyParameterModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsPropertyParameterModifierList,
+        Self,
         crate::ts::lists::property_parameter_modifier_list::FormatTsPropertyParameterModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10689,7 +10689,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertyParameterModifierL
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPropertyParameterModifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsPropertyParameterModifierList,
+        Self,
         crate::ts::lists::property_parameter_modifier_list::FormatTsPropertyParameterModifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10699,7 +10699,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPropertyParameterModifie
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsPropertySignatureModifierList,
+        Self,
         crate::ts::lists::property_signature_modifier_list::FormatTsPropertySignatureModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10708,7 +10708,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureModifierL
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureModifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsPropertySignatureModifierList,
+        Self,
         crate::ts::lists::property_signature_modifier_list::FormatTsPropertySignatureModifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10718,7 +10718,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsPropertySignatureModifie
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateElementList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTemplateElementList,
+        Self,
         crate::ts::lists::template_element_list::FormatTsTemplateElementList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10730,7 +10730,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTemplateElementList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTemplateElementList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTemplateElementList,
+        Self,
         crate::ts::lists::template_element_list::FormatTsTemplateElementList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10743,7 +10743,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTemplateElementList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTupleTypeElementList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTupleTypeElementList,
+        Self,
         crate::ts::lists::tuple_type_element_list::FormatTsTupleTypeElementList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10755,7 +10755,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTupleTypeElementList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTupleTypeElementList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTupleTypeElementList,
+        Self,
         crate::ts::lists::tuple_type_element_list::FormatTsTupleTypeElementList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10768,7 +10768,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTupleTypeElementList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeArgumentList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeArgumentList,
+        Self,
         crate::ts::lists::type_argument_list::FormatTsTypeArgumentList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10780,7 +10780,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeArgumentList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeArgumentList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeArgumentList,
+        Self,
         crate::ts::lists::type_argument_list::FormatTsTypeArgumentList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10793,7 +10793,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeArgumentList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeList,
+        Self,
         crate::ts::lists::type_list::FormatTsTypeList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10805,7 +10805,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeList,
+        Self,
         crate::ts::lists::type_list::FormatTsTypeList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10818,7 +10818,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeMemberList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeMemberList,
+        Self,
         crate::ts::lists::type_member_list::FormatTsTypeMemberList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10830,7 +10830,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeMemberList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeMemberList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeMemberList,
+        Self,
         crate::ts::lists::type_member_list::FormatTsTypeMemberList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10843,7 +10843,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeMemberList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeParameterList,
+        Self,
         crate::ts::lists::type_parameter_list::FormatTsTypeParameterList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10855,7 +10855,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeParameterList,
+        Self,
         crate::ts::lists::type_parameter_list::FormatTsTypeParameterList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10868,7 +10868,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterList {
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsTypeParameterModifierList,
+        Self,
         crate::ts::lists::type_parameter_modifier_list::FormatTsTypeParameterModifierList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10877,7 +10877,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterModifierList 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterModifierList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsTypeParameterModifierList,
+        Self,
         crate::ts::lists::type_parameter_modifier_list::FormatTsTypeParameterModifierList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10887,7 +10887,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeParameterModifierLis
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsUnionTypeVariantList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsUnionTypeVariantList,
+        Self,
         crate::ts::lists::union_type_variant_list::FormatTsUnionTypeVariantList,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10899,7 +10899,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsUnionTypeVariantList {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsUnionTypeVariantList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsUnionTypeVariantList,
+        Self,
         crate::ts::lists::union_type_variant_list::FormatTsUnionTypeVariantList,
     >;
     fn into_format(self) -> Self::Format {
@@ -10918,14 +10918,14 @@ impl FormatRule<biome_js_syntax::JsBogus> for crate::js::bogus::bogus::FormatJsB
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogus {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::JsBogus, crate::js::bogus::bogus::FormatJsBogus>;
+        FormatRefWithRule<'a, Self, crate::js::bogus::bogus::FormatJsBogus>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::js::bogus::bogus::FormatJsBogus::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogus {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::JsBogus, crate::js::bogus::bogus::FormatJsBogus>;
+        FormatOwnedWithRule<Self, crate::js::bogus::bogus::FormatJsBogus>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::js::bogus::bogus::FormatJsBogus::default())
     }
@@ -10946,7 +10946,7 @@ impl FormatRule<biome_js_syntax::JsBogusAssignment>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBogusAssignment,
+        Self,
         crate::js::bogus::bogus_assignment::FormatJsBogusAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10958,7 +10958,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusAssignment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusAssignment,
+        Self,
         crate::js::bogus::bogus_assignment::FormatJsBogusAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -10980,7 +10980,7 @@ impl FormatRule<biome_js_syntax::JsBogusBinding>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusBinding {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBogusBinding,
+        Self,
         crate::js::bogus::bogus_binding::FormatJsBogusBinding,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -10992,7 +10992,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusBinding {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusBinding {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusBinding,
+        Self,
         crate::js::bogus::bogus_binding::FormatJsBogusBinding,
     >;
     fn into_format(self) -> Self::Format {
@@ -11018,7 +11018,7 @@ impl FormatRule<biome_js_syntax::JsBogusExpression>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBogusExpression,
+        Self,
         crate::js::bogus::bogus_expression::FormatJsBogusExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11030,7 +11030,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusExpression,
+        Self,
         crate::js::bogus::bogus_expression::FormatJsBogusExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -11056,7 +11056,7 @@ impl FormatRule<biome_js_syntax::JsBogusImportAssertionEntry>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusImportAssertionEntry {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBogusImportAssertionEntry,
+        Self,
         crate::js::bogus::bogus_import_assertion_entry::FormatJsBogusImportAssertionEntry,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11065,7 +11065,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusImportAssertionEntry 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusImportAssertionEntry {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusImportAssertionEntry,
+        Self,
         crate::js::bogus::bogus_import_assertion_entry::FormatJsBogusImportAssertionEntry,
     >;
     fn into_format(self) -> Self::Format {
@@ -11084,7 +11084,7 @@ impl FormatRule<biome_js_syntax::JsBogusMember>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBogusMember,
+        Self,
         crate::js::bogus::bogus_member::FormatJsBogusMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11096,7 +11096,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusMember,
+        Self,
         crate::js::bogus::bogus_member::FormatJsBogusMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -11122,7 +11122,7 @@ impl FormatRule<biome_js_syntax::JsBogusNamedImportSpecifier>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusNamedImportSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBogusNamedImportSpecifier,
+        Self,
         crate::js::bogus::bogus_named_import_specifier::FormatJsBogusNamedImportSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11131,7 +11131,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusNamedImportSpecifier 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusNamedImportSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusNamedImportSpecifier,
+        Self,
         crate::js::bogus::bogus_named_import_specifier::FormatJsBogusNamedImportSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -11154,7 +11154,7 @@ impl FormatRule<biome_js_syntax::JsBogusParameter>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBogusParameter,
+        Self,
         crate::js::bogus::bogus_parameter::FormatJsBogusParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11166,7 +11166,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusParameter,
+        Self,
         crate::js::bogus::bogus_parameter::FormatJsBogusParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -11192,7 +11192,7 @@ impl FormatRule<biome_js_syntax::JsBogusStatement>
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBogusStatement,
+        Self,
         crate::js::bogus::bogus_statement::FormatJsBogusStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11204,7 +11204,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusStatement,
+        Self,
         crate::js::bogus::bogus_statement::FormatJsBogusStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -11224,7 +11224,7 @@ impl FormatRule<biome_js_syntax::TsBogusType> for crate::ts::bogus::bogus_type::
 impl AsFormat<JsFormatContext> for biome_js_syntax::TsBogusType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::TsBogusType,
+        Self,
         crate::ts::bogus::bogus_type::FormatTsBogusType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11236,7 +11236,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::TsBogusType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::TsBogusType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::TsBogusType,
+        Self,
         crate::ts::bogus::bogus_type::FormatTsBogusType,
     >;
     fn into_format(self) -> Self::Format {
@@ -11249,7 +11249,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsBogusType {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayAssignmentPatternElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsArrayAssignmentPatternElement,
+        Self,
         crate::js::any::array_assignment_pattern_element::FormatAnyJsArrayAssignmentPatternElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11258,7 +11258,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayAssignmentPatternE
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayAssignmentPatternElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsArrayAssignmentPatternElement,
+        Self,
         crate::js::any::array_assignment_pattern_element::FormatAnyJsArrayAssignmentPatternElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -11268,7 +11268,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayAssignmentPatter
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayBindingPatternElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsArrayBindingPatternElement,
+        Self,
         crate::js::any::array_binding_pattern_element::FormatAnyJsArrayBindingPatternElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11277,7 +11277,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayBindingPatternElem
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayBindingPatternElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsArrayBindingPatternElement,
+        Self,
         crate::js::any::array_binding_pattern_element::FormatAnyJsArrayBindingPatternElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -11287,7 +11287,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayBindingPatternEl
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsArrayElement,
+        Self,
         crate::js::any::array_element::FormatAnyJsArrayElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11299,7 +11299,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsArrayElement,
+        Self,
         crate::js::any::array_element::FormatAnyJsArrayElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -11312,7 +11312,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsArrayElement {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsArrowFunctionParameters {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsArrowFunctionParameters,
+        Self,
         crate::js::any::arrow_function_parameters::FormatAnyJsArrowFunctionParameters,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11325,7 +11325,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsArrowFunctionParameters
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsArrowFunctionParameters {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsArrowFunctionParameters,
+        Self,
         crate::js::any::arrow_function_parameters::FormatAnyJsArrowFunctionParameters,
     >;
     fn into_format(self) -> Self::Format {
@@ -11339,7 +11339,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsArrowFunctionParamete
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignment {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsAssignment,
+        Self,
         crate::js::any::assignment::FormatAnyJsAssignment,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11351,7 +11351,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignment {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignment {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsAssignment,
+        Self,
         crate::js::any::assignment::FormatAnyJsAssignment,
     >;
     fn into_format(self) -> Self::Format {
@@ -11364,7 +11364,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignment {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignmentPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsAssignmentPattern,
+        Self,
         crate::js::any::assignment_pattern::FormatAnyJsAssignmentPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11376,7 +11376,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignmentPattern {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignmentPattern {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsAssignmentPattern,
+        Self,
         crate::js::any::assignment_pattern::FormatAnyJsAssignmentPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -11389,7 +11389,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsAssignmentPattern {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsBinding {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsBinding,
+        Self,
         crate::js::any::binding::FormatAnyJsBinding,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11398,7 +11398,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsBinding {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsBinding {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsBinding,
+        Self,
         crate::js::any::binding::FormatAnyJsBinding,
     >;
     fn into_format(self) -> Self::Format {
@@ -11408,7 +11408,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsBinding {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsBindingPattern {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsBindingPattern,
+        Self,
         crate::js::any::binding_pattern::FormatAnyJsBindingPattern,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11420,7 +11420,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsBindingPattern {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsBindingPattern {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsBindingPattern,
+        Self,
         crate::js::any::binding_pattern::FormatAnyJsBindingPattern,
     >;
     fn into_format(self) -> Self::Format {
@@ -11433,7 +11433,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsBindingPattern {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsCallArgument {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsCallArgument,
+        Self,
         crate::js::any::call_argument::FormatAnyJsCallArgument,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11445,7 +11445,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsCallArgument {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsCallArgument {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsCallArgument,
+        Self,
         crate::js::any::call_argument::FormatAnyJsCallArgument,
     >;
     fn into_format(self) -> Self::Format {
@@ -11457,14 +11457,14 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsCallArgument {
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsClass {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::AnyJsClass, crate::js::any::class::FormatAnyJsClass>;
+        FormatRefWithRule<'a, Self, crate::js::any::class::FormatAnyJsClass>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::js::any::class::FormatAnyJsClass::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsClass {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::AnyJsClass, crate::js::any::class::FormatAnyJsClass>;
+        FormatOwnedWithRule<Self, crate::js::any::class::FormatAnyJsClass>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::js::any::class::FormatAnyJsClass::default())
     }
@@ -11472,7 +11472,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsClass {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsClassMember,
+        Self,
         crate::js::any::class_member::FormatAnyJsClassMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11484,7 +11484,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsClassMember,
+        Self,
         crate::js::any::class_member::FormatAnyJsClassMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -11497,7 +11497,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMember {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMemberName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsClassMemberName,
+        Self,
         crate::js::any::class_member_name::FormatAnyJsClassMemberName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11509,7 +11509,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMemberName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMemberName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsClassMemberName,
+        Self,
         crate::js::any::class_member_name::FormatAnyJsClassMemberName,
     >;
     fn into_format(self) -> Self::Format {
@@ -11522,7 +11522,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsClassMemberName {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsCombinedSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsCombinedSpecifier,
+        Self,
         crate::js::any::combined_specifier::FormatAnyJsCombinedSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11534,7 +11534,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsCombinedSpecifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsCombinedSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsCombinedSpecifier,
+        Self,
         crate::js::any::combined_specifier::FormatAnyJsCombinedSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -11547,7 +11547,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsCombinedSpecifier {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsConstructorParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsConstructorParameter,
+        Self,
         crate::js::any::constructor_parameter::FormatAnyJsConstructorParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11559,7 +11559,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsConstructorParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsConstructorParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsConstructorParameter,
+        Self,
         crate::js::any::constructor_parameter::FormatAnyJsConstructorParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -11572,7 +11572,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsConstructorParameter 
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsDeclaration,
+        Self,
         crate::js::any::declaration::FormatAnyJsDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11584,7 +11584,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclaration {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsDeclaration,
+        Self,
         crate::js::any::declaration::FormatAnyJsDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -11597,7 +11597,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclaration {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclarationClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsDeclarationClause,
+        Self,
         crate::js::any::declaration_clause::FormatAnyJsDeclarationClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11609,7 +11609,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclarationClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclarationClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsDeclarationClause,
+        Self,
         crate::js::any::declaration_clause::FormatAnyJsDeclarationClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -11622,7 +11622,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsDeclarationClause {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsDecorator {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsDecorator,
+        Self,
         crate::js::any::decorator::FormatAnyJsDecorator,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11634,7 +11634,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsDecorator {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsDecorator {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsDecorator,
+        Self,
         crate::js::any::decorator::FormatAnyJsDecorator,
     >;
     fn into_format(self) -> Self::Format {
@@ -11647,7 +11647,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsDecorator {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsExportClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsExportClause,
+        Self,
         crate::js::any::export_clause::FormatAnyJsExportClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11659,7 +11659,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsExportClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsExportClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsExportClause,
+        Self,
         crate::js::any::export_clause::FormatAnyJsExportClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -11672,7 +11672,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsExportClause {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsExportDefaultDeclaration {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsExportDefaultDeclaration,
+        Self,
         crate::js::any::export_default_declaration::FormatAnyJsExportDefaultDeclaration,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11681,7 +11681,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsExportDefaultDeclaratio
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsExportDefaultDeclaration {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsExportDefaultDeclaration,
+        Self,
         crate::js::any::export_default_declaration::FormatAnyJsExportDefaultDeclaration,
     >;
     fn into_format(self) -> Self::Format {
@@ -11691,7 +11691,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsExportDefaultDeclarat
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsExportNamedSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsExportNamedSpecifier,
+        Self,
         crate::js::any::export_named_specifier::FormatAnyJsExportNamedSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11703,7 +11703,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsExportNamedSpecifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsExportNamedSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsExportNamedSpecifier,
+        Self,
         crate::js::any::export_named_specifier::FormatAnyJsExportNamedSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -11716,7 +11716,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsExportNamedSpecifier 
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsExpression,
+        Self,
         crate::js::any::expression::FormatAnyJsExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11728,7 +11728,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsExpression,
+        Self,
         crate::js::any::expression::FormatAnyJsExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -11741,7 +11741,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsExpression {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsForInOrOfInitializer {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsForInOrOfInitializer,
+        Self,
         crate::js::any::for_in_or_of_initializer::FormatAnyJsForInOrOfInitializer,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11753,7 +11753,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsForInOrOfInitializer {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsForInOrOfInitializer {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsForInOrOfInitializer,
+        Self,
         crate::js::any::for_in_or_of_initializer::FormatAnyJsForInOrOfInitializer,
     >;
     fn into_format(self) -> Self::Format {
@@ -11766,7 +11766,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsForInOrOfInitializer 
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsForInitializer {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsForInitializer,
+        Self,
         crate::js::any::for_initializer::FormatAnyJsForInitializer,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11778,7 +11778,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsForInitializer {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsForInitializer {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsForInitializer,
+        Self,
         crate::js::any::for_initializer::FormatAnyJsForInitializer,
     >;
     fn into_format(self) -> Self::Format {
@@ -11791,7 +11791,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsForInitializer {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsFormalParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsFormalParameter,
+        Self,
         crate::js::any::formal_parameter::FormatAnyJsFormalParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11803,7 +11803,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsFormalParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsFormalParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsFormalParameter,
+        Self,
         crate::js::any::formal_parameter::FormatAnyJsFormalParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -11816,7 +11816,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsFormalParameter {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsFunction {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsFunction,
+        Self,
         crate::js::any::function::FormatAnyJsFunction,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11828,7 +11828,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsFunction {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsFunction {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsFunction,
+        Self,
         crate::js::any::function::FormatAnyJsFunction,
     >;
     fn into_format(self) -> Self::Format {
@@ -11841,7 +11841,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsFunction {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsFunctionBody {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsFunctionBody,
+        Self,
         crate::js::any::function_body::FormatAnyJsFunctionBody,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11853,7 +11853,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsFunctionBody {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsFunctionBody {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsFunctionBody,
+        Self,
         crate::js::any::function_body::FormatAnyJsFunctionBody,
     >;
     fn into_format(self) -> Self::Format {
@@ -11866,7 +11866,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsFunctionBody {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAssertionEntry {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsImportAssertionEntry,
+        Self,
         crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11878,7 +11878,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAssertionEntry {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAssertionEntry {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsImportAssertionEntry,
+        Self,
         crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry,
     >;
     fn into_format(self) -> Self::Format {
@@ -11891,7 +11891,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAssertionEntry 
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsImportClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsImportClause,
+        Self,
         crate::js::any::import_clause::FormatAnyJsImportClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11903,7 +11903,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsImportClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsImportClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsImportClause,
+        Self,
         crate::js::any::import_clause::FormatAnyJsImportClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -11916,7 +11916,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsImportClause {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsInProperty {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsInProperty,
+        Self,
         crate::js::any::in_property::FormatAnyJsInProperty,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11928,7 +11928,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsInProperty {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsInProperty {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsInProperty,
+        Self,
         crate::js::any::in_property::FormatAnyJsInProperty,
     >;
     fn into_format(self) -> Self::Format {
@@ -11941,7 +11941,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsInProperty {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsLiteralExpression,
+        Self,
         crate::js::any::literal_expression::FormatAnyJsLiteralExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11953,7 +11953,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExpression {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExpression {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsLiteralExpression,
+        Self,
         crate::js::any::literal_expression::FormatAnyJsLiteralExpression,
     >;
     fn into_format(self) -> Self::Format {
@@ -11966,7 +11966,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExpression {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsMethodModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsMethodModifier,
+        Self,
         crate::js::any::method_modifier::FormatAnyJsMethodModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -11978,7 +11978,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsMethodModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsMethodModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsMethodModifier,
+        Self,
         crate::js::any::method_modifier::FormatAnyJsMethodModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -11991,7 +11991,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsMethodModifier {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleItem {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsModuleItem,
+        Self,
         crate::js::any::module_item::FormatAnyJsModuleItem,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12003,7 +12003,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleItem {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleItem {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsModuleItem,
+        Self,
         crate::js::any::module_item::FormatAnyJsModuleItem,
     >;
     fn into_format(self) -> Self::Format {
@@ -12016,7 +12016,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleItem {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleSource {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsModuleSource,
+        Self,
         crate::js::any::module_source::FormatAnyJsModuleSource,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12028,7 +12028,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleSource {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleSource {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsModuleSource,
+        Self,
         crate::js::any::module_source::FormatAnyJsModuleSource,
     >;
     fn into_format(self) -> Self::Format {
@@ -12040,14 +12040,14 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleSource {
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsName {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::AnyJsName, crate::js::any::name::FormatAnyJsName>;
+        FormatRefWithRule<'a, Self, crate::js::any::name::FormatAnyJsName>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::js::any::name::FormatAnyJsName::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsName {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::AnyJsName, crate::js::any::name::FormatAnyJsName>;
+        FormatOwnedWithRule<Self, crate::js::any::name::FormatAnyJsName>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::js::any::name::FormatAnyJsName::default())
     }
@@ -12055,7 +12055,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsName {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsNamedImportSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsNamedImportSpecifier,
+        Self,
         crate::js::any::named_import_specifier::FormatAnyJsNamedImportSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12067,7 +12067,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsNamedImportSpecifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsNamedImportSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsNamedImportSpecifier,
+        Self,
         crate::js::any::named_import_specifier::FormatAnyJsNamedImportSpecifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -12080,7 +12080,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsNamedImportSpecifier 
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectAssignmentPatternMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsObjectAssignmentPatternMember,
+        Self,
         crate::js::any::object_assignment_pattern_member::FormatAnyJsObjectAssignmentPatternMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12089,7 +12089,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectAssignmentPattern
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectAssignmentPatternMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsObjectAssignmentPatternMember,
+        Self,
         crate::js::any::object_assignment_pattern_member::FormatAnyJsObjectAssignmentPatternMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -12099,7 +12099,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectAssignmentPatte
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectBindingPatternMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsObjectBindingPatternMember,
+        Self,
         crate::js::any::object_binding_pattern_member::FormatAnyJsObjectBindingPatternMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12108,7 +12108,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectBindingPatternMem
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectBindingPatternMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsObjectBindingPatternMember,
+        Self,
         crate::js::any::object_binding_pattern_member::FormatAnyJsObjectBindingPatternMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -12118,7 +12118,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectBindingPatternM
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsObjectMember,
+        Self,
         crate::js::any::object_member::FormatAnyJsObjectMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12130,7 +12130,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsObjectMember,
+        Self,
         crate::js::any::object_member::FormatAnyJsObjectMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -12143,7 +12143,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMember {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMemberName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsObjectMemberName,
+        Self,
         crate::js::any::object_member_name::FormatAnyJsObjectMemberName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12155,7 +12155,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMemberName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMemberName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsObjectMemberName,
+        Self,
         crate::js::any::object_member_name::FormatAnyJsObjectMemberName,
     >;
     fn into_format(self) -> Self::Format {
@@ -12168,7 +12168,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsObjectMemberName {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsParameter {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsParameter,
+        Self,
         crate::js::any::parameter::FormatAnyJsParameter,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12180,7 +12180,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsParameter {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsParameter {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsParameter,
+        Self,
         crate::js::any::parameter::FormatAnyJsParameter,
     >;
     fn into_format(self) -> Self::Format {
@@ -12193,7 +12193,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsParameter {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsPropertyModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsPropertyModifier,
+        Self,
         crate::js::any::property_modifier::FormatAnyJsPropertyModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12205,7 +12205,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsPropertyModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsPropertyModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsPropertyModifier,
+        Self,
         crate::js::any::property_modifier::FormatAnyJsPropertyModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -12217,14 +12217,14 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsPropertyModifier {
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsRoot {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::AnyJsRoot, crate::js::any::root::FormatAnyJsRoot>;
+        FormatRefWithRule<'a, Self, crate::js::any::root::FormatAnyJsRoot>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::js::any::root::FormatAnyJsRoot::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsRoot {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::AnyJsRoot, crate::js::any::root::FormatAnyJsRoot>;
+        FormatOwnedWithRule<Self, crate::js::any::root::FormatAnyJsRoot>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::js::any::root::FormatAnyJsRoot::default())
     }
@@ -12232,7 +12232,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsRoot {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsStatement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsStatement,
+        Self,
         crate::js::any::statement::FormatAnyJsStatement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12244,7 +12244,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsStatement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsStatement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsStatement,
+        Self,
         crate::js::any::statement::FormatAnyJsStatement,
     >;
     fn into_format(self) -> Self::Format {
@@ -12257,7 +12257,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsStatement {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsSwitchClause {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsSwitchClause,
+        Self,
         crate::js::any::switch_clause::FormatAnyJsSwitchClause,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12269,7 +12269,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsSwitchClause {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsSwitchClause {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsSwitchClause,
+        Self,
         crate::js::any::switch_clause::FormatAnyJsSwitchClause,
     >;
     fn into_format(self) -> Self::Format {
@@ -12282,7 +12282,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsSwitchClause {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsTemplateElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsTemplateElement,
+        Self,
         crate::js::any::template_element::FormatAnyJsTemplateElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12294,7 +12294,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsTemplateElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsTemplateElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsTemplateElement,
+        Self,
         crate::js::any::template_element::FormatAnyJsTemplateElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -12307,7 +12307,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsTemplateElement {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttribute {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsxAttribute,
+        Self,
         crate::jsx::any::attribute::FormatAnyJsxAttribute,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12319,7 +12319,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttribute {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttribute {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsxAttribute,
+        Self,
         crate::jsx::any::attribute::FormatAnyJsxAttribute,
     >;
     fn into_format(self) -> Self::Format {
@@ -12332,7 +12332,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttribute {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsxAttributeName,
+        Self,
         crate::jsx::any::attribute_name::FormatAnyJsxAttributeName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12344,7 +12344,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsxAttributeName,
+        Self,
         crate::jsx::any::attribute_name::FormatAnyJsxAttributeName,
     >;
     fn into_format(self) -> Self::Format {
@@ -12357,7 +12357,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeName {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeValue {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsxAttributeValue,
+        Self,
         crate::jsx::any::attribute_value::FormatAnyJsxAttributeValue,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12369,7 +12369,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeValue {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeValue {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsxAttributeValue,
+        Self,
         crate::jsx::any::attribute_value::FormatAnyJsxAttributeValue,
     >;
     fn into_format(self) -> Self::Format {
@@ -12382,7 +12382,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttributeValue {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxChild {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsxChild,
+        Self,
         crate::jsx::any::child::FormatAnyJsxChild,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12391,7 +12391,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxChild {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxChild {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsxChild,
+        Self,
         crate::jsx::any::child::FormatAnyJsxChild,
     >;
     fn into_format(self) -> Self::Format {
@@ -12401,7 +12401,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxChild {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxElementName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsxElementName,
+        Self,
         crate::jsx::any::element_name::FormatAnyJsxElementName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12413,7 +12413,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxElementName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxElementName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsxElementName,
+        Self,
         crate::jsx::any::element_name::FormatAnyJsxElementName,
     >;
     fn into_format(self) -> Self::Format {
@@ -12425,14 +12425,14 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxElementName {
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxName {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::AnyJsxName, crate::jsx::any::name::FormatAnyJsxName>;
+        FormatRefWithRule<'a, Self, crate::jsx::any::name::FormatAnyJsxName>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::jsx::any::name::FormatAnyJsxName::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxName {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::AnyJsxName, crate::jsx::any::name::FormatAnyJsxName>;
+        FormatOwnedWithRule<Self, crate::jsx::any::name::FormatAnyJsxName>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::jsx::any::name::FormatAnyJsxName::default())
     }
@@ -12440,7 +12440,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxName {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxObjectName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsxObjectName,
+        Self,
         crate::jsx::any::object_name::FormatAnyJsxObjectName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12452,7 +12452,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxObjectName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxObjectName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsxObjectName,
+        Self,
         crate::jsx::any::object_name::FormatAnyJsxObjectName,
     >;
     fn into_format(self) -> Self::Format {
@@ -12464,14 +12464,14 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxObjectName {
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxTag {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::AnyJsxTag, crate::jsx::any::tag::FormatAnyJsxTag>;
+        FormatRefWithRule<'a, Self, crate::jsx::any::tag::FormatAnyJsxTag>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::jsx::any::tag::FormatAnyJsxTag::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxTag {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::AnyJsxTag, crate::jsx::any::tag::FormatAnyJsxTag>;
+        FormatOwnedWithRule<Self, crate::jsx::any::tag::FormatAnyJsxTag>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::jsx::any::tag::FormatAnyJsxTag::default())
     }
@@ -12479,7 +12479,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxTag {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsEnumMemberName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsEnumMemberName,
+        Self,
         crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12491,7 +12491,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsEnumMemberName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsEnumMemberName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsEnumMemberName,
+        Self,
         crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName,
     >;
     fn into_format(self) -> Self::Format {
@@ -12504,7 +12504,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsEnumMemberName {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsExternalModuleDeclarationBody {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsExternalModuleDeclarationBody,
+        Self,
         crate::ts::any::external_module_declaration_body::FormatAnyTsExternalModuleDeclarationBody,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12513,7 +12513,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsExternalModuleDeclarati
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsExternalModuleDeclarationBody {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsExternalModuleDeclarationBody,
+        Self,
         crate::ts::any::external_module_declaration_body::FormatAnyTsExternalModuleDeclarationBody,
     >;
     fn into_format(self) -> Self::Format {
@@ -12523,7 +12523,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsExternalModuleDeclara
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsIdentifierBinding {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsIdentifierBinding,
+        Self,
         crate::ts::any::identifier_binding::FormatAnyTsIdentifierBinding,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12535,7 +12535,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsIdentifierBinding {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsIdentifierBinding {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsIdentifierBinding,
+        Self,
         crate::ts::any::identifier_binding::FormatAnyTsIdentifierBinding,
     >;
     fn into_format(self) -> Self::Format {
@@ -12548,7 +12548,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsIdentifierBinding {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsIndexSignatureModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsIndexSignatureModifier,
+        Self,
         crate::ts::any::index_signature_modifier::FormatAnyTsIndexSignatureModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12560,7 +12560,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsIndexSignatureModifier 
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsIndexSignatureModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsIndexSignatureModifier,
+        Self,
         crate::ts::any::index_signature_modifier::FormatAnyTsIndexSignatureModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -12573,7 +12573,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsIndexSignatureModifie
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsMethodSignatureModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsMethodSignatureModifier,
+        Self,
         crate::ts::any::method_signature_modifier::FormatAnyTsMethodSignatureModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12586,7 +12586,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsMethodSignatureModifier
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsMethodSignatureModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsMethodSignatureModifier,
+        Self,
         crate::ts::any::method_signature_modifier::FormatAnyTsMethodSignatureModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -12600,7 +12600,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsMethodSignatureModifi
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsModuleName,
+        Self,
         crate::ts::any::module_name::FormatAnyTsModuleName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12612,7 +12612,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleName {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsModuleName,
+        Self,
         crate::ts::any::module_name::FormatAnyTsModuleName,
     >;
     fn into_format(self) -> Self::Format {
@@ -12625,7 +12625,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleName {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleReference {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsModuleReference,
+        Self,
         crate::ts::any::module_reference::FormatAnyTsModuleReference,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12637,7 +12637,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleReference {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleReference {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsModuleReference,
+        Self,
         crate::ts::any::module_reference::FormatAnyTsModuleReference,
     >;
     fn into_format(self) -> Self::Format {
@@ -12649,14 +12649,14 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsModuleReference {
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsName {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::AnyTsName, crate::ts::any::name::FormatAnyTsName>;
+        FormatRefWithRule<'a, Self, crate::ts::any::name::FormatAnyTsName>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::ts::any::name::FormatAnyTsName::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsName {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::AnyTsName, crate::ts::any::name::FormatAnyTsName>;
+        FormatOwnedWithRule<Self, crate::ts::any::name::FormatAnyTsName>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::ts::any::name::FormatAnyTsName::default())
     }
@@ -12664,7 +12664,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsName {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyAnnotation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsPropertyAnnotation,
+        Self,
         crate::ts::any::property_annotation::FormatAnyTsPropertyAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12676,7 +12676,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyAnnotation {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyAnnotation {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsPropertyAnnotation,
+        Self,
         crate::ts::any::property_annotation::FormatAnyTsPropertyAnnotation,
     >;
     fn into_format(self) -> Self::Format {
@@ -12689,7 +12689,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyAnnotation {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyParameterModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsPropertyParameterModifier,
+        Self,
         crate::ts::any::property_parameter_modifier::FormatAnyTsPropertyParameterModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12698,7 +12698,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyParameterModifi
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyParameterModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsPropertyParameterModifier,
+        Self,
         crate::ts::any::property_parameter_modifier::FormatAnyTsPropertyParameterModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -12708,7 +12708,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertyParameterModi
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertySignatureAnnotation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsPropertySignatureAnnotation,
+        Self,
         crate::ts::any::property_signature_annotation::FormatAnyTsPropertySignatureAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12717,7 +12717,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertySignatureAnnota
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertySignatureAnnotation {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsPropertySignatureAnnotation,
+        Self,
         crate::ts::any::property_signature_annotation::FormatAnyTsPropertySignatureAnnotation,
     >;
     fn into_format(self) -> Self::Format {
@@ -12727,7 +12727,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertySignatureAnno
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertySignatureModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsPropertySignatureModifier,
+        Self,
         crate::ts::any::property_signature_modifier::FormatAnyTsPropertySignatureModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12736,7 +12736,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertySignatureModifi
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertySignatureModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsPropertySignatureModifier,
+        Self,
         crate::ts::any::property_signature_modifier::FormatAnyTsPropertySignatureModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -12746,7 +12746,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsPropertySignatureModi
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsReturnType {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsReturnType,
+        Self,
         crate::ts::any::return_type::FormatAnyTsReturnType,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12758,7 +12758,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsReturnType {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsReturnType {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsReturnType,
+        Self,
         crate::ts::any::return_type::FormatAnyTsReturnType,
     >;
     fn into_format(self) -> Self::Format {
@@ -12771,7 +12771,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsReturnType {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTemplateElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsTemplateElement,
+        Self,
         crate::ts::any::template_element::FormatAnyTsTemplateElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12783,7 +12783,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTemplateElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTemplateElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsTemplateElement,
+        Self,
         crate::ts::any::template_element::FormatAnyTsTemplateElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -12796,7 +12796,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTemplateElement {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTupleTypeElement {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsTupleTypeElement,
+        Self,
         crate::ts::any::tuple_type_element::FormatAnyTsTupleTypeElement,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12808,7 +12808,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTupleTypeElement {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTupleTypeElement {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsTupleTypeElement,
+        Self,
         crate::ts::any::tuple_type_element::FormatAnyTsTupleTypeElement,
     >;
     fn into_format(self) -> Self::Format {
@@ -12820,14 +12820,14 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTupleTypeElement {
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsType {
     type Format<'a> =
-        FormatRefWithRule<'a, biome_js_syntax::AnyTsType, crate::ts::any::ts_type::FormatAnyTsType>;
+        FormatRefWithRule<'a, Self, crate::ts::any::ts_type::FormatAnyTsType>;
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, crate::ts::any::ts_type::FormatAnyTsType::default())
     }
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsType {
     type Format =
-        FormatOwnedWithRule<biome_js_syntax::AnyTsType, crate::ts::any::ts_type::FormatAnyTsType>;
+        FormatOwnedWithRule<Self, crate::ts::any::ts_type::FormatAnyTsType>;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, crate::ts::any::ts_type::FormatAnyTsType::default())
     }
@@ -12835,7 +12835,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsType {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeMember {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsTypeMember,
+        Self,
         crate::ts::any::type_member::FormatAnyTsTypeMember,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12847,7 +12847,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeMember {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeMember {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsTypeMember,
+        Self,
         crate::ts::any::type_member::FormatAnyTsTypeMember,
     >;
     fn into_format(self) -> Self::Format {
@@ -12860,7 +12860,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeMember {
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeParameterModifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsTypeParameterModifier,
+        Self,
         crate::ts::any::type_parameter_modifier::FormatAnyTsTypeParameterModifier,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12872,7 +12872,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeParameterModifier {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeParameterModifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsTypeParameterModifier,
+        Self,
         crate::ts::any::type_parameter_modifier::FormatAnyTsTypeParameterModifier,
     >;
     fn into_format(self) -> Self::Format {
@@ -12885,7 +12885,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTypeParameterModifier
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTypePredicateParameterName {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsTypePredicateParameterName,
+        Self,
         crate::ts::any::type_predicate_parameter_name::FormatAnyTsTypePredicateParameterName,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12894,7 +12894,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsTypePredicateParameterN
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTypePredicateParameterName {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsTypePredicateParameterName,
+        Self,
         crate::ts::any::type_predicate_parameter_name::FormatAnyTsTypePredicateParameterName,
     >;
     fn into_format(self) -> Self::Format {
@@ -12904,7 +12904,7 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsTypePredicateParamete
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsVariableAnnotation {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyTsVariableAnnotation,
+        Self,
         crate::ts::any::variable_annotation::FormatAnyTsVariableAnnotation,
     >;
     fn format(&self) -> Self::Format<'_> {
@@ -12916,7 +12916,7 @@ impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsVariableAnnotation {
 }
 impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsVariableAnnotation {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyTsVariableAnnotation,
+        Self,
         crate::ts::any::variable_annotation::FormatAnyTsVariableAnnotation,
     >;
     fn into_format(self) -> Self::Format {

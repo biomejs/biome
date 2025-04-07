@@ -33,13 +33,13 @@ impl From<anyhow::Error> for LspError {
 impl Display for LspError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            LspError::WorkspaceError(err) => {
+            Self::WorkspaceError(err) => {
                 write!(f, "{err}")
             }
-            LspError::Anyhow(err) => {
+            Self::Anyhow(err) => {
                 write!(f, "{err}")
             }
-            LspError::Error(err) => err.description(f),
+            Self::Error(err) => err.description(f),
         }
     }
 }

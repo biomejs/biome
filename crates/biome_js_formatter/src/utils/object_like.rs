@@ -14,37 +14,37 @@ declare_node_union! {
 impl JsObjectLike {
     fn l_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            JsObjectLike::JsObjectExpression(oe) => oe.l_curly_token(),
-            JsObjectLike::TsObjectType(ot) => ot.l_curly_token(),
+            Self::JsObjectExpression(oe) => oe.l_curly_token(),
+            Self::TsObjectType(ot) => ot.l_curly_token(),
         }
     }
     fn r_curly_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            JsObjectLike::JsObjectExpression(oe) => oe.r_curly_token(),
-            JsObjectLike::TsObjectType(ot) => ot.r_curly_token(),
+            Self::JsObjectExpression(oe) => oe.r_curly_token(),
+            Self::TsObjectType(ot) => ot.r_curly_token(),
         }
     }
 
     fn members_have_leading_newline(&self) -> bool {
         match self {
-            JsObjectLike::JsObjectExpression(oe) => oe.members().syntax().has_leading_newline(),
-            JsObjectLike::TsObjectType(ot) => ot.members().syntax().has_leading_newline(),
+            Self::JsObjectExpression(oe) => oe.members().syntax().has_leading_newline(),
+            Self::TsObjectType(ot) => ot.members().syntax().has_leading_newline(),
         }
     }
 
     fn members_are_empty(&self) -> bool {
         match self {
-            JsObjectLike::JsObjectExpression(oe) => oe.members().is_empty(),
-            JsObjectLike::TsObjectType(ot) => ot.members().is_empty(),
+            Self::JsObjectExpression(oe) => oe.members().is_empty(),
+            Self::TsObjectType(ot) => ot.members().is_empty(),
         }
     }
 
     fn write_members(&self, f: &mut JsFormatter) -> FormatResult<()> {
         match self {
-            JsObjectLike::JsObjectExpression(oe) => {
+            Self::JsObjectExpression(oe) => {
                 write!(f, [oe.members().format()])
             }
-            JsObjectLike::TsObjectType(ot) => {
+            Self::TsObjectType(ot) => {
                 write!(f, [ot.members().format()])
             }
         }

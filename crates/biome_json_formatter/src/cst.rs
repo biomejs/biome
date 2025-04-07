@@ -14,7 +14,7 @@ impl FormatRule<JsonSyntaxNode> for FormatJsonSyntaxNode {
 }
 
 impl AsFormat<JsonFormatContext> for JsonSyntaxNode {
-    type Format<'a> = FormatRefWithRule<'a, JsonSyntaxNode, FormatJsonSyntaxNode>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatJsonSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatJsonSyntaxNode)
@@ -22,7 +22,7 @@ impl AsFormat<JsonFormatContext> for JsonSyntaxNode {
 }
 
 impl IntoFormat<JsonFormatContext> for JsonSyntaxNode {
-    type Format = FormatOwnedWithRule<JsonSyntaxNode, FormatJsonSyntaxNode>;
+    type Format = FormatOwnedWithRule<Self, FormatJsonSyntaxNode>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatJsonSyntaxNode)

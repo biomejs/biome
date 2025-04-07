@@ -50,7 +50,7 @@ pub(crate) struct HtmlWord {
 
 impl HtmlWord {
     fn new(text: TokenText, source_position: TextSize) -> Self {
-        HtmlWord {
+        Self {
             text,
             source_position,
         }
@@ -121,7 +121,7 @@ pub(crate) enum HtmlChild {
 impl HtmlChild {
     #[expect(dead_code)]
     pub(crate) const fn is_any_line(&self) -> bool {
-        matches!(self, HtmlChild::EmptyLine | HtmlChild::Newline)
+        matches!(self, Self::EmptyLine | Self::Newline)
     }
 }
 
@@ -296,7 +296,7 @@ struct HtmlSplitChildrenBuilder {
 
 impl HtmlSplitChildrenBuilder {
     fn new() -> Self {
-        HtmlSplitChildrenBuilder { buffer: vec![] }
+        Self { buffer: vec![] }
     }
 
     fn entry(&mut self, child: HtmlChild) {

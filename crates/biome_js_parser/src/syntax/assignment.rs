@@ -153,8 +153,8 @@ pub(crate) enum AssignmentExprPrecedence {
 impl AssignmentExprPrecedence {
     fn parse_expression(&self, p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
         match self {
-            AssignmentExprPrecedence::Unary => parse_unary_expr(p, context),
-            AssignmentExprPrecedence::Conditional => parse_conditional_expr(p, context),
+            Self::Unary => parse_unary_expr(p, context),
+            Self::Conditional => parse_conditional_expr(p, context),
         }
     }
 }

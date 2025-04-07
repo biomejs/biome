@@ -80,7 +80,7 @@ impl ExpressionContextFlags {
     const ALLOW_TS_TYPE_ASSERTION: Self =
         Self(make_bitflags!(ExpressionContextFlag::{AllowTSTypeAssertion}));
 
-    pub fn contains(&self, other: impl Into<ExpressionContextFlags>) -> bool {
+    pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
 }
@@ -89,7 +89,7 @@ impl BitOr for ExpressionContextFlags {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        ExpressionContextFlags(self.0 | rhs.0)
+        Self(self.0 | rhs.0)
     }
 }
 
@@ -142,7 +142,7 @@ impl ExpressionContext {
 
     /// Adds the `flag` if `set` is `true`, otherwise removes the `flag`
     fn and(self, flag: ExpressionContextFlags, set: bool) -> Self {
-        ExpressionContext(if set { self.0 | flag } else { self.0 - flag })
+        Self(if set { self.0 | flag } else { self.0 - flag })
     }
 }
 
@@ -150,7 +150,7 @@ impl ExpressionContext {
 /// or sub-expression of another expression (the alternate branch of a condition expression).
 impl Default for ExpressionContext {
     fn default() -> Self {
-        ExpressionContext(
+        Self(
             ExpressionContextFlags::INCLUDE_IN
                 | ExpressionContextFlags::ALLOW_OBJECT_EXPRESSION
                 | ExpressionContextFlags::ALLOW_TS_TYPE_ASSERTION,

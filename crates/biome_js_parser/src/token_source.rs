@@ -18,7 +18,7 @@ pub(crate) type JsTokenSourceCheckpoint = TokenSourceCheckpoint<JsSyntaxKind>;
 
 impl<'l> JsTokenSource<'l> {
     /// Creates a new token source.
-    pub(crate) fn new(lexer: BufferedLexer<JsSyntaxKind, JsLexer<'l>>) -> JsTokenSource<'l> {
+    pub(crate) fn new(lexer: BufferedLexer<JsSyntaxKind, JsLexer<'l>>) -> Self {
         JsTokenSource {
             lexer,
             trivia_list: vec![],
@@ -26,7 +26,7 @@ impl<'l> JsTokenSource<'l> {
     }
 
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'l str, options: JsParserOptions) -> JsTokenSource<'l> {
+    pub fn from_str(source: &'l str, options: JsParserOptions) -> Self {
         let lexer = JsLexer::from_str(source).with_options(options);
         let buffered = BufferedLexer::new(lexer);
         let mut source = JsTokenSource::new(buffered);

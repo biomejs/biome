@@ -68,26 +68,20 @@ pub enum FormatElement {
 impl std::fmt::Debug for FormatElement {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            FormatElement::Space | FormatElement::HardSpace => write!(fmt, "Space"),
-            FormatElement::Line(mode) => fmt.debug_tuple("Line").field(mode).finish(),
-            FormatElement::ExpandParent => write!(fmt, "ExpandParent"),
-            FormatElement::StaticText { text } => {
-                fmt.debug_tuple("StaticText").field(text).finish()
-            }
-            FormatElement::DynamicText { text, .. } => {
-                fmt.debug_tuple("DynamicText").field(text).finish()
-            }
-            FormatElement::LocatedTokenText { slice, .. } => {
+            Self::Space | Self::HardSpace => write!(fmt, "Space"),
+            Self::Line(mode) => fmt.debug_tuple("Line").field(mode).finish(),
+            Self::ExpandParent => write!(fmt, "ExpandParent"),
+            Self::StaticText { text } => fmt.debug_tuple("StaticText").field(text).finish(),
+            Self::DynamicText { text, .. } => fmt.debug_tuple("DynamicText").field(text).finish(),
+            Self::LocatedTokenText { slice, .. } => {
                 fmt.debug_tuple("LocatedTokenText").field(slice).finish()
             }
-            FormatElement::LineSuffixBoundary => write!(fmt, "LineSuffixBoundary"),
-            FormatElement::BestFitting(best_fitting) => {
+            Self::LineSuffixBoundary => write!(fmt, "LineSuffixBoundary"),
+            Self::BestFitting(best_fitting) => {
                 fmt.debug_tuple("BestFitting").field(&best_fitting).finish()
             }
-            FormatElement::Interned(interned) => {
-                fmt.debug_list().entries(interned.deref()).finish()
-            }
-            FormatElement::Tag(tag) => fmt.debug_tuple("Tag").field(tag).finish(),
+            Self::Interned(interned) => fmt.debug_list().entries(interned.deref()).finish(),
+            Self::Tag(tag) => fmt.debug_tuple("Tag").field(tag).finish(),
         }
     }
 }
@@ -106,7 +100,7 @@ pub enum LineMode {
 
 impl LineMode {
     pub const fn is_hard(&self) -> bool {
-        matches!(self, LineMode::Hard)
+        matches!(self, Self::Hard)
     }
 }
 
@@ -120,11 +114,11 @@ pub enum PrintMode {
 
 impl PrintMode {
     pub const fn is_flat(&self) -> bool {
-        matches!(self, PrintMode::Flat)
+        matches!(self, Self::Flat)
     }
 
     pub const fn is_expanded(&self) -> bool {
-        matches!(self, PrintMode::Expanded)
+        matches!(self, Self::Expanded)
     }
 }
 
@@ -138,7 +132,7 @@ impl Interned {
 }
 
 impl PartialEq for Interned {
-    fn eq(&self, other: &Interned) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
     }
 }
@@ -203,13 +197,13 @@ pub fn normalize_newlines<const N: usize>(text: &str, terminators: [char; N]) ->
 impl FormatElement {
     /// Returns `true` if self is a [FormatElement::Tag]
     pub const fn is_tag(&self) -> bool {
-        matches!(self, FormatElement::Tag(_))
+        matches!(self, Self::Tag(_))
     }
 
     /// Returns `true` if self is a [FormatElement::Tag] and [Tag::is_start] is `true`.
     pub const fn is_start_tag(&self) -> bool {
         match self {
-            FormatElement::Tag(tag) => tag.is_start(),
+            Self::Tag(tag) => tag.is_start(),
             _ => false,
         }
     }
@@ -217,7 +211,7 @@ impl FormatElement {
     /// Returns `true` if self is a [FormatElement::Tag] and [Tag::is_end] is `true`.
     pub const fn is_end_tag(&self) -> bool {
         match self {
-            FormatElement::Tag(tag) => tag.is_end(),
+            Self::Tag(tag) => tag.is_end(),
             _ => false,
         }
     }
@@ -225,49 +219,44 @@ impl FormatElement {
     pub const fn is_text(&self) -> bool {
         matches!(
             self,
-            FormatElement::LocatedTokenText { .. }
-                | FormatElement::DynamicText { .. }
-                | FormatElement::StaticText { .. }
+            Self::LocatedTokenText { .. } | Self::DynamicText { .. } | Self::StaticText { .. }
         )
     }
 
     pub const fn is_space(&self) -> bool {
-        matches!(self, FormatElement::Space)
+        matches!(self, Self::Space)
     }
 
     pub const fn is_line(&self) -> bool {
-        matches!(self, FormatElement::Line(_))
+        matches!(self, Self::Line(_))
     }
 }
 
 impl FormatElements for FormatElement {
     fn will_break(&self) -> bool {
         match self {
-            FormatElement::ExpandParent => true,
-            FormatElement::Tag(Tag::StartGroup(group)) => !group.mode().is_flat(),
-            FormatElement::Line(line_mode) => matches!(line_mode, LineMode::Hard | LineMode::Empty),
-            FormatElement::StaticText { text } => text.contains('\n'),
-            FormatElement::DynamicText { text, .. } => text.contains('\n'),
-            FormatElement::LocatedTokenText { slice, .. } => slice.contains('\n'),
-            FormatElement::Interned(interned) => interned.will_break(),
+            Self::ExpandParent => true,
+            Self::Tag(Tag::StartGroup(group)) => !group.mode().is_flat(),
+            Self::Line(line_mode) => matches!(line_mode, LineMode::Hard | LineMode::Empty),
+            Self::StaticText { text } => text.contains('\n'),
+            Self::DynamicText { text, .. } => text.contains('\n'),
+            Self::LocatedTokenText { slice, .. } => slice.contains('\n'),
+            Self::Interned(interned) => interned.will_break(),
             // Traverse into the most flat version because the content is guaranteed to expand when even
             // the most flat version contains some content that forces a break.
-            FormatElement::BestFitting(best_fitting) => best_fitting.most_flat().will_break(),
-            FormatElement::LineSuffixBoundary
-            | FormatElement::Space
-            | FormatElement::Tag(_)
-            | FormatElement::HardSpace => false,
+            Self::BestFitting(best_fitting) => best_fitting.most_flat().will_break(),
+            Self::LineSuffixBoundary | Self::Space | Self::Tag(_) | Self::HardSpace => false,
         }
     }
 
     fn may_directly_break(&self) -> bool {
-        matches!(self, FormatElement::Line(_))
+        matches!(self, Self::Line(_))
     }
 
     fn has_label(&self, label_id: LabelId) -> bool {
         match self {
-            FormatElement::Tag(Tag::StartLabelled(actual)) => *actual == label_id,
-            FormatElement::Interned(interned) => interned.deref().has_label(label_id),
+            Self::Tag(Tag::StartLabelled(actual)) => *actual == label_id,
+            Self::Interned(interned) => interned.deref().has_label(label_id),
             _ => false,
         }
     }
@@ -278,7 +267,7 @@ impl FormatElements for FormatElement {
 
     fn end_tag(&self, kind: TagKind) -> Option<&Tag> {
         match self {
-            FormatElement::Tag(tag) if tag.kind() == kind && tag.is_end() => Some(tag),
+            Self::Tag(tag) if tag.kind() == kind && tag.is_end() => Some(tag),
             _ => None,
         }
     }

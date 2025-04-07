@@ -501,7 +501,7 @@ pub enum HtmlChildListLayout {
 
 impl HtmlChildListLayout {
     const fn is_multiline(&self) -> bool {
-        matches!(self, HtmlChildListLayout::Multiline)
+        matches!(self, Self::Multiline)
     }
 }
 
@@ -559,7 +559,7 @@ impl WordSeparator {
     fn will_break(&self) -> bool {
         matches!(
             self,
-            WordSeparator::EndOfText {
+            Self::EndOfText {
                 is_soft_line_break: false,
                 is_next_element_whitespace_sensitive: _
             }
@@ -570,8 +570,8 @@ impl WordSeparator {
 impl Format<HtmlFormatContext> for WordSeparator {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         match self {
-            WordSeparator::BetweenWords => soft_line_break_or_space().fmt(f),
-            WordSeparator::EndOfText {
+            Self::BetweenWords => soft_line_break_or_space().fmt(f),
+            Self::EndOfText {
                 is_soft_line_break,
                 is_next_element_whitespace_sensitive,
             } => {

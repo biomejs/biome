@@ -12,22 +12,22 @@ use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 impl AnyJsSwitchClause {
     pub fn clause_token(&self) -> SyntaxResult<SyntaxToken> {
         match &self {
-            AnyJsSwitchClause::JsCaseClause(item) => item.case_token(),
-            AnyJsSwitchClause::JsDefaultClause(item) => item.default_token(),
+            Self::JsCaseClause(item) => item.case_token(),
+            Self::JsDefaultClause(item) => item.default_token(),
         }
     }
 
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         match &self {
-            AnyJsSwitchClause::JsCaseClause(item) => item.colon_token(),
-            AnyJsSwitchClause::JsDefaultClause(item) => item.colon_token(),
+            Self::JsCaseClause(item) => item.colon_token(),
+            Self::JsDefaultClause(item) => item.colon_token(),
         }
     }
 
     pub fn consequent(&self) -> JsStatementList {
         match &self {
-            AnyJsSwitchClause::JsCaseClause(item) => item.consequent(),
-            AnyJsSwitchClause::JsDefaultClause(item) => item.consequent(),
+            Self::JsCaseClause(item) => item.consequent(),
+            Self::JsDefaultClause(item) => item.consequent(),
         }
     }
 }
@@ -152,15 +152,15 @@ impl AnyJsVariableDeclaration {
 
     pub fn variable_kind(&self) -> SyntaxResult<JsVariableKind> {
         match self {
-            AnyJsVariableDeclaration::JsForVariableDeclaration(decl) => decl.variable_kind(),
-            AnyJsVariableDeclaration::JsVariableDeclaration(decl) => decl.variable_kind(),
+            Self::JsForVariableDeclaration(decl) => decl.variable_kind(),
+            Self::JsVariableDeclaration(decl) => decl.variable_kind(),
         }
     }
 
     pub fn kind_token(&self) -> SyntaxResult<SyntaxToken> {
         match self {
-            AnyJsVariableDeclaration::JsVariableDeclaration(x) => x.kind(),
-            AnyJsVariableDeclaration::JsForVariableDeclaration(x) => x.kind_token(),
+            Self::JsVariableDeclaration(x) => x.kind(),
+            Self::JsForVariableDeclaration(x) => x.kind_token(),
         }
     }
 }
