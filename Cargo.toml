@@ -192,7 +192,7 @@ globset              = "0.4.16"
 grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
 ignore               = "0.4.23"
-indexmap             = { version = "2.8.0" }
+indexmap             = { version = "2.9.0" }
 insta                = "1.42.2"
 oxc_resolver         = "5.0.1"
 papaya               = "0.2"
