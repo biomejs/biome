@@ -3081,9 +3081,9 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "oxc_resolver"
-version = "5.0.1"
+version = "5.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a5b2485579535cce22b6fb3bf5c854d233bd2792b4f8385ffe35cf27d4c56b2"
+checksum = "daf236dfc2a79b3dbc1c22e32d6cbdef9dcc72446a1c9b0c133b7e19b8fec1e3"
 dependencies = [
  "cfg-if",
  "indexmap",
@@ -3094,7 +3094,7 @@ dependencies = [
  "serde",
  "serde_json",
  "simdutf8",
- "thiserror 1.0.63",
+ "thiserror 2.0.3",
  "tracing",
 ]
 
