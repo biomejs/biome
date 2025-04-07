@@ -5110,7 +5110,7 @@
 				{
 					"description": "Separate type-only imports and exports from regular imports and exports",
 					"type": "string",
-					"enum": ["separated"]
+					"enum": ["typesFirst"]
 				}
 			]
 		},

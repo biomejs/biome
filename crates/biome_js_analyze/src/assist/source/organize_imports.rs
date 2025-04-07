@@ -574,7 +574,7 @@ impl Rule for OrganizeImports {
         let options = ctx.options();
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
-        let mut prev_section = 0;
+        let mut prev_section = None;
         let mut prev_group = 0;
         for item in root.items() {
             if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
@@ -583,11 +583,12 @@ impl Rule for OrganizeImports {
                 if prev_is_distinct || has_detached_leading_comment(item.syntax()) {
                     // The chunk ends, here
                     report_unsorted_chunk(chunk.take(), &mut result);
-                    prev_section = 0;
+                    prev_section = None;
                     prev_group = 0;
                 }
                 let key = ImportKey::new(info, &options.groups, options.type_placement);
-                let blank_line_separated_groups = key.section != prev_section
+                let blank_line_separated_groups = prev_section
+                    .is_some_and(|prev_section| prev_section != key.section)
                     || options
                         .groups
                         .separated_by_blank_line(prev_group, key.group);
@@ -635,13 +636,13 @@ impl Rule for OrganizeImports {
                     if chunk.max_key > key || chunk.max_key.is_mergeable(&key) {
                         chunk.slot_indexes.end = key.slot_index + 1;
                     } else {
-                        prev_section = key.section;
+                        prev_section = Some(key.section);
                         prev_group = key.group;
                         chunk.max_key = key;
                     }
                 } else {
                     // New chunk
-                    prev_section = key.section;
+                    prev_section = Some(key.section);
                     prev_group = key.group;
                     chunk = Some(ChunkBuilder::new(key));
                 }
@@ -822,7 +823,7 @@ impl Rule for OrganizeImports {
                         i += 1;
                     }
                     // Swap the items to obtain a sorted chunk
-                    let mut prev_section = 0;
+                    let mut prev_section = None;
                     let mut prev_group: u16 = 0;
                     for (
                         index,
@@ -840,7 +841,8 @@ impl Rule for OrganizeImports {
                         };
                         let mut new_item = new_item.into_syntax();
                         let old_item = old_item.into_node()?;
-                        let blank_line_separated_groups = prev_section != key.section
+                        let blank_line_separated_groups = prev_section
+                            .is_some_and(|prev_section| prev_section != key.section)
                             || options
                                 .groups
                                 .separated_by_blank_line(prev_group, key.group);
@@ -892,7 +894,7 @@ impl Rule for OrganizeImports {
                             new_item = new_item.prepend_trivia_pieces(newline)?;
                         }
                         mutation.replace_element_discard_trivia(old_item.into(), new_item.into());
-                        prev_section = key.section;
+                        prev_section = Some(key.section);
                         prev_group = key.group;
                     }
                 }
@@ -934,7 +936,7 @@ pub enum TypePlacement {
     #[default]
     Mixed,
     /// Separate type-only imports and exports from regular imports and exports
-    Separated,
+    TypesFirst,
 }
 
 #[derive(Debug)]

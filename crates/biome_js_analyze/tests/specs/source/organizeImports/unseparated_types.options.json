@@ -6,7 +6,7 @@
 				"organizeImports": {
 					"level": "on",
 					"options": {
-                        "typePlacement": "separated",
+                        "typePlacement": "typesFirst",
                         "groups": [
                             ":BUN:",
                             ":NODE:",
