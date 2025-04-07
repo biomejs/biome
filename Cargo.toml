@@ -210,7 +210,7 @@ serde                = { version = "1.0.219", features = ["derive"] }
 serde_ini            = "0.2.0"
 serde_json           = "1.0.140"
 similar              = "2.7.0"
-smallvec             = { version = "1.14.0", features = ["union", "const_new", "serde"] }
+smallvec             = { version = "1.15.0", features = ["union", "const_new", "serde"] }
 static_assertions    = "1.1"
 syn                  = "1.0.109"
 termcolor            = "1.4.1"
