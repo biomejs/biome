@@ -1,0 +1,15 @@
+{
+	"$schema": "../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+                        "typePlacement": "typesFirst"
+					}
+				}
+			}
+		}
+	}
+}

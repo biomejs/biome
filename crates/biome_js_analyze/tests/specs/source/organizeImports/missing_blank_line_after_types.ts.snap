@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: missing_blank_line_after_types.ts
+---
+# Input
+```ts
+import type T from "mod";
+import D from "mod";
+
+```
+
+# Actions
+```diff
+@@ -1,2 +1,3 @@
+ import type T from "mod";
++
+ import D from "mod";
+
+```

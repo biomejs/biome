@@ -6,6 +6,7 @@ use crate::globals::is_node_builtin_module;
 
 use super::{
     comparable_token::ComparableToken,
+    import_key::ImportInfo,
     import_source::{ImportSource, ImportSourceKind},
 };
 
@@ -23,8 +24,8 @@ impl ImportGroups {
     /// Returns the index of the first group containing `candidate`.
     /// If no group contains `candidate`, then the returned value corresponds to the index of the implicit group.
     /// The index of the implicit group correspond to the number of groups.
-    pub fn index(&self, source: &ImportSource<ComparableToken>) -> u16 {
-        let candidate = ImportSourceCandidate::new(source);
+    pub fn index(&self, info: &ImportInfo) -> u16 {
+        let candidate = ImportSourceCandidate::new(&info.source);
         self.0
             .iter()
             .position(|group| group.contains(&candidate))
