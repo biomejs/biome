@@ -34,6 +34,7 @@ declare_source_rule! {
     /// Imports and exports are first separated into chunks, before being sorted.
     /// Imports or exports of a chunk are then grouped according to the user-defined groups.
     /// Within a group, imports are sorted using a built-in order that depends on the import/export kind, whether the import/export has attributes and the source being imported from.
+    /// **source** is also often called **specifier** in the JavaScript ecosystem.
     ///
     /// ```js,ignore
     /// import A from "@my/lib" with { "attribute1": "value" };
@@ -45,21 +46,20 @@ declare_source_rule! {
     ///   kind         source                attributes
     /// ```
     ///
-    /// Note that **source** is also often called **specifier** in the JavaScript ecosystem.
     ///
-    ///
-    /// ## Chunk of imports and chunks of exports
+    /// ## Chunk of imports and chunk of exports
     ///
     /// A **chunk** is a sequence of adjacent imports or exports.
     /// A chunk contains only imports or exports, not both at the same time.
     /// The following example includes two chunks.
     /// The first chunk consists of the three imports and the second chunk consists of the three exports.
-    /// The first `export` that appears ends the first chunk and starts a new one.
     ///
     /// ```js,ignore
+    /// // chunk 1
     /// import A from "a";
     /// import * as B from "b";
     /// import { C } from "c";
+    /// // chunk 2
     /// export * from "d";
     /// export * as F from "e";
     /// export { F } from "f";
@@ -203,22 +203,21 @@ declare_source_rule! {
     ///
     /// If two imports or exports share the same source and are in the same chunk, then they are ordered according to their kind as follows:
     ///
-    /// 1. Default type import
-    /// 2. Default import
-    /// 3. Combined default and namespace import
-    /// 4. Combined default and named import
-    /// 5. Namespace type import / Namespace type export
-    /// 6. Namespace import / Namespace export
-    /// 7. Named type import / Named type export
+    /// 1. Namespace type import / Namespace type export
+    /// 2. Default type import
+    /// 3. Named type import / Named type export
+    /// 4. Namespace import / Namespace export
+    /// 5. Combined default and namespace import
+    /// 6. Default import
+    /// 7. Combined default and named import
     /// 8. Named import / Named export
     ///
-    /// Also, import and exports with attributes are always placed first.
+    /// Imports and exports with attributes are always placed first.
     /// For example, the following code...
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,ignore
     /// import * as namespaceImport from "same-source";
     /// import type * as namespaceTypeImport from "same-source";
-    /// import { namedImport } from "same-source";
     /// import type { namedTypeImport } from "same-source";
     /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
     /// import defaultNamedCombined, { namedCombined } from "same-source";
@@ -231,18 +230,17 @@ declare_source_rule! {
     ///
     /// ```ts,ignore
     /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
-    /// import type defaultTypeImport from "same-source";
-    /// import defaultImport from "same-source";
-    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
-    /// import defaultNamedCombined, { namedCombined } from "same-source";
     /// import type * as namespaceTypeImport from "same-source";
-    /// import * as namespaceImport from "same-source";
+    /// import type defaultTypeImport from "same-source";
     /// import type { namedTypeImport } from "same-source";
-    /// import { namedImport } from "same-source";
+    /// import * as namespaceImport from "same-source";
+    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
+    /// import defaultImport from "same-source";
+    /// import defaultNamedCombined, { namedCombined } from "same-source";
     /// ```
     ///
     /// This default order cannot be changed.
-    /// However, users can still customize how imports and exports are sorted using the concept of groups.
+    /// However, users can still customize how imports and exports are sorted using the concept of groups as explained in the following section.
     ///
     ///
     /// ## Import and export groups
@@ -256,7 +254,8 @@ declare_source_rule! {
     ///
     /// - A predefined group matcher, or
     /// - A glob pattern, or
-    /// - A list of glob patterns.
+    /// - An object matcher, or
+    /// - A list of glob patterns, predefined group matchers, and object matchers.
     ///
     /// Predefined group matchers are strings in `CONSTANT_CASE` prefixed and suffixed by `:`.
     /// The sorter provides several predefined group matchers:
@@ -264,13 +263,13 @@ declare_source_rule! {
     /// - `:ALIAS:`: sources starting with `#`, `@/`, `~`, or `%`.
     /// - `:BUN:`: sources starting with the protocol `bun:` or that correspond to a built-in Bun module such as `bun`.
     /// - `:NODE:`: sources starting with the protocol `node:` or that correspond to a built-in Node.js module such as `fs` or `path`.
-    /// - `:PACKAGE:`: Scoped and bare packages.
-    /// - `:PACKAGE_WITH_PROTOCOL:`: Scoped and bare packages with a protocol.
+    /// - `:PACKAGE:`: scoped and bare packages.
+    /// - `:PACKAGE_WITH_PROTOCOL:`: scoped and bare packages with a protocol.
     /// - `:PATH:`: absolute and relative paths.
-    /// - `:URL:`
+    /// - `:URL:`: sources starting with `https://` and `http://`.
     ///
     /// Let's take an example.
-    /// In the default configuration, Node.js modules without the `node:` protocols are separated from those with a protocol.
+    /// In the default configuration, Node.js modules without the `node:` protocol are separated from those with a protocol.
     /// To groups them together, you can use the predefined group `:NODE:`.
     /// Given the following configuration...
     ///
@@ -313,10 +312,10 @@ declare_source_rule! {
     ///
     /// ```js,ignore
     /// import data from "https://example.org";
-    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
-    /// import path from "node:path";
     /// import fs from "fs";
+    /// import path from "node:path";
     /// import { test } from "node:test";
+    /// import scopedLibUsingJsr from "jsr:@scoped/lib";
     /// import scopedLib from "@scoped/lib";
     /// import lib from "lib";
     /// import internal from "#alias";
@@ -327,7 +326,7 @@ declare_source_rule! {
     /// Note that all imports that don't match a group matcher are always placed at the end.
     ///
     ///
-    /// Groups matchers can also be glob patterns and list of glob patterns.
+    /// Group matchers can also be glob patterns and list of glob patterns.
     /// Glob patterns select imports and exports with a source that matches the pattern.
     /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/speciaal` and the other that gathers imports/exports starting with `@/`.
     ///
@@ -371,10 +370,40 @@ declare_source_rule! {
     /// The prefix `!` indicates an exception.
     /// You can create exceptions of exceptions by following an exception by a regular glob pattern.
     /// For example `["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**", "@my/lib/special/*/accepted/**"]` allows you to accepts all sources matching `@my/lib/special/*/accepted/**`.
+    /// Note that the predefined groups can also be negated. `!:NODE:` matches all sources that don't match `:NODE:`.
     /// For more details on the supported glob patterns, see the dedicated section.
     ///
-    /// For now, it is not possible to mix predefined group matchers and glob patterns inside a list of globs.
-    /// This is a limitation that we are working to remove.
+    /// Finally, group matchers can be object matchers.
+    /// An object matcher allows to match type-only imports and exports.
+    ///
+    /// Given the following configuration:
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "type": false, "source": ["@my/lib", "@my/lib/**"] },
+    ///             ["@my/lib", "@my/lib/**"]
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The following code:
+    ///
+    /// ```ts,ignore
+    /// import type { T } from "@my/lib";
+    /// import { V } from "@my/lib";
+    /// ```
+    ///
+    /// is sorted as follows:
+    ///
+    /// ```ts,ignore
+    /// import { V } from "@my/lib";
+    /// import type { T } from "@my/lib";
+    /// ```
+    ///
+    /// The object matcher `{ "type": false, "source": ["@my/lib", "@my/lib/**"] }` match against imports and exports without the `type` keyword with a source that matches one of the glob pattern of the list `["@my/lib", "@my/lib/**"]`.
     ///
     /// The sorter allows the separation of two groups with a blank line using the predefined string `:BLANK_LINE:`.
     /// Given the following configuration...
@@ -383,7 +412,7 @@ declare_source_rule! {
     /// {
     ///     "options": {
     ///         "groups": [
-    ///             ":NODE:",
+    ///             [":BUN:", ":NODE:"],
     ///             ":BLANK_LINE:",
     ///             ["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**"],
     ///             "@/**"
@@ -395,10 +424,11 @@ declare_source_rule! {
     /// ...the following code...
     ///
     /// ```js,ignore
+    /// import test from "bun:test";
     /// import path from "node:path";
     /// import lib from "@my/lib";
-    /// import test from "@my/lib/path";
-    /// import path from "@my/lib/special";
+    /// import libPath from "@my/lib/path";
+    /// import libSpecial from "@my/lib/special";
     /// import aliased from "@/alias";
     /// ```
     ///
@@ -413,6 +443,21 @@ declare_source_rule! {
     /// import path from "@my/lib/special";
     /// ```
     ///
+    /// Groups are matched in order.
+    /// This means that one group matcher can shadow succeeding groups.
+    /// For example, in the following configuration, the group matcher `:URL:` is never matched because all imports and exports match the first matcher `**`.
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             "**",
+    ///             ":URL:"
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
     ///
     /// ## Comment handling
     ///
@@ -425,7 +470,7 @@ declare_source_rule! {
     ///
     /// For example, the following code...
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,ignore
     /// // Copyright notice and file header comment
     /// import F from "f";
     /// // Attached comment for `e`
@@ -461,6 +506,31 @@ declare_source_rule! {
     /// ```
     ///
     ///
+    /// ## Import and export merging
+    ///
+    /// The organizer also merges imports and exports that can be merged.
+    ///
+    /// For example, the following code:
+    ///
+    /// ```ts,ignore
+    /// import type { T1 } from "package";
+    /// import type { T2 } from "package";
+    /// import * as ns from "package";
+    /// import D1 from "package";
+    /// import D2 from "package";
+    /// import { A } from "package";
+    /// import { B } from "package";
+    /// ```
+    ///
+    /// is merged as follows:
+    ///
+    /// ```ts,ignore
+    /// import type { T1, T2 } from "package";
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B } from "package";
+    /// ```
+    ///
+    ///
     /// ## Named imports, named exports and attributes sorting
     ///
     /// The sorter also sorts named imports, named exports, as well as attributes.
@@ -468,7 +538,7 @@ declare_source_rule! {
     ///
     /// The following code...
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,ignore
     /// import { a, b, A, B, c10, c9 } from "a";
     ///
     /// export { a, b, A, B, c10, c9 } from "a";
@@ -519,6 +589,37 @@ declare_source_rule! {
     ///
     ///   `file.js` matches `!*.test.js`.
     ///   `src/file.js` matches `!*.js` because the source contains several segments.
+    ///
+    ///
+    /// ## Common configurations
+    ///
+    /// This section provides some examples of common configurations.
+    ///
+    /// ### Placing `import type` and `export type` at the start of the chunks
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "type": true }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Note that you can want to use the lint rule [`useImportType`](https://next.biomejs.dev/linter/rules/use-import-type/) and its [`style`](https://next.biomejs.dev/linter/rules/use-import-type/#style) to enforce the use of `import type` instead of `import { type }`.
+    ///
+    /// ### Placing `import type` and `export type` at the end of the chunks
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "groups": [
+    ///             { "type": false }
+    ///         ]
+    ///     }
+    /// }
+    /// ```
     ///
     pub OrganizeImports {
         version: "1.0.0",
