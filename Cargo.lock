@@ -1155,10 +1155,8 @@ dependencies = [
 name = "biome_module_graph"
 version = "0.0.1"
 dependencies = [
- "biome_css_semantic",
  "biome_deserialize",
  "biome_fs",
- "biome_graphql_semantic",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_js_type_info",
