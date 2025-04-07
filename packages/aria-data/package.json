@@ -6,10 +6,10 @@
   "license": "MIT OR Apache-2.0",
   "author": "Victorien Elvinger",
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.14.0"
   },
   "type": "module",
   "dependencies": {
-    "happy-dom": "^15.11.7"
+    "happy-dom": "^17.4.4"
   }
 }
