@@ -63,10 +63,6 @@ impl JsdocComment {
             && text.as_bytes().get(3).is_some_and(|c| *c != b'*')
             && text.ends_with("*/")
     }
-
-    fn try_from_comment_text(text: &str) -> Option<Self> {
-        Self::text_is_jsdoc_comment(text).then(|| Self::from_comment_text(text))
-    }
 }
 
 impl AsRef<str> for JsdocComment {
@@ -109,7 +105,9 @@ impl TryFrom<JsSyntaxToken> for JsdocComment {
             .rev()
             .find_map(|trivia| match trivia.kind() {
                 TriviaPieceKind::MultiLineComment | TriviaPieceKind::SingleLineComment => {
-                    JsdocComment::try_from_comment_text(trivia.text())
+                    let text = trivia.text();
+                    JsdocComment::text_is_jsdoc_comment(text)
+                        .then(|| JsdocComment::from_comment_text(text))
                 }
                 _ => None,
             })

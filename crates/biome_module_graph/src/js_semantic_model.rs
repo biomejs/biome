@@ -88,6 +88,10 @@ pub enum JsDeclarationKind {
 
 impl JsDeclarationKind {
     /// Returns `true` for any declaration that _may_ be a type.
+    ///
+    /// The main reason why we can't be sure whether something is a value or a
+    /// type is the `Import` variant, for which we don't know the kind of what
+    /// we're importing.
     fn might_be_type(&self) -> bool {
         matches!(
             self,
@@ -101,6 +105,10 @@ impl JsDeclarationKind {
     }
 
     /// Returns `true` for any declaration that _may_ be a value.
+    ///
+    /// The main reason why we can't be sure whether something is a value or a
+    /// type is the `Import` variant, for which we don't know the kind of what
+    /// we're importing.
     fn might_be_value(&self) -> bool {
         matches!(
             self,
@@ -124,6 +132,7 @@ impl JsSemanticModelBuilder {
 
     pub fn push_node(&mut self, node: &JsSyntaxNode) {
         if let Some(import) = AnyJsImportClause::cast_ref(node) {
+            // TODO: Handle CommonJS imports too.
             self.push_import(import);
         } else if let Some(decl) = AnyJsDeclaration::cast_ref(node) {
             self.push_declaration(decl);
