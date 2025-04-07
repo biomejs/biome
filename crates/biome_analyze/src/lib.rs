@@ -553,8 +553,6 @@ where
         text: &str,
         range: TextRange,
     ) -> ControlFlow<Break> {
-        let mut has_suppressions = false;
-
         for result in (self.parse_suppression_comment)(text, range) {
             let suppression = match result {
                 Ok(kind) => kind,
@@ -580,15 +578,13 @@ where
                 continue;
             }
 
-            has_suppressions = true;
-        }
+            if let AnalyzerSuppressionVariant::Line = suppression.variant {
+                // Legacy varient - add the next line to a line comment
+                let line_index = *self.line_index + 1;
 
-        // Suppression comments apply to the next line
-        if has_suppressions {
-            let line_index = *self.line_index + 1;
-
-            self.suppressions
-                .overlap_last_suppression(line_index, range);
+                self.suppressions
+                    .overlap_last_suppression(line_index, range);
+            }
         }
 
         ControlFlow::Continue(())
