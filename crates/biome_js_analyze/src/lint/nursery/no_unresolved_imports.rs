@@ -99,7 +99,7 @@ impl Rule for NoUnresolvedImports {
         };
 
         let node = ctx.query();
-        let Some(import) = module_info.get_import_by_node(node) else {
+        let Some(import) = module_info.get_import_by_js_node(node) else {
             return Vec::new();
         };
 

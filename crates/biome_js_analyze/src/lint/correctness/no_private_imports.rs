@@ -77,12 +77,6 @@ declare_lint_rule! {
     ///
     /// ## Known Limitations
     ///
-    /// * This rule currently only looks at the JSDoc comments that are attached
-    ///   to the _`export` statement_ nearest to the symbol's definition. If the
-    ///   symbol isn't exported in the same statement as in which it is defined,
-    ///   the visibility as specified in the `export` statement is used, not
-    ///   that of the symbol definition. Re-exports cannot (currently) override
-    ///   the visibility from the original `export`.
     /// * This rule only applies to imports from JavaScript and TypeScript
     ///   files. Imports for resources such as images or CSS files are exempted
     ///   regardless of the default visibility setting.
@@ -222,7 +216,7 @@ impl Rule for NoPrivateImports {
 
         let node = ctx.query();
         let Some(target_path) = module_info
-            .get_import_by_node(node)
+            .get_import_by_js_node(node)
             .and_then(|import| import.resolved_path.as_ref().ok())
         else {
             return Vec::new();

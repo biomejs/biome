@@ -4,9 +4,10 @@ use biome_js_syntax::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsClassMember, AnyJsDeclarationClause,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsLiteralExpression,
     AnyJsObjectMember, AnyJsParameter, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
-    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, JsObjectExpression, JsParameters,
-    JsSyntaxToken, TsReferenceType, TsReturnTypeAnnotation, TsTypeAnnotation, TsTypeArguments,
-    TsTypeParameter, TsTypeParameters, TsTypeofType,
+    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, JsArrowFunctionExpression,
+    JsFunctionDeclaration, JsFunctionExpression, JsObjectExpression, JsParameters, JsSyntaxToken,
+    JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration,
+    TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters, TsTypeofType,
 };
 use biome_rowan::{SyntaxResult, Text, TokenText};
 
@@ -14,7 +15,7 @@ use crate::{
     AssertsReturnType, CallSignatureTypeMember, Class, ClassMember, Constructor,
     ConstructorTypeMember, Function, FunctionParameter, GenericTypeParameter, Intersection,
     Literal, MethodTypeMember, Object, PredicateReturnType, PropertyTypeMember, ReturnType, Tuple,
-    TupleElementType, Type, TypeMember, TypeOperator, TypeOperatorType, TypeReference,
+    TupleElementType, Type, TypeAlias, TypeMember, TypeOperator, TypeOperatorType, TypeReference,
     TypeReferenceQualifier, Union,
 };
 
@@ -84,10 +85,9 @@ impl Type {
                 // TODO: Handle module declarations.
                 Self::Unknown
             }
-            AnyJsDeclarationClause::TsTypeAliasDeclaration(decl) => decl
-                .ty()
-                .map(|ty| Self::Alias(Box::new(Self::from_any_ts_type(&ty))))
-                .unwrap_or_default(),
+            AnyJsDeclarationClause::TsTypeAliasDeclaration(decl) => {
+                Self::from_ts_type_alias_declaration(decl).unwrap_or_default()
+            }
         }
     }
 
@@ -198,42 +198,9 @@ impl Type {
                     .collect(),
             ))),
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
-                Type::Function(Box::new(Function {
-                    is_async: expr.async_token().is_some(),
-                    type_parameters: generic_params_from_ts_type_params(expr.type_parameters()),
-                    name: None,
-                    parameters: match expr.parameters() {
-                        Ok(AnyJsArrowFunctionParameters::AnyJsBinding(binding)) => {
-                            Box::new([FunctionParameter {
-                                name: binding
-                                    .as_js_identifier_binding()
-                                    .and_then(|binding| text_from_token(binding.name_token())),
-                                ty: Type::Unknown,
-                                is_optional: false,
-                                is_rest: false,
-                            }])
-                        }
-                        Ok(AnyJsArrowFunctionParameters::JsParameters(params)) => {
-                            function_params_from_js_params(Ok(params))
-                        }
-                        Err(_) => Box::default(),
-                    },
-                    return_type: return_type_from_annotation(expr.return_type_annotation())
-                        .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
-                }))
+                Type::from_js_arrow_function_expression(expr)
             }
-            AnyJsExpression::JsFunctionExpression(expr) => Type::Function(Box::new(Function {
-                is_async: expr.async_token().is_some(),
-                type_parameters: generic_params_from_ts_type_params(expr.type_parameters()),
-                name: expr
-                    .id()
-                    .as_ref()
-                    .and_then(|binding| binding.as_js_identifier_binding())
-                    .and_then(|binding| text_from_token(binding.name_token())),
-                parameters: function_params_from_js_params(expr.parameters()),
-                return_type: return_type_from_annotation(expr.return_type_annotation())
-                    .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
-            })),
+            AnyJsExpression::JsFunctionExpression(expr) => Type::from_js_function_expression(expr),
             _ => {
                 // TODO: Much
                 Type::Unknown
@@ -411,6 +378,63 @@ impl Type {
         ty.map(|ty| Self::from_any_ts_type(&ty)).unwrap_or_default()
     }
 
+    pub fn from_js_arrow_function_expression(expr: &JsArrowFunctionExpression) -> Self {
+        Type::Function(Box::new(Function {
+            is_async: expr.async_token().is_some(),
+            type_parameters: generic_params_from_ts_type_params(expr.type_parameters()),
+            name: None,
+            parameters: match expr.parameters() {
+                Ok(AnyJsArrowFunctionParameters::AnyJsBinding(binding)) => {
+                    Box::new([FunctionParameter {
+                        name: binding
+                            .as_js_identifier_binding()
+                            .and_then(|binding| text_from_token(binding.name_token())),
+                        ty: Type::Unknown,
+                        is_optional: false,
+                        is_rest: false,
+                    }])
+                }
+                Ok(AnyJsArrowFunctionParameters::JsParameters(params)) => {
+                    function_params_from_js_params(Ok(params))
+                }
+                Err(_) => Box::default(),
+            },
+            return_type: return_type_from_annotation(expr.return_type_annotation())
+                .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
+        }))
+    }
+
+    pub fn from_js_function_declaration(decl: &JsFunctionDeclaration) -> Self {
+        Self::Function(Box::new(Function {
+            is_async: decl.async_token().is_some(),
+            type_parameters: generic_params_from_ts_type_params(decl.type_parameters()),
+            name: decl
+                .id()
+                .ok()
+                .as_ref()
+                .and_then(|binding| binding.as_js_identifier_binding())
+                .and_then(|binding| text_from_token(binding.name_token())),
+            parameters: function_params_from_js_params(decl.parameters()),
+            return_type: return_type_from_annotation(decl.return_type_annotation())
+                .unwrap_or_else(|| return_type_from_async_token(decl.async_token())),
+        }))
+    }
+
+    pub fn from_js_function_expression(expr: &JsFunctionExpression) -> Self {
+        Type::Function(Box::new(Function {
+            is_async: expr.async_token().is_some(),
+            type_parameters: generic_params_from_ts_type_params(expr.type_parameters()),
+            name: expr
+                .id()
+                .as_ref()
+                .and_then(|binding| binding.as_js_identifier_binding())
+                .and_then(|binding| text_from_token(binding.name_token())),
+            parameters: function_params_from_js_params(expr.parameters()),
+            return_type: return_type_from_annotation(expr.return_type_annotation())
+                .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
+        }))
+    }
+
     pub fn from_js_object_expression(expr: &JsObjectExpression) -> Self {
         Self::Object(Box::new(Object(
             expr.members()
@@ -422,6 +446,18 @@ impl Type {
                 })
                 .collect(),
         )))
+    }
+
+    pub fn from_js_variable_declarator(decl: &JsVariableDeclarator) -> Option<Self> {
+        let ty = match decl.variable_annotation() {
+            Some(annotation) => {
+                let annotation = annotation.type_annotation().ok()??;
+                Type::from_any_ts_type(&annotation.ty().ok()?)
+            }
+            None => Type::from_any_js_expression(&decl.initializer()?.expression().ok()?),
+        };
+
+        Some(ty)
     }
 
     pub fn from_ts_reference_type(ty: &TsReferenceType) -> Self {
@@ -449,6 +485,17 @@ impl Type {
                 }
             })
             .unwrap_or_default()
+    }
+
+    pub fn from_ts_type_alias_declaration(decl: &TsTypeAliasDeclaration) -> Option<Self> {
+        let ty = Self::Alias(Box::new(TypeAlias {
+            ty: Self::from_any_ts_type(&decl.ty().ok()?),
+            type_parameters: GenericTypeParameter::params_from_ts_type_parameters(
+                &decl.type_parameters()?,
+            ),
+        }));
+
+        Some(ty)
     }
 
     pub fn from_ts_typeof_type(ty: &TsTypeofType) -> Self {

@@ -8,7 +8,9 @@ expression: data.exports
     ): Own(
         OwnExport {
             jsdoc_comment: Some(
-                "TODO: No types can be detected on these yet.",
+                JsdocComment(
+                    "TODO: No types can be detected on these yet.",
+                ),
             ),
             ty: Unknown,
         },
@@ -18,7 +20,9 @@ expression: data.exports
     ): Own(
         OwnExport {
             jsdoc_comment: Some(
-                "TODO: No types can be detected on these yet.",
+                JsdocComment(
+                    "TODO: No types can be detected on these yet.",
+                ),
             ),
             ty: Unknown,
         },
@@ -28,7 +32,9 @@ expression: data.exports
     ): Own(
         OwnExport {
             jsdoc_comment: Some(
-                "@package",
+                JsdocComment(
+                    "@package",
+                ),
             ),
             ty: Function(
                 Function {
@@ -76,7 +82,9 @@ expression: data.exports
     ): Own(
         OwnExport {
             jsdoc_comment: Some(
-                "TODO: No types can be detected on these yet.",
+                JsdocComment(
+                    "TODO: No types can be detected on these yet.",
+                ),
             ),
             ty: Unknown,
         },
@@ -86,7 +94,9 @@ expression: data.exports
     ): Own(
         OwnExport {
             jsdoc_comment: Some(
-                "@public\n@returns {JSX.Element}",
+                JsdocComment(
+                    "@public\n@returns {JSX.Element}",
+                ),
             ),
             ty: Function(
                 Function {
@@ -124,7 +134,9 @@ expression: data.exports
     ): Own(
         OwnExport {
             jsdoc_comment: Some(
-                "TODO: No types can be detected on these yet.",
+                JsdocComment(
+                    "TODO: No types can be detected on these yet.",
+                ),
             ),
             ty: Unknown,
         },
@@ -133,7 +145,51 @@ expression: data.exports
         "foo",
     ): Own(
         OwnExport {
+            jsdoc_comment: Some(
+                JsdocComment(
+                    "@returns {string}",
+                ),
+            ),
+            ty: Function(
+                Function {
+                    is_async: false,
+                    type_parameters: [],
+                    name: Some(
+                        Borrowed(
+                            "foo",
+                        ),
+                    ),
+                    parameters: [],
+                    return_type: Type(
+                        Unknown,
+                    ),
+                },
+            ),
+        },
+    ),
+    Borrowed(
+        "qux",
+    ): Own(
+        OwnExport {
             jsdoc_comment: None,
+            ty: Literal(
+                Number(
+                    Borrowed(
+                        "1",
+                    ),
+                ),
+            ),
+        },
+    ),
+    Borrowed(
+        "quz",
+    ): Own(
+        OwnExport {
+            jsdoc_comment: Some(
+                JsdocComment(
+                    "@private",
+                ),
+            ),
             ty: Unknown,
         },
     ),
