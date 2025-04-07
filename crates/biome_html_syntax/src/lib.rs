@@ -1,5 +1,6 @@
 #[macro_use]
 mod generated;
+pub mod element_ext;
 mod file_source;
 mod syntax_node;
 

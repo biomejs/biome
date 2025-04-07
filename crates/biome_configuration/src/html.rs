@@ -3,7 +3,9 @@ use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth,
 };
-use biome_html_formatter::context::{IndentScriptAndStyle, WhitespaceSensitivity};
+use biome_html_formatter::context::{
+    IndentScriptAndStyle, SelfCloseVoidElements, WhitespaceSensitivity,
+};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -104,4 +106,13 @@ pub struct HtmlFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_script_and_style: Option<IndentScriptAndStyle>,
+
+    /// Whether void elements should be self-closed. Defaults to never.
+    #[bpaf(
+        long("html-formatter-self-close-void-elements"),
+        argument("always|never"),
+        optional
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub self_close_void_elements: Option<SelfCloseVoidElements>,
 }

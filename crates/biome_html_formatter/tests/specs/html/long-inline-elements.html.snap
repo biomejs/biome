@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: long-inline-elements.html
+snapshot_kind: text
 ---
 # Input
 
@@ -38,6 +39,7 @@ Attribute Position: Auto
 Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
+Self close void elements: never
 -----
 
 ```html
