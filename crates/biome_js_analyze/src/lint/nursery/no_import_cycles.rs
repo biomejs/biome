@@ -98,7 +98,7 @@ impl Rule for NoImportCycles {
         let module_info = ctx.module_info_for_path(ctx.file_path())?;
 
         let node = ctx.query();
-        let import = module_info.get_import_by_node(node)?;
+        let import = module_info.get_import_by_js_node(node)?;
         let resolved_path = import.resolved_path.as_ref().ok()?;
 
         let imports = ctx.module_info_for_path(resolved_path)?;

@@ -1174,6 +1174,7 @@ dependencies = [
  "papaya",
  "rustc-hash 2.1.1",
  "serde_json",
+ "static_assertions",
 ]
 
 [[package]]

@@ -3,8 +3,11 @@ use biome_fs::{MemoryFileSystem, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
 use biome_package::{Dependencies, PackageJson, Version};
+use biome_rowan::Text;
 use biome_test_utils::get_added_paths;
 use insta::assert_debug_snapshot;
+
+use crate::{Import, jsdoc_comment::JsdocComment, module_info::ReexportAll};
 
 use super::*;
 
@@ -221,17 +224,22 @@ fn test_resolve_exports() {
         "/src/index.ts".into(),
         r#"
             /**
-             * FIXME: This does not yet get detected.
+             * @returns {string}
              */
             function foo() {}
 
-            export { foo };
+            export { foo, qux };
             
             /** @package */
             export function bar() {}
 
+            /** @private */
+            export const quz = {};
+
             /* @ignored because of incorrect amount of asterisks */
             export async function baz() {}
+
+            var qux = 1;
 
             /**
              * TODO: No types can be detected on these yet.
@@ -246,11 +254,19 @@ fn test_resolve_exports() {
 
             export * from "./reexports";
             export { ohNo as "oh\x0Ano" } from "./renamed-reexports";
+
+            /**
+             * Hello, namespace 2.
+             */
+            export * as renamed2 from "./renamed-reexports";
         "#,
     );
     fs.insert(
         "/src/reexports.ts".into(),
         r#"
+            /**
+             * Hello, namespace 1.
+             */
             export * as renamed from "./renamed-reexports";
         "#,
     );
@@ -289,7 +305,18 @@ fn test_resolve_exports() {
     assert_eq!(
         data.exports.remove(&Text::Static("oh\nno")),
         Some(Export::Reexport(Import {
-            resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts"))
+            resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts")),
+        }))
+    );
+    assert_eq!(
+        data.exports.remove(&Text::Static("renamed2")),
+        Some(Export::ReexportAll(ReexportAll {
+            import: Import {
+                resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts")),
+            },
+            jsdoc_comment: Some(JsdocComment::from_comment_text(
+                "/**\n* Hello, namespace 2.\n*/"
+            )),
         }))
     );
 
@@ -299,8 +326,9 @@ fn test_resolve_exports() {
         data.blanket_reexports,
         vec![ReexportAll {
             import: Import {
-                resolved_path: Ok(Utf8PathBuf::from("/src/reexports.ts"))
-            }
+                resolved_path: Ok(Utf8PathBuf::from("/src/reexports.ts")),
+            },
+            jsdoc_comment: None
         }]
     );
 
@@ -313,7 +341,10 @@ fn test_resolve_exports() {
         Some(&Export::ReexportAll(ReexportAll {
             import: Import {
                 resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts"))
-            }
+            },
+            jsdoc_comment: Some(JsdocComment::from_comment_text(
+                "/**\n* Hello, namespace 1.\n*/"
+            ))
         }))
     );
 }

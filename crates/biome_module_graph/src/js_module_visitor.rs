@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsImportLike, AnyJsModuleSource, AnyJsObjectBindingPatternMember,
@@ -6,23 +8,25 @@ use biome_js_syntax::{
     JsVariableDeclaratorList, unescape_js_string,
 };
 use biome_js_type_info::Type;
-use biome_rowan::{AstNode, Text, TokenText, TriviaPieceKind, WalkEvent};
+use biome_rowan::{AstNode, Text, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{ResolveError, ResolverGeneric};
 
 use crate::{
-    module_graph::{Export, Import, ModuleInfo, OwnExport, ReexportAll},
+    js_semantic_model::{JsDeclarationKind, JsSemanticModel, JsSemanticModelBuilder},
+    jsdoc_comment::JsdocComment,
+    module_info::{Export, Import, ModuleInfo, OwnExport, ReexportAll},
     resolver_cache::ResolverCache,
 };
 
-pub(crate) struct ModuleVisitor<'a> {
+pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
     directory: &'a Utf8Path,
     resolver: &'a ResolverGeneric<ResolverCache<'a>>,
-    data: ModuleInfo,
+    info: ModuleInfo,
 }
 
-impl<'a> ModuleVisitor<'a> {
+impl<'a> JsModuleVisitor<'a> {
     pub fn new(
         root: AnyJsRoot,
         directory: &'a Utf8Path,
@@ -32,26 +36,120 @@ impl<'a> ModuleVisitor<'a> {
             root,
             directory,
             resolver,
-            data: Default::default(),
+            info: Default::default(),
         }
     }
 
-    pub fn collect_data(mut self) -> ModuleInfo {
+    pub fn collect_info(mut self) -> ModuleInfo {
+        let mut semantic_builder = JsSemanticModelBuilder::default();
+
         let iter = self.root.syntax().preorder();
         for event in iter {
             match event {
                 WalkEvent::Enter(node) => {
+                    semantic_builder.push_node(&node);
+
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import);
                     } else if let Some(export) = JsExport::cast_ref(&node) {
                         self.visit_export(export);
                     }
                 }
-                WalkEvent::Leave(_) => {}
+                WalkEvent::Leave(_node) => {}
             }
         }
 
-        self.data
+        // Make a second pass over all registered exports, and use the semantic
+        // model to see if it allows us to resolve any exports symbols that we
+        // couldn't assign a type to initially.
+        self.collect_uninferred_exports_from_semantic_model(semantic_builder.build());
+
+        self.info
+    }
+
+    fn collect_uninferred_exports_from_semantic_model(&mut self, semantic_model: JsSemanticModel) {
+        // Temporarily swap the exports out, so we can still call other methods
+        // while we hold a mutable reference to the exports.
+        let mut exports = BTreeMap::new();
+        std::mem::swap(&mut self.info.exports, &mut exports);
+
+        for (name, export) in &mut exports {
+            match export {
+                Export::Own(own_export) if !own_export.ty.is_inferred() => {
+                    let Some(decl) = semantic_model
+                        .get_value(name)
+                        .or_else(|| semantic_model.get_type(name))
+                    else {
+                        continue;
+                    };
+
+                    match &decl.kind {
+                        JsDeclarationKind::Class(ty)
+                        | JsDeclarationKind::HoistedValue(ty)
+                        | JsDeclarationKind::Value(ty) => {
+                            if own_export.jsdoc_comment.is_none() {
+                                own_export.jsdoc_comment.clone_from(&decl.jsdoc_comment);
+                            }
+                            own_export.ty = ty.clone();
+                        }
+                        JsDeclarationKind::Type(ty) => {
+                            *export = Export::OwnType(OwnExport {
+                                jsdoc_comment: None,
+                                ty: ty.clone(),
+                            })
+                        }
+                        JsDeclarationKind::Import(specifier) => {
+                            *export =
+                                Export::Reexport(self.import_from_specifier(specifier.text()));
+                        }
+                        JsDeclarationKind::ImportType(specifier) => {
+                            *export =
+                                Export::ReexportType(self.import_from_specifier(specifier.text()));
+                        }
+                        JsDeclarationKind::Interface
+                        | JsDeclarationKind::Module
+                        | JsDeclarationKind::Namespace => {
+                            // TODO
+                        }
+                    }
+                }
+                Export::OwnType(own_type_export) if !own_type_export.ty.is_inferred() => {
+                    let Some(decl) = semantic_model
+                        .get_type(name)
+                        .or_else(|| semantic_model.get_value(name))
+                    else {
+                        continue;
+                    };
+
+                    match &decl.kind {
+                        JsDeclarationKind::Class(ty)
+                        | JsDeclarationKind::HoistedValue(ty)
+                        | JsDeclarationKind::Type(ty)
+                        | JsDeclarationKind::Value(ty) => {
+                            if own_type_export.jsdoc_comment.is_none() {
+                                own_type_export
+                                    .jsdoc_comment
+                                    .clone_from(&decl.jsdoc_comment);
+                            }
+                            own_type_export.ty = ty.clone();
+                        }
+                        JsDeclarationKind::Import(specifier)
+                        | JsDeclarationKind::ImportType(specifier) => {
+                            *export =
+                                Export::ReexportType(self.import_from_specifier(specifier.text()));
+                        }
+                        JsDeclarationKind::Interface
+                        | JsDeclarationKind::Module
+                        | JsDeclarationKind::Namespace => {
+                            // TODO
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        std::mem::swap(&mut self.info.exports, &mut exports);
     }
 
     fn visit_import(&mut self, node: AnyJsImportLike) {
@@ -63,12 +161,12 @@ impl<'a> ModuleVisitor<'a> {
 
         match node {
             AnyJsImportLike::JsModuleSource(_) => {
-                self.data
+                self.info
                     .static_imports
                     .insert(specifier.to_string(), import);
             }
             AnyJsImportLike::JsCallExpression(_) | AnyJsImportLike::JsImportCallExpression(_) => {
-                self.data
+                self.info
                     .dynamic_imports
                     .insert(specifier.to_string(), import);
             }
@@ -76,24 +174,10 @@ impl<'a> ModuleVisitor<'a> {
     }
 
     fn visit_export(&mut self, node: JsExport) -> Option<()> {
-        let jsdoc_comment = node.export_token().ok().and_then(|token| {
-            token
-                .leading_trivia()
-                .pieces()
-                .rev()
-                .find_map(|trivia| match trivia.kind() {
-                    TriviaPieceKind::MultiLineComment | TriviaPieceKind::SingleLineComment => {
-                        // JSDoc comments must start with exactly `/**`.
-                        // Either more or less asterisks are ignored.
-                        let text = trivia.text();
-                        (text.starts_with("/**")
-                            && text.as_bytes().get(3).is_some_and(|c| *c != b'*')
-                            && text.ends_with("*/"))
-                        .then(|| normalize_jsdoc_comment(text))
-                    }
-                    _ => None,
-                })
-        });
+        let jsdoc_comment = node
+            .export_token()
+            .ok()
+            .and_then(|token| JsdocComment::try_from(token).ok());
 
         match node.export_clause().ok()? {
             AnyJsExportClause::AnyJsDeclarationClause(node) => {
@@ -111,7 +195,7 @@ impl<'a> ModuleVisitor<'a> {
             }
             AnyJsExportClause::JsExportFromClause(node) => self.visit_export_from_clause(node),
             AnyJsExportClause::JsExportNamedClause(node) => {
-                self.visit_export_named_specifiers(node.specifiers(), jsdoc_comment)
+                self.visit_export_named_specifiers(node.specifiers())
             }
             AnyJsExportClause::JsExportNamedFromClause(node) => {
                 self.visit_export_named_from_clause(node)
@@ -137,7 +221,7 @@ impl<'a> ModuleVisitor<'a> {
     fn visit_export_declaration_clause(
         &mut self,
         node: AnyJsDeclarationClause,
-        jsdoc_comment: Option<String>,
+        jsdoc_comment: Option<JsdocComment>,
     ) -> Option<()> {
         let name = match &node {
             AnyJsDeclarationClause::JsClassDeclaration(node) => {
@@ -178,6 +262,10 @@ impl<'a> ModuleVisitor<'a> {
     fn visit_export_from_clause(&mut self, node: JsExportFromClause) -> Option<()> {
         let module_source = node.source().ok()?;
         let import = self.import_from_module_source(module_source)?;
+        let jsdoc_comment = node
+            .syntax()
+            .parent()
+            .and_then(|parent| JsdocComment::try_from(parent).ok());
 
         if let Some(export_as) = node.export_as() {
             let name = export_as
@@ -185,11 +273,18 @@ impl<'a> ModuleVisitor<'a> {
                 .and_then(|name| name.inner_string_text())
                 .map(unescape_js_string)
                 .ok()?;
-            self.data
-                .exports
-                .insert(name, Export::ReexportAll(ReexportAll { import }));
+            self.info.exports.insert(
+                name,
+                Export::ReexportAll(ReexportAll {
+                    import,
+                    jsdoc_comment,
+                }),
+            );
         } else {
-            self.data.blanket_reexports.push(ReexportAll { import });
+            self.info.blanket_reexports.push(ReexportAll {
+                import,
+                jsdoc_comment,
+            });
         }
 
         Some(())
@@ -210,7 +305,7 @@ impl<'a> ModuleVisitor<'a> {
                 .or_else(|| specifier.source_name().ok())
                 .and_then(|name| name.inner_string_text().ok())
                 .map(unescape_js_string)?;
-            self.data
+            self.info
                 .exports
                 .insert(name, Export::Reexport(import.clone()));
         }
@@ -221,15 +316,10 @@ impl<'a> ModuleVisitor<'a> {
     fn visit_export_named_specifiers(
         &mut self,
         specifiers: JsExportNamedSpecifierList,
-        jsdoc_comment: Option<String>,
     ) -> Option<()> {
-        // TODO: This registers the comment if is attached to the `export`
-        //       statement, but ignores any JSDoc comments that might be
-        //       attached to the symbols themselves.
-        //       We need https://github.com/biomejs/biome/issues/5312 for this.
         for specifier in specifiers {
             if let Ok(name) = specifier.and_then(|specifier| specifier.exported_name()) {
-                self.register_export_with_name_and_jsdoc_comment(name, jsdoc_comment.clone());
+                self.register_export_with_name_and_jsdoc_comment(name, None);
             }
         }
 
@@ -239,7 +329,7 @@ impl<'a> ModuleVisitor<'a> {
     fn visit_export_variable_declarations(
         &mut self,
         declarators: JsVariableDeclaratorList,
-        jsdoc_comment: Option<String>,
+        jsdoc_comment: Option<JsdocComment>,
     ) -> Option<()> {
         for declarator in declarators.into_iter().flatten() {
             if let Ok(binding) = declarator.id() {
@@ -260,7 +350,7 @@ impl<'a> ModuleVisitor<'a> {
     fn visit_binding_pattern(
         &mut self,
         binding: AnyJsBindingPattern,
-        jsdoc_comment: Option<String>,
+        jsdoc_comment: Option<JsdocComment>,
         ty: Option<AnyTsType>,
     ) -> Option<()> {
         match binding {
@@ -364,7 +454,7 @@ impl<'a> ModuleVisitor<'a> {
     fn visit_identifier_binding(
         &mut self,
         binding: &JsIdentifierBinding,
-        jsdoc_comment: Option<String>,
+        jsdoc_comment: Option<JsdocComment>,
         ty: Option<AnyTsType>,
     ) -> Option<()> {
         let name = binding.name_token().ok()?.token_text_trimmed();
@@ -378,7 +468,7 @@ impl<'a> ModuleVisitor<'a> {
     }
 
     fn register_export(&mut self, name: impl Into<Text>, export: Export) -> Option<()> {
-        self.data.exports.insert(name.into(), export);
+        self.info.exports.insert(name.into(), export);
 
         Some(())
     }
@@ -386,7 +476,7 @@ impl<'a> ModuleVisitor<'a> {
     fn register_export_with_name_and_jsdoc_comment(
         &mut self,
         name: impl Into<Text>,
-        jsdoc_comment: Option<String>,
+        jsdoc_comment: Option<JsdocComment>,
     ) -> Option<()> {
         self.register_export(
             name,
@@ -434,31 +524,4 @@ fn get_ts_name(binding_result: AnyTsIdentifierBinding) -> Option<TokenText> {
         .ok()?
         .token_text_trimmed();
     Some(name)
-}
-
-/// Normalizes the text in a JSDoc comment by stripping the opening and trailing
-/// markers, and trimming the leading asterisk from every line.
-fn normalize_jsdoc_comment(text: &str) -> String {
-    debug_assert!(text.starts_with("/**") && text.ends_with("*/"));
-
-    let mut result = text[3..text.len() - 2]
-        .lines()
-        .map(|line| {
-            let trimmed = line.trim();
-            trimmed.strip_prefix('*').map_or(trimmed, str::trim_start)
-        })
-        .fold(String::new(), |mut result, line| {
-            if !result.is_empty() {
-                result.push('\n');
-            }
-            result.push_str(line);
-            result
-        });
-
-    // Trim trailing newlines.
-    while result.ends_with('\n') {
-        result.truncate(result.len() - 1);
-    }
-
-    result
 }
