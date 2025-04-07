@@ -1787,6 +1787,13 @@
 					"description": "What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
+				"selfCloseVoidElements": {
+					"description": "Whether void elements should be self-closed. Defaults to never.",
+					"anyOf": [
+						{ "$ref": "#/definitions/SelfCloseVoidElements" },
+						{ "type": "null" }
+					]
+				},
 				"whitespaceSensitivity": {
 					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"css\".",
 					"anyOf": [
@@ -4105,6 +4112,21 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"SelfCloseVoidElements": {
+			"description": "Controls whether void-elements should be self closed",
+			"oneOf": [
+				{
+					"description": "The `/` inside void elements is removed by the formatter",
+					"type": "string",
+					"enum": ["never"]
+				},
+				{
+					"description": "The `/` inside void elements is always added",
+					"type": "string",
+					"enum": ["always"]
+				}
+			]
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
 		"SeverityOrGroup_for_A11y": {

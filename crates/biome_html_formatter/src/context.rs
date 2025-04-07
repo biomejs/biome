@@ -41,6 +41,9 @@ pub struct HtmlFormatOptions {
 
     /// Whether to indent the content of `<script>` and `<style>` tags. Default is `false`.
     indent_script_and_style: IndentScriptAndStyle,
+
+    /// Controls whether void elements should be self-closed.
+    self_close_void_elements: SelfCloseVoidElements,
 }
 
 impl HtmlFormatOptions {
@@ -96,6 +99,14 @@ impl HtmlFormatOptions {
         self
     }
 
+    pub fn with_self_close_void_elements(
+        mut self,
+        self_close_void_elements: SelfCloseVoidElements,
+    ) -> Self {
+        self.self_close_void_elements = self_close_void_elements;
+        self
+    }
+
     pub fn indent_style(&self) -> IndentStyle {
         self.indent_style
     }
@@ -126,6 +137,10 @@ impl HtmlFormatOptions {
 
     pub fn indent_script_and_style(&self) -> IndentScriptAndStyle {
         self.indent_script_and_style
+    }
+
+    pub fn self_close_void_elements(&self) -> SelfCloseVoidElements {
+        self.self_close_void_elements
     }
 
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
@@ -159,6 +174,13 @@ impl HtmlFormatOptions {
     pub fn set_indent_script_and_style(&mut self, indent_script_and_style: IndentScriptAndStyle) {
         self.indent_script_and_style = indent_script_and_style;
     }
+
+    pub fn set_self_close_void_elements(
+        &mut self,
+        self_close_void_elements: SelfCloseVoidElements,
+    ) {
+        self.self_close_void_elements = self_close_void_elements;
+    }
 }
 
 impl fmt::Display for HtmlFormatOptions {
@@ -174,6 +196,11 @@ impl fmt::Display for HtmlFormatOptions {
             f,
             "Indent script and style: {}",
             self.indent_script_and_style.value()
+        )?;
+        writeln!(
+            f,
+            "Self close void elements: {}",
+            self.self_close_void_elements
         )?;
         Ok(())
     }
@@ -372,5 +399,53 @@ impl CstFormatContext for HtmlFormatContext {
 
     fn comments(&self) -> &HtmlComments {
         &self.comments
+    }
+}
+
+/// Controls whether void-elements should be self closed
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum SelfCloseVoidElements {
+    /// The `/` inside void elements is removed by the formatter
+    #[default]
+    Never,
+    /// The `/` inside void elements is always added
+    Always,
+}
+
+impl fmt::Display for SelfCloseVoidElements {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Never => std::write!(f, "never"),
+            Self::Always => std::write!(f, "always"),
+        }
+    }
+}
+
+impl SelfCloseVoidElements {
+    pub const fn is_never(&self) -> bool {
+        matches!(self, Self::Never)
+    }
+    pub const fn is_always(&self) -> bool {
+        matches!(self, Self::Always)
+    }
+}
+
+impl FromStr for SelfCloseVoidElements {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "never" => Ok(Self::Never),
+            "always" => Ok(Self::Always),
+            _ => Err(
+                "Value not supported for self-close-void-elements. Supported values are 'never' and 'always'.",
+            ),
+        }
     }
 }

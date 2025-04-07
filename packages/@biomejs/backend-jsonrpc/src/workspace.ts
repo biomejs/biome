@@ -552,6 +552,10 @@ export interface HtmlFormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Whether void elements should be self-closed. Defaults to never.
+	 */
+	selfCloseVoidElements?: SelfCloseVoidElements;
+	/**
 	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
 	 */
 	whitespaceSensitivity?: WhitespaceSensitivity;
@@ -824,6 +828,10 @@ export type QuoteStyle = "double" | "single";
 When true, the content of `<script>` and `<style>` tags will be indented one level. 
 	 */
 export type IndentScriptAndStyle = boolean;
+/**
+ * Controls whether void-elements should be self closed
+ */
+export type SelfCloseVoidElements = "never" | "always";
 /**
 	* Whitespace sensitivity for HTML formatting.
 

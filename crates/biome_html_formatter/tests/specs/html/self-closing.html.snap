@@ -1,14 +1,29 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: self-closing.html
+snapshot_kind: text
 ---
 # Input
 
 ```html
 <div>
-<br>
-<img>
+	<br>
+	<img>
+	<area>
+	<base>
+	<br>
+	<col>
+	<embed>
+	<hr>
+	<img>
+	<input>
+	<link>
+	<meta>
+	<source>
+	<track>
+	<wbr>
 </div>
+
 ```
 
 
@@ -27,11 +42,25 @@ Attribute Position: Auto
 Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
+Self close void elements: never
 -----
 
 ```html
 <div>
-	<br />
-	<img />
+	<br >
+	<img >
+	<area >
+	<base >
+	<br >
+	<col >
+	<embed >
+	<hr >
+	<img >
+	<input >
+	<link >
+	<meta >
+	<source >
+	<track >
+	<wbr >
 </div>
 ```

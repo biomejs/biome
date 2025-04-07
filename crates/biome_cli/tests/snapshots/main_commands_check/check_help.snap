@@ -177,6 +177,8 @@ The configuration that is contained inside the file `biome.json`
                               Defaults to "css".
         --html-formatter-indent-script-and-style=<true|false>  Whether to indent the `<script>` and
                               `<style>` tags for HTML (and its super languages). Defaults to false.
+        --html-formatter-self-close-void-elements=<always|never>  Whether void elements should be
+                              self-closed. Defaults to never.
         --assist-enabled=<true|false>  Whether Biome should enable assist via LSP.
 
 Global options applied to all commands
