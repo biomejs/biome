@@ -3,25 +3,29 @@ use biome_rowan::Text;
 
 use super::collector::JsModuleInfoCollector;
 
-/// Type resolver that is able to resolve types within a given scope of a
+/// Type resolver that is able to resolve types within the global scope of a
 /// module.
 ///
 /// Responsible for what we call "thin type resolution". See [TypeResolver] for
 /// more information.
-pub(super) struct JsModuleTypeResolver<'a> {
+pub(super) struct GlobalScopeResolver<'a> {
     collector: &'a JsModuleInfoCollector,
 }
 
-impl<'a> JsModuleTypeResolver<'a> {
+impl<'a> GlobalScopeResolver<'a> {
     pub(super) fn from_collector(collector: &'a JsModuleInfoCollector) -> Self {
         Self { collector }
     }
 }
 
-impl TypeResolver for JsModuleTypeResolver<'_> {
+impl TypeResolver for GlobalScopeResolver<'_> {
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<Type> {
         if qualifier.parts().len() == 1 {
-            self.resolve_type_of(&qualifier.parts()[0])
+            self.resolve_type_of(&qualifier.parts()[0]).or_else(|| {
+                qualifier
+                    .is_promise()
+                    .then(|| Type::promise_of(Type::unknown()))
+            })
         } else {
             // TODO: Resolve nested qualifiers
             None
@@ -29,10 +33,6 @@ impl TypeResolver for JsModuleTypeResolver<'_> {
     }
 
     fn resolve_type_of(&self, identifier: &Text) -> Option<Type> {
-        // TODO: We probably need to traverse parent scopes at some point.
-        //       But since we mainly care about exported symbols, which only
-        //       exist at the module's global scope, we can get away with this
-        //       for now.
         self.collector.scopes[0]
             .bindings_by_name
             .get(identifier.text())

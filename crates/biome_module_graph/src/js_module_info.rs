@@ -1,16 +1,18 @@
+mod ad_hoc_scope_resolver;
 mod binding;
 mod collector;
+mod global_scope_resolver;
 mod scope;
-mod type_resolver;
 mod visitor;
 
 use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
+use ad_hoc_scope_resolver::AdHocScopeResolver;
 use binding::JsBindingData;
 use biome_js_semantic::{BindingId, ScopeId};
-use biome_js_syntax::AnyJsImportLike;
+use biome_js_syntax::{AnyJsExpression, AnyJsImportLike};
 use biome_js_type_info::Type;
-use biome_rowan::{Text, TokenText};
+use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use scope::{JsScope, JsScopeData};
 
@@ -58,6 +60,40 @@ impl JsModuleInfo {
             info: self.0.clone(),
             id: ScopeId::new(0),
         }
+    }
+
+    /// Returns the resolved type of the given expression within this module.
+    pub fn resolved_type_for_expression(
+        &self,
+        expr: &AnyJsExpression,
+        module_graph: &ModuleGraph,
+    ) -> Type {
+        let mut ty = Type::from_any_js_expression(expr);
+        let scope = self.scope_for_range(expr.range());
+        ty.resolve(&AdHocScopeResolver::from_scope_in_module(
+            scope,
+            self,
+            module_graph,
+        ));
+        ty
+    }
+
+    /// Returns the scope to be used for the given `range`.
+    pub fn scope_for_range(&self, range: TextRange) -> JsScope {
+        let start = range.start().into();
+        let end = range.end().into();
+        self.0
+            .scope_by_range
+            .find(start, end)
+            .filter(|interval| !(start < interval.start || end > interval.stop))
+            .max_by_key(|interval| interval.val)
+            .map_or_else(
+                || self.global_scope(),
+                |interval| JsScope {
+                    info: self.0.clone(),
+                    id: ScopeId::new(interval.val.index()),
+                },
+            )
     }
 }
 
@@ -121,6 +157,9 @@ pub struct JsModuleInfoInner {
     ///
     /// The first entry is expected to be the global scope.
     pub(crate) scopes: Box<[JsScopeData]>,
+
+    /// Lookup tree to find scopes by text range.
+    pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
 }
 
 static_assertions::assert_impl_all!(JsModuleInfo: Send, Sync);

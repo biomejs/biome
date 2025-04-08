@@ -188,6 +188,17 @@ fn resolved_type(ident: IdentOrZero, ty: &Type) -> TokenStream {
         Some(segment) if segment.ident == "Text" => {
             quote! { self.#ident.clone() }
         }
+        Some(segment) if segment.ident == "Arc" => match &segment.arguments {
+            PathArguments::None => abort!(segment, "Arc is missing argument"),
+            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
+                quote! {
+                    self.#ident.clone()
+                }
+            }
+            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                abort!(path, "Unsupported type arguments in path")
+            }
+        },
         Some(segment) if segment.ident == "Box" => match &segment.arguments {
             PathArguments::None => abort!(segment, "Box is missing argument"),
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
@@ -265,7 +276,7 @@ fn type_needs_resolving(ident: IdentOrZero, ty: &Type) -> Option<TokenStream> {
     };
 
     match path.path.segments.last() {
-        Some(segment) if segment.ident == "Text" => None,
+        Some(segment) if segment.ident == "Arc" || segment.ident == "Text" => None,
         Some(segment) if segment.ident == "Box" => match &segment.arguments {
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
                 match args.args.iter().next().unwrap() {
@@ -322,6 +333,15 @@ fn resolved_unit_type(ty: &Type) -> TokenStream {
         Some(segment) if segment.ident == "Text" => {
             quote! { ty.clone() }
         }
+        Some(segment) if segment.ident == "Arc" => match &segment.arguments {
+            PathArguments::None => abort!(segment, "Arc is missing argument"),
+            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
+                quote! { ty.clone() }
+            }
+            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                abort!(path, "Unsupported type arguments in path")
+            }
+        },
         Some(segment) if segment.ident == "Box" => match &segment.arguments {
             PathArguments::None => abort!(segment, "Box is missing argument"),
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
@@ -377,7 +397,9 @@ fn unit_type_needs_resolving(ty: &Type) -> Option<TokenStream> {
     };
 
     match path.path.segments.last() {
-        Some(segment) if segment.ident == "Text" => Some(quote! { false }),
+        Some(segment) if segment.ident == "Arc" || segment.ident == "Text" => {
+            Some(quote! { false })
+        }
         Some(segment) if segment.ident == "Box" => match &segment.arguments {
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
                 match args.args.iter().next().unwrap() {

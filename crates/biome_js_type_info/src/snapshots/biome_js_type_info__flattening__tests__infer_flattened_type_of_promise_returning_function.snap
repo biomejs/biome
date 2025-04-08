@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_type_info/src/flattening.tests.rs
+expression: ty
+---
+Type(
+    Function(
+        Function {
+            is_async: false,
+            type_parameters: [],
+            name: Some(
+                Borrowed(
+                    "returnsPromise",
+                ),
+            ),
+            parameters: [],
+            return_type: Type(
+                Type(
+                    Class(
+                        Class {
+                            id: TypeId(
+                                1,
+                            ),
+                            name: Some(
+                                Static(
+                                    "Promise",
+                                ),
+                            ),
+                            type_parameters: [
+                                GenericTypeParameter {
+                                    name: Static(
+                                        "T",
+                                    ),
+                                    ty: Type(
+                                        Number,
+                                    ),
+                                },
+                            ],
+                            extends: None,
+                        },
+                    ),
+                ),
+            ),
+        },
+    ),
+)

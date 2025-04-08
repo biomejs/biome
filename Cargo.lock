@@ -943,9 +943,11 @@ dependencies = [
 name = "biome_js_type_info"
 version = "0.0.1"
 dependencies = [
+ "biome_js_parser",
  "biome_js_syntax",
  "biome_js_type_info_macros",
  "biome_rowan",
+ "insta",
 ]
 
 [[package]]
@@ -1185,6 +1187,7 @@ dependencies = [
  "once_cell",
  "oxc_resolver",
  "papaya",
+ "rust-lapper",
  "rustc-hash 2.1.1",
  "serde_json",
  "static_assertions",

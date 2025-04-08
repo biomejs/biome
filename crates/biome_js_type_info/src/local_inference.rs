@@ -1,23 +1,26 @@
-use std::{ops::Deref, str::FromStr};
+use std::{str::FromStr, sync::Arc};
 
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsClassMember, AnyJsDeclaration,
-    AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsLiteralExpression, AnyJsObjectMember, AnyJsParameter, AnyTsName, AnyTsReturnType,
-    AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName,
-    JsArrowFunctionExpression, JsClassDeclaration, JsFunctionDeclaration, JsFunctionExpression,
-    JsNewExpression, JsObjectExpression, JsParameters, JsReferenceIdentifier, JsSyntaxToken,
-    JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration,
-    TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters, TsTypeofType,
+    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMember,
+    AnyJsDeclaration, AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression,
+    AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMember, AnyJsParameter,
+    AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyTsTypePredicateParameterName, JsArrowFunctionExpression, JsCallArguments,
+    JsClassDeclaration, JsFunctionDeclaration, JsFunctionExpression, JsNewExpression,
+    JsObjectExpression, JsParameters, JsReferenceIdentifier, JsSyntaxToken, JsVariableDeclarator,
+    TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation,
+    TsTypeArguments, TsTypeParameter, TsTypeParameters, TsTypeofType,
 };
 use biome_rowan::{SyntaxResult, Text, TokenText};
 
 use crate::{
-    AssertsReturnType, CallSignatureTypeMember, Class, ClassMember, Constructor,
+    AssertsReturnType, CallArgumentType, CallSignatureTypeMember, Class, Constructor,
     ConstructorTypeMember, Function, FunctionParameter, GenericTypeParameter, Intersection,
     Literal, MethodTypeMember, Object, PredicateReturnType, PropertyTypeMember, ReturnType, Tuple,
-    TupleElementType, Type, TypeAlias, TypeInner, TypeMember, TypeOperator, TypeOperatorType,
-    TypeReference, TypeReferenceQualifier, TypeofValue, Union,
+    TupleElementType, Type, TypeAlias, TypeId, TypeInner, TypeMember, TypeOperator,
+    TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeofCallExpression,
+    TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression, TypeofValue, Union,
+    globals::{ARRAY_TYPE, PROMISE_TYPE},
 };
 
 impl Type {
@@ -76,16 +79,25 @@ impl Type {
         match decl {
             AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(decl) => {
                 TypeInner::Class(Box::new(Class {
+                    id: TypeId::new(),
                     name: decl
                         .id()
                         .as_ref()
                         .and_then(|id| id.as_js_identifier_binding())
                         .and_then(|id| id.name_token().ok())
                         .map(|token| token.token_text_trimmed().into()),
+                    type_parameters: decl
+                        .type_parameters()
+                        .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
+                        .unwrap_or_default(),
+                    extends: decl
+                        .extends_clause()
+                        .and_then(|extends| extends.super_class().ok())
+                        .map(|super_class| Self::from_any_js_expression(&super_class)),
                     members: decl
                         .members()
                         .into_iter()
-                        .filter_map(|member| ClassMember::from_any_js_class_member(&member))
+                        .filter_map(|member| TypeMember::from_any_js_class_member(&member))
                         .collect(),
                 }))
                 .into()
@@ -164,6 +176,18 @@ impl Type {
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(expr)
             }
+            AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
+                Ok(callee) => TypeInner::TypeofExpression(Box::new(TypeofExpression::Call(
+                    TypeofCallExpression {
+                        callee: Self::from_any_js_expression(&callee),
+                        arguments: CallArgumentType::types_from_js_call_arguments(
+                            expr.arguments().ok(),
+                        ),
+                    },
+                )))
+                .into(),
+                Err(_) => Self::unknown(),
+            },
             AnyJsExpression::JsFunctionExpression(expr) => Self::from_js_function_expression(expr),
             AnyJsExpression::JsIdentifierExpression(expr) => expr
                 .name()
@@ -173,10 +197,37 @@ impl Type {
             AnyJsExpression::JsNewExpression(expr) => {
                 Self::from_js_new_expression(expr).unwrap_or_default()
             }
+            AnyJsExpression::JsObjectExpression(expr) => TypeInner::Object(Box::new(Object {
+                prototype: None,
+                members: expr
+                    .members()
+                    .into_iter()
+                    .filter_map(|member| member.ok())
+                    .filter_map(|member| TypeMember::from_any_js_object_member(&member))
+                    .collect(),
+            }))
+            .into(),
             AnyJsExpression::JsParenthesizedExpression(expr) => expr
                 .expression()
                 .map(|expr| Self::from_any_js_expression(&expr))
                 .unwrap_or_default(),
+            AnyJsExpression::JsStaticMemberExpression(expr) => match (expr.object(), expr.member())
+            {
+                (Ok(object), Ok(AnyJsName::JsName(member))) => {
+                    text_from_token(member.value_token())
+                        .map(|member| {
+                            TypeInner::TypeofExpression(Box::new(TypeofExpression::StaticMember(
+                                TypeofStaticMemberExpression {
+                                    object: Self::from_any_js_expression(&object),
+                                    member,
+                                },
+                            )))
+                        })
+                        .unwrap_or_default()
+                        .into()
+                }
+                _ => Self::unknown(),
+            },
             _ => {
                 // TODO: Much
                 Self::unknown()
@@ -211,11 +262,14 @@ impl Type {
         let inner = match ty {
             AnyTsType::JsMetavariable(_) => TypeInner::Unknown,
             AnyTsType::TsAnyType(_) => TypeInner::AnyKeyword,
-            AnyTsType::TsArrayType(ty) => TypeInner::Array(Box::new(
-                ty.element_type()
-                    .map(|ty| Self::from_any_ts_type(&ty))
-                    .unwrap_or_default(),
-            )),
+            AnyTsType::TsArrayType(ty) => {
+                return Self::instance_of(
+                    ARRAY_TYPE.with_type_parameters(&[ty
+                        .element_type()
+                        .map(|ty| Self::from_any_ts_type(&ty))
+                        .unwrap_or_default()]),
+                );
+            }
             AnyTsType::TsBigintLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
                 (Some(minus_token), Ok(literal_token)) => TypeInner::Literal(Box::new(
                     Literal::BigInt(Text::Owned(format!("{minus_token}{literal_token}"))),
@@ -290,12 +344,14 @@ impl Type {
                 (_, Err(_)) => TypeInner::Unknown,
             },
             AnyTsType::TsNumberType(_) => TypeInner::Number,
-            AnyTsType::TsObjectType(ty) => TypeInner::Object(Box::new(Object(
-                ty.members()
+            AnyTsType::TsObjectType(ty) => TypeInner::Object(Box::new(Object {
+                prototype: None,
+                members: ty
+                    .members()
                     .into_iter()
                     .filter_map(|member| TypeMember::from_any_ts_type_member(&member))
                     .collect(),
-            ))),
+            })),
             AnyTsType::TsParenthesizedType(ty) => {
                 return ty
                     .ty()
@@ -369,7 +425,7 @@ impl Type {
             name: None,
             parameters: match expr.parameters() {
                 Ok(AnyJsArrowFunctionParameters::AnyJsBinding(binding)) => {
-                    Box::new([FunctionParameter {
+                    Arc::new([FunctionParameter {
                         name: binding
                             .as_js_identifier_binding()
                             .and_then(|binding| text_from_token(binding.name_token())),
@@ -381,7 +437,7 @@ impl Type {
                 Ok(AnyJsArrowFunctionParameters::JsParameters(params)) => {
                     function_params_from_js_params(Ok(params))
                 }
-                Err(_) => Box::default(),
+                Err(_) => Arc::default(),
             },
             return_type: return_type_from_annotation(expr.return_type_annotation())
                 .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
@@ -391,6 +447,7 @@ impl Type {
 
     pub fn from_js_class_declaration(decl: &JsClassDeclaration) -> Self {
         TypeInner::Class(Box::new(Class {
+            id: TypeId::new(),
             name: decl
                 .id()
                 .ok()
@@ -398,10 +455,18 @@ impl Type {
                 .and_then(|id| id.as_js_identifier_binding())
                 .and_then(|id| id.name_token().ok())
                 .map(|token| token.token_text_trimmed().into()),
+            type_parameters: decl
+                .type_parameters()
+                .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
+                .unwrap_or_default(),
+            extends: decl
+                .extends_clause()
+                .and_then(|extends| extends.super_class().ok())
+                .map(|super_class| Self::from_any_js_expression(&super_class)),
             members: decl
                 .members()
                 .into_iter()
-                .filter_map(|member| ClassMember::from_any_js_class_member(&member))
+                .filter_map(|member| TypeMember::from_any_js_class_member(&member))
                 .collect(),
         }))
         .into()
@@ -441,45 +506,20 @@ impl Type {
     }
 
     pub fn from_js_new_expression(expr: &JsNewExpression) -> Option<Self> {
-        let callee_type = Self::from_any_js_expression(&expr.callee().ok()?);
-        match callee_type.deref() {
-            TypeInner::Class(class) => {
-                let num_args = expr
-                    .arguments()
-                    .map_or(0, |args| args.args().into_iter().count());
-                let ty = class
-                    .members
-                    .iter()
-                    .find_map(|member| match member {
-                        ClassMember::Constructor(constructor) => {
-                            // TODO: We might need to make an attempt to match
-                            //       type signatures too.
-                            (constructor.parameters.len() == num_args)
-                                .then(|| constructor.return_type.clone())
-                                .flatten()
-                        }
-                        _ => None,
-                    })
-                    .unwrap_or_else(|| callee_type.clone());
-                Some(ty)
-            }
-            TypeInner::Reference(reference) => {
-                // TODO: Infer type parameters from arguments.
-                Some(
-                    TypeInner::Reference(Box::new(TypeReference::from_qualifier(
-                        reference.qualifier.clone(),
-                    )))
-                    .into(),
-                )
-            }
-            // TODO: Check other types that may have a constructor.
-            _ => None,
-        }
+        Some(
+            TypeInner::TypeofExpression(Box::new(TypeofExpression::New(TypeofNewExpression {
+                callee: Self::from_any_js_expression(&expr.callee().ok()?),
+                arguments: CallArgumentType::types_from_js_call_arguments(expr.arguments()),
+            })))
+            .into(),
+        )
     }
 
     pub fn from_js_object_expression(expr: &JsObjectExpression) -> Self {
-        TypeInner::Object(Box::new(Object(
-            expr.members()
+        TypeInner::Object(Box::new(Object {
+            prototype: None,
+            members: expr
+                .members()
                 .into_iter()
                 .filter_map(|member| {
                     member
@@ -487,7 +527,7 @@ impl Type {
                         .and_then(|member| TypeMember::from_any_js_object_member(&member))
                 })
                 .collect(),
-        )))
+        }))
         .into()
     }
 
@@ -519,25 +559,11 @@ impl Type {
             .ok()
             .and_then(|name| TypeReferenceQualifier::from_any_ts_name(&name))
             .map(|qualifier| {
-                if qualifier.is_promise() {
-                    TypeInner::Promise(Box::new(
-                        ty.type_arguments()
-                            .and_then(|args| {
-                                args.ts_type_argument_list()
-                                    .into_iter()
-                                    .next()
-                                    .and_then(|ty| ty.ok())
-                                    .map(|ty| Self::from_any_ts_type(&ty))
-                            })
-                            .unwrap_or_default(),
-                    ))
-                } else {
-                    TypeInner::Reference(Box::new(TypeReference {
-                        qualifier,
-                        ty: Type::unknown(),
-                        type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
-                    }))
-                }
+                TypeInner::Reference(Box::new(TypeReference {
+                    qualifier,
+                    ty: Type::unknown(),
+                    type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
+                }))
             })
             .map(Into::into)
             .unwrap_or_default()
@@ -569,7 +595,7 @@ impl Type {
             .unwrap_or_default()
     }
 
-    pub fn types_from_ts_type_arguments(arguments: Option<TsTypeArguments>) -> Box<[Self]> {
+    pub fn types_from_ts_type_arguments(arguments: Option<TsTypeArguments>) -> Arc<[Self]> {
         arguments
             .map(|args| {
                 args.ts_type_argument_list()
@@ -581,47 +607,34 @@ impl Type {
     }
 }
 
-impl ClassMember {
-    pub fn from_any_js_class_member(member: &AnyJsClassMember) -> Option<Self> {
-        match member {
-            AnyJsClassMember::JsMethodClassMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    Self::Method(MethodTypeMember {
-                        is_async: member.async_token().is_some(),
-                        type_parameters: generic_params_from_ts_type_params(
-                            member.type_parameters(),
-                        ),
-                        name: TokenText::from(name).into(),
-                        parameters: function_params_from_js_params(member.parameters()),
-                        return_type: return_type_from_annotation(member.return_type_annotation())
-                            .unwrap_or_else(|| return_type_from_async_token(member.async_token())),
-                        is_optional: false,
+impl CallArgumentType {
+    pub fn types_from_js_call_arguments(
+        arguments: Option<JsCallArguments>,
+    ) -> Arc<[CallArgumentType]> {
+        arguments
+            .map(|args| {
+                args.args()
+                    .into_iter()
+                    .filter_map(|arg| {
+                        arg.ok()
+                            .map(|arg| CallArgumentType::from_any_js_call_argument(&arg))
                     })
-                })
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
+    pub fn from_any_js_call_argument(arg: &AnyJsCallArgument) -> Self {
+        match arg {
+            AnyJsCallArgument::AnyJsExpression(expr) => {
+                Self::Argument(Type::from_any_js_expression(expr))
             }
-            AnyJsClassMember::JsPropertyClassMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    Self::Property(PropertyTypeMember {
-                        name: TokenText::from(name).into(),
-                        ty: member
-                            .property_annotation()
-                            .and_then(|annotation| annotation.type_annotation().ok())
-                            .flatten()
-                            .and_then(|annotation| annotation.ty().ok())
-                            .map(|ty| Type::from_any_ts_type(&ty))
-                            .unwrap_or_default(),
-                        is_optional: member
-                            .property_annotation()
-                            .as_ref()
-                            .and_then(|annotation| annotation.as_ts_optional_property_annotation())
-                            .is_some(),
-                    })
-                })
-            }
-            _ => {
-                // TODO: Handle more variants
-                None
-            }
+            AnyJsCallArgument::JsSpread(spread) => Self::Spread(
+                spread
+                    .argument()
+                    .map(|arg| Type::from_any_js_expression(&arg))
+                    .unwrap_or_default(),
+            ),
         }
     }
 }
@@ -677,7 +690,7 @@ impl FunctionParameter {
         }
     }
 
-    pub fn params_from_js_parameters(params: &JsParameters) -> Box<[Self]> {
+    pub fn params_from_js_parameters(params: &JsParameters) -> Arc<[Self]> {
         params
             .as_fields()
             .items
@@ -694,7 +707,7 @@ impl GenericTypeParameter {
             .and_then(|name| name.ident_token())
             .map(|name| Self {
                 name: name.token_text_trimmed().into(),
-                default_ty: param
+                ty: param
                     .default()
                     .and_then(|default| default.ty().ok())
                     .map(|default_ty| Type::from_any_ts_type(&default_ty))
@@ -703,7 +716,7 @@ impl GenericTypeParameter {
             .ok()
     }
 
-    pub fn params_from_ts_type_parameters(params: &TsTypeParameters) -> Box<[Self]> {
+    pub fn params_from_ts_type_parameters(params: &TsTypeParameters) -> Arc<[Self]> {
         params
             .items()
             .into_iter()
@@ -798,6 +811,57 @@ impl TupleElementType {
 }
 
 impl TypeMember {
+    pub fn from_any_js_class_member(member: &AnyJsClassMember) -> Option<Self> {
+        match member {
+            AnyJsClassMember::JsMethodClassMember(member) => {
+                member.name().ok().and_then(|name| name.name()).map(|name| {
+                    Self::Method(MethodTypeMember {
+                        is_async: member.async_token().is_some(),
+                        type_parameters: generic_params_from_ts_type_params(
+                            member.type_parameters(),
+                        ),
+                        name: TokenText::from(name).into(),
+                        parameters: function_params_from_js_params(member.parameters()),
+                        return_type: return_type_from_annotation(member.return_type_annotation())
+                            .unwrap_or_else(|| return_type_from_async_token(member.async_token())),
+                        is_optional: false,
+                        is_static: member
+                            .modifiers()
+                            .into_iter()
+                            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                    })
+                })
+            }
+            AnyJsClassMember::JsPropertyClassMember(member) => {
+                member.name().ok().and_then(|name| name.name()).map(|name| {
+                    Self::Property(PropertyTypeMember {
+                        name: TokenText::from(name).into(),
+                        ty: member
+                            .property_annotation()
+                            .and_then(|annotation| annotation.type_annotation().ok())
+                            .flatten()
+                            .and_then(|annotation| annotation.ty().ok())
+                            .map(|ty| Type::from_any_ts_type(&ty))
+                            .unwrap_or_default(),
+                        is_optional: member
+                            .property_annotation()
+                            .as_ref()
+                            .and_then(|annotation| annotation.as_ts_optional_property_annotation())
+                            .is_some(),
+                        is_static: member
+                            .modifiers()
+                            .into_iter()
+                            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                    })
+                })
+            }
+            _ => {
+                // TODO: Handle more variants
+                None
+            }
+        }
+    }
+
     pub fn from_any_js_object_member(member: &AnyJsObjectMember) -> Option<Self> {
         match member {
             AnyJsObjectMember::JsBogusMember(_) => None,
@@ -817,6 +881,7 @@ impl TypeMember {
                         return_type: return_type_from_annotation(member.return_type_annotation())
                             .unwrap_or_else(|| return_type_from_async_token(member.async_token())),
                         is_optional: false,
+                        is_static: false,
                     })
                 })
             }
@@ -829,6 +894,7 @@ impl TypeMember {
                             .map(|value| Type::from_any_js_expression(&value))
                             .unwrap_or_default(),
                         is_optional: false,
+                        is_static: false,
                     })
                 })
             }
@@ -849,6 +915,7 @@ impl TypeMember {
                         }))
                         .into(),
                         is_optional: false,
+                        is_static: false,
                     })
                 }),
             AnyJsObjectMember::JsSpread(_) => {
@@ -896,6 +963,7 @@ impl TypeMember {
                         return_type: return_type_from_annotation(member.return_type_annotation())
                             .unwrap_or_default(),
                         is_optional: member.optional_token().is_some(),
+                        is_static: false,
                     })
                 })
             }
@@ -905,6 +973,7 @@ impl TypeMember {
                         name: name.into(),
                         ty: type_from_annotation(member.type_annotation()).unwrap_or_default(),
                         is_optional: member.optional_token().is_some(),
+                        is_static: false,
                     })
                 })
             }
@@ -918,14 +987,14 @@ impl TypeMember {
 
 impl TypeReference {
     pub fn from_name(name: TokenText) -> Self {
-        Self::from_qualifier(TypeReferenceQualifier::from_name(name))
+        Self::from_qualifier(TypeReferenceQualifier::from_name(name.into()))
     }
 
     pub fn from_qualifier(qualifier: TypeReferenceQualifier) -> Self {
         Self {
             qualifier,
             ty: Type::unknown(),
-            type_parameters: Box::new([]),
+            type_parameters: Arc::new([]),
         }
     }
 }
@@ -957,12 +1026,12 @@ impl TypeReferenceQualifier {
         }
     }
 
-    pub fn from_name(name: TokenText) -> Self {
-        Self(Box::new([name.into()]))
+    pub fn from_name(name: Text) -> Self {
+        Self(Box::new([name]))
     }
 }
 
-fn function_params_from_js_params(params: SyntaxResult<JsParameters>) -> Box<[FunctionParameter]> {
+fn function_params_from_js_params(params: SyntaxResult<JsParameters>) -> Arc<[FunctionParameter]> {
     params
         .ok()
         .map(|params| FunctionParameter::params_from_js_parameters(&params))
@@ -971,7 +1040,7 @@ fn function_params_from_js_params(params: SyntaxResult<JsParameters>) -> Box<[Fu
 
 fn generic_params_from_ts_type_params(
     params: Option<TsTypeParameters>,
-) -> Box<[GenericTypeParameter]> {
+) -> Arc<[GenericTypeParameter]> {
     params
         .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
         .unwrap_or_default()
@@ -985,7 +1054,7 @@ fn return_type_from_annotation(annotation: Option<TsReturnTypeAnnotation>) -> Op
 
 fn return_type_from_async_token(async_token: Option<JsSyntaxToken>) -> ReturnType {
     ReturnType::Type(match async_token {
-        Some(_) => TypeInner::Promise(Box::new(Type::unknown())).into(),
+        Some(_) => PROMISE_TYPE.clone(),
         None => Type::unknown(),
     })
 }
