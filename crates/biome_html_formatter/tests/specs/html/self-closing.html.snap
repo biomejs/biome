@@ -47,20 +47,20 @@ Self close void elements: never
 
 ```html
 <div>
-	<br >
-	<img >
-	<area >
-	<base >
-	<br >
-	<col >
-	<embed >
-	<hr >
-	<img >
-	<input >
-	<link >
-	<meta >
-	<source >
-	<track >
-	<wbr >
+	<br>
+	<img>
+	<area>
+	<base>
+	<br>
+	<col>
+	<embed>
+	<hr>
+	<img>
+	<input>
+	<link>
+	<meta>
+	<source>
+	<track>
+	<wbr>
 </div>
 ```

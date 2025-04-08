@@ -6,23 +6,20 @@ snapshot_kind: text
 # Input
 
 ```html
-<div>
-	<br>
-	<img>
-	<area>
-	<base>
-	<br>
-	<col>
-	<embed>
-	<hr>
-	<img>
-	<input>
-	<link>
-	<meta>
-	<source>
-	<track>
-	<wbr>
-</div>
+<br>
+<img>
+<area>
+<base>
+<col>
+<embed>
+<hr>
+<img>
+<input>
+<link>
+<meta>
+<source>
+<track>
+<wbr>
 
 ```
 
@@ -46,23 +43,20 @@ Self close void elements: never
 -----
 
 ```html
-<div>
-	<br >
-	<img >
-	<area >
-	<base >
-	<br >
-	<col >
-	<embed >
-	<hr >
-	<img >
-	<input >
-	<link >
-	<meta >
-	<source >
-	<track >
-	<wbr >
-</div>
+<br>
+<img>
+<area>
+<base>
+<col>
+<embed>
+<hr>
+<img>
+<input>
+<link>
+<meta>
+<source>
+<track>
+<wbr>
 ```
 
 ## Output 1
@@ -80,21 +74,18 @@ Self close void elements: always
 -----
 
 ```html
-<div>
-	<br />
-	<img />
-	<area />
-	<base />
-	<br />
-	<col />
-	<embed />
-	<hr />
-	<img />
-	<input />
-	<link />
-	<meta />
-	<source />
-	<track />
-	<wbr />
-</div>
+<br />
+<img />
+<area />
+<base />
+<col />
+<embed />
+<hr />
+<img />
+<input />
+<link />
+<meta />
+<source />
+<track />
+<wbr />
 ```

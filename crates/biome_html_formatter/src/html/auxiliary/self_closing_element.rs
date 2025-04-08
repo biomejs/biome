@@ -20,7 +20,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         let name = name?;
         let is_canonical_html_tag = is_canonical_html_tag(&name);
 
-        write!(f, [l_angle_token.format(), name.format(), space()])?;
+        write!(f, [l_angle_token.format(), name.format()])?;
 
         let attr_group_id = f.group_id("element-attr-group-id");
         write!(
@@ -41,7 +41,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                 // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
                 if bracket_same_line {
                     write!(f, [hard_space()])?;
-                } else {
+                } else if self_close_void_elements.is_always() || attributes.len() >= 1 {
                     write!(f, [soft_line_break_or_space()])?;
                 }
 
