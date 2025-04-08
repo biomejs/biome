@@ -22,7 +22,7 @@ An option `html.formatter.selfCloseVoidElements` allows to control whether the t
 
 ```diff
 - <input />
-+ <input >
++ <input>
 ```
 
 If you come from Prettier and you want to keep the same formatting behaviour, you should set the option to `"always"`:
@@ -38,7 +38,7 @@ If you come from Prettier and you want to keep the same formatting behaviour, yo
 ```
 
 ```diff
-- <input >
+- <input>
 + <input />
 ```
 
