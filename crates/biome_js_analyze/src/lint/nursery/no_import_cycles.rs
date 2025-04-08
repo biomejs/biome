@@ -4,7 +4,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
-use biome_module_graph::ModuleInfo;
+use biome_module_graph::JsModuleInfo;
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -153,13 +153,13 @@ impl Rule for NoImportCycles {
 fn find_cycle(
     ctx: &RuleContext<NoImportCycles>,
     start_path: &Utf8Path,
-    mut module_info: ModuleInfo,
+    mut module_info: JsModuleInfo,
 ) -> Option<Vec<String>> {
     let mut seen = HashSet::new();
     let mut stack = Vec::new();
 
     'outer: loop {
-        while let Some((_specifier, import)) = module_info.drain_import() {
+        for import in module_info.all_imports() {
             let Ok(resolved_path) = import.resolved_path else {
                 continue;
             };

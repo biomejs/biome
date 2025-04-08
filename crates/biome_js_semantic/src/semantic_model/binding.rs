@@ -3,24 +3,24 @@ use biome_js_syntax::{TextRange, TsTypeParameterName, binding_ext::AnyJsIdentifi
 
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]
-pub(crate) struct SemanticModelBindingData {
-    pub(crate) range: TextRange,
-    pub(crate) references: Vec<SemanticModelReference>,
+pub struct SemanticModelBindingData {
+    pub range: TextRange,
+    pub references: Vec<SemanticModelReference>,
     // We use a SmallVec because most of the time a binding is expected once.
-    pub(crate) export_by_start: smallvec::SmallVec<[TextSize; 4]>,
+    pub export_by_start: smallvec::SmallVec<[TextSize; 4]>,
 }
 
 #[derive(Clone, Copy, Debug)]
-pub(crate) enum SemanticModelReferenceType {
+pub enum SemanticModelReferenceType {
     Read { hoisted: bool },
     Write { hoisted: bool },
 }
 
 /// Internal type with all the semantic data of a specific reference
 #[derive(Debug)]
-pub(crate) struct SemanticModelReference {
-    pub(crate) range_start: TextSize,
-    pub(crate) ty: SemanticModelReferenceType,
+pub struct SemanticModelReference {
+    pub range_start: TextSize,
+    pub ty: SemanticModelReferenceType,
 }
 
 impl SemanticModelReference {
@@ -120,8 +120,9 @@ impl Binding {
     }
 
     /// Returns all exports of the binding.
-    /// The node kind is either an identifier binding (tehd eclaration is self exported)
-    /// or an identifier usage.
+    ///
+    /// The node kind is either an identifier binding (if the declaration is
+    /// itself an `export` statement) or an identifier usage.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
         binding

@@ -12,7 +12,7 @@ use biome_rowan::TextRange;
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{AnalysisLogs, error::GritPatternError};
-use std::{borrow::Cow, fmt::Debug, str::FromStr};
+use std::{borrow::Cow, fmt::Debug, str::FromStr, sync::Arc};
 
 use crate::{AnalyzerPlugin, PluginDiagnostic};
 
@@ -42,7 +42,7 @@ impl AnalyzerGritPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerGritPlugin {
-    fn evaluate(&self, root: AnyParse, path: Utf8PathBuf) -> Vec<RuleDiagnostic> {
+    fn evaluate(&self, root: AnyParse, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
         let name: &str = self.grit_query.name.as_deref().unwrap_or("anonymous");
 
         let file = GritTargetFile { parse: root, path };

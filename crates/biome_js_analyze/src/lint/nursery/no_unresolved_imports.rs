@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
-use biome_module_graph::{ModuleGraph, ModuleInfo, SUPPORTED_EXTENSIONS};
+use biome_module_graph::{JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -237,7 +237,7 @@ struct GetUnresolvedImportsOptions<'a> {
     specifier: TokenText,
 
     /// Module info of the module we're importing from.
-    target_info: ModuleInfo,
+    target_info: JsModuleInfo,
 }
 
 fn get_unresolved_imports_from_module_source(
