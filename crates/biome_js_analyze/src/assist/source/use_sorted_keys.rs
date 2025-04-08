@@ -157,7 +157,7 @@ impl Rule for UseSortedKeys {
         let mut mutation = ctx.root().begin();
 
         for (unsorted, sorted) in state.iter().zip(sorted_state.iter()) {
-            mutation.replace_node(unsorted.member.clone(), sorted.member.clone());
+            mutation.replace_node_discard_trivia(unsorted.member.clone(), sorted.member.clone());
         }
 
         Some(RuleAction::new(
