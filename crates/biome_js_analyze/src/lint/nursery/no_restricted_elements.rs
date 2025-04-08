@@ -90,8 +90,8 @@ impl Rule for NoRestrictedElements {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let options = ctx.options();
         let node = ctx.query();
-        let element_name = node.name().ok()?.syntax().text_trimmed().to_string();
-        options.elements.get(element_name.as_str()).cloned()
+        let element_name = node.name().ok()?.syntax().text_trimmed().into_text();
+        options.elements.get(element_name.text()).cloned()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
