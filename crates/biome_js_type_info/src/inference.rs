@@ -66,9 +66,8 @@ impl Type {
         }
     }
 
-    pub fn from_any_js_declaration_clause(decl: &AnyJsDeclarationClause) -> Self {
-        decl.clone()
-            .into_declaration()
+    pub fn from_any_js_declaration_clause(decl: AnyJsDeclarationClause) -> Self {
+        decl.into_declaration()
             .map(|decl| Self::from_any_js_declaration(&decl))
             .unwrap_or_default()
     }

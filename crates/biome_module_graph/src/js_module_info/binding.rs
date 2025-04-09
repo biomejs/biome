@@ -78,7 +78,7 @@ impl JsBinding {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub enum JsDeclarationKind {
     /// A `class` declaration.
     Class,
@@ -108,6 +108,7 @@ pub enum JsDeclarationKind {
     Type,
 
     /// A bogus declaration or a declaration kind we don't handle yet.
+    #[default]
     Unknown,
 
     /// A `using` declaration.

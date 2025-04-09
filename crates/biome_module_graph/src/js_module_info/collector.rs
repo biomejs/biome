@@ -5,7 +5,7 @@ use biome_js_semantic::{
 };
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsImportClause,
-    JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, inner_string_text,
+    JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, inner_string_text,
 };
 use biome_js_type_info::Type;
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
@@ -180,28 +180,36 @@ impl JsModuleInfoCollector {
                 debug_assert!((binding_scope_id.index()) < self.scopes.len());
 
                 let binding_id = BindingId::new(self.bindings.len());
-                if let Some(node) = self.binding_node_by_start.get(&range.start()) {
-                    if let Some(name_token) =
-                        JsIdentifierBinding::cast_ref(node).and_then(|node| node.name_token().ok())
-                    {
-                        let name = name_token.token_text_trimmed();
 
-                        self.bindings.push(JsBindingData {
-                            range,
-                            references: Vec::new(),
-                            scope_id: *self.scope_stack.last().expect("scope must be present"),
-                            declaration_kind: JsDeclarationKind::from_node(node),
-                            ty: infer_type(node, &name),
-                            jsdoc: find_jsdoc(node),
-                            export_ranges: Vec::new(),
-                        });
-                        self.bindings_by_start.insert(range.start(), binding_id);
+                // We must proceed and register the binding, even if the node
+                // cannot be found. Otherwise, later lookups for the binding
+                // may fail.
+                let node = self.binding_node_by_start.get(&range.start());
+                let name_token = node.and_then(|node| {
+                    JsIdentifierBinding::cast_ref(node).and_then(|node| node.name_token().ok())
+                });
 
-                        let scope = &mut self.scopes[binding_scope_id.index()];
+                let name = name_token.as_ref().map(JsSyntaxToken::token_text_trimmed);
 
-                        scope.bindings.push(binding_id);
-                        scope.bindings_by_name.insert(name, binding_id);
-                    }
+                self.bindings.push(JsBindingData {
+                    range,
+                    references: Vec::new(),
+                    scope_id: *self.scope_stack.last().expect("scope must be present"),
+                    declaration_kind: node.map(JsDeclarationKind::from_node).unwrap_or_default(),
+                    ty: match (node, &name) {
+                        (Some(node), Some(name)) => infer_type(node, name),
+                        _ => Type::Unknown,
+                    },
+                    jsdoc: node.and_then(find_jsdoc),
+                    export_ranges: Vec::new(),
+                });
+                self.bindings_by_start.insert(range.start(), binding_id);
+
+                let scope = &mut self.scopes[binding_scope_id.index()];
+
+                scope.bindings.push(binding_id);
+                if let Some(name) = name {
+                    scope.bindings_by_name.insert(name, binding_id);
                 }
             }
             Read {
@@ -481,13 +489,11 @@ impl JsModuleInfoBag {
                 continue;
             };
 
-            let binding_id = global_scope
-                .bindings_by_name
-                .get(local_name)
-                .expect("missing binding");
-            let binding = &collector.bindings[binding_id.index()];
-            export.jsdoc_comment.clone_from(&binding.jsdoc);
-            export.ty.clone_from(&binding.ty);
+            if let Some(binding_id) = global_scope.bindings_by_name.get(local_name) {
+                let binding = &collector.bindings[binding_id.index()];
+                export.jsdoc_comment.clone_from(&binding.jsdoc);
+                export.ty.clone_from(&binding.ty);
+            }
         }
     }
 }
