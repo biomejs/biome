@@ -5,23 +5,23 @@ use rustc_hash::FxHashMap;
 use std::rc::Rc;
 
 #[derive(Debug)]
-pub struct SemanticModelScopeData {
+pub(crate) struct SemanticModelScopeData {
     // The scope range
-    pub range: TextRange,
+    pub(crate) range: TextRange,
     // The parent scope of this scope
-    pub parent: Option<ScopeId>,
+    pub(crate) parent: Option<ScopeId>,
     // All children scope of this scope
-    pub children: Vec<ScopeId>,
+    pub(crate) children: Vec<ScopeId>,
     // All bindings of this scope (points to SemanticModelData::bindings)
-    pub bindings: Vec<BindingId>,
+    pub(crate) bindings: Vec<BindingId>,
     // Map pointing to the [bindings] vec of each bindings by its name
-    pub bindings_by_name: FxHashMap<TokenText, BindingId>,
+    pub(crate) bindings_by_name: FxHashMap<TokenText, BindingId>,
     // All read references of a scope
-    pub read_references: Vec<ReferenceId>,
+    pub(crate) read_references: Vec<ReferenceId>,
     // All write references of a scope
-    pub write_references: Vec<ReferenceId>,
+    pub(crate) write_references: Vec<ReferenceId>,
     // Identify if this scope is from a closure or not
-    pub is_closure: bool,
+    pub(crate) is_closure: bool,
 }
 
 /// Provides all information regarding a specific scope.

@@ -3,24 +3,24 @@ use biome_js_syntax::{TextRange, TsTypeParameterName, binding_ext::AnyJsIdentifi
 
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]
-pub struct SemanticModelBindingData {
-    pub range: TextRange,
-    pub references: Vec<SemanticModelReference>,
+pub(crate) struct SemanticModelBindingData {
+    pub(crate) range: TextRange,
+    pub(crate) references: Vec<SemanticModelReference>,
     // We use a SmallVec because most of the time a binding is expected once.
-    pub export_by_start: smallvec::SmallVec<[TextSize; 4]>,
+    pub(crate) export_by_start: smallvec::SmallVec<[TextSize; 4]>,
 }
 
 #[derive(Clone, Copy, Debug)]
-pub enum SemanticModelReferenceType {
+pub(crate) enum SemanticModelReferenceType {
     Read { hoisted: bool },
     Write { hoisted: bool },
 }
 
 /// Internal type with all the semantic data of a specific reference
 #[derive(Debug)]
-pub struct SemanticModelReference {
-    pub range_start: TextSize,
-    pub ty: SemanticModelReferenceType,
+pub(crate) struct SemanticModelReference {
+    pub(crate) range_start: TextSize,
+    pub(crate) ty: SemanticModelReferenceType,
 }
 
 impl SemanticModelReference {
