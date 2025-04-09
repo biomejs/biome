@@ -3,28 +3,10 @@ use biome_parser::{
     lexer::{LexContext, Lexer, TokenFlags},
 };
 use biome_rowan::{TextRange, TextSize};
-use biome_yaml_syntax::{T, YamlSyntaxKind};
-use std::iter::FusedIterator;
+use biome_yaml_syntax::{T, YamlSyntaxKind, YamlSyntaxKind::*};
 
 #[rustfmt::skip]
 mod tests;
-
-pub struct Token {
-    kind: YamlSyntaxKind,
-    range: TextRange,
-}
-
-impl Token {
-    #[expect(dead_code)]
-    pub fn kind(&self) -> YamlSyntaxKind {
-        self.kind
-    }
-
-    #[expect(dead_code)]
-    pub fn range(&self) -> TextRange {
-        self.range
-    }
-}
 
 pub(crate) struct YamlLexer<'src> {
     /// Source text
@@ -56,7 +38,7 @@ pub(crate) struct YamlLexer<'src> {
     context: YamlLexContext,
 }
 
-impl YamlLexer<'_> {
+impl<'src> YamlLexer<'src> {
     fn current_char(&self) -> Option<u8> {
         self.source.as_bytes().get(self.position).copied()
     }
@@ -341,51 +323,11 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
     }
 }
 
-impl Iterator for YamlLexer<'_> {
-    type Item = Token;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.consume_token()
-    }
-}
-
-impl FusedIterator for YamlLexer<'_> {}
-
 /// Context in which the lexer should lex the next token
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum YamlLexContext {
     #[default]
     Regular,
-    /// The lexer has just lexed an identifier and is expecting a value to come next.
-    ///
-    /// After an identifier, a `: ` is expected to come next, and then the value. If the next token is another identifier, it must come after a newline. Otherwise, values can remain on the same line.
-    /// However, it is possible to have a nested mapping on the same line, but the nested mapping must be enclosed in `{}`.
-    ///
-    /// Valid:
-    /// ```yaml
-    /// foo:
-    ///   bar: baz
-    /// ```
-    /// ```yaml
-    /// foo: 5
-    /// ```
-    /// ```yaml
-    /// foo: { bar: baz }
-    /// ```
-    /// Invalid:
-    /// ```yaml
-    /// foo: bar: baz
-    /// #       ^ invalid syntax, mapping values not allowed here
-    /// ```
-    AfterIdent,
-    /// The lexer has lexed an inline array and is expecting a value or the end of the array to come next.
-    ///
-    /// In this context, commas are allowed to separate values. Normally, commas are simply treated as part of a value.
-    /// A newline is not allowed in this context. The newline must come after the array has been closed with `]`
-    /// ```yaml
-    /// foo: [1, 2, 3]
-    /// ```
-    AfterInlineArray,
 }
 
 impl LexContext for YamlLexContext {
