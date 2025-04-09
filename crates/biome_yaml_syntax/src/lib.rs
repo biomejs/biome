@@ -28,13 +28,13 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
     fn is_bogus(&self) -> bool {
         matches!(
             self,
-            YamlSyntaxKind::YAML_BOGUS | YamlSyntaxKind::YAML_BOGUS_VALUE
+            YamlSyntaxKind::YAML_BOGUS | YamlSyntaxKind::YAML_BOGUS_NODE
         )
     }
 
     fn to_bogus(&self) -> Self {
         match self {
-            YamlSyntaxKind::YAML_BOGUS_VALUE => YamlSyntaxKind::YAML_BOGUS_VALUE,
+            YamlSyntaxKind::YAML_BOGUS_NODE => YamlSyntaxKind::YAML_BOGUS_NODE,
             _ => YamlSyntaxKind::YAML_BOGUS,
         }
     }
@@ -50,7 +50,7 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
     }
 
     fn is_root(&self) -> bool {
-        matches!(self, YamlSyntaxKind::YAML_ROOT)
+        matches!(self, YamlSyntaxKind::YAML_STREAM)
     }
 
     fn is_list(&self) -> bool {
@@ -76,11 +76,6 @@ impl YamlSyntaxKind {
 
     pub fn is_comments(self) -> bool {
         matches!(self, YamlSyntaxKind::COMMENT)
-    }
-
-    #[inline]
-    pub const fn is_keyword(self) -> bool {
-        matches!(self, T![null])
     }
 }
 

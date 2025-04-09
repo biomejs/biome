@@ -198,7 +198,6 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
                         EOF => "EOF",
-                        YAML_STRING_VALUE => "string value",
                         _ => return None,
                     };
                     Some(tok)
