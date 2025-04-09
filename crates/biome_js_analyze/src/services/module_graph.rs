@@ -2,7 +2,7 @@ use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
     Queryable, RuleKey, ServiceBag, SyntaxVisitor,
 };
-use biome_module_graph::{ModuleGraph, JsModuleInfo};
+use biome_module_graph::{JsModuleInfo, ModuleGraph};
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
 use camino::Utf8Path;
 use std::sync::Arc;
