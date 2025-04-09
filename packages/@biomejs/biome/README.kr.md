@@ -162,6 +162,9 @@ Biome은 기업이 다양한 개발자들 사이에서 인지도를 얻을 수 �
       <td align="center" valign="middle">
         <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://pennylane.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/57875210?s=200&v=4" width="80"></a>
+      </td>
     </tr>
   </tbody>
 </table>
