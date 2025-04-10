@@ -21,7 +21,7 @@ use grit_util::error::GritPatternError;
 use grit_util::{AnalysisLogs, FileOrigin, InputRanges, MatchRanges, error::GritResult};
 use path_absolutize::Absolutize;
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct GritQueryContext;
@@ -236,7 +236,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
                 // TODO: Verify the workspace's maximum file size.
 
                 let file = file_owner_from_matches(
-                    &file.path,
+                    file.path.as_ref(),
                     &file.parse,
                     None,
                     FileOrigin::Fresh,
@@ -314,15 +314,27 @@ fn new_file_owner(
 /// that can use the Biome workspace.
 #[derive(Clone, Debug)]
 pub struct GritTargetFile {
-    pub path: Utf8PathBuf,
+    pub path: Arc<Utf8PathBuf>,
     pub parse: AnyParse,
 }
 
 impl GritTargetFile {
-    pub fn parse(source: &str, path: Utf8PathBuf, target_language: GritTargetLanguage) -> Self {
-        let parser = target_language.get_parser();
-        let parse = parser.parse_with_path(source, &path);
+    pub fn new(path: impl Into<Utf8PathBuf>, parse: AnyParse) -> Self {
+        Self {
+            path: Arc::new(path.into()),
+            parse,
+        }
+    }
 
-        Self { parse, path }
+    pub fn parse(
+        source: &str,
+        path: impl Into<Utf8PathBuf>,
+        target_language: GritTargetLanguage,
+    ) -> Self {
+        let path = path.into();
+        let parser = target_language.get_parser();
+        let parse = parser.parse_with_path(source, path.as_ref());
+
+        Self::new(path, parse)
     }
 }

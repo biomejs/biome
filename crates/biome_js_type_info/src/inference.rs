@@ -1,11 +1,12 @@
 use std::str::FromStr;
 
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsClassMember, AnyJsDeclarationClause,
-    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsLiteralExpression,
-    AnyJsObjectMember, AnyJsParameter, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
-    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, JsArrowFunctionExpression,
-    JsFunctionDeclaration, JsFunctionExpression, JsObjectExpression, JsParameters, JsSyntaxToken,
+    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsClassMember, AnyJsDeclaration,
+    AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
+    AnyJsLiteralExpression, AnyJsObjectMember, AnyJsParameter, AnyTsName, AnyTsReturnType,
+    AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName,
+    JsArrowFunctionExpression, JsClassDeclaration, JsFunctionDeclaration, JsFunctionExpression,
+    JsNewExpression, JsObjectExpression, JsParameters, JsReferenceIdentifier, JsSyntaxToken,
     JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration,
     TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters, TsTypeofType,
 };
@@ -20,75 +21,55 @@ use crate::{
 };
 
 impl Type {
-    pub fn from_any_js_declaration_clause(decl: &AnyJsDeclarationClause) -> Self {
+    pub fn from_any_js_declaration(decl: &AnyJsDeclaration) -> Self {
         match decl {
-            AnyJsDeclarationClause::JsClassDeclaration(decl) => Self::Class(Box::new(Class {
-                name: decl
-                    .id()
-                    .ok()
-                    .as_ref()
-                    .and_then(|id| id.as_js_identifier_binding())
-                    .and_then(|id| id.name_token().ok())
-                    .map(|token| token.token_text_trimmed().into()),
-                members: decl
-                    .members()
-                    .into_iter()
-                    .filter_map(|member| ClassMember::from_any_js_class_member(&member))
-                    .collect(),
-            })),
-            AnyJsDeclarationClause::JsFunctionDeclaration(decl) => {
-                Self::Function(Box::new(Function {
-                    is_async: decl.async_token().is_some(),
-                    type_parameters: generic_params_from_ts_type_params(decl.type_parameters()),
-                    name: decl
-                        .id()
-                        .ok()
-                        .as_ref()
-                        .and_then(|id| id.as_js_identifier_binding())
-                        .and_then(|id| id.name_token().ok())
-                        .map(|token| token.token_text_trimmed().into()),
-                    parameters: function_params_from_js_params(decl.parameters()),
-                    return_type: return_type_from_annotation(decl.return_type_annotation())
-                        .unwrap_or_else(|| return_type_from_async_token(decl.async_token())),
-                }))
+            AnyJsDeclaration::JsClassDeclaration(decl) => Self::from_js_class_declaration(decl),
+            AnyJsDeclaration::JsFunctionDeclaration(decl) => {
+                Self::from_js_function_declaration(decl)
             }
-            AnyJsDeclarationClause::JsVariableDeclarationClause(_) => {
+            AnyJsDeclaration::JsVariableDeclaration(_) => {
                 // Variable declarations don't have a type;
                 // only their inner declarators have.
                 Self::Unknown
             }
-            AnyJsDeclarationClause::TsDeclareFunctionDeclaration(_decl) => {
+            AnyJsDeclaration::TsDeclareFunctionDeclaration(_decl) => {
                 // TODO: Handle module declarations.
                 Self::Unknown
             }
-            AnyJsDeclarationClause::TsEnumDeclaration(_decl) => {
+            AnyJsDeclaration::TsEnumDeclaration(_decl) => {
                 // TODO: Handle enum declarations.
                 Self::Unknown
             }
-            AnyJsDeclarationClause::TsExternalModuleDeclaration(_decl) => {
+            AnyJsDeclaration::TsExternalModuleDeclaration(_decl) => {
                 // TODO: Handle external module declarations.
                 Self::Unknown
             }
-            AnyJsDeclarationClause::TsGlobalDeclaration(_decl) => {
+            AnyJsDeclaration::TsGlobalDeclaration(_decl) => {
                 // TODO: Handle global declarations.
                 Self::Unknown
             }
-            AnyJsDeclarationClause::TsImportEqualsDeclaration(_decl) => {
+            AnyJsDeclaration::TsImportEqualsDeclaration(_decl) => {
                 // TODO: Handle `import T = Name` syntax.
                 Self::Unknown
             }
-            AnyJsDeclarationClause::TsInterfaceDeclaration(_decl) => {
+            AnyJsDeclaration::TsInterfaceDeclaration(_decl) => {
                 // TODO: Handle interface declarations.
                 Self::Unknown
             }
-            AnyJsDeclarationClause::TsModuleDeclaration(_decl) => {
+            AnyJsDeclaration::TsModuleDeclaration(_decl) => {
                 // TODO: Handle module declarations.
                 Self::Unknown
             }
-            AnyJsDeclarationClause::TsTypeAliasDeclaration(decl) => {
+            AnyJsDeclaration::TsTypeAliasDeclaration(decl) => {
                 Self::from_ts_type_alias_declaration(decl).unwrap_or_default()
             }
         }
+    }
+
+    pub fn from_any_js_declaration_clause(decl: AnyJsDeclarationClause) -> Self {
+        decl.into_declaration()
+            .map(|decl| Self::from_any_js_declaration(&decl))
+            .unwrap_or_default()
     }
 
     pub fn from_any_js_export_default_declaration(decl: &AnyJsExportDefaultDeclaration) -> Self {
@@ -201,6 +182,18 @@ impl Type {
                 Type::from_js_arrow_function_expression(expr)
             }
             AnyJsExpression::JsFunctionExpression(expr) => Type::from_js_function_expression(expr),
+            AnyJsExpression::JsIdentifierExpression(expr) => expr
+                .name()
+                .map(|name| Self::from_js_reference_identifier(&name))
+                .unwrap_or_default(),
+            AnyJsExpression::JsInstanceofExpression(_expr) => Type::Boolean,
+            AnyJsExpression::JsNewExpression(expr) => {
+                Type::from_js_new_expression(expr).unwrap_or_default()
+            }
+            AnyJsExpression::JsParenthesizedExpression(expr) => expr
+                .expression()
+                .map(|expr| Self::from_any_js_expression(&expr))
+                .unwrap_or_default(),
             _ => {
                 // TODO: Much
                 Type::Unknown
@@ -404,6 +397,23 @@ impl Type {
         }))
     }
 
+    pub fn from_js_class_declaration(decl: &JsClassDeclaration) -> Self {
+        Self::Class(Box::new(Class {
+            name: decl
+                .id()
+                .ok()
+                .as_ref()
+                .and_then(|id| id.as_js_identifier_binding())
+                .and_then(|id| id.name_token().ok())
+                .map(|token| token.token_text_trimmed().into()),
+            members: decl
+                .members()
+                .into_iter()
+                .filter_map(|member| ClassMember::from_any_js_class_member(&member))
+                .collect(),
+        }))
+    }
+
     pub fn from_js_function_declaration(decl: &JsFunctionDeclaration) -> Self {
         Self::Function(Box::new(Function {
             is_async: decl.async_token().is_some(),
@@ -435,6 +445,40 @@ impl Type {
         }))
     }
 
+    pub fn from_js_new_expression(expr: &JsNewExpression) -> Option<Self> {
+        let callee_type = Type::from_any_js_expression(&expr.callee().ok()?);
+        match callee_type {
+            Type::Class(class) => {
+                let num_args = expr
+                    .arguments()
+                    .map_or(0, |args| args.args().into_iter().count());
+                let ty = class
+                    .members
+                    .iter()
+                    .find_map(|member| match member {
+                        ClassMember::Constructor(constructor) => {
+                            // TODO: We might need to make an attempt to match
+                            //       type signatures too.
+                            (constructor.parameters.len() == num_args)
+                                .then(|| constructor.return_type.clone())
+                                .flatten()
+                        }
+                        _ => None,
+                    })
+                    .unwrap_or(Type::Class(class));
+                Some(ty)
+            }
+            Type::Reference(reference) => {
+                // TODO: Infer type parameters from arguments.
+                Some(Type::Reference(Box::new(TypeReference::from_qualifier(
+                    reference.qualifier.clone(),
+                ))))
+            }
+            // TODO: Check other types that may have a constructor.
+            _ => None,
+        }
+    }
+
     pub fn from_js_object_expression(expr: &JsObjectExpression) -> Self {
         Self::Object(Box::new(Object(
             expr.members()
@@ -446,6 +490,16 @@ impl Type {
                 })
                 .collect(),
         )))
+    }
+
+    pub fn from_js_reference_identifier(id: &JsReferenceIdentifier) -> Self {
+        if id.is_undefined() {
+            Type::Undefined
+        } else {
+            id.name()
+                .map(|name| Self::Reference(Box::new(TypeReference::from_name(name))))
+                .unwrap_or_default()
+        }
     }
 
     pub fn from_js_variable_declarator(decl: &JsVariableDeclarator) -> Option<Self> {
@@ -854,6 +908,19 @@ impl TypeMember {
     }
 }
 
+impl TypeReference {
+    pub fn from_name(name: TokenText) -> Self {
+        Self::from_qualifier(TypeReferenceQualifier::from_name(name))
+    }
+
+    pub fn from_qualifier(qualifier: TypeReferenceQualifier) -> Self {
+        Self {
+            qualifier,
+            type_parameters: Box::new([]),
+        }
+    }
+}
+
 impl TypeReferenceQualifier {
     pub fn from_any_ts_name(name: &AnyTsName) -> Option<Self> {
         match name {
@@ -879,6 +946,10 @@ impl TypeReferenceQualifier {
                 Some(Self(identifiers.into()))
             }
         }
+    }
+
+    pub fn from_name(name: TokenText) -> Self {
+        Self(Box::new([name.into()]))
     }
 }
 

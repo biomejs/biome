@@ -4,7 +4,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
-use biome_module_graph::{ModuleGraph, ModuleInfo};
+use biome_module_graph::{JsModuleInfo, JsResolvedPath, ModuleGraph};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
@@ -216,8 +216,8 @@ impl Rule for NoPrivateImports {
 
         let node = ctx.query();
         let Some(target_path) = module_info
-            .get_import_by_js_node(node)
-            .and_then(|import| import.resolved_path.as_ref().ok())
+            .get_import_path_by_js_node(node)
+            .and_then(JsResolvedPath::as_path)
         else {
             return Vec::new();
         };
@@ -288,7 +288,7 @@ struct GetRestrictedImportOptions<'a> {
     target_path: &'a Utf8Path,
 
     /// Module info of the target module we're importing from.
-    target_info: ModuleInfo,
+    target_info: JsModuleInfo,
 
     /// The visibility to assume for symbols without explicit visibility tag.
     default_visibility: Visibility,

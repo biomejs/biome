@@ -1,0 +1,45 @@
+---
+source: crates/biome_module_graph/src/module_graph.tests.rs
+expression: data.exports
+---
+{
+    Borrowed(
+        "superComputer",
+    ): Own(
+        JsOwnExport {
+            jsdoc_comment: None,
+            local_name: Some(
+                "superComputer",
+            ),
+            ty: Reference(
+                TypeReference {
+                    qualifier: TypeReferenceQualifier(
+                        [
+                            Borrowed(
+                                "DeepThought",
+                            ),
+                        ],
+                    ),
+                    type_parameters: [],
+                },
+            ),
+        },
+    ),
+    Borrowed(
+        "theAnswer",
+    ): Own(
+        JsOwnExport {
+            jsdoc_comment: None,
+            local_name: Some(
+                "theAnswer",
+            ),
+            ty: Literal(
+                Number(
+                    Borrowed(
+                        "42",
+                    ),
+                ),
+            ),
+        },
+    ),
+}

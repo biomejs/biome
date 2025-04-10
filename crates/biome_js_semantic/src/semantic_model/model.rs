@@ -2,32 +2,32 @@ use super::*;
 use biome_js_syntax::{AnyJsFunction, AnyJsRoot};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
-pub(crate) struct BindingId(u32);
+pub struct BindingId(u32);
 
 impl BindingId {
-    pub(crate) fn new(index: usize) -> Self {
-        // SAFETY: We didn't handle files execedding `u32::MAX` bytes.
-        // Thus, it isn't possible to execedd `u32::MAX` bindings.
+    pub fn new(index: usize) -> Self {
+        // SAFETY: We didn't handle files exceeding `u32::MAX` bytes.
+        // Thus, it isn't possible to exceed `u32::MAX` bindings.
         Self(index as u32)
     }
 
-    pub(crate) fn index(self) -> usize {
+    pub fn index(self) -> usize {
         self.0 as usize
     }
 }
 
 #[derive(Copy, Clone, Debug)]
-pub(crate) struct ReferenceId(BindingId, u32);
+pub struct ReferenceId(BindingId, u32);
 
 impl ReferenceId {
-    pub(crate) fn new(binding_id: BindingId, index: usize) -> Self {
-        // SAFETY: We didn't handle files execedding `u32::MAX` bytes.
-        // Thus, it isn't possible to execedd `u32::MAX` refernces.
+    pub fn new(binding_id: BindingId, index: usize) -> Self {
+        // SAFETY: We didn't handle files exceeding `u32::MAX` bytes.
+        // Thus, it isn't possible to exceed `u32::MAX` refernces.
         Self(binding_id, index as u32)
     }
 
     // Points to [SemanticModel]::bindings vec
-    pub(crate) fn binding_id(&self) -> BindingId {
+    pub fn binding_id(&self) -> BindingId {
         self.0
     }
 
@@ -43,9 +43,9 @@ pub struct ScopeId(std::num::NonZeroU32);
 // We don't implement `From<usize> for ScopeId` and `From<ScopeId> for usize`
 // to ensure that the API consumers don't create `ScopeId`.
 impl ScopeId {
-    pub(crate) fn new(index: usize) -> Self {
-        // SAFETY: We didn't handle files execedding `u32::MAX` bytes.
-        // Thus, it isn't possible to execedd `u32::MAX` scopes.
+    pub fn new(index: usize) -> Self {
+        // SAFETY: We didn't handle files exceeding `u32::MAX` bytes.
+        // Thus, it isn't possible to exceed `u32::MAX` scopes.
         //
         // Adding 1 ensurtes that the value is never equal to 0.
         // Instead of adding 1, we could XOR the value with `u32::MAX`.
@@ -55,7 +55,7 @@ impl ScopeId {
         Self(unsafe { std::num::NonZeroU32::new_unchecked(index.unchecked_add(1) as u32) })
     }
 
-    pub(crate) fn index(self) -> usize {
+    pub fn index(self) -> usize {
         // SAFETY: The internal representation ensures that the value is never equal to 0.
         // Thus, it is safe to substract 1.
         (unsafe { self.0.get().unchecked_sub(1) }) as usize

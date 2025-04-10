@@ -832,10 +832,7 @@ pub(crate) fn search(
     _settings: WorkspaceSettingsHandle,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let result = query
-        .execute(GritTargetFile {
-            path: path.to_path_buf(),
-            parse,
-        })
+        .execute(GritTargetFile::new(path.as_path(), parse))
         .map_err(|err| {
             WorkspaceError::SearchError(SearchError::QueryError(QueryDiagnostic(err.to_string())))
         })?;

@@ -1159,6 +1159,7 @@ dependencies = [
  "biome_deserialize",
  "biome_fs",
  "biome_js_parser",
+ "biome_js_semantic",
  "biome_js_syntax",
  "biome_js_type_info",
  "biome_json_parser",
