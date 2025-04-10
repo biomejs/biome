@@ -11,7 +11,7 @@ use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
+use biome_rowan::{Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
@@ -456,4 +456,19 @@ impl CheckActionType {
     pub const fn is_suppression(&self) -> bool {
         matches!(self, Self::Suppression)
     }
+}
+
+/// Validator to run in our parser's spec tests to make sure no excess data
+/// is collected in the EOF token.
+pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
+    let last_token = syntax.last_token().expect("no tokens parsed");
+    assert_eq!(
+        last_token.kind(),
+        L::Kind::EOF,
+        "the syntax tree's last token must be an EOF token"
+    );
+    assert!(
+        last_token.token_text_trimmed().is_empty(),
+        "the EOF token may not contain any data except trailing whitespace"
+    );
 }

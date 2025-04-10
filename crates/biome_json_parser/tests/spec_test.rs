@@ -5,6 +5,7 @@ use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_rowan::SyntaxKind;
+use biome_test_utils::validate_eof_token;
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;
@@ -39,7 +40,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         allow_comments: test_directory.contains("allow_comments"),
         allow_trailing_commas: test_directory.contains("allow_trailing_commas"),
     };
+
     let parsed = parse_json(&content, parse_config);
+    validate_eof_token(parsed.syntax());
+
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
