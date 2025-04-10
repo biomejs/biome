@@ -74,7 +74,7 @@ impl Rule for NoFlatMapIdentity {
                 AnyJsExpression::JsArrowFunctionExpression(arg) => {
                     let parameter: String = match arg.parameters().ok()? {
                         biome_js_syntax::AnyJsArrowFunctionParameters::AnyJsBinding(p) => {
-                            p.to_trimmed_string().trim_matches(['(', ')']).to_owned()
+                            p.as_trimmed_text().trim_matches(['(', ')']).to_owned()
                         }
                         biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(p) => {
                             if p.items().len() == 1 {

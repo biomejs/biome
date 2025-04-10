@@ -50,7 +50,7 @@ declare_lint_rule! {
 
 impl Rule for UseFocusableInteractive {
     type Query = Aria<AnyJsxElement>;
-    type State = String;
+    type State = Box<str>;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -68,7 +68,7 @@ impl Rule for UseFocusableInteractive {
                 if attribute_has_interactive_role(&role_attribute_value)?
                     && tabindex_attribute.is_none()
                 {
-                    return Some(role_attribute_value.to_trimmed_string());
+                    return Some(role_attribute_value.as_trimmed_text().text().into());
                 }
             }
         }

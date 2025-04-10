@@ -43,19 +43,19 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateJsxProps {
     type Query = Ast<AnyJsxElement>;
-    type State = (String, Vec<JsxAttribute>);
-    type Signals = FxHashMap<String, Vec<JsxAttribute>>;
+    type State = (Box<str>, Vec<JsxAttribute>);
+    type Signals = FxHashMap<Box<str>, Vec<JsxAttribute>>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let mut defined_attributes: FxHashMap<String, Vec<JsxAttribute>> = FxHashMap::default();
+        let mut defined_attributes: FxHashMap<Box<str>, Vec<JsxAttribute>> = FxHashMap::default();
         for attribute in node.attributes() {
             if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
                 if let Ok(name) = attr.name() {
                     defined_attributes
-                        .entry(name.to_trimmed_string())
+                        .entry(name.as_trimmed_text().text().into())
                         .or_default()
                         .push(attr);
                 }

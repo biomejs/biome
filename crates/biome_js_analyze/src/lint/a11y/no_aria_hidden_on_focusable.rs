@@ -79,7 +79,7 @@ impl Rule for NoAriaHiddenOnFocusable {
 
                 match tabindex_val {
                     AnyJsxAttributeValue::AnyJsxTag(jsx_tag) => {
-                        let value = jsx_tag.to_trimmed_string().parse::<i32>();
+                        let value = jsx_tag.as_trimmed_text().text().parse::<i32>();
                         if let Ok(num) = value {
                             return (num >= 0).then_some(());
                         }

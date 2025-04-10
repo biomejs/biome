@@ -18,6 +18,7 @@ mod mutation;
 use crate::syntax::{SyntaxSlot, SyntaxSlots};
 use crate::{
     Language, RawSyntaxKind, SyntaxKind, SyntaxList, SyntaxNode, SyntaxToken, SyntaxTriviaPiece,
+    Text,
 };
 pub use batch::*;
 pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
@@ -215,6 +216,11 @@ pub trait AstNode: Clone {
     /// This function allocates a [String]
     fn to_trimmed_string(&self) -> std::string::String {
         self.syntax().text_trimmed().to_string()
+    }
+
+    /// Returns the string representation of this node without trivia, without allocating a string, if possible
+    fn as_trimmed_text(&self) -> Text {
+        self.syntax().text_trimmed().into_text()
     }
 
     fn range(&self) -> TextRange {

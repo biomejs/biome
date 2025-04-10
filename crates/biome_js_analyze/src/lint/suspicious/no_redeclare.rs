@@ -117,7 +117,7 @@ impl Rule for NoRedeclare {
 }
 
 fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<Redeclaration>) {
-    let mut declarations = FxHashMap::<String, (TextRange, AnyJsBindingDeclaration)>::default();
+    let mut declarations = FxHashMap::<Box<str>, (TextRange, AnyJsBindingDeclaration)>::default();
     if scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY {
         // Handle cases where a variable/type redeclares a parameter or type parameter.
         // For example:
@@ -145,8 +145,11 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                 if let Some(decl) = id_binding.declaration() {
                     // Ignore the function itself.
                     if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
-                        let name = id_binding.to_trimmed_string();
-                        declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                        let name = id_binding.as_trimmed_text();
+                        declarations.insert(
+                            name.text().into(),
+                            (id_binding.syntax().text_trimmed_range(), decl),
+                        );
                     }
                 }
             }
@@ -158,8 +161,8 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // We consider only binding of a declaration
         // This allows to skip function parameters, methods, ...
         if let Some(decl) = id_binding.declaration() {
-            let name = id_binding.to_trimmed_string();
-            if let Some((first_text_range, first_decl)) = declarations.get(&name) {
+            let name = id_binding.as_trimmed_text();
+            if let Some((first_text_range, first_decl)) = declarations.get(name.text()) {
                 // Do not report:
                 // - mergeable declarations.
                 //   e.g. a `function` and a `namespace`
@@ -174,13 +177,16 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                         && first_decl.syntax().parent() != decl.syntax().parent())
                 {
                     redeclarations.push(Redeclaration {
-                        name: name.into_boxed_str(),
+                        name: name.text().into(),
                         declaration: *first_text_range,
                         redeclaration: id_binding.syntax().text_trimmed_range(),
                     })
                 }
             } else {
-                declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                declarations.insert(
+                    name.text().into(),
+                    (id_binding.syntax().text_trimmed_range(), decl),
+                );
             }
         }
     }

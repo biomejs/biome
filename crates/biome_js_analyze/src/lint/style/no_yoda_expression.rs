@@ -364,9 +364,9 @@ fn extract_string_value(expression: AnyJsExpression) -> Option<String> {
     match expression {
         AnyJsExpression::JsUnaryExpression(unary) => match unary.operator() {
             Ok(JsUnaryOperator::Minus) => {
-                let argument = unary.argument().ok()?.to_trimmed_string();
+                let argument = unary.argument().ok()?.as_trimmed_text();
                 let is_numeric_literal = unary.is_signed_numeric_literal().ok()?;
-                is_numeric_literal.then_some(String::from("-") + argument.as_str())
+                is_numeric_literal.then_some(String::from("-") + argument.text())
             }
             _ => None,
         },

@@ -77,7 +77,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let node_name = node.name().ok()?.to_trimmed_string();
+        let node_name = node.name().ok()?.as_trimmed_text();
         let linear_gradient_property = [
             "linear-gradient",
             "-webkit-linear-gradient",
@@ -91,7 +91,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
         let css_parameter = node.items();
 
         let first_css_parameter = css_parameter.first()?.ok()?;
-        let first_css_parameter_text = first_css_parameter.to_trimmed_string();
+        let first_css_parameter_text = first_css_parameter.as_trimmed_text();
         if IN_KEYWORD.is_match(&first_css_parameter_text) {
             return None;
         }

@@ -12,6 +12,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionNth, CssPseudoClassFunctionRelativeSelectorList,
     CssPseudoClassFunctionSelector, CssPseudoClassFunctionSelectorList,
     CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
+    CssSyntaxToken,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
@@ -82,13 +83,107 @@ declare_node_union! {
       | CssPageSelectorPseudo
 }
 
+impl AnyPseudoLike {
+    fn name_range(&self) -> Option<TextRange> {
+        Some(match self {
+            AnyPseudoLike::CssBogusPseudoClass(_) => return None,
+            AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
+                let name = selector.name().ok()?;
+                name.text_trimmed_range()
+            }
+            AnyPseudoLike::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
+                let name = selector_list.name().ok()?;
+                name.text_trimmed_range()
+            }
+            AnyPseudoLike::CssPseudoClassFunctionIdentifier(ident) => {
+                let name = ident.name_token().ok()?;
+                name.text_trimmed_range()
+            }
+            AnyPseudoLike::CssPseudoClassFunctionNth(func_nth) => {
+                let name = func_nth.name().ok()?;
+                name.text_trimmed_range()
+            }
+            AnyPseudoLike::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
+                let name = selector_list.name_token().ok()?;
+                name.text_trimmed_range()
+            }
+            AnyPseudoLike::CssPseudoClassFunctionSelector(selector) => {
+                let name = selector.name().ok()?;
+                name.text_trimmed_range()
+            }
+            AnyPseudoLike::CssPseudoClassFunctionSelectorList(selector_list) => {
+                let name = selector_list.name().ok()?;
+                name.text_trimmed_range()
+            }
+            AnyPseudoLike::CssPseudoClassFunctionValueList(func_value_list) => {
+                let name = func_value_list.name_token().ok()?;
+                name.text_trimmed_range()
+            }
+            AnyPseudoLike::CssPseudoClassIdentifier(ident) => {
+                let name = ident.name().ok()?;
+                name.range()
+            }
+            AnyPseudoLike::CssPageSelectorPseudo(page_pseudo) => {
+                let name = page_pseudo.selector().ok()?;
+                name.text_trimmed_range()
+            }
+        })
+    }
+
+    fn name(&self) -> Option<CssSyntaxToken> {
+        Some(match self {
+            AnyPseudoLike::CssBogusPseudoClass(_) => return None,
+            AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
+                let name = selector.name().ok()?;
+                name
+            }
+            AnyPseudoLike::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
+                let name = selector_list.name().ok()?;
+                name
+            }
+            AnyPseudoLike::CssPseudoClassFunctionIdentifier(ident) => {
+                let name = ident.name_token().ok()?;
+                name
+            }
+            AnyPseudoLike::CssPseudoClassFunctionNth(func_nth) => {
+                let name = func_nth.name().ok()?;
+                name
+            }
+            AnyPseudoLike::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
+                let name = selector_list.name_token().ok()?;
+                name
+            }
+            AnyPseudoLike::CssPseudoClassFunctionSelector(selector) => {
+                let name = selector.name().ok()?;
+                name
+            }
+            AnyPseudoLike::CssPseudoClassFunctionSelectorList(selector_list) => {
+                let name = selector_list.name().ok()?;
+                name
+            }
+            AnyPseudoLike::CssPseudoClassFunctionValueList(func_value_list) => {
+                let name = func_value_list.name_token().ok()?;
+                name
+            }
+            AnyPseudoLike::CssPseudoClassIdentifier(ident) => {
+                let name = ident.name().ok()?;
+                name.value_token().ok()?
+            }
+            AnyPseudoLike::CssPageSelectorPseudo(page_pseudo) => {
+                let name = page_pseudo.selector().ok()?;
+                name
+            }
+        })
+    }
+}
+
 fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
     let mut prev_element = node.syntax().parent().and_then(|p| p.prev_sibling());
     while let Some(prev) = &prev_element {
         let maybe_selector = CssPseudoElementSelector::cast_ref(prev);
         if let Some(selector) = maybe_selector.as_ref() {
             return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS
-                .contains(&selector.to_trimmed_string().trim_matches(':'));
+                .contains(&selector.as_trimmed_text().trim_matches(':'));
         };
         prev_element = prev.prev_sibling();
     }
@@ -104,7 +199,7 @@ enum PseudoClassType {
 }
 
 pub struct NoUnknownPseudoClassSelectorState {
-    class_name: String,
+    class_name: Box<str>,
     span: TextRange,
     class_type: PseudoClassType,
 }
@@ -117,51 +212,8 @@ impl Rule for NoUnknownPseudoClass {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let pseudo_class = ctx.query();
-        let (name, span) = match pseudo_class {
-            AnyPseudoLike::CssBogusPseudoClass(class) => {
-                Some((class.to_trimmed_string(), class.range()))
-            }
-            AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
-                let name = selector.name().ok()?;
-                Some((name.text().to_string(), name.text_range()))
-            }
-            AnyPseudoLike::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
-                let name = selector_list.name().ok()?;
-                Some((name.text().to_string(), name.text_range()))
-            }
-            AnyPseudoLike::CssPseudoClassFunctionIdentifier(ident) => {
-                let name = ident.name_token().ok()?;
-                Some((name.text().to_string(), name.text_range()))
-            }
-            AnyPseudoLike::CssPseudoClassFunctionNth(func_nth) => {
-                let name = func_nth.name().ok()?;
-                Some((name.text().to_string(), name.text_range()))
-            }
-            AnyPseudoLike::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
-                let name = selector_list.name_token().ok()?;
-                Some((name.token_text_trimmed().to_string(), name.text_range()))
-            }
-            AnyPseudoLike::CssPseudoClassFunctionSelector(selector) => {
-                let name = selector.name().ok()?;
-                Some((name.text().to_string(), name.text_range()))
-            }
-            AnyPseudoLike::CssPseudoClassFunctionSelectorList(selector_list) => {
-                let name = selector_list.name().ok()?;
-                Some((name.text().to_string(), name.text_range()))
-            }
-            AnyPseudoLike::CssPseudoClassFunctionValueList(func_value_list) => {
-                let name = func_value_list.name_token().ok()?;
-                Some((name.text().to_string(), name.text_range()))
-            }
-            AnyPseudoLike::CssPseudoClassIdentifier(ident) => {
-                let name = ident.name().ok()?;
-                Some((name.to_trimmed_string().to_string(), name.range()))
-            }
-            AnyPseudoLike::CssPageSelectorPseudo(page_pseudo) => {
-                let name = page_pseudo.selector().ok()?;
-                Some((name.token_text_trimmed().to_string(), name.text_range()))
-            }
-        }?;
+        let span = pseudo_class.name_range()?;
+        let name = pseudo_class.name()?;
 
         let pseudo_type = match &pseudo_class {
             AnyPseudoLike::CssPageSelectorPseudo(_) => PseudoClassType::PagePseudoClass,
@@ -174,7 +226,7 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        let lower_name = name.to_ascii_lowercase_cow();
+        let lower_name = name.text_trimmed().to_ascii_lowercase_cow();
         let lower_name = lower_name.as_ref();
 
         let is_valid_class = match pseudo_type {
@@ -194,7 +246,7 @@ impl Rule for NoUnknownPseudoClass {
             None
         } else {
             Some(NoUnknownPseudoClassSelectorState {
-                class_name: name,
+                class_name: name.text_trimmed().into(),
                 span,
                 class_type: pseudo_type,
             })

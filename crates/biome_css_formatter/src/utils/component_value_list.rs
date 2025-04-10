@@ -1,14 +1,12 @@
-use std::cmp;
-
+use crate::CssFormatter;
 use crate::comments::CssComments;
+use crate::prelude::*;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_formatter::{CstFormatContext, write};
 use biome_formatter::{FormatOptions, FormatResult};
-use biome_string_case::StrLikeExtension;
-
-use crate::CssFormatter;
-use crate::prelude::*;
 use biome_rowan::{AstNode, AstNodeList, TextSize};
+use biome_string_case::StrLikeExtension;
+use std::cmp;
 
 pub(crate) fn write_component_value_list<N, I>(node: &N, f: &mut CssFormatter) -> FormatResult<()>
 where
@@ -227,10 +225,7 @@ where
     let css_property = list
         .parent::<CssGenericProperty>()
         .and_then(|parent| parent.name().ok())
-        .and_then(|name| {
-            name.as_css_identifier()
-                .map(|name| name.to_trimmed_string())
-        });
+        .and_then(|name| name.as_css_identifier().map(|name| name.as_trimmed_text()));
     let is_grid_property = css_property.as_ref().is_some_and(|name| {
         let name = name.to_ascii_lowercase_cow();
 
@@ -256,7 +251,7 @@ where
         ValueListLayout::PreserveInline
     } else if list.len() == 1 {
         ValueListLayout::SingleValue
-    } else if use_one_group_per_line(css_property, list) {
+    } else if use_one_group_per_line(css_property.as_deref(), list) {
         ValueListLayout::OneGroupPerLine
     } else if is_comma_separated
         && value_count > 12
@@ -268,7 +263,7 @@ where
     }
 }
 
-pub(crate) fn use_one_group_per_line<N, I>(css_property: Option<String>, list: &N) -> bool
+pub(crate) fn use_one_group_per_line<N, I>(css_property: Option<&str>, list: &N) -> bool
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
     I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,

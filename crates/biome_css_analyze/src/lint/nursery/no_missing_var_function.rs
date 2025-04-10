@@ -2,7 +2,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_css_syntax::{AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssSyntaxKind};
 use biome_diagnostics::Severity;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, Text};
 
 use crate::services::semantic::Semantic;
 
@@ -157,9 +157,9 @@ impl Rule for NoMissingVarFunction {
         }
 
         let property_name = get_property_name(node)?;
-        let custom_variable_name = node.to_trimmed_string();
+        let custom_variable_name = node.as_trimmed_text();
 
-        if IGNORED_PROPERTIES.contains(&property_name.as_str()) {
+        if IGNORED_PROPERTIES.contains(&property_name.text()) {
             return None;
         }
 
@@ -170,7 +170,7 @@ impl Rule for NoMissingVarFunction {
             .declarations()
             .iter()
             .flat_map(|decl| decl.property().value())
-            .any(|value| value.text() == custom_variable_name)
+            .any(|value| value.text() == custom_variable_name.text())
         {
             return Some(node.clone());
         }
@@ -182,7 +182,7 @@ impl Rule for NoMissingVarFunction {
                 .declarations()
                 .iter()
                 .flat_map(|decl| decl.property().value())
-                .any(|value| value.text() == custom_variable_name)
+                .any(|value| value.text() == custom_variable_name.text())
             {
                 return Some(node.clone());
             }
@@ -191,7 +191,7 @@ impl Rule for NoMissingVarFunction {
 
         if model
             .global_custom_variables()
-            .contains_key(&custom_variable_name)
+            .contains_key(custom_variable_name.text())
         {
             return Some(node.clone());
         }
@@ -201,7 +201,8 @@ impl Rule for NoMissingVarFunction {
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
         let span = node.range();
-        let custom_variable_name = node.to_trimmed_string();
+        let custom_variable_name = node.as_trimmed_text();
+        let custom_variable_name = custom_variable_name.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -235,7 +236,7 @@ fn is_wrapped_in_var(node: &CssDashedIdentifier) -> bool {
     false
 }
 
-fn get_property_name(node: &CssDashedIdentifier) -> Option<String> {
+fn get_property_name(node: &CssDashedIdentifier) -> Option<Text> {
     let mut current_node = node.syntax().parent();
     while let Some(parent) = current_node {
         if let Some(node) = CssDeclaration::cast(parent.clone()) {
@@ -243,10 +244,10 @@ fn get_property_name(node: &CssDashedIdentifier) -> Option<String> {
             return match prop {
                 AnyCssProperty::CssBogusProperty(_) => None,
                 AnyCssProperty::CssComposesProperty(prop) => {
-                    Some(prop.name().ok()?.to_trimmed_string())
+                    Some(prop.name().ok()?.as_trimmed_text())
                 }
                 AnyCssProperty::CssGenericProperty(prop) => {
-                    Some(prop.name().ok()?.to_trimmed_string())
+                    Some(prop.name().ok()?.as_trimmed_text())
                 }
             };
         }

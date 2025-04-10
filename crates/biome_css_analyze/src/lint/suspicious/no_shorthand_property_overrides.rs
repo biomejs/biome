@@ -80,8 +80,8 @@ declare_lint_rule! {
 
 #[derive(Default)]
 struct PriorProperty {
-    original: String,
-    lowercase: String,
+    original: Box<str>,
+    lowercase: Box<str>,
 }
 
 #[derive(Default)]
@@ -106,7 +106,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                     if let Some(prop_node) = CssGenericProperty::cast_ref(node)
                         .and_then(|property_node| property_node.name().ok())
                     {
-                        let prop = prop_node.to_trimmed_string();
+                        let prop = prop_node.as_trimmed_text();
                         #[expect(clippy::disallowed_methods)]
                         let prop_lowercase = prop.to_lowercase();
 
@@ -132,8 +132,8 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                         });
 
                         self.prior_props_in_block.push(PriorProperty {
-                            original: prop,
-                            lowercase: prop_lowercase,
+                            original: prop.into(),
+                            lowercase: prop_lowercase.into(),
                         });
                     }
                 }
@@ -146,7 +146,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
 #[derive(Clone)]
 pub struct NoDeclarationBlockShorthandPropertyOverridesQuery {
     property_node: AnyCssDeclarationName,
-    override_property: String,
+    override_property: Box<str>,
 }
 
 impl QueryMatch for NoDeclarationBlockShorthandPropertyOverridesQuery {
@@ -177,8 +177,8 @@ impl Queryable for NoDeclarationBlockShorthandPropertyOverridesQuery {
 }
 
 pub struct NoDeclarationBlockShorthandPropertyOverridesState {
-    target_property: String,
-    override_property: String,
+    target_property: Box<str>,
+    override_property: Box<str>,
     span: TextRange,
 }
 
@@ -192,8 +192,8 @@ impl Rule for NoShorthandPropertyOverrides {
         let query = ctx.query();
 
         Some(NoDeclarationBlockShorthandPropertyOverridesState {
-            target_property: query.property_node.to_trimmed_string(),
-            override_property: query.override_property.clone(),
+            target_property: query.property_node.as_trimmed_text().into(),
+            override_property: query.override_property.clone().into(),
             span: query.text_range(),
         })
     }
