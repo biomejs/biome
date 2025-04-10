@@ -1,0 +1,9 @@
+jsx_self_closing_element { 
+  name: identifier {
+    text: `img`
+  }
+  register_diagnostic(
+    span = $name,
+    message = "use Image component instead of img tag"
+  )
+}

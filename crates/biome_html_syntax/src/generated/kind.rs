@@ -108,6 +108,7 @@ impl HtmlSyntaxKind {
             FALSE_KW => "false",
             DOCTYPE_KW => "doctype",
             HTML_KW => "html",
+            EOF => "EOF",
             HTML_STRING_LITERAL => "string literal",
             _ => return None,
         };
