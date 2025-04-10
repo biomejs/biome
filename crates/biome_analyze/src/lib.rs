@@ -54,8 +54,8 @@ pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
-    AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextRange, TextSize,
-    TokenAtOffset, TriviaPieceKind, WalkEvent,
+    AstNode, BatchMutation, Direction, Language, SyntaxToken, TextRange, TextSize, TokenAtOffset,
+    TriviaPieceKind,
 };
 use biome_suppression::{Suppression, SuppressionKind};
 pub use suppression_action::{ApplySuppression, SuppressionAction};
@@ -342,31 +342,13 @@ where
     /// Runs phase 0 over nodes and tokens to process line breaks and
     /// suppression comments
     fn run_first_phase(mut self) -> ControlFlow<Break> {
-        let iter = self.root.syntax().preorder_with_tokens(Direction::Next);
-        for event in iter {
-            match event {
-                // If this is a token enter event, process its text content
-                WalkEvent::Enter(SyntaxElement::Token(token)) => {
-                    self.handle_token(token)?;
-                    continue;
-                }
-                WalkEvent::Leave(SyntaxElement::Token(_) | SyntaxElement::Node(_))
-                | WalkEvent::Enter(SyntaxElement::Node(_)) => {
-                    continue;
-                }
-            };
+        let iter = self.root.syntax().preorder_tokens(Direction::Next);
+        for token in iter {
+            self.handle_token(token)?;
         }
         // Iterate for syntax rules after we've established suppressions
-        let iter = self.root.syntax().preorder_with_tokens(Direction::Next);
+        let iter = self.root.syntax().preorder();
         for event in iter {
-            let node_event = match event {
-                WalkEvent::Enter(SyntaxElement::Node(node)) => WalkEvent::Enter(node),
-                WalkEvent::Leave(SyntaxElement::Node(node)) => WalkEvent::Leave(node),
-                WalkEvent::Leave(SyntaxElement::Token(_))
-                | WalkEvent::Enter(SyntaxElement::Token(_)) => {
-                    continue;
-                }
-            };
             // If this is a node event pass it to the visitors for this phase
             for visitor in self.visitors.iter_mut() {
                 let ctx = VisitorContext {
@@ -380,7 +362,7 @@ where
                     options: self.options,
                 };
 
-                visitor.visit(&node_event, ctx);
+                visitor.visit(&event, ctx);
             }
         }
 
