@@ -199,6 +199,24 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         }
     };
 
+    let keyword_impl = if all_keywords.is_empty() {
+        quote! {
+            pub fn from_keyword(_ident: &str) -> Option<#syntax_kind> {
+                None
+            }
+        }
+    } else {
+        quote! {
+            pub fn from_keyword(ident: &str) -> Option<#syntax_kind> {
+                let kw = match ident {
+                    #(#all_keyword_strings => #full_keywords,)*
+                    _ => return None,
+                };
+                Some(kw)
+            }
+        }
+    };
+
     let ast = quote! {
         #![allow(bad_style, missing_docs, unreachable_pub)]
         /// The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`.
@@ -239,13 +257,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                 matches!(self, #(#lists)|*)
             }
 
-            pub fn from_keyword(ident: &str) -> Option<#syntax_kind> {
-                let kw = match ident {
-                    #(#all_keyword_strings => #full_keywords,)*
-                    _ => return None,
-                };
-                Some(kw)
-            }
+            #keyword_impl
 
             #syntax_kind_impl
 
