@@ -452,9 +452,7 @@ where
             }
         }
 
-        // Flush signals from the queue until the end of the current token is reached
-        let cutoff = token.text_range().end();
-        self.flush_matches(Some(cutoff))
+        ControlFlow::Continue(())
     }
 
     /// Flush all pending query signals in the queue.  If `cutoff` is specified,
