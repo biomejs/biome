@@ -15,7 +15,7 @@ use crate::{
     jsdoc_comment::JsdocComment, resolver_cache::ResolverCache,
 };
 
-use super::collector::JsModuleInfoCollector;
+use super::{JsResolvedPath, collector::JsModuleInfoCollector};
 
 pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
@@ -401,14 +401,16 @@ impl<'a> JsModuleVisitor<'a> {
         collector.register_export_with_name(name.clone(), Some(name))
     }
 
-    fn resolved_path_from_specifier(&self, specifier: &str) -> Result<Utf8PathBuf, String> {
-        self.resolver
+    fn resolved_path_from_specifier(&self, specifier: &str) -> JsResolvedPath {
+        let resolved_path = self
+            .resolver
             .resolve(self.directory, specifier)
             .and_then(|resolution| {
                 Utf8PathBuf::from_path_buf(resolution.into_path_buf())
                     .map_err(|path| ResolveError::NotFound(path.to_string_lossy().to_string()))
             })
-            .map_err(|error| error.to_string())
+            .map_err(|error| error.to_string());
+        JsResolvedPath::new(resolved_path)
     }
 }
 

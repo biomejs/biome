@@ -7,7 +7,7 @@ use biome_rowan::Text;
 use biome_test_utils::get_added_paths;
 use insta::assert_debug_snapshot;
 
-use crate::{JsImport, js_module_info::JsReexport, jsdoc_comment::JsdocComment};
+use crate::{JsImport, JsResolvedPath, js_module_info::JsReexport, jsdoc_comment::JsdocComment};
 
 use super::*;
 
@@ -99,7 +99,7 @@ fn test_resolve_relative_import() {
         file_imports.static_imports.get("bar"),
         Some(&JsImport {
             specifier: "./bar.ts".into(),
-            resolved_path: Ok(Utf8PathBuf::from("/src/bar.ts")),
+            resolved_path: JsResolvedPath::from_path("/src/bar.ts"),
             symbol: "bar".into()
         })
     );
@@ -125,7 +125,7 @@ fn test_resolve_package_import() {
         file_imports.static_imports.get("foo"),
         Some(&JsImport {
             specifier: "shared".into(),
-            resolved_path: Ok(Utf8PathBuf::from("/node_modules/shared/dist/index.js")),
+            resolved_path: JsResolvedPath::from_path("/node_modules/shared/dist/index.js"),
             symbol: "foo".into()
         })
     );
@@ -207,9 +207,9 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         file_imports.static_imports.get("sharedFoo"),
         Some(&JsImport {
             specifier: "shared".into(),
-            resolved_path: Ok(Utf8PathBuf::from(format!(
+            resolved_path: JsResolvedPath::from_path(format!(
                 "{fixtures_path}/shared/dist/index.js"
-            ))),
+            )),
             symbol: "sharedFoo".into()
         })
     );
@@ -217,9 +217,9 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         file_imports.static_imports.get("bar"),
         Some(&JsImport {
             specifier: "./bar".into(),
-            resolved_path: Ok(Utf8PathBuf::from(format!(
+            resolved_path: JsResolvedPath::from_path(format!(
                 "{fixtures_path}/frontend/src/bar.ts"
-            ))),
+            )),
             symbol: "bar".into()
         })
     );
@@ -375,7 +375,7 @@ fn test_resolve_exports() {
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
-                resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts")),
+                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: "ohNo".into()
             },
             jsdoc_comment: None
@@ -386,7 +386,7 @@ fn test_resolve_exports() {
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
-                resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts")),
+                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: JsImportSymbol::All,
             },
             jsdoc_comment: Some(JsdocComment::from_comment_text(
@@ -402,7 +402,7 @@ fn test_resolve_exports() {
         &[JsReexport {
             import: JsImport {
                 specifier: "./reexports".into(),
-                resolved_path: Ok(Utf8PathBuf::from("/src/reexports.ts")),
+                resolved_path: JsResolvedPath::from_path("/src/reexports.ts"),
                 symbol: JsImportSymbol::All,
             },
             jsdoc_comment: None
@@ -418,7 +418,7 @@ fn test_resolve_exports() {
         Some(&JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
-                resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts")),
+                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: JsImportSymbol::All,
             },
             jsdoc_comment: Some(JsdocComment::from_comment_text(

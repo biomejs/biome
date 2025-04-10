@@ -4,7 +4,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
-use biome_module_graph::JsModuleInfo;
+use biome_module_graph::{JsModuleInfo, JsResolvedPath};
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -98,8 +98,9 @@ impl Rule for NoImportCycles {
         let module_info = ctx.module_info_for_path(ctx.file_path())?;
 
         let node = ctx.query();
-        let import = module_info.get_import_by_js_node(node)?;
-        let resolved_path = import.resolved_path.as_ref().ok()?;
+        let resolved_path = module_info
+            .get_import_path_by_js_node(node)
+            .and_then(JsResolvedPath::as_path)?;
 
         let imports = ctx.module_info_for_path(resolved_path)?;
         find_cycle(ctx, resolved_path, imports)
@@ -159,8 +160,8 @@ fn find_cycle(
     let mut stack = Vec::new();
 
     'outer: loop {
-        for import in module_info.all_imports() {
-            let Ok(resolved_path) = import.resolved_path else {
+        for resolved_path in module_info.all_import_paths() {
+            let Some(resolved_path) = resolved_path.as_path() else {
                 continue;
             };
 
@@ -169,7 +170,7 @@ fn find_cycle(
                 let paths = Some(start_path.to_string())
                     .into_iter()
                     .chain(stack.into_iter().map(|(path, _)| path))
-                    .chain(Some(resolved_path.into()))
+                    .chain(Some(resolved_path.to_string()))
                     .collect();
                 return Some(paths);
             }
@@ -182,8 +183,8 @@ fn find_cycle(
 
             seen.insert(resolved_path.to_string());
 
-            if let Some(next_module_info) = ctx.module_info_for_path(&resolved_path) {
-                stack.push((resolved_path.into(), module_info));
+            if let Some(next_module_info) = ctx.module_info_for_path(resolved_path) {
+                stack.push((resolved_path.to_string(), module_info));
                 module_info = next_module_info;
                 continue 'outer;
             }

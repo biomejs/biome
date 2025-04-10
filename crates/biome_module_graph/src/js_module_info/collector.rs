@@ -9,7 +9,6 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::Type;
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
-use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
 
 use crate::{
@@ -19,7 +18,7 @@ use crate::{
 
 use super::{
     JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsModuleInfoInner, JsOwnExport, JsReexport,
-    binding::JsBindingData, scope::JsScopeData,
+    JsResolvedPath, binding::JsBindingData, scope::JsScopeData,
 };
 
 /// Responsible for collecting all the information from which to build the
@@ -53,10 +52,10 @@ pub(super) struct JsModuleInfoCollector {
     scope_stack: Vec<ScopeId>,
 
     /// Map with all static import paths, from the source specifier to the resolved path.
-    static_imports: FxHashMap<TokenText, Result<Utf8PathBuf, String>>,
+    static_import_paths: BTreeMap<Text, JsResolvedPath>,
 
     /// Map with all dynamic import paths, from the import source to the resolved path.
-    dynamic_imports: FxHashMap<TokenText, Result<Utf8PathBuf, String>>,
+    dynamic_import_paths: BTreeMap<Text, JsResolvedPath>,
 
     /// Map with exports, from the exported symbol name to a [JsExport] definition.
     exports: BTreeMap<Text, JsExport>,
@@ -118,17 +117,19 @@ impl JsModuleInfoCollector {
     pub fn register_static_import_path(
         &mut self,
         specifier: TokenText,
-        resolved_path: Result<Utf8PathBuf, String>,
+        resolved_path: JsResolvedPath,
     ) {
-        self.static_imports.insert(specifier, resolved_path);
+        self.static_import_paths
+            .insert(specifier.into(), resolved_path);
     }
 
     pub fn register_dynamic_import_path(
         &mut self,
         specifier: TokenText,
-        resolved_path: Result<Utf8PathBuf, String>,
+        resolved_path: JsResolvedPath,
     ) {
-        self.dynamic_imports.insert(specifier, resolved_path);
+        self.dynamic_import_paths
+            .insert(specifier.into(), resolved_path);
     }
 
     pub fn finalise(&mut self) {
@@ -296,7 +297,6 @@ impl JsModuleInfoCollector {
 #[derive(Clone, Debug, Default)]
 pub(super) struct JsModuleInfoBag {
     static_imports: BTreeMap<Text, JsImport>,
-    dynamic_imports: BTreeMap<Text, JsImport>,
     exports: BTreeMap<Text, JsExport>,
     blanket_reexports: Vec<JsReexport>,
 }
@@ -329,18 +329,6 @@ impl JsModuleInfoBag {
                 self.push_static_import(import, collector);
             }
         }
-
-        // Register dynamic imports.
-        for (source, resolved_path) in &collector.dynamic_imports {
-            self.dynamic_imports.insert(
-                source.clone().into(),
-                JsImport {
-                    specifier: source.clone().into(),
-                    resolved_path: resolved_path.clone(),
-                    symbol: JsImportSymbol::All,
-                },
-            );
-        }
     }
 
     fn push_static_import(
@@ -354,7 +342,7 @@ impl JsModuleInfoBag {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let resolved_path = collector.static_imports.get(&source).cloned()?;
+                let resolved_path = collector.static_import_paths.get(source.text())?;
 
                 let default_specifier = node.default_specifier().ok()?;
                 let local_name = default_specifier.local_name().ok()?;
@@ -409,7 +397,7 @@ impl JsModuleInfoBag {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let resolved_path = collector.static_imports.get(&source).cloned()?;
+                let resolved_path = collector.static_import_paths.get(source.text())?;
 
                 let local_name = node.default_specifier().ok()?.local_name().ok()?;
                 let local_name = local_name.as_js_identifier_binding()?;
@@ -418,7 +406,7 @@ impl JsModuleInfoBag {
                     local_name_token.token_text_trimmed().into(),
                     JsImport {
                         specifier: source.into(),
-                        resolved_path,
+                        resolved_path: resolved_path.clone(),
                         symbol: JsImportSymbol::Default,
                     },
                 );
@@ -427,7 +415,7 @@ impl JsModuleInfoBag {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let resolved_path = collector.static_imports.get(&source).cloned()?;
+                let resolved_path = collector.static_import_paths.get(source.text())?;
 
                 for specifier in node.named_specifiers().ok()?.specifiers() {
                     let specifier = specifier.ok()?;
@@ -452,7 +440,7 @@ impl JsModuleInfoBag {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let resolved_path = collector.static_imports.get(&source).cloned()?;
+                let resolved_path = collector.static_import_paths.get(source.text())?;
 
                 let specifier = node.namespace_specifier().ok()?;
                 let local_name = specifier.local_name().ok()?;
@@ -504,7 +492,8 @@ impl JsModuleInfo {
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: bag.static_imports,
-            dynamic_imports: bag.dynamic_imports,
+            static_import_paths: collector.static_import_paths,
+            dynamic_import_paths: collector.dynamic_import_paths,
             exports: bag.exports,
             blanket_reexports: bag.blanket_reexports.into(),
             bindings: collector.bindings.into(),

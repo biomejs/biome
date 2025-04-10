@@ -99,7 +99,7 @@ impl Rule for NoUnresolvedImports {
         };
 
         let node = ctx.query();
-        let Some(import) = module_info.get_import_by_js_node(node) else {
+        let Some(resolved_path) = module_info.get_import_path_by_js_node(node) else {
             return Vec::new();
         };
 
@@ -107,7 +107,7 @@ impl Rule for NoUnresolvedImports {
             return Vec::new();
         };
 
-        let resolved_path = match &import.resolved_path {
+        let resolved_path = match resolved_path.as_deref() {
             Ok(resolved_path) => resolved_path,
             Err(resolve_error) => {
                 if Utf8Path::new(&specifier)

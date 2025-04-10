@@ -162,7 +162,7 @@ impl ModuleGraph {
                             ty: Type::Namespace(Box::new(Namespace(Box::new([])))),
                         })
                     } else {
-                        match &reexport.import.resolved_path {
+                        match reexport.import.resolved_path.as_deref() {
                             Ok(path) if seen_paths.insert(path) => {
                                 data.get(path).and_then(|module| {
                                     find_exported_symbol_with_seen_paths(
@@ -178,7 +178,7 @@ impl ModuleGraph {
                     }
                 }
                 None => module.blanket_reexports.iter().find_map(|reexport| {
-                    match &reexport.import.resolved_path {
+                    match reexport.import.resolved_path.as_deref() {
                         Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
                             find_exported_symbol_with_seen_paths(
                                 data,

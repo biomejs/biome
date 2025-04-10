@@ -10,7 +10,7 @@ use biome_js_semantic::{BindingId, ScopeId};
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::Type;
 use biome_rowan::{Text, TokenText};
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use scope::{JsScope, JsScopeData};
 
 use crate::{ModuleGraph, jsdoc_comment::JsdocComment};
@@ -32,11 +32,11 @@ impl Deref for JsModuleInfo {
 impl JsModuleInfo {
     /// Returns an iterator over all the static and dynamic imports in this
     /// module.
-    pub fn all_imports(&self) -> impl Iterator<Item = JsImport> + use<> {
+    pub fn all_import_paths(&self) -> impl Iterator<Item = JsResolvedPath> + use<> {
         let module_info = self.0.as_ref();
-        ImportIterator {
-            static_imports: module_info.static_imports.clone(),
-            dynamic_imports: module_info.dynamic_imports.clone(),
+        ImportPathIterator {
+            static_import_paths: module_info.static_import_paths.clone(),
+            dynamic_import_paths: module_info.dynamic_import_paths.clone(),
         }
     }
 
@@ -75,21 +75,29 @@ pub struct JsModuleInfoInner {
     /// [Self::blanket_reexports].
     pub static_imports: BTreeMap<Text, JsImport>,
 
-    /// Map of all dynamic imports found in the module for which the import
+    /// Map of all the paths from static imports in the module.
+    ///
+    /// Maps from the source specifier name to a [JsResolvedPath] with the
+    /// absolute path it resolves to. The resolved path may be looked up as key
+    /// in the [ModuleGraph::data] map, although it is not required to exist
+    /// (for instance, if the path is outside the project's scope).
+    pub static_import_paths: BTreeMap<Text, JsResolvedPath>,
+
+    /// Map of all dynamic import paths found in the module for which the import
     /// specifier could be statically determined.
     ///
     /// Dynamic imports for which the specifier cannot be statically determined
     /// (for instance, because a template string with variables is used) will be
     /// omitted from this map.
     ///
-    /// Maps from the *source specifier* name to a [JsImport] with the absolute
-    /// path it resolves to. The resolved path may be looked up as key in the
-    /// [ModuleGraph::data] map, although it is not required to exist
+    /// Maps from the source specifier name to a [JsResolvedPath] with the
+    /// absolute path it resolves to. The resolved path may be looked up as key
+    /// in the [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     ///
-    /// `require()` expressions in CommonJS sources are also included with the
-    /// dynamic imports.
-    pub dynamic_imports: BTreeMap<Text, JsImport>,
+    /// Paths found in `require()` expressions in CommonJS sources are also
+    /// included with the dynamic import paths.
+    pub dynamic_import_paths: BTreeMap<Text, JsResolvedPath>,
 
     /// Map of exports from the module.
     ///
@@ -123,13 +131,13 @@ impl JsModuleInfoInner {
     }
 
     /// Returns the information about a given import by its syntax node.
-    pub fn get_import_by_js_node(&self, node: &AnyJsImportLike) -> Option<&JsImport> {
+    pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&JsResolvedPath> {
         let specifier_text = node.inner_string_text()?;
         let specifier = specifier_text.text();
         if node.is_static_import() {
-            self.static_imports.get(specifier)
+            self.static_import_paths.get(specifier)
         } else {
-            self.dynamic_imports.get(specifier)
+            self.dynamic_import_paths.get(specifier)
         }
     }
 }
@@ -175,7 +183,7 @@ pub struct JsImport {
     /// point towards the resolved entry point of the package.
     ///
     /// If `None`, import resolution failed.
-    pub resolved_path: Result<Utf8PathBuf, String>,
+    pub resolved_path: JsResolvedPath,
 
     /// The symbol(s) being imported.
     pub symbol: JsImportSymbol,
@@ -230,23 +238,51 @@ pub struct JsReexport {
     pub import: JsImport,
 }
 
-struct ImportIterator {
-    static_imports: BTreeMap<Text, JsImport>,
-    dynamic_imports: BTreeMap<Text, JsImport>,
+/// Reference-counted resolved path wrapped in a [Result] that contains a string
+/// message if resolution failed.
+#[derive(Clone, Debug, PartialEq)]
+pub struct JsResolvedPath(Arc<Result<Utf8PathBuf, String>>);
+
+impl Deref for JsResolvedPath {
+    type Target = Result<Utf8PathBuf, String>;
+
+    fn deref(&self) -> &Self::Target {
+        self.0.as_ref()
+    }
 }
 
-impl Iterator for ImportIterator {
-    type Item = JsImport;
+impl JsResolvedPath {
+    pub(super) fn new(resolved_path: Result<Utf8PathBuf, String>) -> Self {
+        Self(Arc::new(resolved_path))
+    }
+
+    pub fn as_path(&self) -> Option<&Utf8Path> {
+        self.as_deref().ok()
+    }
+
+    #[cfg(test)]
+    pub(super) fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
+        Self::new(Ok(path.into()))
+    }
+}
+
+struct ImportPathIterator {
+    static_import_paths: BTreeMap<Text, JsResolvedPath>,
+    dynamic_import_paths: BTreeMap<Text, JsResolvedPath>,
+}
+
+impl Iterator for ImportPathIterator {
+    type Item = JsResolvedPath;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.static_imports.is_empty() {
-            self.dynamic_imports
+        if self.static_import_paths.is_empty() {
+            self.dynamic_import_paths
                 .pop_first()
-                .map(|(_source, import)| import)
+                .map(|(_source, path)| path)
         } else {
-            self.static_imports
+            self.static_import_paths
                 .pop_first()
-                .map(|(_identifier, import)| import)
+                .map(|(_identifier, path)| path)
         }
     }
 }
