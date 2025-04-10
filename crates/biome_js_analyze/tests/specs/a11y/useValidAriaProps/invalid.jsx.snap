@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -135,19 +134,19 @@ invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
-  i aria-skldjfaria-foo1 is not a valid ARIA attribute.
+  i aria-skldjfaria-foo222 is not a valid ARIA attribute.
   
     3 │ var a = <div aria-labeledby="foobar" />;
     4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
   > 5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
-      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
   i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
     5 │ var·a·=·<div·aria-skldjfaria-foo1="foobar"·aria-skldjfaria-foo222="foobar"·/>;
-      │              ------------------------------                                   
+      │                                            --------------------------------   
 
 ```
 
@@ -162,18 +161,18 @@ invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
-  i aria-skldjfaria-foo222 is not a valid ARIA attribute.
+  i aria-skldjfaria-foo1 is not a valid ARIA attribute.
   
     3 │ var a = <div aria-labeledby="foobar" />;
     4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
   > 5 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
-      │                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
   i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
     5 │ var·a·=·<div·aria-skldjfaria-foo1="foobar"·aria-skldjfaria-foo222="foobar"·/>;
-      │                                            --------------------------------   
+      │              ------------------------------                                   
 
 ```

@@ -54,8 +54,8 @@ pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
-    AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextRange, TextSize,
-    TokenAtOffset, TriviaPieceKind, WalkEvent,
+    AstNode, BatchMutation, Direction, Language, SyntaxToken, TextRange, TextSize, TokenAtOffset,
+    TriviaPieceKind,
 };
 use biome_suppression::{Suppression, SuppressionKind};
 pub use suppression_action::{ApplySuppression, SuppressionAction};
@@ -342,22 +342,13 @@ where
     /// Runs phase 0 over nodes and tokens to process line breaks and
     /// suppression comments
     fn run_first_phase(mut self) -> ControlFlow<Break> {
-        let iter = self.root.syntax().preorder_with_tokens(Direction::Next);
+        let iter = self.root.syntax().preorder_tokens(Direction::Next);
+        for token in iter {
+            self.handle_token(token)?;
+        }
+        // Iterate for syntax rules after we've established suppressions
+        let iter = self.root.syntax().preorder();
         for event in iter {
-            let node_event = match event {
-                WalkEvent::Enter(SyntaxElement::Node(node)) => WalkEvent::Enter(node),
-                WalkEvent::Leave(SyntaxElement::Node(node)) => WalkEvent::Leave(node),
-
-                // If this is a token enter event, process its text content
-                WalkEvent::Enter(SyntaxElement::Token(token)) => {
-                    self.handle_token(token)?;
-
-                    continue;
-                }
-                WalkEvent::Leave(SyntaxElement::Token(_)) => {
-                    continue;
-                }
-            };
             // If this is a node event pass it to the visitors for this phase
             for visitor in self.visitors.iter_mut() {
                 let ctx = VisitorContext {
@@ -371,7 +362,7 @@ where
                     options: self.options,
                 };
 
-                visitor.visit(&node_event, ctx);
+                visitor.visit(&event, ctx);
             }
         }
 
@@ -443,9 +434,7 @@ where
             }
         }
 
-        // Flush signals from the queue until the end of the current token is reached
-        let cutoff = token.text_range().end();
-        self.flush_matches(Some(cutoff))
+        ControlFlow::Continue(())
     }
 
     /// Flush all pending query signals in the queue.  If `cutoff` is specified,
@@ -466,7 +455,7 @@ where
                 || self.suppressions.top_level_suppression.suppress_all
             {
                 self.signal_queue.pop();
-                break;
+                continue;
             }
 
             if self
@@ -475,7 +464,7 @@ where
                 .suppressed_rule(&entry.rule, &entry.text_range)
             {
                 self.signal_queue.pop();
-                break;
+                continue;
             }
 
             // Search for an active line suppression comment covering the range of
@@ -504,7 +493,15 @@ where
                     if index >= self.suppressions.line_suppressions.len() {
                         None
                     } else {
-                        Some(&mut self.suppressions.line_suppressions[index])
+                        let line_suppression = &mut self.suppressions.line_suppressions[index];
+                        // Since line suppressions of something like a function need to work, we just check the start overlap
+                        if line_suppression.text_range.start() <= entry.text_range.start()
+                            && line_suppression.text_range.end() >= entry.text_range.start()
+                        {
+                            Some(line_suppression)
+                        } else {
+                            None
+                        }
                     }
                 }
             };
@@ -553,8 +550,6 @@ where
         text: &str,
         range: TextRange,
     ) -> ControlFlow<Break> {
-        let mut has_suppressions = false;
-
         for result in (self.parse_suppression_comment)(text, range) {
             let suppression = match result {
                 Ok(kind) => kind,
@@ -580,15 +575,13 @@ where
                 continue;
             }
 
-            has_suppressions = true;
-        }
+            if let AnalyzerSuppressionVariant::Line = suppression.variant {
+                // Legacy varient - add the next line to a line comment
+                let line_index = *self.line_index + 1;
 
-        // Suppression comments apply to the next line
-        if has_suppressions {
-            let line_index = *self.line_index + 1;
-
-            self.suppressions
-                .overlap_last_suppression(line_index, range);
+                self.suppressions
+                    .overlap_last_suppression(line_index, range);
+            }
         }
 
         ControlFlow::Continue(())
@@ -766,6 +759,7 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().end()).start(),
     );
     for (key, subcategory, value) in suppression.categories {
+        // TODO - allow skipping the whole category for syntax
         if key == category!("lint") || key == category!("assist") {
             result
                 .push(AnalyzerSuppression::everything(key.name()).with_variant(&suppression.kind));
@@ -790,6 +784,15 @@ pub fn to_analyzer_suppressions(
                 let suppression = AnalyzerSuppression::action(action)
                     .with_ignore_range(ignore_range)
                     .with_variant(&suppression.kind);
+                result.push(suppression);
+            } else if let Some(rule) = category.strip_prefix("syntax/") {
+                let suppression = if let Some(instance) = value {
+                    AnalyzerSuppression::rule_instance(rule, instance)
+                        .with_ignore_range(ignore_range)
+                } else {
+                    AnalyzerSuppression::rule(rule).with_ignore_range(ignore_range)
+                }
+                .with_variant(&suppression.kind);
                 result.push(suppression);
             }
         }

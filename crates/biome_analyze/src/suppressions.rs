@@ -147,13 +147,15 @@ pub(crate) struct RangeSuppression {
 
     /// The rules to suppress
     pub(crate) filters: FxHashSet<RuleFilter<'static>>,
+    /// Indicates if the rule has found its end comment - if false, the suppression_range is not yet complete
+    pub(crate) is_ended: bool,
 }
 
 impl RangeSuppressions {
     /// Expands the range of all range suppressions
     pub(crate) fn expand_range(&mut self, text_range: TextRange) {
         for range_suppression in self.suppressions.iter_mut() {
-            if !range_suppression.filters.is_empty() {
+            if !range_suppression.is_ended {
                 range_suppression.suppression_range =
                     range_suppression.suppression_range.cover(text_range);
             }
@@ -176,30 +178,17 @@ impl RangeSuppressions {
             }.to_owned()));
         }
         if suppression.is_range_start() {
-            if let Some(range_suppression) = self.suppressions.last_mut() {
-                match filter {
-                    None => {
-                        range_suppression.suppress_all = true;
-                        range_suppression.already_suppressed = already_suppressed;
-                    }
-                    Some(filter) => {
-                        range_suppression.filters.insert(filter);
-                        range_suppression.already_suppressed = already_suppressed;
-                    }
+            let mut range_suppression = RangeSuppression::default();
+            match filter {
+                None => range_suppression.suppress_all = true,
+                Some(filter) => {
+                    range_suppression.filters.insert(filter);
                 }
-            } else {
-                let mut range_suppression = RangeSuppression::default();
-                match filter {
-                    None => range_suppression.suppress_all = true,
-                    Some(filter) => {
-                        range_suppression.filters.insert(filter);
-                    }
-                }
-                range_suppression.suppression_range = text_range;
-                range_suppression.already_suppressed = already_suppressed;
-                range_suppression.start_comment_range = text_range;
-                self.suppressions.push(range_suppression);
             }
+            range_suppression.suppression_range = text_range;
+            range_suppression.already_suppressed = already_suppressed;
+            range_suppression.start_comment_range = text_range;
+            self.suppressions.push(range_suppression);
         } else if suppression.is_range_end() {
             if self.suppressions.is_empty() {
                 // This an error. We found a range end suppression without having a range start
@@ -218,10 +207,16 @@ impl RangeSuppressions {
                 }
                 Some(filter) => {
                     // SAFETY: we checked if the vector isn't empty at the beginning
-                    let range_suppression = self.suppressions.last_mut().unwrap();
-                    let present = range_suppression.filters.remove(&filter);
-                    // the user tried to remove a filter that wasn't added, let's fire a diagnostic
-                    if !present {
+                    // We need to make sure that we support nested start, end
+                    // let range_suppression = self.suppressions.last_mut().unwrap();
+                    let range_suppression = self.suppressions.iter_mut().find(|suppression| {
+                        !suppression.is_ended && suppression.filters.contains(&filter)
+                    });
+                    if let Some(suppression) = range_suppression {
+                        // Mark this as ended and expand it by the text range of this comment
+                        suppression.suppression_range.cover(text_range);
+                        suppression.is_ended = true;
+                    } else {
                         // This an error. We found a range end suppression without having a range start
                         return Err(AnalyzerSuppressionDiagnostic::new(
                             category!("suppressions/incorrect"),
@@ -239,23 +234,17 @@ impl RangeSuppressions {
 
     /// Checks if there's suppression that suppresses the current rule in the range provided
     pub(crate) fn suppressed_rule(&mut self, filter: &RuleKey, position: &TextRange) -> bool {
-        let range_suppression = self
-            .suppressions
-            .iter_mut()
-            .rev()
-            .find(|range_suppression| {
-                range_suppression
-                    .suppression_range
-                    .contains_range(*position)
-            });
-        let range_suppression = range_suppression
-            .filter(|range_suppression| range_suppression.filters.iter().any(|f| f == filter));
-        if let Some(range_suppression) = range_suppression {
-            range_suppression.did_suppress_signal = true;
-            true
-        } else {
-            false
+        for range_suppression in self.suppressions.iter_mut() {
+            if range_suppression
+                .suppression_range
+                .contains_range(*position)
+                && range_suppression.filters.iter().any(|f| f == filter)
+            {
+                range_suppression.did_suppress_signal = true;
+                return true;
+            }
         }
+        false
     }
 
     /// Whether if the provided `filter` matches ones, given a range.

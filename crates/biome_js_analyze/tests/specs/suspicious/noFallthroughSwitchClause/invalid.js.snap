@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -55,25 +54,6 @@ switch (foo) { case 0: {} case 1: case 2: f(); }
 ```
 
 # Diagnostics
-```
-invalid.js:39:9 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This case is falling through to the next case.
-  
-    37 │ function f () {
-    38 │     switch (a) {
-  > 39 │         case 0:
-       │         ^^^^^^^
-  > 40 │             try { return foo(); } catch {} finally {}
-       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    41 │         case 1:
-    42 │             f();
-  
-  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
-  
-
-```
-
 ```
 invalid.js:1:15 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -406,6 +386,25 @@ invalid.js:35:24 lint/suspicious/noFallthroughSwitchClause ━━━━━━━
        │                        ^^^^^^^^^
     36 │ 
     37 │ function f () {
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+invalid.js:39:9 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    37 │ function f () {
+    38 │     switch (a) {
+  > 39 │         case 0:
+       │         ^^^^^^^
+  > 40 │             try { return foo(); } catch {} finally {}
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │         case 1:
+    42 │             f();
   
   i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
   

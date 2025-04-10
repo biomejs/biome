@@ -315,6 +315,10 @@ impl SyntaxNode {
         PreorderWithTokens::new(self.clone(), direction)
     }
 
+    pub fn preorder_tokens(&self, direction: Direction) -> PreorderTokens {
+        PreorderTokens::new(self.clone(), direction)
+    }
+
     pub(crate) fn preorder_slots(&self) -> SlotsPreorder {
         SlotsPreorder::new(self.clone())
     }
@@ -651,6 +655,36 @@ impl Iterator for PreorderWithTokens {
 }
 
 impl FusedIterator for PreorderWithTokens {}
+
+pub(crate) struct PreorderTokens {
+    next: Option<SyntaxToken>,
+    direction: Direction,
+}
+
+impl PreorderTokens {
+    fn new(start: SyntaxNode, direction: Direction) -> PreorderTokens {
+        let next = match direction {
+            Direction::Next => start.first_token(),
+            Direction::Prev => start.last_token(),
+        };
+        PreorderTokens { next, direction }
+    }
+}
+
+impl Iterator for PreorderTokens {
+    type Item = SyntaxToken;
+
+    fn next(&mut self) -> Option<SyntaxToken> {
+        let next = self.next.take();
+        self.next = next.as_ref().and_then(|next| match self.direction {
+            Direction::Next => next.next_token(),
+            Direction::Prev => next.prev_token(),
+        });
+        next
+    }
+}
+
+impl FusedIterator for PreorderTokens {}
 
 /// Represents a cursor to a green node slot. A slot either contains an element or is empty
 /// if the child isn't present in the source.

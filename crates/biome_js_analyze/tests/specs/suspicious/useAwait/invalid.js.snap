@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -220,36 +219,6 @@ invalid.js:16:2 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:22:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This async function lacks an await expression.
-  
-    21 │ async function outer() {
-  > 22 │ 	async function innerFetchData() {
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 23 │ 		return fetch('/data');
-  > 24 │ 	}
-       │ 	^
-    25 │ }
-    26 │ 
-  
-  i Remove this async modifier, or add an await expression in the function.
-  
-    21 │ async function outer() {
-  > 22 │ 	async function innerFetchData() {
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 23 │ 		return fetch('/data');
-  > 24 │ 	}
-       │ 	^
-    25 │ }
-    26 │ 
-  
-  i Async functions without await expressions may not need to be declared async.
-  
-
-```
-
-```
 invalid.js:21:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This async function lacks an await expression.
@@ -286,29 +255,29 @@ invalid.js:21:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:28:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This async function lacks an await expression.
   
-    27 │ async function outer() {
-  > 28 │ 	async function innerFetchData() {
+    21 │ async function outer() {
+  > 22 │ 	async function innerFetchData() {
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 29 │ 		return fetch('/data');
-  > 30 │ 	}
+  > 23 │ 		return fetch('/data');
+  > 24 │ 	}
        │ 	^
-    31 │ 	return fetch('/another-data');
-    32 │ }
+    25 │ }
+    26 │ 
   
   i Remove this async modifier, or add an await expression in the function.
   
-    27 │ async function outer() {
-  > 28 │ 	async function innerFetchData() {
+    21 │ async function outer() {
+  > 22 │ 	async function innerFetchData() {
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 29 │ 		return fetch('/data');
-  > 30 │ 	}
+  > 23 │ 		return fetch('/data');
+  > 24 │ 	}
        │ 	^
-    31 │ 	return fetch('/another-data');
-    32 │ }
+    25 │ }
+    26 │ 
   
   i Async functions without await expressions may not need to be declared async.
   
@@ -354,6 +323,36 @@ invalid.js:27:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 
 ```
+invalid.js:28:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function lacks an await expression.
+  
+    27 │ async function outer() {
+  > 28 │ 	async function innerFetchData() {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │ 		return fetch('/data');
+  > 30 │ 	}
+       │ 	^
+    31 │ 	return fetch('/another-data');
+    32 │ }
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    27 │ async function outer() {
+  > 28 │ 	async function innerFetchData() {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 29 │ 		return fetch('/data');
+  > 30 │ 	}
+       │ 	^
+    31 │ 	return fetch('/another-data');
+    32 │ }
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+```
+
+```
 invalid.js:34:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This async function lacks an await expression.
@@ -385,6 +384,42 @@ invalid.js:34:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
        │ ^
     40 │ 
     41 │ async function complexFunction() {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+```
+
+```
+invalid.js:41:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function lacks an await expression.
+  
+    39 │ }
+    40 │ 
+  > 41 │ async function complexFunction() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 42 │ 	const obj = {
+        ...
+  > 56 │ 	}
+  > 57 │ }
+       │ ^
+    58 │ 
+    59 │ async function withoutForAwait () {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    39 │ }
+    40 │ 
+  > 41 │ async function complexFunction() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 42 │ 	const obj = {
+        ...
+  > 56 │ 	}
+  > 57 │ }
+       │ ^
+    58 │ 
+    59 │ async function withoutForAwait () {
   
   i Async functions without await expressions may not need to be declared async.
   
@@ -447,42 +482,6 @@ invalid.js:49:3 lint/suspicious/useAwait ━━━━━━━━━━━━━
        │ 		^
     52 │ 	}
     53 │ 
-  
-  i Async functions without await expressions may not need to be declared async.
-  
-
-```
-
-```
-invalid.js:41:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This async function lacks an await expression.
-  
-    39 │ }
-    40 │ 
-  > 41 │ async function complexFunction() {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 42 │ 	const obj = {
-        ...
-  > 56 │ 	}
-  > 57 │ }
-       │ ^
-    58 │ 
-    59 │ async function withoutForAwait () {
-  
-  i Remove this async modifier, or add an await expression in the function.
-  
-    39 │ }
-    40 │ 
-  > 41 │ async function complexFunction() {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 42 │ 	const obj = {
-        ...
-  > 56 │ 	}
-  > 57 │ }
-       │ ^
-    58 │ 
-    59 │ async function withoutForAwait () {
   
   i Async functions without await expressions may not need to be declared async.
   

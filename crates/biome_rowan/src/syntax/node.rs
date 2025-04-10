@@ -380,6 +380,13 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    pub fn preorder_tokens(&self, direction: Direction) -> PreorderTokens<L> {
+        PreorderTokens {
+            raw: self.raw.preorder_tokens(direction),
+            _p: PhantomData,
+        }
+    }
+
     /// Find a token in the subtree corresponding to this node, which covers the offset.
     /// Precondition: offset must be withing node's range.
     pub fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken<L>> {
@@ -889,6 +896,18 @@ impl<L: Language> Iterator for Preorder<L> {
     type Item = WalkEvent<SyntaxNode<L>>;
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(SyntaxNode::from))
+    }
+}
+
+pub struct PreorderTokens<L: Language> {
+    raw: cursor::PreorderTokens,
+    _p: PhantomData<L>,
+}
+
+impl<L: Language> Iterator for PreorderTokens<L> {
+    type Item = SyntaxToken<L>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.raw.next().map(SyntaxToken::from)
     }
 }
 
