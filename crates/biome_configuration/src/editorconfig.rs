@@ -9,11 +9,10 @@
 //! | end_of_line          | line_ending  |
 //! | max_line_length      | line_width   |
 
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
-use biome_diagnostics::{Error, IniError};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding};
-use serde::{Deserialize, Deserializer};
+use biome_diagnostics::Error;
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, ParseFormatNumberError};
 
 use crate::{
     Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
@@ -22,40 +21,194 @@ use crate::{
 };
 
 pub fn parse_str(s: &str) -> Result<EditorConfig, EditorConfigDiagnostic> {
-    // TODO: use serde_path_to_error to emit better parse diagnostics
-    serde_ini::from_str(s).map_err(|err| {
+    EditorConfig::from_str(s).map_err(|err| {
         EditorConfigDiagnostic::ParseFailed(ParseFailedDiagnostic {
-            source: Some(Error::from(IniError::from(err))),
+            source: Some(Error::from(err)),
         })
     })
 }
 
+#[derive(Debug)]
+pub enum EditorConfigErrorKind {
+    StaticStr(&'static str),
+    ParseBoolError(std::str::ParseBoolError),
+    ParseFormatNumberError(ParseFormatNumberError),
+    // A section must end with `]`
+    MissingSectionEnd,
+}
+impl std::fmt::Display for EditorConfigErrorKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::StaticStr(s) => f.write_str(s),
+            Self::ParseBoolError(error) => {
+                write!(f, "{}", error)
+            }
+            Self::ParseFormatNumberError(error) => {
+                write!(f, "{}", error)
+            }
+            Self::MissingSectionEnd => f.write_str("a section must be closed with `]`"),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct EditorConfigError {
+    line_number: u32,
+    kind: EditorConfigErrorKind,
+}
+impl biome_diagnostics::Diagnostic for EditorConfigError {
+    fn category(&self) -> Option<&'static biome_diagnostics::Category> {
+        Some(biome_diagnostics::category!("configuration"))
+    }
+
+    fn severity(&self) -> crate::Severity {
+        crate::Severity::Error
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(fmt, "{}", self)
+    }
+
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(biome_console::markup!({ AsConsoleDisplay(&self) }))
+    }
+}
+impl biome_console::fmt::Display for EditorConfigError {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        write!(fmt, "{}", self)
+    }
+}
+impl std::fmt::Display for EditorConfigError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "line {}: {}", self.line_number, self.kind)
+    }
+}
+
+struct AsConsoleDisplay<'a, T>(&'a T);
+impl<T: std::fmt::Display> biome_console::fmt::Display for AsConsoleDisplay<'_, T> {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_fmt(format_args!("{}", self.0))
+    }
+}
+
 /// Represents a parsed .editorconfig file, containing only the options that are relevant to biome.
-#[derive(Debug, Clone, Deserialize, Default)]
-#[serde(default)]
+#[derive(Debug, Clone, Default)]
 pub struct EditorConfig {
-    #[serde(deserialize_with = "deserialize_bool_from_string")]
-    root: bool,
-    #[serde(flatten)]
-    options: HashMap<String, EditorConfigOptions>,
+    pub root: bool,
+    pub sections: Vec<EditorConfigSection>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct EditorConfigSection {
+    pub glob: String,
+    pub options: EditorConfigOptions,
+}
+
+impl FromStr for EditorConfig {
+    type Err = EditorConfigError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut root = false;
+        let mut sections = Vec::new();
+        let mut last_section: Option<(&str, EditorConfigOptions)> = None;
+        for (line_number, line) in (1..).zip(s.lines()) {
+            let line = line.trim_ascii();
+            match line.bytes().next() {
+                Some(b'#' | b';') => {
+                    // Ignore comments
+                }
+                Some(b'[') => {
+                    if let Some((section_name, options)) = last_section.take() {
+                        if !options.is_all_none() {
+                            sections.push(EditorConfigSection {
+                                glob: section_name.to_string(),
+                                options,
+                            });
+                        }
+                    }
+                    if let Some(section_name) = line[1..].strip_suffix(']') {
+                        last_section = Some((section_name, EditorConfigOptions::default()))
+                    } else {
+                        return Err(EditorConfigError {
+                            line_number,
+                            kind: EditorConfigErrorKind::MissingSectionEnd,
+                        });
+                    }
+                }
+                Some(b'a'..=b'z' | b'A'..=b'Z') => {
+                    if let Some((key, value)) = line.split_once('=') {
+                        let key = key.trim_ascii_end();
+                        let value = value.trim_ascii();
+                        if let Some((_, last_options)) = &mut last_section {
+                            if key.eq_ignore_ascii_case("indent_style") {
+                                last_options.indent_style = EditorconfigValue::from_str(value)
+                                    .map_err(|err| EditorConfigError {
+                                        line_number,
+                                        kind: EditorConfigErrorKind::StaticStr(err),
+                                    })?;
+                            } else if key.eq_ignore_ascii_case("indent_size") {
+                                last_options.indent_size = EditorconfigValue::from_str(value)
+                                    .map_err(|err| EditorConfigError {
+                                        line_number,
+                                        kind: EditorConfigErrorKind::ParseFormatNumberError(err),
+                                    })?;
+                            } else if key.eq_ignore_ascii_case("end_of_line") {
+                                last_options.end_of_line = EditorconfigValue::from_str(value)
+                                    .map_err(|err| EditorConfigError {
+                                        line_number,
+                                        kind: EditorConfigErrorKind::StaticStr(err),
+                                    })?;
+                            } else if key.eq_ignore_ascii_case("insert_final_newline") {
+                                last_options.insert_final_newline =
+                                    EditorconfigValue::from_str(value).map_err(|err| {
+                                        EditorConfigError {
+                                            line_number,
+                                            kind: EditorConfigErrorKind::ParseBoolError(err),
+                                        }
+                                    })?;
+                            }
+                        } else if key.eq_ignore_ascii_case("root") {
+                            root = bool::from_str(value).map_err(|err| EditorConfigError {
+                                line_number,
+                                kind: EditorConfigErrorKind::ParseBoolError(err),
+                            })?;
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+        if let Some((section_name, options)) = last_section.take() {
+            if !options.is_all_none() {
+                sections.push(EditorConfigSection {
+                    glob: section_name.to_string(),
+                    options,
+                });
+            }
+        }
+        Ok(Self { root, sections })
+    }
 }
 
 impl EditorConfig {
     pub fn to_biome(mut self) -> (Option<Configuration>, Vec<EditorConfigDiagnostic>) {
         let diagnostics = self.validate();
 
+        let global_index = self
+            .sections
+            .iter()
+            .position(|section| &*section.glob == "*");
         let mut config = Configuration {
-            formatter: self.options.remove("*").map(|o| o.to_biome()),
+            formatter: global_index.map(|index| self.sections.remove(index).options.to_biome()),
             ..Default::default()
         };
         let overrides: Vec<_> = self
-            .options
+            .sections
             .into_iter()
-            .filter_map(|(k, v)| {
+            .filter_map(|section| {
                 // Ignore glob patterns that cannot be parsed.
                 Some((
-                    biome_glob::editorconfig::EditorconfigGlob::try_from(k).ok()?,
-                    v,
+                    biome_glob::editorconfig::EditorconfigGlob::try_from(section.glob).ok()?,
+                    section.options,
                 ))
             })
             .map(|(glob, v)| OverridePattern {
@@ -70,27 +223,30 @@ impl EditorConfig {
     }
 
     fn validate(&self) -> Vec<EditorConfigDiagnostic> {
-        let errors: Vec<_> = self.options.values().flat_map(|o| o.validate()).collect();
-
-        errors
+        self.sections
+            .iter()
+            .flat_map(|section| section.options.validate())
+            .collect()
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Default)]
-#[serde(default)]
+#[derive(Debug, Clone, Default)]
 pub struct EditorConfigOptions {
-    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
-    indent_style: EditorconfigValue<IndentStyle>,
-    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
-    indent_size: EditorconfigValue<IndentWidth>,
-    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
-    end_of_line: EditorconfigValue<LineEnding>,
+    pub indent_style: EditorconfigValue<IndentStyle>,
+    pub indent_size: EditorconfigValue<IndentWidth>,
+    pub end_of_line: EditorconfigValue<LineEnding>,
     // Not a biome option, but we need it to emit a diagnostic when this is set to false.
-    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
-    insert_final_newline: EditorconfigValue<bool>,
+    pub insert_final_newline: EditorconfigValue<bool>,
 }
 
 impl EditorConfigOptions {
+    pub fn is_all_none(&self) -> bool {
+        self.indent_style.is_none()
+            && self.indent_size.is_none()
+            && self.end_of_line.is_none()
+            && self.insert_final_newline.is_none()
+    }
+
     pub fn to_biome(self) -> FormatterConfiguration {
         FormatterConfiguration {
             indent_style: self.indent_style.into(),
@@ -123,8 +279,7 @@ impl EditorConfigOptions {
 }
 
 /// Represents a value in an .editorconfig file.
-#[derive(Debug, Clone, Deserialize, Default)]
-#[serde(untagged)]
+#[derive(Debug, Clone, Default)]
 pub enum EditorconfigValue<T> {
     /// The value was explicitly specified.
     Explicit(T),
@@ -133,6 +288,20 @@ pub enum EditorconfigValue<T> {
     /// The value was not specified.
     #[default]
     None,
+}
+impl<T> EditorconfigValue<T> {
+    pub fn is_none(&self) -> bool {
+        matches!(self, Self::None)
+    }
+}
+impl<T: FromStr> FromStr for EditorconfigValue<T> {
+    type Err = T::Err;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "unset" | "off" => Ok(EditorconfigValue::Default),
+            _ => T::from_str(s).map(EditorconfigValue::Explicit),
+        }
+    }
 }
 
 // This is an `Into` because implementing `From` is not possible because you can't implement traits for a type you don't own.
@@ -144,35 +313,6 @@ impl<T: Default> Into<Option<T>> for EditorconfigValue<T> {
             EditorconfigValue::Default => Some(T::default()),
             EditorconfigValue::None => None,
         }
-    }
-}
-
-fn deserialize_bool_from_string<'de, D>(deserializer: D) -> Result<bool, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    match s.as_str() {
-        "false" => Ok(false),
-        "true" => Ok(true),
-        _ => Err(serde::de::Error::custom("expected 'true' or 'false'")),
-    }
-}
-
-fn deserialize_optional_value_from_string<'de, D, T>(
-    deserializer: D,
-) -> Result<EditorconfigValue<T>, D::Error>
-where
-    D: Deserializer<'de>,
-    T: FromStr,
-    T::Err: std::fmt::Display,
-{
-    let s = String::deserialize(deserializer)?;
-    match s.as_str() {
-        "unset" | "off" => Ok(EditorconfigValue::Default),
-        _ => T::from_str(s.as_str())
-            .map_err(serde::de::Error::custom)
-            .map(EditorconfigValue::Explicit),
     }
 }
 
@@ -273,17 +413,45 @@ insert_final_newline = unset
 "#;
 
         let conf = parse_str(input).expect("Failed to parse editorconfig");
+        let global_options = conf
+            .sections
+            .into_iter()
+            .find(|section| section.glob == "*")
+            .expect("has section")
+            .options;
         assert!(matches!(
-            conf.options["*"].indent_style,
+            global_options.indent_style,
             EditorconfigValue::Default
         ));
         assert!(matches!(
-            conf.options["*"].indent_size,
+            global_options.indent_size,
             EditorconfigValue::Default
         ));
         assert!(matches!(
-            conf.options["*"].end_of_line,
+            global_options.end_of_line,
             EditorconfigValue::Default
+        ));
+    }
+
+    #[test]
+    fn test_inner_section_brackets() {
+        let input = r#"
+root = true
+
+[a[abc]a]
+indent_style=space
+"#;
+
+        let conf = parse_str(input).expect("Failed to parse editorconfig");
+        let options = conf
+            .sections
+            .into_iter()
+            .find(|section| section.glob == "a[abc]a")
+            .expect("has section")
+            .options;
+        assert!(matches!(
+            options.indent_style,
+            EditorconfigValue::Explicit(IndentStyle::Space)
         ));
     }
 }
