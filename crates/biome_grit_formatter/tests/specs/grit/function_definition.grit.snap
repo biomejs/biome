@@ -5,7 +5,7 @@ info: grit/function_definition.grit
 # Input
 
 ```grit
-/ define a lines function
+// define a lines function
 function lines($string) {
     return split($string, separator=`\n`)
 }
@@ -49,7 +49,7 @@ Attribute Position: Auto
 -----
 
 ```grit
-/ define a lines function
+// define a lines function
 function lines($string) { return split($string, separator=`\n`) }
 
 // Define a my_todo function
