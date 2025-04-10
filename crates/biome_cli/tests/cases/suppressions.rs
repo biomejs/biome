@@ -383,3 +383,112 @@ a == b;
         result,
     ));
 }
+
+#[test]
+fn syntax_rule_line_suppression() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.ts");
+    fs.insert(
+        file_path.into(),
+        *b"
+// biome-ignore syntax/correctness/noTypeOnlyImportAttributes: bug
+import type { ChalkInstance } from \"chalk\" with { \"resolution-mode\": \"import\" };
+
+function sommething(chalk: ChalkInstance) {
+  console.log(chalk.yellow('we do something here'));
+}",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    if let Result::Err(e) = &result {
+        println!("{e:#?}");
+    }
+
+    assert!(result.is_ok(), "run_cli returned {result:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "syntax_rule_line_suppression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn syntax_rule_range_suppression() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.ts");
+    fs.insert(
+        file_path.into(),
+        *b"
+// biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+import type { ChalkInstance } from \"chalk\" with { \"resolution-mode\": \"import\" };
+import type { ChalkInstance2 } from \"chalk2\" with { \"resolution-mode\": \"import\" };
+// biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
+
+function sommething(chalk: ChalkInstance) {
+  console.log(chalk.yellow('we do something here'));
+}",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "syntax_rule_range_suppression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn syntax_rule_top_suppression() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.ts");
+    fs.insert(
+        file_path.into(),
+        *b"
+// biome-ignore-all syntax/correctness/noTypeOnlyImportAttributes: bug
+import type { ChalkInstance } from \"chalk\" with { \"resolution-mode\": \"import\" };
+import type { ChalkInstance2 } from \"chalk2\" with { \"resolution-mode\": \"import\" };
+
+function sommething(chalk: ChalkInstance) {
+  console.log(chalk.yellow('we do something here'));
+}",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "syntax_rule_top_suppression",
+        fs,
+        console,
+        result,
+    ));
+}

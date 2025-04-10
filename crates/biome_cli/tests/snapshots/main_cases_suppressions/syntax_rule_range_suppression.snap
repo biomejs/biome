@@ -1,0 +1,23 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.ts`
+
+```ts
+
+// biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+// biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
+
+function sommething(chalk: ChalkInstance) {
+  console.log(chalk.yellow('we do something here'));
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

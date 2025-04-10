@@ -344,17 +344,26 @@ where
     fn run_first_phase(mut self) -> ControlFlow<Break> {
         let iter = self.root.syntax().preorder_with_tokens(Direction::Next);
         for event in iter {
-            let node_event = match event {
-                WalkEvent::Enter(SyntaxElement::Node(node)) => WalkEvent::Enter(node),
-                WalkEvent::Leave(SyntaxElement::Node(node)) => WalkEvent::Leave(node),
-
+            match event {
                 // If this is a token enter event, process its text content
                 WalkEvent::Enter(SyntaxElement::Token(token)) => {
                     self.handle_token(token)?;
-
                     continue;
                 }
-                WalkEvent::Leave(SyntaxElement::Token(_)) => {
+                WalkEvent::Leave(SyntaxElement::Token(_) | SyntaxElement::Node(_))
+                | WalkEvent::Enter(SyntaxElement::Node(_)) => {
+                    continue;
+                }
+            };
+        }
+        // Iterate for syntax rules after we've established suppressions
+        let iter = self.root.syntax().preorder_with_tokens(Direction::Next);
+        for event in iter {
+            let node_event = match event {
+                WalkEvent::Enter(SyntaxElement::Node(node)) => WalkEvent::Enter(node),
+                WalkEvent::Leave(SyntaxElement::Node(node)) => WalkEvent::Leave(node),
+                WalkEvent::Leave(SyntaxElement::Token(_))
+                | WalkEvent::Enter(SyntaxElement::Token(_)) => {
                     continue;
                 }
             };
@@ -466,7 +475,7 @@ where
                 || self.suppressions.top_level_suppression.suppress_all
             {
                 self.signal_queue.pop();
-                break;
+                continue;
             }
 
             if self
@@ -475,7 +484,7 @@ where
                 .suppressed_rule(&entry.rule, &entry.text_range)
             {
                 self.signal_queue.pop();
-                break;
+                continue;
             }
 
             // Search for an active line suppression comment covering the range of
@@ -504,7 +513,15 @@ where
                     if index >= self.suppressions.line_suppressions.len() {
                         None
                     } else {
-                        Some(&mut self.suppressions.line_suppressions[index])
+                        let line_suppression = &mut self.suppressions.line_suppressions[index];
+                        // Since line suppressions of something like a function need to work, we just check the start overlap
+                        if line_suppression.text_range.start() <= entry.text_range.start()
+                            && line_suppression.text_range.end() >= entry.text_range.start()
+                        {
+                            Some(line_suppression)
+                        } else {
+                            None
+                        }
                     }
                 }
             };
@@ -762,6 +779,7 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().end()).start(),
     );
     for (key, subcategory, value) in suppression.categories {
+        // TODO - allow skipping the whole category for syntax
         if key == category!("lint") || key == category!("assist") {
             result
                 .push(AnalyzerSuppression::everything(key.name()).with_variant(&suppression.kind));
@@ -786,6 +804,15 @@ pub fn to_analyzer_suppressions(
                 let suppression = AnalyzerSuppression::action(action)
                     .with_ignore_range(ignore_range)
                     .with_variant(&suppression.kind);
+                result.push(suppression);
+            } else if let Some(rule) = category.strip_prefix("syntax/") {
+                let suppression = if let Some(instance) = value {
+                    AnalyzerSuppression::rule_instance(rule, instance)
+                        .with_ignore_range(ignore_range)
+                } else {
+                    AnalyzerSuppression::rule(rule).with_ignore_range(ignore_range)
+                }
+                .with_variant(&suppression.kind);
                 result.push(suppression);
             }
         }
