@@ -430,8 +430,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     };
     Ok(FixFileResult {
         code,
-        skipped_suggested_fixes,
-        actions,
+        skipped_suggested_fixes: 0,
+        actions: vec![],
         errors: 0,
     })
 }
