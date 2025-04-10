@@ -749,15 +749,14 @@ impl Features {
 /// Checks whether a diagnostic coming from the analyzer is an [error](Severity::Error)
 ///
 /// The function checks the diagnostic against the current configured rules.
+// TODO: this function works only with lint rules, but it should work with assist actions too
 pub(crate) fn is_diagnostic_error(
     diagnostic: &'_ AnalyzerDiagnostic,
     rules: Option<&'_ Rules>,
 ) -> bool {
     let severity = diagnostic
         .category()
-        .filter(|category| {
-            category.name().starts_with("lint/") || category.name().starts_with("assist/")
-        })
+        .filter(|category| category.name().starts_with("lint/"))
         .map_or_else(
             || diagnostic.severity(),
             |category| {

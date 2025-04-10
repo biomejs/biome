@@ -18,7 +18,7 @@ use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonSyntaxNode;
+use biome_json_syntax::{JsonRoot, JsonSyntaxNode};
 use biome_parser::prelude::ParseDiagnostic;
 use biome_rowan::NodeCache;
 use criterion::black_box;
@@ -123,7 +123,7 @@ impl Parsed {
     pub fn analyze(&self) -> Option<Analyze> {
         match self {
             Parsed::JavaScript(parse, _) => Some(Analyze::JavaScript(parse.tree())),
-            Parsed::Json(_) => None,
+            Parsed::Json(parse) => Some(Analyze::Json(parse.tree())),
             Parsed::Graphql(_) => None,
             Parsed::Css(parse) => Some(Analyze::Css(parse.tree())),
             Parsed::Html(_) => None,
@@ -197,6 +197,7 @@ impl FormattedNode {
 pub enum Analyze {
     JavaScript(AnyJsRoot),
     Css(CssRoot),
+    Json(JsonRoot),
 }
 
 impl Analyze {
@@ -207,6 +208,7 @@ impl Analyze {
                     categories: RuleCategoriesBuilder::default()
                         .with_syntax()
                         .with_lint()
+                        .with_assist()
                         .build(),
                     ..AnalysisFilter::default()
                 };
@@ -232,11 +234,29 @@ impl Analyze {
                     categories: RuleCategoriesBuilder::default()
                         .with_syntax()
                         .with_lint()
+                        .with_assist()
                         .build(),
                     ..AnalysisFilter::default()
                 };
                 let options = AnalyzerOptions::default();
                 biome_css_analyze::analyze(root, filter, &options, &[], |event| {
+                    black_box(event.diagnostic());
+                    black_box(event.actions());
+                    ControlFlow::<Never>::Continue(())
+                });
+            }
+            Analyze::Json(root) => {
+                let filter = AnalysisFilter {
+                    categories: RuleCategoriesBuilder::default()
+                        .with_syntax()
+                        .with_lint()
+                        .with_assist()
+                        .build(),
+                    ..AnalysisFilter::default()
+                };
+
+                let options = AnalyzerOptions::default();
+                biome_json_analyze::analyze(root, filter, &options, Default::default(), |event| {
                     black_box(event.diagnostic());
                     black_box(event.actions());
                     ControlFlow::<Never>::Continue(())

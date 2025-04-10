@@ -1,8 +1,10 @@
 use super::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{check_feature_activity, check_override_feature_activity};
+use crate::workspace::FixFileResult;
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
@@ -10,6 +12,7 @@ use crate::{
 };
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::html::{HtmlFormatterConfiguration, HtmlFormatterEnabled};
+use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
 };
@@ -23,8 +26,9 @@ use biome_html_formatter::{
 use biome_html_parser::parse_html_with_cache;
 use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::AnyParse;
-use biome_rowan::NodeCache;
+use biome_rowan::{AstNode, NodeCache};
 use camino::Utf8Path;
+use tracing::debug_span;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -204,10 +208,10 @@ impl ExtensionHandler for HtmlFileHandler {
                 debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
+                lint: Some(lint),
                 code_actions: None,
                 rename: None,
-                fix_all: None,
+                fix_all: Some(fix_all),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -292,4 +296,36 @@ fn format(
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+fn lint(params: LintParams) -> LintResults {
+    let _ = debug_span!("Linting HTML file", path =? params.path, language =? params.language)
+        .entered();
+    let diagnostics = params.parse.into_diagnostics();
+
+    let diagnostic_count = diagnostics.len() as u32;
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+    let errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() <= Severity::Error)
+        .count();
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
+    }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    // We don't have analyzer rules yet
+    let tree: HtmlRoot = params.parse.tree();
+    Ok(FixFileResult {
+        actions: Vec::new(),
+        errors: 0,
+        skipped_suggested_fixes: 0,
+        code: tree.syntax().to_string(),
+    })
 }

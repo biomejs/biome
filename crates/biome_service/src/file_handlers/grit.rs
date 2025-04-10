@@ -1,10 +1,10 @@
 use super::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{check_feature_activity, check_override_feature_activity};
-use crate::workspace::GetSyntaxTreeResult;
+use crate::workspace::{FixFileResult, GetSyntaxTreeResult};
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
@@ -21,7 +21,7 @@ use biome_grit_formatter::{context::GritFormatOptions, format_node, format_sub_t
 use biome_grit_parser::parse_grit_with_cache;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
 use biome_parser::AnyParse;
-use biome_rowan::{NodeCache, TextRange, TextSize, TokenAtOffset};
+use biome_rowan::{AstNode, NodeCache, TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use tracing::debug_span;
 
@@ -252,7 +252,7 @@ impl ExtensionHandler for GritFileHandler {
                 lint: Some(lint),
                 code_actions: None,
                 rename: None,
-                fix_all: None,
+                fix_all: Some(fix_all),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -410,4 +410,16 @@ fn lint(params: LintParams) -> LintResults {
         errors,
         skipped_diagnostics,
     }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    // We don't have analyzer rules yet
+    let tree: GritRoot = params.parse.tree();
+    Ok(FixFileResult {
+        actions: Vec::new(),
+        errors: 0,
+        skipped_suggested_fixes: 0,
+        code: tree.syntax().to_string(),
+    })
 }

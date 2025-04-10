@@ -6,7 +6,51 @@ use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
-fn assist_emit_diagnostic() {
+fn assist_emit_diagnostic_but_doesnt_block() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        r#"{
+            "assist": {
+                "enabled": true,
+                "actions": {
+                  "source": {
+                    "useSortedKeys": "on"
+                  }
+                }
+            },
+            "formatter": { "enabled": false }
+        }"#
+        .as_bytes(),
+    );
+    let file = Utf8Path::new("file.json");
+    fs.insert(
+        file.into(),
+        r#"{ "zod": true, "lorem": "ipsum", "foo": "bar" }"#.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--enforce-assist=false", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "assist_emit_diagnostic_but_doesnt_block",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn assist_emit_diagnostic_and_blocks() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -42,7 +86,7 @@ fn assist_emit_diagnostic() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "assist_emit_diagnostic",
+        "assist_emit_diagnostic_and_blocks",
         fs,
         console,
         result,

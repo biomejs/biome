@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `check.js`
@@ -25,9 +25,16 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-check.js assist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Not all actions were applied:
+  × The imports and exports are not sorted.
+  
+  > 1 │ import { lorem, foom, bar } from "foo";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import * as something from "../something";
+    3 │ 
+  
+  i Safe fix: Organize Imports (Biome)
   
     1   │ - import·{·lorem,·foom,·bar·}·from·"foo";
       1 │ + import·{·bar,·foom,·lorem·}·from·"foo";

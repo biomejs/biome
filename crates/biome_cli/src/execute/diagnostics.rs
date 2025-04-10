@@ -20,36 +20,11 @@ pub(crate) struct CIFormatDiffDiagnostic {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "assist",
-    message = "Applied actions differs from the output"
-)]
-pub(crate) struct CIAssistDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
     category = "format",
     severity = Error,
     message = "Formatter would have printed the following content:"
 )]
 pub(crate) struct FormatDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "assist",
-    severity = Error,
-    message = "Not all actions were applied:"
-)]
-pub(crate) struct AssistDiffDiagnostic {
     #[location(resource)]
     pub(crate) file_name: String,
     #[advice]
