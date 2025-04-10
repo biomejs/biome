@@ -56,8 +56,7 @@ impl ParseNodeList for DefinitionList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(GRIT_BOGUS_DEFINITION, DEFINITION_LIST_RECOVERY_SET)
-                .enable_recovery_on_line_break(),
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_DEFINITION, DEFINITION_LIST_RECOVERY_SET),
             expected_definition,
         )
     }
