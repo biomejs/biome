@@ -322,10 +322,22 @@ fn lint(params: LintParams) -> LintResults {
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     // We don't have analyzer rules yet
     let tree: HtmlRoot = params.parse.tree();
+    let code = if params.should_format {
+        format_node(
+            params
+                .workspace
+                .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source),
+            tree.syntax(),
+        )?
+        .print()?
+        .into_code()
+    } else {
+        tree.syntax().to_string()
+    };
     Ok(FixFileResult {
-        actions: Vec::new(),
+        code,
+        skipped_suggested_fixes,
+        actions,
         errors: 0,
-        skipped_suggested_fixes: 0,
-        code: tree.syntax().to_string(),
     })
 }
