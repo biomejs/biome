@@ -33,6 +33,13 @@ a = 10_0000;
 // Floats
 a = 1.2_3_4567_89
 
+/* Octal/binary/hexadecimal */
+
+a = 0b101010;
+a = 0b1010_10001;
+a = 0xA_B_CD_EF;
+a = 0o77_77;
+
 ```
 
 # Diagnostics
@@ -353,6 +360,7 @@ invalid.js:28:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
   > 28 │ a = 1.2_3_4567_89
        │     ^^^^^^^^^^^^^
     29 │ 
+    30 │ /* Octal/binary/hexadecimal */
   
   i Safe fix: Fix numeric separator grouping
   
@@ -361,6 +369,100 @@ invalid.js:28:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
     28    │ - a·=·1.2_3_4567_89
        28 │ + a·=·1.234_567_89
     29 29 │   
+    30 30 │   /* Octal/binary/hexadecimal */
+  
+
+```
+
+```
+invalid.js:32:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    30 │ /* Octal/binary/hexadecimal */
+    31 │ 
+  > 32 │ a = 0b101010;
+       │     ^^^^^^^^
+    33 │ a = 0b1010_10001;
+    34 │ a = 0xA_B_CD_EF;
+  
+  i Safe fix: Add numeric separators
+  
+    30 30 │   /* Octal/binary/hexadecimal */
+    31 31 │   
+    32    │ - a·=·0b101010;
+       32 │ + a·=·0b10_1010;
+    33 33 │   a = 0b1010_10001;
+    34 34 │   a = 0xA_B_CD_EF;
+  
+
+```
+
+```
+invalid.js:33:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent digit grouping in numeric literal
+  
+    32 │ a = 0b101010;
+  > 33 │ a = 0b1010_10001;
+       │     ^^^^^^^^^^^^
+    34 │ a = 0xA_B_CD_EF;
+    35 │ a = 0o77_77;
+  
+  i Safe fix: Fix numeric separator grouping
+  
+    31 31 │   
+    32 32 │   a = 0b101010;
+    33    │ - a·=·0b1010_10001;
+       33 │ + a·=·0b1_0101_0001;
+    34 34 │   a = 0xA_B_CD_EF;
+    35 35 │   a = 0o77_77;
+  
+
+```
+
+```
+invalid.js:34:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent digit grouping in numeric literal
+  
+    32 │ a = 0b101010;
+    33 │ a = 0b1010_10001;
+  > 34 │ a = 0xA_B_CD_EF;
+       │     ^^^^^^^^^^^
+    35 │ a = 0o77_77;
+    36 │ 
+  
+  i Safe fix: Fix numeric separator grouping
+  
+    32 32 │   a = 0b101010;
+    33 33 │   a = 0b1010_10001;
+    34    │ - a·=·0xA_B_CD_EF;
+       34 │ + a·=·0xAB_CD_EF;
+    35 35 │   a = 0o77_77;
+    36 36 │   
+  
+
+```
+
+```
+invalid.js:35:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent digit grouping in numeric literal
+  
+    33 │ a = 0b1010_10001;
+    34 │ a = 0xA_B_CD_EF;
+  > 35 │ a = 0o77_77;
+       │     ^^^^^^^
+    36 │ 
+  
+  i Safe fix: Fix numeric separator grouping
+  
+    33 33 │   a = 0b1010_10001;
+    34 34 │   a = 0xA_B_CD_EF;
+    35    │ - a·=·0o77_77;
+       35 │ + a·=·0o7777;
+    36 36 │   
   
 
 ```

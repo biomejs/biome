@@ -26,3 +26,10 @@ a = 10_0000;
 
 // Floats
 a = 1.2_3_4567_89
+
+/* Octal/binary/hexadecimal */
+
+a = 0b101010;
+a = 0b1010_10001;
+a = 0xA_B_CD_EF;
+a = 0o77_77;

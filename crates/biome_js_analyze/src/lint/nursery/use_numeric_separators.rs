@@ -271,7 +271,14 @@ impl NumericLiteral {
         };
 
         format!(
-            "{}{}{}",
+            "{}{}{}{}",
+            match radix {
+                2 => "0b",
+                8 => "0o",
+                10 => "",
+                16 => "0x",
+                _ => unreachable!(),
+            },
             if let Some(sign) = sign {
                 sign.to_string()
             } else {
