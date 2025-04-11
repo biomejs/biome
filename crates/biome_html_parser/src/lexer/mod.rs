@@ -2,8 +2,8 @@ mod tests;
 
 use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
-    DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
-    UNICODE_BOM, WHITESPACE,
+    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
+    TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -50,8 +50,8 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume a token in the [HtmlLexContext::Regular] context.
-    fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
+    /// Consume a token in the [HtmlLexContext::InsideTag] context.
+    fn consume_token_inside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'<' => self.consume_l_angle(),
@@ -80,16 +80,18 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume a token in the [HtmlLexContext::OutsideTag] context.
-    fn consume_token_outside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
+    /// Consume a token in the [HtmlLexContext::Regular] context.
+    fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'!' if self.current() == T![<] => self.consume_byte(T![!]),
+            b'/' if self.current() == T![<] => self.consume_byte(T![/]),
             b'<' => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
                 if self
                     .peek_byte()
-                    .is_some_and(|b| is_tag_name_byte(b) || b == b'!' || b == b'/')
+                    .is_some_and(|b| is_tag_name_byte(b) || b == b'!' || b == b'/' || b == b'>')
                 {
                     self.consume_l_angle()
                 } else {
@@ -163,22 +165,20 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume a token in the [HtmlLexContext::Comment] context.
-    fn consume_inside_comment(&mut self, current: u8) -> HtmlSyntaxKind {
-        match current {
-            b'<' if self.at_start_comment() => self.consume_comment_start(),
-            b'-' if self.at_end_comment() => self.consume_comment_end(),
-            _ => {
-                while let Some(char) = self.current_byte() {
-                    if self.at_end_comment() {
-                        // eat -->
-                        break;
-                    }
-                    self.advance_byte_or_char(char);
-                }
-                HTML_LITERAL
+    fn consume_comment(&mut self) -> HtmlSyntaxKind {
+        // eat <!--
+        self.advance(4);
+
+        while let Some(char) = self.current_byte() {
+            if self.at_end_comment() {
+                // eat -->
+                self.advance(3);
+                return COMMENT;
             }
+            self.advance_byte_or_char(char);
         }
+
+        COMMENT
     }
 
     /// Consume a token in the [HtmlLexContext::CdataSection] context.
@@ -259,20 +259,10 @@ impl<'src> HtmlLexer<'src> {
     fn consume_tag_name(&mut self, first: u8) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
 
-        const BUFFER_SIZE: usize = 14;
-        let mut buffer = [0u8; BUFFER_SIZE];
-        buffer[0] = first;
-        let mut len = 1;
-
         self.advance_byte_or_char(first);
 
         while let Some(byte) = self.current_byte() {
             if is_tag_name_byte(byte) {
-                if len < BUFFER_SIZE {
-                    buffer[len] = byte;
-                    len += 1;
-                }
-
                 self.advance(1)
             } else {
                 break;
@@ -397,7 +387,7 @@ impl<'src> HtmlLexer<'src> {
         self.assert_byte(b'<');
 
         if self.at_start_comment() {
-            self.consume_comment_start()
+            self.consume_comment()
         } else if self.at_start_cdata() {
             self.consume_cdata_start()
         } else {
@@ -434,20 +424,6 @@ impl<'src> HtmlLexer<'src> {
         self.current_byte() == Some(b']')
             && self.byte_at(1) == Some(b']')
             && self.byte_at(2) == Some(b'>')
-    }
-
-    fn consume_comment_start(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.at_start_comment());
-
-        self.advance(4);
-        T![<!--]
-    }
-
-    fn consume_comment_end(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.at_end_comment());
-
-        self.advance(3);
-        T![-->]
     }
 
     fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
@@ -512,43 +488,60 @@ impl<'src> HtmlLexer<'src> {
         Ok(())
     }
 
-    /// Consume HTML text literals outside of tags.
+    /// Consume a single block of HTML text outside of tags.
     ///
-    /// This includes text and single spaces between words. If newline or a second
-    /// consecutive space is found, this will stop consuming and to allow the lexer to
-    /// switch to `consume_whitespace`.
+    /// We consider a "block" of text to be a sequence of words, with whitespace
+    /// separating them. A block ends when there is 2 newlines, or when a special
+    /// character (eg. `<`) is found.
     ///
-    /// See: https://html.spec.whatwg.org/#space-separated-tokens
-    /// See: https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
+    /// Spaces between words are treated the same as newlines between words in HTML,
+    /// and we don't end a block when we encounter a newline. However, we do not
+    /// include leading or trailing whitespace in the block, letting the lexer
+    /// consume that whitespace as trivia.
+    ///
+    /// This makes it easier for users to suppress formatting for specific blocks
+    /// of text instead of needing to suppress the entire parent element, which may
+    /// not even be present if the text is at the root level.
+    ///
+    /// - See: <https://html.spec.whatwg.org/#space-separated-tokens>
+    /// - See: <https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace>
     fn consume_html_text(&mut self) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
+        let mut seen_newlines = 0;
         while let Some(current) = self.current_byte() {
             match current {
                 b'<' => {
-                    if let Some(checkpoint) = whitespace_started {
-                        // avoid treating the last space as part of the token if there is one
-                        self.rewind(checkpoint);
-                    }
                     break;
                 }
                 b'\n' | b'\r' => {
+                    if whitespace_started.is_none() {
+                        whitespace_started = Some(self.checkpoint());
+                    }
                     self.after_newline = true;
-                    break;
-                }
-                b' ' => {
-                    if let Some(checkpoint) = whitespace_started {
-                        // avoid treating the last space as part of the token
-                        self.rewind(checkpoint);
+                    seen_newlines += 1;
+                    if seen_newlines > 1 {
                         break;
                     }
-                    whitespace_started = Some(self.checkpoint());
+                    self.advance(1);
+                    continue;
+                }
+                b' ' | b'\t' => {
+                    if whitespace_started.is_none() {
+                        whitespace_started = Some(self.checkpoint());
+                    }
                     self.advance(1);
                 }
                 _ => {
                     self.advance(1);
                     whitespace_started = None;
+                    seen_newlines = 0;
                 }
             }
+        }
+
+        if let Some(checkpoint) = whitespace_started {
+            // avoid treating the trailing whitespace as part of the token if there is any
+            self.rewind(checkpoint);
         }
 
         HTML_LITERAL
@@ -584,13 +577,12 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
             match self.current_byte() {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
-                    HtmlLexContext::OutsideTag => self.consume_token_outside_tag(current),
+                    HtmlLexContext::InsideTag => self.consume_token_inside_tag(current),
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang)
                     }
-                    HtmlLexContext::Comment => self.consume_inside_comment(current),
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                 },
                 None => EOF,

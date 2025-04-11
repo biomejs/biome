@@ -1,17 +1,15 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: elements/spacing/case3.html
-snapshot_kind: text
+info: comments/before-text-inside-div.html
 ---
 # Input
 
 ```html
-<!-- foo -->
-<!-- bar -->
+<div>
+  <!-- Foo -->
 
-
-
-test
+  Bar
+</div>
 
 ```
 
@@ -31,12 +29,12 @@ Attribute Position: Auto
 Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
-Self close void elements: never
 -----
 
 ```html
-<!-- foo -->
-<!-- bar -->
+<div>
+	<!-- Foo -->
 
-test
+	Bar
+</div>
 ```

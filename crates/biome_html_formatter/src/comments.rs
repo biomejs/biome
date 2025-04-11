@@ -8,7 +8,7 @@ use biome_formatter::{
     prelude::*,
     write,
 };
-use biome_html_syntax::HtmlLanguage;
+use biome_html_syntax::{HtmlLanguage, HtmlSyntaxKind};
 use biome_rowan::{SyntaxTriviaPieceComments, TextLen};
 use biome_suppression::parse_suppression_comment;
 
@@ -96,10 +96,29 @@ impl CommentStyle for HtmlCommentStyle {
         CommentKind::Block
     }
 
+    /// This allows us to override which comments are associated with which nodes.
+    ///
+    /// While every comment is directly attached to a **syntax token**, Biome actually builds a map of comments to **syntax nodes** separately. This map lives in [`HtmlComments`]. This is so that we can easily look up comments that are associated with a specific node. It's part of how suppression comments are handled.
+    ///
+    /// This method specifically, however, lets us fine tune which comments are associated with which nodes. This is useful when the default heuristic fails.
     fn place_comment(
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
+        // Fix trailing comments that are right before EOF being assigned to the wrong node.
+        //
+        // The issue is demonstrated in the example below.
+        // ```html
+        // Foo
+        //
+        // <!-- This comment gets assigned to the text node, despite it being actually attached to the EOF token. -->
+        // ```
+        if let Some(token) = comment.following_token() {
+            if token.kind() == HtmlSyntaxKind::EOF {
+                return CommentPlacement::trailing(comment.enclosing_node().clone(), comment);
+            }
+        }
+
         CommentPlacement::Default(comment)
     }
 }
