@@ -128,7 +128,7 @@ invalid.js:6:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
      4  4 │   a = 1000000000;
      5  5 │   a = 1000000000000;
      6    │ - a·=·3.1415926;
-        6 │ + a·=·3.1_415_926;
+        6 │ + a·=·3.141_592_6;
      7  7 │   /* Inconsistent digit grouping with separators. */
      8  8 │   a = 100_00;
   
