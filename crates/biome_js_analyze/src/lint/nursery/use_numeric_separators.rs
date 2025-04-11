@@ -3,8 +3,10 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{JsNumberLiteralExpression, numbers::split_into_radix_and_number};
 use biome_rowan::AstNode;
+use serde::{Deserialize, Serialize};
 
 use crate::JsRuleAction;
 
@@ -44,22 +46,14 @@ impl Rule for UseNumericSeparators {
     type Query = Ast<JsNumberLiteralExpression>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNumericSeparatorsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let token = ctx.query().value_token().ok()?;
         let raw = token.text_trimmed();
-        let num = parse_numeric_literal(token.text_trimmed());
 
-        let (min_digits, chunk_size) = match num.radix {
-            2 => (0, 4),
-            8 => (0, 4),
-            10 => (5, 3),
-            16 => (0, 2),
-            _ => unreachable!(),
-        };
-
-        let expected = format_numeric_literal(&num, min_digits, chunk_size);
+        let num = NumericLiteral::parse(token.text_trimmed());
+        let expected = num.format(ctx.options().clone());
 
         if raw == expected {
             None
@@ -98,6 +92,68 @@ impl Rule for UseNumericSeparators {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Deserializable, Eq, PartialEq)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct UseNumericSeparatorsOptions {
+    /// Binary numeric literal options.
+    #[serde(default)]
+    pub binary: BaseOptions,
+    /// Octal numeric literal options.
+    #[serde(default)]
+    pub octal: BaseOptions,
+    /// Decimal numeric literal options.
+    #[serde(default = "decimal_default")]
+    pub decimal: BaseOptions,
+    /// Hexadecimal numeric literal options.
+    #[serde(default = "hexadecimal_default")]
+    pub hexadecimal: BaseOptions,
+}
+
+impl Default for UseNumericSeparatorsOptions {
+    fn default() -> Self {
+        Self {
+            binary: BaseOptions::default(),
+            octal: BaseOptions::default(),
+            decimal: decimal_default(),
+            hexadecimal: hexadecimal_default(),
+        }
+    }
+}
+
+fn decimal_default() -> BaseOptions {
+    BaseOptions {
+        min_digits: 5,
+        chunk_size: 3,
+    }
+}
+
+fn hexadecimal_default() -> BaseOptions {
+    BaseOptions {
+        min_digits: 0,
+        chunk_size: 2,
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BaseOptions {
+    /// The minimum number of digits before a separator is required.
+    pub min_digits: usize,
+    /// The size of each chunk.
+    pub chunk_size: usize,
+}
+
+impl Default for BaseOptions {
+    fn default() -> Self {
+        Self {
+            min_digits: 0,
+            chunk_size: 4,
+        }
+    }
+}
+
 pub enum State {
     InconsistentDigitGrouping,
     UnreadableLiteral,
@@ -106,16 +162,19 @@ pub enum State {
 /// Add chunk separators to a number string.
 /// 1234567890 -> 1_234_567_890
 fn add_chunk_separators(num: &str, chunk_size: usize) -> String {
-    let reverse_digits = num.chars().rev().collect::<Vec<_>>();
-    let chunks = reverse_digits
-        // TODO: rchunks?
+    num.chars()
+        .rev()
+        .collect::<Vec<_>>()
         .chunks(chunk_size)
         .map(|c| c.iter().collect::<String>())
-        .collect::<Vec<_>>();
-
-    chunks.join("_").chars().rev().collect()
+        .collect::<Vec<_>>()
+        .join("_")
+        .chars()
+        .rev()
+        .collect()
 }
 
+#[derive(Debug)]
 struct NumericLiteral {
     sign: Option<char>,
     radix: u8,
@@ -123,82 +182,103 @@ struct NumericLiteral {
     fractional: Option<String>,
 }
 
-fn parse_numeric_literal(raw: &str) -> NumericLiteral {
-    let (sign, num) = if raw.starts_with('-') {
-        (Some('-'), &raw[1..])
-    } else if raw.starts_with('+') {
-        (Some('+'), &raw[1..])
-    } else {
-        (None, raw)
-    };
-    let (radix, num) = split_into_radix_and_number(num);
-    let (number, fractional) = num.split_once('.').unwrap_or((&num, ""));
-
-    NumericLiteral {
-        sign,
-        radix,
-        number: number.to_owned(),
-        fractional: if fractional.is_empty() {
-            None
+impl NumericLiteral {
+    fn parse(raw: &str) -> Self {
+        let (sign, num) = if raw.starts_with('-') {
+            (Some('-'), &raw[1..])
+        } else if raw.starts_with('+') {
+            (Some('+'), &raw[1..])
         } else {
-            Some(fractional.to_owned())
-        },
-    }
-}
+            (None, raw)
+        };
+        let (radix, num) = split_into_radix_and_number(num);
+        let (number, fractional) = num.split_once('.').unwrap_or((&num, ""));
 
-fn format_numeric_literal(
-    numberic_literal: &NumericLiteral,
-    min_digits: usize,
-    chunk_size: usize,
-) -> String {
-    let NumericLiteral {
-        sign,
-        number,
-        fractional,
-        ..
-    } = numberic_literal;
-
-    let number = if number.len() < min_digits {
-        number.to_owned()
-    } else {
-        add_chunk_separators(&number, chunk_size)
-    };
-
-    let fractional = if let Some(fractional) = fractional {
-        if fractional.len() < min_digits {
-            None
-        } else {
-            Some(add_chunk_separators(&fractional, chunk_size))
+        NumericLiteral {
+            sign,
+            radix,
+            number: number.to_owned(),
+            fractional: if fractional.is_empty() {
+                None
+            } else {
+                Some(fractional.to_owned())
+            },
         }
-    } else {
-        None
-    };
+    }
 
-    format!(
-        "{}{}{}",
-        sign.unwrap_or_default(),
-        number,
-        fractional.map(|f| format!(".{}", f)).unwrap_or_default()
-    )
+    fn format(&self, options: UseNumericSeparatorsOptions) -> String {
+        let NumericLiteral {
+            sign,
+            radix,
+            number,
+            fractional,
+        } = self;
+
+        let BaseOptions {
+            min_digits,
+            chunk_size,
+        } = match radix {
+            2 => options.binary,
+            8 => options.octal,
+            10 => options.decimal,
+            16 => options.hexadecimal,
+            _ => unreachable!(),
+        };
+
+        let number = if number.len() < min_digits {
+            number.to_owned()
+        } else {
+            add_chunk_separators(&number, chunk_size)
+        };
+
+        let fractional = if let Some(fractional) = fractional {
+            if fractional.len() < min_digits {
+                Some(fractional.to_owned())
+            } else {
+                Some(add_chunk_separators(&fractional, chunk_size))
+            }
+        } else {
+            None
+        };
+
+        format!(
+            "{}{}{}",
+            if let Some(sign) = sign {
+                sign.to_string()
+            } else {
+                String::new()
+            },
+            number,
+            fractional.map(|f| format!(".{}", f)).unwrap_or_default()
+        )
+    }
 }
 
 #[test]
 fn test() {
-    assert_eq!(format_numeric_literal("10", 3), "10");
-    assert_eq!(format_numeric_literal("100", 3), "100");
-    assert_eq!(format_numeric_literal("1000", 3), "1_000");
-    assert_eq!(format_numeric_literal("10000", 3), "10_000");
-    assert_eq!(format_numeric_literal("100000", 3), "100_000");
-    assert_eq!(format_numeric_literal("1000000", 3), "1_000_000");
-    assert_eq!(format_numeric_literal("1234567890", 3), "1_234_567_890");
+    fn format_numeric_literal(num: &str) -> String {
+        let options = UseNumericSeparatorsOptions::default();
+        let num = NumericLiteral::parse(num);
+        num.format(options)
+    }
+
+    // Decimals with less than 5 digits are not formatted with separators with the default options.
+    assert_eq!(format_numeric_literal("10"), "10");
+    assert_eq!(format_numeric_literal("100"), "100");
+    assert_eq!(format_numeric_literal("1000"), "1000");
+    // Decimals with 5 digits or more are formatted with separators.
+    assert_eq!(format_numeric_literal("10000"), "10_000");
+    assert_eq!(format_numeric_literal("100000"), "100_000");
+    assert_eq!(format_numeric_literal("1000000"), "1_000_000");
+    assert_eq!(format_numeric_literal("1234567890"), "1_234_567_890");
     assert_eq!(
-        format_numeric_literal("12345678901234567890", 3),
+        format_numeric_literal("12345678901234567890"),
         "12_345_678_901_234_567_890"
     );
 
-    assert_eq!(format_numeric_literal("-10_000", 3), "-10_000");
+    assert_eq!(format_numeric_literal("-10_000"), "-10_000");
 
-    assert_eq!(format_numeric_literal("1_000_000_000", 3), "1_000_000_000");
+    assert_eq!(format_numeric_literal("1_000_000_000"), "1_000_000_000");
 
-    assert_eq!(format_numeric_literal("9999.99", 3), "9_999.99");
+    assert_eq!(format_numeric_literal("99999.99"), "99_999.99");
 }
