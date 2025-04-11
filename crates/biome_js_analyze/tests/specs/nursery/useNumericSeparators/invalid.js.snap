@@ -5,84 +5,56 @@ expression: invalid.js
 # Input
 ```js
 /* No separators at all. */
+
+// Integers
 var a = 10000;
+a = 100000;
 a = 1000000;
-a = 1000000000;
-a = 1000000000000;
+a = 10000000;
+a = 1234567890;
+
+// Floats
 a = 3.1415926;
+a = 99999.99;
+
+// Signed
+
+a = -10000;
+a = -3.1415926;
+a = +10000;
+a = +3.1415926;
+
 /* Inconsistent digit grouping with separators. */
+
+// Integers
 a = 100_00;
 a = 10_0000;
+
+// Floats
+a = 1.2_3_4567_89
 
 ```
 
 # Diagnostics
 ```
-invalid.js:2:9 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:9 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Long numeric literal missing separators
   
-    1 │ /* No separators at all. */
-  > 2 │ var a = 10000;
+    3 │ // Integers
+  > 4 │ var a = 10000;
       │         ^^^^^
-    3 │ a = 1000000;
-    4 │ a = 1000000000;
+    5 │ a = 100000;
+    6 │ a = 1000000;
   
   i Safe fix: Add numeric separators
   
-     1  1 │   /* No separators at all. */
-     2    │ - var·a·=·10000;
-        2 │ + var·a·=·10_000;
-     3  3 │   a = 1000000;
-     4  4 │   a = 1000000000;
-  
-
-```
-
-```
-invalid.js:3:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Long numeric literal missing separators
-  
-    1 │ /* No separators at all. */
-    2 │ var a = 10000;
-  > 3 │ a = 1000000;
-      │     ^^^^^^^
-    4 │ a = 1000000000;
-    5 │ a = 1000000000000;
-  
-  i Safe fix: Add numeric separators
-  
-     1  1 │   /* No separators at all. */
-     2  2 │   var a = 10000;
-     3    │ - a·=·1000000;
-        3 │ + a·=·1_000_000;
-     4  4 │   a = 1000000000;
-     5  5 │   a = 1000000000000;
-  
-
-```
-
-```
-invalid.js:4:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Long numeric literal missing separators
-  
-    2 │ var a = 10000;
-    3 │ a = 1000000;
-  > 4 │ a = 1000000000;
-      │     ^^^^^^^^^^
-    5 │ a = 1000000000000;
-    6 │ a = 3.1415926;
-  
-  i Safe fix: Add numeric separators
-  
-     2  2 │   var a = 10000;
-     3  3 │   a = 1000000;
-     4    │ - a·=·1000000000;
-        4 │ + a·=·1_000_000_000;
-     5  5 │   a = 1000000000000;
-     6  6 │   a = 3.1415926;
+     2  2 │   
+     3  3 │   // Integers
+     4    │ - var·a·=·10000;
+        4 │ + var·a·=·10_000;
+     5  5 │   a = 100000;
+     6  6 │   a = 1000000;
   
 
 ```
@@ -92,21 +64,21 @@ invalid.js:5:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
 
   i Long numeric literal missing separators
   
-    3 │ a = 1000000;
-    4 │ a = 1000000000;
-  > 5 │ a = 1000000000000;
-      │     ^^^^^^^^^^^^^
-    6 │ a = 3.1415926;
-    7 │ /* Inconsistent digit grouping with separators. */
+    3 │ // Integers
+    4 │ var a = 10000;
+  > 5 │ a = 100000;
+      │     ^^^^^^
+    6 │ a = 1000000;
+    7 │ a = 10000000;
   
   i Safe fix: Add numeric separators
   
-     3  3 │   a = 1000000;
-     4  4 │   a = 1000000000;
-     5    │ - a·=·1000000000000;
-        5 │ + a·=·1_000_000_000_000;
-     6  6 │   a = 3.1415926;
-     7  7 │   /* Inconsistent digit grouping with separators. */
+     3  3 │   // Integers
+     4  4 │   var a = 10000;
+     5    │ - a·=·100000;
+        5 │ + a·=·100_000;
+     6  6 │   a = 1000000;
+     7  7 │   a = 10000000;
   
 
 ```
@@ -116,21 +88,45 @@ invalid.js:6:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
 
   i Long numeric literal missing separators
   
-    4 │ a = 1000000000;
-    5 │ a = 1000000000000;
-  > 6 │ a = 3.1415926;
-      │     ^^^^^^^^^
-    7 │ /* Inconsistent digit grouping with separators. */
-    8 │ a = 100_00;
+    4 │ var a = 10000;
+    5 │ a = 100000;
+  > 6 │ a = 1000000;
+      │     ^^^^^^^
+    7 │ a = 10000000;
+    8 │ a = 1234567890;
   
   i Safe fix: Add numeric separators
   
-     4  4 │   a = 1000000000;
-     5  5 │   a = 1000000000000;
-     6    │ - a·=·3.1415926;
-        6 │ + a·=·3.141_592_6;
-     7  7 │   /* Inconsistent digit grouping with separators. */
-     8  8 │   a = 100_00;
+     4  4 │   var a = 10000;
+     5  5 │   a = 100000;
+     6    │ - a·=·1000000;
+        6 │ + a·=·1_000_000;
+     7  7 │   a = 10000000;
+     8  8 │   a = 1234567890;
+  
+
+```
+
+```
+invalid.js:7:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    5 │ a = 100000;
+    6 │ a = 1000000;
+  > 7 │ a = 10000000;
+      │     ^^^^^^^^
+    8 │ a = 1234567890;
+    9 │ 
+  
+  i Safe fix: Add numeric separators
+  
+     5  5 │   a = 100000;
+     6  6 │   a = 1000000;
+     7    │ - a·=·10000000;
+        7 │ + a·=·10_000_000;
+     8  8 │   a = 1234567890;
+     9  9 │   
   
 
 ```
@@ -138,45 +134,233 @@ invalid.js:6:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
 ```
 invalid.js:8:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  i Long numeric literal missing separators
+  
+     6 │ a = 1000000;
+     7 │ a = 10000000;
+   > 8 │ a = 1234567890;
+       │     ^^^^^^^^^^
+     9 │ 
+    10 │ // Floats
+  
+  i Safe fix: Add numeric separators
+  
+     6  6 │   a = 1000000;
+     7  7 │   a = 10000000;
+     8    │ - a·=·1234567890;
+        8 │ + a·=·1_234_567_890;
+     9  9 │   
+    10 10 │   // Floats
+  
+
+```
+
+```
+invalid.js:11:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    10 │ // Floats
+  > 11 │ a = 3.1415926;
+       │     ^^^^^^^^^
+    12 │ a = 99999.99;
+    13 │ 
+  
+  i Safe fix: Add numeric separators
+  
+     9  9 │   
+    10 10 │   // Floats
+    11    │ - a·=·3.1415926;
+       11 │ + a·=·3.141_592_6;
+    12 12 │   a = 99999.99;
+    13 13 │   
+  
+
+```
+
+```
+invalid.js:12:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    10 │ // Floats
+    11 │ a = 3.1415926;
+  > 12 │ a = 99999.99;
+       │     ^^^^^^^^
+    13 │ 
+    14 │ // Signed
+  
+  i Safe fix: Add numeric separators
+  
+    10 10 │   // Floats
+    11 11 │   a = 3.1415926;
+    12    │ - a·=·99999.99;
+       12 │ + a·=·99_999.99;
+    13 13 │   
+    14 14 │   // Signed
+  
+
+```
+
+```
+invalid.js:16:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    14 │ // Signed
+    15 │ 
+  > 16 │ a = -10000;
+       │      ^^^^^
+    17 │ a = -3.1415926;
+    18 │ a = +10000;
+  
+  i Safe fix: Add numeric separators
+  
+    14 14 │   // Signed
+    15 15 │   
+    16    │ - a·=·-10000;
+       16 │ + a·=·-10_000;
+    17 17 │   a = -3.1415926;
+    18 18 │   a = +10000;
+  
+
+```
+
+```
+invalid.js:17:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    16 │ a = -10000;
+  > 17 │ a = -3.1415926;
+       │      ^^^^^^^^^
+    18 │ a = +10000;
+    19 │ a = +3.1415926;
+  
+  i Safe fix: Add numeric separators
+  
+    15 15 │   
+    16 16 │   a = -10000;
+    17    │ - a·=·-3.1415926;
+       17 │ + a·=·-3.141_592_6;
+    18 18 │   a = +10000;
+    19 19 │   a = +3.1415926;
+  
+
+```
+
+```
+invalid.js:18:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    16 │ a = -10000;
+    17 │ a = -3.1415926;
+  > 18 │ a = +10000;
+       │      ^^^^^
+    19 │ a = +3.1415926;
+    20 │ 
+  
+  i Safe fix: Add numeric separators
+  
+    16 16 │   a = -10000;
+    17 17 │   a = -3.1415926;
+    18    │ - a·=·+10000;
+       18 │ + a·=·+10_000;
+    19 19 │   a = +3.1415926;
+    20 20 │   
+  
+
+```
+
+```
+invalid.js:19:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    17 │ a = -3.1415926;
+    18 │ a = +10000;
+  > 19 │ a = +3.1415926;
+       │      ^^^^^^^^^
+    20 │ 
+    21 │ /* Inconsistent digit grouping with separators. */
+  
+  i Safe fix: Add numeric separators
+  
+    17 17 │   a = -3.1415926;
+    18 18 │   a = +10000;
+    19    │ - a·=·+3.1415926;
+       19 │ + a·=·+3.141_592_6;
+    20 20 │   
+    21 21 │   /* Inconsistent digit grouping with separators. */
+  
+
+```
+
+```
+invalid.js:24:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   i Inconsistent digit grouping in numeric literal
   
-     6 │ a = 3.1415926;
-     7 │ /* Inconsistent digit grouping with separators. */
-   > 8 │ a = 100_00;
+    23 │ // Integers
+  > 24 │ a = 100_00;
        │     ^^^^^^
-     9 │ a = 10_0000;
-    10 │ 
+    25 │ a = 10_0000;
+    26 │ 
   
   i Safe fix: Fix numeric separator grouping
   
-     6  6 │   a = 3.1415926;
-     7  7 │   /* Inconsistent digit grouping with separators. */
-     8    │ - a·=·100_00;
-        8 │ + a·=·10_000;
-     9  9 │   a = 10_0000;
-    10 10 │   
+    22 22 │   
+    23 23 │   // Integers
+    24    │ - a·=·100_00;
+       24 │ + a·=·10_000;
+    25 25 │   a = 10_0000;
+    26 26 │   
   
 
 ```
 
 ```
-invalid.js:9:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Inconsistent digit grouping in numeric literal
   
-     7 │ /* Inconsistent digit grouping with separators. */
-     8 │ a = 100_00;
-   > 9 │ a = 10_0000;
+    23 │ // Integers
+    24 │ a = 100_00;
+  > 25 │ a = 10_0000;
        │     ^^^^^^^
-    10 │ 
+    26 │ 
+    27 │ // Floats
   
   i Safe fix: Fix numeric separator grouping
   
-     7  7 │   /* Inconsistent digit grouping with separators. */
-     8  8 │   a = 100_00;
-     9    │ - a·=·10_0000;
-        9 │ + a·=·100_000;
-    10 10 │   
+    23 23 │   // Integers
+    24 24 │   a = 100_00;
+    25    │ - a·=·10_0000;
+       25 │ + a·=·100_000;
+    26 26 │   
+    27 27 │   // Floats
+  
+
+```
+
+```
+invalid.js:28:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent digit grouping in numeric literal
+  
+    27 │ // Floats
+  > 28 │ a = 1.2_3_4567_89
+       │     ^^^^^^^^^^^^^
+    29 │ 
+  
+  i Safe fix: Fix numeric separator grouping
+  
+    26 26 │   
+    27 27 │   // Floats
+    28    │ - a·=·1.2_3_4567_89
+       28 │ + a·=·1.234_567_89
+    29 29 │   
   
 
 ```

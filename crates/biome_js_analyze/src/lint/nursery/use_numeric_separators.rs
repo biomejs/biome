@@ -282,34 +282,3 @@ impl NumericLiteral {
         )
     }
 }
-
-#[test]
-fn test() {
-    fn format_numeric_literal(num: &str) -> String {
-        let options = UseNumericSeparatorsOptions::default();
-        let num = NumericLiteral::parse(num);
-        num.format(options)
-    }
-
-    // Decimals with less than 5 digits are not formatted with separators with the default options.
-    assert_eq!(format_numeric_literal("10"), "10");
-    assert_eq!(format_numeric_literal("100"), "100");
-    assert_eq!(format_numeric_literal("1000"), "1000");
-    // Decimals with 5 digits or more are formatted with separators.
-    assert_eq!(format_numeric_literal("10000"), "10_000");
-    assert_eq!(format_numeric_literal("100000"), "100_000");
-    assert_eq!(format_numeric_literal("1000000"), "1_000_000");
-    assert_eq!(format_numeric_literal("1234567890"), "1_234_567_890");
-    assert_eq!(
-        format_numeric_literal("12345678901234567890"),
-        "12_345_678_901_234_567_890"
-    );
-
-    assert_eq!(format_numeric_literal("-10_000"), "-10_000");
-
-    assert_eq!(format_numeric_literal("1_000_000_000"), "1_000_000_000");
-
-    assert_eq!(format_numeric_literal("99999.99"), "99_999.99");
-
-    assert_eq!(format_numeric_literal("1.23456789"), "1.234_567_89");
-}
