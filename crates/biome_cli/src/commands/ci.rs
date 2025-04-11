@@ -18,6 +18,7 @@ pub(crate) struct CiCommandPayload {
     pub(crate) formatter_enabled: Option<FormatterEnabled>,
     pub(crate) linter_enabled: Option<LinterEnabled>,
     pub(crate) assist_enabled: Option<AssistEnabled>,
+    pub(crate) enforce_assist: bool,
     pub(crate) paths: Vec<OsString>,
     pub(crate) configuration: Option<Configuration>,
     pub(crate) changed: bool,
@@ -115,7 +116,12 @@ impl CommandRunner for CiCommandPayload {
         _workspace: &dyn Workspace,
         project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
-        Ok(Execution::new_ci(project_key, (false, self.changed).into()).set_report(cli_options))
+        Ok(Execution::new_ci(
+            project_key,
+            (false, self.changed).into(),
+            self.enforce_assist,
+        )
+        .set_report(cli_options))
     }
 
     fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {

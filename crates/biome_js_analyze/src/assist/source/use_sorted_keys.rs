@@ -1,10 +1,12 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 
-use biome_analyze::{Ast, Rule, RuleAction, context::RuleContext, declare_source_rule};
+use biome_analyze::{
+    Ast, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
+};
 use biome_console::markup;
 use biome_deserialize::TextRange;
-use biome_diagnostics::Applicability;
+use biome_diagnostics::{Applicability, category};
 use biome_js_syntax::{
     AnyJsObjectMember, AnyJsObjectMemberName, JsObjectExpression, JsObjectMemberList,
 };
@@ -133,6 +135,16 @@ impl Rule for UseSortedKeys {
         }
 
         groups.into_boxed_slice()
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            category!("assist/source/useSortedKeys"),
+            ctx.query().range(),
+            markup! {
+                "The keys are not sorted."
+            },
+        ))
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {

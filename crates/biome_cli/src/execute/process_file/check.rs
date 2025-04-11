@@ -1,9 +1,9 @@
-use crate::execute::process_file::assist::assist_with_guard;
 use crate::execute::process_file::format::format_with_guard;
-use crate::execute::process_file::lint::lint_with_guard;
+use crate::execute::process_file::lint_and_assist::analyze_with_guard;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
-use biome_diagnostics::{DiagnosticExt, category};
+use biome_analyze::RuleCategoriesBuilder;
+use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::workspace::FileFeaturesResult;
@@ -20,51 +20,38 @@ pub(crate) fn check_file<'ctx>(
         ctx.push_diagnostic(
             FileTooLarge::from(result)
                 .with_file_path(workspace_file.path.to_string())
-                .with_category(category!("check")),
+                .with_category(ctx.execution.as_diagnostic_category()),
         );
         return Ok(FileStatus::Ignored);
     }
     let mut changed = false;
     let _ = tracing::info_span!("Check ", path =? workspace_file.path).entered();
+
+    let mut categories = RuleCategoriesBuilder::default().with_syntax();
     if file_features.supports_lint() {
-        let lint_result = lint_with_guard(ctx, &mut workspace_file, false, None);
-        match lint_result {
-            Ok(status) => {
-                if status.is_changed() {
-                    changed = true
-                }
-                if let FileStatus::Message(msg) = status {
-                    if msg.is_failure() {
-                        has_failures = true;
-                    }
-                    ctx.push_message(msg);
-                }
-            }
-            Err(err) => {
-                ctx.push_message(err);
-                has_failures = true;
-            }
-        }
+        categories = categories.with_lint();
+    }
+    if file_features.supports_assist() {
+        categories = categories.with_assist();
     }
 
-    if file_features.supports_assist() {
-        let assist_result = assist_with_guard(ctx, &mut workspace_file);
-        match assist_result {
-            Ok(status) => {
-                if status.is_changed() {
-                    changed = true
-                }
-                if let FileStatus::Message(msg) = status {
-                    if msg.is_failure() {
-                        has_failures = true;
-                    }
-                    ctx.push_message(msg);
-                }
+    let analyzer_result =
+        analyze_with_guard(ctx, &mut workspace_file, false, None, categories.build());
+    match analyzer_result {
+        Ok(status) => {
+            if status.is_changed() {
+                changed = true
             }
-            Err(err) => {
-                ctx.push_message(err);
-                has_failures = true;
+            if let FileStatus::Message(msg) = status {
+                if msg.is_failure() {
+                    has_failures = true;
+                }
+                ctx.push_message(msg);
             }
+        }
+        Err(err) => {
+            ctx.push_message(err);
+            has_failures = true;
         }
     }
 

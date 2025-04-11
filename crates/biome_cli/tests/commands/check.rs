@@ -1547,7 +1547,7 @@ fn applies_organize_imports_bug_4552() {
 }
 
 #[test]
-fn shows_organize_imports_diff_on_check() {
+fn shows_organize_imports_diff_on_check_when_enforced() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1569,7 +1569,7 @@ import * as something from "../something";
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "shows_organize_imports_diff_on_check",
+        "shows_organize_imports_diff_on_check_when_enforced",
         fs,
         console,
         result,

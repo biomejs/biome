@@ -99,7 +99,7 @@ export interface AssistConfiguration {
 	 */
 	actions?: Actions;
 	/**
-	 * Whether Biome should enable assist via LSP.
+	 * Whether Biome should enable assist via LSP and CLI.
 	 */
 	enabled?: Bool;
 	/**
@@ -3587,8 +3587,7 @@ export type Category =
 	| "internalError/panic"
 	| "reporter/parse"
 	| "reporter/format"
-	| "reporter/assist"
-	| "reporter/linter"
+	| "reporter/violations"
 	| "parse"
 	| "lint"
 	| "lint/a11y"

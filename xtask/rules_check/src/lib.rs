@@ -32,30 +32,36 @@ use std::slice;
 use std::str::FromStr;
 
 #[derive(Debug)]
-struct NoStyleRuleError(String);
+struct Errors(String);
 
-impl NoStyleRuleError {
-    fn new(rule_name: impl Display) -> Self {
+impl Errors {
+    fn style_rule_error(rule_name: impl Display) -> Self {
         Self(format!(
             "The rule '{}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",
             rule_name
         ))
     }
+
+    fn action_error(rule_name: impl Display) -> Self {
+        Self(format!(
+            "The rule '{}' is an action, and it must have Severity::Information. Lower down the severity.",
+            rule_name
+        ))
+    }
 }
 
-impl Display for NoStyleRuleError {
+impl Display for Errors {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.0.as_str())
     }
 }
 
-impl std::error::Error for NoStyleRuleError {}
-
+impl std::error::Error for Errors {}
 pub fn check_rules() -> anyhow::Result<()> {
     #[derive(Default)]
     struct LintRulesVisitor {
         groups: BTreeMap<(&'static str, &'static str), BTreeMap<&'static str, RuleMetadata>>,
-        errors: Vec<NoStyleRuleError>,
+        errors: Vec<Errors>,
     }
 
     impl LintRulesVisitor {
@@ -64,7 +70,11 @@ pub fn check_rules() -> anyhow::Result<()> {
             R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         {
             if R::Group::NAME == "style" && R::METADATA.severity == Severity::Error {
-                self.errors.push(NoStyleRuleError::new(R::METADATA.name))
+                self.errors.push(Errors::style_rule_error(R::METADATA.name))
+            } else if <R::Group as RuleGroup>::Category::CATEGORY == RuleCategory::Action
+                && R::METADATA.severity != Severity::Information
+            {
+                self.errors.push(Errors::action_error(R::METADATA.name));
             } else {
                 self.groups
                     .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))

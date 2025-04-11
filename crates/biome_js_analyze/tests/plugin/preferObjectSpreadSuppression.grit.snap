@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: preferObjectSpreadSuppression.grit
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -66,34 +67,6 @@ preferObjectSpreadSuppression.grit:5:15 plugin ━━━━━━━━━━━
       │               ^^^^^^^^^^^^^^^^
     6 │ // biome-ignore-end lint/plugin/preferObjectSpreadSuppression: reason
     7 │ 
-  
-
-```
-
-```
-preferObjectSpreadSuppression.grit:14:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Prefer object spread instead of `Object.assign()`
-  
-    12 │ // only suppress specified plugin
-    13 │ // biome-ignore lint/plugin/anotherPlugin: reason
-  > 14 │ Object.assign({ foo: 'bar'}, baz);
-       │               ^^^^^^^^^^^^^^^^^^
-    15 │ 
-  
-
-```
-
-```
-preferObjectSpreadSuppression.grit:13:1 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
-  
-    12 │ // only suppress specified plugin
-  > 13 │ // biome-ignore lint/plugin/anotherPlugin: reason
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ Object.assign({ foo: 'bar'}, baz);
-    15 │ 
   
 
 ```

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `biome.json`
@@ -45,9 +45,16 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.js assist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Applied actions differs from the output
+  i The imports and exports are not sorted.
+  
+  > 2 │ import { B, C } from "b.js"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import A from "a.js"
+    4 │ 
+  
+  i Safe fix: Organize Imports (Biome)
   
     1 1 │   
     2   │ - import·{·B,·C·}·from·"b.js"
@@ -82,5 +89,5 @@ file.js format ━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
 ```

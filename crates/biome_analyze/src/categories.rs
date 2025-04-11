@@ -1,8 +1,9 @@
 use enumflags2::{BitFlags, bitflags};
 use std::borrow::Cow;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
+use std::str::FromStr;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -32,6 +33,19 @@ impl RuleCategory {
             RuleCategory::Lint => "lint",
             RuleCategory::Action => "assist",
             RuleCategory::Transformation => "transformation",
+        }
+    }
+}
+
+impl FromStr for RuleCategory {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "syntax" => Ok(RuleCategory::Syntax),
+            "lint" => Ok(RuleCategory::Lint),
+            "action" => Ok(RuleCategory::Action),
+            "transformation" => Ok(RuleCategory::Transformation),
+            _ => Err("Invalid rule category"),
         }
     }
 }
@@ -247,7 +261,7 @@ pub(crate) enum Categories {
     Transformation = 1 << RuleCategory::Transformation as u8,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 /// The categories supported by the analyzer.
 ///
 /// The default implementation of this type returns an instance with all the categories.
@@ -256,6 +270,12 @@ pub(crate) enum Categories {
 pub struct RuleCategories(BitFlags<Categories>);
 
 impl Display for RuleCategories {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(self, f)
+    }
+}
+
+impl Debug for RuleCategories {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.0.is_empty() {
             write!(f, "No categories")
@@ -286,9 +306,26 @@ impl RuleCategories {
         Self(empty)
     }
 
+    pub fn insert(&mut self, other: impl Into<RuleCategories>) {
+        self.0.insert(other.into().0);
+    }
+
+    pub fn remove(&mut self, other: impl Into<RuleCategories>) {
+        self.0.remove(other.into().0);
+    }
+
     /// Checks whether the current categories contain a specific [RuleCategories]
     pub fn contains(&self, other: impl Into<RuleCategories>) -> bool {
         self.0.contains(other.into().0)
+    }
+
+    /// Checks if `category` matches the current categories
+    pub fn matches(&self, category: &str) -> bool {
+        if let Ok(category) = Self::from_str(category) {
+            self.contains(category)
+        } else {
+            false
+        }
     }
 }
 
@@ -313,6 +350,34 @@ impl From<RuleCategory> for RuleCategories {
             RuleCategory::Transformation => {
                 RuleCategories(BitFlags::from_flag(Categories::Transformation))
             }
+        }
+    }
+}
+
+impl From<&RuleCategory> for RuleCategories {
+    fn from(input: &RuleCategory) -> Self {
+        match input {
+            RuleCategory::Syntax => RuleCategories(BitFlags::from_flag(Categories::Syntax)),
+            RuleCategory::Lint => RuleCategories(BitFlags::from_flag(Categories::Lint)),
+            RuleCategory::Action => RuleCategories(BitFlags::from_flag(Categories::Assist)),
+            RuleCategory::Transformation => {
+                RuleCategories(BitFlags::from_flag(Categories::Transformation))
+            }
+        }
+    }
+}
+
+impl FromStr for RuleCategories {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "syntax" => Ok(RuleCategories(BitFlags::from_flag(Categories::Syntax))),
+            "lint" => Ok(RuleCategories(BitFlags::from_flag(Categories::Lint))),
+            "action" => Ok(RuleCategories(BitFlags::from_flag(Categories::Assist))),
+            "transformation" => Ok(RuleCategories(BitFlags::from_flag(
+                Categories::Transformation,
+            ))),
+            _ => Err("Invalid rule category"),
         }
     }
 }

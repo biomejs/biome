@@ -2,8 +2,8 @@ use crate::TraversalMode;
 use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
-use biome_analyze::RuleCategoriesBuilder;
-use biome_diagnostics::{DiagnosticExt, Error, category};
+use biome_analyze::RuleCategories;
+use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_rowan::TextSize;
 use biome_service::diagnostics::FileTooLarge;
@@ -13,11 +13,12 @@ use tracing::{info, instrument};
 
 /// Lints a single file and returns a [FileResult]
 #[instrument(level = "debug", name = "cli_lint", skip_all)]
-pub(crate) fn lint<'ctx>(
+pub(crate) fn lint_and_assist<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     path: BiomePath,
     suppress: bool,
     suppression_reason: Option<&str>,
+    categories: RuleCategories,
 ) -> FileResult {
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
     let result = workspace_file.guard().check_file_size()?;
@@ -29,17 +30,24 @@ pub(crate) fn lint<'ctx>(
         );
         Ok(FileStatus::Ignored)
     } else {
-        lint_with_guard(ctx, &mut workspace_file, suppress, suppression_reason)
+        analyze_with_guard(
+            ctx,
+            &mut workspace_file,
+            suppress,
+            suppression_reason,
+            categories,
+        )
     }
 }
 
 #[instrument(level = "debug", name = "cli_lint_guard", skip_all)]
 
-pub(crate) fn lint_with_guard<'ctx>(
+pub(crate) fn analyze_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
     suppress: bool,
     suppression_reason: Option<&str>,
+    categories: RuleCategories,
 ) -> FileResult {
     let mut input = workspace_file.input()?;
     let mut changed = false;
@@ -61,15 +69,15 @@ pub(crate) fn lint_with_guard<'ctx>(
             .fix_file(
                 *fix_mode,
                 false,
-                RuleCategoriesBuilder::default()
-                    .with_syntax()
-                    .with_lint()
-                    .build(),
+                categories,
                 only.clone(),
                 skip.clone(),
                 Some(suppression_explanation.to_string()),
             )
-            .with_file_path_and_code(workspace_file.path.to_string(), category!("lint"))?;
+            .with_file_path_and_code(
+                workspace_file.path.to_string(),
+                ctx.execution.as_diagnostic_category(),
+            )?;
 
         info!(
             "Fix file summary result. Errors {}, skipped fixes {}, actions {}",
@@ -106,16 +114,11 @@ pub(crate) fn lint_with_guard<'ctx>(
     let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
     let pull_diagnostics_result = workspace_file
         .guard()
-        .pull_diagnostics(
-            RuleCategoriesBuilder::default()
-                .with_syntax()
-                .with_lint()
-                .build(),
-            max_diagnostics,
-            only,
-            skip,
-        )
-        .with_file_path_and_code(workspace_file.path.to_string(), category!("lint"))?;
+        .pull_diagnostics(categories, max_diagnostics, only, skip)
+        .with_file_path_and_code(
+            workspace_file.path.to_string(),
+            ctx.execution.as_diagnostic_category(),
+        )?;
 
     let no_diagnostics = pull_diagnostics_result.diagnostics.is_empty()
         && pull_diagnostics_result.skipped_diagnostics == 0;
@@ -141,7 +144,17 @@ pub(crate) fn lint_with_guard<'ctx>(
                         d
                     }
                 })
-                .map(Error::from)
+                .map(|diagnostic| {
+                    let category = diagnostic.category();
+                    if let Some(category) = category {
+                        if category.name().starts_with("assist/")
+                            && ctx.execution.should_enforce_assist()
+                        {
+                            return diagnostic.with_severity(Severity::Error);
+                        }
+                    }
+                    Error::from(diagnostic)
+                })
                 .collect(),
             skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics as u32,
         });

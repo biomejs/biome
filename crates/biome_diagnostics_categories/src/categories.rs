@@ -386,8 +386,7 @@ define_categories! {
     "internalError/panic",
     "reporter/parse",
     "reporter/format",
-    "reporter/assist",
-    "reporter/linter",
+    "reporter/violations",
     // parse categories
     "parse",
 
@@ -410,7 +409,6 @@ define_categories! {
     "suppressions/unknownAction",
     "suppressions/unused",
     "suppressions/incorrect",
-
     // Used in tests and examples
     "args/fileNotFound",
     "flags/invalid",

@@ -136,6 +136,10 @@ pub enum BiomeCommand {
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
         assist_enabled: Option<AssistEnabled>,
 
+        /// Allows to enforce assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
+        #[bpaf(long("enforce-assist"), argument("true|false"), fallback(true))]
+        enforce_assist: bool,
+
         #[bpaf(external(configuration), hide_usage, optional)]
         configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
@@ -331,6 +335,10 @@ pub enum BiomeCommand {
         /// Allow to enable or disable the assist.
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
         assist_enabled: Option<AssistEnabled>,
+
+        /// Allows to enforce assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
+        #[bpaf(long("enforce-assist"), switch, fallback(true))]
+        enforce_assist: bool,
 
         #[bpaf(external(configuration), hide_usage, optional)]
         configuration: Option<Configuration>,
