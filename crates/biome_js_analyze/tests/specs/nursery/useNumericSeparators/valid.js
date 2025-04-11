@@ -1,7 +1,7 @@
-/* should not generate diagnostics */
 var a = 1_000;
 a = 1_000_000;
 a = 1_000_000_000;
 a = 1_000_000_000_000;
 a = 999;
+a = 10;
 a = 3.1415;
