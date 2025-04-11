@@ -70,22 +70,22 @@ impl Rule for NoUnknownPseudoElement {
         let node: &CssPseudoElementSelector = ctx.query();
         let pseudo_element = node.element().ok()?;
 
-        let pseudo_element_name = match &pseudo_element {
-            AnyCssPseudoElement::CssBogusPseudoElement(element) => element.to_trimmed_string(),
+        let should_not_trigger = match &pseudo_element {
+            AnyCssPseudoElement::CssBogusPseudoElement(element) => {
+                should_not_trigger(element.to_trimmed_text().text())
+            }
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(ident) => {
-                ident.name().ok()?.text().to_string()
+                should_not_trigger(ident.name().ok()?.text().into())
             }
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => {
-                selector.to_trimmed_string()
+                should_not_trigger(selector.to_trimmed_text().text().into())
             }
             AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
-                ident.name().ok()?.to_trimmed_string().to_string()
+                should_not_trigger(ident.name().ok()?.to_trimmed_text().text().into())
             }
         };
 
-        if !vender_prefix(pseudo_element_name.as_str()).is_empty()
-            || is_pseudo_elements(pseudo_element_name.to_ascii_lowercase_cow().as_ref())
-        {
+        if should_not_trigger {
             return None;
         }
 
@@ -99,7 +99,7 @@ impl Rule for NoUnknownPseudoElement {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected unknown pseudo-elements: "<Emphasis>{ element.to_trimmed_string() }</Emphasis>
+                    "Unexpected unknown pseudo-elements: "<Emphasis>{ element.to_trimmed_text().text() }</Emphasis>
                 },
             )
             .note(markup! {
@@ -113,4 +113,10 @@ impl Rule for NoUnknownPseudoElement {
             ),
         )
     }
+}
+
+/// It doesn't trigger the rule if the pseudo-element name isn't a vendor prefix or is a pseudo-element
+fn should_not_trigger(pseudo_element_name: &str) -> bool {
+    !vender_prefix(&pseudo_element_name).is_empty()
+        || is_pseudo_elements(&pseudo_element_name.to_ascii_lowercase_cow().as_ref())
 }

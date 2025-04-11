@@ -385,7 +385,7 @@ fn has_key_attribute(attributes: &JsxAttributeList) -> bool {
         // key must be statically provided, so no spread
         if let AnyJsxAttribute::JsxAttribute(attr) = attr {
             if let Ok(name) = attr.name() {
-                name.to_trimmed_string() == "key"
+                name.to_trimmed_text().text() == "key"
             } else {
                 false
             }

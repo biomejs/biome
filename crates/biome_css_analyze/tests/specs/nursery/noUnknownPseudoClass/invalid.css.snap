@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -201,39 +202,6 @@ invalid.css:13:2 lint/nursery/noUnknownPseudoClass ━━━━━━━━━�
        │  ^^^^^^^^^^^
     14 │ @page :blank:unknown { }
     15 │ @page foo:unknown { }
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-invalid.css:14:14 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected unknown pseudo-class unknown 
-  
-    12 │ :slotted {}
-    13 │ :placeholder {}
-  > 14 │ @page :blank:unknown { }
-       │              ^^^^^^^
-    15 │ @page foo:unknown { }
-    16 │ :horizontal:decrement {}
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-invalid.css:15:11 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected unknown pseudo-class unknown 
-  
-    13 │ :placeholder {}
-    14 │ @page :blank:unknown { }
-  > 15 │ @page foo:unknown { }
-       │           ^^^^^^^
-    16 │ :horizontal:decrement {}
   
   i See MDN web docs for more details.
   

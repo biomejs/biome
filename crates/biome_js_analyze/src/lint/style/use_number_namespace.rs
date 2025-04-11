@@ -131,11 +131,11 @@ impl Rule for UseNumberNamespace {
         let node = ctx.query();
         let (old_node, new_node) = match node {
             AnyJsExpression::JsIdentifierExpression(expression) => {
-                let name = expression.name().ok()?.to_trimmed_string();
-                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
+                let name = expression.name().ok()?.to_trimmed_text();
+                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text()) {
                     return None;
                 }
-                let (old_node, replacement) = match name.as_str() {
+                let (old_node, replacement) = match name.text() {
                     "Infinity" => {
                         if let Some(parent) = node.parent::<JsUnaryExpression>() {
                             match parent.operator().ok()? {
@@ -153,7 +153,7 @@ impl Rule for UseNumberNamespace {
                             (node.clone(), "POSITIVE_INFINITY")
                         }
                     }
-                    _ => (node.clone(), name.as_str()),
+                    _ => (node.clone(), name.text()),
                 };
                 (
                     old_node,
