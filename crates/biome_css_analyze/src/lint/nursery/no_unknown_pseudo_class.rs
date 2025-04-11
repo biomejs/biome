@@ -134,45 +134,28 @@ impl AnyPseudoLike {
         Some(match self {
             AnyPseudoLike::CssBogusPseudoClass(_) => return None,
             AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
-                let name = selector.name().ok()?;
-                name
+                selector.name().ok()?
             }
             AnyPseudoLike::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
-                let name = selector_list.name().ok()?;
-                name
+                selector_list.name().ok()?
             }
-            AnyPseudoLike::CssPseudoClassFunctionIdentifier(ident) => {
-                let name = ident.name_token().ok()?;
-                name
-            }
-            AnyPseudoLike::CssPseudoClassFunctionNth(func_nth) => {
-                let name = func_nth.name().ok()?;
-                name
-            }
+            AnyPseudoLike::CssPseudoClassFunctionIdentifier(ident) => ident.name_token().ok()?,
+            AnyPseudoLike::CssPseudoClassFunctionNth(func_nth) => func_nth.name().ok()?,
             AnyPseudoLike::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
-                let name = selector_list.name_token().ok()?;
-                name
+                selector_list.name_token().ok()?
             }
-            AnyPseudoLike::CssPseudoClassFunctionSelector(selector) => {
-                let name = selector.name().ok()?;
-                name
-            }
+            AnyPseudoLike::CssPseudoClassFunctionSelector(selector) => selector.name().ok()?,
             AnyPseudoLike::CssPseudoClassFunctionSelectorList(selector_list) => {
-                let name = selector_list.name().ok()?;
-                name
+                selector_list.name().ok()?
             }
             AnyPseudoLike::CssPseudoClassFunctionValueList(func_value_list) => {
-                let name = func_value_list.name_token().ok()?;
-                name
+                func_value_list.name_token().ok()?
             }
             AnyPseudoLike::CssPseudoClassIdentifier(ident) => {
                 let name = ident.name().ok()?;
                 name.value_token().ok()?
             }
-            AnyPseudoLike::CssPageSelectorPseudo(page_pseudo) => {
-                let name = page_pseudo.selector().ok()?;
-                name
-            }
+            AnyPseudoLike::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector().ok()?,
         })
     }
 }
