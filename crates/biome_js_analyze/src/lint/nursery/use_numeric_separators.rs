@@ -62,10 +62,15 @@ impl Rule for UseNumericSeparators {
             None
         } else {
             if raw.contains('_') {
-                // Already contains separators, but not in the right places.
-                Some(State::InconsistentDigitGrouping)
+                if expected.contains('_') {
+                    // Contains separators, but not in the same places as the expected value.
+                    Some(State::InconsistentGrouping)
+                } else {
+                    // Contains separators which are not present in the expected value.
+                    Some(State::UnnecessaryGrouping)
+                }
             } else {
-                // Missing separators.
+                // Missing separators entirely.
                 Some(State::UnreadableLiteral)
             }
         }
@@ -78,12 +83,17 @@ impl Rule for UseNumericSeparators {
             State::UnreadableLiteral => Some(RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
-                markup!("Long numeric literal missing separators"),
+                markup!("Long numeric literal lacks separators"),
             )),
-            State::InconsistentDigitGrouping => Some(RuleDiagnostic::new(
+            State::InconsistentGrouping => Some(RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
-                markup!("Inconsistent digit grouping in numeric literal"),
+                markup!("Inconsistent grouping of digits in numeric literal"),
+            )),
+            State::UnnecessaryGrouping => Some(RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup!("Unnecessary grouping of digits in numeric literal"),
             )),
         }
     }
@@ -101,7 +111,8 @@ impl Rule for UseNumericSeparators {
             ctx.metadata().applicability(),
             match state {
                 State::UnreadableLiteral => markup! { "Add numeric separators" },
-                State::InconsistentDigitGrouping => markup! { "Fix numeric separator grouping" },
+                State::InconsistentGrouping => markup! { "Fix numeric separator grouping" },
+                State::UnnecessaryGrouping => markup! { "Remove unnecessary numeric separators" },
             },
             mutation,
         ))
@@ -171,8 +182,9 @@ impl Default for BaseOptions {
 }
 
 pub enum State {
-    InconsistentDigitGrouping,
     UnreadableLiteral,
+    InconsistentGrouping,
+    UnnecessaryGrouping,
 }
 
 /// Add chunk separators to a number string, starting from the right.

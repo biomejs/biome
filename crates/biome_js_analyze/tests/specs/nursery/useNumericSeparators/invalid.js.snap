@@ -46,7 +46,7 @@ a = 0o77_77;
 ```
 invalid.js:4:9 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     3 │ // Integers
   > 4 │ var a = 10000;
@@ -69,7 +69,7 @@ invalid.js:4:9 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
 ```
 invalid.js:5:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     3 │ // Integers
     4 │ var a = 10000;
@@ -93,7 +93,7 @@ invalid.js:5:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
 ```
 invalid.js:6:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     4 │ var a = 10000;
     5 │ a = 100000;
@@ -117,7 +117,7 @@ invalid.js:6:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
 ```
 invalid.js:7:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     5 │ a = 100000;
     6 │ a = 1000000;
@@ -141,7 +141,7 @@ invalid.js:7:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
 ```
 invalid.js:8:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
      6 │ a = 1000000;
      7 │ a = 10000000;
@@ -165,7 +165,7 @@ invalid.js:8:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
 ```
 invalid.js:11:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     10 │ // Floats
   > 11 │ a = 3.1415926;
@@ -188,7 +188,7 @@ invalid.js:11:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:12:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     10 │ // Floats
     11 │ a = 3.1415926;
@@ -212,7 +212,7 @@ invalid.js:12:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:16:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     14 │ // Signed
     15 │ 
@@ -236,7 +236,7 @@ invalid.js:16:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:17:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     16 │ a = -10000;
   > 17 │ a = -3.1415926;
@@ -259,7 +259,7 @@ invalid.js:17:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:18:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     16 │ a = -10000;
     17 │ a = -3.1415926;
@@ -283,7 +283,7 @@ invalid.js:18:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:19:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     17 │ a = -3.1415926;
     18 │ a = +10000;
@@ -307,7 +307,7 @@ invalid.js:19:6 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:24:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Inconsistent digit grouping in numeric literal
+  i Inconsistent grouping of digits in numeric literal
   
     23 │ // Integers
   > 24 │ a = 100_00;
@@ -330,7 +330,7 @@ invalid.js:24:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:25:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Inconsistent digit grouping in numeric literal
+  i Inconsistent grouping of digits in numeric literal
   
     23 │ // Integers
     24 │ a = 100_00;
@@ -354,7 +354,7 @@ invalid.js:25:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:28:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Inconsistent digit grouping in numeric literal
+  i Inconsistent grouping of digits in numeric literal
   
     27 │ // Floats
   > 28 │ a = 1.2_3_4567_89
@@ -377,7 +377,7 @@ invalid.js:28:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:32:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Long numeric literal missing separators
+  i Long numeric literal lacks separators
   
     30 │ /* Octal/binary/hexadecimal */
     31 │ 
@@ -401,7 +401,7 @@ invalid.js:32:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:33:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Inconsistent digit grouping in numeric literal
+  i Inconsistent grouping of digits in numeric literal
   
     32 │ a = 0b101010;
   > 33 │ a = 0b1010_10001;
@@ -424,7 +424,7 @@ invalid.js:33:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:34:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Inconsistent digit grouping in numeric literal
+  i Inconsistent grouping of digits in numeric literal
   
     32 │ a = 0b101010;
     33 │ a = 0b1010_10001;
@@ -448,7 +448,7 @@ invalid.js:34:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
 ```
 invalid.js:35:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Inconsistent digit grouping in numeric literal
+  i Unnecessary grouping of digits in numeric literal
   
     33 │ a = 0b1010_10001;
     34 │ a = 0xA_B_CD_EF;
@@ -456,7 +456,7 @@ invalid.js:35:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
        │     ^^^^^^^
     36 │ 
   
-  i Safe fix: Fix numeric separator grouping
+  i Safe fix: Remove unnecessary numeric separators
   
     33 33 │   a = 0b1010_10001;
     34 34 │   a = 0xA_B_CD_EF;
