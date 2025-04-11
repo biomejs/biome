@@ -19,7 +19,7 @@ biome_css_analyze        = { workspace = true }
 biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true, features = ["serde_ini", "oxc_resolver"] }
+biome_diagnostics        = { workspace = true, features = ["oxc_resolver"] }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_glob               = { workspace = true }
@@ -41,7 +41,6 @@ regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
-serde_ini                = { workspace = true }
 
 [features]
 default = ["schema"]

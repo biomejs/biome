@@ -173,45 +173,6 @@ impl Diagnostic for SerdeJsonError {
     }
 }
 
-#[cfg(feature = "serde_ini")]
-#[derive(Debug, Clone)]
-pub struct IniError {
-    error: serde_ini::de::Error,
-}
-
-#[cfg(feature = "serde_ini")]
-impl Diagnostic for IniError {
-    fn category(&self) -> Option<&'static Category> {
-        Some(category!("configuration"))
-    }
-
-    fn severity(&self) -> crate::Severity {
-        crate::Severity::Error
-    }
-
-    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(fmt, "{}", self.error)
-    }
-
-    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
-    }
-}
-
-#[cfg(feature = "serde_ini")]
-impl biome_console::fmt::Display for IniError {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        write!(fmt, "{:?}", self.error)
-    }
-}
-
-#[cfg(feature = "serde_ini")]
-impl From<serde_ini::de::Error> for IniError {
-    fn from(error: serde_ini::de::Error) -> Self {
-        Self { error }
-    }
-}
-
 #[cfg(feature = "camino")]
 #[derive(Debug, Clone)]
 pub struct CaminoError {
