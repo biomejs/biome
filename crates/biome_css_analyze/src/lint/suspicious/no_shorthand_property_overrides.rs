@@ -193,7 +193,7 @@ impl Rule for NoShorthandPropertyOverrides {
 
         Some(NoDeclarationBlockShorthandPropertyOverridesState {
             target_property: query.property_node.to_trimmed_text().into(),
-            override_property: query.override_property.clone().into(),
+            override_property: query.override_property.clone(),
             span: query.text_range(),
         })
     }
