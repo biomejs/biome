@@ -126,6 +126,15 @@ impl Rule for UseArrowFunction {
         Some(())
     }
 
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        let node = ctx.query();
+        let AnyThisScopeMetadata { scope, .. } = node;
+        let AnyThisScope::JsFunctionExpression(function_expression) = scope else {
+            return None;
+        };
+        Some(function_expression.function_token().ok()?.text_range())
+    }
+
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
