@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
 var a = 1000;
 a = 1_000_000;
 a = 1_000_000_000;
@@ -5,3 +11,5 @@ a = 1_000_000_000_000;
 a = 999;
 a = 10;
 a = 3.1415;
+
+```

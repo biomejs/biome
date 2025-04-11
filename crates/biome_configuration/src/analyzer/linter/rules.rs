@@ -3395,7 +3395,7 @@ pub struct Nursery {
     #[doc = "Enforce the use of numeric separators in numeric literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_numeric_separators:
-        Option<RuleConfiguration<biome_js_analyze::options::UseNumericSeparators>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNumericSeparators>>,
     #[doc = "Enforce the consistent use of the radix argument when using parseInt()."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_parse_int_radix:

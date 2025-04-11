@@ -4,8 +4,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::{JsNumberLiteralExpression, numbers::split_into_radix_and_number};
-use biome_rowan::AstNode;
+use biome_js_syntax::{
+    JsNumberLiteralExpression, JsSyntaxToken, numbers::split_into_radix_and_number,
+};
+use biome_rowan::{AstNode, BatchMutationExt};
 use serde::{Deserialize, Serialize};
 
 use crate::JsRuleAction;
@@ -21,14 +23,15 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// var a = 1234567890;
+    /// a = -999_99;
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// // var a = 1;
+    /// var a = 1_234_567_890;
+    /// a = -99_999;
     /// ```
     ///
     pub UseNumericSeparators {
@@ -52,7 +55,7 @@ impl Rule for UseNumericSeparators {
         let token = ctx.query().value_token().ok()?;
         let raw = token.text_trimmed();
 
-        let num = NumericLiteral::parse(token.text_trimmed());
+        let num = NumericLiteral::parse(raw);
         let expected = num.format(ctx.options().clone());
 
         if raw == expected {
@@ -85,10 +88,23 @@ impl Rule for UseNumericSeparators {
         }
     }
 
-    fn action(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
-        // let token = ctx.query().value_token().ok()?;
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let token = ctx.query().value_token().ok()?;
+        let num = NumericLiteral::parse(token.text_trimmed());
 
-        None
+        let new_token =
+            JsSyntaxToken::new_detached(token.kind(), &num.format(ctx.options().clone()), [], []);
+        let mut mutation = ctx.root().begin();
+        mutation.replace_token_transfer_trivia(token.clone(), new_token);
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            match state {
+                State::UnreadableLiteral => markup! { "Add numeric separators" },
+                State::InconsistentDigitGrouping => markup! { "Fix numeric separator grouping" },
+            },
+            mutation,
+        ))
     }
 }
 

@@ -1728,7 +1728,7 @@ export interface Nursery {
 	/**
 	 * Enforce the use of numeric separators in numeric literals.
 	 */
-	useNumericSeparators?: RuleConfiguration_for_Null;
+	useNumericSeparators?: RuleFixConfiguration_for_UseNumericSeparatorsOptions;
 	/**
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
@@ -2370,6 +2370,9 @@ export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 export type RuleConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseConsistentObjectDefinitionOptions;
+export type RuleFixConfiguration_for_UseNumericSeparatorsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseNumericSeparatorsOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -2641,6 +2644,20 @@ export interface RuleWithOptions_for_UseConsistentObjectDefinitionOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentObjectDefinitionOptions;
+}
+export interface RuleWithFixOptions_for_UseNumericSeparatorsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseNumericSeparatorsOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -2938,6 +2955,24 @@ export interface UseConsistentObjectDefinitionOptions {
 	 */
 	syntax?: ObjectPropertySyntax;
 }
+export interface UseNumericSeparatorsOptions {
+	/**
+	 * Binary numeric literal options.
+	 */
+	binary?: BaseOptions;
+	/**
+	 * Decimal numeric literal options.
+	 */
+	decimal?: BaseOptions;
+	/**
+	 * Hexadecimal numeric literal options.
+	 */
+	hexadecimal?: BaseOptions;
+	/**
+	 * Octal numeric literal options.
+	 */
+	octal?: BaseOptions;
+}
 export interface UtilityClassSortingOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -3080,6 +3115,16 @@ export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
+export interface BaseOptions {
+	/**
+	 * The size of each chunk.
+	 */
+	chunkSize: number;
+	/**
+	 * The minimum number of digits before a separator is required.
+	 */
+	minDigits: number;
+}
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;

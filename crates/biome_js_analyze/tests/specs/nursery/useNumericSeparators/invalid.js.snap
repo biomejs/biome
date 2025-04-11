@@ -1,0 +1,182 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* No separators at all. */
+var a = 10000;
+a = 1000000;
+a = 1000000000;
+a = 1000000000000;
+a = 3.1415926;
+/* Inconsistent digit grouping with separators. */
+a = 100_00;
+a = 10_0000;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:9 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    1 │ /* No separators at all. */
+  > 2 │ var a = 10000;
+      │         ^^^^^
+    3 │ a = 1000000;
+    4 │ a = 1000000000;
+  
+  i Safe fix: Add numeric separators
+  
+     1  1 │   /* No separators at all. */
+     2    │ - var·a·=·10000;
+        2 │ + var·a·=·10_000;
+     3  3 │   a = 1000000;
+     4  4 │   a = 1000000000;
+  
+
+```
+
+```
+invalid.js:3:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    1 │ /* No separators at all. */
+    2 │ var a = 10000;
+  > 3 │ a = 1000000;
+      │     ^^^^^^^
+    4 │ a = 1000000000;
+    5 │ a = 1000000000000;
+  
+  i Safe fix: Add numeric separators
+  
+     1  1 │   /* No separators at all. */
+     2  2 │   var a = 10000;
+     3    │ - a·=·1000000;
+        3 │ + a·=·1_000_000;
+     4  4 │   a = 1000000000;
+     5  5 │   a = 1000000000000;
+  
+
+```
+
+```
+invalid.js:4:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    2 │ var a = 10000;
+    3 │ a = 1000000;
+  > 4 │ a = 1000000000;
+      │     ^^^^^^^^^^
+    5 │ a = 1000000000000;
+    6 │ a = 3.1415926;
+  
+  i Safe fix: Add numeric separators
+  
+     2  2 │   var a = 10000;
+     3  3 │   a = 1000000;
+     4    │ - a·=·1000000000;
+        4 │ + a·=·1_000_000_000;
+     5  5 │   a = 1000000000000;
+     6  6 │   a = 3.1415926;
+  
+
+```
+
+```
+invalid.js:5:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    3 │ a = 1000000;
+    4 │ a = 1000000000;
+  > 5 │ a = 1000000000000;
+      │     ^^^^^^^^^^^^^
+    6 │ a = 3.1415926;
+    7 │ /* Inconsistent digit grouping with separators. */
+  
+  i Safe fix: Add numeric separators
+  
+     3  3 │   a = 1000000;
+     4  4 │   a = 1000000000;
+     5    │ - a·=·1000000000000;
+        5 │ + a·=·1_000_000_000_000;
+     6  6 │   a = 3.1415926;
+     7  7 │   /* Inconsistent digit grouping with separators. */
+  
+
+```
+
+```
+invalid.js:6:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal missing separators
+  
+    4 │ a = 1000000000;
+    5 │ a = 1000000000000;
+  > 6 │ a = 3.1415926;
+      │     ^^^^^^^^^
+    7 │ /* Inconsistent digit grouping with separators. */
+    8 │ a = 100_00;
+  
+  i Safe fix: Add numeric separators
+  
+     4  4 │   a = 1000000000;
+     5  5 │   a = 1000000000000;
+     6    │ - a·=·3.1415926;
+        6 │ + a·=·3.1_415_926;
+     7  7 │   /* Inconsistent digit grouping with separators. */
+     8  8 │   a = 100_00;
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent digit grouping in numeric literal
+  
+     6 │ a = 3.1415926;
+     7 │ /* Inconsistent digit grouping with separators. */
+   > 8 │ a = 100_00;
+       │     ^^^^^^
+     9 │ a = 10_0000;
+    10 │ 
+  
+  i Safe fix: Fix numeric separator grouping
+  
+     6  6 │   a = 3.1415926;
+     7  7 │   /* Inconsistent digit grouping with separators. */
+     8    │ - a·=·100_00;
+        8 │ + a·=·10_000;
+     9  9 │   a = 10_0000;
+    10 10 │   
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent digit grouping in numeric literal
+  
+     7 │ /* Inconsistent digit grouping with separators. */
+     8 │ a = 100_00;
+   > 9 │ a = 10_0000;
+       │     ^^^^^^^
+    10 │ 
+  
+  i Safe fix: Fix numeric separator grouping
+  
+     7  7 │   /* Inconsistent digit grouping with separators. */
+     8  8 │   a = 100_00;
+     9    │ - a·=·10_0000;
+        9 │ + a·=·100_000;
+    10 10 │   
+  
+
+```

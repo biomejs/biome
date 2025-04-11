@@ -382,6 +382,25 @@
 			"additionalProperties": false
 		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
+		"BaseOptions": {
+			"type": "object",
+			"required": ["chunkSize", "minDigits"],
+			"properties": {
+				"chunkSize": {
+					"description": "The size of each chunk.",
+					"type": "integer",
+					"format": "uint",
+					"minimum": 0.0
+				},
+				"minDigits": {
+					"description": "The minimum number of digits before a separator is required.",
+					"type": "integer",
+					"format": "uint",
+					"minimum": 0.0
+				}
+			},
+			"additionalProperties": false
+		},
 		"Bool": { "type": "boolean" },
 		"BracketSameLine": {
 			"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
@@ -3052,7 +3071,7 @@
 				"useNumericSeparators": {
 					"description": "Enforce the use of numeric separators in numeric literals.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UseNumericSeparatorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3974,6 +3993,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseImportExtensionsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseNumericSeparatorsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseNumericSeparatorsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -5261,6 +5299,38 @@
 					"description": "If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.",
 					"default": false,
 					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseNumericSeparatorsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseNumericSeparatorsOptions" }
+			]
+		},
+		"UseNumericSeparatorsOptions": {
+			"type": "object",
+			"properties": {
+				"binary": {
+					"description": "Binary numeric literal options.",
+					"default": { "minDigits": 0, "chunkSize": 4 },
+					"allOf": [{ "$ref": "#/definitions/BaseOptions" }]
+				},
+				"decimal": {
+					"description": "Decimal numeric literal options.",
+					"default": { "minDigits": 5, "chunkSize": 3 },
+					"allOf": [{ "$ref": "#/definitions/BaseOptions" }]
+				},
+				"hexadecimal": {
+					"description": "Hexadecimal numeric literal options.",
+					"default": { "minDigits": 0, "chunkSize": 2 },
+					"allOf": [{ "$ref": "#/definitions/BaseOptions" }]
+				},
+				"octal": {
+					"description": "Octal numeric literal options.",
+					"default": { "minDigits": 0, "chunkSize": 4 },
+					"allOf": [{ "$ref": "#/definitions/BaseOptions" }]
 				}
 			},
 			"additionalProperties": false
