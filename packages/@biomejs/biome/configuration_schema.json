@@ -384,10 +384,10 @@
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
 		"BaseOptions": {
 			"type": "object",
-			"required": ["chunkSize", "minDigits"],
+			"required": ["groupLength", "minDigits"],
 			"properties": {
-				"chunkSize": {
-					"description": "The size of each chunk.",
+				"groupLength": {
+					"description": "The size of each group of digits.",
 					"type": "integer",
 					"format": "uint",
 					"minimum": 0.0
@@ -5314,22 +5314,22 @@
 			"properties": {
 				"binary": {
 					"description": "Binary numeric literal options.",
-					"default": { "minDigits": 0, "chunkSize": 4 },
+					"default": { "minDigits": 0, "groupLength": 4 },
 					"allOf": [{ "$ref": "#/definitions/BaseOptions" }]
 				},
 				"decimal": {
 					"description": "Decimal numeric literal options.",
-					"default": { "minDigits": 5, "chunkSize": 3 },
+					"default": { "minDigits": 5, "groupLength": 3 },
 					"allOf": [{ "$ref": "#/definitions/BaseOptions" }]
 				},
 				"hexadecimal": {
 					"description": "Hexadecimal numeric literal options.",
-					"default": { "minDigits": 0, "chunkSize": 2 },
+					"default": { "minDigits": 0, "groupLength": 2 },
 					"allOf": [{ "$ref": "#/definitions/BaseOptions" }]
 				},
 				"octal": {
 					"description": "Octal numeric literal options.",
-					"default": { "minDigits": 0, "chunkSize": 4 },
+					"default": { "minDigits": 0, "groupLength": 4 },
 					"allOf": [{ "$ref": "#/definitions/BaseOptions" }]
 				}
 			},

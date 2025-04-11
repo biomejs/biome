@@ -3117,9 +3117,9 @@ export type Accessibility = "noPublic" | "explicit" | "none";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
 export interface BaseOptions {
 	/**
-	 * The size of each chunk.
+	 * The size of each group of digits.
 	 */
-	chunkSize: number;
+	groupLength: number;
 	/**
 	 * The minimum number of digits before a separator is required.
 	 */
