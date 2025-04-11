@@ -190,7 +190,7 @@ pub enum State {
 /// Add chunk separators to a number string, starting from the right.
 /// The "uneven" chunk is added to the left of the first separator.
 /// 1234567890 -> 1_234_567_890
-fn add_chunk_separators_from_right(num: &str, group_length: usize) -> String {
+fn add_separators_from_right(num: &str, group_length: usize) -> String {
     num.chars()
         .rev()
         .collect::<Vec<_>>()
@@ -206,7 +206,7 @@ fn add_chunk_separators_from_right(num: &str, group_length: usize) -> String {
 /// Add chunk separators to a number string, starting from the left. Used for fractional parts.
 /// The "uneven" chunk is added to the right of the last separator.
 /// 12345654321 -> 123_456_543_21
-fn add_chunk_separators_from_left(num: &str, group_length: usize) -> String {
+fn add_separators_from_left(num: &str, group_length: usize) -> String {
     num.chars()
         .collect::<Vec<_>>()
         .chunks(group_length)
@@ -269,14 +269,14 @@ impl NumericLiteral {
         let number = if number.len() < min_digits {
             number.to_owned()
         } else {
-            add_chunk_separators_from_right(&number, group_length)
+            add_separators_from_right(&number, group_length)
         };
 
         let fractional = if let Some(fractional) = fractional {
             if fractional.len() < min_digits {
                 Some(fractional.to_owned())
             } else {
-                Some(add_chunk_separators_from_left(&fractional, group_length))
+                Some(add_separators_from_left(&fractional, group_length))
             }
         } else {
             None
