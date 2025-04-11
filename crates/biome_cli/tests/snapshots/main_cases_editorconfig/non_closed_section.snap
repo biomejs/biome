@@ -1,0 +1,27 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `.editorconfig`
+
+```editorconfig
+
+[*
+indent_style = space
+indent_size = 8
+
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Failed to parse the .editorconfig file.
+    
+    Caused by:
+      a section must be closed with `]`
+  
+
+
+```

@@ -13,6 +13,7 @@ use std::str::FromStr;
 
 use biome_diagnostics::Error;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, ParseFormatNumberError};
+use biome_rowan::TextRange;
 
 use crate::{
     Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
@@ -53,7 +54,7 @@ impl std::fmt::Display for EditorConfigErrorKind {
 
 #[derive(Debug)]
 pub struct EditorConfigError {
-    line_number: u32,
+    span: TextRange,
     kind: EditorConfigErrorKind,
 }
 impl biome_diagnostics::Diagnostic for EditorConfigError {
@@ -61,8 +62,16 @@ impl biome_diagnostics::Diagnostic for EditorConfigError {
         Some(biome_diagnostics::category!("configuration"))
     }
 
-    fn severity(&self) -> crate::Severity {
-        crate::Severity::Error
+    fn location(&self) -> biome_diagnostics::Location<'_> {
+        biome_diagnostics::Location {
+            resource: None,
+            span: Some(self.span),
+            source_code: None,
+        }
+    }
+
+    fn severity(&self) -> biome_diagnostics::Severity {
+        biome_diagnostics::Severity::Error
     }
 
     fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -70,24 +79,17 @@ impl biome_diagnostics::Diagnostic for EditorConfigError {
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_markup(biome_console::markup!({ AsConsoleDisplay(&self) }))
+        fmt.write_fmt(format_args!("{}", self))
     }
 }
 impl biome_console::fmt::Display for EditorConfigError {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        write!(fmt, "{}", self)
+        write!(fmt, "{}", self.kind)
     }
 }
 impl std::fmt::Display for EditorConfigError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "line {}: {}", self.line_number, self.kind)
-    }
-}
-
-struct AsConsoleDisplay<'a, T>(&'a T);
-impl<T: std::fmt::Display> biome_console::fmt::Display for AsConsoleDisplay<'_, T> {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_fmt(format_args!("{}", self.0))
+        write!(f, "{}", self.kind)
     }
 }
 
@@ -107,12 +109,14 @@ pub struct EditorConfigSection {
 impl FromStr for EditorConfig {
     type Err = EditorConfigError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut offset = 0;
         let mut root = false;
         let mut sections = Vec::new();
         let mut last_section: Option<(&str, EditorConfigOptions)> = None;
-        for (line_number, line) in (1..).zip(s.lines()) {
-            let line = line.trim_ascii();
-            match line.bytes().next() {
+        // We use `s.split('\n')` instead of `s.lines()` because the latter splits on `\n` and `\r\n`.
+        // This could be an issue for updating `offset`.
+        for line in s.split('\n') {
+            match line.trim_ascii_start().bytes().next() {
                 Some(b'#' | b';') => {
                     // Ignore comments
                 }
@@ -125,50 +129,56 @@ impl FromStr for EditorConfig {
                             });
                         }
                     }
-                    if let Some(section_name) = line[1..].strip_suffix(']') {
+                    if let Some(section_name) = line[1..].trim_ascii().strip_suffix(']') {
                         last_section = Some((section_name, EditorConfigOptions::default()))
                     } else {
+                        let offset = offset + line.len() as u32;
                         return Err(EditorConfigError {
-                            line_number,
+                            span: TextRange::new((offset - 1).into(), offset.into()),
                             kind: EditorConfigErrorKind::MissingSectionEnd,
                         });
                     }
                 }
                 Some(b'a'..=b'z' | b'A'..=b'Z') => {
-                    if let Some((key, value)) = line.split_once('=') {
-                        let key = key.trim_ascii_end();
-                        let value = value.trim_ascii();
+                    if let Some((key, val)) = line.split_once('=') {
+                        let val = val.trim_ascii_end();
+                        let val_len = val.len() as u32;
+                        let val = val.trim_ascii_start();
+                        // `+ 1` for the equal sign `=`.
+                        let val_end = offset + key.len() as u32 + 1 + val_len;
+                        let val_start = val_end - val.len() as u32;
+                        let key = key.trim_ascii();
                         if let Some((_, last_options)) = &mut last_section {
                             if key.eq_ignore_ascii_case("indent_style") {
-                                last_options.indent_style = EditorconfigValue::from_str(value)
+                                last_options.indent_style = EditorconfigValue::from_str(val)
                                     .map_err(|err| EditorConfigError {
-                                        line_number,
+                                        span: TextRange::new(val_start.into(), val_end.into()),
                                         kind: EditorConfigErrorKind::StaticStr(err),
                                     })?;
                             } else if key.eq_ignore_ascii_case("indent_size") {
-                                last_options.indent_size = EditorconfigValue::from_str(value)
+                                last_options.indent_size = EditorconfigValue::from_str(val)
                                     .map_err(|err| EditorConfigError {
-                                        line_number,
+                                        span: TextRange::new(val_start.into(), val_end.into()),
                                         kind: EditorConfigErrorKind::ParseFormatNumberError(err),
                                     })?;
                             } else if key.eq_ignore_ascii_case("end_of_line") {
-                                last_options.end_of_line = EditorconfigValue::from_str(value)
+                                last_options.end_of_line = EditorconfigValue::from_str(val)
                                     .map_err(|err| EditorConfigError {
-                                        line_number,
+                                        span: TextRange::new(val_start.into(), val_end.into()),
                                         kind: EditorConfigErrorKind::StaticStr(err),
                                     })?;
                             } else if key.eq_ignore_ascii_case("insert_final_newline") {
                                 last_options.insert_final_newline =
-                                    EditorconfigValue::from_str(value).map_err(|err| {
+                                    EditorconfigValue::from_str(val).map_err(|err| {
                                         EditorConfigError {
-                                            line_number,
+                                            span: TextRange::new(val_start.into(), val_end.into()),
                                             kind: EditorConfigErrorKind::ParseBoolError(err),
                                         }
                                     })?;
                             }
                         } else if key.eq_ignore_ascii_case("root") {
-                            root = bool::from_str(value).map_err(|err| EditorConfigError {
-                                line_number,
+                            root = bool::from_str(val).map_err(|err| EditorConfigError {
+                                span: TextRange::new(val_start.into(), val_end.into()),
                                 kind: EditorConfigErrorKind::ParseBoolError(err),
                             })?;
                         }
@@ -176,6 +186,8 @@ impl FromStr for EditorConfig {
                 }
                 _ => {}
             }
+            // `+ 1` for the newline `\n`
+            offset += line.len() as u32 + 1;
         }
         if let Some((section_name, options)) = last_section.take() {
             if !options.is_all_none() {
