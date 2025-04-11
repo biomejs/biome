@@ -359,7 +359,7 @@ mod tests {
             comment
                 .trim_start_matches("//")
                 .split(' ')
-                .map(AnalyzerSuppression::rule)
+                .map(|rule_str| AnalyzerSuppression::rule(RuleCategory::Lint, rule_str))
                 .map(Ok)
                 .collect()
         }

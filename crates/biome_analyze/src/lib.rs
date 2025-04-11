@@ -585,7 +585,7 @@ where
                 }
             };
 
-            if !self.categories.contains(suppression.as_rule_category()) {
+            if !self.categories.contains(suppression.category) {
                 let signal = DiagnosticSignal::new(|| {
                     AnalyzerSuppressionDiagnostic::new(
                         category!("suppressions/unused"),
@@ -675,6 +675,9 @@ pub struct AnalyzerSuppression<'a> {
 
     /// The kind of `biome-ignore` comment used for this suppression
     pub(crate) variant: AnalyzerSuppressionVariant,
+
+    /// The category that this suppression applies to
+    pub(crate) category: RuleCategory,
 }
 
 #[derive(Debug, Clone)]
@@ -706,21 +709,25 @@ impl<'a> AnalyzerSuppression<'a> {
             kind: AnalyzerSuppressionKind::Everything(category),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
+            category: RuleCategory::from_str(category)
+                .unwrap_or_else(|_| panic!("Unknown category {category}")),
         }
     }
 
-    pub fn rule_instance(rule: &'a str, instance: &'a str) -> Self {
+    pub fn rule_instance(category: RuleCategory, rule: &'a str, instance: &'a str) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::RuleInstance(rule, instance),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
+            category,
         }
     }
-    pub fn rule(rule: &'a str) -> Self {
+    pub fn rule(category: RuleCategory, rule: &'a str) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::Rule(rule),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
+            category,
         }
     }
 
@@ -729,6 +736,7 @@ impl<'a> AnalyzerSuppression<'a> {
             kind: AnalyzerSuppressionKind::Action(action),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
+            category: RuleCategory::Action,
         }
     }
 
@@ -737,18 +745,8 @@ impl<'a> AnalyzerSuppression<'a> {
             kind: AnalyzerSuppressionKind::Plugin(plugin_name),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
-        }
-    }
-
-    pub fn as_rule_category(&self) -> RuleCategory {
-        match self.kind {
-            AnalyzerSuppressionKind::Everything(category) => {
-                RuleCategory::from_str(category).unwrap()
-            }
-            AnalyzerSuppressionKind::Rule(_) => RuleCategory::Lint,
-            AnalyzerSuppressionKind::Action(_) => RuleCategory::Action,
-            AnalyzerSuppressionKind::RuleInstance(_, _) => RuleCategory::Lint,
-            AnalyzerSuppressionKind::Plugin(_) => RuleCategory::Lint,
+            // Is this true?  Isn't the category a plugin and not linting?  What is the plugin is for formatting, etc?
+            category: RuleCategory::Lint,
         }
     }
 
@@ -813,7 +811,7 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().end()).start(),
     );
     for (key, subcategory, value) in suppression.categories {
-        // TODO - allow skipping the whole category for syntax
+        // Don't allow skipping of syntax since we want explicit bypasses as an escape hatch only
         if key == category!("lint") || key == category!("assist") {
             result
                 .push(AnalyzerSuppression::everything(key.name()).with_variant(&suppression.kind));
@@ -826,10 +824,11 @@ pub fn to_analyzer_suppressions(
             let category = key.name();
             if let Some(rule) = category.strip_prefix("lint/") {
                 let suppression = if let Some(instance) = value {
-                    AnalyzerSuppression::rule_instance(rule, instance)
+                    AnalyzerSuppression::rule_instance(RuleCategory::Lint, rule, instance)
                         .with_ignore_range(ignore_range)
                 } else {
-                    AnalyzerSuppression::rule(rule).with_ignore_range(ignore_range)
+                    AnalyzerSuppression::rule(RuleCategory::Lint, rule)
+                        .with_ignore_range(ignore_range)
                 }
                 .with_variant(&suppression.kind);
                 result.push(suppression);
@@ -841,10 +840,11 @@ pub fn to_analyzer_suppressions(
                 result.push(suppression);
             } else if let Some(rule) = category.strip_prefix("syntax/") {
                 let suppression = if let Some(instance) = value {
-                    AnalyzerSuppression::rule_instance(rule, instance)
+                    AnalyzerSuppression::rule_instance(RuleCategory::Syntax, rule, instance)
                         .with_ignore_range(ignore_range)
                 } else {
-                    AnalyzerSuppression::rule(rule).with_ignore_range(ignore_range)
+                    AnalyzerSuppression::rule(RuleCategory::Syntax, rule)
+                        .with_ignore_range(ignore_range)
                 }
                 .with_variant(&suppression.kind);
                 result.push(suppression);
