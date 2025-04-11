@@ -72,16 +72,16 @@ impl Rule for NoUnknownPseudoElement {
 
         let should_not_trigger = match &pseudo_element {
             AnyCssPseudoElement::CssBogusPseudoElement(element) => {
-                should_not_trigger(element.as_trimmed_text().text())
+                should_not_trigger(element.to_trimmed_text().text())
             }
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(ident) => {
                 should_not_trigger(ident.name().ok()?.text().into())
             }
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => {
-                should_not_trigger(selector.as_trimmed_text().text().into())
+                should_not_trigger(selector.to_trimmed_text().text().into())
             }
             AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
-                should_not_trigger(ident.name().ok()?.as_trimmed_text().text().into())
+                should_not_trigger(ident.name().ok()?.to_trimmed_text().text().into())
             }
         };
 
@@ -99,7 +99,7 @@ impl Rule for NoUnknownPseudoElement {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected unknown pseudo-elements: "<Emphasis>{ element.as_trimmed_text().text() }</Emphasis>
+                    "Unexpected unknown pseudo-elements: "<Emphasis>{ element.to_trimmed_text().text() }</Emphasis>
                 },
             )
             .note(markup! {

@@ -219,7 +219,7 @@ pub trait AstNode: Clone {
     }
 
     /// Returns the string representation of this node without trivia, without allocating a string, if possible
-    fn as_trimmed_text(&self) -> Text {
+    fn to_trimmed_text(&self) -> Text {
         self.syntax().text_trimmed().into_text()
     }
 

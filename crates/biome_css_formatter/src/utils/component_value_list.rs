@@ -225,7 +225,7 @@ where
     let css_property = list
         .parent::<CssGenericProperty>()
         .and_then(|parent| parent.name().ok())
-        .and_then(|name| name.as_css_identifier().map(|name| name.as_trimmed_text()));
+        .and_then(|name| name.as_css_identifier().map(|name| name.to_trimmed_text()));
     let is_grid_property = css_property.as_ref().is_some_and(|name| {
         let name = name.to_ascii_lowercase_cow();
 

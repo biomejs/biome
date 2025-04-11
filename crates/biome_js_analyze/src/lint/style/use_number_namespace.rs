@@ -131,7 +131,7 @@ impl Rule for UseNumberNamespace {
         let node = ctx.query();
         let (old_node, new_node) = match node {
             AnyJsExpression::JsIdentifierExpression(expression) => {
-                let name = expression.name().ok()?.as_trimmed_text();
+                let name = expression.name().ok()?.to_trimmed_text();
                 if !GLOBAL_NUMBER_PROPERTIES.contains(&name.text()) {
                     return None;
                 }

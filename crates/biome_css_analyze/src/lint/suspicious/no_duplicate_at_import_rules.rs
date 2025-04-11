@@ -73,7 +73,7 @@ impl Rule for NoDuplicateAtImportRules {
                         let import_url = import_rule
                             .url()
                             .ok()?
-                            .as_trimmed_text()
+                            .to_trimmed_text()
                             .to_lowercase_cow()
                             .replace("url(", "")
                             .replace(')', "")
@@ -81,7 +81,7 @@ impl Rule for NoDuplicateAtImportRules {
                         if let Some(media_query_set) = import_url_map.get_mut(&import_url) {
                             // if the current import_rule has no media queries or there are no queries saved in the
                             // media_query_set, this is always a duplicate
-                            if import_rule.media().as_trimmed_text().is_empty()
+                            if import_rule.media().to_trimmed_text().is_empty()
                                 || media_query_set.is_empty()
                             {
                                 return Some(import_rule);
@@ -91,7 +91,7 @@ impl Rule for NoDuplicateAtImportRules {
                                 match media {
                                     Ok(media) => {
                                         if !media_query_set.insert(
-                                            media.as_trimmed_text().to_lowercase_cow().into(),
+                                            media.to_trimmed_text().to_lowercase_cow().into(),
                                         ) {
                                             return Some(import_rule);
                                         }
@@ -105,7 +105,7 @@ impl Rule for NoDuplicateAtImportRules {
                                 match media {
                                     Ok(media) => {
                                         media_set.insert(
-                                            media.as_trimmed_text().to_lowercase_cow().into(),
+                                            media.to_trimmed_text().to_lowercase_cow().into(),
                                         );
                                     }
                                     _ => return None,

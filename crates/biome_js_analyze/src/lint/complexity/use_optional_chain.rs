@@ -529,8 +529,8 @@ impl LogicalAndChain {
                 // they should be considered different even if `main_value_token`
                 // and `branch_value_token` are the same.
                 // Therefore, we need to check their arguments here.
-                if main_call_expression_args.args().as_trimmed_text()
-                    != branch_call_expression_args.args().as_trimmed_text()
+                if main_call_expression_args.args().to_trimmed_text()
+                    != branch_call_expression_args.args().to_trimmed_text()
                 {
                     return Ok(LogicalAndChainOrdering::Different);
                 }

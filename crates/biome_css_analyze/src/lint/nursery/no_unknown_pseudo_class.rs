@@ -183,7 +183,7 @@ fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
         let maybe_selector = CssPseudoElementSelector::cast_ref(prev);
         if let Some(selector) = maybe_selector.as_ref() {
             return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS
-                .contains(&selector.as_trimmed_text().trim_matches(':'));
+                .contains(&selector.to_trimmed_text().trim_matches(':'));
         };
         prev_element = prev.prev_sibling();
     }

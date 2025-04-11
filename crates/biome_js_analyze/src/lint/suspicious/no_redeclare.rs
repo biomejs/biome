@@ -145,7 +145,7 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                 if let Some(decl) = id_binding.declaration() {
                     // Ignore the function itself.
                     if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
-                        let name = id_binding.as_trimmed_text();
+                        let name = id_binding.to_trimmed_text();
                         declarations.insert(
                             name.text().into(),
                             (id_binding.syntax().text_trimmed_range(), decl),
@@ -161,7 +161,7 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // We consider only binding of a declaration
         // This allows to skip function parameters, methods, ...
         if let Some(decl) = id_binding.declaration() {
-            let name = id_binding.as_trimmed_text();
+            let name = id_binding.to_trimmed_text();
             if let Some((first_text_range, first_decl)) = declarations.get(name.text()) {
                 // Do not report:
                 // - mergeable declarations.
