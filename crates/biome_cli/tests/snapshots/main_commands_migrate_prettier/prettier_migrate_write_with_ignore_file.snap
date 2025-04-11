@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -33,7 +34,8 @@ expression: redactor(content)
       "attributePosition": "auto",
       "bracketSpacing": true
     }
-  }
+  },
+  "html": { "formatter": { "selfCloseVoidElements": "always" } }
 }
 ```
 

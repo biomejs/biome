@@ -1,6 +1,49 @@
 use biome_rowan::AstNode;
 
-use crate::{JsClassDeclaration, JsSyntaxKind, JsSyntaxNode, TsEnumDeclaration};
+use crate::{
+    AnyJsDeclaration, AnyJsDeclarationClause, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
+    TsEnumDeclaration,
+};
+
+impl AnyJsDeclarationClause {
+    pub fn into_declaration(self) -> Option<AnyJsDeclaration> {
+        match self {
+            AnyJsDeclarationClause::JsClassDeclaration(decl) => {
+                Some(AnyJsDeclaration::JsClassDeclaration(decl))
+            }
+            AnyJsDeclarationClause::JsFunctionDeclaration(decl) => {
+                Some(AnyJsDeclaration::JsFunctionDeclaration(decl))
+            }
+            AnyJsDeclarationClause::JsVariableDeclarationClause(decl) => Some(
+                AnyJsDeclaration::JsVariableDeclaration(decl.declaration().ok()?),
+            ),
+            AnyJsDeclarationClause::TsDeclareFunctionDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsDeclareFunctionDeclaration(decl))
+            }
+            AnyJsDeclarationClause::TsEnumDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsEnumDeclaration(decl))
+            }
+            AnyJsDeclarationClause::TsExternalModuleDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsExternalModuleDeclaration(decl))
+            }
+            AnyJsDeclarationClause::TsGlobalDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsGlobalDeclaration(decl))
+            }
+            AnyJsDeclarationClause::TsImportEqualsDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsImportEqualsDeclaration(decl))
+            }
+            AnyJsDeclarationClause::TsInterfaceDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsInterfaceDeclaration(decl))
+            }
+            AnyJsDeclarationClause::TsModuleDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsModuleDeclaration(decl))
+            }
+            AnyJsDeclarationClause::TsTypeAliasDeclaration(decl) => {
+                Some(AnyJsDeclaration::TsTypeAliasDeclaration(decl))
+            }
+        }
+    }
+}
 
 impl TsEnumDeclaration {
     /// Returns `true` if this enum is an ambient enum or in an ambient context.

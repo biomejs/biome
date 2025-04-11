@@ -14,8 +14,8 @@
     "execute": "node dist/generate-tailwind-preset.js"
   },
   "devDependencies": {
-    "@types/node": "22.13.14",
+    "@types/node": "22.14.0",
     "read-package-up": "11.0.0",
-    "typescript": "5.8.2"
+    "typescript": "5.8.3"
   }
 }

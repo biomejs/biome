@@ -43,7 +43,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_transformation_registry(&mut registry);
 
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors, categories) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -90,6 +90,7 @@ where
         |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
         Box::new(TestAction),
         &mut emit_signal,
+        categories,
     );
 
     for ((phase, _), visitor) in visitors {

@@ -3,8 +3,11 @@ use biome_fs::{MemoryFileSystem, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
 use biome_package::{Dependencies, PackageJson, Version};
+use biome_rowan::Text;
 use biome_test_utils::get_added_paths;
 use insta::assert_debug_snapshot;
+
+use crate::{JsImport, JsResolvedPath, js_module_info::JsReexport, jsdoc_comment::JsdocComment};
 
 use super::*;
 
@@ -93,9 +96,11 @@ fn test_resolve_relative_import() {
 
     assert_eq!(file_imports.static_imports.len(), 2);
     assert_eq!(
-        file_imports.static_imports.get("./bar.ts"),
-        Some(&Import {
-            resolved_path: Ok(Utf8PathBuf::from("/src/bar.ts"))
+        file_imports.static_imports.get("bar"),
+        Some(&JsImport {
+            specifier: "./bar.ts".into(),
+            resolved_path: JsResolvedPath::from_path("/src/bar.ts"),
+            symbol: "bar".into()
         })
     );
 }
@@ -117,9 +122,11 @@ fn test_resolve_package_import() {
 
     assert_eq!(file_imports.static_imports.len(), 2);
     assert_eq!(
-        file_imports.static_imports.get("shared"),
-        Some(&Import {
-            resolved_path: Ok(Utf8PathBuf::from("/node_modules/shared/dist/index.js"))
+        file_imports.static_imports.get("foo"),
+        Some(&JsImport {
+            specifier: "shared".into(),
+            resolved_path: JsResolvedPath::from_path("/node_modules/shared/dist/index.js"),
+            symbol: "foo".into()
         })
     );
 }
@@ -197,21 +204,84 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
 
     assert_eq!(file_imports.static_imports.len(), 2);
     assert_eq!(
-        file_imports.static_imports.get("shared"),
-        Some(&Import {
-            resolved_path: Ok(Utf8PathBuf::from(format!(
+        file_imports.static_imports.get("sharedFoo"),
+        Some(&JsImport {
+            specifier: "shared".into(),
+            resolved_path: JsResolvedPath::from_path(format!(
                 "{fixtures_path}/shared/dist/index.js"
-            )))
+            )),
+            symbol: "sharedFoo".into()
         })
     );
     assert_eq!(
-        file_imports.static_imports.get("./bar"),
-        Some(&Import {
-            resolved_path: Ok(Utf8PathBuf::from(format!(
+        file_imports.static_imports.get("bar"),
+        Some(&JsImport {
+            specifier: "./bar".into(),
+            resolved_path: JsResolvedPath::from_path(format!(
                 "{fixtures_path}/frontend/src/bar.ts"
-            )))
+            )),
+            symbol: "bar".into()
         })
     );
+}
+
+#[test]
+fn test_export_referenced_function() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            /**
+             * @returns {string}
+             */
+            function foo() {}
+
+            export { foo };
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let dependency_data = module_graph.data.pin();
+    let data = dependency_data
+        .get(Utf8Path::new("/src/index.ts"))
+        .unwrap()
+        .clone();
+
+    assert_debug_snapshot!(data.exports);
+}
+
+#[test]
+fn test_export_default_function_declaration() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            /**
+             * @public
+             * @returns {JSX.Element}
+             */
+            export default function Component(): JSX.Element {}
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let dependency_data = module_graph.data.pin();
+    let data = dependency_data
+        .get(Utf8Path::new("/src/index.ts"))
+        .unwrap()
+        .clone();
+
+    assert_debug_snapshot!(data.exports);
 }
 
 #[test]
@@ -221,17 +291,22 @@ fn test_resolve_exports() {
         "/src/index.ts".into(),
         r#"
             /**
-             * FIXME: This does not yet get detected.
+             * @returns {string}
              */
             function foo() {}
 
-            export { foo };
+            export { foo, qux };
             
             /** @package */
             export function bar() {}
 
+            /** @private */
+            export const quz = {};
+
             /* @ignored because of incorrect amount of asterisks */
             export async function baz() {}
+
+            var qux = 1;
 
             /**
              * TODO: No types can be detected on these yet.
@@ -246,11 +321,19 @@ fn test_resolve_exports() {
 
             export * from "./reexports";
             export { ohNo as "oh\x0Ano" } from "./renamed-reexports";
+
+            /**
+             * Hello, namespace 2.
+             */
+            export * as renamed2 from "./renamed-reexports";
         "#,
     );
     fs.insert(
         "/src/reexports.ts".into(),
         r#"
+            /**
+             * Hello, namespace 1.
+             */
             export * as renamed from "./renamed-reexports";
         "#,
     );
@@ -280,27 +363,49 @@ fn test_resolve_exports() {
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
     let dependency_data = module_graph.data.pin();
-    let mut data = dependency_data
+    let data = dependency_data
         .get(Utf8Path::new("/src/index.ts"))
         .unwrap()
         .clone();
+    let mut exports = data.exports.clone();
 
     // Remove this entry, or the Windows tests fail on the path in the snapshot below:
     assert_eq!(
-        data.exports.remove(&Text::Static("oh\nno")),
-        Some(Export::Reexport(Import {
-            resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts"))
+        exports.remove(&Text::Static("oh\nno")),
+        Some(JsExport::Reexport(JsReexport {
+            import: JsImport {
+                specifier: "./renamed-reexports".into(),
+                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
+                symbol: "ohNo".into()
+            },
+            jsdoc_comment: None
+        }))
+    );
+    assert_eq!(
+        exports.remove(&Text::Static("renamed2")),
+        Some(JsExport::Reexport(JsReexport {
+            import: JsImport {
+                specifier: "./renamed-reexports".into(),
+                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
+                symbol: JsImportSymbol::All,
+            },
+            jsdoc_comment: Some(JsdocComment::from_comment_text(
+                "/**\n* Hello, namespace 2.\n*/"
+            )),
         }))
     );
 
-    assert_debug_snapshot!(data.exports);
+    assert_debug_snapshot!(exports);
 
     assert_eq!(
-        data.blanket_reexports,
-        vec![ReexportAll {
-            import: Import {
-                resolved_path: Ok(Utf8PathBuf::from("/src/reexports.ts"))
-            }
+        data.blanket_reexports.as_ref(),
+        &[JsReexport {
+            import: JsImport {
+                specifier: "./reexports".into(),
+                resolved_path: JsResolvedPath::from_path("/src/reexports.ts"),
+                symbol: JsImportSymbol::All,
+            },
+            jsdoc_comment: None
         }]
     );
 
@@ -310,10 +415,68 @@ fn test_resolve_exports() {
     assert_eq!(data.exports.len(), 1);
     assert_eq!(
         data.exports.get(&Text::Static("renamed")),
-        Some(&Export::ReexportAll(ReexportAll {
-            import: Import {
-                resolved_path: Ok(Utf8PathBuf::from("/src/renamed-reexports.ts"))
-            }
+        Some(&JsExport::Reexport(JsReexport {
+            import: JsImport {
+                specifier: "./renamed-reexports".into(),
+                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
+                symbol: JsImportSymbol::All,
+            },
+            jsdoc_comment: Some(JsdocComment::from_comment_text(
+                "/**\n* Hello, namespace 1.\n*/"
+            ))
         }))
     );
+}
+
+#[test]
+fn test_resolve_export_types() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const theAnswer = 42;
+
+            /**
+             * Built by a race of hyper-intelligent pan-dimensional beings to
+             * calculate the Ultimate Answer to the Ultimate Question of Life,
+             * The Universe, and Everything.
+             * 
+             * This JSDoc comment should not be transferred to the exported
+             * instance variable below.
+             */
+            class DeepThought {
+                answerMe(): number {
+                    return theAnswer;
+                }
+
+                giveMeABiggerAnswer(delta: number) {
+                    // Return type should be inferred to `number`.
+                    // TODO: At some point.
+                    return theAnswer + delta;
+                }
+
+                whatWasTheUltimateQuestion(): unknown {
+                    // This should not be inferred to `string` due to the
+                    // explicit annotation in the signature.
+                    return "Life, The Universe, and Everything";
+                }
+            }
+
+            export const superComputer = new DeepThought();
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let dependency_data = module_graph.data.pin();
+    let data = dependency_data
+        .get(Utf8Path::new("/src/index.ts"))
+        .unwrap()
+        .clone();
+
+    assert_debug_snapshot!(data.exports);
 }

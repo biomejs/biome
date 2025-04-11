@@ -1,9 +1,23 @@
+use super::{
+    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    ParserCapabilities, SearchCapabilities,
+};
+use crate::settings::{check_feature_activity, check_override_feature_activity};
+use crate::workspace::FixFileResult;
+use crate::{
+    WorkspaceError,
+    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
+    workspace::GetSyntaxTreeResult,
+};
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::html::{HtmlFormatterConfiguration, HtmlFormatterEnabled};
+use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
 };
 use biome_fs::BiomePath;
+use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
     HtmlFormatOptions,
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
@@ -12,19 +26,9 @@ use biome_html_formatter::{
 use biome_html_parser::parse_html_with_cache;
 use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::AnyParse;
-use biome_rowan::NodeCache;
+use biome_rowan::{AstNode, NodeCache};
 use camino::Utf8Path;
-
-use super::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
-};
-use crate::settings::{check_feature_activity, check_override_feature_activity};
-use crate::{
-    WorkspaceError,
-    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
-    workspace::GetSyntaxTreeResult,
-};
+use tracing::debug_span;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -38,6 +42,7 @@ pub struct HtmlFormatterSettings {
     pub bracket_same_line: Option<BracketSameLine>,
     pub whitespace_sensitivity: Option<WhitespaceSensitivity>,
     pub indent_script_and_style: Option<IndentScriptAndStyle>,
+    pub self_close_void_elements: Option<SelfCloseVoidElements>,
 }
 
 impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
@@ -52,6 +57,7 @@ impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
             bracket_same_line: config.bracket_same_line,
             whitespace_sensitivity: config.whitespace_sensitivity,
             indent_script_and_style: config.indent_script_and_style,
+            self_close_void_elements: config.self_close_void_elements,
         }
     }
 }
@@ -107,6 +113,9 @@ impl ServiceLanguage for HtmlLanguage {
         let indent_script_and_style = language
             .and_then(|l| l.indent_script_and_style)
             .unwrap_or_default();
+        let self_close_void_elements = language
+            .and_then(|l| l.self_close_void_elements)
+            .unwrap_or_default();
 
         let options = HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
             .with_indent_style(indent_style)
@@ -116,7 +125,8 @@ impl ServiceLanguage for HtmlLanguage {
             .with_attribute_position(attribute_position)
             .with_bracket_same_line(bracket_same_line)
             .with_whitespace_sensitivity(whitespace_sensitivity)
-            .with_indent_script_and_style(indent_script_and_style);
+            .with_indent_script_and_style(indent_script_and_style)
+            .with_self_close_void_elements(self_close_void_elements);
         if let Some(overrides) = overrides {
             overrides.to_override_html_format_options(path, options)
         } else {
@@ -198,10 +208,10 @@ impl ExtensionHandler for HtmlFileHandler {
                 debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
+                lint: Some(lint),
                 code_actions: None,
                 rename: None,
-                fix_all: None,
+                fix_all: Some(fix_all),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -286,4 +296,48 @@ fn format(
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+fn lint(params: LintParams) -> LintResults {
+    let _ = debug_span!("Linting HTML file", path =? params.path, language =? params.language)
+        .entered();
+    let diagnostics = params.parse.into_diagnostics();
+
+    let diagnostic_count = diagnostics.len() as u32;
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+    let errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() <= Severity::Error)
+        .count();
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
+    }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+    // We don't have analyzer rules yet
+    let tree: HtmlRoot = params.parse.tree();
+    let code = if params.should_format {
+        format_node(
+            params
+                .workspace
+                .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source),
+            tree.syntax(),
+        )?
+        .print()?
+        .into_code()
+    } else {
+        tree.syntax().to_string()
+    };
+    Ok(FixFileResult {
+        code,
+        skipped_suggested_fixes: 0,
+        actions: vec![],
+        errors: 0,
+    })
 }

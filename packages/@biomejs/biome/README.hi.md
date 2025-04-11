@@ -160,9 +160,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://www.kanamekey.com?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/kaname/d15fd98/logo/256.png?height=80" width="80"></a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://nanabit.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80"></a>
       </td>
       <td align="center" valign="middle">
@@ -176,6 +173,9 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
       </td>
       <td align="center" valign="middle">
         <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://pennylane.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/57875210?s=200&v=4" width="80"></a>
       </td>
     </tr>
   </tbody>

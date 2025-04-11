@@ -99,7 +99,7 @@ export interface AssistConfiguration {
 	 */
 	actions?: Actions;
 	/**
-	 * Whether Biome should enable assist via LSP.
+	 * Whether Biome should enable assist via LSP and CLI.
 	 */
 	enabled?: Bool;
 	/**
@@ -552,6 +552,10 @@ export interface HtmlFormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Whether void elements should be self-closed. Defaults to never.
+	 */
+	selfCloseVoidElements?: SelfCloseVoidElements;
+	/**
 	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
 	 */
 	whitespaceSensitivity?: WhitespaceSensitivity;
@@ -824,6 +828,10 @@ export type QuoteStyle = "double" | "single";
 When true, the content of `<script>` and `<style>` tags will be indented one level. 
 	 */
 export type IndentScriptAndStyle = boolean;
+/**
+ * Controls whether void-elements should be self closed
+ */
+export type SelfCloseVoidElements = "never" | "always";
 /**
 	* Whitespace sensitivity for HTML formatting.
 
@@ -1538,6 +1546,10 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of the !important style.
+	 */
+	noImportantStyles?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
@@ -1565,6 +1577,10 @@ export interface Nursery {
 	 * Disallow the use of process global.
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow the use of configured elements.
+	 */
+	noRestrictedElements?: RuleConfiguration_for_NoRestrictedElementsOptions;
 	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
@@ -2329,6 +2345,9 @@ export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
+export type RuleConfiguration_for_NoRestrictedElementsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoRestrictedElementsOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -2382,6 +2401,7 @@ export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
 export interface Options {
 	groups?: ImportGroups;
+	typePlacement?: TypePlacement;
 }
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_Null {
@@ -2543,6 +2563,16 @@ export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	 * Rule's options
 	 */
 	options: NoBitwiseOperatorsOptions;
+}
+export interface RuleWithOptions_for_NoRestrictedElementsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoRestrictedElementsOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -2747,6 +2777,7 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	options: NoDoubleEqualsOptions;
 }
 export type ImportGroups = ImportGroup[];
+export type TypePlacement = "mixed" | "typesFirst";
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -2859,6 +2890,12 @@ export interface NoBitwiseOperatorsOptions {
 	 * Allows a list of bitwise operators to be used as exceptions.
 	 */
 	allow: string[];
+}
+export interface NoRestrictedElementsOptions {
+	/**
+	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
+	 */
+	elements: CustomRestrictedElements;
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -3034,6 +3071,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
+export type CustomRestrictedElements = Record<string, string>;
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type Accessibility = "noPublic" | "explicit" | "none";
@@ -3321,6 +3359,7 @@ export type Category =
 	| "lint/nursery/noDuplicateFields"
 	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
+	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noFloatingPromises"
@@ -3330,6 +3369,7 @@ export type Category =
 	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noImportantInKeyframe"
+	| "lint/nursery/noImportantStyles"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
@@ -3547,8 +3587,7 @@ export type Category =
 	| "internalError/panic"
 	| "reporter/parse"
 	| "reporter/format"
-	| "reporter/assist"
-	| "reporter/linter"
+	| "reporter/violations"
 	| "parse"
 	| "lint"
 	| "lint/a11y"

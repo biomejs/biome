@@ -1,14 +1,19 @@
 ---
 source: crates/biome_module_graph/src/module_graph.tests.rs
-expression: data.exports
+expression: exports
 ---
 {
     Borrowed(
         "a",
     ): Own(
-        OwnExport {
+        JsOwnExport {
             jsdoc_comment: Some(
-                "TODO: No types can be detected on these yet.",
+                JsdocComment(
+                    "TODO: No types can be detected on these yet.",
+                ),
+            ),
+            local_name: Some(
+                "a",
             ),
             ty: Unknown,
         },
@@ -16,9 +21,14 @@ expression: data.exports
     Borrowed(
         "b",
     ): Own(
-        OwnExport {
+        JsOwnExport {
             jsdoc_comment: Some(
-                "TODO: No types can be detected on these yet.",
+                JsdocComment(
+                    "TODO: No types can be detected on these yet.",
+                ),
+            ),
+            local_name: Some(
+                "b",
             ),
             ty: Unknown,
         },
@@ -26,9 +36,14 @@ expression: data.exports
     Borrowed(
         "bar",
     ): Own(
-        OwnExport {
+        JsOwnExport {
             jsdoc_comment: Some(
-                "@package",
+                JsdocComment(
+                    "@package",
+                ),
+            ),
+            local_name: Some(
+                "bar",
             ),
             ty: Function(
                 Function {
@@ -50,8 +65,11 @@ expression: data.exports
     Borrowed(
         "baz",
     ): Own(
-        OwnExport {
+        JsOwnExport {
             jsdoc_comment: None,
+            local_name: Some(
+                "baz",
+            ),
             ty: Function(
                 Function {
                     is_async: true,
@@ -63,7 +81,9 @@ expression: data.exports
                     ),
                     parameters: [],
                     return_type: Type(
-                        Unknown,
+                        Promise(
+                            Unknown,
+                        ),
                     ),
                 },
             ),
@@ -72,9 +92,14 @@ expression: data.exports
     Borrowed(
         "d",
     ): Own(
-        OwnExport {
+        JsOwnExport {
             jsdoc_comment: Some(
-                "TODO: No types can be detected on these yet.",
+                JsdocComment(
+                    "TODO: No types can be detected on these yet.",
+                ),
+            ),
+            local_name: Some(
+                "d",
             ),
             ty: Unknown,
         },
@@ -82,9 +107,14 @@ expression: data.exports
     Static(
         "default",
     ): Own(
-        OwnExport {
+        JsOwnExport {
             jsdoc_comment: Some(
-                "@public\n@returns {JSX.Element}",
+                JsdocComment(
+                    "@public\n@returns {JSX.Element}",
+                ),
+            ),
+            local_name: Some(
+                "Component",
             ),
             ty: Function(
                 Function {
@@ -120,9 +150,14 @@ expression: data.exports
     Borrowed(
         "e",
     ): Own(
-        OwnExport {
+        JsOwnExport {
             jsdoc_comment: Some(
-                "TODO: No types can be detected on these yet.",
+                JsdocComment(
+                    "TODO: No types can be detected on these yet.",
+                ),
+            ),
+            local_name: Some(
+                "e",
             ),
             ty: Unknown,
         },
@@ -130,8 +165,61 @@ expression: data.exports
     Borrowed(
         "foo",
     ): Own(
-        OwnExport {
+        JsOwnExport {
+            jsdoc_comment: Some(
+                JsdocComment(
+                    "@returns {string}",
+                ),
+            ),
+            local_name: Some(
+                "foo",
+            ),
+            ty: Function(
+                Function {
+                    is_async: false,
+                    type_parameters: [],
+                    name: Some(
+                        Borrowed(
+                            "foo",
+                        ),
+                    ),
+                    parameters: [],
+                    return_type: Type(
+                        Unknown,
+                    ),
+                },
+            ),
+        },
+    ),
+    Borrowed(
+        "qux",
+    ): Own(
+        JsOwnExport {
             jsdoc_comment: None,
+            local_name: Some(
+                "qux",
+            ),
+            ty: Literal(
+                Number(
+                    Borrowed(
+                        "1",
+                    ),
+                ),
+            ),
+        },
+    ),
+    Borrowed(
+        "quz",
+    ): Own(
+        JsOwnExport {
+            jsdoc_comment: Some(
+                JsdocComment(
+                    "@private",
+                ),
+            ),
+            local_name: Some(
+                "quz",
+            ),
             ty: Unknown,
         },
     ),

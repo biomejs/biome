@@ -84,6 +84,7 @@ impl JsonSyntaxKind {
             NULL_KW => "null",
             TRUE_KW => "true",
             FALSE_KW => "false",
+            EOF => "EOF",
             JSON_STRING_LITERAL => "string literal",
             _ => return None,
         };

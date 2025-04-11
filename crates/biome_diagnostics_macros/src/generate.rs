@@ -187,11 +187,14 @@ fn generate_advices(input: &DeriveStructInput) -> TokenStream {
         return quote!();
     }
 
-    let advices = input.advices.iter();
+    let advices = input.advices.iter().map(|advice| match advice {
+        StaticOrDynamic::Static(literal) => quote! { #literal },
+        StaticOrDynamic::Dynamic(token_stream) => quote! { &self.#token_stream },
+    });
 
     quote! {
         fn advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> ::std::io::Result<()> {
-            #( biome_diagnostics::Advices::record(&self.#advices, visitor)?; )*
+            #( biome_diagnostics::Advices::record(#advices, visitor)?; )*
             Ok(())
         }
     }

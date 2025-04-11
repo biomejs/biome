@@ -1,0 +1,21 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"nursery": {
+				"noBitwiseOperators": "error",
+				"noRestrictedElements": {
+					"level": "error",
+					"options": {
+						"elements": {
+							"input": "Use TextField instead",
+							"button": "Use Button instead",
+							"MyNS.MyComponent": "This component is deprecated"
+						}
+					}
+				}
+			}
+		}
+	}
+}

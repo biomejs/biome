@@ -33,10 +33,10 @@ fn test_query() {
 
     let body = r#"console.log("grape");"#;
 
-    let file = GritTargetFile {
-        path: "test.js".into(),
-        parse: parse(body, JsFileSource::tsx(), JsParserOptions::default()).into(),
-    };
+    let file = GritTargetFile::new(
+        "test.js",
+        parse(body, JsFileSource::tsx(), JsParserOptions::default()).into(),
+    );
     let GritQueryResult { effects, logs, .. } =
         query.execute(file).expect("could not execute query");
 

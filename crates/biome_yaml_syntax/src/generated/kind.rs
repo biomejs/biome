@@ -138,6 +138,7 @@ impl YamlSyntaxKind {
             DOC_START => "---",
             DOC_END => "...",
             NULL_KW => "null",
+            EOF => "EOF",
             YAML_STRING_VALUE => "string value",
             _ => return None,
         };

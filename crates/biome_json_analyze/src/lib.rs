@@ -91,7 +91,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors, categories) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -104,6 +104,7 @@ where
         parse_linter_suppression_comment,
         Box::new(JsonSuppressionAction),
         &mut emit_signal,
+        categories,
     );
 
     for ((phase, _), visitor) in visitors {

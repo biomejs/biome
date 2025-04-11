@@ -2,25 +2,25 @@ use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
     Queryable, RuleKey, ServiceBag, SyntaxVisitor,
 };
-use biome_module_graph::{ModuleGraph, ModuleInfo};
+use biome_module_graph::{JsModuleInfo, ModuleGraph};
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
 use camino::Utf8Path;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub struct DependencyGraphService(Arc<ModuleGraph>);
+pub struct ModuleGraphService(Arc<ModuleGraph>);
 
-impl DependencyGraphService {
+impl ModuleGraphService {
     pub fn module_graph(&self) -> &ModuleGraph {
         self.0.as_ref()
     }
 
-    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
         self.0.module_info_for_path(path)
     }
 }
 
-impl FromServices for DependencyGraphService {
+impl FromServices for ModuleGraphService {
     fn from_services(
         rule_key: &RuleKey,
         services: &ServiceBag,
@@ -32,7 +32,7 @@ impl FromServices for DependencyGraphService {
     }
 }
 
-impl Phase for DependencyGraphService {
+impl Phase for ModuleGraphService {
     fn phase() -> Phases {
         Phases::Syntax
     }
@@ -62,7 +62,7 @@ where
     type Output = N;
 
     type Language = L;
-    type Services = DependencyGraphService;
+    type Services = ModuleGraphService;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<L>, _: &L::Root) {
         analyzer.add_visitor(Phases::Syntax, SyntaxVisitor::default);

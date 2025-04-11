@@ -8,7 +8,8 @@
     ],
     "actions": {
       "source": {
-        "useSortedKeys": "off"
+        "useSortedKeys": "off",
+        "organizeImports": "on"
       }
     }
   },

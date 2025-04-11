@@ -10,7 +10,7 @@ Command to use in CI environments. Runs formatter, linter and import sorting to 
 Files won't be modified, the command is a read-only operation.
 
 Usage: ci [--formatter-enabled=<true|false>] [--linter-enabled=<true|false>] [--assist-enabled=
-<true|false>] [--changed] [--since=REF] [PATH]...
+<true|false>] [--enforce-assist] [--changed] [--since=REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -178,7 +178,9 @@ The configuration that is contained inside the file `biome.json`
                               Defaults to "css".
         --html-formatter-indent-script-and-style=<true|false>  Whether to indent the `<script>` and
                               `<style>` tags for HTML (and its super languages). Defaults to false.
-        --assist-enabled=<true|false>  Whether Biome should enable assist via LSP.
+        --html-formatter-self-close-void-elements=<always|never>  Whether void elements should be
+                              self-closed. Defaults to never.
+        --assist-enabled=<true|false>  Whether Biome should enable assist via LSP and CLI.
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain
@@ -221,6 +223,8 @@ Available options:
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --assist-enabled=<true|false>  Allow to enable or disable the assist.
+        --enforce-assist      Allows to enforce assist, and make the CLI fail if some actions aren't
+                              applied. Defaults to `true`.
         --changed             When set to true, only the files that have been changed compared to
                               your `defaultBranch` configuration will be linted.
         --since=REF           Use this to specify the base branch to compare against when you're

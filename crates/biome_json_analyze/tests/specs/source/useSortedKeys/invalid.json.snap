@@ -1,6 +1,7 @@
 ---
 source: crates/biome_json_analyze/tests/spec_tests.rs
 expression: invalid.json
+snapshot_kind: text
 ---
 # Input
 ```json
@@ -11,14 +12,29 @@ expression: invalid.json
 
 ```
 
-# Actions
-```diff
-@@ -1,4 +1,4 @@
- {
--	"zed": "",
--	"alpha": "fff"
-+	"alpha": "fff",
-+	"zed": ""
- }
+# Diagnostics
+```
+invalid.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The keys are not sorted.
+  
+  > 1 │ {
+      │ ^
+  > 2 │ 	"zed": "",
+  > 3 │ 	"alpha": "fff"
+  > 4 │ }
+      │ ^
+    5 │ 
+  
+  i Safe fix: They keys of the current object can be sorted.
+  
+    1 1 │   {
+    2   │ - → "zed":·"",
+    3   │ - → "alpha":·"fff"
+      2 │ + → "alpha":·"fff",
+      3 │ + → "zed":·""
+    4 4 │   }
+    5 5 │   
+  
 
 ```

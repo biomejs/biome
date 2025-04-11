@@ -151,6 +151,7 @@ define_categories! {
     "lint/nursery/noDuplicateFields": "https://biomejs.dev/linter/rules/no-duplicate-fields",
     "lint/nursery/noDuplicateProperties": "https://biomejs.dev/linter/rules/no-duplicate-properties",
     "lint/nursery/noDynamicNamespaceImportAccess": "https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access",
+    "lint/nursery/noRestrictedElements": "https://biomejs.dev/linter/rules/no-restricted-elements",
     "lint/nursery/noEnum": "https://biomejs.dev/linter/rules/no-enum",
     "lint/nursery/noExportedImports": "https://biomejs.dev/linter/rules/no-exported-imports",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
@@ -160,6 +161,7 @@ define_categories! {
     "lint/nursery/noImgElement": "https://biomejs.dev/linter/rules/no-img-element",
     "lint/nursery/noImportCycles": "https://biomejs.dev/linter/rules/no-import-cycles",
     "lint/nursery/noImportantInKeyframe": "https://biomejs.dev/linter/rules/no-important-in-keyframe",
+    "lint/nursery/noImportantStyles": "https://biomejs.dev/linter/rules/no-important-styles",
     "lint/nursery/noInvalidDirectionInLinearGradient": "https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient",
     "lint/nursery/noInvalidGridAreas": "https://biomejs.dev/linter/rules/use-consistent-grid-areas",
     "lint/nursery/noInvalidPositionAtImportRule": "https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule",
@@ -384,8 +386,7 @@ define_categories! {
     "internalError/panic",
     "reporter/parse",
     "reporter/format",
-    "reporter/assist",
-    "reporter/linter",
+    "reporter/violations",
     // parse categories
     "parse",
 
@@ -408,7 +409,6 @@ define_categories! {
     "suppressions/unknownAction",
     "suppressions/unused",
     "suppressions/incorrect",
-
     // Used in tests and examples
     "args/fileNotFound",
     "flags/invalid",

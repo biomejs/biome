@@ -370,7 +370,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Actions" }, { "type": "null" }]
 				},
 				"enabled": {
-					"description": "Whether Biome should enable assist via LSP.",
+					"description": "Whether Biome should enable assist via LSP and CLI.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"includes": {
@@ -1218,6 +1218,11 @@
 			},
 			"additionalProperties": false
 		},
+		"CustomRestrictedElements": {
+			"type": "object",
+			"minProperties": 1,
+			"additionalProperties": { "type": "string" }
+		},
 		"CustomRestrictedImport": {
 			"anyOf": [
 				{
@@ -1786,6 +1791,13 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"selfCloseVoidElements": {
+					"description": "Whether void elements should be self-closed. Defaults to never.",
+					"anyOf": [
+						{ "$ref": "#/definitions/SelfCloseVoidElements" },
+						{ "type": "null" }
+					]
 				},
 				"whitespaceSensitivity": {
 					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"css\".",
@@ -2470,6 +2482,22 @@
 			},
 			"additionalProperties": false
 		},
+		"NoRestrictedElementsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoRestrictedElementsOptions" }
+			]
+		},
+		"NoRestrictedElementsOptions": {
+			"type": "object",
+			"properties": {
+				"elements": {
+					"description": "Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.",
+					"allOf": [{ "$ref": "#/definitions/CustomRestrictedElements" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoRestrictedTypesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2703,6 +2731,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImportantStyles": {
+					"description": "Disallow the use of the !important style.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
@@ -2749,6 +2784,13 @@
 					"description": "Disallow the use of process global.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRestrictedElements": {
+					"description": "Disallow the use of configured elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoRestrictedElementsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3068,6 +3110,10 @@
 				"groups": {
 					"default": [],
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
+				},
+				"typePlacement": {
+					"default": "mixed",
+					"allOf": [{ "$ref": "#/definitions/TypePlacement" }]
 				}
 			},
 			"additionalProperties": false
@@ -3723,6 +3769,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoRestrictedElementsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoRestrictedElementsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoRestrictedTypesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -4098,6 +4159,21 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"SelfCloseVoidElements": {
+			"description": "Controls whether void-elements should be self closed",
+			"oneOf": [
+				{
+					"description": "The `/` inside void elements is removed by the formatter",
+					"type": "string",
+					"enum": ["never"]
+				},
+				{
+					"description": "The `/` inside void elements is always added",
+					"type": "string",
+					"enum": ["always"]
+				}
+			]
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
 		"SeverityOrGroup_for_A11y": {
@@ -5064,6 +5140,20 @@
 					"description": "The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.",
 					"type": "string",
 					"enum": ["all"]
+				}
+			]
+		},
+		"TypePlacement": {
+			"oneOf": [
+				{
+					"description": "Mix type-only imports and exports with regular imports and exports",
+					"type": "string",
+					"enum": ["mixed"]
+				},
+				{
+					"description": "Separate type-only imports and exports from regular imports and exports",
+					"type": "string",
+					"enum": ["typesFirst"]
 				}
 			]
 		},

@@ -4,7 +4,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
-use biome_module_graph::{ModuleGraph, ModuleInfo};
+use biome_module_graph::{JsModuleInfo, JsResolvedPath, ModuleGraph};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
@@ -77,12 +77,6 @@ declare_lint_rule! {
     ///
     /// ## Known Limitations
     ///
-    /// * This rule currently only looks at the JSDoc comments that are attached
-    ///   to the _`export` statement_ nearest to the symbol's definition. If the
-    ///   symbol isn't exported in the same statement as in which it is defined,
-    ///   the visibility as specified in the `export` statement is used, not
-    ///   that of the symbol definition. Re-exports cannot (currently) override
-    ///   the visibility from the original `export`.
     /// * This rule only applies to imports from JavaScript and TypeScript
     ///   files. Imports for resources such as images or CSS files are exempted
     ///   regardless of the default visibility setting.
@@ -222,8 +216,8 @@ impl Rule for NoPrivateImports {
 
         let node = ctx.query();
         let Some(target_path) = module_info
-            .get_import_by_node(node)
-            .and_then(|import| import.resolved_path.as_ref().ok())
+            .get_import_path_by_js_node(node)
+            .and_then(JsResolvedPath::as_path)
         else {
             return Vec::new();
         };
@@ -294,7 +288,7 @@ struct GetRestrictedImportOptions<'a> {
     target_path: &'a Utf8Path,
 
     /// Module info of the target module we're importing from.
-    target_info: ModuleInfo,
+    target_info: JsModuleInfo,
 
     /// The visibility to assume for symbols without explicit visibility tag.
     default_visibility: Visibility,

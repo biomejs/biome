@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unseparated_types.ts
+snapshot_kind: text
+---
+# Input
+```ts
+import type { T1 } from "bun:test"
+import type { T2 } from "node:test"
+import type { T3 } from "@scopeX/special/subpath"
+import type { T4 } from "@scopeX/special"
+import { v1 } from "bun:test"
+import { v2 } from "node:test"
+import { v3 } from "@scopeX/special/subpath"
+import { v4 } from "@scopeX/special"
+import { v5 } from "@scopeX/lib"
+import { v6 } from "@scopeA/lib"
+import { v7 } from "@scopeB/lib"
+import type { T5 } from "@scopeX/lib"
+import type { T6 } from "@scopeA/lib"
+import type { T7 } from "@scopeB/lib"
+
+```
+
+# Diagnostics
+```
+unseparated_types.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import type { T1 } from "bun:test"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import type { T2 } from "node:test"
+    3 │ import type { T3 } from "@scopeX/special/subpath"
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1  1 │   import type { T1 } from "bun:test"
+     2  2 │   import type { T2 } from "node:test"
+     3    │ - import·type·{·T3·}·from·"@scopeX/special/subpath"
+     4    │ - import·type·{·T4·}·from·"@scopeX/special"
+     5    │ - import·{·v1·}·from·"bun:test"
+     6    │ - import·{·v2·}·from·"node:test"
+     7    │ - import·{·v3·}·from·"@scopeX/special/subpath"
+     8    │ - import·{·v4·}·from·"@scopeX/special"
+     9    │ - import·{·v5·}·from·"@scopeX/lib"
+    10    │ - import·{·v6·}·from·"@scopeA/lib"
+        3 │ + import·type·{·T5·}·from·"@scopeX/lib"
+        4 │ + 
+        5 │ + import·type·{·T7·}·from·"@scopeB/lib"
+        6 │ + import·type·{·T6·}·from·"@scopeA/lib"
+        7 │ + import·type·{·T4·}·from·"@scopeX/special"
+        8 │ + import·type·{·T3·}·from·"@scopeX/special/subpath"
+        9 │ + 
+       10 │ + import·{·v1·}·from·"bun:test"
+       11 │ + import·{·v2·}·from·"node:test"
+       12 │ + import·{·v5·}·from·"@scopeX/lib"
+       13 │ + 
+    11 14 │   import { v7 } from "@scopeB/lib"
+    12    │ - import·type·{·T5·}·from·"@scopeX/lib"
+    13    │ - import·type·{·T6·}·from·"@scopeA/lib"
+    14    │ - import·type·{·T7·}·from·"@scopeB/lib"
+       15 │ + import·{·v6·}·from·"@scopeA/lib"
+       16 │ + import·{·v4·}·from·"@scopeX/special"
+       17 │ + import·{·v3·}·from·"@scopeX/special/subpath"
+    15 18 │   
+  
+
+```

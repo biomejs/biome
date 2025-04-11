@@ -10,7 +10,7 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
-use biome_test_utils::has_bogus_nodes_or_empty_slots;
+use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
 use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
@@ -83,6 +83,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let extension = file_source.file_extension();
     let parsed = parse(&content, file_source, options);
+    validate_eof_token(parsed.syntax());
+
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();

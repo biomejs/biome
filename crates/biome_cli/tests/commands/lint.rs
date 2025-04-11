@@ -12,7 +12,7 @@ use crate::{
     run_cli_with_server_workspace,
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
-use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
+use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env::temp_dir;
@@ -3932,6 +3932,37 @@ fn should_report_when_schema_version_mismatch() {
         module_path!(),
         "should_report_when_schema_version_mismatch",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_lint_module_in_commonjs_package() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("should_lint_module_in_commonjs_package");
+
+    fs.create_file("biome.json", r#"{ "files": { "includes": ["**/*"] } }"#);
+
+    fs.create_file("package.json", r#"{ "type": "commonjs" }"#);
+
+    fs.create_file(
+        "src/file.mjs",
+        r#"import { foo } from "foo";
+var a = foo;
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_lint_module_in_commonjs_package",
+        fs.create_mem(),
         console,
         result,
     ));

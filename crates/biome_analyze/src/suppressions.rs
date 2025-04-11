@@ -1,6 +1,7 @@
 use crate::{
     AnalyzerSuppression, AnalyzerSuppressionDiagnostic, AnalyzerSuppressionKind,
-    AnalyzerSuppressionVariant, MetadataRegistry, RuleFilter, RuleKey,
+    AnalyzerSuppressionVariant, MetadataRegistry, RuleCategories, RuleCategory, RuleFilter,
+    RuleKey,
 };
 use biome_console::markup;
 use biome_diagnostics::category;
@@ -9,12 +10,12 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 const PLUGIN_LINT_RULE_FILTER: RuleFilter<'static> = RuleFilter::Group("lint/plugin");
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct TopLevelSuppression {
     /// Whether this suppression suppresses all filters
-    pub(crate) suppress_all: bool,
+    pub(crate) suppressed_categories: RuleCategories,
     /// Filters for the current suppression
-    pub(crate) filters: FxHashSet<RuleFilter<'static>>,
+    pub(crate) filters_by_category: FxHashMap<RuleCategory, FxHashSet<RuleFilter<'static>>>,
     /// Whether this suppression suppresses all plugins
     pub(crate) suppress_all_plugins: bool,
     /// Current suppressed plugins
@@ -25,6 +26,19 @@ pub struct TopLevelSuppression {
     /// The range covered by the current suppression.
     /// Eventually, it should hit the entire document
     pub(crate) range: TextRange,
+}
+
+impl Default for TopLevelSuppression {
+    fn default() -> Self {
+        Self {
+            suppressed_categories: RuleCategories::empty(),
+            filters_by_category: Default::default(),
+            suppress_all_plugins: false,
+            plugins: Default::default(),
+            comment_range: Default::default(),
+            range: Default::default(),
+        }
+    }
 }
 
 impl TopLevelSuppression {
@@ -53,17 +67,19 @@ impl TopLevelSuppression {
         }
         // The absence of a filter means that it's a suppression all
         match filter {
-            None => self.suppress_all = true,
+            None => self
+                .suppressed_categories
+                .insert(suppression.as_rule_category()),
             Some(PLUGIN_LINT_RULE_FILTER) => self.insert_plugin(&suppression.kind),
-            Some(filter) => self.insert(filter),
+            Some(filter) => self.insert(suppression.as_rule_category(), filter),
         }
         self.comment_range = comment_range;
-
         Ok(())
     }
 
-    pub(crate) fn insert(&mut self, filter: RuleFilter<'static>) {
-        self.filters.insert(filter);
+    pub(crate) fn insert(&mut self, rule_category: RuleCategory, filter: RuleFilter<'static>) {
+        let filters = self.filters_by_category.entry(rule_category).or_default();
+        filters.insert(filter);
     }
 
     pub(crate) fn insert_plugin(&mut self, kind: &AnalyzerSuppressionKind) {
@@ -78,8 +94,14 @@ impl TopLevelSuppression {
         }
     }
 
-    pub(crate) fn suppressed_rule(&self, filter: &RuleKey) -> bool {
-        self.filters.iter().any(|f| f == filter)
+    pub(crate) fn suppresses_category(&self, category: impl Into<RuleCategories>) -> bool {
+        self.suppressed_categories.contains(category.into())
+    }
+
+    pub(crate) fn contains_rule_key(&self, rule_category: &RuleCategory, filter: &RuleKey) -> bool {
+        self.filters_by_category
+            .get(rule_category)
+            .is_some_and(|filters| filters.iter().any(|f| f == filter))
     }
 
     pub(crate) fn suppressed_plugin(&self, plugin_name: &str) -> bool {
@@ -91,12 +113,14 @@ impl TopLevelSuppression {
     }
 
     pub(crate) fn has_filter(&self, filter: &RuleFilter) -> bool {
-        self.filters.contains(filter)
+        self.filters_by_category
+            .values()
+            .any(|filters| filters.contains(filter))
     }
 }
 
 /// Single entry for a suppression comment in the `line_suppressions` buffer
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub(crate) struct LineSuppression {
     /// Line index this comment is suppressing lint rules for
     pub(crate) line_index: usize,
@@ -106,10 +130,10 @@ pub(crate) struct LineSuppression {
     pub(crate) text_range: TextRange,
     /// Set to true if this comment has set the `suppress_all` flag to true
     /// (must be restored to false on expiration)
-    pub(crate) suppress_all: bool,
+    pub(crate) suppressed_categories: RuleCategories,
     /// List of all the rules this comment has started suppressing (must be
     /// removed from the suppressed set on expiration)
-    pub(crate) suppressed_rules: FxHashSet<RuleFilter<'static>>,
+    pub(crate) suppressed_rules: FxHashMap<RuleCategory, FxHashSet<RuleFilter<'static>>>,
     /// List of all the rule instances this comment has started suppressing.
     pub(crate) suppressed_instances: FxHashMap<String, RuleFilter<'static>>,
     /// List of plugins this comment has started suppressing
@@ -123,15 +147,40 @@ pub(crate) struct LineSuppression {
     pub(crate) already_suppressed: Option<TextRange>,
 }
 
+impl Default for LineSuppression {
+    fn default() -> Self {
+        Self {
+            line_index: 0,
+            comment_span: Default::default(),
+            text_range: Default::default(),
+            suppressed_categories: RuleCategories::empty(),
+            suppressed_rules: Default::default(),
+            suppressed_instances: Default::default(),
+            suppressed_plugins: Default::default(),
+            suppress_all_plugins: false,
+            did_suppress_signal: false,
+            already_suppressed: None,
+        }
+    }
+}
+
+impl LineSuppression {
+    pub(crate) fn matches_rule(&self, rule_category: &RuleCategory, filter: &RuleKey) -> bool {
+        self.suppressed_rules
+            .get(rule_category)
+            .is_some_and(|filters| filters.iter().any(|f| f == filter))
+    }
+}
+
 #[derive(Debug, Default)]
 pub(crate) struct RangeSuppressions {
     pub(crate) suppressions: Vec<RangeSuppression>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub(crate) struct RangeSuppression {
     /// Whether the current suppression should suppress all signals
-    pub(crate) suppress_all: bool,
+    pub(crate) suppressed_categories: RuleCategories,
 
     /// The range of the `biome-ignore-start` suppressions
     pub(crate) start_comment_range: TextRange,
@@ -145,10 +194,25 @@ pub(crate) struct RangeSuppression {
     /// Whether this suppression has suppressed a signal
     pub(crate) did_suppress_signal: bool,
 
-    /// The rules to suppress
-    pub(crate) filters: FxHashSet<RuleFilter<'static>>,
     /// Indicates if the rule has found its end comment - if false, the suppression_range is not yet complete
     pub(crate) is_ended: bool,
+
+    /// The rules to suppress, grouped by [RuleCategory]
+    pub(crate) filters_by_category: FxHashMap<RuleCategory, FxHashSet<RuleFilter<'static>>>,
+}
+
+impl Default for RangeSuppression {
+    fn default() -> Self {
+        Self {
+            suppressed_categories: RuleCategories::empty(),
+            start_comment_range: Default::default(),
+            suppression_range: Default::default(),
+            already_suppressed: None,
+            did_suppress_signal: false,
+            filters_by_category: Default::default(),
+            is_ended: false,
+        }
+    }
 }
 
 impl RangeSuppressions {
@@ -178,17 +242,23 @@ impl RangeSuppressions {
             }.to_owned()));
         }
         if suppression.is_range_start() {
-            let mut range_suppression = RangeSuppression::default();
-            match filter {
-                None => range_suppression.suppress_all = true,
-                Some(filter) => {
-                    range_suppression.filters.insert(filter);
+                let mut range_suppression = RangeSuppression::default();
+                match filter {
+                    None => range_suppression
+                        .suppressed_categories
+                        .insert(suppression.as_rule_category()),
+                    Some(filter) => {
+                        let filters = range_suppression
+                            .filters_by_category
+                            .entry(suppression.as_rule_category())
+                            .or_default();
+                        filters.insert(filter);
+                    }
                 }
-            }
-            range_suppression.suppression_range = text_range;
-            range_suppression.already_suppressed = already_suppressed;
-            range_suppression.start_comment_range = text_range;
-            self.suppressions.push(range_suppression);
+                range_suppression.suppression_range = text_range;
+                range_suppression.already_suppressed = already_suppressed;
+                range_suppression.start_comment_range = text_range;
+                self.suppressions.push(range_suppression);
         } else if suppression.is_range_end() {
             if self.suppressions.is_empty() {
                 // This an error. We found a range end suppression without having a range start
@@ -208,14 +278,20 @@ impl RangeSuppressions {
                 Some(filter) => {
                     // SAFETY: we checked if the vector isn't empty at the beginning
                     // We need to make sure that we support nested start, end
-                    // let range_suppression = self.suppressions.last_mut().unwrap();
-                    let range_suppression = self.suppressions.iter_mut().find(|suppression| {
-                        !suppression.is_ended && suppression.filters.contains(&filter)
-                    });
-                    if let Some(suppression) = range_suppression {
+                    let mut range_suppression: Option<&mut RangeSuppression> = None;
+                    for existing_suppression in self.suppressions.iter_mut() {
+                        if !existing_suppression.is_ended {
+                            let filters = existing_suppression.filters_by_category.entry(suppression.as_rule_category()).or_default();
+                            if filters.contains(&filter) {
+                                range_suppression = Some(existing_suppression);
+                                break;
+                            }
+                        }
+                    }
+                    if let Some(existing_suppression) = range_suppression {
                         // Mark this as ended and expand it by the text range of this comment
-                        suppression.suppression_range.cover(text_range);
-                        suppression.is_ended = true;
+                        existing_suppression.suppression_range.cover(text_range);
+                        existing_suppression.is_ended = true;
                     } else {
                         // This an error. We found a range end suppression without having a range start
                         return Err(AnalyzerSuppressionDiagnostic::new(
@@ -233,12 +309,12 @@ impl RangeSuppressions {
     }
 
     /// Checks if there's suppression that suppresses the current rule in the range provided
-    pub(crate) fn suppressed_rule(&mut self, filter: &RuleKey, position: &TextRange) -> bool {
-        for range_suppression in self.suppressions.iter_mut() {
+    pub(crate) fn suppress_rule(&mut self,         rule_category: &RuleCategory, filter: &RuleKey, position: &TextRange) -> bool {
+        for range_suppression in self.suppressions.iter_mut().rev() {
             if range_suppression
                 .suppression_range
                 .contains_range(*position)
-                && range_suppression.filters.iter().any(|f| f == filter)
+                && range_suppression.filters_by_category.get(rule_category).is_some_and(|filters| filters.iter().any(|f| f == filter))
             {
                 range_suppression.did_suppress_signal = true;
                 return true;
@@ -257,7 +333,10 @@ impl RangeSuppressions {
             if range_suppression
                 .suppression_range
                 .contains_range(*position)
-                && range_suppression.filters.contains(filter)
+                && range_suppression
+                    .filters_by_category
+                    .values()
+                    .any(|filters| filters.contains(filter))
             {
                 return Some(range_suppression.suppression_range);
             }
@@ -299,6 +378,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         instance: Option<String>,
         current_range: TextRange,
         already_suppressed: Option<TextRange>,
+        rule_category: RuleCategory,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
         if let Some(suppression) = self.line_suppressions.last_mut() {
             if (suppression.line_index) == (self.line_index) {
@@ -306,7 +386,7 @@ impl<'analyzer> Suppressions<'analyzer> {
 
                 match filter {
                     None => {
-                        suppression.suppress_all = true;
+                        suppression.suppressed_categories.insert(rule_category);
                         suppression.suppressed_rules.clear();
                         suppression.suppressed_instances.clear();
                         suppression.suppressed_plugins.clear();
@@ -318,14 +398,18 @@ impl<'analyzer> Suppressions<'analyzer> {
                         } else {
                             suppression.suppress_all_plugins = true;
                         }
-                        suppression.suppress_all = false;
+                        suppression.suppressed_categories.remove(rule_category);
                     }
                     Some(filter) => {
-                        suppression.suppressed_rules.insert(filter);
+                        let filters = suppression
+                            .suppressed_rules
+                            .entry(rule_category)
+                            .or_default();
+                        filters.insert(filter);
                         if let Some(instance) = instance {
                             suppression.suppressed_instances.insert(instance, filter);
                         }
-                        suppression.suppress_all = false;
+                        suppression.suppressed_categories.insert(rule_category);
                     }
                 }
                 return Ok(());
@@ -339,11 +423,15 @@ impl<'analyzer> Suppressions<'analyzer> {
             already_suppressed,
             ..Default::default()
         };
+
         match filter {
             None => {
-                suppression.suppress_all = true;
+                suppression.suppressed_categories.insert(rule_category);
             }
             Some(PLUGIN_LINT_RULE_FILTER) => {
+                // As for now, plugins are part of the "linter" and they always suppress
+                // `RuleCategory::Lint` rules
+                suppression.suppressed_categories.insert(rule_category);
                 if let Some(plugin_name) = plugin_name {
                     suppression.suppressed_plugins.insert(plugin_name);
                 } else {
@@ -351,7 +439,11 @@ impl<'analyzer> Suppressions<'analyzer> {
                 }
             }
             Some(filter) => {
-                suppression.suppressed_rules.insert(filter);
+                let filters = suppression
+                    .suppressed_rules
+                    .entry(rule_category)
+                    .or_default();
+                filters.insert(filter);
                 if let Some(instance) = instance {
                     suppression.suppressed_instances.insert(instance, filter);
                 }
@@ -444,6 +536,7 @@ impl<'analyzer> Suppressions<'analyzer> {
                 instances,
                 comment_range,
                 already_suppressed,
+                suppression.as_rule_category(),
             ),
             AnalyzerSuppressionVariant::TopLevel => self.top_level_suppression.push_suppression(
                 suppression,

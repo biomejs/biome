@@ -5,13 +5,14 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 
 use super::{
-    comparable_token::ComparableToken, import_groups, import_source,
+    TypePlacement, comparable_token::ComparableToken, import_groups, import_source,
     specifiers_attributes::JsNamedSpecifiers,
 };
 
 /// Type used to determine the order between imports
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct ImportKey {
+    pub section: ImportSection,
     pub group: u16,
     pub source: import_source::ImportSource<ComparableToken>,
     pub has_no_attributes: bool,
@@ -21,28 +22,53 @@ pub struct ImportKey {
     pub slot_index: u32,
 }
 impl ImportKey {
-    pub fn new(info: ImportInfo, groups: &import_groups::ImportGroups) -> Self {
+    pub fn new(
+        info: ImportInfo,
+        groups: &import_groups::ImportGroups,
+        type_placement: TypePlacement,
+    ) -> Self {
+        let section = match type_placement {
+            TypePlacement::TypesFirst if info.kind.has_type_token() => ImportSection::TypesFirst,
+            _ => ImportSection::Mixed,
+        };
         Self {
-            group: groups.index(&info.source),
+            section,
+            group: groups.index(&info),
             source: info.source,
             has_no_attributes: info.has_no_attributes,
             kind: info.kind,
             slot_index: info.slot_index,
         }
     }
+
+    pub fn is_mergeable(&self, other: &Self) -> bool {
+        self.source == other.source
+            && self.kind.is_mergeable(other.kind.into())
+            && self.has_no_attributes
+            && other.has_no_attributes
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+pub enum ImportSection {
+    /// Section reserved for types with the [`TypePlacement::TypesFirst`] setting.
+    TypesFirst,
+    /// Section for mixed imports.
+    #[default]
+    Mixed,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[enumflags2::bitflags]
 #[repr(u8)]
 pub enum ImportStatementKind {
-    DefaultType = 1 << 0,
-    Default = 1 << 1,
-    DefaultNamespace = 1 << 2,
-    DefaultNamed = 1 << 3,
-    NamespaceType = 1 << 4,
-    Namespace = 1 << 5,
-    NamedType = 1 << 6,
+    NamespaceType = 1 << 0,
+    DefaultType = 1 << 1,
+    NamedType = 1 << 2,
+    Namespace = 1 << 3,
+    DefaultNamespace = 1 << 4,
+    Default = 1 << 5,
+    DefaultNamed = 1 << 6,
     Named = 1 << 7,
 }
 impl ImportStatementKind {
@@ -53,31 +79,19 @@ impl ImportStatementKind {
             .contains(self)
     }
 
-    pub fn is_mergeable(self, kinds: ImportStatementKinds) -> bool {
+    pub fn is_mergeable(self, kinds: enumflags2::BitFlags<ImportStatementKind>) -> bool {
         match self {
+            ImportStatementKind::Namespace => kinds.contains(ImportStatementKind::Default),
+            ImportStatementKind::Default => {
+                kinds.intersects(ImportStatementKind::Namespace | ImportStatementKind::Named)
+            }
             ImportStatementKind::DefaultNamed => kinds.contains(ImportStatementKind::Named),
-            ImportStatementKind::Named => kinds
-                .0
-                .intersects(ImportStatementKind::DefaultNamed | ImportStatementKind::Named),
+            ImportStatementKind::Named => {
+                kinds.intersects(ImportStatementKind::DefaultNamed | ImportStatementKind::Named)
+            }
             ImportStatementKind::NamedType => kinds.contains(ImportStatementKind::NamedType),
             _ => false,
         }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct ImportStatementKinds(enumflags2::BitFlags<ImportStatementKind>);
-impl ImportStatementKinds {
-    pub fn contains(self, kind: ImportStatementKind) -> bool {
-        self.0.contains(kind)
-    }
-
-    pub fn insert(&mut self, kind: ImportStatementKind) {
-        self.0 |= kind;
-    }
-
-    pub fn clear(&mut self) {
-        self.0 = Default::default();
     }
 }
 

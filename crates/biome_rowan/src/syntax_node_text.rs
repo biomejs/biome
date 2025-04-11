@@ -1,5 +1,5 @@
 use crate::{
-    TextRange, TextSize, TokenAtOffset,
+    Text, TextRange, TextSize, TokenAtOffset,
     cursor::{SyntaxNode, SyntaxToken},
 };
 use biome_text_size::TextLen;
@@ -146,6 +146,15 @@ impl SyntaxNodeText {
 
     pub fn chars(&self) -> impl FusedIterator<Item = char> + use<> {
         SyntaxNodeTextChars::new(self)
+    }
+
+    /// Converts the node text into `Text`, attempting to avoid an allocation if
+    /// the node consists of a single token.
+    pub fn into_text(self) -> Text {
+        match self.node.first_token() {
+            Some(token) if token.text_range() == self.range => Text::Borrowed(token.token_text()),
+            _ => Text::Owned(self.to_string()),
+        }
     }
 }
 

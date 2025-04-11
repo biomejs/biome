@@ -7,7 +7,7 @@ use biome_html_syntax::{HtmlAttributeName, HtmlAttributeNameFields, HtmlTagName}
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAttributeName {
-    /// Whether or not this attribute belongs to a canonical tag.
+    /// Whether this attribute belongs to a canonical tag.
     pub is_canonical_html_element: bool,
 
     /// The name of the tag this attribute belongs to.
@@ -15,7 +15,7 @@ pub(crate) struct FormatHtmlAttributeName {
 }
 
 pub(crate) struct FormatHtmlAttributeNameOptions {
-    /// Whether or not this attribute belongs to a canonical tag.
+    /// Whether this attribute belongs to a canonical tag.
     pub is_canonical_html_element: bool,
 
     /// The name of the tag this attribute belongs to.

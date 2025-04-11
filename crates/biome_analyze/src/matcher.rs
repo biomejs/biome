@@ -1,6 +1,6 @@
 use crate::{
-    AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleFilter, RuleGroup, ServiceBag,
-    SuppressionAction,
+    AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleCategory, RuleFilter, RuleGroup,
+    ServiceBag, SuppressionAction,
 };
 use biome_rowan::{Language, TextRange};
 use std::{
@@ -9,7 +9,7 @@ use std::{
     collections::BinaryHeap,
 };
 
-/// The [QueryMatcher] trait is responsible of running lint rules on
+/// The [QueryMatcher] trait is responsible for running lint rules on
 /// [QueryMatch](crate::QueryMatch) instances emitted by the various
 /// [Visitor](crate::Visitor) and push signals wrapped in [SignalEntry]
 /// to the signal queue
@@ -141,6 +141,8 @@ pub struct SignalEntry<'phase, L: Language> {
     pub instances: Box<[Box<str>]>,
     /// Text range in the document this signal covers
     pub text_range: TextRange,
+    /// The category of the rule emitted by this signal
+    pub category: RuleCategory,
 }
 
 // SignalEntry is ordered based on the starting point of its `text_range`
@@ -201,8 +203,8 @@ mod tests {
     use super::MatchQueryParams;
     use crate::{
         Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry,
-        Never, Phases, QueryMatcher, RuleKey, ServiceBag, SignalEntry, SuppressionAction,
-        SyntaxVisitor, signals::DiagnosticSignal,
+        Never, Phases, QueryMatcher, RuleCategories, RuleCategory, RuleKey, ServiceBag,
+        SignalEntry, SuppressionAction, SyntaxVisitor, signals::DiagnosticSignal,
     };
     use crate::{AnalyzerOptions, AnalyzerSuppression};
     use biome_diagnostics::{Diagnostic, Severity};
@@ -237,6 +239,7 @@ mod tests {
                 rule: RuleKey::new("group", "rule"),
                 instances: Default::default(),
                 text_range: span,
+                category: RuleCategory::Lint,
             });
         }
     }
@@ -406,6 +409,7 @@ mod tests {
             parse_suppression_comment,
             Box::new(TestAction),
             &mut emit_signal,
+            RuleCategories::all(),
         );
 
         analyzer.add_visitor(Phases::Syntax, Box::<SyntaxVisitor<RawLanguage>>::default());

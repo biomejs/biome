@@ -45,7 +45,9 @@ use std::borrow::Cow;
 use std::ops::Deref;
 use tracing::instrument;
 
-/// Global settings for the entire project.
+/// Settings active in a project.
+///
+/// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
     /// Formatter settings applied to all files in the project.
@@ -1369,6 +1371,7 @@ impl OverrideSettingPattern {
         let html_formatter = &self.languages.html.formatter;
         let formatter = &self.formatter;
 
+        // #region global formatter options
         if let Some(indent_style) = html_formatter.indent_style.or(formatter.indent_style) {
             options.set_indent_style(indent_style);
         }
@@ -1381,6 +1384,38 @@ impl OverrideSettingPattern {
         if let Some(line_width) = html_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
         }
+
+        if let Some(bracket_same_line) = html_formatter
+            .bracket_same_line
+            .or(formatter.bracket_same_line)
+        {
+            options.set_bracket_same_line(bracket_same_line);
+        }
+
+        if let Some(attribute_position) = html_formatter
+            .attribute_position
+            .or(formatter.attribute_position)
+        {
+            options.set_attribute_position(attribute_position);
+        }
+
+        // #endregion
+
+        // #region HTML formatter options
+
+        if let Some(whitespace_sensitivity) = html_formatter.whitespace_sensitivity {
+            options.set_whitespace_sensitivity(whitespace_sensitivity);
+        }
+
+        if let Some(self_close_void_elements) = html_formatter.self_close_void_elements {
+            options.set_self_close_void_elements(self_close_void_elements);
+        }
+
+        if let Some(indent_script_and_style) = html_formatter.indent_script_and_style {
+            options.set_indent_script_and_style(indent_script_and_style);
+        }
+
+        // #endregion
     }
 
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
