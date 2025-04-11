@@ -37,6 +37,8 @@ pub enum BiomeDiagnostic {
 
     NoConfigurationFileFound(NoConfigurationFileFound),
 
+    NonRootConfiguration(NonRootConfiguration),
+
     /// Thrown when trying to **create** a new configuration file, but it exists already
     ConfigAlreadyExists(ConfigAlreadyExists),
 
@@ -129,6 +131,12 @@ impl BiomeDiagnostic {
         })
     }
 
+    pub fn non_root_configuration(path: &Utf8Path) -> Self {
+        Self::NonRootConfiguration(NonRootConfiguration {
+            path: path.to_string(),
+        })
+    }
+
     pub fn cant_resolve(path: impl Display, source: oxc_resolver::ResolveError) -> Self {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(
@@ -195,6 +203,21 @@ pub struct ConfigAlreadyExists {}
     )
 )]
 pub struct NoConfigurationFileFound {
+    #[location(resource)]
+    path: String,
+}
+
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        message("The given configuration file ("<Emphasis>{self.path}</Emphasis>") is not a root configuration."),
+        description = "The given configuration file {path} is not a root configuration."
+    ),
+    advice = "When an explicit configuration path is given, you must supply the project's root configuration"
+)]
+pub struct NonRootConfiguration {
     #[location(resource)]
     path: String,
 }

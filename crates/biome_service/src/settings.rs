@@ -45,7 +45,9 @@ use std::borrow::Cow;
 use std::ops::Deref;
 use tracing::instrument;
 
-/// Global settings for the entire project.
+/// Settings active in a project.
+///
+/// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
     /// Formatter settings applied to all files in the project.
