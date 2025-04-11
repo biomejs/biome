@@ -151,14 +151,14 @@ impl Default for UseNumericSeparatorsOptions {
 fn decimal_default() -> BaseOptions {
     BaseOptions {
         min_digits: 5,
-        chunk_size: 3,
+        group_length: 3,
     }
 }
 
 fn hexadecimal_default() -> BaseOptions {
     BaseOptions {
         min_digits: 0,
-        chunk_size: 2,
+        group_length: 2,
     }
 }
 
@@ -168,15 +168,15 @@ fn hexadecimal_default() -> BaseOptions {
 pub struct BaseOptions {
     /// The minimum number of digits before a separator is required.
     pub min_digits: usize,
-    /// The size of each chunk.
-    pub chunk_size: usize,
+    /// The size of each group of digits.
+    pub group_length: usize,
 }
 
 impl Default for BaseOptions {
     fn default() -> Self {
         Self {
             min_digits: 0,
-            chunk_size: 4,
+            group_length: 4,
         }
     }
 }
@@ -190,11 +190,11 @@ pub enum State {
 /// Add chunk separators to a number string, starting from the right.
 /// The "uneven" chunk is added to the left of the first separator.
 /// 1234567890 -> 1_234_567_890
-fn add_chunk_separators_from_right(num: &str, chunk_size: usize) -> String {
+fn add_chunk_separators_from_right(num: &str, group_length: usize) -> String {
     num.chars()
         .rev()
         .collect::<Vec<_>>()
-        .chunks(chunk_size)
+        .chunks(group_length)
         .map(|c| c.iter().collect::<String>())
         .collect::<Vec<_>>()
         .join("_")
@@ -206,10 +206,10 @@ fn add_chunk_separators_from_right(num: &str, chunk_size: usize) -> String {
 /// Add chunk separators to a number string, starting from the left. Used for fractional parts.
 /// The "uneven" chunk is added to the right of the last separator.
 /// 12345654321 -> 123_456_543_21
-fn add_chunk_separators_from_left(num: &str, chunk_size: usize) -> String {
+fn add_chunk_separators_from_left(num: &str, group_length: usize) -> String {
     num.chars()
         .collect::<Vec<_>>()
-        .chunks(chunk_size)
+        .chunks(group_length)
         .map(|c| c.iter().collect::<String>())
         .collect::<Vec<_>>()
         .join("_")
@@ -257,7 +257,7 @@ impl NumericLiteral {
 
         let BaseOptions {
             min_digits,
-            chunk_size,
+            group_length,
         } = match radix {
             2 => options.binary,
             8 => options.octal,
@@ -269,14 +269,14 @@ impl NumericLiteral {
         let number = if number.len() < min_digits {
             number.to_owned()
         } else {
-            add_chunk_separators_from_right(&number, chunk_size)
+            add_chunk_separators_from_right(&number, group_length)
         };
 
         let fractional = if let Some(fractional) = fractional {
             if fractional.len() < min_digits {
                 Some(fractional.to_owned())
             } else {
-                Some(add_chunk_separators_from_left(&fractional, chunk_size))
+                Some(add_chunk_separators_from_left(&fractional, group_length))
             }
         } else {
             None
