@@ -1726,6 +1726,10 @@ export interface Nursery {
 	 */
 	useNamingConvention?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce the use of numeric separators in numeric literals.
+	 */
+	useNumericSeparators?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_Null;
@@ -3359,7 +3363,6 @@ export type Category =
 	| "lint/nursery/noDuplicateFields"
 	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
-	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noFloatingPromises"
@@ -3382,6 +3385,7 @@ export type Category =
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
+	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noSecrets"
@@ -3431,6 +3435,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
+	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"

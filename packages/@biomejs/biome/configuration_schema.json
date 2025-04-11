@@ -3049,6 +3049,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNumericSeparators": {
+					"description": "Enforce the use of numeric separators in numeric literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useParseIntRadix": {
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
