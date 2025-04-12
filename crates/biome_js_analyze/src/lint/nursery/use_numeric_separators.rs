@@ -60,19 +60,17 @@ impl Rule for UseNumericSeparators {
 
         if raw == expected {
             None
-        } else {
-            if raw.contains('_') {
-                if expected.contains('_') {
-                    // Contains separators, but not in the same places as the expected value.
-                    Some(State::InconsistentGrouping)
-                } else {
-                    // Contains separators which are not present in the expected value.
-                    Some(State::UnnecessaryGrouping)
-                }
+        } else if raw.contains('_') {
+            if expected.contains('_') {
+                // Contains separators, but not in the same places as the expected value.
+                Some(State::InconsistentGrouping)
             } else {
-                // Missing separators entirely.
-                Some(State::UnreadableLiteral)
+                // Contains separators which are not present in the expected value.
+                Some(State::UnnecessaryGrouping)
             }
+        } else {
+            // Missing separators entirely.
+            Some(State::UnreadableLiteral)
         }
     }
 
@@ -232,10 +230,10 @@ struct FractionalExponent {
 }
 
 fn split_into_sign_and_number(num: &str) -> (Option<char>, &str) {
-    if num.starts_with('-') {
-        (Some('-'), &num[1..])
-    } else if num.starts_with('+') {
-        (Some('+'), &num[1..])
+    if let Some(rest) = num.strip_prefix('-') {
+        (Some('-'), rest)
+    } else if let Some(rest) = num.strip_prefix('+') {
+        (Some('+'), rest)
     } else {
         (None, num)
     }
@@ -258,7 +256,7 @@ impl NumericLiteral {
                         Some(FractionalExponent {
                             exponent: exponent.to_owned(),
                             sign,
-                            e: fractional.contains('e').then_some('e').unwrap_or('E'),
+                            e: if fractional.contains('e') { 'e' } else { 'E' },
                         }),
                     )
                 });
@@ -289,7 +287,7 @@ impl NumericLiteral {
         };
 
         let number = if self.number.len() < min_digits {
-            self.number.to_owned()
+            self.number.clone()
         } else {
             add_separators_from_right(&self.number, group_length)
         };
@@ -300,7 +298,7 @@ impl NumericLiteral {
                 if fraction.len() < min_digits {
                     fraction.to_owned()
                 } else {
-                    add_separators_from_left(&fraction, group_length)
+                    add_separators_from_left(fraction, group_length)
                 },
             )
         } else {
@@ -343,7 +341,7 @@ impl OptionalCharExt for Option<char> {
     fn unwrap_or_empty(&self) -> String {
         match self {
             Some(ch) => ch.to_string(),
-            None => "".to_owned(),
+            None => String::new(),
         }
     }
 }
