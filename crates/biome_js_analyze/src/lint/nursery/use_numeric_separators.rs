@@ -220,45 +220,67 @@ struct NumericLiteral {
     sign: Option<char>,
     radix: u8,
     number: String,
-    fractional: Option<String>,
+    fraction: Option<String>,
+    exponent: Option<FractionalExponent>,
+}
+
+#[derive(Debug)]
+struct FractionalExponent {
+    e: char,
+    exponent: String,
+    sign: Option<char>,
+}
+
+fn split_into_sign_and_number(num: &str) -> (Option<char>, &str) {
+    if num.starts_with('-') {
+        (Some('-'), &num[1..])
+    } else if num.starts_with('+') {
+        (Some('+'), &num[1..])
+    } else {
+        (None, num)
+    }
 }
 
 impl NumericLiteral {
     fn parse(raw: &str) -> Self {
-        let (sign, num) = if raw.starts_with('-') {
-            (Some('-'), &raw[1..])
-        } else if raw.starts_with('+') {
-            (Some('+'), &raw[1..])
-        } else {
-            (None, raw)
-        };
+        let (sign, num) = split_into_sign_and_number(raw);
         let (radix, num) = split_into_radix_and_number(num);
+
         let (number, fractional) = num.split_once('.').unwrap_or((&num, ""));
+
+        let (fraction, exponent) =
+            fractional
+                .split_once(['e', 'E'])
+                .map_or((fractional, None), |(fraction, exponent)| {
+                    let (sign, exponent) = split_into_sign_and_number(exponent);
+                    (
+                        fraction,
+                        Some(FractionalExponent {
+                            exponent: exponent.to_owned(),
+                            sign,
+                            e: fractional.contains('e').then_some('e').unwrap_or('E'),
+                        }),
+                    )
+                });
 
         NumericLiteral {
             sign,
             radix,
             number: number.to_owned(),
-            fractional: if fractional.is_empty() {
+            fraction: if fraction.is_empty() {
                 None
             } else {
-                Some(fractional.to_owned())
+                Some(fraction.to_owned())
             },
+            exponent,
         }
     }
 
     fn format(&self, options: UseNumericSeparatorsOptions) -> String {
-        let NumericLiteral {
-            sign,
-            radix,
-            number,
-            fractional,
-        } = self;
-
         let BaseOptions {
             min_digits,
             group_length,
-        } = match radix {
+        } = match self.radix {
             2 => options.binary,
             8 => options.octal,
             10 => options.decimal,
@@ -266,38 +288,62 @@ impl NumericLiteral {
             _ => unreachable!(),
         };
 
-        let number = if number.len() < min_digits {
-            number.to_owned()
+        let number = if self.number.len() < min_digits {
+            self.number.to_owned()
         } else {
-            add_separators_from_right(&number, group_length)
+            add_separators_from_right(&self.number, group_length)
         };
 
-        let fractional = if let Some(fractional) = fractional {
-            if fractional.len() < min_digits {
-                Some(fractional.to_owned())
-            } else {
-                Some(add_separators_from_left(&fractional, group_length))
-            }
+        let fraction = if let Some(fraction) = &self.fraction {
+            format!(
+                ".{}",
+                if fraction.len() < min_digits {
+                    fraction.to_owned()
+                } else {
+                    add_separators_from_left(&fraction, group_length)
+                },
+            )
         } else {
-            None
+            String::new()
+        };
+
+        let exponent = if let Some(exp) = &self.exponent {
+            format!(
+                "{}{}{}",
+                exp.e,
+                exp.sign.unwrap_or_empty(),
+                add_separators_from_right(&exp.exponent, group_length)
+            )
+        } else {
+            String::new()
         };
 
         format!(
-            "{}{}{}{}",
-            match radix {
+            "{}{}{}{}{}",
+            match self.radix {
                 2 => "0b",
                 8 => "0o",
                 10 => "",
                 16 => "0x",
                 _ => unreachable!(),
             },
-            if let Some(sign) = sign {
-                sign.to_string()
-            } else {
-                String::new()
-            },
+            self.sign.unwrap_or_empty(),
             number,
-            fractional.map(|f| format!(".{}", f)).unwrap_or_default()
+            fraction,
+            exponent
         )
+    }
+}
+
+trait OptionalCharExt {
+    fn unwrap_or_empty(&self) -> String;
+}
+
+impl OptionalCharExt for Option<char> {
+    fn unwrap_or_empty(&self) -> String {
+        match self {
+            Some(ch) => ch.to_string(),
+            None => "".to_owned(),
+        }
     }
 }
