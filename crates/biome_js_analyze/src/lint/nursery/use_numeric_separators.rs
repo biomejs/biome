@@ -226,29 +226,37 @@ pub enum State {
 /// Add chunk separators to a number string, starting from the right.
 /// The "uneven" chunk is added to the left of the first separator.
 /// 1234567890 -> 1_234_567_890
-fn add_separators_from_right(num: &str, group_length: usize) -> String {
-    num.chars()
-        .rev()
-        .collect::<Vec<_>>()
-        .chunks(group_length)
-        .map(|c| c.iter().collect::<String>())
-        .collect::<Vec<_>>()
-        .join("_")
-        .chars()
-        .rev()
-        .collect()
+fn add_separators_from_right(num: &str, opts: &BaseOptions) -> String {
+    if num.len() < opts.min_digits {
+        num.to_owned()
+    } else {
+        num.chars()
+            .rev()
+            .collect::<Vec<_>>()
+            .chunks(opts.group_length)
+            .map(|c| c.iter().collect::<String>())
+            .collect::<Vec<_>>()
+            .join("_")
+            .chars()
+            .rev()
+            .collect()
+    }
 }
 
 /// Add chunk separators to a number string, starting from the left. Used for fractional parts.
 /// The "uneven" chunk is added to the right of the last separator.
 /// 12345654321 -> 123_456_543_21
-fn add_separators_from_left(num: &str, group_length: usize) -> String {
-    num.chars()
-        .collect::<Vec<_>>()
-        .chunks(group_length)
-        .map(|c| c.iter().collect::<String>())
-        .collect::<Vec<_>>()
-        .join("_")
+fn add_separators_from_left(num: &str, opts: &BaseOptions) -> String {
+    if num.len() < opts.min_digits {
+        num.to_owned()
+    } else {
+        num.chars()
+            .collect::<Vec<_>>()
+            .chunks(opts.group_length)
+            .map(|c| c.iter().collect::<String>())
+            .collect::<Vec<_>>()
+            .join("_")
+    }
 }
 
 #[derive(Debug)]
@@ -313,10 +321,7 @@ impl NumericLiteral {
     }
 
     fn format(&self, options: UseNumericSeparatorsOptions) -> String {
-        let BaseOptions {
-            min_digits,
-            group_length,
-        } = match self.radix {
+        let opts = match self.radix {
             2 => options.binary,
             8 => options.octal,
             10 => options.decimal,
@@ -324,21 +329,10 @@ impl NumericLiteral {
             _ => unreachable!(),
         };
 
-        let number = if self.number.len() < min_digits {
-            self.number.clone()
-        } else {
-            add_separators_from_right(&self.number, group_length)
-        };
+        let number = add_separators_from_right(&self.number, &opts);
 
         let fraction = if let Some(fraction) = &self.fraction {
-            format!(
-                ".{}",
-                if fraction.len() < min_digits {
-                    fraction.to_owned()
-                } else {
-                    add_separators_from_left(fraction, group_length)
-                },
-            )
+            format!(".{}", add_separators_from_left(fraction, &opts),)
         } else {
             String::new()
         };
@@ -348,7 +342,7 @@ impl NumericLiteral {
                 "{}{}{}",
                 exp.prefix,
                 exp.sign.unwrap_or_empty(),
-                add_separators_from_right(&exp.exponent, group_length)
+                add_separators_from_right(&exp.exponent, &opts)
             )
         } else {
             String::new()
