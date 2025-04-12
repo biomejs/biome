@@ -59,7 +59,7 @@ impl DeriveInput {
                         let ident = variant.ident;
                         let key = attrs
                             .rename
-                            .unwrap_or_else(|| Case::Camel.convert(&ident.to_string()));
+                            .unwrap_or_else(|| Case::Camel.convert(ident.to_string().trim_start_matches("r#")));
 
                         DeserializableVariantData { ident, key }
                     })
@@ -85,9 +85,9 @@ impl DeriveInput {
                                     return None;
                                 }
 
-                                let key = attrs
-                                    .rename
-                                    .unwrap_or_else(|| Case::Camel.convert(&ident.to_string()));
+                                let key = attrs.rename.unwrap_or_else(|| {
+                                    Case::Camel.convert(ident.to_string().trim_start_matches("r#"))
+                                });
 
                                 if rest_field.is_some() && attrs.rest {
                                     abort!(

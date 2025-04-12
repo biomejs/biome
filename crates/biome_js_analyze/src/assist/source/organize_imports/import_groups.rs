@@ -6,7 +6,6 @@ use crate::globals::is_node_builtin_module;
 
 use super::{
     comparable_token::ComparableToken,
-    import_key::ImportInfo,
     import_source::{ImportSource, ImportSourceKind},
 };
 
@@ -24,11 +23,11 @@ impl ImportGroups {
     /// Returns the index of the first group containing `candidate`.
     /// If no group contains `candidate`, then the returned value corresponds to the index of the implicit group.
     /// The index of the implicit group correspond to the number of groups.
-    pub fn index(&self, info: &ImportInfo) -> u16 {
-        let candidate = ImportSourceCandidate::new(&info.source);
+    pub fn index(&self, candidate: &ImportCandidate<'_>) -> u16 {
+        candidate.source.as_str();
         self.0
             .iter()
-            .position(|group| group.contains(&candidate))
+            .position(|group| group.contains(candidate))
             .unwrap_or(self.0.len()) as u16
     }
 
@@ -44,20 +43,42 @@ impl ImportGroups {
     }
 }
 
+pub struct ImportCandidate<'a> {
+    pub has_type_token: bool,
+    pub source: ImportSourceCandidate<'a>,
+}
+impl ImportCandidate<'_> {
+    /// Match against a list of matchers where negated matchers are handled as exceptions.
+    /// Returns `default` if there is no matchers that match.
+    pub fn matches_with_exceptions<'b, I>(&self, matchers: I) -> bool
+    where
+        I: IntoIterator<Item = &'b GroupMatcher>,
+        I::IntoIter: DoubleEndedIterator,
+    {
+        // Iterate in reverse order to avoid unnecessary glob matching.
+        for matcher in matchers.into_iter().rev() {
+            if matcher.is_raw_match(self) {
+                return !matcher.is_negated();
+            }
+        }
+        false
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(untagged)]
-pub enum ImportGroup {
+enum ImportGroup {
     #[serde(rename = ":BLANK_LINE:")]
     BlankLine,
     Matcher(GroupMatcher),
     MatcherList(Box<[GroupMatcher]>),
 }
 impl ImportGroup {
-    pub fn contains(&self, candidate: &ImportSourceCandidate) -> bool {
+    fn contains(&self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             ImportGroup::BlankLine => false,
-            ImportGroup::Matcher(glob) => glob.is_match(candidate),
+            ImportGroup::Matcher(matcher) => matcher.is_match(candidate),
             ImportGroup::MatcherList(matchers) => {
                 candidate.matches_with_exceptions(matchers.iter())
             }
@@ -70,15 +91,25 @@ impl Deserializable for ImportGroup {
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type() == Some(biome_deserialize::DeserializableType::Str) {
-            let value_text = Text::deserialize(ctx, value, name)?;
-            if value_text.text() == ":BLANK_LINE:" {
-                Some(ImportGroup::BlankLine)
-            } else {
-                Deserializable::deserialize(ctx, value, name).map(ImportGroup::Matcher)
+        match value.visitable_type() {
+            Some(biome_deserialize::DeserializableType::Array) => {
+                Deserializable::deserialize(ctx, value, name).map(Self::MatcherList)
             }
-        } else {
-            Deserializable::deserialize(ctx, value, name).map(ImportGroup::MatcherList)
+            Some(biome_deserialize::DeserializableType::Map) => {
+                Deserializable::deserialize(ctx, value, name)
+                    .map(GroupMatcher::Import)
+                    .map(Self::Matcher)
+            }
+            _ => {
+                let value_text = Text::deserialize(ctx, value, name)?;
+                if value_text.text() == ":BLANK_LINE:" {
+                    Some(Self::BlankLine)
+                } else {
+                    Deserializable::deserialize(ctx, value, name)
+                        .map(GroupMatcher::Source)
+                        .map(Self::Matcher)
+                }
+            }
         }
     }
 }
@@ -87,10 +118,104 @@ impl Deserializable for ImportGroup {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum GroupMatcher {
-    Predefined(NegatablePredefinedGroupMatcher),
-    Glob(Box<ImportSourceGlob>),
+    Import(ImportMatcher),
+    Source(SourceMatcher),
 }
 impl GroupMatcher {
+    pub fn is_negated(&self) -> bool {
+        match self {
+            Self::Import(_) => false,
+            Self::Source(matcher) => matcher.is_negated(),
+        }
+    }
+
+    pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+        match self {
+            Self::Import(matcher) => matcher.is_match(candidate),
+            Self::Source(matcher) => matcher.is_match(&candidate.source),
+        }
+    }
+
+    pub fn is_raw_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+        match self {
+            Self::Import(matcher) => matcher.is_match(candidate),
+            Self::Source(matcher) => matcher.is_raw_match(&candidate.source),
+        }
+    }
+}
+impl Deserializable for GroupMatcher {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl biome_deserialize::DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type() == Some(biome_deserialize::DeserializableType::Map) {
+            Deserializable::deserialize(ctx, value, name).map(Self::Import)
+        } else {
+            Deserializable::deserialize(ctx, value, name).map(Self::Source)
+        }
+    }
+}
+
+#[derive(
+    Clone, Debug, Default, Eq, PartialEq, Deserializable, serde::Deserialize, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ImportMatcher {
+    r#type: Option<bool>,
+    source: Option<SourcesMatcher>,
+}
+impl ImportMatcher {
+    pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+        let matches_type = self
+            .r#type
+            .is_none_or(|r#type| candidate.has_type_token == r#type);
+        matches_type
+            && self
+                .source
+                .as_ref()
+                .is_none_or(|src| src.is_match(&candidate.source))
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(untagged)]
+pub enum SourcesMatcher {
+    Matcher(SourceMatcher),
+    MatcherList(Box<[SourceMatcher]>),
+}
+impl Deserializable for SourcesMatcher {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl biome_deserialize::DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type() == Some(biome_deserialize::DeserializableType::Array) {
+            Deserializable::deserialize(ctx, value, name).map(Self::MatcherList)
+        } else {
+            Deserializable::deserialize(ctx, value, name).map(Self::Matcher)
+        }
+    }
+}
+impl SourcesMatcher {
+    /// Tests whether the given `candidate` matches this matcher.
+    pub fn is_match(&self, candidate: &ImportSourceCandidate) -> bool {
+        match self {
+            SourcesMatcher::Matcher(matcher) => candidate.matches(matcher),
+            SourcesMatcher::MatcherList(matchers) => candidate.matches_with_exceptions(matchers),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(untagged)]
+pub enum SourceMatcher {
+    Predefined(NegatablePredefinedSourceMatcher),
+    Glob(Box<ImportSourceGlob>),
+}
+impl SourceMatcher {
     pub fn is_negated(&self) -> bool {
         match self {
             Self::Predefined(matcher) => matcher.is_negated(),
@@ -114,7 +239,7 @@ impl GroupMatcher {
         }
     }
 }
-impl biome_deserialize::Deserializable for GroupMatcher {
+impl biome_deserialize::Deserializable for SourceMatcher {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
@@ -122,20 +247,20 @@ impl biome_deserialize::Deserializable for GroupMatcher {
     ) -> Option<Self> {
         let text = biome_deserialize::Text::deserialize(ctx, value, name)?;
         if text.ends_with(':') && (text.starts_with(':') || text.starts_with("!:")) {
-            text.parse().ok().map(GroupMatcher::Predefined)
+            text.parse().ok().map(SourceMatcher::Predefined)
         } else {
-            Deserializable::deserialize(ctx, value, name).map(GroupMatcher::Glob)
+            Deserializable::deserialize(ctx, value, name).map(SourceMatcher::Glob)
         }
     }
 }
 
 #[derive(Clone, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct NegatablePredefinedGroupMatcher {
+pub struct NegatablePredefinedSourceMatcher {
     is_negated: bool,
-    matcher: PredefinedGroupMatcher,
+    matcher: PredefinedSourceMatcher,
 }
-impl NegatablePredefinedGroupMatcher {
+impl NegatablePredefinedSourceMatcher {
     pub fn is_negated(&self) -> bool {
         self.is_negated
     }
@@ -150,24 +275,24 @@ impl NegatablePredefinedGroupMatcher {
         self.matcher.is_match(candidate)
     }
 }
-impl std::fmt::Display for NegatablePredefinedGroupMatcher {
+impl std::fmt::Display for NegatablePredefinedSourceMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let negation = if self.is_negated { "!" } else { "" };
         let matcher_repr = &self.matcher;
         write!(f, "{negation}{matcher_repr}")
     }
 }
-impl std::fmt::Debug for NegatablePredefinedGroupMatcher {
+impl std::fmt::Debug for NegatablePredefinedSourceMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self, f)
     }
 }
-impl From<NegatablePredefinedGroupMatcher> for String {
-    fn from(value: NegatablePredefinedGroupMatcher) -> Self {
+impl From<NegatablePredefinedSourceMatcher> for String {
+    fn from(value: NegatablePredefinedSourceMatcher) -> Self {
         value.to_string()
     }
 }
-impl std::str::FromStr for NegatablePredefinedGroupMatcher {
+impl std::str::FromStr for NegatablePredefinedSourceMatcher {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         let (is_negated, value) = if let Some(stripped) = value.strip_prefix('!') {
@@ -175,21 +300,21 @@ impl std::str::FromStr for NegatablePredefinedGroupMatcher {
         } else {
             (false, value)
         };
-        let matcher = PredefinedGroupMatcher::from_str(value)?;
+        let matcher = PredefinedSourceMatcher::from_str(value)?;
         Ok(Self {
             is_negated,
             matcher,
         })
     }
 }
-impl TryFrom<String> for NegatablePredefinedGroupMatcher {
+impl TryFrom<String> for NegatablePredefinedSourceMatcher {
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, Self::Error> {
         value.parse()
     }
 }
 #[cfg(feature = "schema")]
-impl schemars::JsonSchema for NegatablePredefinedGroupMatcher {
+impl schemars::JsonSchema for NegatablePredefinedSourceMatcher {
     fn schema_name() -> String {
         "PredefinedGroupMatcher".to_string()
     }
@@ -200,7 +325,7 @@ impl schemars::JsonSchema for NegatablePredefinedGroupMatcher {
 
 #[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum PredefinedGroupMatcher {
+pub enum PredefinedSourceMatcher {
     #[serde(rename = ":ALIAS:")]
     Alias,
     #[serde(rename = ":BUN:")]
@@ -216,7 +341,7 @@ pub enum PredefinedGroupMatcher {
     #[serde(rename = ":URL:")]
     Url,
 }
-impl PredefinedGroupMatcher {
+impl PredefinedSourceMatcher {
     fn is_match(&self, candidate: &ImportSourceCandidate) -> bool {
         let source_kind = candidate.source_kund();
         let source = candidate.as_str();
@@ -238,22 +363,22 @@ impl PredefinedGroupMatcher {
         }
     }
 }
-impl std::fmt::Display for PredefinedGroupMatcher {
+impl std::fmt::Display for PredefinedSourceMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
             // Don't forget to update `impl std::str::FromStr for PredefinedImportGroup`
-            PredefinedGroupMatcher::Alias => "ALIAS",
-            PredefinedGroupMatcher::Bun => "BUN",
-            PredefinedGroupMatcher::Node => "NODE",
-            PredefinedGroupMatcher::Package => "PACKAGE",
-            PredefinedGroupMatcher::ProtocolPackage => "PACKAGE_WITH_PROTOCOL",
-            PredefinedGroupMatcher::Path => "PATH",
-            PredefinedGroupMatcher::Url => "URL",
+            PredefinedSourceMatcher::Alias => "ALIAS",
+            PredefinedSourceMatcher::Bun => "BUN",
+            PredefinedSourceMatcher::Node => "NODE",
+            PredefinedSourceMatcher::Package => "PACKAGE",
+            PredefinedSourceMatcher::ProtocolPackage => "PACKAGE_WITH_PROTOCOL",
+            PredefinedSourceMatcher::Path => "PATH",
+            PredefinedSourceMatcher::Url => "URL",
         };
         f.write_str(repr)
     }
 }
-impl std::str::FromStr for PredefinedGroupMatcher {
+impl std::str::FromStr for PredefinedSourceMatcher {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
@@ -274,7 +399,7 @@ impl std::str::FromStr for PredefinedGroupMatcher {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ImportSourceGlob(Glob);
 impl ImportSourceGlob {
-    pub fn is_negated(&self) -> bool {
+    fn is_negated(&self) -> bool {
         self.0.is_negated()
     }
 
@@ -317,7 +442,7 @@ impl<'a> ImportSourceCandidate<'a> {
     }
 
     /// Tests whether the current path matches `matcher`.
-    pub fn matches(&self, matcher: &GroupMatcher) -> bool {
+    pub fn matches(&self, matcher: &SourceMatcher) -> bool {
         matcher.is_match(self)
     }
 
@@ -325,7 +450,7 @@ impl<'a> ImportSourceCandidate<'a> {
     /// Returns `default` if there is no matchers that match.
     pub fn matches_with_exceptions<'b, I>(&self, matchers: I) -> bool
     where
-        I: IntoIterator<Item = &'b GroupMatcher>,
+        I: IntoIterator<Item = &'b SourceMatcher>,
         I::IntoIter: DoubleEndedIterator,
     {
         // Iterate in reverse order to avoid unnecessary glob matching.

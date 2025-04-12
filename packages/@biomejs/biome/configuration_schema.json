@@ -1660,8 +1660,8 @@
 		},
 		"GroupMatcher": {
 			"anyOf": [
-				{ "$ref": "#/definitions/PredefinedGroupMatcher" },
-				{ "$ref": "#/definitions/ImportSourceGlob" }
+				{ "$ref": "#/definitions/ImportMatcher" },
+				{ "$ref": "#/definitions/SourceMatcher" }
 			]
 		},
 		"GroupPlainConfiguration": {
@@ -1823,6 +1823,18 @@
 		"ImportGroups": {
 			"type": "array",
 			"items": { "$ref": "#/definitions/ImportGroup" }
+		},
+		"ImportMatcher": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"anyOf": [
+						{ "$ref": "#/definitions/SourcesMatcher" },
+						{ "type": "null" }
+					]
+				},
+				"type": { "type": ["boolean", "null"] }
+			}
 		},
 		"ImportSourceGlob": {
 			"description": "Glob to match against import sources.",
@@ -4262,6 +4274,18 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"SourceMatcher": {
+			"anyOf": [
+				{ "$ref": "#/definitions/PredefinedGroupMatcher" },
+				{ "$ref": "#/definitions/ImportSourceGlob" }
+			]
+		},
+		"SourcesMatcher": {
+			"anyOf": [
+				{ "$ref": "#/definitions/SourceMatcher" },
+				{ "type": "array", "items": { "$ref": "#/definitions/SourceMatcher" } }
+			]
 		},
 		"StableHookResult": {
 			"oneOf": [

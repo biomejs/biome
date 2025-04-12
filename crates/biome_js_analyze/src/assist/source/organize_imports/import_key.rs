@@ -5,7 +5,10 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 
 use super::{
-    TypePlacement, comparable_token::ComparableToken, import_groups, import_source,
+    TypePlacement,
+    comparable_token::ComparableToken,
+    import_groups::{self, ImportCandidate, ImportSourceCandidate},
+    import_source,
     specifiers_attributes::JsNamedSpecifiers,
 };
 
@@ -33,7 +36,7 @@ impl ImportKey {
         };
         Self {
             section,
-            group: groups.index(&info),
+            group: groups.index(&((&info).into())),
             source: info.source,
             has_no_attributes: info.has_no_attributes,
             kind: info.kind,
@@ -234,5 +237,13 @@ impl ImportInfo {
             named_specifiers.map(JsNamedSpecifiers::JsExportNamedFromSpecifierList),
             attributes,
         ))
+    }
+}
+impl<'a> From<&'a ImportInfo> for ImportCandidate<'a> {
+    fn from(value: &'a ImportInfo) -> Self {
+        Self {
+            has_type_token: value.kind.has_type_token(),
+            source: ImportSourceCandidate::new(&value.source),
+        }
     }
 }

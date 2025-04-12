@@ -3093,7 +3093,7 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
-export type GroupMatcher = PredefinedGroupMatcher | ImportSourceGlob;
+export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[];
 export interface CustomRestrictedImportOptions {
 	/**
@@ -3137,11 +3137,11 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
-export type PredefinedGroupMatcher = string;
-/**
- * Glob to match against import sources.
- */
-export type ImportSourceGlob = Glob;
+export interface ImportMatcher {
+	source?: SourcesMatcher;
+	type?: boolean;
+}
+export type SourceMatcher = PredefinedGroupMatcher | ImportSourceGlob;
 /**
  * Supported cases.
  */
@@ -3191,6 +3191,12 @@ export type Kind =
 	| "typeMethod";
 export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
+export type SourcesMatcher = SourceMatcher | SourceMatcher[];
+export type PredefinedGroupMatcher = string;
+/**
+ * Glob to match against import sources.
+ */
+export type ImportSourceGlob = Glob;
 export type RestrictedModifier =
 	| "abstract"
 	| "private"
