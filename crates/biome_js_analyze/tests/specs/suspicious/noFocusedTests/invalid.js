@@ -24,3 +24,7 @@ test.only(foo.bar, () => {});
 describe.only(name = name || "bar", () => {});
 it.only(name = name || "bar", () => {});
 test.only(name = name || "bar", () => {});
+
+describe.only.each([["a"], ["b"]])("%s", (a) => {});
+it.only.each([["a"], ["b"]])("%s", (a) => {});
+test.only.each([["a"], ["b"]])("%s", (a) => {});

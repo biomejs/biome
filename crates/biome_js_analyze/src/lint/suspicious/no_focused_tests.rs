@@ -28,9 +28,17 @@ declare_lint_rule! {
     /// test.only("foo", () => {});
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// test.only.each([["a"]])("%s", (a) => {});
+    /// ```
+    ///
     /// ### Valid
     /// ```js
     /// test("foo", () => {});
+    /// ```
+    ///
+    /// ```js
+    /// test.each([["a"]])("%s", (a) => {});
     /// ```
     pub NoFocusedTests {
         version: "1.6.0",
@@ -45,7 +53,13 @@ declare_lint_rule! {
     }
 }
 
-const FUNCTION_NAMES: [&str; 3] = ["only", "fdescribe", "fit"];
+/// Focused test keyword as used in e.g. Jest or Vitest
+const ONLY_KEYWORD: &str = "only";
+/// Focused test keyword as used in e.g. Jasmine or Angular
+const FDESCRIBE_KEYWORD: &str = "fdescribe";
+/// Focused test keyword as used in e.g. Jasmine or Angular
+const FIT_KEYWORD: &str = "fit";
+const FUNCTION_NAMES: [&str; 3] = [ONLY_KEYWORD, FDESCRIBE_KEYWORD, FIT_KEYWORD];
 const CALEE_NAMES: [&str; 3] = ["describe", "it", "test"];
 
 impl Rule for NoFocusedTests {
@@ -66,6 +80,13 @@ impl Rule for NoFocusedTests {
                 if FUNCTION_NAMES.contains(&function_name.text_trimmed()) {
                     return Some(function_name.text_trimmed_range());
                 }
+
+                // Check also for loop-like patterns like `test.only.each()`
+                let callee_text = callee.to_string();
+                if callee_text.contains(format!(".{ONLY_KEYWORD}.each").as_str()) {
+                    return Some(function_name.text_trimmed_range());
+                }
+
             }
         } else if let Some(expression) = callee.as_js_computed_member_expression() {
             let value_token = expression
@@ -84,7 +105,7 @@ impl Rule for NoFocusedTests {
             {
                 if let Some(literal) = expression.member().ok()?.as_any_js_literal_expression() {
                     if literal.as_js_string_literal_expression().is_some()
-                        && literal.to_string() == "\"only\""
+                        && literal.to_string() == format!("\"{}\"", ONLY_KEYWORD)
                     {
                         return Some(expression.syntax().text_trimmed_range());
                     }
@@ -118,7 +139,7 @@ impl Rule for NoFocusedTests {
         if let Some(function_name) = callee.get_callee_member_name() {
             let replaced_function;
             match function_name.text_trimmed() {
-                "only" => {
+                ONLY_KEYWORD => {
                     if let Some(expression) = callee.as_js_static_member_expression() {
                         let member_name = expression.member().ok()?;
                         let operator_token = expression.operator_token().ok()?;
@@ -126,16 +147,33 @@ impl Rule for NoFocusedTests {
                         mutation.remove_element(operator_token.into());
                     }
                 }
-                "fdescribe" => {
+                FDESCRIBE_KEYWORD => {
                     replaced_function = make::js_reference_identifier(make::ident("describe"));
                     mutation.replace_element(function_name.into(), replaced_function.into());
                 }
-                "fit" => {
+                FIT_KEYWORD => {
                     replaced_function = make::js_reference_identifier(make::ident("it"));
                     mutation.replace_element(function_name.into(), replaced_function.into());
                 }
                 _ => {}
             };
+        } else if let Some(static_member) = callee.as_js_static_member_expression() {
+            // Handle of `.only` in loop expressions like `test.only.each()`
+            let callee_text = static_member.to_string();
+            if callee_text.contains(format!(".{ONLY_KEYWORD}.").as_str()) {
+                if let Ok(obj) = static_member.object() {
+                    if let Some(parent) = obj.as_js_static_member_expression() {
+                        if let Ok(member_name) = parent.member() {
+                            if member_name.to_string() == ONLY_KEYWORD {
+                                if let Ok(operator) = parent.operator_token() {
+                                    mutation.remove_element(member_name.into());
+                                    mutation.remove_element(operator.into());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         } else if let Some(expression) = callee.as_js_computed_member_expression() {
             let l_brack = expression.l_brack_token().ok()?;
             let r_brack = expression.r_brack_token().ok()?;

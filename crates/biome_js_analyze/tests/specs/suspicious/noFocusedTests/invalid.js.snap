@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -32,6 +31,9 @@ describe.only(name = name || "bar", () => {});
 it.only(name = name || "bar", () => {});
 test.only(name = name || "bar", () => {});
 
+describe.only.each([["a"], ["b"]])("%s", (a) => {});
+it.only.each([["a"], ["b"]])("%s", (a) => {});
+test.only.each([["a"], ["b"]])("%s", (a) => {});
 ```
 
 # Diagnostics
@@ -483,6 +485,7 @@ invalid.js:26:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
   > 26 │ test.only(name = name || "bar", () => {});
        │      ^^^^
     27 │ 
+    28 │ describe.only.each([["a"], ["b"]])("%s", (a) => {});
   
   i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
   
