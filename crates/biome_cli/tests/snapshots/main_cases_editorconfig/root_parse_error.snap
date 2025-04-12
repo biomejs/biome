@@ -13,12 +13,13 @@ root = on
 # Termination Message
 
 ```block
-configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+.editorconfig:2:8 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Failed to parse the .editorconfig file.
-    
-    Caused by:
-      provided string was not `true` or `false`
+  × Invalid boolean value: `true` or `false` is expected.
+  
+  > 2 │ root = on
+      │        ^^
+    3 │ 
   
 
 

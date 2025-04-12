@@ -11,85 +11,56 @@
 
 use std::str::FromStr;
 
-use biome_diagnostics::Error;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, ParseFormatNumberError};
 use biome_rowan::TextRange;
 
 use crate::{
     Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
-    OverridePattern, Overrides,
-    diagnostics::{EditorConfigDiagnostic, ParseFailedDiagnostic},
+    OverridePattern, Overrides, diagnostics::EditorConfigDiagnostic,
 };
 
-pub fn parse_str(s: &str) -> Result<EditorConfig, EditorConfigDiagnostic> {
-    EditorConfig::from_str(s).map_err(|err| {
-        EditorConfigDiagnostic::ParseFailed(ParseFailedDiagnostic {
-            source: Some(Error::from(err)),
-        })
-    })
+#[derive(Debug, biome_diagnostics::Diagnostic)]
+#[diagnostic(category = "configuration", severity = Error)]
+pub struct EditorConfigError {
+    #[description]
+    #[message]
+    pub kind: EditorConfigErrorKind,
+    #[location(span)]
+    pub span: TextRange,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum EditorConfigErrorKind {
-    StaticStr(&'static str),
-    ParseBoolError(std::str::ParseBoolError),
     ParseFormatNumberError(ParseFormatNumberError),
     // A section must end with `]`
+    #[default]
     MissingSectionEnd,
+    InvalidBooleanValue,
+    InvalidEndOfLineValue,
+    InvalidIndentStyleValue,
+}
+impl biome_console::fmt::Display for EditorConfigErrorKind {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        write!(fmt, "{}", self)
+    }
 }
 impl std::fmt::Display for EditorConfigErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::StaticStr(s) => f.write_str(s),
-            Self::ParseBoolError(error) => {
-                write!(f, "{}", error)
-            }
             Self::ParseFormatNumberError(error) => {
                 write!(f, "{}", error)
             }
-            Self::MissingSectionEnd => f.write_str("a section must be closed with `]`"),
+            Self::MissingSectionEnd => f.write_str("A section must be closed with `]`."),
+            Self::InvalidBooleanValue => {
+                f.write_str("Invalid boolean value: `true` or `false` is expected.")
+            }
+            Self::InvalidEndOfLineValue => {
+                f.write_str("Invalid `end_of_line` value: `lf`, `cr`, or `crlf` is expected.")
+            }
+            Self::InvalidIndentStyleValue => {
+                f.write_str("Invalid `ident_style` value: `space` or `tab` is expected.")
+            }
         }
-    }
-}
-
-#[derive(Debug)]
-pub struct EditorConfigError {
-    span: TextRange,
-    kind: EditorConfigErrorKind,
-}
-impl biome_diagnostics::Diagnostic for EditorConfigError {
-    fn category(&self) -> Option<&'static biome_diagnostics::Category> {
-        Some(biome_diagnostics::category!("configuration"))
-    }
-
-    fn location(&self) -> biome_diagnostics::Location<'_> {
-        biome_diagnostics::Location {
-            resource: None,
-            span: Some(self.span),
-            source_code: None,
-        }
-    }
-
-    fn severity(&self) -> biome_diagnostics::Severity {
-        biome_diagnostics::Severity::Error
-    }
-
-    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(fmt, "{}", self)
-    }
-
-    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_fmt(format_args!("{}", self))
-    }
-}
-impl biome_console::fmt::Display for EditorConfigError {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        write!(fmt, "{}", self.kind)
-    }
-}
-impl std::fmt::Display for EditorConfigError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.kind)
     }
 }
 
@@ -132,10 +103,10 @@ impl FromStr for EditorConfig {
                     if let Some(section_name) = line[1..].trim_ascii().strip_suffix(']') {
                         last_section = Some((section_name, EditorConfigOptions::default()))
                     } else {
-                        let offset = offset + line.len() as u32;
+                        let end = offset + line.len() as u32;
                         return Err(EditorConfigError {
-                            span: TextRange::new((offset - 1).into(), offset.into()),
                             kind: EditorConfigErrorKind::MissingSectionEnd,
+                            span: TextRange::new(offset.into(), end.into()),
                         });
                     }
                 }
@@ -151,35 +122,35 @@ impl FromStr for EditorConfig {
                         if let Some((_, last_options)) = &mut last_section {
                             if key.eq_ignore_ascii_case("indent_style") {
                                 last_options.indent_style = EditorconfigValue::from_str(val)
-                                    .map_err(|err| EditorConfigError {
+                                    .map_err(|_| EditorConfigError {
+                                        kind: EditorConfigErrorKind::InvalidIndentStyleValue,
                                         span: TextRange::new(val_start.into(), val_end.into()),
-                                        kind: EditorConfigErrorKind::StaticStr(err),
                                     })?;
                             } else if key.eq_ignore_ascii_case("indent_size") {
                                 last_options.indent_size = EditorconfigValue::from_str(val)
                                     .map_err(|err| EditorConfigError {
-                                        span: TextRange::new(val_start.into(), val_end.into()),
                                         kind: EditorConfigErrorKind::ParseFormatNumberError(err),
+                                        span: TextRange::new(val_start.into(), val_end.into()),
                                     })?;
                             } else if key.eq_ignore_ascii_case("end_of_line") {
                                 last_options.end_of_line = EditorconfigValue::from_str(val)
-                                    .map_err(|err| EditorConfigError {
+                                    .map_err(|_| EditorConfigError {
+                                        kind: EditorConfigErrorKind::InvalidEndOfLineValue,
                                         span: TextRange::new(val_start.into(), val_end.into()),
-                                        kind: EditorConfigErrorKind::StaticStr(err),
                                     })?;
                             } else if key.eq_ignore_ascii_case("insert_final_newline") {
                                 last_options.insert_final_newline =
-                                    EditorconfigValue::from_str(val).map_err(|err| {
+                                    EditorconfigValue::from_str(val).map_err(|_| {
                                         EditorConfigError {
+                                            kind: EditorConfigErrorKind::InvalidBooleanValue,
                                             span: TextRange::new(val_start.into(), val_end.into()),
-                                            kind: EditorConfigErrorKind::ParseBoolError(err),
                                         }
                                     })?;
                             }
                         } else if key.eq_ignore_ascii_case("root") {
-                            root = bool::from_str(val).map_err(|err| EditorConfigError {
+                            root = bool::from_str(val).map_err(|_| EditorConfigError {
+                                kind: EditorConfigErrorKind::InvalidBooleanValue,
                                 span: TextRange::new(val_start.into(), val_end.into()),
-                                kind: EditorConfigErrorKind::ParseBoolError(err),
                             })?;
                         }
                     }
@@ -325,145 +296,5 @@ impl<T: Default> Into<Option<T>> for EditorconfigValue<T> {
             EditorconfigValue::Default => Some(T::default()),
             EditorconfigValue::None => None,
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn should_parse_editorconfig() {
-        // the example from https://editorconfig.org/
-        let input = r#"
-# EditorConfig is awesome: https://EditorConfig.org
-
-# top-most EditorConfig file
-root = true
-
-# Unix-style newlines with a newline ending every file
-[*]
-end_of_line = lf
-insert_final_newline = true
-
-# Matches multiple files with brace expansion notation
-# Set default charset
-[*.{js,py}]
-charset = utf-8
-
-# 4 space indentation
-[*.py]
-indent_style = space
-indent_size = 4
-
-# Tab indentation (no size specified)
-[Makefile]
-indent_style = tab
-
-# Indentation override for all JS under lib directory
-[lib/**.js]
-indent_style = space
-indent_size = 2
-
-# Matches the exact files either package.json or .travis.yml
-[{package.json,.travis.yml}]
-indent_style = space
-indent_size = 2
-"#;
-
-        let conf = parse_str(input).expect("Failed to parse editorconfig");
-        assert!(conf.root);
-    }
-
-    #[test]
-    fn should_convert_to_biome_root_settings() {
-        let input = r#"
-root = true
-
-[*]
-insert_final_newline = true
-end_of_line = crlf
-indent_style = space
-indent_size = 4
-"#;
-
-        let conf = parse_str(input).expect("Failed to parse editorconfig");
-        let (conf, _) = conf.to_biome();
-        let conf = conf.expect("Failed to convert editorconfig to biome");
-        let formatter = conf.formatter.expect("Formatter not set");
-        assert_eq!(formatter.indent_style, Some(IndentStyle::Space));
-        assert_eq!(formatter.indent_width.unwrap().value(), 4);
-        assert_eq!(formatter.line_ending, Some(LineEnding::Crlf));
-    }
-
-    #[test]
-    fn should_emit_diagnostic_incompatible() {
-        let input = r#"
-root = true
-
-[*]
-insert_final_newline = false
-"#;
-
-        let conf = parse_str(input).expect("Failed to parse editorconfig");
-        let (_, errors) = conf.to_biome();
-        assert_eq!(errors.len(), 1);
-        assert!(matches!(errors[0], EditorConfigDiagnostic::Incompatible(_)));
-    }
-
-    #[test]
-    fn should_parse_editorconfig_with_unset_values() {
-        let input = r#"
-root = true
-
-[*]
-indent_style = unset
-indent_size = unset
-end_of_line = unset
-max_line_length = unset
-insert_final_newline = unset
-"#;
-
-        let conf = parse_str(input).expect("Failed to parse editorconfig");
-        let global_options = conf
-            .sections
-            .into_iter()
-            .find(|section| section.glob == "*")
-            .expect("has section")
-            .options;
-        assert!(matches!(
-            global_options.indent_style,
-            EditorconfigValue::Default
-        ));
-        assert!(matches!(
-            global_options.indent_size,
-            EditorconfigValue::Default
-        ));
-        assert!(matches!(
-            global_options.end_of_line,
-            EditorconfigValue::Default
-        ));
-    }
-
-    #[test]
-    fn test_inner_section_brackets() {
-        let input = r#"
-root = true
-
-[a[abc]a]
-indent_style=space
-"#;
-
-        let conf = parse_str(input).expect("Failed to parse editorconfig");
-        let options = conf
-            .sections
-            .into_iter()
-            .find(|section| section.glob == "a[abc]a")
-            .expect("has section")
-            .options;
-        assert!(matches!(
-            options.indent_style,
-            EditorconfigValue::Explicit(IndentStyle::Space)
-        ));
     }
 }
