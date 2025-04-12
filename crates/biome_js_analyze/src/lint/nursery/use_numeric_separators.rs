@@ -24,14 +24,52 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// var a = 1234567890;
-    /// a = -999_99;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// var a = -999_99;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// var a = 0.1234567;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// var a = 0b11001100;
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
     /// var a = 1_234_567_890;
-    /// a = -99_999;
+    /// ```
+    ///
+    /// ```js
+    /// var a = -99_999;
+    /// ```
+    ///
+    /// ```js
+    /// var a = 0.123_456_7;
+    /// ```
+    ///
+    /// ```js
+    /// var a = 0b1100_1100;
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// The rule provides several sub-options for each base: `binary`, `octal`, `decimal`, and `hexadecimal`.
+    /// The minimum number of digits before a separator is required and the size of each group of digits can be configured for each base.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "binary": {
+    ///             "minDigits": 0,
+    ///             "groupLength": 2
+    ///         }
+    ///     }
+    /// }
     /// ```
     ///
     pub UseNumericSeparators {
