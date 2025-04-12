@@ -262,7 +262,7 @@ struct NumericLiteral {
 
 #[derive(Debug)]
 struct FractionalExponent {
-    e: char,
+    prefix: char,
     exponent: String,
     sign: Option<char>,
 }
@@ -294,7 +294,7 @@ impl NumericLiteral {
                         Some(FractionalExponent {
                             exponent: exponent.to_owned(),
                             sign,
-                            e: if fractional.contains('e') { 'e' } else { 'E' },
+                            prefix: if fractional.contains('e') { 'e' } else { 'E' },
                         }),
                     )
                 });
@@ -346,7 +346,7 @@ impl NumericLiteral {
         let exponent = if let Some(exp) = &self.exponent {
             format!(
                 "{}{}{}",
-                exp.e,
+                exp.prefix,
                 exp.sign.unwrap_or_empty(),
                 add_separators_from_right(&exp.exponent, group_length)
             )
