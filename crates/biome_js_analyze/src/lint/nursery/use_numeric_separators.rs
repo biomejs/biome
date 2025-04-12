@@ -330,23 +330,24 @@ impl NumericLiteral {
         };
 
         let number = add_separators_from_right(&self.number, &opts);
+        let fraction = self
+            .fraction
+            .as_ref()
+            .map(|fraction| format!(".{}", add_separators_from_left(fraction, &opts)))
+            .unwrap_or_default();
 
-        let fraction = if let Some(fraction) = &self.fraction {
-            format!(".{}", add_separators_from_left(fraction, &opts),)
-        } else {
-            String::new()
-        };
-
-        let exponent = if let Some(exp) = &self.exponent {
-            format!(
-                "{}{}{}",
-                exp.prefix,
-                exp.sign.unwrap_or_empty(),
-                add_separators_from_right(&exp.exponent, &opts)
-            )
-        } else {
-            String::new()
-        };
+        let exponent = self
+            .exponent
+            .as_ref()
+            .map(|exp| {
+                format!(
+                    "{}{}{}",
+                    exp.prefix,
+                    exp.sign.unwrap_or_empty(),
+                    add_separators_from_right(&exp.exponent, &opts)
+                )
+            })
+            .unwrap_or_default();
 
         format!(
             "{}{}{}{}{}",
