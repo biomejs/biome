@@ -4,21 +4,148 @@ expression: valid.js
 ---
 # Input
 ```js
-1000;
-10_000;
-100_000;
-1_000_000;
-999;
-10;
-3.141_592_6;
-+34_567;
--987_654;
--2.718_28;
-0o7777;
--0o377;
-0o12_7777;
-0b10_1010;
-+0b10;
-0xAB_CD_EF;
+// Tests adapted from https://github.com/sindresorhus/eslint-plugin-unicorn/blob/756dbbf0a359a139745b092a676f6e535cb85128/test/numeric-separators-style.js.
+
+let foo;
+
+// Hexadecimal
+foo = 0xAB_CD;
+foo = 0xAB;
+foo = 0xA;
+foo = 0xA_BC_DE_F0;
+foo = 0xab_e8_12;
+foo = 0xe;
+foo = 0Xab_e3_cd;
+
+// Octal
+foo = 0o1234_5670;
+foo = 0o7777;
+foo = 0o01;
+foo = 0o12_7000_0000;
+foo = 0O1111_1111;
+
+// Binary
+foo = 0b1010_0001_1000_0101;
+foo = 0b0000;
+foo = 0b10;
+foo = 0b1_0111_0101_0101;
+foo = 0B1010;
+
+// Binary with BigInt
+foo = 0b1010n;
+foo = 0b1010_1010n;
+
+// BigInt
+foo = 9_223_372_036_854_775_807n;
+foo = 807n;
+foo = 1n;
+foo = 9_372_854_807n;
+foo = 9807n;
+foo = 0n;
+
+// Numbers
+foo = 12_345_678;
+foo = 123;
+foo = 1;
+foo = 1234;
+
+// Decimal numbers
+foo = 9807.123;
+foo = 3819.123_432;
+foo = 138_789.123_432_42;
+foo = .000_000_1;
+
+// Negative numbers
+foo = -3000;
+foo = -10_000_000;
+
+// Exponential notation
+foo = 1e10_000;
+foo = 39_804e1000;
+foo = -123_456e-100;
+foo = -100_000e-100_000;
+foo = -100_000e+100_000;
+foo = 3.6e12_000;
+foo = 3.6E12_000;
+foo = -1_200_000e5;
+
+// Miscellaneous values
+foo = -282_932 - (1938 / 10_000) * .1 + 18.100_000_2;
+foo = NaN;
+foo = Infinity;
+foo = "1234567n";
+
+```
+
+# Diagnostics
+```
+valid.js:12:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal
+  
+    10 │ foo = 0xab_e8_12;
+    11 │ foo = 0xe;
+  > 12 │ foo = 0Xab_e3_cd;
+       │       ^^^^^^^^^^
+    13 │ 
+    14 │ // Octal
+  
+  i Safe fix: Fix numeric separator grouping
+  
+    10 10 │   foo = 0xab_e8_12;
+    11 11 │   foo = 0xe;
+    12    │ - foo·=·0Xab_e3_cd;
+       12 │ + foo·=·0xab_e3_cd;
+    13 13 │   
+    14 14 │   // Octal
+  
+
+```
+
+```
+valid.js:19:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal
+  
+    17 │ foo = 0o01;
+    18 │ foo = 0o12_7000_0000;
+  > 19 │ foo = 0O1111_1111;
+       │       ^^^^^^^^^^^
+    20 │ 
+    21 │ // Binary
+  
+  i Safe fix: Fix numeric separator grouping
+  
+    17 17 │   foo = 0o01;
+    18 18 │   foo = 0o12_7000_0000;
+    19    │ - foo·=·0O1111_1111;
+       19 │ + foo·=·0o1111_1111;
+    20 20 │   
+    21 21 │   // Binary
+  
+
+```
+
+```
+valid.js:26:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators
+  
+    24 │ foo = 0b10;
+    25 │ foo = 0b1_0111_0101_0101;
+  > 26 │ foo = 0B1010;
+       │       ^^^^^^
+    27 │ 
+    28 │ // Binary with BigInt
+  
+  i Safe fix: Add numeric separators
+  
+    24 24 │   foo = 0b10;
+    25 25 │   foo = 0b1_0111_0101_0101;
+    26    │ - foo·=·0B1010;
+       26 │ + foo·=·0b1010;
+    27 27 │   
+    28 28 │   // Binary with BigInt
+  
 
 ```

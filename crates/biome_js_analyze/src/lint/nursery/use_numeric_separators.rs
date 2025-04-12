@@ -1,3 +1,5 @@
+use std::{borrow::Cow, ops::Deref};
+
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
     declare_lint_rule,
@@ -265,11 +267,11 @@ struct NumericLiteral {
     radix: u8,
     number: String,
     fraction: Option<String>,
-    exponent: Option<FractionalExponent>,
+    exponent: Option<Exponent>,
 }
 
 #[derive(Debug)]
-struct FractionalExponent {
+struct Exponent {
     prefix: char,
     exponent: String,
     sign: Option<char>,
@@ -287,35 +289,44 @@ fn split_into_sign_and_number(num: &str) -> (Option<char>, &str) {
 
 impl NumericLiteral {
     fn parse(raw: &str) -> Self {
-        let (sign, num) = split_into_sign_and_number(raw);
-        let (radix, num) = split_into_radix_and_number(num);
+        let (sign, num_without_sign) = split_into_sign_and_number(raw);
+        let (radix, num_without_radix) = split_into_radix_and_number(num_without_sign);
 
-        let (number, fractional) = num.split_once('.').unwrap_or((&num, ""));
+        let (num_without_exp, exponent) = if radix == 10 {
+            let prefix = if num_without_radix.contains('e') {
+                'e'
+            } else {
+                'E'
+            };
 
-        let (fraction, exponent) =
-            fractional
-                .split_once(['e', 'E'])
-                .map_or((fractional, None), |(fraction, exponent)| {
+            num_without_radix.split_once(prefix).map_or(
+                (num_without_radix.clone(), None),
+                |(rest, exponent)| {
                     let (sign, exponent) = split_into_sign_and_number(exponent);
                     (
-                        fraction,
-                        Some(FractionalExponent {
+                        Cow::Borrowed(rest),
+                        Some(Exponent {
                             exponent: exponent.to_owned(),
                             sign,
-                            prefix: if fractional.contains('e') { 'e' } else { 'E' },
+                            prefix,
                         }),
                     )
-                });
+                },
+            )
+        } else {
+            (num_without_radix, None)
+        };
+
+        let (number, fraction) = match num_without_exp.split_once('.') {
+            Some((number, fraction)) => (number, Some(fraction.to_owned())),
+            None => (num_without_exp.deref(), None),
+        };
 
         NumericLiteral {
             sign,
             radix,
             number: number.to_owned(),
-            fraction: if fraction.is_empty() {
-                None
-            } else {
-                Some(fraction.to_owned())
-            },
+            fraction,
             exponent,
         }
     }
