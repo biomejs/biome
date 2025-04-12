@@ -60,7 +60,7 @@ const FDESCRIBE_KEYWORD: &str = "fdescribe";
 /// Focused test keyword as used in e.g. Jasmine or Angular
 const FIT_KEYWORD: &str = "fit";
 const FUNCTION_NAMES: [&str; 3] = [ONLY_KEYWORD, FDESCRIBE_KEYWORD, FIT_KEYWORD];
-const CALEE_NAMES: [&str; 3] = ["describe", "it", "test"];
+const CALLEE_NAMES: [&str; 3] = ["describe", "it", "test"];
 
 impl Rule for NoFocusedTests {
     type Query = Ast<JsCallExpression>;
@@ -86,7 +86,6 @@ impl Rule for NoFocusedTests {
                 if callee_text.contains(format!(".{ONLY_KEYWORD}.each").as_str()) {
                     return Some(function_name.text_trimmed_range());
                 }
-
             }
         } else if let Some(expression) = callee.as_js_computed_member_expression() {
             let value_token = expression
@@ -101,7 +100,7 @@ impl Rule for NoFocusedTests {
 
             if expression.l_brack_token().is_ok()
                 && expression.r_brack_token().is_ok()
-                && CALEE_NAMES.contains(&value_token.text_trimmed())
+                && CALLEE_NAMES.contains(&value_token.text_trimmed())
             {
                 if let Some(literal) = expression.member().ok()?.as_any_js_literal_expression() {
                     if literal.as_js_string_literal_expression().is_some()
