@@ -512,3 +512,103 @@ indent_size = 8
         result,
     ));
 }
+
+#[test]
+fn non_closed_section() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*
+indent_style = space
+indent_size = 8
+"#,
+    );
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "non_closed_section",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn root_parse_error() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = on
+"#,
+    );
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "root_parse_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn end_of_line_parse_error() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+end_of_line = lfcr
+"#,
+    );
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "end_of_line_parse_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn indent_size_parse_error() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+  [*]
+  indent_size = 1000
+"#,
+    );
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "indent_size_parse_error",
+        fs,
+        console,
+        result,
+    ));
+}
