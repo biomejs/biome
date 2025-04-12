@@ -58,22 +58,6 @@ declare_lint_rule! {
     /// var a = 0b1100_1100;
     /// ```
     ///
-    /// ## Options
-    ///
-    /// The rule provides several sub-options for each base: `binary`, `octal`, `decimal`, and `hexadecimal`.
-    /// The minimum number of digits before a separator is required and the size of each group of digits can be configured for each base.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "binary": {
-    ///             "minDigits": 0,
-    ///             "groupLength": 2
-    ///         }
-    ///     }
-    /// }
-    /// ```
-    ///
     pub UseNumericSeparators {
         version: "next",
         name: "useNumericSeparators",
@@ -89,14 +73,14 @@ impl Rule for UseNumericSeparators {
     type Query = Ast<JsNumberLiteralExpression>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = UseNumericSeparatorsOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let token = ctx.query().value_token().ok()?;
         let raw = token.text_trimmed();
 
         let num = NumericLiteral::parse(raw);
-        let expected = num.format(ctx.options().clone());
+        let expected = num.format();
 
         if raw == expected {
             None
@@ -140,8 +124,7 @@ impl Rule for UseNumericSeparators {
         let token = ctx.query().value_token().ok()?;
         let num = NumericLiteral::parse(token.text_trimmed());
 
-        let new_token =
-            JsSyntaxToken::new_detached(token.kind(), &num.format(ctx.options().clone()), [], []);
+        let new_token = JsSyntaxToken::new_detached(token.kind(), &num.format(), [], []);
         let mut mutation = ctx.root().begin();
         mutation.replace_token_transfer_trivia(token.clone(), new_token);
         Some(JsRuleAction::new(
@@ -157,68 +140,6 @@ impl Rule for UseNumericSeparators {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Deserializable, Eq, PartialEq)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseNumericSeparatorsOptions {
-    /// Binary numeric literal options.
-    #[serde(default)]
-    pub binary: BaseOptions,
-    /// Octal numeric literal options.
-    #[serde(default)]
-    pub octal: BaseOptions,
-    /// Decimal numeric literal options.
-    #[serde(default = "decimal_default")]
-    pub decimal: BaseOptions,
-    /// Hexadecimal numeric literal options.
-    #[serde(default = "hexadecimal_default")]
-    pub hexadecimal: BaseOptions,
-}
-
-impl Default for UseNumericSeparatorsOptions {
-    fn default() -> Self {
-        Self {
-            binary: BaseOptions::default(),
-            octal: BaseOptions::default(),
-            decimal: decimal_default(),
-            hexadecimal: hexadecimal_default(),
-        }
-    }
-}
-
-fn decimal_default() -> BaseOptions {
-    BaseOptions {
-        min_digits: 5,
-        group_length: 3,
-    }
-}
-
-fn hexadecimal_default() -> BaseOptions {
-    BaseOptions {
-        min_digits: 0,
-        group_length: 2,
-    }
-}
-
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct BaseOptions {
-    /// The minimum number of digits before a separator is required.
-    pub min_digits: usize,
-    /// The size of each group of digits.
-    pub group_length: usize,
-}
-
-impl Default for BaseOptions {
-    fn default() -> Self {
-        Self {
-            min_digits: 0,
-            group_length: 4,
-        }
-    }
-}
-
 pub enum State {
     UnreadableLiteral,
     InconsistentGrouping,
@@ -228,14 +149,14 @@ pub enum State {
 /// Add chunk separators to a number string, starting from the right.
 /// The "uneven" chunk is added to the left of the first separator.
 /// 1234567890 -> 1_234_567_890
-fn add_separators_from_right(num: &str, opts: &BaseOptions) -> String {
-    if num.len() < opts.min_digits {
+fn add_separators_from_right(num: &str, min_digits: usize, group_length: usize) -> String {
+    if num.len() < min_digits {
         num.to_owned()
     } else {
         num.chars()
             .rev()
             .collect::<Vec<_>>()
-            .chunks(opts.group_length)
+            .chunks(group_length)
             .map(|c| c.iter().collect::<String>())
             .collect::<Vec<_>>()
             .join("_")
@@ -248,13 +169,13 @@ fn add_separators_from_right(num: &str, opts: &BaseOptions) -> String {
 /// Add chunk separators to a number string, starting from the left. Used for fractional parts.
 /// The "uneven" chunk is added to the right of the last separator.
 /// 12345654321 -> 123_456_543_21
-fn add_separators_from_left(num: &str, opts: &BaseOptions) -> String {
-    if num.len() < opts.min_digits {
+fn add_separators_from_left(num: &str, min_digits: usize, group_length: usize) -> String {
+    if num.len() < min_digits {
         num.to_owned()
     } else {
         num.chars()
             .collect::<Vec<_>>()
-            .chunks(opts.group_length)
+            .chunks(group_length)
             .map(|c| c.iter().collect::<String>())
             .collect::<Vec<_>>()
             .join("_")
@@ -331,20 +252,25 @@ impl NumericLiteral {
         }
     }
 
-    fn format(&self, options: UseNumericSeparatorsOptions) -> String {
-        let opts = match self.radix {
-            2 => options.binary,
-            8 => options.octal,
-            10 => options.decimal,
-            16 => options.hexadecimal,
+    fn format(&self) -> String {
+        let (min_digits, group_length) = match self.radix {
+            2 => (0, 4),
+            8 => (0, 4),
+            10 => (5, 3),
+            16 => (0, 2),
             _ => unreachable!(),
         };
 
-        let number = add_separators_from_right(&self.number, &opts);
+        let number = add_separators_from_right(&self.number, min_digits, group_length);
         let fraction = self
             .fraction
             .as_ref()
-            .map(|fraction| format!(".{}", add_separators_from_left(fraction, &opts)))
+            .map(|fraction| {
+                format!(
+                    ".{}",
+                    add_separators_from_left(fraction, min_digits, group_length)
+                )
+            })
             .unwrap_or_default();
 
         let exponent = self
@@ -355,7 +281,7 @@ impl NumericLiteral {
                     "{}{}{}",
                     exp.prefix,
                     exp.sign.unwrap_or_empty(),
-                    add_separators_from_right(&exp.exponent, &opts)
+                    add_separators_from_right(&exp.exponent, min_digits, group_length)
                 )
             })
             .unwrap_or_default();
