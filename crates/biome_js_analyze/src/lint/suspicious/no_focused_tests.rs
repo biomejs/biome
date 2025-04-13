@@ -71,6 +71,29 @@ impl Rule for NoFocusedTests {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let callee = node.callee().ok()?;
+        
+        // Special check for patterns like test.only.each()
+        // Due to additional chaining (.only.each) we need check it first, or the other rule would
+        // just recognize the "only" part and not the whole expression
+        let callee_str = callee.to_string();
+        if callee_str.contains(format!(".{ONLY_KEYWORD}.each").as_str()) {
+            if let Some(static_member) = callee.as_js_static_member_expression() {
+                if let Ok(obj) = static_member.object() {
+                    if let Some(parent) = obj.as_js_static_member_expression() {
+                        if let Ok(member) = parent.member() {
+                            if member.to_string() == ONLY_KEYWORD {
+                                return Some(member.syntax().text_trimmed_range());
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Fallback to providing any reasonable range
+            if let Some(name) = callee.get_callee_member_name() {
+                return Some(name.text_trimmed_range());
+            }
+        }
 
         if node.is_test_call_expression().ok()? {
             let callee = node.callee().ok()?;
@@ -81,10 +104,13 @@ impl Rule for NoFocusedTests {
                     return Some(function_name.text_trimmed_range());
                 }
 
-                // Check also for loop-like patterns like `test.only.each()`
-                let callee_text = callee.to_string();
-                if callee_text.contains(format!(".{ONLY_KEYWORD}.each").as_str()) {
-                    return Some(function_name.text_trimmed_range());
+                // Direct "only" member in static member expression
+                if let Some(static_member) = callee.as_js_static_member_expression() {
+                    if let Ok(member) = static_member.member() {
+                        if member.to_string() == ONLY_KEYWORD {
+                            return Some(member.syntax().text_trimmed_range());
+                        }
+                    }
                 }
             }
         } else if let Some(expression) = callee.as_js_computed_member_expression() {
@@ -134,6 +160,32 @@ impl Rule for NoFocusedTests {
         let callee = node.callee().ok()?;
 
         let mut mutation = ctx.root().begin();
+        
+        // Special handling for test.only.each() pattern
+        let callee_str = callee.to_string(); // describe.only.each()
+        if callee_str.contains(format!(".{ONLY_KEYWORD}.each").as_str()) {
+            if let Some(static_member) = callee.as_js_static_member_expression() {
+                if let Ok(obj) = static_member.object() { // objec = describe.only
+                    if let Some(parent) = obj.as_js_static_member_expression() {
+                        if let Ok(member) = parent.member() { // member == only
+                            if member.to_string() == ONLY_KEYWORD {
+                                if let Ok(operator) = parent.operator_token() {
+                                    // Remove ".only" from pattern like "test.only.each()"
+                                    mutation.remove_element(member.into());
+                                    mutation.remove_element(operator.into());
+                                    return Some(JsRuleAction::new(
+                                        ctx.metadata().action_category(ctx.category(), ctx.group()),
+                                        ctx.metadata().applicability(),
+                                        markup! { "Remove focus from test." }.to_owned(),
+                                        mutation,
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         if let Some(function_name) = callee.get_callee_member_name() {
             let replaced_function;
@@ -157,19 +209,12 @@ impl Rule for NoFocusedTests {
                 _ => {}
             };
         } else if let Some(static_member) = callee.as_js_static_member_expression() {
-            // Handle of `.only` in loop expressions like `test.only.each()`
-            let callee_text = static_member.to_string();
-            if callee_text.contains(format!(".{ONLY_KEYWORD}.").as_str()) {
-                if let Ok(obj) = static_member.object() {
-                    if let Some(parent) = obj.as_js_static_member_expression() {
-                        if let Ok(member_name) = parent.member() {
-                            if member_name.to_string() == ONLY_KEYWORD {
-                                if let Ok(operator) = parent.operator_token() {
-                                    mutation.remove_element(member_name.into());
-                                    mutation.remove_element(operator.into());
-                                }
-                            }
-                        }
+            // Check if this is a direct ".only" member expression
+            if let Ok(member) = static_member.member() {
+                if member.to_string() == ONLY_KEYWORD {
+                    if let Ok(operator) = static_member.operator_token() {
+                        mutation.remove_element(member.into());
+                        mutation.remove_element(operator.into());
                     }
                 }
             }
