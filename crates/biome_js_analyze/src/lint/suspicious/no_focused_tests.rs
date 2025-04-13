@@ -59,7 +59,6 @@ const ONLY_KEYWORD: &str = "only";
 const FDESCRIBE_KEYWORD: &str = "fdescribe";
 /// Focused test keyword as used in e.g. Jasmine or Angular
 const FIT_KEYWORD: &str = "fit";
-const FUNCTION_NAMES: [&str; 3] = [ONLY_KEYWORD, FDESCRIBE_KEYWORD, FIT_KEYWORD];
 const CALLEE_NAMES: [&str; 3] = ["describe", "it", "test"];
 
 impl Rule for NoFocusedTests {
@@ -72,15 +71,27 @@ impl Rule for NoFocusedTests {
         let node = ctx.query();
         let callee = node.callee().ok()?;
 
+        // Case Focused Test via computed member expression with ["only"]
+        // not covered by contains_focused_test()
+        let computed_member_match = match_computed_only_member(&callee);
+        if computed_member_match.is_some() {
+            return computed_member_match;
+        }
+
+        // Quick check for other patterns - early exit if not a focused test
+        if !callee.contains_focused_test().ok()? && !callee.contains_only_each_pattern().ok()? {
+            return None;
+        }
+
         // Check all focused test patterns in order:
-        // 1. `only` as part of a chained call (e.g. `test.only.each()`)
-        // 2. Function name patterns (e.g. `fdescribe`, `fit`)
+        // 1. Function name patterns (e.g. `fdescribe`, `fit`)
+        // 2. `only` as part of a chained call (e.g. `test.only.each()`)
         // 3. `only` as static member expression (e.g. `test.only()`)
-        // 4. `only` as computed member expression (e.g. `test["only"]`)
-        match_only_each_pattern(&callee)
-            .or_else(|| match_function_name_pattern(&callee))
-            .or_else(|| match_static_only_member(node, &callee))
-            .or_else(|| match_computed_only_member(&callee))
+        if callee.contains_only_each_pattern().ok()? {
+            match_only_each_pattern(&callee)
+        } else {
+            match_function_name_pattern(&callee).or_else(|| match_static_only_member(&callee))
+        }
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -103,8 +114,8 @@ impl Rule for NoFocusedTests {
         let mut mutation = ctx.root().begin();
 
         // Apply mutations for each pattern type
-        fix_only_each_pattern(&callee, &mut mutation)
-            .or_else(|| fix_function_name_pattern(&callee, &mut mutation))
+        fix_function_name_pattern(&callee, &mut mutation)
+            .or_else(|| fix_only_each_pattern(&callee, &mut mutation))
             .or_else(|| fix_static_only_member(&callee, &mut mutation))
             .or_else(|| fix_computed_only_member(&callee, &mut mutation))
             .map(|_| {
@@ -122,26 +133,13 @@ impl Rule for NoFocusedTests {
 
 /// Find the `.only.each` pattern in test calls
 fn match_only_each_pattern(callee: &AnyJsExpression) -> Option<TextRange> {
-    // Check if callee contains ".only.each" pattern using string conversion
-    // This is still more efficient than traversing the AST when the pattern isn't present
-    let callee_str = callee.to_string();
-    if !callee_str.contains(".only.each") {
-        return None;
-    }
-
-    // Find the "only" member in a chain like test.only.each
     callee
         .as_js_static_member_expression()
         .and_then(|static_member| {
-            static_member.object().ok().and_then(|obj| {
-                obj.as_js_static_member_expression().and_then(|parent| {
-                    parent
-                        .member()
-                        .ok()
-                        .filter(|member| member.syntax().text_trimmed() == ONLY_KEYWORD)
-                        .map(|member| member.syntax().text_trimmed_range())
-                })
-            })
+            static_member
+                .object()
+                .ok()
+                .and_then(|obj| match_static_only_member(&obj))
         })
         .or_else(|| {
             // Fallback to providing any reasonable range
@@ -153,24 +151,21 @@ fn match_only_each_pattern(callee: &AnyJsExpression) -> Option<TextRange> {
 
 /// Find focused test function names like fdescribe, fit
 fn match_function_name_pattern(callee: &AnyJsExpression) -> Option<TextRange> {
+    // Get the specific token for the diagnostic range
     callee
         .get_callee_member_name()
-        .filter(|function_name| FUNCTION_NAMES.contains(&function_name.text_trimmed()))
+        .filter(|function_name| {
+            let name = function_name.text_trimmed();
+            // Detect f-prefixed functions like fdescribe, fit
+            name.starts_with('f')
+                && (name == FDESCRIBE_KEYWORD || name == FIT_KEYWORD || name == "ftest")
+        })
         .map(|function_name| function_name.text_trimmed_range())
 }
 
 /// Find static member expressions with `.only` member
-fn match_static_only_member(
-    node: &JsCallExpression,
-    callee: &AnyJsExpression,
-) -> Option<TextRange> {
-    // Skip if not a test call expression - avoids unnecessary pattern checks
-    if !matches!(node.is_test_call_expression().ok(), Some(true))
-        || !matches!(callee.contains_a_test_pattern().ok(), Some(true))
-    {
-        return None;
-    }
-
+fn match_static_only_member(callee: &AnyJsExpression) -> Option<TextRange> {
+    // Find the specific 'only' member to highlight in the diagnostic
     callee
         .as_js_static_member_expression()
         .and_then(|static_member| {
@@ -222,8 +217,7 @@ fn fix_only_each_pattern(
     mutation: &mut BatchMutation<JsLanguage>,
 ) -> Option<()> {
     // Early check for pattern
-    let callee_str = callee.to_string();
-    if !callee_str.contains(".only.each") {
+    if !callee.contains_only_each_pattern().ok()? {
         return None;
     }
 
@@ -231,44 +225,32 @@ fn fix_only_each_pattern(
     callee
         .as_js_static_member_expression()
         .and_then(|static_member| {
-            static_member.object().ok().and_then(|obj| {
-                obj.as_js_static_member_expression().and_then(|parent| {
-                    parent
-                        .member()
-                        .ok()
-                        .filter(|member| member.syntax().text_trimmed() == ONLY_KEYWORD)
-                        .and_then(|member| {
-                            parent.operator_token().ok().map(|operator| {
-                                mutation.remove_element(member.into());
-                                mutation.remove_element(operator.into());
-                                ()
-                            })
-                        })
-                })
-            })
+            static_member
+                .object()
+                .ok()
+                .and_then(|obj| fix_static_only_member(&obj, mutation))
         })
 }
 
-/// Apply fix for function name patterns (only, fdescribe, fit)
+/// Apply fix for function name patterns (fdescribe, fit, ftest)
 fn fix_function_name_pattern(
     callee: &AnyJsExpression,
     mutation: &mut BatchMutation<JsLanguage>,
 ) -> Option<()> {
-    let function_name = callee.get_callee_member_name()?;
+    // Skip if not a focused test
+    if !matches!(callee.contains_focused_test().ok(), Some(true)) {
+        return None;
+    }
 
-    match function_name.text_trimmed() {
-        ONLY_KEYWORD => {
-            // Remove .only from static member expressions
-            callee
-                .as_js_static_member_expression()
-                .and_then(|expression| {
-                    let member = expression.member().ok()?;
-                    let operator = expression.operator_token().ok()?;
-                    mutation.remove_element(member.into());
-                    mutation.remove_element(operator.into());
-                    Some(())
-                })
-        }
+    let function_name = callee.get_callee_member_name()?;
+    let name = function_name.text_trimmed();
+
+    // Only handle f-prefixed functions here (fdescribe, fit, ftest)
+    if !name.starts_with('f') {
+        return None;
+    }
+
+    match name {
         FDESCRIBE_KEYWORD => {
             // Replace fdescribe with describe
             let replaced_function = make::js_reference_identifier(make::ident("describe"));
@@ -281,6 +263,12 @@ fn fix_function_name_pattern(
             mutation.replace_element(function_name.into(), replaced_function.into());
             Some(())
         }
+        "ftest" => {
+            // Replace ftest with test
+            let replaced_function = make::js_reference_identifier(make::ident("test"));
+            mutation.replace_element(function_name.into(), replaced_function.into());
+            Some(())
+        }
         _ => None,
     }
 }
@@ -290,6 +278,11 @@ fn fix_static_only_member(
     callee: &AnyJsExpression,
     mutation: &mut BatchMutation<JsLanguage>,
 ) -> Option<()> {
+    // Use the contains_focused_test helper to check if this is a focused test pattern
+    if !matches!(callee.contains_focused_test().ok(), Some(true)) {
+        return None;
+    }
+
     callee
         .as_js_static_member_expression()
         .and_then(|static_member| {
