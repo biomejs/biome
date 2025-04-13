@@ -6,8 +6,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, TextRange};
-use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
+use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, NodeOrToken};
 
 declare_lint_rule! {
     /// Disallow focused tests.
@@ -100,107 +100,12 @@ impl Rule for NoFocusedTests {
         let callee = node.callee().ok()?;
         let mut mutation = ctx.root().begin();
 
-        // Special handling for test.only.each() pattern
-        let callee_str = callee.to_string();
-        if callee_str.contains(&format!(".{ONLY_KEYWORD}.each")) {
-            // Look for and remove ".only" from pattern like "test.only.each()" using functional chain
-            let action = callee
-                .as_js_static_member_expression()
-                .and_then(|static_member| {
-                    static_member.object().ok().and_then(|obj| {
-                        obj.as_js_static_member_expression().and_then(|parent| {
-                            parent.member().ok().and_then(|member| {
-                                if member.to_string() == ONLY_KEYWORD {
-                                    parent.operator_token().ok().map(|operator| {
-                                        mutation.remove_element(member.into());
-                                        mutation.remove_element(operator.into());
-                                    })
-                                } else {
-                                    None
-                                }
-                            })
-                        })
-                    })
-                });
+        // Apply fixes based on the same patterns we detect
+        apply_fix_for_chained_focused_test_calls(&callee, &mut mutation)
+            .or_else(|| apply_fix_for_simple_focused_test_calls(&callee, &mut mutation))
+            .or_else(|| apply_fix_computed_focused_test_calls(&callee, &mut mutation));
 
-            if action.is_some() {
-                return Some(JsRuleAction::new(
-                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    ctx.metadata().applicability(),
-                    markup! { "Remove focus from test." },
-                    mutation,
-                ));
-            }
-        }
-
-        // Process different code patterns using functional chains where possible
-
-        // Check for function name patterns (only, fdescribe, fit)
-        if let Some(function_name) = callee.get_callee_member_name() {
-            match function_name.text_trimmed() {
-                ONLY_KEYWORD => {
-                    // Remove .only from expressions like test.only() using functional chain
-                    if let Some(expression) = callee.as_js_static_member_expression() {
-                        expression.member().ok().and_then(|member_name| {
-                            expression.operator_token().ok().map(|operator_token| {
-                                mutation.remove_element(member_name.into());
-                                mutation.remove_element(operator_token.into());
-                            })
-                        });
-                    }
-                }
-                FDESCRIBE_KEYWORD => {
-                    // Replace fdescribe with describe
-                    let replaced_function = make::js_reference_identifier(make::ident("describe"));
-                    mutation.replace_element(function_name.into(), replaced_function.into());
-                }
-                FIT_KEYWORD => {
-                    // Replace fit with it
-                    let replaced_function = make::js_reference_identifier(make::ident("it"));
-                    mutation.replace_element(function_name.into(), replaced_function.into());
-                }
-                _ => {}
-            };
-        }
-        // Check for direct .only member using functional chain
-        else if let Some(static_member) = callee.as_js_static_member_expression() {
-            static_member.member().ok().and_then(|member| {
-                if member.to_string() == ONLY_KEYWORD {
-                    static_member.operator_token().ok().map(|operator| {
-                        mutation.remove_element(member.into());
-                        mutation.remove_element(operator.into());
-                    })
-                } else {
-                    None
-                }
-            });
-        }
-        // Check for computed ["only"] member using functional chain
-        else if let Some(expression) = callee.as_js_computed_member_expression() {
-            let maybe_action = (|| {
-                let l_brack = expression.l_brack_token().ok()?;
-                let r_brack = expression.r_brack_token().ok()?;
-                let member = expression.member().ok()?;
-                let literal = member.as_any_js_literal_expression()?;
-
-                if literal.as_js_string_literal_expression().is_some()
-                    && literal.to_string() == "\"only\""
-                {
-                    mutation.remove_element(NodeOrToken::Token(l_brack));
-                    mutation.remove_element(NodeOrToken::Node(literal.syntax().clone()));
-                    mutation.remove_element(NodeOrToken::Token(r_brack));
-                    Some(())
-                } else {
-                    None
-                }
-            })();
-
-            if maybe_action.is_none() {
-                return None;
-            }
-        }
-
-        // We'll just create the action - any mutations will be applied
+        // Create and return the action with the accumulated mutations
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -293,6 +198,120 @@ fn match_computed_focused_test_calls(callee: &AnyJsExpression) -> Option<TextRan
         && literal.syntax().text_trimmed() == "\"only\""
     {
         Some(expression.syntax().text_trimmed_range())
+    } else {
+        None
+    }
+}
+
+/// (Unsafe) Fix for test.only.each() pattern
+fn apply_fix_for_chained_focused_test_calls(
+    callee: &AnyJsExpression,
+    mutation: &mut BatchMutation<JsLanguage>,
+) -> Option<()> {
+    // Check if the callee contains ".only.each" without string allocation
+    // NOTE: Actually would be better not to allocate a string, but `callee.syntax().text_trimmed()` doesn't support
+    // the `contains` method and we need to search for substrings
+    let callee_text = callee.to_string();
+    if !callee_text.contains(".only.each") {
+        return None;
+    }
+
+    // Navigate the AST to find and remove the '.only' part
+    callee
+        .as_js_static_member_expression()
+        .and_then(|static_member| {
+            static_member.object().ok().and_then(|obj| {
+                obj.as_js_static_member_expression().and_then(|parent| {
+                    parent.member().ok().and_then(|member| {
+                        if member.syntax().text_trimmed() == ONLY_KEYWORD {
+                            parent.operator_token().ok().map(|operator| {
+                                mutation.remove_element(member.into());
+                                mutation.remove_element(operator.into());
+                                ()
+                            })
+                        } else {
+                            None
+                        }
+                    })
+                })
+            })
+        })
+}
+
+/// (Unsafe) Fix for `test.only()`, `fdescribe()`, `fit()` patterns
+fn apply_fix_for_simple_focused_test_calls(
+    callee: &AnyJsExpression,
+    mutation: &mut BatchMutation<JsLanguage>,
+) -> Option<()> {
+    // Handle function names like only, fdescribe, fit
+    if let Some(function_name) = callee.get_callee_member_name() {
+        match function_name.text_trimmed() {
+            ONLY_KEYWORD => {
+                // Remove .only from expressions like test.only()
+                callee
+                    .as_js_static_member_expression()
+                    .and_then(|expression| {
+                        expression.member().ok().and_then(|member_name| {
+                            expression.operator_token().ok().map(|operator_token| {
+                                mutation.remove_element(member_name.into());
+                                mutation.remove_element(operator_token.into());
+                                ()
+                            })
+                        })
+                    })
+            }
+            FDESCRIBE_KEYWORD => {
+                // Replace fdescribe with describe
+                let replaced_function = make::js_reference_identifier(make::ident("describe"));
+                mutation.replace_element(function_name.into(), replaced_function.into());
+                Some(())
+            }
+            FIT_KEYWORD => {
+                // Replace fit with it
+                let replaced_function = make::js_reference_identifier(make::ident("it"));
+                mutation.replace_element(function_name.into(), replaced_function.into());
+                Some(())
+            }
+            _ => None,
+        }
+    } else if let Some(static_member) = callee.as_js_static_member_expression() {
+        // Handle direct .only member
+        static_member.member().ok().and_then(|member| {
+            if member.syntax().text_trimmed() == ONLY_KEYWORD {
+                static_member.operator_token().ok().map(|operator| {
+                    mutation.remove_element(member.into());
+                    mutation.remove_element(operator.into());
+                    ()
+                })
+            } else {
+                None
+            }
+        })
+    } else {
+        None
+    }
+}
+
+/// (Unsafe) Fix for `test["only"]` pattern
+fn apply_fix_computed_focused_test_calls(
+    callee: &AnyJsExpression,
+    mutation: &mut BatchMutation<JsLanguage>,
+) -> Option<()> {
+    let expression = callee.as_js_computed_member_expression()?;
+
+    let l_brack = expression.l_brack_token().ok()?;
+    let r_brack = expression.r_brack_token().ok()?;
+    let member = expression.member().ok()?;
+    let literal = member.as_any_js_literal_expression()?;
+
+    // Only apply if it's a string literal with "only"
+    if literal.as_js_string_literal_expression().is_some()
+        && literal.syntax().text_trimmed() == "\"only\""
+    {
+        mutation.remove_element(NodeOrToken::Token(l_brack));
+        mutation.remove_element(NodeOrToken::Node(literal.syntax().clone()));
+        mutation.remove_element(NodeOrToken::Token(r_brack));
+        Some(())
     } else {
         None
     }
