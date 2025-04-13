@@ -2978,7 +2978,7 @@ export interface RestrictedImportsOptions {
 	/**
 	 * A list of gitignore-style patterns or regular expressions that should trigger the rule.
 	 */
-	patterns: Patterns[];
+	patterns?: Patterns[];
 }
 export interface NoRestrictedTypesOptions {
 	types?: Record<string, CustomRestrictedType>;

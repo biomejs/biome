@@ -3305,7 +3305,7 @@
 				},
 				"patterns": {
 					"description": "A list of gitignore-style patterns or regular expressions that should trigger the rule.",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "$ref": "#/definitions/Patterns" }
 				}
 			},
