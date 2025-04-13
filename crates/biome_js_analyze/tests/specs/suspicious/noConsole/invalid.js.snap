@@ -6,6 +6,7 @@ expression: invalid.js
 # Input
 ```js
 console.log('hello world')
+console['log']('hello world')
 console.info('hello world')
 console.warn('hello world')
 console.table('hello world')
@@ -25,8 +26,8 @@ invalid.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
   
   > 1 │ console.log('hello world')
       │ ^^^^^^^^^^^
-    2 │ console.info('hello world')
-    3 │ console.warn('hello world')
+    2 │ console['log']('hello world')
+    3 │ console.info('hello world')
   
   i The use of console is often reserved for debugging.
   
@@ -43,19 +44,19 @@ invalid.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
   i Don't use console.
   
     1 │ console.log('hello world')
-  > 2 │ console.info('hello world')
-      │ ^^^^^^^^^^^^
-    3 │ console.warn('hello world')
-    4 │ console.table('hello world')
+  > 2 │ console['log']('hello world')
+      │ ^^^^^^^^^^^^^^
+    3 │ console.info('hello world')
+    4 │ console.warn('hello world')
   
   i The use of console is often reserved for debugging.
   
   i Unsafe fix: Remove console.
   
-     1 1 │   console.log('hello world')
-     2   │ - console.info('hello·world')
-     3 2 │   console.warn('hello world')
-     4 3 │   console.table('hello world')
+     1  1 │   console.log('hello world')
+     2    │ - console['log']('hello·world')
+     3  2 │   console.info('hello world')
+     4  3 │   console.warn('hello world')
   
 
 ```
@@ -66,21 +67,21 @@ invalid.js:3:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
   i Don't use console.
   
     1 │ console.log('hello world')
-    2 │ console.info('hello world')
-  > 3 │ console.warn('hello world')
+    2 │ console['log']('hello world')
+  > 3 │ console.info('hello world')
       │ ^^^^^^^^^^^^
-    4 │ console.table('hello world')
-    5 │ console.error('hello world')
+    4 │ console.warn('hello world')
+    5 │ console.table('hello world')
   
   i The use of console is often reserved for debugging.
   
   i Unsafe fix: Remove console.
   
-     1 1 │   console.log('hello world')
-     2 2 │   console.info('hello world')
-     3   │ - console.warn('hello·world')
-     4 3 │   console.table('hello world')
-     5 4 │   console.error('hello world')
+     1  1 │   console.log('hello world')
+     2  2 │   console['log']('hello world')
+     3    │ - console.info('hello·world')
+     4  3 │   console.warn('hello world')
+     5  4 │   console.table('hello world')
   
 
 ```
@@ -90,22 +91,22 @@ invalid.js:4:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 
   i Don't use console.
   
-    2 │ console.info('hello world')
-    3 │ console.warn('hello world')
-  > 4 │ console.table('hello world')
-      │ ^^^^^^^^^^^^^
-    5 │ console.error('hello world')
-    6 │ console.nonExistent('hello world')
+    2 │ console['log']('hello world')
+    3 │ console.info('hello world')
+  > 4 │ console.warn('hello world')
+      │ ^^^^^^^^^^^^
+    5 │ console.table('hello world')
+    6 │ console.error('hello world')
   
   i The use of console is often reserved for debugging.
   
   i Unsafe fix: Remove console.
   
-     2 2 │   console.info('hello world')
-     3 3 │   console.warn('hello world')
-     4   │ - console.table('hello·world')
-     5 4 │   console.error('hello world')
-     6 5 │   console.nonExistent('hello world')
+     2  2 │   console['log']('hello world')
+     3  3 │   console.info('hello world')
+     4    │ - console.warn('hello·world')
+     5  4 │   console.table('hello world')
+     6  5 │   console.error('hello world')
   
 
 ```
@@ -115,22 +116,22 @@ invalid.js:5:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 
   i Don't use console.
   
-    3 │ console.warn('hello world')
-    4 │ console.table('hello world')
-  > 5 │ console.error('hello world')
+    3 │ console.info('hello world')
+    4 │ console.warn('hello world')
+  > 5 │ console.table('hello world')
       │ ^^^^^^^^^^^^^
-    6 │ console.nonExistent('hello world')
-    7 │ console.log('with semicolon');
+    6 │ console.error('hello world')
+    7 │ console.nonExistent('hello world')
   
   i The use of console is often reserved for debugging.
   
   i Unsafe fix: Remove console.
   
-     3 3 │   console.warn('hello world')
-     4 4 │   console.table('hello world')
-     5   │ - console.error('hello·world')
-     6 5 │   console.nonExistent('hello world')
-     7 6 │   console.log('with semicolon');
+     3  3 │   console.info('hello world')
+     4  4 │   console.warn('hello world')
+     5    │ - console.table('hello·world')
+     6  5 │   console.error('hello world')
+     7  6 │   console.nonExistent('hello world')
   
 
 ```
@@ -140,22 +141,22 @@ invalid.js:6:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 
   i Don't use console.
   
-    4 │ console.table('hello world')
-    5 │ console.error('hello world')
-  > 6 │ console.nonExistent('hello world')
-      │ ^^^^^^^^^^^^^^^^^^^
-    7 │ console.log('with semicolon');
-    8 │ 
+    4 │ console.warn('hello world')
+    5 │ console.table('hello world')
+  > 6 │ console.error('hello world')
+      │ ^^^^^^^^^^^^^
+    7 │ console.nonExistent('hello world')
+    8 │ console.log('with semicolon');
   
   i The use of console is often reserved for debugging.
   
   i Unsafe fix: Remove console.
   
-     4 4 │   console.table('hello world')
-     5 5 │   console.error('hello world')
-     6   │ - console.nonExistent('hello·world')
-     7 6 │   console.log('with semicolon');
-     8 7 │   
+     4  4 │   console.warn('hello world')
+     5  5 │   console.table('hello world')
+     6    │ - console.error('hello·world')
+     7  6 │   console.nonExistent('hello world')
+     8  7 │   console.log('with semicolon');
   
 
 ```
@@ -165,46 +166,71 @@ invalid.js:7:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 
   i Don't use console.
   
-    5 │ console.error('hello world')
-    6 │ console.nonExistent('hello world')
-  > 7 │ console.log('with semicolon');
-      │ ^^^^^^^^^^^
-    8 │ 
-    9 │ globalThis.console.warn();
+    5 │ console.table('hello world')
+    6 │ console.error('hello world')
+  > 7 │ console.nonExistent('hello world')
+      │ ^^^^^^^^^^^^^^^^^^^
+    8 │ console.log('with semicolon');
+    9 │ 
   
   i The use of console is often reserved for debugging.
   
   i Unsafe fix: Remove console.
   
-     5 5 │   console.error('hello world')
-     6 6 │   console.nonExistent('hello world')
-     7   │ - console.log('with·semicolon');
-     8 7 │   
-     9 8 │   globalThis.console.warn();
+     5  5 │   console.table('hello world')
+     6  6 │   console.error('hello world')
+     7    │ - console.nonExistent('hello·world')
+     8  7 │   console.log('with semicolon');
+     9  8 │   
   
 
 ```
 
 ```
-invalid.js:9:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Don't use console.
   
-     7 │ console.log('with semicolon');
-     8 │ 
-   > 9 │ globalThis.console.warn();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ 
+     6 │ console.error('hello world')
+     7 │ console.nonExistent('hello world')
+   > 8 │ console.log('with semicolon');
+       │ ^^^^^^^^^^^
+     9 │ 
+    10 │ globalThis.console.warn();
   
   i The use of console is often reserved for debugging.
   
   i Unsafe fix: Remove console.
   
-     6 6 │   console.nonExistent('hello world')
-     7 7 │   console.log('with semicolon');
-     8   │ - 
-     9   │ - globalThis.console.warn();
-    10 8 │   
+     6  6 │   console.error('hello world')
+     7  7 │   console.nonExistent('hello world')
+     8    │ - console.log('with·semicolon');
+     9  8 │   
+    10  9 │   globalThis.console.warn();
+  
+
+```
+
+```
+invalid.js:10:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use console.
+  
+     8 │ console.log('with semicolon');
+     9 │ 
+  > 10 │ globalThis.console.warn();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+     7 7 │   console.nonExistent('hello world')
+     8 8 │   console.log('with semicolon');
+     9   │ - 
+    10   │ - globalThis.console.warn();
+    11 9 │   
   
 
 ```

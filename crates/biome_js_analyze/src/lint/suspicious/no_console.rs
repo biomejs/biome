@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make::{js_directive_list, js_function_body, js_statement_list, token};
 use biome_js_syntax::{
-    JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement, JsStaticMemberExpression,
-    T, global_identifier,
+    AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement, T,
+    global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -56,7 +56,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoConsole {
-    type Query = Semantic<JsStaticMemberExpression>;
+    type Query = Semantic<AnyJsMemberExpression>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = Box<NoConsoleOptions>;
@@ -69,9 +69,8 @@ impl Rule for NoConsole {
         if name.text() != "console" {
             return None;
         }
-        if let Ok(member_name) = member_expression.member() {
-            let member_name_token = member_name.value_token().ok()?;
-            let member_name = member_name_token.text_trimmed();
+        if let Some(member_name) = member_expression.member_name() {
+            let member_name = member_name.text();
             if ctx
                 .options()
                 .allow
