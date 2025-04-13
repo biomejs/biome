@@ -812,6 +812,7 @@ dependencies = [
  "enumflags2",
  "fancy-regex",
  "globset",
+ "ignore",
  "insta",
  "regex",
  "roaring",
