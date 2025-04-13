@@ -1,26 +1,12 @@
 ---
-"@biomejs/backend-jsonrpc": minor
 "@biomejs/biome": minor
-"@biomejs/cli-darwin-arm64": minor
-"@biomejs/cli-darwin-x64": minor
-"@biomejs/cli-linux-arm64": minor
-"@biomejs/cli-linux-arm64-musl": minor
-"@biomejs/cli-linux-x64": minor
-"@biomejs/cli-linux-x64-musl": minor
-"@biomejs/cli-win32-arm64": minor
-"@biomejs/cli-win32-x64": minor
-"@biomejs/js-api": minor
-"@biomejs/wasm-bundler": minor
-"@biomejs/wasm-nodejs": minor
-"@biomejs/wasm-web": minor
 ---
 
 Suppression of syntax rules
 
-Added support for suppressing fully resolved syntax rules that run before linting or format.
+Added support for suppressing syntax rules. Syntax rules are particular rules meant **to complement the parser**, hence they can't be configured.
 
-Biome now allows an escape hatch if a syntax rule needs to be suppressed due to a bug or too-narrow syntax rule for a given
-project.
+Biome now allows to suppress those rules. This can, for example, be useful in case the rule is affected by a bug. However, this is more an escape hatch, so if a syntax rule requires a suppression, please file an issue.
 
 Example:
 
@@ -29,4 +15,3 @@ Example:
 import type { MyType } from "my-esm-pkg" with { "resolution-mode": "import" };
 ```
 
-Biome also now fully processes suppressions before evaluating any rules.
