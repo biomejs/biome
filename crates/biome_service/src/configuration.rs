@@ -1,8 +1,10 @@
 use crate::WorkspaceError;
 use crate::settings::Settings;
 use biome_analyze::AnalyzerRules;
-use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
-use biome_configuration::editorconfig::parse_str;
+use biome_configuration::diagnostics::{
+    CantLoadExtendFile, EditorConfigDiagnostic, ParseFailedDiagnostic,
+};
+use biome_configuration::editorconfig::EditorConfig;
 use biome_configuration::{
     BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload, push_to_analyzer_rules,
 };
@@ -11,7 +13,7 @@ use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
-use biome_diagnostics::CaminoError;
+use biome_diagnostics::{CaminoError, Resource, SourceCode};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{
     AutoSearchResult, ConfigName, FileSystem, FileSystemDiagnostic, FsErrorKind, OpenOptions,
@@ -28,6 +30,7 @@ use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::ops::Deref;
 use std::path::Path;
+use std::str::FromStr;
 use tracing::instrument;
 
 /// Information regarding the configuration that was found.
@@ -322,10 +325,20 @@ pub fn load_editorconfig(
     if let Some(auto_search_result) = fs.auto_search_files(&workspace_root, &[".editorconfig"]) {
         let AutoSearchResult {
             content,
+            file_path,
             directory_path,
-            ..
         } = auto_search_result;
-        let editorconfig = parse_str(&content)?;
+        let editorconfig = EditorConfig::from_str(&content).map_err(|err| {
+            EditorConfigDiagnostic::ParseFailed(ParseFailedDiagnostic {
+                kind: err.kind,
+                path: Resource::File(file_path.into_string().into()),
+                source_code: Some(Box::new(SourceCode {
+                    text: content.into(),
+                    line_starts: None,
+                })),
+                span: err.span,
+            })
+        })?;
         if let Some(config_path) = config_path {
             // if `.edirotconfig` is higher than `biome.json`
             if is_parent_of(directory_path, config_path) {

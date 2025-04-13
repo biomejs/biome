@@ -189,6 +189,12 @@ impl Borrow<LineIndex> for LineIndexBuf {
     }
 }
 
+impl AsRef<LineIndex> for LineIndexBuf {
+    fn as_ref(&self) -> &LineIndex {
+        LineIndex::new(self.0.as_slice())
+    }
+}
+
 /// Builder type for the [Location] struct
 pub struct LocationBuilder<'a> {
     resource: Option<Resource<&'a str>>,
@@ -303,9 +309,24 @@ impl<T: AsSourceCode> AsSourceCode for Option<T> {
     }
 }
 
+impl<T: AsSourceCode> AsSourceCode for Box<T> {
+    fn as_source_code(&self) -> Option<BorrowedSourceCode<'_>> {
+        T::as_source_code(self)
+    }
+}
+
 impl<T: AsSourceCode + ?Sized> AsSourceCode for &'_ T {
     fn as_source_code(&self) -> Option<BorrowedSourceCode<'_>> {
         T::as_source_code(*self)
+    }
+}
+
+impl<T: AsRef<str>, L: AsRef<LineIndex>> AsSourceCode for SourceCode<T, L> {
+    fn as_source_code(&self) -> Option<BorrowedSourceCode<'_>> {
+        Some(SourceCode {
+            text: self.text.as_ref(),
+            line_starts: self.line_starts.as_ref().map(|x| x.as_ref()),
+        })
     }
 }
 
@@ -315,16 +336,25 @@ impl AsSourceCode for BorrowedSourceCode<'_> {
     }
 }
 
-impl AsSourceCode for OwnedSourceCode {
+/*impl AsSourceCode for OwnedSourceCode {
     fn as_source_code(&self) -> Option<BorrowedSourceCode<'_>> {
         Some(SourceCode {
             text: self.text.as_str(),
             line_starts: self.line_starts.as_deref(),
         })
     }
-}
+}*/
 
 impl AsSourceCode for str {
+    fn as_source_code(&self) -> Option<BorrowedSourceCode<'_>> {
+        Some(SourceCode {
+            text: self,
+            line_starts: None,
+        })
+    }
+}
+
+impl AsSourceCode for Box<str> {
     fn as_source_code(&self) -> Option<BorrowedSourceCode<'_>> {
         Some(SourceCode {
             text: self,

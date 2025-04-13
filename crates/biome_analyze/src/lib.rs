@@ -506,16 +506,21 @@ where
             let suppression = match suppression {
                 Some(suppression) => Some(suppression),
                 None => {
-                    let index =
-                        self.suppressions
-                            .line_suppressions
-                            .partition_point(|suppression| {
-                                suppression.text_range.end() < entry.text_range.start()
-                            });
+                    let index = self
+                        .suppressions
+                        .line_suppressions
+                        .binary_search_by(|suppression| {
+                            if suppression.text_range.end() < entry.text_range.start() {
+                                Ordering::Less
+                            } else if entry.text_range.end() < suppression.text_range.start() {
+                                Ordering::Greater
+                            } else {
+                                Ordering::Equal
+                            }
+                        })
+                        .ok();
 
-                    if index >= self.suppressions.line_suppressions.len() {
-                        None
-                    } else {
+                    if let Some(index) = index {
                         let line_suppression = &mut self.suppressions.line_suppressions[index];
                         if line_suppression.text_range.start() <= entry.text_range.start()
                             && line_suppression.text_range.end() >= entry.text_range.start()
@@ -524,6 +529,8 @@ where
                         } else {
                             None
                         }
+                    } else {
+                        None
                     }
                 }
             };

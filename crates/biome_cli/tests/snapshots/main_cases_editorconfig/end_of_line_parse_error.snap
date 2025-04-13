@@ -1,0 +1,28 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `.editorconfig`
+
+```editorconfig
+
+[*]
+end_of_line = lfcr
+
+```
+
+# Termination Message
+
+```block
+.editorconfig:3:15 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid `end_of_line` value: `lf`, `cr`, or `crlf` is expected.
+  
+    2 │ [*]
+  > 3 │ end_of_line = lfcr
+      │               ^^^^
+    4 │ 
+  
+
+
+```
