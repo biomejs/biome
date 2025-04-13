@@ -71,7 +71,7 @@ impl Rule for NoFocusedTests {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let callee = node.callee().ok()?;
-        
+
         // Special check for patterns like test.only.each()
         // Due to additional chaining (.only.each) we need check it first, or the other rule would
         // just recognize the "only" part and not the whole expression
@@ -88,7 +88,7 @@ impl Rule for NoFocusedTests {
                     }
                 }
             }
-            
+
             // Fallback to providing any reasonable range
             if let Some(name) = callee.get_callee_member_name() {
                 return Some(name.text_trimmed_range());
@@ -160,14 +160,14 @@ impl Rule for NoFocusedTests {
         let callee = node.callee().ok()?;
 
         let mut mutation = ctx.root().begin();
-        
+
         // Special handling for test.only.each() pattern
-        let callee_str = callee.to_string(); // describe.only.each()
+        let callee_str = callee.to_string();
         if callee_str.contains(format!(".{ONLY_KEYWORD}.each").as_str()) {
             if let Some(static_member) = callee.as_js_static_member_expression() {
-                if let Ok(obj) = static_member.object() { // objec = describe.only
+                if let Ok(obj) = static_member.object() {
                     if let Some(parent) = obj.as_js_static_member_expression() {
-                        if let Ok(member) = parent.member() { // member == only
+                        if let Ok(member) = parent.member() {
                             if member.to_string() == ONLY_KEYWORD {
                                 if let Ok(operator) = parent.operator_token() {
                                     // Remove ".only" from pattern like "test.only.each()"
