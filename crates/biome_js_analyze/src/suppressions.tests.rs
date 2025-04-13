@@ -817,18 +817,59 @@ var foo = {
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
-                dbg!(&diag);
                 if code == category!("suppressions/unused") {
                     panic!("unexpected diagnostic {code:?}");
                 }
-            }
-            for action in signal.actions() {
-                dbg!(action);
             }
 
             ControlFlow::<Never>::Continue(())
         },
     );
+}
+
+#[test]
+fn suppression_issue_5562() {
+    const SOURCE: &str = r#"console.log("should error");
+
+// biome-ignore lint/suspicious/noConsole: foo
+console.log("should be suppressed");"#;
+
+    let parsed = parse(
+        SOURCE,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default()
+            .with_assist()
+            .with_lint()
+            .with_syntax()
+            .build(),
+        ..AnalysisFilter::default()
+    };
+
+    let options = AnalyzerOptions::default();
+    let mut diagnostic_found = false;
+    analyze(
+        &parsed.tree(),
+        filter,
+        &options,
+        &[],
+        Default::default(),
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let code = diag.category().unwrap();
+                if code == category!("lint/suspicious/noConsole") {
+                    diagnostic_found = true
+                }
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    assert!(diagnostic_found, "must have diagnostics");
 }
 
 fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc<ProjectLayout> {
