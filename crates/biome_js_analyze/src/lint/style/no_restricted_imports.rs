@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
@@ -19,6 +21,7 @@ use biome_js_syntax::{
     JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator, inner_string_text,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
+use fancy_regex::Regex;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
@@ -1411,6 +1414,13 @@ impl Rule for NoRestrictedImports {
                                         );
                                     }
                                 }
+                            }
+                        }
+                        if let Some(regex) = &pattern_options.regex {
+                            let re = Regex::new(regex.deref()).unwrap();
+                            let is_match = re.is_match(import_source).unwrap();
+                            if is_match {
+                                is_matched = true;
                             }
                         }
                     }
