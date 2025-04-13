@@ -76,7 +76,8 @@ impl Rule for NoFocusedTests {
         // Due to additional chaining (.only.each) we need check it first, or the other rule would
         // just recognize the "only" part and not the whole expression
         let callee_str = callee.to_string();
-        if callee_str.contains(format!(".{ONLY_KEYWORD}.each").as_str()) {
+        if callee_str.contains(&format!(".{ONLY_KEYWORD}.each")) {
+            // Try to find the "only" member in a chain like test.only.each
             if let Some(static_member) = callee.as_js_static_member_expression() {
                 if let Ok(obj) = static_member.object() {
                     if let Some(parent) = obj.as_js_static_member_expression() {
@@ -90,9 +91,9 @@ impl Rule for NoFocusedTests {
             }
 
             // Fallback to providing any reasonable range
-            if let Some(name) = callee.get_callee_member_name() {
-                return Some(name.text_trimmed_range());
-            }
+            return callee
+                .get_callee_member_name()
+                .map(|name| name.text_trimmed_range());
         }
 
         if node.is_test_call_expression().ok()? {
@@ -128,12 +129,13 @@ impl Rule for NoFocusedTests {
                 && expression.r_brack_token().is_ok()
                 && CALLEE_NAMES.contains(&value_token.text_trimmed())
             {
-                if let Some(literal) = expression.member().ok()?.as_any_js_literal_expression() {
-                    if literal.as_js_string_literal_expression().is_some()
-                        && literal.to_string() == format!("\"{}\"", ONLY_KEYWORD)
-                    {
-                        return Some(expression.syntax().text_trimmed_range());
-                    }
+                let member = expression.member().ok()?;
+                let literal = member.as_any_js_literal_expression()?;
+
+                if literal.as_js_string_literal_expression().is_some()
+                    && literal.to_string() == "\"only\""
+                {
+                    return Some(expression.syntax().text_trimmed_range());
                 }
             }
         }
@@ -163,20 +165,20 @@ impl Rule for NoFocusedTests {
 
         // Special handling for test.only.each() pattern
         let callee_str = callee.to_string();
-        if callee_str.contains(format!(".{ONLY_KEYWORD}.each").as_str()) {
+        if callee_str.contains(&format!(".{ONLY_KEYWORD}.each")) {
+            // Look for and remove ".only" from pattern like "test.only.each()"
             if let Some(static_member) = callee.as_js_static_member_expression() {
                 if let Ok(obj) = static_member.object() {
                     if let Some(parent) = obj.as_js_static_member_expression() {
                         if let Ok(member) = parent.member() {
                             if member.to_string() == ONLY_KEYWORD {
                                 if let Ok(operator) = parent.operator_token() {
-                                    // Remove ".only" from pattern like "test.only.each()"
                                     mutation.remove_element(member.into());
                                     mutation.remove_element(operator.into());
                                     return Some(JsRuleAction::new(
                                         ctx.metadata().action_category(ctx.category(), ctx.group()),
                                         ctx.metadata().applicability(),
-                                        markup! { "Remove focus from test." }.to_owned(),
+                                        markup! { "Remove focus from test." },
                                         mutation,
                                     ));
                                 }
@@ -231,7 +233,7 @@ impl Rule for NoFocusedTests {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Remove focus from test." }.to_owned(),
+            markup! { "Remove focus from test." },
             mutation,
         ))
     }
