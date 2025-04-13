@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 103
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -24,7 +24,7 @@ invalid.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
   i Don't use console.
   
   > 1 │ console.log('hello world')
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^
     2 │ console.info('hello world')
     3 │ console.warn('hello world')
   
@@ -44,7 +44,7 @@ invalid.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
   
     1 │ console.log('hello world')
   > 2 │ console.info('hello world')
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^
     3 │ console.warn('hello world')
     4 │ console.table('hello world')
   
@@ -68,7 +68,7 @@ invalid.js:3:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
     1 │ console.log('hello world')
     2 │ console.info('hello world')
   > 3 │ console.warn('hello world')
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^
     4 │ console.table('hello world')
     5 │ console.error('hello world')
   
@@ -93,7 +93,7 @@ invalid.js:4:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
     2 │ console.info('hello world')
     3 │ console.warn('hello world')
   > 4 │ console.table('hello world')
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^
     5 │ console.error('hello world')
     6 │ console.nonExistent('hello world')
   
@@ -118,7 +118,7 @@ invalid.js:5:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
     3 │ console.warn('hello world')
     4 │ console.table('hello world')
   > 5 │ console.error('hello world')
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^
     6 │ console.nonExistent('hello world')
     7 │ console.log('with semicolon');
   
@@ -143,7 +143,7 @@ invalid.js:6:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
     4 │ console.table('hello world')
     5 │ console.error('hello world')
   > 6 │ console.nonExistent('hello world')
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^
     7 │ console.log('with semicolon');
     8 │ 
   
@@ -168,7 +168,7 @@ invalid.js:7:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
     5 │ console.error('hello world')
     6 │ console.nonExistent('hello world')
   > 7 │ console.log('with semicolon');
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^
     8 │ 
     9 │ globalThis.console.warn();
   
@@ -193,7 +193,7 @@ invalid.js:9:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
      7 │ console.log('with semicolon');
      8 │ 
    > 9 │ globalThis.console.warn();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
   
   i The use of console is often reserved for debugging.

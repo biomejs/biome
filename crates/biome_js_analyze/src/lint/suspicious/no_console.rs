@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make::{js_directive_list, js_function_body, js_statement_list, token};
 use biome_js_syntax::{
-    AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement, T,
-    global_identifier,
+    JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement, JsStaticMemberExpression,
+    T, global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -56,23 +56,22 @@ declare_lint_rule! {
 }
 
 impl Rule for NoConsole {
-    type Query = Semantic<JsCallExpression>;
+    type Query = Semantic<JsStaticMemberExpression>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = Box<NoConsoleOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let call_expression = ctx.query();
+        let member_expression = ctx.query();
         let model = ctx.model();
-        let callee = call_expression.callee().ok()?;
-        let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
         let object = member_expression.object().ok()?;
         let (reference, name) = global_identifier(&object)?;
         if name.text() != "console" {
             return None;
         }
-        if let Some(member_name) = member_expression.member_name() {
-            let member_name = member_name.text();
+        if let Ok(member_name) = member_expression.member() {
+            let member_name_token = member_name.value_token().ok()?;
+            let member_name = member_name_token.text_trimmed();
             if ctx
                 .options()
                 .allow
@@ -86,14 +85,10 @@ impl Rule for NoConsole {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        let parent = node.clone().syntax().parent()?;
-        let range = JsExpressionStatement::cast_ref(&parent)
-            .map_or(node.range(), |node| node.syntax().text_trimmed_range());
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                range,
+                ctx.query().range(),
                 markup! {
                     "Don't use "<Emphasis>"console"</Emphasis>"."
                 },
@@ -105,7 +100,8 @@ impl Rule for NoConsole {
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        let call_expression = ctx.query();
+        let member_expression = ctx.query();
+        let call_expression = JsCallExpression::cast(member_expression.syntax().parent()?)?;
         let mut mutation = ctx.root().begin();
         let parent = call_expression.syntax().parent()?;
         if let Some(stmt) = JsExpressionStatement::cast(parent.clone()) {
