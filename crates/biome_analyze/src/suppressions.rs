@@ -192,7 +192,7 @@ pub(crate) struct RangeSuppression {
     /// Whether this suppression has suppressed a signal
     pub(crate) did_suppress_signal: bool,
 
-    /// Indicates if the rule has found its end comment - if false, the suppression_range is not yet complete
+    /// Indicates if this suppression has found its end comment - if false, the suppression_range is not yet complete
     pub(crate) is_ended: bool,
 
     /// The rules to suppress, grouped by [RuleCategory]
@@ -274,10 +274,8 @@ impl RangeSuppressions {
                     self.suppressions.pop();
                 }
                 Some(filter) => {
-                    // SAFETY: we checked if the vector isn't empty at the beginning
-                    // We need to make sure that we support nested start, end
                     let mut range_suppression: Option<&mut RangeSuppression> = None;
-                    for existing_suppression in self.suppressions.iter_mut() {
+                    for existing_suppression in self.suppressions.iter_mut().rev() {
                         if !existing_suppression.is_ended {
                             let filters = existing_suppression
                                 .filters_by_category

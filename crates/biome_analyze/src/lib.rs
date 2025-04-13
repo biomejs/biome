@@ -361,6 +361,7 @@ where
     /// suppression comments
     fn run_first_phase(mut self) -> ControlFlow<Break> {
         let iter = self.root.syntax().preorder_tokens(Direction::Next);
+        // iterate to evaluate suppressions
         for token in iter {
             self.handle_token(token)?;
         }
@@ -516,7 +517,6 @@ where
                         None
                     } else {
                         let line_suppression = &mut self.suppressions.line_suppressions[index];
-                        // Since line suppressions of something like a function need to work, we just check the start overlap
                         if line_suppression.text_range.start() <= entry.text_range.start()
                             && line_suppression.text_range.end() >= entry.text_range.start()
                         {
@@ -745,7 +745,6 @@ impl<'a> AnalyzerSuppression<'a> {
             kind: AnalyzerSuppressionKind::Plugin(plugin_name),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
-            // Is this true?  Isn't the category a plugin and not linting?  What is the plugin is for formatting, etc?
             category: RuleCategory::Lint,
         }
     }
