@@ -138,10 +138,10 @@ importers:
         version: 5.8.3
       vite:
         specifier: 5.4.18
-        version: 5.4.18(@types/node@22.14.0)
+        version: 5.4.18(@types/node@22.14.1)
       vitest:
         specifier: 1.6.1
-        version: 1.6.1(@types/node@22.14.0)(happy-dom@15.11.7)
+        version: 1.6.1(@types/node@22.14.1)(happy-dom@15.11.7)
 
   packages/@biomejs/wasm-bundler: {}
 
@@ -162,8 +162,8 @@ importers:
         version: 3.4.17
     devDependencies:
       '@types/node':
-        specifier: 22.14.0
-        version: 22.14.0
+        specifier: 22.14.1
+        version: 22.14.1
       read-package-up:
         specifier: 11.0.0
         version: 11.0.0
@@ -686,8 +686,8 @@ packages:
   '@types/node@20.17.30':
     resolution: {integrity: sha512-7zf4YyHA+jvBNfVrk2Gtvs6x7E8V+YDW05bNfG2XkWDJfYRXrTiP/DsB2zSYTaHX0bGIujTBQdMVAhb+j7mwpg==}
 
-  '@types/node@22.14.0':
-    resolution: {integrity: sha512-Kmpl+z84ILoG+3T/zQFyAJsU6EPTmOCj8/2+83fSN6djd6I4o7uOuGIH6vq3PrjY5BGitSbFuMN18j3iknubbA==}
+  '@types/node@22.14.1':
+    resolution: {integrity: sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -2387,7 +2387,7 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
-  '@types/node@22.14.0':
+  '@types/node@22.14.1':
     dependencies:
       undici-types: 6.21.0
 
@@ -3541,13 +3541,13 @@ snapshots:
       - supports-color
       - terser
 
-  vite-node@1.6.1(@types/node@22.14.0):
+  vite-node@1.6.1(@types/node@22.14.1):
     dependencies:
       cac: 6.7.14
       debug: 4.3.7
       pathe: 1.1.2
       picocolors: 1.1.1
-      vite: 5.4.18(@types/node@22.14.0)
+      vite: 5.4.18(@types/node@22.14.1)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -3568,13 +3568,13 @@ snapshots:
       '@types/node': 20.17.30
       fsevents: 2.3.3
 
-  vite@5.4.18(@types/node@22.14.0):
+  vite@5.4.18(@types/node@22.14.1):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.47
       rollup: 4.23.0
     optionalDependencies:
-      '@types/node': 22.14.0
+      '@types/node': 22.14.1
       fsevents: 2.3.3
 
   vitest@1.6.1(@types/node@20.17.30)(happy-dom@15.11.7):
@@ -3612,7 +3612,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@1.6.1(@types/node@22.14.0)(happy-dom@15.11.7):
+  vitest@1.6.1(@types/node@22.14.1)(happy-dom@15.11.7):
     dependencies:
       '@vitest/expect': 1.6.1
       '@vitest/runner': 1.6.1
@@ -3631,11 +3631,11 @@ snapshots:
       strip-literal: 2.1.0
       tinybench: 2.9.0
       tinypool: 0.8.4
-      vite: 5.4.18(@types/node@22.14.0)
-      vite-node: 1.6.1(@types/node@22.14.0)
+      vite: 5.4.18(@types/node@22.14.1)
+      vite-node: 1.6.1(@types/node@22.14.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 22.14.0
+      '@types/node': 22.14.1
       happy-dom: 15.11.7
     transitivePeerDependencies:
       - less
