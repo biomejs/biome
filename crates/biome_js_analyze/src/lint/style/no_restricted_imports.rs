@@ -7,7 +7,6 @@ use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_diagnostics::Severity;
-use biome_glob::{CandidatePath, Glob};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsExpression,
     AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember, JsCallExpression,
@@ -21,7 +20,8 @@ use biome_js_syntax::{
     JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator, inner_string_text,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
-use fancy_regex::Regex;
+use fancy_regex::RegexBuilder;
+use ignore::gitignore::GitignoreBuilder;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
@@ -590,8 +590,8 @@ pub struct RestrictedImportsOptions {
     paths: FxHashMap<Box<str>, CustomRestrictedImport>,
 
     /// A list of gitignore-style patterns or regular expressions that should trigger the rule.
-    #[serde(skip_serializing_if = "<[_]>::is_empty")]
-    patterns: Box<[Patterns]>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    patterns: Option<Box<[Patterns]>>,
 }
 
 /// Specifies why a specific import is allowed or disallowed.
@@ -1373,91 +1373,86 @@ impl Rule for NoRestrictedImports {
                     }
                 }
             }
-        } else if !options.patterns.is_empty() {
-            type Negation = bool;
-            let mut last_match: Option<(Negation, &Patterns)> = None;
-            let candidate_path: CandidatePath<'_> = CandidatePath::new(import_source);
+        } else if let Some(patterns) = &options.patterns {
+            let mut has_simple = false;
+            let mut last_matched_options: Option<&PatternOptions> = None;
+            let mut builder_for_simple = GitignoreBuilder::new("");
 
-            for patterns in options.patterns.iter() {
-                let mut is_matched: bool = false;
-                let mut is_negated: Negation = false;
-
+            for patterns in patterns.iter() {
                 match patterns {
-                    Patterns::Simple(pattern) => match pattern.parse::<Glob>() {
-                        Ok(glob) => {
-                            if candidate_path.matches_raw(&glob) {
-                                is_matched = true;
-                                is_negated = glob.is_negated();
-                            }
-                        }
-                        Err(e) => {
-                            eprintln!(
-                                "Failed to parse gitignore-style pattern '{}': {}",
-                                pattern, e
-                            );
-                        }
-                    },
+                    Patterns::Simple(pattern) => {
+                        has_simple = true;
+                        builder_for_simple.add_line(None, pattern.deref()).unwrap();
+                    }
                     Patterns::WithOptions(pattern_options) => {
+                        if has_simple {
+                            eprintln!(
+                                "simple gitignore-style patterns cannot be used in combination with other properties."
+                            )
+                        }
+
                         if let Some(group) = &pattern_options.group {
+                            let mut builder = GitignoreBuilder::new("");
                             for pattern in group.iter() {
-                                match pattern.parse::<Glob>() {
-                                    Ok(glob) => {
-                                        if candidate_path.matches_raw(&glob) {
-                                            is_matched = true;
-                                            is_negated = glob.is_negated();
-                                        }
-                                    }
-                                    Err(e) => {
-                                        eprintln!(
-                                            "Failed to parse group property gitignore-style pattern '{}': {}",
-                                            pattern, e
-                                        );
-                                    }
-                                }
+                                builder.add_line(None, pattern.deref()).unwrap();
+                            }
+                            let gitignore = builder
+                                .case_insensitive(!pattern_options.case_sensitive)
+                                .unwrap()
+                                .build()
+                                .unwrap();
+                            if gitignore.matched(import_source, false).is_ignore() {
+                                last_matched_options = Some(pattern_options);
                             }
                         }
+
                         if let Some(regex) = &pattern_options.regex {
-                            let re = Regex::new(regex.deref()).unwrap();
+                            let re = RegexBuilder::new(regex.deref())
+                                .case_insensitive(pattern_options.case_sensitive)
+                                .build()
+                                .unwrap();
                             let is_match = re.is_match(import_source).unwrap();
                             if is_match {
-                                is_matched = true;
+                                last_matched_options = Some(pattern_options);
                             }
                         }
                     }
-                }
-
-                if is_matched {
-                    last_match = Some((is_negated, patterns));
                 }
             }
 
-            match last_match {
-                Some((is_negated, patterns)) => {
-                    if is_negated {
-                        vec![]
-                    } else {
-                        let base_message = format!(
-                            "'{import_source}' import is restricted from being used by a pattern."
-                        );
-                        let additional_message: Option<&str> = match patterns {
-                            Patterns::Simple(_) => None,
-                            Patterns::WithOptions(pattern_options) => pattern_options.message.as_deref(),
-                        };
-                        let message = if let Some(additional_message) = additional_message {
-                            format!("{base_message} {additional_message}")
-                        } else {
-                            base_message
-                        };
+            let is_match_in_simple = builder_for_simple
+                // Default case-sensitive option is false
+                // The Simple pattern does not have a case-sensitive option
+                .case_insensitive(true)
+                .unwrap()
+                .build()
+                .unwrap()
+                .matched(import_source, false)
+                .is_ignore();
 
-                        vec![RestrictedImportMessage {
-                            location: module_name.text_trimmed_range(),
-                            message,
-                            import_source: import_source.to_string(),
-                            allowed_import_names: [].into(),
-                        }]
-                    }
-                }
-                None => vec![],
+            let base_message =
+                format!("'{import_source}' import is restricted from being used by a pattern.");
+
+            if is_match_in_simple {
+                vec![RestrictedImportMessage {
+                    location: module_name.text_trimmed_range(),
+                    message: base_message,
+                    import_source: import_source.to_string(),
+                    allowed_import_names: [].into(),
+                }]
+            } else if let Some(pattern_options) = last_matched_options {
+                let message = match &pattern_options.message {
+                    Some(additional_message) => format!("{base_message} {additional_message}"),
+                    None => base_message,
+                };
+                vec![RestrictedImportMessage {
+                    location: module_name.text_trimmed_range(),
+                    message: message,
+                    import_source: import_source.to_string(),
+                    allowed_import_names: [].into(),
+                }]
+            } else {
+                vec![]
             }
         } else {
             return vec![];
