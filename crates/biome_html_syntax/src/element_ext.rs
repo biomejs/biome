@@ -10,7 +10,7 @@ const VOID_ELEMENTS: &[&str] = &[
 impl HtmlSelfClosingElement {
     /// Whether the current self-closing element is a void element.
     ///
-    /// https://html.spec.whatwg.org/#void-elements
+    /// <https://html.spec.whatwg.org/#void-elements>
     pub fn is_void_element(&self) -> SyntaxResult<bool> {
         let name = self.name()?;
         Ok(VOID_ELEMENTS
