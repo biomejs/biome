@@ -228,6 +228,11 @@ fn get_extensionless_import(
         .is_some_and(|stem| stem.contains('.'));
     let existing_extension = path.extension();
 
+    if resolved_path_has_sub_extension && path.file_name()?.starts_with(resolved_path.file_name()?)
+    {
+        return None;
+    }
+
     if !resolved_path_has_sub_extension && existing_extension.is_some() {
         return None;
     }
