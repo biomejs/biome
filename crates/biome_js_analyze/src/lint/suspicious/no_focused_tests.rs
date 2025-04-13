@@ -113,11 +113,15 @@ impl Rule for NoFocusedTests {
         let callee = node.callee().ok()?;
         let mut mutation = ctx.root().begin();
 
-        // Apply mutations for each pattern type
-        fix_function_name_pattern(&callee, &mut mutation)
+        // Apply mutations for each pattern type, matching the order we use in run()
+        // 1. Check for computed member expressions first - they're handled separately
+        // 2. Check for function patterns (fdescribe, fit)
+        // 3. Check for only.each patterns
+        // 4. Check for static .only patterns
+        fix_computed_only_member(&callee, &mut mutation)
+            .or_else(|| fix_function_name_pattern(&callee, &mut mutation))
             .or_else(|| fix_only_each_pattern(&callee, &mut mutation))
             .or_else(|| fix_static_only_member(&callee, &mut mutation))
-            .or_else(|| fix_computed_only_member(&callee, &mut mutation))
             .map(|_| {
                 JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -278,36 +282,38 @@ fn fix_static_only_member(
     callee: &AnyJsExpression,
     mutation: &mut BatchMutation<JsLanguage>,
 ) -> Option<()> {
-    // Use the contains_focused_test helper to check if this is a focused test pattern
-    if !matches!(callee.contains_focused_test().ok(), Some(true)) {
+    let static_member = callee.as_js_static_member_expression()?;
+
+    let member = static_member.member().ok()?;
+    if member.syntax().text_trimmed() != ONLY_KEYWORD {
         return None;
     }
 
-    callee
-        .as_js_static_member_expression()
-        .and_then(|static_member| {
-            static_member
-                .member()
-                .ok()
-                .filter(|member| member.syntax().text_trimmed() == ONLY_KEYWORD)
-                .and_then(|member| {
-                    static_member.operator_token().ok().map(|operator| {
-                        mutation.remove_element(member.into());
-                        mutation.remove_element(operator.into());
-                        ()
-                    })
-                })
-        })
+    // Get the operator token (the '.' in test.only)
+    let operator = static_member.operator_token().ok()?;
+
+    // Remove both the 'only' member and the '.' operator
+    mutation.remove_element(member.into());
+    mutation.remove_element(operator.into());
+
+    Some(())
 }
 
-/// Apply fix for computed ["only"] member
+/// Apply fix for computed ["only"] member expressions
 fn fix_computed_only_member(
     callee: &AnyJsExpression,
     mutation: &mut BatchMutation<JsLanguage>,
 ) -> Option<()> {
     let expression = callee.as_js_computed_member_expression()?;
 
-    // Get member and validate it's "only"
+    let object = expression.as_fields().object.ok()?;
+    let identifier = object.as_js_identifier_expression()?;
+    let value_token = identifier.name().ok()?.value_token().ok()?;
+
+    if !CALLEE_NAMES.contains(&value_token.text_trimmed()) {
+        return None;
+    }
+
     let member = expression.member().ok()?;
     let literal = member.as_any_js_literal_expression()?;
 
