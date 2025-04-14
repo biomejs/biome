@@ -1,6 +1,7 @@
 mod binding;
 mod collector;
 mod scope;
+mod type_resolver;
 mod visitor;
 
 use std::{collections::BTreeMap, ops::Deref, sync::Arc};
@@ -166,6 +167,22 @@ pub enum JsExport {
     ///
     /// E.g. `export type { someSymbol } from "other-module"`.
     ReexportType(JsReexport),
+}
+
+impl JsExport {
+    pub fn as_own_export(&self) -> Option<&JsOwnExport> {
+        match self {
+            JsExport::Own(own_export) | JsExport::OwnType(own_export) => Some(own_export),
+            JsExport::Reexport(_) | JsExport::ReexportType(_) => None,
+        }
+    }
+
+    pub fn as_own_export_mut(&mut self) -> Option<&mut JsOwnExport> {
+        match self {
+            JsExport::Own(own_export) | JsExport::OwnType(own_export) => Some(own_export),
+            JsExport::Reexport(_) | JsExport::ReexportType(_) => None,
+        }
+    }
 }
 
 /// Represents an import to one or more symbols from an external path.

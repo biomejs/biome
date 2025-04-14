@@ -9,14 +9,60 @@
 //! The type information is instantiated and updated inside the Workspace
 //! Server.
 
-use std::str::FromStr;
+use std::{ops::Deref, str::FromStr, sync::Arc};
 
+use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 use static_assertions::assert_eq_size;
 
+use crate::Resolvable;
+
 /// Represents an inferred TypeScript type.
 #[derive(Clone, Debug, Default, PartialEq)]
-pub enum Type {
+// TODO: Before moving onto full inference, we should probably use a different
+//       wrapper than `Arc`. I'm thinking of creating a type called
+//       `FragileArc`, which would have a single owner and any number of weak
+//       pointers to it. This would allow the types of one module to be dropped
+//       (for when the watcher reloads a module), after which we could simply
+//       re-lookup the broken arcs. The "fragileness" would come from the fact
+//       there would be a single type that can be either owner, or weak pointer,
+//       so at the type level you would never know when your pointer is going to
+//       break.
+pub struct Type(Arc<TypeInner>);
+
+// `Type` should not be bigger than 8 bytes.
+assert_eq_size!(Type, usize);
+
+impl Deref for Type {
+    type Target = TypeInner;
+
+    fn deref(&self) -> &Self::Target {
+        self.0.as_ref()
+    }
+}
+
+impl From<TypeInner> for Type {
+    fn from(inner: TypeInner) -> Self {
+        Self(Arc::new(inner))
+    }
+}
+
+impl Type {
+    pub fn boolean() -> Self {
+        Self(Arc::new(TypeInner::Boolean))
+    }
+
+    pub fn undefined() -> Self {
+        Self(Arc::new(TypeInner::Undefined))
+    }
+
+    pub fn unknown() -> Self {
+        Self(Arc::new(TypeInner::Unknown))
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Resolvable)]
+pub enum TypeInner {
     /// The type is unknown because inference couldn't determine a type.
     ///
     /// This is different from `UnknownKeyword`, because an explicit `unknown`
@@ -63,11 +109,7 @@ pub enum Type {
     TypeofType(Box<TypeReference>),
 
     /// Reference to the type of a named JavaScript value.
-    ///
-    /// We explicitly do not allow full expressions to be used as values,
-    /// meaning our inference needs to break down expressions into parts before
-    /// deciding the values to reference.
-    TypeofValue(Box<Text>),
+    TypeofValue(Box<TypeofValue>),
 
     /// The `any` keyword.
     ///
@@ -102,10 +144,10 @@ pub enum Type {
     VoidKeyword,
 }
 
-// `Type` should not be bigger than 16 bytes.
-assert_eq_size!(Type, [usize; 2]);
+// `TypeInner` should not be bigger than 16 bytes.
+assert_eq_size!(TypeInner, [usize; 2]);
 
-impl Type {
+impl TypeInner {
     /// Returns whether the given type has been inferred.
     ///
     /// A type is considered inferred if it is anything except `Self::Unknown`,
@@ -123,16 +165,17 @@ impl Type {
     /// returns a `Promise`.
     pub fn is_function_that_returns_promise(&self) -> bool {
         match self {
-            Self::Function(function) => {
-                function.return_type.as_type().is_some_and(Type::is_promise)
-            }
+            Self::Function(function) => function
+                .return_type
+                .as_type()
+                .is_some_and(|ty| ty.is_promise()),
             _ => false,
         }
     }
 }
 
 /// A class definition.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Class {
     /// Name of the class, if specified in the definition.
     pub name: Option<Text>,
@@ -143,7 +186,7 @@ pub struct Class {
 
 /// Members of a class definition.
 // TODO: Include getters, setters and index signatures.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub enum ClassMember {
     Constructor(ConstructorTypeMember),
     Method(MethodTypeMember),
@@ -151,7 +194,7 @@ pub enum ClassMember {
 }
 
 /// A constructor definition.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Constructor {
     /// Generic type parameters used in the call signature.
     pub type_parameters: Box<[GenericTypeParameter]>,
@@ -164,7 +207,7 @@ pub struct Constructor {
 }
 
 /// A function definition.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Function {
     /// Whether the function has an `async` specifier or not.
     pub is_async: bool,
@@ -183,7 +226,7 @@ pub struct Function {
 }
 
 /// Definition of a function argument.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct FunctionParameter {
     /// Name of the argument, if specified in the definition.
     pub name: Option<Text>,
@@ -200,7 +243,7 @@ pub struct FunctionParameter {
 
 /// Definition of a generic type parameter.
 // TODO: Include modifiers and constraints.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct GenericTypeParameter {
     /// Name of the type parameter.
     pub name: Text,
@@ -210,11 +253,11 @@ pub struct GenericTypeParameter {
 }
 
 /// The intersection between other types.
-#[derive(Clone, Debug, PartialEq)]
-pub struct Intersection(pub Box<[Type]>);
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct Intersection(pub(super) Box<[Type]>);
 
 /// Literal value used as a type.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub enum Literal {
     BigInt(Text),
     Boolean(Text),
@@ -227,12 +270,18 @@ pub enum Literal {
 }
 
 /// A namespace definition.
-#[derive(Clone, Debug, PartialEq)]
-pub struct Namespace(pub Box<[TypeMember]>);
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct Namespace(pub(super) Box<[TypeMember]>);
+
+impl Namespace {
+    pub fn from_type_members(members: Box<[TypeMember]>) -> Self {
+        Self(members)
+    }
+}
 
 /// An object definition.
-#[derive(Clone, Debug, PartialEq)]
-pub struct Object(pub Box<[TypeMember]>);
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct Object(pub(super) Box<[TypeMember]>);
 
 impl Object {
     pub fn members(&self) -> &[TypeMember] {
@@ -241,17 +290,17 @@ impl Object {
 }
 
 /// Object literal used as a type.
-#[derive(Clone, Debug, PartialEq)]
-pub struct ObjectLiteral(pub Box<[TypeMember]>);
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct ObjectLiteral(pub(super) Box<[TypeMember]>);
 
 /// Tuple type.
 ///
 /// Tuples in TypeScript are created using `Array`s of a fixed size.
-#[derive(Clone, Debug, PartialEq)]
-pub struct Tuple(pub Box<[TupleElementType]>);
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct Tuple(pub(super) Box<[TupleElementType]>);
 
 /// An individual element within a tuple.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TupleElementType {
     /// Type of the element.
     pub ty: Type,
@@ -268,7 +317,7 @@ pub struct TupleElementType {
 
 /// Members of an object definition.
 // TODO: Include getters, setters and index signatures.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub enum TypeMember {
     CallSignature(CallSignatureTypeMember),
     Constructor(ConstructorTypeMember),
@@ -277,7 +326,7 @@ pub enum TypeMember {
 }
 
 /// Defines a call signature on an object definition.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct CallSignatureTypeMember {
     /// Generic type parameters defined in the call signature.
     pub type_parameters: Box<[GenericTypeParameter]>,
@@ -290,7 +339,7 @@ pub struct CallSignatureTypeMember {
 }
 
 /// Defines a call signature for an object's constructor.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct ConstructorTypeMember {
     /// Generic type parameters defined in the constructor.
     pub type_parameters: Box<[GenericTypeParameter]>,
@@ -304,7 +353,7 @@ pub struct ConstructorTypeMember {
 
 /// Defines a method on an object.
 // TODO: Include modifiers.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct MethodTypeMember {
     /// Whether the function has an `async` specifier or not.
     pub is_async: bool,
@@ -327,14 +376,14 @@ pub struct MethodTypeMember {
 
 /// Defines an object property and its type.
 // TODO: Include modifiers.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct PropertyTypeMember {
     pub name: Text,
     pub ty: Type,
     pub is_optional: bool,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub enum ReturnType {
     Type(Type),
     Predicate(PredicateReturnType),
@@ -343,7 +392,7 @@ pub enum ReturnType {
 
 impl Default for ReturnType {
     fn default() -> Self {
-        Self::Type(Type::Unknown)
+        Self::Type(Type::unknown())
     }
 }
 
@@ -360,7 +409,7 @@ impl ReturnType {
 /// whether one of its arguments is of a given type.
 ///
 /// Predicate functions return `boolean` at runtime.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct PredicateReturnType {
     pub parameter_name: Text,
     pub ty: Type,
@@ -370,14 +419,14 @@ pub struct PredicateReturnType {
 /// one of its arguments to be of a given type.
 ///
 /// Assertion functions throw at runtime if the type assertion fails.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct AssertsReturnType {
     pub parameter_name: Text,
     pub ty: Type,
 }
 
 /// Alias to another type.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeAlias {
     /// The type being aliased.
     pub ty: Type,
@@ -386,13 +435,47 @@ pub struct TypeAlias {
     pub type_parameters: Box<[GenericTypeParameter]>,
 }
 
+/// Resolved reference to the type of a named JavaScript value.
 #[derive(Clone, Debug, PartialEq)]
+pub struct TypeofValue {
+    /// Identifier of the type being referenced.
+    ///
+    /// We explicitly do not allow full expressions to be used as values,
+    /// meaning our inference needs to break down expressions into parts before
+    /// deciding the values to reference.
+    pub identifier: Text,
+
+    /// The resolved type.
+    pub ty: Type,
+}
+
+impl Resolvable for TypeofValue {
+    fn needs_resolving(&self, resolver: &dyn crate::TypeResolver, _stack: &[&TypeInner]) -> bool {
+        !self.ty.is_inferred() && resolver.resolve_type_of(&self.identifier).is_some()
+    }
+
+    fn resolved(&self, resolver: &dyn crate::TypeResolver, _stack: &[&TypeInner]) -> Self {
+        let ty = match self.ty.is_inferred() {
+            true => self.ty.clone(),
+            false => resolver
+                .resolve_type_of(&self.identifier)
+                .unwrap_or_else(Type::unknown),
+        };
+
+        Self {
+            identifier: self.identifier.clone(),
+            ty,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeOperatorType {
     pub operator: TypeOperator,
     pub ty: Type,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Resolvable)]
 pub enum TypeOperator {
     Keyof,
     Readonly,
@@ -414,19 +497,51 @@ impl FromStr for TypeOperator {
 
 /// Reference to another type definition.
 ///
-/// This definition may be imported from another module.
+/// This definition may require importing from another module.
 #[derive(Clone, Debug, PartialEq)]
 pub struct TypeReference {
     /// Qualifier of the type being referenced.
     pub qualifier: TypeReferenceQualifier,
 
+    /// The resolved type.
+    pub ty: Type,
+
     /// Generic type parameters specified in the reference.
     pub type_parameters: Box<[Type]>,
 }
 
+impl Resolvable for TypeReference {
+    fn needs_resolving(&self, resolver: &dyn crate::TypeResolver, stack: &[&TypeInner]) -> bool {
+        (!self.ty.is_inferred() && resolver.resolve_qualifier(&self.qualifier).is_some())
+            || self
+                .type_parameters
+                .iter()
+                .any(|param| param.needs_resolving(resolver, stack))
+    }
+
+    fn resolved(&self, resolver: &dyn crate::TypeResolver, stack: &[&TypeInner]) -> Self {
+        let ty = match self.ty.is_inferred() {
+            true => self.ty.clone(),
+            false => resolver
+                .resolve_qualifier(&self.qualifier)
+                .unwrap_or_else(Type::unknown),
+        };
+
+        Self {
+            qualifier: self.qualifier.clone(),
+            ty,
+            type_parameters: self
+                .type_parameters
+                .iter()
+                .map(|param| param.resolved(resolver, stack))
+                .collect(),
+        }
+    }
+}
+
 /// Path of identifiers to the type to a referenced type.
 #[derive(Clone, Debug, PartialEq)]
-pub struct TypeReferenceQualifier(pub Box<[Text]>);
+pub struct TypeReferenceQualifier(pub(super) Box<[Text]>);
 
 impl TypeReferenceQualifier {
     /// HACK: This method simply checks whether the reference is for a literal
@@ -437,11 +552,15 @@ impl TypeReferenceQualifier {
     pub fn is_promise(&self) -> bool {
         self.0.len() == 1 && self.0[0] == "Promise"
     }
+
+    pub fn parts(&self) -> &[Text] {
+        &self.0
+    }
 }
 
 /// A union of types.
-#[derive(Clone, Debug, PartialEq)]
-pub struct Union(pub Box<[Type]>);
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct Union(pub(super) Box<[Type]>);
 
 #[cfg(test)]
 #[path = "type_info.tests.rs"]

@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{ops::Deref, str::FromStr};
 
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsClassMember, AnyJsDeclaration,
@@ -16,8 +16,8 @@ use crate::{
     AssertsReturnType, CallSignatureTypeMember, Class, ClassMember, Constructor,
     ConstructorTypeMember, Function, FunctionParameter, GenericTypeParameter, Intersection,
     Literal, MethodTypeMember, Object, PredicateReturnType, PropertyTypeMember, ReturnType, Tuple,
-    TupleElementType, Type, TypeAlias, TypeMember, TypeOperator, TypeOperatorType, TypeReference,
-    TypeReferenceQualifier, Union,
+    TupleElementType, Type, TypeAlias, TypeInner, TypeMember, TypeOperator, TypeOperatorType,
+    TypeReference, TypeReferenceQualifier, TypeofValue, Union,
 };
 
 impl Type {
@@ -30,35 +30,35 @@ impl Type {
             AnyJsDeclaration::JsVariableDeclaration(_) => {
                 // Variable declarations don't have a type;
                 // only their inner declarators have.
-                Self::Unknown
+                Self::unknown()
             }
             AnyJsDeclaration::TsDeclareFunctionDeclaration(_decl) => {
                 // TODO: Handle module declarations.
-                Self::Unknown
+                Self::unknown()
             }
             AnyJsDeclaration::TsEnumDeclaration(_decl) => {
                 // TODO: Handle enum declarations.
-                Self::Unknown
+                Self::unknown()
             }
             AnyJsDeclaration::TsExternalModuleDeclaration(_decl) => {
                 // TODO: Handle external module declarations.
-                Self::Unknown
+                Self::unknown()
             }
             AnyJsDeclaration::TsGlobalDeclaration(_decl) => {
                 // TODO: Handle global declarations.
-                Self::Unknown
+                Self::unknown()
             }
             AnyJsDeclaration::TsImportEqualsDeclaration(_decl) => {
                 // TODO: Handle `import T = Name` syntax.
-                Self::Unknown
+                Self::unknown()
             }
             AnyJsDeclaration::TsInterfaceDeclaration(_decl) => {
                 // TODO: Handle interface declarations.
-                Self::Unknown
+                Self::unknown()
             }
             AnyJsDeclaration::TsModuleDeclaration(_decl) => {
                 // TODO: Handle module declarations.
-                Self::Unknown
+                Self::unknown()
             }
             AnyJsDeclaration::TsTypeAliasDeclaration(decl) => {
                 Self::from_ts_type_alias_declaration(decl).unwrap_or_default()
@@ -75,7 +75,7 @@ impl Type {
     pub fn from_any_js_export_default_declaration(decl: &AnyJsExportDefaultDeclaration) -> Self {
         match decl {
             AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(decl) => {
-                Self::Class(Box::new(Class {
+                TypeInner::Class(Box::new(Class {
                     name: decl
                         .id()
                         .as_ref()
@@ -88,9 +88,10 @@ impl Type {
                         .filter_map(|member| ClassMember::from_any_js_class_member(&member))
                         .collect(),
                 }))
+                .into()
             }
             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(decl) => {
-                Self::Function(Box::new(Function {
+                TypeInner::Function(Box::new(Function {
                     is_async: decl.async_token().is_some(),
                     type_parameters: generic_params_from_ts_type_params(decl.type_parameters()),
                     name: decl
@@ -103,9 +104,10 @@ impl Type {
                     return_type: return_type_from_annotation(decl.return_type_annotation())
                         .unwrap_or_else(|| return_type_from_async_token(decl.async_token())),
                 }))
+                .into()
             }
             AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(decl) => {
-                Self::Function(Box::new(Function {
+                TypeInner::Function(Box::new(Function {
                     is_async: decl.async_token().is_some(),
                     type_parameters: generic_params_from_ts_type_params(decl.type_parameters()),
                     name: decl
@@ -118,77 +120,58 @@ impl Type {
                     return_type: return_type_from_annotation(decl.return_type_annotation())
                         .unwrap_or_else(|| return_type_from_async_token(decl.async_token())),
                 }))
+                .into()
             }
             AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(_decl) => {
                 // TODO: Handle interface declarations.
-                Self::Unknown
+                Self::unknown()
             }
         }
     }
 
     pub fn from_any_js_expression(expr: &AnyJsExpression) -> Self {
-        // TODO: Here is where we can do a lot of *real* inference.
-        //       However, to get there, we will need to think carefully about
-        //       how we invoke the inference. There's some static analysis we
-        //       can do here, but without access to the semantic model, the
-        //       inference will be very limited. And even the semantic model as
-        //       it exists today will be limited, because we'll want access to
-        //       the entire model graph to cross-reference imports.
-        //
-        //       My current thinking goes along these lines:
-        //       - I think we'll want to do a "thin" inference here, meaning
-        //         we extract all the information we can, but without following
-        //         type references and identifiers. For example: After the thin
-        //         inference, we may know that an expression evaluates to the
-        //         type of the return value of a function, and we know the
-        //         identifier of the function, but we don't necessarily know yet
-        //         where said function is defined, and therefore its actual
-        //         return type.
-        //       - Somewhere higher up, probably in the `ModuleGraph` or
-        //         somewhere related to it, we can invoke the full inference,
-        //         where all references get resolved, allowing us to resolve to
-        //         concrete types.
         match expr {
             AnyJsExpression::AnyJsLiteralExpression(expr) => {
                 Self::from_any_js_literal_expression(expr).unwrap_or_default()
             }
-            AnyJsExpression::JsArrayExpression(expr) => Self::Tuple(Box::new(Tuple(
+            AnyJsExpression::JsArrayExpression(expr) => TypeInner::Tuple(Box::new(Tuple(
                 expr.elements()
                     .into_iter()
                     .map(|el| match el {
                         Ok(AnyJsArrayElement::AnyJsExpression(expr)) => TupleElementType {
-                            ty: Self::from_any_js_expression(&expr),
+                            ty: Type::from_any_js_expression(&expr),
                             name: None,
                             is_optional: false,
                             is_rest: false,
                         },
                         Ok(AnyJsArrayElement::JsSpread(_spread)) => TupleElementType {
                             // TODO: We can definitely be smarter about this one.
-                            ty: Type::Unknown,
+                            ty: Type::unknown(),
                             name: None,
                             is_optional: false,
                             is_rest: false,
                         },
                         Ok(AnyJsArrayElement::JsArrayHole(_)) | Err(_) => TupleElementType {
-                            ty: Type::Unknown,
+                            ty: Type::unknown(),
                             name: None,
                             is_optional: false,
                             is_rest: false,
                         },
                     })
                     .collect(),
-            ))),
+            )))
+            .into(),
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
-                Type::from_js_arrow_function_expression(expr)
+                Self::from_js_arrow_function_expression(expr)
             }
-            AnyJsExpression::JsFunctionExpression(expr) => Type::from_js_function_expression(expr),
+            AnyJsExpression::JsFunctionExpression(expr) => Self::from_js_function_expression(expr),
             AnyJsExpression::JsIdentifierExpression(expr) => expr
                 .name()
                 .map(|name| Self::from_js_reference_identifier(&name))
                 .unwrap_or_default(),
-            AnyJsExpression::JsInstanceofExpression(_expr) => Type::Boolean,
+            AnyJsExpression::JsInstanceofExpression(_expr) => Self::boolean(),
             AnyJsExpression::JsNewExpression(expr) => {
-                Type::from_js_new_expression(expr).unwrap_or_default()
+                Self::from_js_new_expression(expr).unwrap_or_default()
             }
             AnyJsExpression::JsParenthesizedExpression(expr) => expr
                 .expression()
@@ -196,7 +179,7 @@ impl Type {
                 .unwrap_or_default(),
             _ => {
                 // TODO: Much
-                Type::Unknown
+                Self::unknown()
             }
         }
     }
@@ -221,46 +204,46 @@ impl Type {
             }
         };
 
-        Some(Self::Literal(Box::new(literal)))
+        Some(TypeInner::Literal(Box::new(literal)).into())
     }
 
     pub fn from_any_ts_type(ty: &AnyTsType) -> Self {
-        match ty {
-            AnyTsType::JsMetavariable(_) => Self::Unknown,
-            AnyTsType::TsAnyType(_) => Self::AnyKeyword,
-            AnyTsType::TsArrayType(ty) => Self::Array(Box::new(
+        let inner = match ty {
+            AnyTsType::JsMetavariable(_) => TypeInner::Unknown,
+            AnyTsType::TsAnyType(_) => TypeInner::AnyKeyword,
+            AnyTsType::TsArrayType(ty) => TypeInner::Array(Box::new(
                 ty.element_type()
                     .map(|ty| Self::from_any_ts_type(&ty))
                     .unwrap_or_default(),
             )),
             AnyTsType::TsBigintLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
-                (Some(minus_token), Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
-                    Text::Owned(format!("{minus_token}{literal_token}")),
-                ))),
-                (None, Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
+                (Some(minus_token), Ok(literal_token)) => TypeInner::Literal(Box::new(
+                    Literal::BigInt(Text::Owned(format!("{minus_token}{literal_token}"))),
+                )),
+                (None, Ok(literal_token)) => TypeInner::Literal(Box::new(Literal::BigInt(
                     literal_token.token_text_trimmed().into(),
                 ))),
-                (_, Err(_)) => Self::Unknown,
+                (_, Err(_)) => TypeInner::Unknown,
             },
-            AnyTsType::TsBigintType(_) => Self::BigInt,
-            AnyTsType::TsBogusType(_) => Self::Unknown,
+            AnyTsType::TsBigintType(_) => TypeInner::BigInt,
+            AnyTsType::TsBogusType(_) => TypeInner::Unknown,
             AnyTsType::TsBooleanLiteralType(ty) => match ty.literal() {
-                Ok(token) => Self::Literal(Box::new(Literal::Boolean(
+                Ok(token) => TypeInner::Literal(Box::new(Literal::Boolean(
                     token.token_text_trimmed().into(),
                 ))),
-                Err(_) => Self::Unknown,
+                Err(_) => TypeInner::Unknown,
             },
-            AnyTsType::TsBooleanType(_) => Self::Boolean,
+            AnyTsType::TsBooleanType(_) => TypeInner::Boolean,
             AnyTsType::TsConditionalType(_) => {
                 // TODO: Handle conditional types (`T extends U ? V : W`).
-                Self::Unknown
+                TypeInner::Unknown
             }
-            AnyTsType::TsConstructorType(ty) => Self::Constructor(Box::new(Constructor {
+            AnyTsType::TsConstructorType(ty) => TypeInner::Constructor(Box::new(Constructor {
                 type_parameters: generic_params_from_ts_type_params(ty.type_parameters()),
                 parameters: function_params_from_js_params(ty.parameters()),
                 return_type: ty.return_type().ok().map(|ty| Type::from_any_ts_type(&ty)),
             })),
-            AnyTsType::TsFunctionType(ty) => Self::Function(Box::new(Function {
+            AnyTsType::TsFunctionType(ty) => TypeInner::Function(Box::new(Function {
                 is_async: false,
                 type_parameters: generic_params_from_ts_type_params(ty.type_parameters()),
                 name: None,
@@ -273,17 +256,17 @@ impl Type {
             })),
             AnyTsType::TsImportType(_) => {
                 // TODO: Handle import types (`import("./module").T`).
-                Self::Unknown
+                TypeInner::Unknown
             }
             AnyTsType::TsIndexedAccessType(_) => {
                 // TODO: Handle type indexing (`T[U]`).
-                Self::Unknown
+                TypeInner::Unknown
             }
             AnyTsType::TsInferType(_) => {
                 // TODO: Handle `infer T` syntax.
-                Self::Unknown
+                TypeInner::Unknown
             }
-            AnyTsType::TsIntersectionType(ty) => Self::Intersection(Box::new(Intersection(
+            AnyTsType::TsIntersectionType(ty) => TypeInner::Intersection(Box::new(Intersection(
                 ty.types()
                     .into_iter()
                     .filter_map(|ty| ty.ok())
@@ -292,44 +275,48 @@ impl Type {
             ))),
             AnyTsType::TsMappedType(_) => {
                 // TODO: Handle mapped types (`type T<U> = { [K in keyof U]: V }`).
-                Self::Unknown
+                TypeInner::Unknown
             }
-            AnyTsType::TsNeverType(_) => Self::NeverKeyword,
-            AnyTsType::TsNonPrimitiveType(_) => Self::ObjectKeyword,
-            AnyTsType::TsNullLiteralType(_) => Self::Literal(Box::new(Literal::Null)),
+            AnyTsType::TsNeverType(_) => TypeInner::NeverKeyword,
+            AnyTsType::TsNonPrimitiveType(_) => TypeInner::ObjectKeyword,
+            AnyTsType::TsNullLiteralType(_) => TypeInner::Literal(Box::new(Literal::Null)),
             AnyTsType::TsNumberLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
-                (Some(minus_token), Ok(literal_token)) => Self::Literal(Box::new(Literal::Number(
-                    Text::Owned(format!("{minus_token}{literal_token}")),
-                ))),
-                (None, Ok(literal_token)) => Self::Literal(Box::new(Literal::Number(
+                (Some(minus_token), Ok(literal_token)) => TypeInner::Literal(Box::new(
+                    Literal::Number(Text::Owned(format!("{minus_token}{literal_token}"))),
+                )),
+                (None, Ok(literal_token)) => TypeInner::Literal(Box::new(Literal::Number(
                     literal_token.token_text_trimmed().into(),
                 ))),
-                (_, Err(_)) => Self::Unknown,
+                (_, Err(_)) => TypeInner::Unknown,
             },
-            AnyTsType::TsNumberType(_) => Self::Number,
-            AnyTsType::TsObjectType(ty) => Self::Object(Box::new(Object(
+            AnyTsType::TsNumberType(_) => TypeInner::Number,
+            AnyTsType::TsObjectType(ty) => TypeInner::Object(Box::new(Object(
                 ty.members()
                     .into_iter()
                     .filter_map(|member| TypeMember::from_any_ts_type_member(&member))
                     .collect(),
             ))),
-            AnyTsType::TsParenthesizedType(ty) => ty
-                .ty()
-                .map(|ty| Self::from_any_ts_type(&ty))
-                .unwrap_or_default(),
-            AnyTsType::TsReferenceType(ty) => Self::from_ts_reference_type(ty),
+            AnyTsType::TsParenthesizedType(ty) => {
+                return ty
+                    .ty()
+                    .map(|ty| Self::from_any_ts_type(&ty))
+                    .unwrap_or_default();
+            }
+            AnyTsType::TsReferenceType(ty) => {
+                return Self::from_ts_reference_type(ty);
+            }
             AnyTsType::TsStringLiteralType(ty) => match ty.literal_token() {
                 Ok(token) => {
-                    Self::Literal(Box::new(Literal::String(token.token_text_trimmed().into())))
+                    TypeInner::Literal(Box::new(Literal::String(token.token_text_trimmed().into())))
                 }
-                Err(_) => Self::Unknown,
+                Err(_) => TypeInner::Unknown,
             },
-            AnyTsType::TsStringType(_) => Self::String,
-            AnyTsType::TsSymbolType(_) => Self::Symbol,
+            AnyTsType::TsStringType(_) => TypeInner::String,
+            AnyTsType::TsSymbolType(_) => TypeInner::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
-                Self::Literal(Box::new(Literal::Template(Text::Owned(ty.to_string()))))
+                TypeInner::Literal(Box::new(Literal::Template(Text::Owned(ty.to_string()))))
             }
-            AnyTsType::TsThisType(_) => Self::ThisKeyword,
+            AnyTsType::TsThisType(_) => TypeInner::ThisKeyword,
             AnyTsType::TsTupleType(ty) => {
                 let elements: SyntaxResult<Box<_>> = ty
                     .elements()
@@ -337,34 +324,38 @@ impl Type {
                     .map(|el| el.map(|el| TupleElementType::from_any_ts_tuple_type_element(&el)))
                     .collect();
                 match elements {
-                    Ok(elements) => Self::Tuple(Box::new(Tuple(elements))),
-                    Err(_) => Self::Unknown,
+                    Ok(elements) => TypeInner::Tuple(Box::new(Tuple(elements))),
+                    Err(_) => TypeInner::Unknown,
                 }
             }
             AnyTsType::TsTypeOperatorType(ty) => match (ty.operator_token(), ty.ty()) {
                 (Ok(operator_token), Ok(ty)) => TypeOperator::from_str(
                     operator_token.text_trimmed(),
                 )
-                .map_or(Self::Unknown, |operator| {
-                    Self::TypeOperator(Box::new(TypeOperatorType {
+                .map_or(TypeInner::Unknown, |operator| {
+                    TypeInner::TypeOperator(Box::new(TypeOperatorType {
                         operator,
                         ty: Self::from_any_ts_type(&ty),
                     }))
                 }),
-                _ => Self::Unknown,
+                _ => TypeInner::Unknown,
             },
-            AnyTsType::TsTypeofType(ty) => Self::from_ts_typeof_type(ty),
-            AnyTsType::TsUndefinedType(_) => Self::Undefined,
-            AnyTsType::TsUnionType(ty) => Self::Union(Box::new(Union(
+            AnyTsType::TsTypeofType(ty) => {
+                return Self::from_ts_typeof_type(ty);
+            }
+            AnyTsType::TsUndefinedType(_) => TypeInner::Undefined,
+            AnyTsType::TsUnionType(ty) => TypeInner::Union(Box::new(Union(
                 ty.types()
                     .into_iter()
                     .filter_map(|ty| ty.ok())
                     .map(|ty| Self::from_any_ts_type(&ty))
                     .collect(),
             ))),
-            AnyTsType::TsUnknownType(_) => Self::UnknownKeyword,
-            AnyTsType::TsVoidType(_) => Self::VoidKeyword,
-        }
+            AnyTsType::TsUnknownType(_) => TypeInner::UnknownKeyword,
+            AnyTsType::TsVoidType(_) => TypeInner::VoidKeyword,
+        };
+
+        inner.into()
     }
 
     pub fn from_any_ts_type_result(ty: SyntaxResult<AnyTsType>) -> Self {
@@ -372,7 +363,7 @@ impl Type {
     }
 
     pub fn from_js_arrow_function_expression(expr: &JsArrowFunctionExpression) -> Self {
-        Type::Function(Box::new(Function {
+        TypeInner::Function(Box::new(Function {
             is_async: expr.async_token().is_some(),
             type_parameters: generic_params_from_ts_type_params(expr.type_parameters()),
             name: None,
@@ -382,7 +373,7 @@ impl Type {
                         name: binding
                             .as_js_identifier_binding()
                             .and_then(|binding| text_from_token(binding.name_token())),
-                        ty: Type::Unknown,
+                        ty: Type::unknown(),
                         is_optional: false,
                         is_rest: false,
                     }])
@@ -395,10 +386,11 @@ impl Type {
             return_type: return_type_from_annotation(expr.return_type_annotation())
                 .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
         }))
+        .into()
     }
 
     pub fn from_js_class_declaration(decl: &JsClassDeclaration) -> Self {
-        Self::Class(Box::new(Class {
+        TypeInner::Class(Box::new(Class {
             name: decl
                 .id()
                 .ok()
@@ -412,10 +404,11 @@ impl Type {
                 .filter_map(|member| ClassMember::from_any_js_class_member(&member))
                 .collect(),
         }))
+        .into()
     }
 
     pub fn from_js_function_declaration(decl: &JsFunctionDeclaration) -> Self {
-        Self::Function(Box::new(Function {
+        TypeInner::Function(Box::new(Function {
             is_async: decl.async_token().is_some(),
             type_parameters: generic_params_from_ts_type_params(decl.type_parameters()),
             name: decl
@@ -428,10 +421,11 @@ impl Type {
             return_type: return_type_from_annotation(decl.return_type_annotation())
                 .unwrap_or_else(|| return_type_from_async_token(decl.async_token())),
         }))
+        .into()
     }
 
     pub fn from_js_function_expression(expr: &JsFunctionExpression) -> Self {
-        Type::Function(Box::new(Function {
+        TypeInner::Function(Box::new(Function {
             is_async: expr.async_token().is_some(),
             type_parameters: generic_params_from_ts_type_params(expr.type_parameters()),
             name: expr
@@ -443,12 +437,13 @@ impl Type {
             return_type: return_type_from_annotation(expr.return_type_annotation())
                 .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
         }))
+        .into()
     }
 
     pub fn from_js_new_expression(expr: &JsNewExpression) -> Option<Self> {
-        let callee_type = Type::from_any_js_expression(&expr.callee().ok()?);
-        match callee_type {
-            Type::Class(class) => {
+        let callee_type = Self::from_any_js_expression(&expr.callee().ok()?);
+        match callee_type.deref() {
+            TypeInner::Class(class) => {
                 let num_args = expr
                     .arguments()
                     .map_or(0, |args| args.args().into_iter().count());
@@ -465,14 +460,17 @@ impl Type {
                         }
                         _ => None,
                     })
-                    .unwrap_or(Type::Class(class));
+                    .unwrap_or_else(|| callee_type.clone());
                 Some(ty)
             }
-            Type::Reference(reference) => {
+            TypeInner::Reference(reference) => {
                 // TODO: Infer type parameters from arguments.
-                Some(Type::Reference(Box::new(TypeReference::from_qualifier(
-                    reference.qualifier.clone(),
-                ))))
+                Some(
+                    TypeInner::Reference(Box::new(TypeReference::from_qualifier(
+                        reference.qualifier.clone(),
+                    )))
+                    .into(),
+                )
             }
             // TODO: Check other types that may have a constructor.
             _ => None,
@@ -480,7 +478,7 @@ impl Type {
     }
 
     pub fn from_js_object_expression(expr: &JsObjectExpression) -> Self {
-        Self::Object(Box::new(Object(
+        TypeInner::Object(Box::new(Object(
             expr.members()
                 .into_iter()
                 .filter_map(|member| {
@@ -490,14 +488,16 @@ impl Type {
                 })
                 .collect(),
         )))
+        .into()
     }
 
     pub fn from_js_reference_identifier(id: &JsReferenceIdentifier) -> Self {
         if id.is_undefined() {
-            Type::Undefined
+            Self::undefined()
         } else {
             id.name()
-                .map(|name| Self::Reference(Box::new(TypeReference::from_name(name))))
+                .map(|name| TypeInner::Reference(Box::new(TypeReference::from_name(name))))
+                .map(Into::into)
                 .unwrap_or_default()
         }
     }
@@ -506,9 +506,9 @@ impl Type {
         let ty = match decl.variable_annotation() {
             Some(annotation) => {
                 let annotation = annotation.type_annotation().ok()??;
-                Type::from_any_ts_type(&annotation.ty().ok()?)
+                Self::from_any_ts_type(&annotation.ty().ok()?)
             }
-            None => Type::from_any_js_expression(&decl.initializer()?.expression().ok()?),
+            None => Self::from_any_js_expression(&decl.initializer()?.expression().ok()?),
         };
 
         Some(ty)
@@ -520,7 +520,7 @@ impl Type {
             .and_then(|name| TypeReferenceQualifier::from_any_ts_name(&name))
             .map(|qualifier| {
                 if qualifier.is_promise() {
-                    Self::Promise(Box::new(
+                    TypeInner::Promise(Box::new(
                         ty.type_arguments()
                             .and_then(|args| {
                                 args.ts_type_argument_list()
@@ -532,24 +532,26 @@ impl Type {
                             .unwrap_or_default(),
                     ))
                 } else {
-                    Self::Reference(Box::new(TypeReference {
+                    TypeInner::Reference(Box::new(TypeReference {
                         qualifier,
+                        ty: Type::unknown(),
                         type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
                     }))
                 }
             })
+            .map(Into::into)
             .unwrap_or_default()
     }
 
     pub fn from_ts_type_alias_declaration(decl: &TsTypeAliasDeclaration) -> Option<Self> {
-        let ty = Self::Alias(Box::new(TypeAlias {
+        let inner = TypeInner::Alias(Box::new(TypeAlias {
             ty: Self::from_any_ts_type(&decl.ty().ok()?),
             type_parameters: GenericTypeParameter::params_from_ts_type_parameters(
                 &decl.type_parameters()?,
             ),
         }));
 
-        Some(ty)
+        Some(inner.into())
     }
 
     pub fn from_ts_typeof_type(ty: &TsTypeofType) -> Self {
@@ -557,11 +559,13 @@ impl Type {
             .ok()
             .and_then(|name| TypeReferenceQualifier::from_any_ts_name(&name))
             .map(|qualifier| {
-                Self::TypeofType(Box::new(TypeReference {
+                TypeInner::TypeofType(Box::new(TypeReference {
                     qualifier,
+                    ty: Type::unknown(),
                     type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
                 }))
             })
+            .map(Into::into)
             .unwrap_or_default()
     }
 
@@ -646,7 +650,7 @@ impl FunctionParameter {
             },
             AnyJsParameter::AnyJsFormalParameter(_) => Self {
                 name: None,
-                ty: Type::Unknown,
+                ty: Type::unknown(),
                 is_optional: false,
                 is_rest: false,
             },
@@ -839,7 +843,11 @@ impl TypeMember {
                 .map(|name| {
                     TypeMember::Property(PropertyTypeMember {
                         name: name.clone(),
-                        ty: Type::TypeofValue(Box::new(name)),
+                        ty: TypeInner::TypeofValue(Box::new(TypeofValue {
+                            identifier: name,
+                            ty: Type::unknown(),
+                        }))
+                        .into(),
                         is_optional: false,
                     })
                 }),
@@ -916,6 +924,7 @@ impl TypeReference {
     pub fn from_qualifier(qualifier: TypeReferenceQualifier) -> Self {
         Self {
             qualifier,
+            ty: Type::unknown(),
             type_parameters: Box::new([]),
         }
     }
@@ -976,8 +985,8 @@ fn return_type_from_annotation(annotation: Option<TsReturnTypeAnnotation>) -> Op
 
 fn return_type_from_async_token(async_token: Option<JsSyntaxToken>) -> ReturnType {
     ReturnType::Type(match async_token {
-        Some(_) => Type::Promise(Box::new(Type::Unknown)),
-        None => Type::Unknown,
+        Some(_) => TypeInner::Promise(Box::new(Type::unknown())).into(),
+        None => Type::unknown(),
     })
 }
 

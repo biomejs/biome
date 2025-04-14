@@ -76,6 +76,11 @@ impl JsBinding {
             id: binding.scope_id,
         }
     }
+
+    /// Returns a reference to the binding's type.
+    pub fn ty(&self) -> &Type {
+        &self.data.binding(self.id).ty
+    }
 }
 
 #[derive(Clone, Debug, Default)]

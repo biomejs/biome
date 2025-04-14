@@ -15,7 +15,9 @@ expression: exports
             local_name: Some(
                 "a",
             ),
-            ty: Unknown,
+            ty: Type(
+                Unknown,
+            ),
         },
     ),
     Borrowed(
@@ -30,7 +32,9 @@ expression: exports
             local_name: Some(
                 "b",
             ),
-            ty: Unknown,
+            ty: Type(
+                Unknown,
+            ),
         },
     ),
     Borrowed(
@@ -45,20 +49,24 @@ expression: exports
             local_name: Some(
                 "bar",
             ),
-            ty: Function(
-                Function {
-                    is_async: false,
-                    type_parameters: [],
-                    name: Some(
-                        Borrowed(
-                            "bar",
+            ty: Type(
+                Function(
+                    Function {
+                        is_async: false,
+                        type_parameters: [],
+                        name: Some(
+                            Borrowed(
+                                "bar",
+                            ),
                         ),
-                    ),
-                    parameters: [],
-                    return_type: Type(
-                        Unknown,
-                    ),
-                },
+                        parameters: [],
+                        return_type: Type(
+                            Type(
+                                Unknown,
+                            ),
+                        ),
+                    },
+                ),
             ),
         },
     ),
@@ -70,22 +78,28 @@ expression: exports
             local_name: Some(
                 "baz",
             ),
-            ty: Function(
-                Function {
-                    is_async: true,
-                    type_parameters: [],
-                    name: Some(
-                        Borrowed(
-                            "baz",
+            ty: Type(
+                Function(
+                    Function {
+                        is_async: true,
+                        type_parameters: [],
+                        name: Some(
+                            Borrowed(
+                                "baz",
+                            ),
                         ),
-                    ),
-                    parameters: [],
-                    return_type: Type(
-                        Promise(
-                            Unknown,
+                        parameters: [],
+                        return_type: Type(
+                            Type(
+                                Promise(
+                                    Type(
+                                        Unknown,
+                                    ),
+                                ),
+                            ),
                         ),
-                    ),
-                },
+                    },
+                ),
             ),
         },
     ),
@@ -101,7 +115,9 @@ expression: exports
             local_name: Some(
                 "d",
             ),
-            ty: Unknown,
+            ty: Type(
+                Unknown,
+            ),
         },
     ),
     Static(
@@ -116,34 +132,41 @@ expression: exports
             local_name: Some(
                 "Component",
             ),
-            ty: Function(
-                Function {
-                    is_async: false,
-                    type_parameters: [],
-                    name: Some(
-                        Borrowed(
-                            "Component",
+            ty: Type(
+                Function(
+                    Function {
+                        is_async: false,
+                        type_parameters: [],
+                        name: Some(
+                            Borrowed(
+                                "Component",
+                            ),
                         ),
-                    ),
-                    parameters: [],
-                    return_type: Type(
-                        Reference(
-                            TypeReference {
-                                qualifier: TypeReferenceQualifier(
-                                    [
-                                        Borrowed(
-                                            "JSX",
+                        parameters: [],
+                        return_type: Type(
+                            Type(
+                                Reference(
+                                    TypeReference {
+                                        qualifier: TypeReferenceQualifier(
+                                            [
+                                                Borrowed(
+                                                    "JSX",
+                                                ),
+                                                Borrowed(
+                                                    "Element",
+                                                ),
+                                            ],
                                         ),
-                                        Borrowed(
-                                            "Element",
+                                        ty: Type(
+                                            Unknown,
                                         ),
-                                    ],
+                                        type_parameters: [],
+                                    },
                                 ),
-                                type_parameters: [],
-                            },
+                            ),
                         ),
-                    ),
-                },
+                    },
+                ),
             ),
         },
     ),
@@ -159,7 +182,9 @@ expression: exports
             local_name: Some(
                 "e",
             ),
-            ty: Unknown,
+            ty: Type(
+                Unknown,
+            ),
         },
     ),
     Borrowed(
@@ -174,20 +199,24 @@ expression: exports
             local_name: Some(
                 "foo",
             ),
-            ty: Function(
-                Function {
-                    is_async: false,
-                    type_parameters: [],
-                    name: Some(
-                        Borrowed(
-                            "foo",
+            ty: Type(
+                Function(
+                    Function {
+                        is_async: false,
+                        type_parameters: [],
+                        name: Some(
+                            Borrowed(
+                                "foo",
+                            ),
                         ),
-                    ),
-                    parameters: [],
-                    return_type: Type(
-                        Unknown,
-                    ),
-                },
+                        parameters: [],
+                        return_type: Type(
+                            Type(
+                                Unknown,
+                            ),
+                        ),
+                    },
+                ),
             ),
         },
     ),
@@ -199,10 +228,12 @@ expression: exports
             local_name: Some(
                 "qux",
             ),
-            ty: Literal(
-                Number(
-                    Borrowed(
-                        "1",
+            ty: Type(
+                Literal(
+                    Number(
+                        Borrowed(
+                            "1",
+                        ),
                     ),
                 ),
             ),
@@ -220,7 +251,9 @@ expression: exports
             local_name: Some(
                 "quz",
             ),
-            ty: Unknown,
+            ty: Type(
+                Unknown,
+            ),
         },
     ),
 }

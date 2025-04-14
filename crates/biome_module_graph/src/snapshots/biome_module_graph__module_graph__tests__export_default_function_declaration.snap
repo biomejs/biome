@@ -15,34 +15,41 @@ expression: data.exports
             local_name: Some(
                 "Component",
             ),
-            ty: Function(
-                Function {
-                    is_async: false,
-                    type_parameters: [],
-                    name: Some(
-                        Borrowed(
-                            "Component",
+            ty: Type(
+                Function(
+                    Function {
+                        is_async: false,
+                        type_parameters: [],
+                        name: Some(
+                            Borrowed(
+                                "Component",
+                            ),
                         ),
-                    ),
-                    parameters: [],
-                    return_type: Type(
-                        Reference(
-                            TypeReference {
-                                qualifier: TypeReferenceQualifier(
-                                    [
-                                        Borrowed(
-                                            "JSX",
+                        parameters: [],
+                        return_type: Type(
+                            Type(
+                                Reference(
+                                    TypeReference {
+                                        qualifier: TypeReferenceQualifier(
+                                            [
+                                                Borrowed(
+                                                    "JSX",
+                                                ),
+                                                Borrowed(
+                                                    "Element",
+                                                ),
+                                            ],
                                         ),
-                                        Borrowed(
-                                            "Element",
+                                        ty: Type(
+                                            Unknown,
                                         ),
-                                    ],
+                                        type_parameters: [],
+                                    },
                                 ),
-                                type_parameters: [],
-                            },
+                            ),
                         ),
-                    ),
-                },
+                    },
+                ),
             ),
         },
     ),
