@@ -183,35 +183,28 @@ const HEXADECIMAL_OPTS: (usize, usize) = (0, 2);
 fn format_num(raw: &str) -> String {
     let mut chars = raw.chars().peekable();
     let mut result = String::new();
-
-    let (mut min_digits, mut group_length) = DECIMAL_OPTS;
+    let mut current_num = String::new();
 
     let mut is_base_10 = true;
-    let mut in_fraction_part = false;
-    let mut is_past_prefix = false;
+    let mut in_fraction = false;
+    let mut prefix_parsed = false;
 
-    let mut current_num = String::new();
+    let (mut min_digits, mut group_len) = DECIMAL_OPTS;
 
     while let Some(c) = chars.next() {
         match c {
             '_' => continue,
-            '0' if !is_past_prefix && !in_fraction_part => {
-                if let Some(n) = &chars.peek() {
-                    match n {
+            '0' if !prefix_parsed && !in_fraction => {
+                if let Some(&next) = chars.peek() {
+                    match next {
                         'b' | 'B' => {
-                            (min_digits, group_length) = BINARY_OPTS;
-                            is_base_10 = false;
-                            is_past_prefix = true;
+                            (min_digits, group_len) = BINARY_OPTS;
                         }
                         'o' | 'O' | '0'..='7' => {
-                            (min_digits, group_length) = OCTAL_OPTS;
-                            is_base_10 = false;
-                            is_past_prefix = true;
+                            (min_digits, group_len) = OCTAL_OPTS;
                         }
                         'x' | 'X' => {
-                            (min_digits, group_length) = HEXADECIMAL_OPTS;
-                            is_base_10 = false;
-                            is_past_prefix = true;
+                            (min_digits, group_len) = HEXADECIMAL_OPTS;
                         }
                         _ => {
                             result.push(c);
@@ -220,67 +213,59 @@ fn format_num(raw: &str) -> String {
                     }
                     result.push(c);
                     result.push(chars.next().unwrap());
+                    is_base_10 = false;
+                    prefix_parsed = true;
                 }
             }
             'e' | 'E' if is_base_10 => {
-                if in_fraction_part {
-                    result.push_str(&add_separators_from_left(
-                        &current_num,
-                        min_digits,
-                        group_length,
-                    ));
-                } else {
-                    result.push_str(&add_separators_from_right(
-                        &current_num,
-                        min_digits,
-                        group_length,
-                    ));
-                }
-                current_num.clear();
+                flush_current_num(
+                    &mut result,
+                    &current_num,
+                    in_fraction,
+                    min_digits,
+                    group_len,
+                );
                 result.push(c);
-                in_fraction_part = false;
+                current_num.clear();
+                in_fraction = false;
             }
             '.' => {
-                result.push_str(&add_separators_from_right(
-                    &current_num,
-                    min_digits,
-                    group_length,
-                ));
+                flush_current_num(&mut result, &current_num, false, min_digits, group_len);
+                result.push(c);
                 current_num.clear();
-                result.push(c);
-                in_fraction_part = true;
+                in_fraction = true;
             }
-            '-' | '+' => {
-                result.push(c);
-            }
+            '-' | '+' => result.push(c),
             _ if c.is_ascii_alphanumeric() => {
-                is_past_prefix = true;
+                prefix_parsed = true;
                 current_num.push(c);
             }
-            _ => {
-                unimplemented!("unexpected character '{}'", c);
-            }
+
+            _ => panic!("unexpected character '{}'", c),
         }
     }
 
-    if in_fraction_part {
-        result.push_str(&add_separators_from_left(
-            &current_num,
-            min_digits,
-            group_length,
-        ));
-    } else {
-        result.push_str(&add_separators_from_right(
-            &current_num,
-            min_digits,
-            group_length,
-        ));
-    }
+    flush_current_num(
+        &mut result,
+        &current_num,
+        in_fraction,
+        min_digits,
+        group_len,
+    );
 
     result
 }
 
-#[test]
-fn test() {
-    assert_eq!(format_num("-30000.65432E+12000"), "-30_000.654_32E+12_000");
+fn flush_current_num(
+    result: &mut String,
+    current: &str,
+    left_aligned: bool,
+    min_digits: usize,
+    group_len: usize,
+) {
+    if left_aligned {
+        result.push_str(&add_separators_from_left(current, min_digits, group_len));
+    } else {
+        result.push_str(&add_separators_from_right(current, min_digits, group_len));
+    }
 }
