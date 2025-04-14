@@ -2,5 +2,16 @@
 "@biomejs/biome": minor
 ---
 
-Enhanced no_focused_test rule to also recognize usage in loops. Solves #5493
-Implement new helper methods in `biome_js_syntax/src/expr_ext.rs` to search for focused tests with or without loops.
+The rule [`noFocusedTests`](https://biomejs.dev/linter/rules/no-focused-tests/) can now detect the usage of focused tests inside loops.
+
+```js
+// invalid
+describe.only.each([["a"], ["b"]])("%s", (a) => {});
+it.only.each([["a"], ["b"]])("%s", (a) => {});
+test.only.each([["a"], ["b"]])("%s", (a) => {});
+
+// valid
+describe.each([["a"], ["b"]])("%s", (a) => {});
+it.each([["a"], ["b"]])("%s", (a) => {});
+test.each([["a"], ["b"]])("%s", (a) => {});
+```
