@@ -39,7 +39,8 @@
         "hashbrown",
         "grit-pattern-matcher",
         "grit-util",
-        "getrandom"
+        "getrandom",
+        "rand"
       ]
     },
     {
