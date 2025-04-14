@@ -34,11 +34,6 @@ expression: valid.jsonc
 
 # Input
 ```cjs
-({ a: 1, ['a']: 1 });
-```
-
-# Input
-```cjs
 ({ a: 1, b: 1 });
 ```
 
@@ -86,5 +81,3 @@ expression: valid.jsonc
 ```cjs
 var { a, a } = obj;
 ```
-
-

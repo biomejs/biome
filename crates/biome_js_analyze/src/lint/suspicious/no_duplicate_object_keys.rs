@@ -1,17 +1,10 @@
-use crate::utils::batch::JsBatchMutation;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{
-    AnyJsObjectMember, JsGetterObjectMember, JsObjectExpression, JsSetterObjectMember,
-};
-use biome_js_syntax::{
-    JsMethodObjectMember, JsPropertyObjectMember, JsShorthandPropertyObjectMember, TextRange,
-};
-use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_js_syntax::{AnyJsObjectMember, JsObjectExpression, JsSyntaxKind};
+use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, TokenText};
 use rustc_hash::FxHashMap;
-use std::cmp::Ordering;
 use std::collections::hash_map;
 use std::fmt::Display;
 
@@ -67,139 +60,6 @@ declare_lint_rule! {
     }
 }
 
-/// An object member defining a single object property.
-#[derive(Debug, Clone)]
-enum MemberDefinition {
-    Getter(JsGetterObjectMember),
-    Setter(JsSetterObjectMember),
-    Method(JsMethodObjectMember),
-    Property(JsPropertyObjectMember),
-    ShorthandProperty(JsShorthandPropertyObjectMember),
-}
-impl MemberDefinition {
-    fn name(&self) -> Option<TokenText> {
-        match self {
-            Self::Getter(getter) => getter.name().ok()?.as_js_literal_member_name()?.name().ok(),
-            Self::Setter(setter) => setter.name().ok()?.as_js_literal_member_name()?.name().ok(),
-            Self::Method(method) => method.name().ok()?.as_js_literal_member_name()?.name().ok(),
-            Self::Property(property) => property
-                .name()
-                .ok()?
-                .as_js_literal_member_name()?
-                .name()
-                .ok(),
-            Self::ShorthandProperty(shorthand_property) => Some(
-                shorthand_property
-                    .name()
-                    .ok()?
-                    .value_token()
-                    .ok()?
-                    .token_text_trimmed(),
-            ),
-        }
-    }
-
-    fn range(&self) -> TextRange {
-        match self {
-            Self::Getter(getter) => getter.range(),
-            Self::Setter(setter) => setter.range(),
-            Self::Method(method) => method.range(),
-            Self::Property(property) => property.range(),
-            Self::ShorthandProperty(shorthand_property) => shorthand_property.range(),
-        }
-    }
-
-    fn into_node(self) -> AnyJsObjectMember {
-        match self {
-            Self::Getter(getter) => getter.into(),
-            Self::Setter(setter) => setter.into(),
-            Self::Method(method) => method.into(),
-            Self::Property(property) => property.into(),
-            Self::ShorthandProperty(shorthand_property) => shorthand_property.into(),
-        }
-    }
-}
-impl Display for MemberDefinition {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
-            Self::Getter(_) => "getter",
-            Self::Setter(_) => "setter",
-            Self::Method(_) => "method",
-            Self::Property(_) => "property value",
-            Self::ShorthandProperty(_) => "shorthand property",
-        })?;
-        if let Some(name) = self.name() {
-            f.write_str(" named ")?;
-            f.write_str(&name)?;
-        }
-        Ok(())
-    }
-}
-enum MemberDefinitionError {
-    NotASinglePropertyMember,
-    BogusMemberType,
-}
-impl TryFrom<AnyJsObjectMember> for MemberDefinition {
-    type Error = MemberDefinitionError;
-
-    fn try_from(member: AnyJsObjectMember) -> Result<Self, Self::Error> {
-        match member {
-            AnyJsObjectMember::JsGetterObjectMember(member) => Ok(Self::Getter(member)),
-            AnyJsObjectMember::JsSetterObjectMember(member) => Ok(Self::Setter(member)),
-            AnyJsObjectMember::JsMethodObjectMember(member) => Ok(Self::Method(member)),
-            AnyJsObjectMember::JsPropertyObjectMember(member) => Ok(Self::Property(member)),
-            AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
-                Ok(Self::ShorthandProperty(member))
-            }
-            AnyJsObjectMember::JsSpread(_) => Err(Self::Error::NotASinglePropertyMember),
-            AnyJsObjectMember::JsBogusMember(_) => Err(Self::Error::BogusMemberType),
-        }
-    }
-}
-
-/// A descriptor for a property that is, as far as we can tell from statically analyzing the object expression,
-/// not overwritten by another object member and will make it into the object.
-#[derive(Clone)]
-enum DefinedProperty {
-    Get(TextRange),
-    Set(TextRange),
-    GetSet(TextRange, TextRange),
-    Value(TextRange),
-}
-impl From<MemberDefinition> for DefinedProperty {
-    fn from(definition: MemberDefinition) -> Self {
-        match definition {
-            MemberDefinition::Getter(getter) => Self::Get(getter.range()),
-            MemberDefinition::Setter(setter) => Self::Set(setter.range()),
-            MemberDefinition::Method(method) => Self::Value(method.range()),
-            MemberDefinition::Property(property) => Self::Value(property.range()),
-            MemberDefinition::ShorthandProperty(shorthand_property) => {
-                Self::Value(shorthand_property.range())
-            }
-        }
-    }
-}
-
-pub struct PropertyConflict(DefinedProperty, MemberDefinition);
-impl DefinedProperty {
-    fn extend_with(&mut self, member_definition: MemberDefinition) -> Option<PropertyConflict> {
-        match (&self, member_definition) {
-            // Add missing get/set counterpart
-            (Self::Set(set_range), MemberDefinition::Getter(getter)) => {
-                *self = Self::GetSet(getter.range(), *set_range);
-                None
-            }
-
-            (Self::Get(get_range), MemberDefinition::Setter(setter)) => {
-                *self = Self::GetSet(*get_range, setter.range());
-                None
-            }
-            // Else conflict
-            (_, member_definition) => Some(PropertyConflict(self.clone(), member_definition)),
-        }
-    }
-}
-
 impl Rule for NoDuplicateObjectKeys {
     type Query = Ast<JsObjectExpression>;
     type State = PropertyConflict;
@@ -209,27 +69,25 @@ impl Rule for NoDuplicateObjectKeys {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let mut defined_properties: FxHashMap<TokenText, DefinedProperty> = FxHashMap::default();
+        let mut defined_properties: FxHashMap<TokenText, DefinedProperties> = FxHashMap::default();
         let mut signals = Vec::new();
 
-        for member_definition in node
+        for (member_name, defined_property) in node
             .members()
             .into_iter()
             .flatten()
-            .filter_map(|member| MemberDefinition::try_from(member).ok())
+            .filter_map(|member| Some((member.name()?, DefinedProperty::try_from(&member).ok()?)))
             // Note that we iterate from last to first property, so that we highlight properties being overwritten as problems and not those that take effect.
             .rev()
         {
-            if let Some(member_name) = member_definition.name() {
-                match defined_properties.entry(member_name) {
-                    hash_map::Entry::Occupied(entry) => {
-                        if let Some(conflict) = entry.into_mut().extend_with(member_definition) {
-                            signals.push(conflict);
-                        }
+            match defined_properties.entry(member_name) {
+                hash_map::Entry::Occupied(entry) => {
+                    if let Some(conflict) = entry.into_mut().extend_with(defined_property) {
+                        signals.push(conflict);
                     }
-                    hash_map::Entry::Vacant(entry) => {
-                        entry.insert(DefinedProperty::from(member_definition));
-                    }
+                }
+                hash_map::Entry::Vacant(entry) => {
+                    entry.insert(defined_property.into());
                 }
             }
         }
@@ -238,65 +96,221 @@ impl Rule for NoDuplicateObjectKeys {
     }
 
     fn diagnostic(
-        _ctx: &RuleContext<Self>,
-        PropertyConflict(defined_property, member_definition): &Self::State,
+        ctx: &RuleContext<Self>,
+        PropertyConflict(overridden_properties, defined_property): &Self::State,
     ) -> Option<RuleDiagnostic> {
-        let mut diagnostic = RuleDiagnostic::new(
+        let node = ctx.query();
+        let members = node.members().into_syntax();
+        let range = members
+            .slots()
+            .nth(defined_property.index() as usize)?
+            .into_node()?
+            .text_trimmed_range();
+        let diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            member_definition.range(),
+            range,
             format!(
-                "This {member_definition} is later overwritten by an object member with the same name."
+                "This {defined_property} is later overwritten by an object member with the same name."
             ),
         );
-        diagnostic = match defined_property {
-            DefinedProperty::Get(range) => {
-                diagnostic.detail(range, "Overwritten with this getter.")
+        let diagnostic = match overridden_properties {
+            DefinedProperties::Get(index)
+            | DefinedProperties::Set(index)
+            | DefinedProperties::Method(index)
+            | DefinedProperties::Property(index) => {
+                let range = members
+                    .slots()
+                    .nth(*index as usize)?
+                    .into_node()?
+                    .text_trimmed_range();
+                diagnostic.detail(range, markup! { "Overwritten with this "{format_args!("{}", overridden_properties)}"." })
             }
-            DefinedProperty::Set(range) => {
-                diagnostic.detail(range, "Overwritten with this setter.")
-            }
-            DefinedProperty::Value(range) => {
-                diagnostic.detail(range, "Overwritten with this value.")
-            }
-            DefinedProperty::GetSet(get_range, set_range) => match member_definition {
-                MemberDefinition::Getter(_) => {
-                    diagnostic.detail(get_range, "Overwritten with this getter.")
-                }
-                MemberDefinition::Setter(_) => {
-                    diagnostic.detail(set_range, "Overwritten with this setter.")
-                }
-                MemberDefinition::Method(_)
-                | MemberDefinition::Property(_)
-                | MemberDefinition::ShorthandProperty(_) => match get_range.ordering(*set_range) {
-                    Ordering::Less => diagnostic.detail(set_range, "Overwritten with this setter."),
-                    Ordering::Greater => {
-                        diagnostic.detail(get_range, "Overwritten with this getter.")
+            DefinedProperties::GetSet(getter_index, setter_index) => {
+                let getter_range = members
+                    .slots()
+                    .nth(*getter_index as usize)?
+                    .into_node()?
+                    .text_trimmed_range();
+                let setter_range = members
+                    .slots()
+                    .nth(*setter_index as usize)?
+                    .into_node()?
+                    .text_trimmed_range();
+                match defined_property {
+                    DefinedProperty::Get(_) => {
+                        diagnostic.detail(getter_range, "Overwritten with this getter.")
                     }
-                    Ordering::Equal => {
-                        panic!(
-                            "The ranges of the property getter and property setter cannot overlap."
-                        )
+                    DefinedProperty::Set(_) => {
+                        diagnostic.detail(setter_range, "Overwritten with this setter.")
                     }
-                },
-            },
+                    DefinedProperty::Method(_) | DefinedProperty::Property(_) => {
+                        if getter_range < setter_range {
+                            diagnostic.detail(setter_range, "Overwritten with this setter.")
+                        } else {
+                            diagnostic.detail(getter_range, "Overwritten with this getter.")
+                        }
+                    }
+                }
+            }
         };
-        diagnostic = diagnostic.note("If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored.");
-
-        Some(diagnostic)
+        Some(diagnostic.note("If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored."))
     }
 
     fn action(
         ctx: &RuleContext<Self>,
-        PropertyConflict(_, member_definition): &Self::State,
+        PropertyConflict(overridden_properties, defined_property): &Self::State,
     ) -> Option<JsRuleAction> {
-        let mut batch = ctx.root().begin();
-        batch.remove_js_object_member(member_definition.clone().into_node());
+        let mut mutation = ctx.root().begin();
+        let node = ctx.query();
+        let members = node.members().into_syntax();
+        let member = members
+            .slots()
+            .nth(defined_property.index() as usize)?
+            .into_node()?;
+        if member.has_leading_comments() {
+            match overridden_properties {
+                DefinedProperties::Get(index)
+                | DefinedProperties::Set(index)
+                | DefinedProperties::Method(index)
+                | DefinedProperties::Property(index) => {
+                    let node = members.slots().nth(*index as usize)?.into_node()?;
+                    let new_node = node
+                        .clone()
+                        .prepend_trivia_pieces(member.first_leading_trivia()?.pieces())?;
+                    mutation.replace_element_discard_trivia(node.into(), new_node.into());
+                }
+                DefinedProperties::GetSet(getter_index, setter_index) => {
+                    let getter = members.slots().nth(*getter_index as usize)?.into_node()?;
+                    let setter = members.slots().nth(*setter_index as usize)?.into_node()?;
+                    if matches!(defined_property, DefinedProperty::Set(_))
+                        || getter.text_trimmed_range() < setter.text_trimmed_range()
+                    {
+                        let new_setter = setter
+                            .clone()
+                            .prepend_trivia_pieces(member.first_leading_trivia()?.pieces())?;
+                        mutation.replace_element_discard_trivia(setter.into(), new_setter.into());
+                    } else {
+                        let new_getter = getter
+                            .clone()
+                            .prepend_trivia_pieces(member.first_leading_trivia()?.pieces())?;
+                        mutation.replace_element_discard_trivia(getter.into(), new_getter.into());
+                    }
+                }
+            }
+        }
+        if let Some(NodeOrToken::Token(next_token)) = member.next_sibling_or_token() {
+            if next_token.kind() == JsSyntaxKind::COMMA {
+                mutation.remove_token(next_token);
+            }
+        }
+        mutation.remove_element(member.into());
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             // The property initialization could contain side effects
             ctx.metadata().applicability(),
-            markup!("Remove this " {member_definition.to_string()}).to_owned(),
-            batch,
+            markup!("Remove this " {format_args!("{}", defined_property)} ".").to_owned(),
+            mutation,
         ))
+    }
+}
+
+pub struct PropertyConflict(DefinedProperties, DefinedProperty);
+
+/// A descriptor for a property that is, as far as we can tell from statically analyzing the object expression,
+/// not overwritten by another object member and will make it into the object.
+#[derive(Clone)]
+enum DefinedProperty {
+    Get(u32),
+    Set(u32),
+    Method(u32),
+    Property(u32),
+}
+impl DefinedProperty {
+    fn index(&self) -> u32 {
+        match self {
+            Self::Get(index) | Self::Set(index) | Self::Method(index) | Self::Property(index) => {
+                *index
+            }
+        }
+    }
+}
+impl TryFrom<&AnyJsObjectMember> for DefinedProperty {
+    type Error = ();
+    fn try_from(value: &AnyJsObjectMember) -> Result<Self, Self::Error> {
+        match value {
+            AnyJsObjectMember::JsGetterObjectMember(member) => {
+                Ok(Self::Get(member.syntax().index() as u32))
+            }
+            AnyJsObjectMember::JsMethodObjectMember(member) => {
+                Ok(Self::Method(member.syntax().index() as u32))
+            }
+            AnyJsObjectMember::JsPropertyObjectMember(member) => {
+                Ok(Self::Property(member.syntax().index() as u32))
+            }
+            AnyJsObjectMember::JsSetterObjectMember(member) => {
+                Ok(Self::Set(member.syntax().index() as u32))
+            }
+            AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
+                Ok(Self::Property(member.syntax().index() as u32))
+            }
+            AnyJsObjectMember::JsBogusMember(_) | AnyJsObjectMember::JsSpread(_) => Err(()),
+        }
+    }
+}
+impl Display for DefinedProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::Get(_) => "getter",
+            Self::Set(_) => "setter",
+            Self::Method(_) => "method",
+            Self::Property(_) => "property",
+        })
+    }
+}
+
+#[derive(Clone)]
+enum DefinedProperties {
+    Get(u32),
+    Set(u32),
+    GetSet(u32, u32),
+    Method(u32),
+    Property(u32),
+}
+impl DefinedProperties {
+    fn extend_with(&mut self, other: DefinedProperty) -> Option<PropertyConflict> {
+        match (&self, other) {
+            // Add missing get/set counterpart
+            (Self::Set(setter_index), DefinedProperty::Get(getter_index)) => {
+                *self = Self::GetSet(getter_index, *setter_index);
+                None
+            }
+            (Self::Get(getter_index), DefinedProperty::Set(setter_index)) => {
+                *self = Self::GetSet(*getter_index, setter_index);
+                None
+            }
+            // Else conflict
+            (_, other) => Some(PropertyConflict(self.clone(), other)),
+        }
+    }
+}
+impl From<DefinedProperty> for DefinedProperties {
+    fn from(value: DefinedProperty) -> Self {
+        match value {
+            DefinedProperty::Get(index) => DefinedProperties::Get(index),
+            DefinedProperty::Set(index) => DefinedProperties::Set(index),
+            DefinedProperty::Method(index) => DefinedProperties::Method(index),
+            DefinedProperty::Property(index) => DefinedProperties::Property(index),
+        }
+    }
+}
+impl Display for DefinedProperties {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::Get(_) => "getter",
+            Self::Set(_) => "setter",
+            Self::GetSet(_, _) => "getter and setter",
+            Self::Method(_) => "method",
+            Self::Property(_) => "property",
+        })
     }
 }
