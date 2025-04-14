@@ -3,9 +3,9 @@ use crate::numbers::parse_js_number;
 use crate::static_value::StaticValue;
 use crate::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMemberName,
-    AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMemberName,
-    AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression, JsArrayHole,
-    JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMember,
+    AnyJsObjectMemberName, AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression,
+    JsArrayHole, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
     JsLiteralMemberName, JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression,
@@ -1588,6 +1588,26 @@ impl From<AnyJsOptionalChainExpression> for AnyJsExpression {
             }
             AnyJsOptionalChainExpression::JsCallExpression(expression) => expression.into(),
         }
+    }
+}
+
+impl AnyJsObjectMember {
+    /// Returns the member name of the current node
+    /// if it is a literal member name or a computed member with a literal value.
+    pub fn name(&self) -> Option<TokenText> {
+        let name = match self {
+            Self::JsGetterObjectMember(member) => member.name(),
+            Self::JsMethodObjectMember(member) => member.name(),
+            Self::JsPropertyObjectMember(member) => member.name(),
+            Self::JsSetterObjectMember(member) => member.name(),
+            Self::JsShorthandPropertyObjectMember(member) => {
+                return Some(member.name().ok()?.value_token().ok()?.token_text_trimmed());
+            }
+            Self::JsBogusMember(_) | Self::JsSpread(_) => {
+                return None;
+            }
+        };
+        name.ok()?.name()
     }
 }
 
