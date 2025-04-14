@@ -146,16 +146,18 @@ fn add_separators_from_right(num: &str, min_digits: usize, group_length: usize) 
     if num.len() < min_digits {
         num.to_owned()
     } else {
-        num.chars()
-            .rev()
-            .collect::<Vec<_>>()
-            .chunks(group_length)
-            .map(|c| c.iter().collect::<String>())
-            .collect::<Vec<_>>()
-            .join("_")
-            .chars()
-            .rev()
-            .collect()
+        let mut result = String::new();
+        let mut count = 0;
+
+        for c in num.chars().rev() {
+            if count > 0 && count % group_length == 0 {
+                result.push('_');
+            }
+            result.push(c);
+            count += 1;
+        }
+
+        result.chars().rev().collect()
     }
 }
 
@@ -166,12 +168,18 @@ fn add_separators_from_left(num: &str, min_digits: usize, group_length: usize) -
     if num.len() < min_digits {
         num.to_owned()
     } else {
-        num.chars()
-            .collect::<Vec<_>>()
-            .chunks(group_length)
-            .map(|c| c.iter().collect::<String>())
-            .collect::<Vec<_>>()
-            .join("_")
+        let mut result = String::new();
+        let mut count = 0;
+
+        for c in num.chars() {
+            if count > 0 && count % group_length == 0 {
+                result.push('_');
+            }
+            result.push(c);
+            count += 1;
+        }
+
+        result
     }
 }
 
