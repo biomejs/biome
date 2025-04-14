@@ -36,7 +36,7 @@
     "GraphQL"
   ],
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=14.21.3"
   },
   "funding": {
     "type": "opencollective",
