@@ -9,7 +9,7 @@ use std::{collections::BTreeSet, sync::Arc};
 
 use biome_fs::{BiomePath, FileSystem, PathKind};
 use biome_js_syntax::AnyJsRoot;
-use biome_js_type_info::{Namespace, Type};
+use biome_js_type_info::{Namespace, TypeInner};
 use biome_project_layout::ProjectLayout;
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{EnforceExtension, ResolveOptions, ResolverGeneric};
@@ -159,7 +159,11 @@ impl ModuleGraph {
                         Some(JsOwnExport {
                             jsdoc_comment: reexport.jsdoc_comment.clone(),
                             local_name: None,
-                            ty: Type::Namespace(Box::new(Namespace(Box::new([])))),
+                            // TODO: Infer members.
+                            ty: TypeInner::Namespace(Box::new(Namespace::from_type_members(
+                                Box::new([]),
+                            )))
+                            .into(),
                         })
                     } else {
                         match reexport.import.resolved_path.as_deref() {

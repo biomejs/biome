@@ -19,6 +19,7 @@ use crate::{
 use super::{
     JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsModuleInfoInner, JsOwnExport, JsReexport,
     JsResolvedPath, binding::JsBindingData, scope::JsScopeData,
+    type_resolver::JsModuleTypeResolver,
 };
 
 /// Responsible for collecting all the information from which to build the
@@ -29,7 +30,7 @@ use super::{
 /// [`JsModuleInfoBag`], and finally the [`JsModuleInfo`] itself.
 #[derive(Default)]
 pub(super) struct JsModuleInfoCollector {
-    bindings: Vec<JsBindingData>,
+    pub(super) bindings: Vec<JsBindingData>,
 
     /// Maps a binding range start to its index inside the [Self::bindings]
     /// vector.
@@ -46,7 +47,7 @@ pub(super) struct JsModuleInfoCollector {
     /// Collection of all the scopes within the module.
     ///
     /// The first entry is always the module's global scope.
-    scopes: Vec<JsScopeData>,
+    pub(super) scopes: Vec<JsScopeData>,
 
     /// Used for tracking the scope we are currently in.
     scope_stack: Vec<ScopeId>,
@@ -105,7 +106,7 @@ impl JsModuleInfoCollector {
             JsExport::Own(JsOwnExport {
                 jsdoc_comment: None,
                 local_name,
-                ty: Type::Unknown,
+                ty: Type::unknown(),
             }),
         )
     }
@@ -199,7 +200,7 @@ impl JsModuleInfoCollector {
                     declaration_kind: node.map(JsDeclarationKind::from_node).unwrap_or_default(),
                     ty: match (node, &name) {
                         (Some(node), Some(name)) => infer_type(node, name),
-                        _ => Type::Unknown,
+                        _ => Type::unknown(),
                     },
                     jsdoc: node.and_then(find_jsdoc),
                     export_ranges: Vec::new(),
@@ -302,7 +303,6 @@ pub(super) struct JsModuleInfoBag {
 }
 
 impl JsModuleInfoBag {
-    /// Creates the
     pub(super) fn from_collector(collector: &JsModuleInfoCollector) -> Self {
         let mut info = Self::default();
         info.collect_imports(collector);
@@ -468,9 +468,8 @@ impl JsModuleInfoBag {
         // Lookup types from the bindings in the global scope.
         let global_scope = &collector.scopes[0];
         for export in self.exports.values_mut() {
-            let export = match export {
-                JsExport::Own(export) | JsExport::OwnType(export) => export,
-                JsExport::Reexport(_) | JsExport::ReexportType(_) => continue,
+            let Some(export) = export.as_own_export_mut() else {
+                continue;
             };
 
             let Some(local_name) = &export.local_name else {
@@ -484,11 +483,26 @@ impl JsModuleInfoBag {
             }
         }
     }
+
+    /// Performs "thin" or module-level type resolution.
+    ///
+    /// Iterates over all exported symbols in the module and resolves them if
+    /// they refer to any other symbols in scope of the module.
+    fn resolve_module_types(&mut self, collector: &JsModuleInfoCollector) {
+        let resolver = JsModuleTypeResolver::from_collector(collector);
+
+        for export in self.exports.values_mut() {
+            if let Some(export) = export.as_own_export_mut() {
+                export.ty.resolve(&resolver);
+            }
+        }
+    }
 }
 
 impl JsModuleInfo {
     pub(super) fn new(collector: JsModuleInfoCollector) -> Self {
-        let bag = JsModuleInfoBag::from_collector(&collector);
+        let mut bag = JsModuleInfoBag::from_collector(&collector);
+        bag.resolve_module_types(&collector);
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: bag.static_imports,
@@ -518,7 +532,7 @@ fn infer_type(node: &JsSyntaxNode, binding_name: &TokenText) -> Type {
             .ancestors()
             .find_map(AnyJsExportDefaultDeclaration::cast)
         else {
-            return Type::Unknown;
+            return Type::unknown();
         };
 
         return Type::from_any_js_export_default_declaration(&declaration);

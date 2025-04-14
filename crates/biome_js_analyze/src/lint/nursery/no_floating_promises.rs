@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -12,7 +14,7 @@ use biome_js_syntax::{
     JsStaticMemberExpression, JsSyntaxKind, JsThisExpression, JsVariableDeclarator,
     TsReturnTypeAnnotation, binding_ext::AnyJsBindingDeclaration, global_identifier,
 };
-use biome_js_type_info::{Type, TypeMember};
+use biome_js_type_info::{Type, TypeInner, TypeMember};
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNode, SyntaxNodeCast,
     TriviaPieceKind,
@@ -999,8 +1001,8 @@ fn is_ts_type_a_promise(
 
 fn find_promise_in_object(object: &JsObjectExpression, member_name: &str) -> Option<bool> {
     let ty = Type::from_js_object_expression(object);
-    match ty {
-        Type::Object(object) => object.members().iter().find_map(|member| match member {
+    match ty.deref() {
+        TypeInner::Object(object) => object.members().iter().find_map(|member| match member {
             TypeMember::CallSignature(_) | TypeMember::Constructor(_) => None,
             TypeMember::Method(member) => match member.name == member_name {
                 true => Some(
