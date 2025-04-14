@@ -12,6 +12,7 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 use rustc_hash::FxHashMap;
 use std::cmp::Ordering;
+use std::collections::hash_map;
 use std::fmt::Display;
 
 use crate::JsRuleAction;
@@ -190,24 +191,21 @@ impl From<MemberDefinition> for DefinedProperty {
 
 pub struct PropertyConflict(DefinedProperty, MemberDefinition);
 impl DefinedProperty {
-    fn extend_with(
-        &self,
-        member_definition: MemberDefinition,
-    ) -> Result<DefinedProperty, PropertyConflict> {
-        match (self, member_definition) {
+    fn extend_with(&mut self, member_definition: MemberDefinition) -> Option<PropertyConflict> {
+        match (&self, member_definition) {
             // Add missing get/set counterpart
             (DefinedProperty::Set(set_range), MemberDefinition::Getter(getter)) => {
-                Ok(DefinedProperty::GetSet(getter.range(), *set_range))
+                *self = DefinedProperty::GetSet(getter.range(), *set_range);
+                //Ok(DefinedProperty::GetSet(getter.range(), *set_range))
+                None
             }
 
             (DefinedProperty::Get(get_range), MemberDefinition::Setter(setter)) => {
-                Ok(DefinedProperty::GetSet(*get_range, setter.range()))
+                *self = DefinedProperty::GetSet(*get_range, setter.range());
+                None
             }
             // Else conflict
-            (defined_property, member_definition) => Err(PropertyConflict(
-                defined_property.clone(),
-                member_definition,
-            )),
+            (_, member_definition) => Some(PropertyConflict(self.clone(), member_definition)),
         }
     }
 }
@@ -221,7 +219,7 @@ impl Rule for NoDuplicateObjectKeys {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let mut defined_properties = FxHashMap::default();
+        let mut defined_properties: FxHashMap<TokenText, DefinedProperty> = FxHashMap::default();
         let mut signals = Vec::new();
 
         for member_definition in node
@@ -233,21 +231,14 @@ impl Rule for NoDuplicateObjectKeys {
             .rev()
         {
             if let Some(member_name) = member_definition.name() {
-                match defined_properties.remove(&member_name) {
-                    None => {
-                        defined_properties
-                            .insert(member_name, DefinedProperty::from(member_definition));
-                    }
-                    Some(defined_property) => {
-                        match defined_property.extend_with(member_definition) {
-                            Ok(new_defined_property) => {
-                                defined_properties.insert(member_name, new_defined_property);
-                            }
-                            Err(conflict) => {
-                                signals.push(conflict);
-                                defined_properties.insert(member_name, defined_property);
-                            }
+                match defined_properties.entry(member_name) {
+                    hash_map::Entry::Occupied(entry) => {
+                        if let Some(conflict) = entry.into_mut().extend_with(member_definition) {
+                            signals.push(conflict);
                         }
+                    }
+                    hash_map::Entry::Vacant(entry) => {
+                        entry.insert(DefinedProperty::from(member_definition));
                     }
                 }
             }
