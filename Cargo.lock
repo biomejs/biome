@@ -946,7 +946,6 @@ dependencies = [
  "biome_js_syntax",
  "biome_js_type_info_macros",
  "biome_rowan",
- "static_assertions",
 ]
 
 [[package]]
