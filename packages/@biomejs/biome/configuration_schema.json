@@ -3122,10 +3122,6 @@
 				"groups": {
 					"default": [],
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
-				},
-				"typePlacement": {
-					"default": "mixed",
-					"allOf": [{ "$ref": "#/definitions/TypePlacement" }]
 				}
 			},
 			"additionalProperties": false
@@ -5164,20 +5160,6 @@
 					"description": "The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.",
 					"type": "string",
 					"enum": ["all"]
-				}
-			]
-		},
-		"TypePlacement": {
-			"oneOf": [
-				{
-					"description": "Mix type-only imports and exports with regular imports and exports",
-					"type": "string",
-					"enum": ["mixed"]
-				},
-				{
-					"description": "Separate type-only imports and exports from regular imports and exports",
-					"type": "string",
-					"enum": ["typesFirst"]
 				}
 			]
 		},

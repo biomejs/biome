@@ -5,7 +5,6 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 
 use super::{
-    TypePlacement,
     comparable_token::ComparableToken,
     import_groups::{self, ImportCandidate, ImportSourceCandidate},
     import_source,
@@ -15,7 +14,6 @@ use super::{
 /// Type used to determine the order between imports
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct ImportKey {
-    pub section: ImportSection,
     pub group: u16,
     pub source: import_source::ImportSource<ComparableToken>,
     pub has_no_attributes: bool,
@@ -25,17 +23,8 @@ pub struct ImportKey {
     pub slot_index: u32,
 }
 impl ImportKey {
-    pub fn new(
-        info: ImportInfo,
-        groups: &import_groups::ImportGroups,
-        type_placement: TypePlacement,
-    ) -> Self {
-        let section = match type_placement {
-            TypePlacement::TypesFirst if info.kind.has_type_token() => ImportSection::TypesFirst,
-            _ => ImportSection::Mixed,
-        };
+    pub fn new(info: ImportInfo, groups: &import_groups::ImportGroups) -> Self {
         Self {
-            section,
             group: groups.index(&((&info).into())),
             source: info.source,
             has_no_attributes: info.has_no_attributes,
@@ -50,15 +39,6 @@ impl ImportKey {
             && self.has_no_attributes
             && other.has_no_attributes
     }
-}
-
-#[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
-pub enum ImportSection {
-    /// Section reserved for types with the [`TypePlacement::TypesFirst`] setting.
-    TypesFirst,
-    /// Section for mixed imports.
-    #[default]
-    Mixed,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
