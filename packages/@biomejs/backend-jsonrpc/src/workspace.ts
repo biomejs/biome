@@ -154,7 +154,7 @@ Examples where this may be useful:
 
 // But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: "RedisCommander.d.ts", ], } } ```
 
-Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned. 
+Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned.
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
@@ -3118,7 +3118,7 @@ export interface RestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: Record<string, CustomRestrictedImport>;
+	paths: Record<string, Paths>;
 	/**
 	 * A list of gitignore-style patterns or regular expressions that should trigger the rule.
 	 */
@@ -3326,6 +3326,7 @@ export type ObjectPropertySyntax = "explicit" | "shorthand";
  */
 export type PropertyAssignmentMode = "allow" | "deny";
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type Paths = string | PathOptions;
 export type Patterns = string | PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
@@ -3352,7 +3353,7 @@ export interface Convention {
 }
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[];
-export interface CustomRestrictedImportOptions {
+export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
 	 */
