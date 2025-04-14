@@ -464,17 +464,16 @@ impl<'analyzer> Suppressions<'analyzer> {
     /// Maps a [suppression](AnalyzerSuppressionKind) to a [RuleFilter]
     fn map_to_rule_filter(
         &self,
-        suppression_kind: &AnalyzerSuppressionKind,
+        suppression: &AnalyzerSuppression,
         text_range: TextRange,
     ) -> Result<Option<RuleFilter<'static>>, AnalyzerSuppressionDiagnostic> {
-        let rule = match suppression_kind {
+        let rule = match suppression.kind {
             AnalyzerSuppressionKind::Everything(_) => return Ok(None),
             AnalyzerSuppressionKind::Rule(rule) => rule,
             AnalyzerSuppressionKind::RuleInstance(rule, _) => rule,
             AnalyzerSuppressionKind::Plugin(_) => return Ok(Some(PLUGIN_LINT_RULE_FILTER)),
-            AnalyzerSuppressionKind::Action(action) => action,
         };
-        let is_action = suppression_kind.is_action();
+        let is_action = suppression.category == RuleCategory::Action;
 
         let group_rule = rule.split_once('/');
 
@@ -512,7 +511,6 @@ impl<'analyzer> Suppressions<'analyzer> {
         match suppression_kind {
             AnalyzerSuppressionKind::Everything(_)
             | AnalyzerSuppressionKind::Rule(_)
-            | AnalyzerSuppressionKind::Action(_)
             | AnalyzerSuppressionKind::Plugin(_) => None,
             AnalyzerSuppressionKind::RuleInstance(_, instances) => Some((*instances).to_string()),
         }
@@ -531,7 +529,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         comment_range: TextRange,
         token_range_not_trimmed: TextRange,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        let filter = self.map_to_rule_filter(&suppression.kind, comment_range)?;
+        let filter = self.map_to_rule_filter(suppression, comment_range)?;
         let instances = self.map_to_rule_instances(&suppression.kind);
         let plugin_name: Option<String> = self.map_to_plugin_name(&suppression.kind);
         self.last_suppression = Some(suppression.variant.clone());
