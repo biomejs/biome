@@ -48,8 +48,8 @@ pub(crate) trait Resolvable {
 
 impl Resolvable for Type {
     fn needs_resolving(&self, resolver: &dyn TypeResolver, stack: &[&TypeInner]) -> bool {
-        // We only call this function through `Type::resolve()` which passes the
-        // first element, so the following range should always be valid:
+        debug_assert!(!stack.is_empty(), "stack must be initialised");
+
         let inner = &**self;
         if stack.len() >= MAX_RESOLUTION_DEPTH || stack[0..stack.len() - 1].contains(&inner) {
             return false;
