@@ -14,7 +14,6 @@ version              = "0.0.1"
 proc-macro = true
 
 [dependencies]
-biome_string_case = { workspace = true }
 proc-macro-error2 = { workspace = true }
 proc-macro2       = { workspace = true }
 quote             = { workspace = true }

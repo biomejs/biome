@@ -955,7 +955,6 @@ dependencies = [
 name = "biome_js_type_info_macros"
 version = "0.0.1"
 dependencies = [
- "biome_string_case",
  "proc-macro-error2",
  "proc-macro2",
  "quote",
