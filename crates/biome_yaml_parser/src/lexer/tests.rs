@@ -1,27 +1,28 @@
 #![cfg(test)]
-#![expect(unused_mut)]
 
-use super::{TextSize, YamlLexContext};
+use super::TextSize;
 use crate::lexer::YamlLexer;
-use biome_parser::lexer::TokenFlags;
-use biome_yaml_syntax::YamlSyntaxKind;
+use biome_parser::lexer::Lexer;
+use biome_yaml_syntax::YamlSyntaxKind::*;
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
 
-/// Creates a new lexer from the given string
-fn init_yaml_lexer(s: &str) -> YamlLexer {
-    YamlLexer {
-        source: s,
-        position: 0,
-        after_newline: false,
-        unicode_bom_length: 0,
-        current_start: TextSize::from(0),
-        current_kind: YamlSyntaxKind::EOF,
-        current_flags: TokenFlags::empty(),
-        diagnostics: vec![],
-        context: YamlLexContext::Regular,
+impl<'src> YamlLexer<'src> {
+    /// Make a new lexer from a str, this is safe because strs are valid utf8
+    pub fn from_str(source: &'src str) -> Self {
+        use biome_parser::lexer::TokenFlags;
+
+        Self {
+            source,
+            position: 0,
+            unicode_bom_length: 0,
+            current_kind: TOMBSTONE,
+            current_start: TextSize::from(0),
+            current_flags: TokenFlags::empty(),
+            diagnostics: vec![],
+        }
     }
 }
 
@@ -29,34 +30,38 @@ fn init_yaml_lexer(s: &str) -> YamlLexer {
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = init_yaml_lexer($src);
+        let mut lexer = YamlLexer::from_str($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
         let mut new_str = String::with_capacity($src.len());
-        let tokens: Vec<_> = lexer.collect();
+        let mut tokens = vec![];
+
+        while lexer.next_token(()) != EOF {
+            tokens.push((lexer.current(), lexer.current_range()));
+
+        }
 
         $(
             assert_eq!(
-                tokens[idx].kind,
+                tokens[idx].0,
                 biome_yaml_syntax::YamlSyntaxKind::$kind,
-                "expected token kind {}, but found {:?} when lexing {:?}",
+                "expected token kind {}, but found {:?}",
                 stringify!($kind),
-                tokens[idx].kind,
-                &$src[tokens[idx].range]
+                tokens[idx].0,
             );
 
             assert_eq!(
-                tokens[idx].range.len(),
+                tokens[idx].1.len(),
                 TextSize::from($len),
                 "expected token length of {}, but found {:?} for token {:?}",
                 $len,
-                tokens[idx].range.len(),
-                tokens[idx].kind,
+                tokens[idx].1.len(),
+                tokens[idx].0,
             );
 
-            new_str.push_str(&$src[tokens[idx].range]);
-            tok_idx += tokens[idx].range.len();
+            new_str.push_str(&$src[tokens[idx].1]);
+            tok_idx += tokens[idx].1.len();
 
             idx += 1;
         )*
@@ -66,7 +71,7 @@ macro_rules! assert_lex {
                 "expected {} tokens but lexer returned {}, first unexpected token is '{:?}'",
                 idx,
                 tokens.len(),
-                tokens[idx].kind
+                tokens[idx].0
             );
         } else {
             assert_eq!(idx, tokens.len());
@@ -85,8 +90,12 @@ fn losslessness(string: String) -> bool {
     let cloned = string.clone();
     let (sender, receiver) = channel();
     thread::spawn(move || {
-        let mut lexer = init_yaml_lexer(&cloned);
-        let tokens: Vec<_> = lexer.map(|token| token.range).collect();
+        let mut lexer = YamlLexer::from_str(&cloned);
+        let mut tokens = vec![];
+
+        while lexer.next_token(()) != EOF {
+            tokens.push(lexer.current_range());
+        }
 
         sender
             .send(tokens)
@@ -108,95 +117,18 @@ fn losslessness(string: String) -> bool {
 }
 
 #[test]
-fn lex_booleans() {
-    assert_lex!(
-        "true",
-        YAML_BOOLEAN_VALUE:4,
-    );
-
-    assert_lex!(
-        "false",
-        YAML_BOOLEAN_VALUE:5,
-    );
-}
-
-#[test]
-fn lex_null() {
-    assert_lex!(
-        "null",
-        YAML_NULL_VALUE:4,
-    );
-}
-
-#[test]
-fn lex_float() {
-    assert_lex!(
-        "123.456",
-        YAML_NUMBER_VALUE:7,
-    );
-}
-
-#[test]
-fn lex_invalid_float_as_string() {
-    assert_lex!(
-        "123.456.789",
-        YAML_STRING_VALUE:11,
-    );
-}
-
-#[test]
-fn lex_quoted_string() {
+fn lex_double_quoted_literal() {
     assert_lex!(
         "\"hello world\"",
-        YAML_STRING_VALUE:13,
+        DOUBLE_QUOTED_LITERAL:13,
     );
 }
 
 #[test]
-fn lex_key_value_pair() {
+fn lex_single_quoted_literal() {
     assert_lex!(
-        "key: value",
-        YAML_IDENTIFIER:3,
-        COLON:1,
-        WHITESPACE:1,
-        YAML_STRING_VALUE:5,
-    );
-}
-
-#[test]
-fn lex_invalid_key_value_pair() {
-    assert_lex!(
-        "key:value",
-        YAML_STRING_VALUE:9,
-    );
-}
-
-#[test]
-fn lex_kinda_invalid_key_value_pair() {
-    assert_lex!(
-        "foo:bar: baz",
-        YAML_IDENTIFIER:7,
-        COLON:1,
-        WHITESPACE:1,
-        YAML_STRING_VALUE:3,
-    );
-}
-
-#[test]
-fn lex_object_nested() {
-    assert_lex!(
-        r#"
-foo:
-    bar: baz"#,
-        NEWLINE:1,
-        YAML_IDENTIFIER:3,
-        COLON:1,
-        NEWLINE:1,
-        WHITESPACE:4,
-        YAML_IDENTIFIER:3,
-        COLON:1,
-        WHITESPACE:1,
-        YAML_STRING_VALUE:3,
+        "'hello world'",
+        SINGLE_QUOTED_LITERAL:13,
     );
 }
 
@@ -205,77 +137,5 @@ fn lex_comment() {
     assert_lex!(
         "# this is a comment",
         COMMENT:19,
-    );
-}
-
-#[test]
-fn lex_list() {
-    assert_lex!(
-        "- foo",
-        DASH:1,
-        WHITESPACE:1,
-        YAML_STRING_VALUE:3,
-    );
-}
-
-#[test]
-fn lex_list_object() {
-    assert_lex!(
-        "- foo: bar",
-        DASH:1,
-        WHITESPACE:1,
-        YAML_IDENTIFIER:3,
-        COLON:1,
-        WHITESPACE:1,
-        YAML_STRING_VALUE:3,
-    );
-}
-
-#[test]
-fn lex_list_invalid() {
-    assert_lex!(
-        "-foo",
-        YAML_STRING_VALUE:4,
-    );
-}
-
-#[test]
-fn lex_nested_list() {
-    assert_lex!(
-        "- - bar",
-        DASH:1,
-        WHITESPACE:1,
-        DASH:1,
-        WHITESPACE:1,
-        YAML_STRING_VALUE:3,
-    );
-}
-
-#[test]
-fn lex_array_inline() {
-    assert_lex!(
-        "[1]",
-        L_BRACK:1,
-        YAML_NUMBER_VALUE:1,
-        R_BRACK:1,
-    );
-}
-#[test]
-fn lex_array_inline_2() {
-    assert_lex!(
-        "[1,2]",
-        L_BRACK:1,
-        YAML_NUMBER_VALUE:1,
-        COMMA:1,
-        YAML_NUMBER_VALUE:1,
-        R_BRACK:1,
-    );
-}
-
-#[test]
-fn lex_array_inline_invalid() {
-    assert_lex!(
-        "1]",
-        YAML_STRING_VALUE:2,
     );
 }
