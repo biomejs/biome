@@ -2974,7 +2974,7 @@ export interface RestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: Record<string, CustomRestrictedImport>;
+	paths: Record<string, Paths>;
 	/**
 	 * A list of gitignore-style patterns or regular expressions that should trigger the rule.
 	 */
@@ -3159,7 +3159,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type CustomRestrictedElements = Record<string, string>;
 export type ObjectPropertySyntax = "explicit" | "shorthand";
-export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type Paths = string | PathOptions;
 export type Patterns = string | PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
@@ -3186,7 +3186,7 @@ export interface Convention {
 }
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[];
-export interface CustomRestrictedImportOptions {
+export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
 	 */

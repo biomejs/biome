@@ -1272,38 +1272,6 @@
 			"minProperties": 1,
 			"additionalProperties": { "type": "string" }
 		},
-		"CustomRestrictedImport": {
-			"anyOf": [
-				{
-					"description": "The message to display when this module is imported.",
-					"type": "string"
-				},
-				{
-					"description": "Additional options to configure the message and allowed/disallowed import names.",
-					"allOf": [{ "$ref": "#/definitions/CustomRestrictedImportOptions" }]
-				}
-			]
-		},
-		"CustomRestrictedImportOptions": {
-			"type": "object",
-			"properties": {
-				"allowImportNames": {
-					"description": "Names of the exported members that allowed to be not be used.",
-					"type": "array",
-					"items": { "type": "string" }
-				},
-				"importNames": {
-					"description": "Names of the exported members that should not be used.",
-					"type": "array",
-					"items": { "type": "string" }
-				},
-				"message": {
-					"description": "The message to display when this module is imported.",
-					"type": "string"
-				}
-			},
-			"additionalProperties": false
-		},
 		"CustomRestrictedType": {
 			"anyOf": [
 				{ "type": "string" },
@@ -3146,6 +3114,38 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/OverridePattern" }
 		},
+		"PathOptions": {
+			"type": "object",
+			"properties": {
+				"allowImportNames": {
+					"description": "Names of the exported members that allowed to be not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"importNames": {
+					"description": "Names of the exported members that should not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"Paths": {
+			"anyOf": [
+				{
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				},
+				{
+					"description": "Additional options to configure the message and allowed/disallowed import names.",
+					"allOf": [{ "$ref": "#/definitions/PathOptions" }]
+				}
+			]
+		},
 		"PatternOptions": {
 			"type": "object",
 			"properties": {
@@ -3299,9 +3299,7 @@
 				"paths": {
 					"description": "A list of import paths that should trigger the rule.",
 					"type": "object",
-					"additionalProperties": {
-						"$ref": "#/definitions/CustomRestrictedImport"
-					}
+					"additionalProperties": { "$ref": "#/definitions/Paths" }
 				},
 				"patterns": {
 					"description": "A list of gitignore-style patterns or regular expressions that should trigger the rule.",
