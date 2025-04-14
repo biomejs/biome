@@ -68,6 +68,7 @@ declare_lint_rule! {
 }
 
 /// An object member defining a single object property.
+#[derive(Debug, Clone)]
 enum MemberDefinition {
     Getter(JsGetterObjectMember),
     Setter(JsSetterObjectMember),
@@ -78,22 +79,16 @@ enum MemberDefinition {
 impl MemberDefinition {
     fn name(&self) -> Option<TokenText> {
         match self {
-            MemberDefinition::Getter(getter) => {
-                getter.name().ok()?.as_js_literal_member_name()?.name().ok()
-            }
-            MemberDefinition::Setter(setter) => {
-                setter.name().ok()?.as_js_literal_member_name()?.name().ok()
-            }
-            MemberDefinition::Method(method) => {
-                method.name().ok()?.as_js_literal_member_name()?.name().ok()
-            }
-            MemberDefinition::Property(property) => property
+            Self::Getter(getter) => getter.name().ok()?.as_js_literal_member_name()?.name().ok(),
+            Self::Setter(setter) => setter.name().ok()?.as_js_literal_member_name()?.name().ok(),
+            Self::Method(method) => method.name().ok()?.as_js_literal_member_name()?.name().ok(),
+            Self::Property(property) => property
                 .name()
                 .ok()?
                 .as_js_literal_member_name()?
                 .name()
                 .ok(),
-            MemberDefinition::ShorthandProperty(shorthand_property) => Some(
+            Self::ShorthandProperty(shorthand_property) => Some(
                 shorthand_property
                     .name()
                     .ok()?
@@ -106,23 +101,21 @@ impl MemberDefinition {
 
     fn range(&self) -> TextRange {
         match self {
-            MemberDefinition::Getter(getter) => getter.range(),
-            MemberDefinition::Setter(setter) => setter.range(),
-            MemberDefinition::Method(method) => method.range(),
-            MemberDefinition::Property(property) => property.range(),
-            MemberDefinition::ShorthandProperty(shorthand_property) => shorthand_property.range(),
+            Self::Getter(getter) => getter.range(),
+            Self::Setter(setter) => setter.range(),
+            Self::Method(method) => method.range(),
+            Self::Property(property) => property.range(),
+            Self::ShorthandProperty(shorthand_property) => shorthand_property.range(),
         }
     }
 
-    fn node(&self) -> AnyJsObjectMember {
+    fn into_node(self) -> AnyJsObjectMember {
         match self {
-            MemberDefinition::Getter(getter) => getter.clone().into(),
-            MemberDefinition::Setter(setter) => setter.clone().into(),
-            MemberDefinition::Method(method) => method.clone().into(),
-            MemberDefinition::Property(property) => property.clone().into(),
-            MemberDefinition::ShorthandProperty(shorthand_property) => {
-                shorthand_property.clone().into()
-            }
+            Self::Getter(getter) => getter.into(),
+            Self::Setter(setter) => setter.into(),
+            Self::Method(method) => method.into(),
+            Self::Property(property) => property.into(),
+            Self::ShorthandProperty(shorthand_property) => shorthand_property.into(),
         }
     }
 }
@@ -151,17 +144,15 @@ impl TryFrom<AnyJsObjectMember> for MemberDefinition {
 
     fn try_from(member: AnyJsObjectMember) -> Result<Self, Self::Error> {
         match member {
-            AnyJsObjectMember::JsGetterObjectMember(member) => Ok(MemberDefinition::Getter(member)),
-            AnyJsObjectMember::JsSetterObjectMember(member) => Ok(MemberDefinition::Setter(member)),
-            AnyJsObjectMember::JsMethodObjectMember(member) => Ok(MemberDefinition::Method(member)),
-            AnyJsObjectMember::JsPropertyObjectMember(member) => {
-                Ok(MemberDefinition::Property(member))
-            }
+            AnyJsObjectMember::JsGetterObjectMember(member) => Ok(Self::Getter(member)),
+            AnyJsObjectMember::JsSetterObjectMember(member) => Ok(Self::Setter(member)),
+            AnyJsObjectMember::JsMethodObjectMember(member) => Ok(Self::Method(member)),
+            AnyJsObjectMember::JsPropertyObjectMember(member) => Ok(Self::Property(member)),
             AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
-                Ok(MemberDefinition::ShorthandProperty(member))
+                Ok(Self::ShorthandProperty(member))
             }
-            AnyJsObjectMember::JsSpread(_) => Err(MemberDefinitionError::NotASinglePropertyMember),
-            AnyJsObjectMember::JsBogusMember(_) => Err(MemberDefinitionError::BogusMemberType),
+            AnyJsObjectMember::JsSpread(_) => Err(Self::Error::NotASinglePropertyMember),
+            AnyJsObjectMember::JsBogusMember(_) => Err(Self::Error::BogusMemberType),
         }
     }
 }
@@ -178,12 +169,12 @@ enum DefinedProperty {
 impl From<MemberDefinition> for DefinedProperty {
     fn from(definition: MemberDefinition) -> Self {
         match definition {
-            MemberDefinition::Getter(getter) => DefinedProperty::Get(getter.range()),
-            MemberDefinition::Setter(setter) => DefinedProperty::Set(setter.range()),
-            MemberDefinition::Method(method) => DefinedProperty::Value(method.range()),
-            MemberDefinition::Property(property) => DefinedProperty::Value(property.range()),
+            MemberDefinition::Getter(getter) => Self::Get(getter.range()),
+            MemberDefinition::Setter(setter) => Self::Set(setter.range()),
+            MemberDefinition::Method(method) => Self::Value(method.range()),
+            MemberDefinition::Property(property) => Self::Value(property.range()),
             MemberDefinition::ShorthandProperty(shorthand_property) => {
-                DefinedProperty::Value(shorthand_property.range())
+                Self::Value(shorthand_property.range())
             }
         }
     }
@@ -194,14 +185,13 @@ impl DefinedProperty {
     fn extend_with(&mut self, member_definition: MemberDefinition) -> Option<PropertyConflict> {
         match (&self, member_definition) {
             // Add missing get/set counterpart
-            (DefinedProperty::Set(set_range), MemberDefinition::Getter(getter)) => {
-                *self = DefinedProperty::GetSet(getter.range(), *set_range);
-                //Ok(DefinedProperty::GetSet(getter.range(), *set_range))
+            (Self::Set(set_range), MemberDefinition::Getter(getter)) => {
+                *self = Self::GetSet(getter.range(), *set_range);
                 None
             }
 
-            (DefinedProperty::Get(get_range), MemberDefinition::Setter(setter)) => {
-                *self = DefinedProperty::GetSet(*get_range, setter.range());
+            (Self::Get(get_range), MemberDefinition::Setter(setter)) => {
+                *self = Self::GetSet(*get_range, setter.range());
                 None
             }
             // Else conflict
@@ -300,7 +290,7 @@ impl Rule for NoDuplicateObjectKeys {
         PropertyConflict(_, member_definition): &Self::State,
     ) -> Option<JsRuleAction> {
         let mut batch = ctx.root().begin();
-        batch.remove_js_object_member(member_definition.node());
+        batch.remove_js_object_member(member_definition.clone().into_node());
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             // The property initialization could contain side effects
