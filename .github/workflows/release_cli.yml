@@ -6,7 +6,7 @@ on:
 jobs:
   check:
     name: Check version
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     outputs:
       version: ${{ env.version }}
     steps:
@@ -142,7 +142,7 @@ jobs:
 
   build-wasm:
     name: Build WASM
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     needs: check
     steps:
       - name: Checkout repository
@@ -170,7 +170,7 @@ jobs:
 
   publish:
     name: Publish
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     needs:
       - build
       - build-wasm

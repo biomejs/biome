@@ -30,7 +30,7 @@ jobs:
     permissions:
       pull-requests: write
     name: Bench
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
 
     steps:
 

@@ -16,7 +16,7 @@ jobs:
       pull-requests: write
     name: Bench
     if: github.event.issue.pull_request && contains(github.event.comment.body, '!bench_cli')
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
 
     steps:
       - name: Get PR SHA

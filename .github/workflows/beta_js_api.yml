@@ -13,7 +13,7 @@ env:
 jobs:
   version:
     name: Generate version
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     outputs:
       version: ${{ env.version }}
     steps:
@@ -26,7 +26,7 @@ jobs:
   build:
     needs: version
     name: Package JavaScript APIs
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
 
     env:
       version: ${{ needs.version.outputs.version }}
@@ -80,7 +80,7 @@ jobs:
 
   publish:
     name: Publish
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     needs: build
     environment: npm-publish
     permissions:
