@@ -181,7 +181,7 @@ fn match_static_only_member(callee: &AnyJsExpression) -> Option<TextRange> {
         })
 }
 
-/// Find computed member expressions with ["only"] syntax
+/// Find computed member expressions with `["only"]` syntax
 fn match_computed_only_member(callee: &AnyJsExpression) -> Option<TextRange> {
     let expression = callee.as_js_computed_member_expression()?;
 
@@ -196,7 +196,7 @@ fn match_computed_only_member(callee: &AnyJsExpression) -> Option<TextRange> {
     }
 
     // Verify brackets exist
-    if !expression.l_brack_token().is_ok() || !expression.r_brack_token().is_ok() {
+    if expression.l_brack_token().is_err() || expression.r_brack_token().is_err() {
         return None;
     }
 
@@ -299,7 +299,7 @@ fn fix_static_only_member(
     Some(())
 }
 
-/// Apply fix for computed ["only"] member expressions
+/// Apply fix for computed `["only"]` member expressions
 fn fix_computed_only_member(
     callee: &AnyJsExpression,
     mutation: &mut BatchMutation<JsLanguage>,
@@ -317,7 +317,7 @@ fn fix_computed_only_member(
     let member = expression.member().ok()?;
     let literal = member.as_any_js_literal_expression()?;
 
-    if !literal.as_js_string_literal_expression().is_some()
+    if literal.as_js_string_literal_expression().is_none()
         || literal.syntax().text_trimmed() != "\"only\""
     {
         return None;
