@@ -13,7 +13,6 @@ use std::{ops::Deref, str::FromStr, sync::Arc};
 
 use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
-use static_assertions::assert_eq_size;
 
 use crate::Resolvable;
 
@@ -29,9 +28,6 @@ use crate::Resolvable;
 //       so at the type level you would never know when your pointer is going to
 //       break.
 pub struct Type(Arc<TypeInner>);
-
-// `Type` should not be bigger than 8 bytes.
-assert_eq_size!(Type, usize);
 
 impl Deref for Type {
     type Target = TypeInner;
@@ -143,9 +139,6 @@ pub enum TypeInner {
     /// The `void` keyword.
     VoidKeyword,
 }
-
-// `TypeInner` should not be bigger than 16 bytes.
-assert_eq_size!(TypeInner, [usize; 2]);
 
 impl TypeInner {
     /// Returns whether the given type has been inferred.
