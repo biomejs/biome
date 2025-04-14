@@ -110,7 +110,7 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
   </tbody>
 </table>
 
-### Gold Sponsors
+### ゴールドスポンサー
 
 <table>
   <tbody>
