@@ -1,4 +1,5 @@
 console.log('hello world')
+console['log']('hello world')
 console.info('hello world')
 console.warn('hello world')
 console.table('hello world')

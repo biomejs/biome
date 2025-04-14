@@ -56,16 +56,14 @@ declare_lint_rule! {
 }
 
 impl Rule for NoConsole {
-    type Query = Semantic<JsCallExpression>;
+    type Query = Semantic<AnyJsMemberExpression>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = Box<NoConsoleOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let call_expression = ctx.query();
+        let member_expression = ctx.query();
         let model = ctx.model();
-        let callee = call_expression.callee().ok()?;
-        let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
         let object = member_expression.object().ok()?;
         let (reference, name) = global_identifier(&object)?;
         if name.text() != "console" {
@@ -86,14 +84,10 @@ impl Rule for NoConsole {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        let parent = node.clone().syntax().parent()?;
-        let range = JsExpressionStatement::cast_ref(&parent)
-            .map_or(node.range(), |node| node.syntax().text_trimmed_range());
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                range,
+                ctx.query().range(),
                 markup! {
                     "Don't use "<Emphasis>"console"</Emphasis>"."
                 },
@@ -105,7 +99,8 @@ impl Rule for NoConsole {
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        let call_expression = ctx.query();
+        let member_expression = ctx.query();
+        let call_expression = JsCallExpression::cast(member_expression.syntax().parent()?)?;
         let mut mutation = ctx.root().begin();
         let parent = call_expression.syntax().parent()?;
         if let Some(stmt) = JsExpressionStatement::cast(parent.clone()) {
