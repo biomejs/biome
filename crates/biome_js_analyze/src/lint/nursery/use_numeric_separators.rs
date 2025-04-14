@@ -1,16 +1,10 @@
-use std::{borrow::Cow, ops::Deref};
-
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::{
-    JsNumberLiteralExpression, JsSyntaxToken, numbers::split_into_radix_and_number,
-};
+use biome_js_syntax::{JsNumberLiteralExpression, JsSyntaxToken};
 use biome_rowan::{AstNode, BatchMutationExt};
-use serde::{Deserialize, Serialize};
 
 use crate::JsRuleAction;
 
@@ -79,8 +73,7 @@ impl Rule for UseNumericSeparators {
         let token = ctx.query().value_token().ok()?;
         let raw = token.text_trimmed();
 
-        let num = NumericLiteral::parse(raw);
-        let expected = num.format();
+        let expected = format_num(raw);
 
         if raw == expected {
             None
@@ -122,9 +115,9 @@ impl Rule for UseNumericSeparators {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let token = ctx.query().value_token().ok()?;
-        let num = NumericLiteral::parse(token.text_trimmed());
+        let num = format_num(token.text_trimmed());
 
-        let new_token = JsSyntaxToken::new_detached(token.kind(), &num.format(), [], []);
+        let new_token = JsSyntaxToken::new_detached(token.kind(), &num, [], []);
         let mut mutation = ctx.root().begin();
         mutation.replace_token_transfer_trivia(token.clone(), new_token);
         Some(JsRuleAction::new(
@@ -182,136 +175,112 @@ fn add_separators_from_left(num: &str, min_digits: usize, group_length: usize) -
     }
 }
 
-#[derive(Debug)]
-struct NumericLiteral {
-    sign: Option<char>,
-    radix: u8,
-    number: String,
-    fraction: Option<String>,
-    exponent: Option<Exponent>,
-}
+const BINARY_OPTS: (usize, usize) = (0, 4);
+const OCTAL_OPTS: (usize, usize) = (0, 4);
+const DECIMAL_OPTS: (usize, usize) = (5, 3);
+const HEXADECIMAL_OPTS: (usize, usize) = (0, 2);
 
-#[derive(Debug)]
-struct Exponent {
-    prefix: char,
-    exponent: String,
-    sign: Option<char>,
-}
+fn format_num(raw: &str) -> String {
+    let mut chars = raw.chars().peekable();
+    let mut result = String::new();
 
-fn split_into_sign_and_number(num: &str) -> (Option<char>, &str) {
-    if let Some(rest) = num.strip_prefix('-') {
-        (Some('-'), rest)
-    } else if let Some(rest) = num.strip_prefix('+') {
-        (Some('+'), rest)
+    let (mut min_digits, mut group_length) = DECIMAL_OPTS;
+
+    let mut is_base_10 = true;
+    let mut in_fraction_part = false;
+    let mut is_past_prefix = false;
+
+    let mut current_num = String::new();
+
+    while let Some(c) = chars.next() {
+        match c {
+            '_' => continue,
+            '0' if !is_past_prefix && !in_fraction_part => {
+                if let Some(n) = &chars.peek() {
+                    match n {
+                        'b' | 'B' => {
+                            (min_digits, group_length) = BINARY_OPTS;
+                            is_base_10 = false;
+                            is_past_prefix = true;
+                        }
+                        'o' | 'O' | '0'..='7' => {
+                            (min_digits, group_length) = OCTAL_OPTS;
+                            is_base_10 = false;
+                            is_past_prefix = true;
+                        }
+                        'x' | 'X' => {
+                            (min_digits, group_length) = HEXADECIMAL_OPTS;
+                            is_base_10 = false;
+                            is_past_prefix = true;
+                        }
+                        _ => {
+                            result.push(c);
+                            continue;
+                        }
+                    }
+                    result.push(c);
+                    result.push(chars.next().unwrap());
+                }
+            }
+            'e' | 'E' if is_base_10 => {
+                if in_fraction_part {
+                    result.push_str(&add_separators_from_left(
+                        &current_num,
+                        min_digits,
+                        group_length,
+                    ));
+                } else {
+                    result.push_str(&add_separators_from_right(
+                        &current_num,
+                        min_digits,
+                        group_length,
+                    ));
+                }
+                current_num.clear();
+                result.push(c);
+                in_fraction_part = false;
+            }
+            '.' => {
+                result.push_str(&add_separators_from_right(
+                    &current_num,
+                    min_digits,
+                    group_length,
+                ));
+                current_num.clear();
+                result.push(c);
+                in_fraction_part = true;
+            }
+            '-' | '+' => {
+                result.push(c);
+            }
+            _ if c.is_ascii_alphanumeric() => {
+                is_past_prefix = true;
+                current_num.push(c);
+            }
+            _ => {
+                unimplemented!("unexpected character '{}'", c);
+            }
+        }
+    }
+
+    if in_fraction_part {
+        result.push_str(&add_separators_from_left(
+            &current_num,
+            min_digits,
+            group_length,
+        ));
     } else {
-        (None, num)
+        result.push_str(&add_separators_from_right(
+            &current_num,
+            min_digits,
+            group_length,
+        ));
     }
+
+    result
 }
 
-impl NumericLiteral {
-    fn parse(raw: &str) -> Self {
-        let (sign, num_without_sign) = split_into_sign_and_number(raw);
-        let (radix, num_without_radix) = split_into_radix_and_number(num_without_sign);
-
-        let (num_without_exp, exponent) = if radix == 10 {
-            let prefix = if num_without_radix.contains('e') {
-                'e'
-            } else {
-                'E'
-            };
-
-            num_without_radix.split_once(prefix).map_or(
-                (num_without_radix.clone(), None),
-                |(rest, exponent)| {
-                    let (sign, exponent) = split_into_sign_and_number(exponent);
-                    (
-                        Cow::Borrowed(rest),
-                        Some(Exponent {
-                            exponent: exponent.to_owned(),
-                            sign,
-                            prefix,
-                        }),
-                    )
-                },
-            )
-        } else {
-            (num_without_radix, None)
-        };
-
-        let (number, fraction) = match num_without_exp.split_once('.') {
-            Some((number, fraction)) => (number, Some(fraction.to_owned())),
-            None => (num_without_exp.deref(), None),
-        };
-
-        NumericLiteral {
-            sign,
-            radix,
-            number: number.to_owned(),
-            fraction,
-            exponent,
-        }
-    }
-
-    fn format(&self) -> String {
-        let (min_digits, group_length) = match self.radix {
-            2 => (0, 4),
-            8 => (0, 4),
-            10 => (5, 3),
-            16 => (0, 2),
-            _ => unreachable!(),
-        };
-
-        let number = add_separators_from_right(&self.number, min_digits, group_length);
-        let fraction = self
-            .fraction
-            .as_ref()
-            .map(|fraction| {
-                format!(
-                    ".{}",
-                    add_separators_from_left(fraction, min_digits, group_length)
-                )
-            })
-            .unwrap_or_default();
-
-        let exponent = self
-            .exponent
-            .as_ref()
-            .map(|exp| {
-                format!(
-                    "{}{}{}",
-                    exp.prefix,
-                    exp.sign.unwrap_or_empty(),
-                    add_separators_from_right(&exp.exponent, min_digits, group_length)
-                )
-            })
-            .unwrap_or_default();
-
-        format!(
-            "{}{}{}{}{}",
-            match self.radix {
-                2 => "0b",
-                8 => "0o",
-                10 => "",
-                16 => "0x",
-                _ => unreachable!(),
-            },
-            self.sign.unwrap_or_empty(),
-            number,
-            fraction,
-            exponent
-        )
-    }
-}
-
-trait OptionalCharExt {
-    fn unwrap_or_empty(&self) -> String;
-}
-
-impl OptionalCharExt for Option<char> {
-    fn unwrap_or_empty(&self) -> String {
-        match self {
-            Some(ch) => ch.to_string(),
-            None => String::new(),
-        }
-    }
+#[test]
+fn test() {
+    assert_eq!(format_num("-30000.65432E+12000"), "-30_000.654_32E+12_000");
 }
