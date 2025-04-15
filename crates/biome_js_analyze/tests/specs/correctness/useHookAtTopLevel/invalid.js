@@ -166,3 +166,19 @@ test('b', () => {
 
     render(<TestComponent />);
 });
+
+class DemoMethod {
+    useHook() {
+        if (condition) {
+            return useMemo(() => "string", []);
+        }
+    }
+}
+
+class DemoProperty {
+    useHook = () => {
+        if (condition) {
+            return useMemo(() => "string", []);
+        }
+    }
+}
