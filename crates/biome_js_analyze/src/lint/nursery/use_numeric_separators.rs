@@ -73,7 +73,7 @@ impl Rule for UseNumericSeparators {
         let token = ctx.query().value_token().ok()?;
         let raw = token.text_trimmed();
 
-        let expected = format_num(raw);
+        let expected = format_numeric_literal(raw);
 
         if raw == expected {
             None
@@ -115,7 +115,7 @@ impl Rule for UseNumericSeparators {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let token = ctx.query().value_token().ok()?;
-        let num = format_num(token.text_trimmed());
+        let num = format_numeric_literal(token.text_trimmed());
 
         let new_token = JsSyntaxToken::new_detached(token.kind(), &num, [], []);
         let mut mutation = ctx.root().begin();
@@ -171,12 +171,14 @@ fn add_separators_from_left(num: &[u8], group_length: usize) -> Vec<u8> {
     result
 }
 
+// Options for the minimum length of a number required before adding separators and the length of digit groups between separators, respectively.
 const BINARY_OPTS: (usize, usize) = (0, 4);
 const OCTAL_OPTS: (usize, usize) = (0, 4);
 const DECIMAL_OPTS: (usize, usize) = (5, 3);
 const HEXADECIMAL_OPTS: (usize, usize) = (0, 2);
 
-fn format_num(raw: &str) -> String {
+/// Formats all parts of a numeric literal by adding separators between groups of digits when appropriate.
+fn format_numeric_literal(raw: &str) -> String {
     let mut bytes = raw.bytes().peekable();
     let mut result = Vec::new();
     let mut current_num = Vec::new();
