@@ -141,36 +141,6 @@ pub enum State {
     UnnecessaryGrouping,
 }
 
-/// Add chunk separators to a number string, starting from the right.
-/// The "uneven" chunk is added to the left of the first separator.
-/// 1234567890 -> 1_234_567_890
-fn add_separators_from_right(num: &[u8], group_length: usize) -> Vec<u8> {
-    let mut result: Vec<u8> = Vec::new();
-
-    for (count, &b) in num.iter().rev().enumerate() {
-        if count > 0 && count % group_length == 0 {
-            result.push(b'_');
-        }
-        result.push(b);
-    }
-
-    result.reverse();
-    result
-}
-
-fn add_separators_from_left(num: &[u8], group_length: usize) -> Vec<u8> {
-    let mut result: Vec<u8> = Vec::new();
-
-    for (count, &b) in num.iter().enumerate() {
-        if count > 0 && count % group_length == 0 {
-            result.push(b'_');
-        }
-        result.push(b);
-    }
-
-    result
-}
-
 // Options for the minimum length of a number required before adding separators and the length of digit groups between separators, respectively.
 const BINARY_OPTS: (usize, usize) = (0, 4);
 const OCTAL_OPTS: (usize, usize) = (0, 4);
@@ -214,7 +184,7 @@ fn format_numeric_literal(raw: &str) -> String {
                 }
             }
             b'e' | b'E' if is_base_10 => {
-                separate_and_push_num(
+                add_separators_and_push(
                     &mut result,
                     &current_num,
                     in_fraction,
@@ -226,7 +196,7 @@ fn format_numeric_literal(raw: &str) -> String {
                 in_fraction = false;
             }
             b'.' => {
-                separate_and_push_num(&mut result, &current_num, false, min_digits, group_len);
+                add_separators_and_push(&mut result, &current_num, false, min_digits, group_len);
                 result.push(b);
                 current_num.clear();
                 in_fraction = true;
@@ -241,7 +211,7 @@ fn format_numeric_literal(raw: &str) -> String {
         }
     }
 
-    separate_and_push_num(
+    add_separators_and_push(
         &mut result,
         &current_num,
         in_fraction,
@@ -254,7 +224,19 @@ fn format_numeric_literal(raw: &str) -> String {
 }
 
 /// Add separators (potentially `left_aligned`) to the `number` and push to the `result` vec.
-fn separate_and_push_num(
+///
+/// When right aligned, separators are added starting from the right (in reverse).
+/// ```
+/// 1234567890 // -> 1_234_567_890
+/// //               ^ The "uneven" group of numbers is then to the left of the first separator.
+/// ```
+///
+/// When left aligned, separators are added starting from the left.
+/// ```
+/// 12345654321 // -> 123_456_543_21
+/// //                            ^^ The "uneven" group of numbers is added to the right of the last separator.
+/// ```
+fn add_separators_and_push(
     result: &mut Vec<u8>,
     number: &[u8],
     left_aligned: bool,
@@ -262,10 +244,30 @@ fn separate_and_push_num(
     group_len: usize,
 ) {
     result.extend(if number.len() < min_digits {
+        // Don't insert separators if the number is shorter than the minimum number of digits required to start adding separators.
         number.to_vec()
-    } else if left_aligned {
-        add_separators_from_left(number, group_len)
     } else {
-        add_separators_from_right(number, group_len)
+        // Iterate backwards if right aligned.
+        let iter: Box<dyn Iterator<Item = &u8>> = if left_aligned {
+            Box::new(number.iter())
+        } else {
+            Box::new(number.iter().rev())
+        };
+
+        let mut result: Vec<u8> = Vec::new();
+
+        for (count, &b) in iter.enumerate() {
+            if count > 0 && count % group_len == 0 {
+                result.push(b'_');
+            }
+            result.push(b);
+        }
+
+        // Reverse the result if right aligned (to restore the correct order - original iterator was reversed while adding separators).
+        if !left_aligned {
+            result.reverse();
+        }
+
+        result
     });
 }
