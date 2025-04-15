@@ -94,23 +94,26 @@ impl Rule for UseNumericSeparators {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
-        match state {
-            State::UnreadableLiteral => Some(RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup!("Long numeric literal lacks separators"),
-            )),
-            State::InconsistentGrouping => Some(RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup!("Inconsistent grouping of digits in numeric literal"),
-            )),
-            State::UnnecessaryGrouping => Some(RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup!("Unnecessary grouping of digits in numeric literal"),
-            )),
-        }
+        let (title, note) = match state {
+            State::UnreadableLiteral => (
+                markup!("Long numeric literal lacks separators."),
+                markup!(
+                    "Adding separators helps improve readability and clarity for long numbers."
+                ),
+            ),
+            State::InconsistentGrouping => (
+                markup!("Inconsistent grouping of digits in numeric literal."),
+                markup!(
+                    "Numbers with inconsistently placed separators can be misleading or confusing."
+                ),
+            ),
+            State::UnnecessaryGrouping => (
+                markup!("Unnecessary grouping of digits in numeric literal."),
+                markup!("Separators are unnecessary in a number of this length."),
+            ),
+        };
+
+        Some(RuleDiagnostic::new(rule_category!(), node.range(), title).note(note))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
