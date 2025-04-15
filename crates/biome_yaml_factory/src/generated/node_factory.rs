@@ -57,7 +57,7 @@ impl YamlBlockMapExplicitEntryBuilder {
 }
 pub fn yaml_block_map_explicit_key(
     question_mark_token: SyntaxToken,
-    key: YamlIndentedBlock,
+    key: AnyYamlIndentedBlock,
 ) -> YamlBlockMapExplicitKey {
     YamlBlockMapExplicitKey::unwrap_cast(SyntaxNode::new_detached(
         YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_KEY,
@@ -69,7 +69,7 @@ pub fn yaml_block_map_explicit_key(
 }
 pub fn yaml_block_map_explicit_value(
     colon_token: SyntaxToken,
-    value: YamlIndentedBlock,
+    value: AnyYamlIndentedBlock,
 ) -> YamlBlockMapExplicitValue {
     YamlBlockMapExplicitValue::unwrap_cast(SyntaxNode::new_detached(
         YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_VALUE,
@@ -181,7 +181,7 @@ impl YamlBlockSequenceBuilder {
 }
 pub fn yaml_block_sequence_entry(
     minus_token: SyntaxToken,
-    value: YamlIndentedBlock,
+    value: AnyYamlIndentedBlock,
 ) -> YamlBlockSequenceEntry {
     YamlBlockSequenceEntry::unwrap_cast(SyntaxNode::new_detached(
         YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY,
@@ -423,19 +423,19 @@ pub fn yaml_property_list(any_yaml_property: AnyYamlProperty) -> YamlPropertyLis
         [Some(SyntaxElement::Node(any_yaml_property.into_syntax()))],
     ))
 }
-pub fn yaml_single_quoted_scalar(value_token: SyntaxToken) -> YamlSingleQuotedScalar {
-    YamlSingleQuotedScalar::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_SINGLE_QUOTED_SCALAR,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
-pub fn yaml_stream(documents: YamlDocumentList, eof_token: SyntaxToken) -> YamlStream {
-    YamlStream::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_STREAM,
+pub fn yaml_root(documents: YamlDocumentList, eof_token: SyntaxToken) -> YamlRoot {
+    YamlRoot::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_ROOT,
         [
             Some(SyntaxElement::Node(documents.into_syntax())),
             Some(SyntaxElement::Token(eof_token)),
         ],
+    ))
+}
+pub fn yaml_single_quoted_scalar(value_token: SyntaxToken) -> YamlSingleQuotedScalar {
+    YamlSingleQuotedScalar::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_SINGLE_QUOTED_SCALAR,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn yaml_tag_property(value_token: SyntaxToken) -> YamlTagProperty {

@@ -54,7 +54,7 @@ impl YamlBlockMapExplicitKey {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_key(self, element: YamlIndentedBlock) -> Self {
+    pub fn with_key(self, element: AnyYamlIndentedBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -68,7 +68,7 @@ impl YamlBlockMapExplicitValue {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: YamlIndentedBlock) -> Self {
+    pub fn with_value(self, element: AnyYamlIndentedBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -150,7 +150,7 @@ impl YamlBlockSequenceEntry {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: YamlIndentedBlock) -> Self {
+    pub fn with_value(self, element: AnyYamlIndentedBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -355,15 +355,7 @@ impl YamlPropertyList {
         )
     }
 }
-impl YamlSingleQuotedScalar {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
-impl YamlStream {
+impl YamlRoot {
     pub fn with_documents(self, element: YamlDocumentList) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -374,6 +366,14 @@ impl YamlStream {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
+impl YamlSingleQuotedScalar {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

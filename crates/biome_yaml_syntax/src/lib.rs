@@ -50,7 +50,7 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
     }
 
     fn is_root(&self) -> bool {
-        matches!(self, YamlSyntaxKind::YAML_STREAM)
+        matches!(self, YamlSyntaxKind::YAML_ROOT)
     }
 
     fn is_list(&self) -> bool {
