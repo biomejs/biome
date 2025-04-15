@@ -224,7 +224,7 @@ fn format_num(raw: &str) -> String {
                 }
             }
             'e' | 'E' if is_base_10 => {
-                flush_current_num(
+                separate_and_push_num(
                     &mut result,
                     &current_num,
                     in_fraction,
@@ -236,7 +236,7 @@ fn format_num(raw: &str) -> String {
                 in_fraction = false;
             }
             '.' => {
-                flush_current_num(&mut result, &current_num, false, min_digits, group_len);
+                separate_and_push_num(&mut result, &current_num, false, min_digits, group_len);
                 result.push(c);
                 current_num.clear();
                 in_fraction = true;
@@ -251,7 +251,7 @@ fn format_num(raw: &str) -> String {
         }
     }
 
-    flush_current_num(
+    separate_and_push_num(
         &mut result,
         &current_num,
         in_fraction,
@@ -262,16 +262,17 @@ fn format_num(raw: &str) -> String {
     result
 }
 
-fn flush_current_num(
+/// Add separators (potentially `left_aligned`) to the `number` and push to the `result` string.
+fn separate_and_push_num(
     result: &mut String,
-    current: &str,
+    number: &str,
     left_aligned: bool,
     min_digits: usize,
     group_len: usize,
 ) {
     if left_aligned {
-        result.push_str(&add_separators_from_left(current, min_digits, group_len));
+        result.push_str(&add_separators_from_left(number, min_digits, group_len));
     } else {
-        result.push_str(&add_separators_from_right(current, min_digits, group_len));
+        result.push_str(&add_separators_from_right(number, min_digits, group_len));
     }
 }
