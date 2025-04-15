@@ -149,14 +149,12 @@ fn add_separators_from_right(num: &str, min_digits: usize, group_length: usize) 
         num.to_owned()
     } else {
         let mut result = String::new();
-        let mut count = 0;
 
-        for c in num.chars().rev() {
+        for (count, c) in num.chars().rev().enumerate() {
             if count > 0 && count % group_length == 0 {
                 result.push('_');
             }
             result.push(c);
-            count += 1;
         }
 
         result.chars().rev().collect()
@@ -171,14 +169,12 @@ fn add_separators_from_left(num: &str, min_digits: usize, group_length: usize) -
         num.to_owned()
     } else {
         let mut result = String::new();
-        let mut count = 0;
 
-        for c in num.chars() {
+        for (count, c) in num.chars().enumerate() {
             if count > 0 && count % group_length == 0 {
                 result.push('_');
             }
             result.push(c);
-            count += 1;
         }
 
         result
