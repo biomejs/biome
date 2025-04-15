@@ -208,6 +208,7 @@ fn format_num(raw: &str) -> String {
                         }
                     }
                     result.push(b);
+                    // SAFETY: We already peeked and confirmed the existence of the `next` byte, so we can safely advance the iterator and push the value immediately.
                     result.push(bytes.next().unwrap());
                     is_base_10 = false;
                     prefix_parsed = true;
@@ -249,6 +250,7 @@ fn format_num(raw: &str) -> String {
         group_len,
     );
 
+    // SAFETY: The original string is valid UTF-8 so we can be confident here that the result is valid as well.
     String::from_utf8(result).unwrap()
 }
 
