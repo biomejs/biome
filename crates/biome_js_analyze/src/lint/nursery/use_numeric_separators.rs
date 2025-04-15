@@ -184,19 +184,23 @@ fn format_numeric_literal(raw: &str) -> String {
                 }
             }
             b'e' | b'E' if is_base_10 => {
-                add_separators_and_push(
-                    &mut result,
+                result.extend(&insert_separators(
                     &current_num,
                     in_fraction,
                     min_digits,
                     group_len,
-                );
+                ));
                 result.push(b);
                 current_num.clear();
                 in_fraction = false;
             }
             b'.' => {
-                add_separators_and_push(&mut result, &current_num, false, min_digits, group_len);
+                result.extend(insert_separators(
+                    &current_num,
+                    false,
+                    min_digits,
+                    group_len,
+                ));
                 result.push(b);
                 current_num.clear();
                 in_fraction = true;
@@ -211,13 +215,12 @@ fn format_numeric_literal(raw: &str) -> String {
         }
     }
 
-    add_separators_and_push(
-        &mut result,
+    result.extend(insert_separators(
         &current_num,
         in_fraction,
         min_digits,
         group_len,
-    );
+    ));
 
     // SAFETY: The original string is valid UTF-8 so we can be confident here that the result is valid as well.
     String::from_utf8(result).unwrap()
@@ -227,23 +230,22 @@ fn format_numeric_literal(raw: &str) -> String {
 ///
 /// When right aligned, separators are added starting from the right (in reverse).
 /// ```
-/// 1234567890 // -> 1_234_567_890
+/// 1234567; // -> 1_234_567
 /// //               ^ The "uneven" group of numbers is then to the left of the first separator.
 /// ```
 ///
 /// When left aligned, separators are added starting from the left.
 /// ```
-/// 12345654321 // -> 123_456_543_21
+/// 12345654; // -> 123_456_54
 /// //                            ^^ The "uneven" group of numbers is added to the right of the last separator.
 /// ```
-fn add_separators_and_push(
-    result: &mut Vec<u8>,
+fn insert_separators(
     number: &[u8],
     left_aligned: bool,
     min_digits: usize,
     group_len: usize,
-) {
-    result.extend(if number.len() < min_digits {
+) -> Vec<u8> {
+    if number.len() < min_digits {
         // Don't insert separators if the number is shorter than the minimum number of digits required to start adding separators.
         number.to_vec()
     } else {
@@ -269,5 +271,5 @@ fn add_separators_and_push(
         }
 
         result
-    });
+    }
 }
