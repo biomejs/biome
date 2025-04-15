@@ -30,7 +30,7 @@ pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
     let parse = Parse::try_from_case(&test_case).expect("Supported language");
 
     let code = test_case.code();
-
+    let mut diagnostics = vec![];
     group.throughput(Throughput::Bytes(code.len() as u64));
     group.bench_with_input(
         BenchmarkId::new(test_case.filename(), "uncached"),
@@ -38,15 +38,16 @@ pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
         |b, _| {
             b.iter(|| {
                 let result = black_box(parse.parse());
-                for diagnostic in result.into_diagnostics() {
-                    let diagnostic = diagnostic
-                        .with_file_source_code(code)
-                        .with_file_path(test_case.filename());
-                    println!("{}", print_diagnostic_to_string(&diagnostic));
-                }
+                diagnostics.extend(result.into_diagnostics());
             })
         },
     );
+    for diagnostic in diagnostics {
+        let diagnostic = diagnostic
+            .with_file_source_code(code)
+            .with_file_path(test_case.filename());
+        println!("{}", print_diagnostic_to_string(&diagnostic));
+    }
     group.bench_with_input(
         BenchmarkId::new(test_case.filename(), "cached"),
         &code,
