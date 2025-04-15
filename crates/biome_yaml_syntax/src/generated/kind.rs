@@ -39,7 +39,7 @@ pub enum YamlSyntaxKind {
     INDENT,
     DEDENT,
     COMMENT,
-    YAML_STREAM,
+    YAML_ROOT,
     YAML_DOCUMENT_LIST,
     YAML_DOCUMENT,
     YAML_DIRECTIVE_LIST,

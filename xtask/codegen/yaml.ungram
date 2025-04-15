@@ -30,7 +30,7 @@ YamlBogus = SyntaxElement*
 YamlBogusNode = SyntaxElement*
 
 // https://yaml.org/spec/1.2.2/#92-streams
-YamlStream =
+YamlRoot =
 	documents: YamlDocumentList
 	eof: 'EOF'
 
@@ -174,7 +174,7 @@ YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
 
 YamlBlockSequenceEntry =
 	'-'
-	value: YamlIndentedBlock
+	value: AnyYamlIndentedBlock
 
 // a:
 //  b: c
@@ -206,16 +206,16 @@ YamlBlockMapExplicitEntry =
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
 YamlBlockMapExplicitKey =
 	'?'
-	key: YamlIndentedBlock
+	key: AnyYamlIndentedBlock
 
 // : 10
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
 YamlBlockMapExplicitValue =
 	':'
-	value: YamlIndentedBlock
+	value: AnyYamlIndentedBlock
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-indented
-YamlIndentedBlock =
+AnyYamlIndentedBlock =
 	YamlCompactSequence
 	| YamlCompactMapping
 	| AnyYamlNode

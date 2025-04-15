@@ -1,4 +1,4 @@
-use crate::{YamlStream, YamlSyntaxKind};
+use crate::{YamlRoot, YamlSyntaxKind};
 use biome_rowan::Language;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -6,7 +6,7 @@ pub struct YamlLanguage;
 
 impl Language for YamlLanguage {
     type Kind = YamlSyntaxKind;
-    type Root = YamlStream;
+    type Root = YamlRoot;
 }
 
 pub type YamlSyntaxNode = biome_rowan::SyntaxNode<YamlLanguage>;

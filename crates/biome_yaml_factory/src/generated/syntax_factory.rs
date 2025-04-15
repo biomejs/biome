@@ -119,7 +119,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if YamlIndentedBlock::can_cast(element.kind()) {
+                    if AnyYamlIndentedBlock::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -145,7 +145,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if YamlIndentedBlock::can_cast(element.kind()) {
+                    if AnyYamlIndentedBlock::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -289,7 +289,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if YamlIndentedBlock::can_cast(element.kind()) {
+                    if AnyYamlIndentedBlock::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -679,26 +679,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.into_node(YAML_PROPERTY_LIST, children)
             }
-            YAML_SINGLE_QUOTED_SCALAR => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == SINGLE_QUOTED_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        YAML_SINGLE_QUOTED_SCALAR.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(YAML_SINGLE_QUOTED_SCALAR, children)
-            }
-            YAML_STREAM => {
+            YAML_ROOT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -718,11 +699,30 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        YAML_STREAM.to_bogus(),
+                        YAML_ROOT.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(YAML_STREAM, children)
+                slots.into_node(YAML_ROOT, children)
+            }
+            YAML_SINGLE_QUOTED_SCALAR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == SINGLE_QUOTED_LITERAL {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        YAML_SINGLE_QUOTED_SCALAR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(YAML_SINGLE_QUOTED_SCALAR, children)
             }
             YAML_TAG_PROPERTY => {
                 let mut elements = (&children).into_iter();

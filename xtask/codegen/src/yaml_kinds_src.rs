@@ -37,7 +37,7 @@ pub const YAML_KINDS_SRC: KindsSrc = KindsSrc {
         "COMMENT",
     ],
     nodes: &[
-        "YAML_STREAM",
+        "YAML_ROOT",
         "YAML_DOCUMENT_LIST",
         "YAML_DOCUMENT",
         "YAML_DIRECTIVE_LIST",
