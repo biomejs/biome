@@ -361,9 +361,16 @@ where
     /// suppression comments
     fn run_first_phase(mut self) -> ControlFlow<Break> {
         let iter = self.root.syntax().preorder_tokens(Direction::Next);
-        // iterate to evaluate suppressions
+        // Iterate to evaluate suppressions
         for token in iter {
             self.handle_token(token)?;
+        }
+        // Emit any validation diagnostics from finalizing
+        if let Err(error_diagnostics) = self.suppressions.finalize() {
+            for diagnostic in error_diagnostics {
+                let signal = DiagnosticSignal::new(|| diagnostic.clone());
+                (self.emit_signal)(&signal)?;
+            }
         }
         // Iterate for syntax rules after we've established suppressions
         let iter = self.root.syntax().preorder();

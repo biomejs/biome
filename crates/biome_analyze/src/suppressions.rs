@@ -351,6 +351,26 @@ impl RangeSuppressions {
 
         None
     }
+
+    /// Finalizes the suppressions after having evaluated the suppression source (i.e. a file)
+    /// You would call then when you expect to be done adding suppressions to this object
+    pub fn finalize(&self) -> Result<(), Vec<AnalyzerSuppressionDiagnostic>> {
+        let mut errors = Vec::new();
+        for suppression in self.suppressions.iter() {
+            if !suppression.is_ended {
+                let diagnostic = AnalyzerSuppressionDiagnostic::new(
+                    category!("suppressions/incorrect"),
+                    suppression.start_comment_range,
+                    "Range suppressions must have a matching biome-ignore-end",
+                );
+                errors.push(diagnostic);
+            }
+        }
+        if !errors.is_empty() {
+            return Err(errors);
+        }
+        Ok(())
+    }
 }
 
 #[derive(Debug)]
@@ -619,5 +639,12 @@ impl<'analyzer> Suppressions<'analyzer> {
                     .range_suppressions
                     .matches_filter_in_range(filter, range))
         })
+    }
+
+    /// Finalizes the suppressions after having evaluated the suppression source (i.e. a file)
+    /// This exists to validate things like correctly ended range suppresions
+    pub fn finalize(&self) -> Result<(), Vec<AnalyzerSuppressionDiagnostic>> {
+        // Only range_suppressions have a finalize right now
+        self.range_suppressions.finalize()
     }
 }

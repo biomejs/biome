@@ -492,3 +492,38 @@ function sommething(chalk: ChalkInstance) {
         result,
     ));
 }
+
+#[test]
+fn err_when_missing_range_end() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.ts");
+    fs.insert(
+        file_path.into(),
+        *b"
+// biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+import type { ChalkInstance } from \"chalk\" with { \"resolution-mode\": \"import\" };
+import type { ChalkInstance2 } from \"chalk2\" with { \"resolution-mode\": \"import\" };
+
+function sommething(chalk: ChalkInstance) {
+  console.log(chalk.yellow('we do something here'));
+}",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "err_when_missing_range_end",
+        fs,
+        console,
+        result,
+    ));
+}

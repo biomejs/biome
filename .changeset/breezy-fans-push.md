@@ -15,3 +15,4 @@ Example:
 import type { MyType } from "my-esm-pkg" with { "resolution-mode": "import" };
 ```
 
+Biome now requires all `biome-ignore-start` suppressions to have an equivalent `biome-ignore-end` comment.
