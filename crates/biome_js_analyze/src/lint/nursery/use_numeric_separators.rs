@@ -144,41 +144,31 @@ pub enum State {
 /// Add chunk separators to a number string, starting from the right.
 /// The "uneven" chunk is added to the left of the first separator.
 /// 1234567890 -> 1_234_567_890
-fn add_separators_from_right(num: &str, min_digits: usize, group_length: usize) -> String {
-    if num.len() < min_digits {
-        num.to_owned()
-    } else {
-        let mut result = String::new();
+fn add_separators_from_right(num: &[u8], group_length: usize) -> Vec<u8> {
+    let mut result: Vec<u8> = Vec::new();
 
-        for (count, c) in num.chars().rev().enumerate() {
-            if count > 0 && count % group_length == 0 {
-                result.push('_');
-            }
-            result.push(c);
+    for (count, &b) in num.iter().rev().enumerate() {
+        if count > 0 && count % group_length == 0 {
+            result.push(b'_');
         }
-
-        result.chars().rev().collect()
+        result.push(b);
     }
+
+    result.reverse();
+    result
 }
 
-/// Add chunk separators to a number string, starting from the left. Used for fractional parts.
-/// The "uneven" chunk is added to the right of the last separator.
-/// 12345654321 -> 123_456_543_21
-fn add_separators_from_left(num: &str, min_digits: usize, group_length: usize) -> String {
-    if num.len() < min_digits {
-        num.to_owned()
-    } else {
-        let mut result = String::new();
+fn add_separators_from_left(num: &[u8], group_length: usize) -> Vec<u8> {
+    let mut result: Vec<u8> = Vec::new();
 
-        for (count, c) in num.chars().enumerate() {
-            if count > 0 && count % group_length == 0 {
-                result.push('_');
-            }
-            result.push(c);
+    for (count, &b) in num.iter().enumerate() {
+        if count > 0 && count % group_length == 0 {
+            result.push(b'_');
         }
-
-        result
+        result.push(b);
     }
+
+    result
 }
 
 const BINARY_OPTS: (usize, usize) = (0, 4);
@@ -187,9 +177,9 @@ const DECIMAL_OPTS: (usize, usize) = (5, 3);
 const HEXADECIMAL_OPTS: (usize, usize) = (0, 2);
 
 fn format_num(raw: &str) -> String {
-    let mut chars = raw.chars().peekable();
-    let mut result = String::new();
-    let mut current_num = String::new();
+    let mut bytes = raw.bytes().peekable();
+    let mut result = Vec::new();
+    let mut current_num = Vec::new();
 
     let mut is_base_10 = true;
     let mut in_fraction = false;
@@ -197,33 +187,33 @@ fn format_num(raw: &str) -> String {
 
     let (mut min_digits, mut group_len) = DECIMAL_OPTS;
 
-    while let Some(c) = chars.next() {
-        match c {
-            '_' => continue,
-            '0' if !prefix_parsed && !in_fraction => {
-                if let Some(&next) = chars.peek() {
+    while let Some(b) = bytes.next() {
+        match b {
+            b'_' => continue,
+            b'0' if !prefix_parsed && !in_fraction => {
+                if let Some(&next) = bytes.peek() {
                     match next {
-                        'b' | 'B' => {
+                        b'b' | b'B' => {
                             (min_digits, group_len) = BINARY_OPTS;
                         }
-                        'o' | 'O' | '0'..='7' => {
+                        b'o' | b'O' | b'0'..=b'7' => {
                             (min_digits, group_len) = OCTAL_OPTS;
                         }
-                        'x' | 'X' => {
+                        b'x' | b'X' => {
                             (min_digits, group_len) = HEXADECIMAL_OPTS;
                         }
                         _ => {
-                            result.push(c);
+                            result.push(b);
                             continue;
                         }
                     }
-                    result.push(c);
-                    result.push(chars.next().unwrap());
+                    result.push(b);
+                    result.push(bytes.next().unwrap());
                     is_base_10 = false;
                     prefix_parsed = true;
                 }
             }
-            'e' | 'E' if is_base_10 => {
+            b'e' | b'E' if is_base_10 => {
                 separate_and_push_num(
                     &mut result,
                     &current_num,
@@ -231,23 +221,23 @@ fn format_num(raw: &str) -> String {
                     min_digits,
                     group_len,
                 );
-                result.push(c);
+                result.push(b);
                 current_num.clear();
                 in_fraction = false;
             }
-            '.' => {
+            b'.' => {
                 separate_and_push_num(&mut result, &current_num, false, min_digits, group_len);
-                result.push(c);
+                result.push(b);
                 current_num.clear();
                 in_fraction = true;
             }
-            '-' | '+' => result.push(c),
-            _ if c.is_ascii_alphanumeric() => {
+            b'-' | b'+' => result.push(b),
+            b if b.is_ascii_alphanumeric() => {
                 prefix_parsed = true;
-                current_num.push(c);
+                current_num.push(b);
             }
 
-            _ => panic!("unexpected character '{}'", c),
+            _ => panic!("unexpected byte '{}'", b),
         }
     }
 
@@ -259,20 +249,22 @@ fn format_num(raw: &str) -> String {
         group_len,
     );
 
-    result
+    String::from_utf8(result).unwrap()
 }
 
-/// Add separators (potentially `left_aligned`) to the `number` and push to the `result` string.
+/// Add separators (potentially `left_aligned`) to the `number` and push to the `result` vec.
 fn separate_and_push_num(
-    result: &mut String,
-    number: &str,
+    result: &mut Vec<u8>,
+    number: &[u8],
     left_aligned: bool,
     min_digits: usize,
     group_len: usize,
 ) {
-    if left_aligned {
-        result.push_str(&add_separators_from_left(number, min_digits, group_len));
+    result.extend(if number.len() < min_digits {
+        number.to_vec()
+    } else if left_aligned {
+        add_separators_from_left(number, group_len)
     } else {
-        result.push_str(&add_separators_from_right(number, min_digits, group_len));
-    }
+        add_separators_from_right(number, group_len)
+    });
 }
