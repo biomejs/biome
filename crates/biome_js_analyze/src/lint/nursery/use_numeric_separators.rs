@@ -124,9 +124,11 @@ impl Rule for UseNumericSeparators {
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             match state {
-                State::UnreadableLiteral => markup! { "Add numeric separators" },
-                State::InconsistentGrouping => markup! { "Fix numeric separator grouping" },
-                State::UnnecessaryGrouping => markup! { "Remove unnecessary numeric separators" },
+                State::UnreadableLiteral => markup! { "Add numeric separators." },
+                State::InconsistentGrouping => {
+                    markup! { "Use consistent numeric separator grouping." }
+                }
+                State::UnnecessaryGrouping => markup! { "Remove unnecessary numeric separators." },
             },
             mutation,
         ))
