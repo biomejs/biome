@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: type-first-groups.ts
+---
+# Input
+```ts
+import V1 from "bun:package";
+import V2 from "node:package";
+import V3 from "package";
+import V4 from "https://example.com";
+import V5 from "exception";
+import type T1 from "bun:package";
+import type T2 from "node:package";
+import type T3 from "package";
+import type T4 from "https://example.com";
+
+
+```
+
+# Diagnostics
+```
+type-first-groups.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import V1 from "bun:package";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import V2 from "node:package";
+    3 │ import V3 from "package";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1    │ - import·V1·from·"bun:package";
+     2    │ - import·V2·from·"node:package";
+     3    │ - import·V3·from·"package";
+     4    │ - import·V4·from·"https://example.com";
+     5    │ - import·V5·from·"exception";
+     6    │ - import·type·T1·from·"bun:package";
+     7    │ - import·type·T2·from·"node:package";
+     8    │ - import·type·T3·from·"package";
+     9    │ - import·type·T4·from·"https://example.com";
+        1 │ + import·type·T4·from·"https://example.com";
+        2 │ + import·type·T2·from·"node:package";
+        3 │ + import·V5·from·"exception";
+        4 │ + import·type·T1·from·"bun:package";
+        5 │ + import·type·T3·from·"package";
+        6 │ + import·V4·from·"https://example.com";
+        7 │ + import·V2·from·"node:package";
+        8 │ + import·V1·from·"bun:package";
+        9 │ + import·V3·from·"package";
+    10 10 │   
+    11 11 │   
+  
+
+```

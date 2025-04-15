@@ -16,9 +16,6 @@ pub mod serde;
 #[cfg(feature = "camino")]
 pub use adapters::CaminoError;
 
-#[cfg(feature = "serde_ini")]
-pub use adapters::IniError;
-
 #[cfg(feature = "oxc_resolver")]
 pub use adapters::ResolveError;
 

@@ -99,7 +99,7 @@ export interface AssistConfiguration {
 	 */
 	actions?: Actions;
 	/**
-	 * Whether Biome should enable assist via LSP.
+	 * Whether Biome should enable assist via LSP and CLI.
 	 */
 	enabled?: Bool;
 	/**
@@ -2405,7 +2405,6 @@ export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
 export interface Options {
 	groups?: ImportGroups;
-	typePlacement?: TypePlacement;
 }
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_Null {
@@ -2781,7 +2780,6 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	options: NoDoubleEqualsOptions;
 }
 export type ImportGroups = ImportGroup[];
-export type TypePlacement = "mixed" | "typesFirst";
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -3097,7 +3095,7 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
-export type GroupMatcher = PredefinedGroupMatcher | ImportSourceGlob;
+export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[];
 export interface CustomRestrictedImportOptions {
 	/**
@@ -3141,11 +3139,11 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
-export type PredefinedGroupMatcher = string;
-/**
- * Glob to match against import sources.
- */
-export type ImportSourceGlob = Glob;
+export interface ImportMatcher {
+	source?: SourcesMatcher;
+	type?: boolean;
+}
+export type SourceMatcher = PredefinedGroupMatcher | ImportSourceGlob;
 /**
  * Supported cases.
  */
@@ -3195,6 +3193,12 @@ export type Kind =
 	| "typeMethod";
 export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
+export type SourcesMatcher = SourceMatcher | SourceMatcher[];
+export type PredefinedGroupMatcher = string;
+/**
+ * Glob to match against import sources.
+ */
+export type ImportSourceGlob = Glob;
 export type RestrictedModifier =
 	| "abstract"
 	| "private"
@@ -3592,8 +3596,7 @@ export type Category =
 	| "internalError/panic"
 	| "reporter/parse"
 	| "reporter/format"
-	| "reporter/assist"
-	| "reporter/linter"
+	| "reporter/violations"
 	| "parse"
 	| "lint"
 	| "lint/a11y"

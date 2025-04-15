@@ -23,6 +23,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) formatter_enabled: Option<FormatterEnabled>,
     pub(crate) linter_enabled: Option<LinterEnabled>,
     pub(crate) assist_enabled: Option<AssistEnabled>,
+    pub(crate) enforce_assist: bool,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
@@ -137,6 +138,7 @@ impl CommandRunner for CheckCommandPayload {
             fix_file_mode,
             stdin: self.get_stdin(console)?,
             vcs_targeted: (self.staged, self.changed).into(),
+            enforce_assist: self.enforce_assist,
         })
         .set_report(cli_options))
     }

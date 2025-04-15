@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `file.vue`
@@ -27,17 +27,23 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.vue assist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Not all actions were applied:
+  × The imports and exports are not sorted.
   
-    1 1 │   <script setup lang="ts">
-    2   │ - import·Button·from·"./components/Button.vue";
-    3   │ - import·*·as·vueUse·from·"vue-use";
-      2 │ + import·*·as·vueUse·from·"vue-use";
-      3 │ + import·Button·from·"./components/Button.vue";
-    4 4 │   </script>
-    5 5 │   <template></template>
+    1 │ <script setup lang="ts">
+  > 2 │ import Button from "./components/Button.vue";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import * as vueUse from "vue-use";
+    4 │ </script>
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·Button·from·"./components/Button.vue";
+    2   │ - import·*·as·vueUse·from·"vue-use";
+      1 │ + import·*·as·vueUse·from·"vue-use";
+      2 │ + import·Button·from·"./components/Button.vue";
+    3 3 │   
   
 
 ```

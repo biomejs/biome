@@ -1,7 +1,10 @@
 use biome_analyze::{
-    ActionCategory, Ast, FixKind, Rule, SourceActionKind, context::RuleContext, declare_source_rule,
+    ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, SourceActionKind, context::RuleContext,
+    declare_source_rule,
 };
+use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::category;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsModule,
@@ -545,6 +548,16 @@ impl Rule for OrganizeImports {
             .map(|item| item.range())
     }
 
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            category!("assist/source/organizeImports"),
+            Self::text_range(ctx, state),
+            markup! {
+                "The imports and exports are not sorted."
+            },
+        ))
+    }
+
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         struct ChunkBuilder {
             slot_indexes: std::ops::Range<u32>,
@@ -574,7 +587,6 @@ impl Rule for OrganizeImports {
         let options = ctx.options();
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
-        let mut prev_section = None;
         let mut prev_group = 0;
         for item in root.items() {
             if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
@@ -583,15 +595,12 @@ impl Rule for OrganizeImports {
                 if prev_is_distinct || has_detached_leading_comment(item.syntax()) {
                     // The chunk ends, here
                     report_unsorted_chunk(chunk.take(), &mut result);
-                    prev_section = None;
                     prev_group = 0;
                 }
-                let key = ImportKey::new(info, &options.groups, options.type_placement);
-                let blank_line_separated_groups = prev_section
-                    .is_some_and(|prev_section| prev_section != key.section)
-                    || options
-                        .groups
-                        .separated_by_blank_line(prev_group, key.group);
+                let key = ImportKey::new(info, &options.groups);
+                let blank_line_separated_groups = options
+                    .groups
+                    .separated_by_blank_line(prev_group, key.group);
                 let starts_chunk = chunk.is_none();
                 let leading_newline_count = leading_newlines(item.syntax()).count();
                 let are_specifiers_unsorted =
@@ -636,13 +645,11 @@ impl Rule for OrganizeImports {
                     if chunk.max_key > key || chunk.max_key.is_mergeable(&key) {
                         chunk.slot_indexes.end = key.slot_index + 1;
                     } else {
-                        prev_section = Some(key.section);
                         prev_group = key.group;
                         chunk.max_key = key;
                     }
                 } else {
                     // New chunk
-                    prev_section = Some(key.section);
                     prev_group = key.group;
                     chunk = Some(ChunkBuilder::new(key));
                 }
@@ -789,11 +796,7 @@ impl Rule for OrganizeImports {
                                 let info = ImportInfo::from_module_item(&item)?.0;
                                 let item = organized_items.remove(&info.slot_index).unwrap_or(item);
                                 Some(KeyedItem {
-                                    key: ImportKey::new(
-                                        info,
-                                        &options.groups,
-                                        options.type_placement,
-                                    ),
+                                    key: ImportKey::new(info, &options.groups),
                                     was_merged: false,
                                     item: Some(item),
                                 })
@@ -823,7 +826,6 @@ impl Rule for OrganizeImports {
                         i += 1;
                     }
                     // Swap the items to obtain a sorted chunk
-                    let mut prev_section = None;
                     let mut prev_group: u16 = 0;
                     for (
                         index,
@@ -841,11 +843,9 @@ impl Rule for OrganizeImports {
                         };
                         let mut new_item = new_item.into_syntax();
                         let old_item = old_item.into_node()?;
-                        let blank_line_separated_groups = prev_section
-                            .is_some_and(|prev_section| prev_section != key.section)
-                            || options
-                                .groups
-                                .separated_by_blank_line(prev_group, key.group);
+                        let blank_line_separated_groups = options
+                            .groups
+                            .separated_by_blank_line(prev_group, key.group);
                         // Don't make any change if it is the same node and no change have to be done
                         if !blank_line_separated_groups && index == key.slot_index && !was_merged {
                             continue;
@@ -894,7 +894,6 @@ impl Rule for OrganizeImports {
                             new_item = new_item.prepend_trivia_pieces(newline)?;
                         }
                         mutation.replace_element_discard_trivia(old_item.into(), new_item.into());
-                        prev_section = Some(key.section);
                         prev_group = key.group;
                     }
                 }
@@ -923,20 +922,6 @@ impl Rule for OrganizeImports {
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct Options {
     groups: import_groups::ImportGroups,
-    type_placement: TypePlacement,
-}
-
-#[derive(
-    Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub enum TypePlacement {
-    /// Mix type-only imports and exports with regular imports and exports
-    #[default]
-    Mixed,
-    /// Separate type-only imports and exports from regular imports and exports
-    TypesFirst,
 }
 
 #[derive(Debug)]

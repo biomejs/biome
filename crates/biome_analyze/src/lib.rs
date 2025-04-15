@@ -6,6 +6,7 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
+use std::str::FromStr;
 use std::sync::Arc;
 
 mod analyzer_plugin;
@@ -85,6 +86,8 @@ pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     suppression_action: Box<dyn SuppressionAction<Language = L>>,
     /// Handles analyzer signals emitted by individual rules
     emit_signal: SignalHandler<'analyzer, L, Break>,
+    /// The rule categories used during the run of the analyzer
+    categories: RuleCategories,
 }
 
 pub struct AnalyzerContext<'a, L: Language> {
@@ -108,6 +111,7 @@ where
         parse_suppression_comment: SuppressionParser<Diag>,
         suppression_action: Box<dyn SuppressionAction<Language = L>>,
         emit_signal: SignalHandler<'analyzer, L, Break>,
+        categories: RuleCategories,
     ) -> Self {
         Self {
             phases: BTreeMap::new(),
@@ -117,6 +121,7 @@ where
             parse_suppression_comment,
             suppression_action,
             emit_signal,
+            categories,
         }
     }
 
@@ -143,6 +148,7 @@ where
             mut emit_signal,
             suppression_action,
             metadata: _,
+            categories,
         } = self;
 
         let mut line_index = 0;
@@ -163,6 +169,7 @@ where
                 suppression_action: suppression_action.as_ref(),
                 options: ctx.options,
                 suppressions: &mut suppressions,
+                categories,
             };
 
             // The first phase being run will inspect the tokens and parse the
@@ -199,7 +206,9 @@ where
 
                 // 1. Check for top level suppression:
                 if suppressions.top_level_suppression.suppressed_plugin(&name)
-                    || suppressions.top_level_suppression.suppress_all
+                    || suppressions
+                        .top_level_suppression
+                        .suppresses_category(RuleCategory::Lint)
                 {
                     break;
                 }
@@ -232,14 +241,21 @@ where
                     };
 
                     suppression.filter(|suppression| {
-                        suppression.suppress_all
+                        suppression
+                            .suppressed_categories
+                            .contains(RuleCategory::Lint)
                             || suppression.suppress_all_plugins
                             || suppression.suppressed_plugins.contains(&name)
                     })
                 });
 
                 if let Some(suppression) = suppression {
-                    suppression.did_suppress_signal = true;
+                    if suppression
+                        .suppressed_categories
+                        .contains(RuleCategory::Lint)
+                    {
+                        suppression.did_suppress_signal = true;
+                    }
                 } else {
                     let signal = DiagnosticSignal::new(|| diagnostic.clone());
                     if let ControlFlow::Break(br) = (emit_signal)(&signal) {
@@ -331,6 +347,8 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     options: &'phase AnalyzerOptions,
     /// Tracks all suppressions during the analyzer phase
     suppressions: &'phase mut Suppressions<'analyzer>,
+    /// The current categories
+    categories: RuleCategories,
 }
 
 impl<L, Matcher, Break, Diag> PhaseRunner<'_, '_, L, Matcher, Break, Diag>
@@ -462,18 +480,22 @@ where
             if self
                 .suppressions
                 .top_level_suppression
-                .suppressed_rule(&entry.rule)
-                || self.suppressions.top_level_suppression.suppress_all
+                .contains_rule_key(&entry.category, &entry.rule)
+                || self
+                    .suppressions
+                    .top_level_suppression
+                    .suppressed_categories
+                    .contains(entry.category)
             {
                 self.signal_queue.pop();
                 break;
             }
 
-            if self
-                .suppressions
-                .range_suppressions
-                .suppressed_rule(&entry.rule, &entry.text_range)
-            {
+            if self.suppressions.range_suppressions.suppress_rule(
+                &entry.category,
+                &entry.rule,
+                &entry.text_range,
+            ) {
                 self.signal_queue.pop();
                 break;
             }
@@ -497,27 +519,28 @@ where
                     let index =
                         self.suppressions
                             .line_suppressions
-                            .partition_point(|suppression| {
-                                suppression.text_range.end() < entry.text_range.start()
+                            .binary_search_by(|suppression| {
+                                if suppression.text_range.end() < entry.text_range.start() {
+                                    Ordering::Less
+                                } else if entry.text_range.end() < suppression.text_range.start() {
+                                    Ordering::Greater
+                                } else {
+                                    Ordering::Equal
+                                }
                             });
 
-                    if index >= self.suppressions.line_suppressions.len() {
-                        None
-                    } else {
-                        Some(&mut self.suppressions.line_suppressions[index])
-                    }
+                    index
+                        .ok()
+                        .map(|index| &mut self.suppressions.line_suppressions[index])
                 }
             };
 
             let suppression = suppression.filter(|suppression| {
-                if suppression.suppress_all {
+                if suppression.suppressed_categories.contains(entry.category) {
                     return true;
                 }
                 if suppression.suppressed_instances.is_empty() {
-                    suppression
-                        .suppressed_rules
-                        .iter()
-                        .any(|filter| *filter == entry.rule)
+                    suppression.matches_rule(&entry.category, &entry.rule)
                 } else {
                     entry.instances.iter().all(|value| {
                         suppression
@@ -556,7 +579,7 @@ where
         let mut has_suppressions = false;
 
         for result in (self.parse_suppression_comment)(text, range) {
-            let suppression = match result {
+            let suppression: AnalyzerSuppression = match result {
                 Ok(kind) => kind,
                 Err(diag) => {
                     // Emit the suppression parser diagnostic
@@ -570,6 +593,18 @@ where
                     continue;
                 }
             };
+
+            if !self.categories.contains(suppression.as_rule_category()) {
+                let signal = DiagnosticSignal::new(|| {
+                    AnalyzerSuppressionDiagnostic::new(
+                        category!("suppressions/unused"),
+                        suppression.ignore_range.unwrap_or(range),
+                        "Suppression comment has no effect because the tool is not enabled.",
+                    )
+                });
+                (self.emit_signal)(&signal)?;
+                continue;
+            }
 
             if let Err(diagnostic) =
                 self.suppressions
@@ -716,6 +751,18 @@ impl<'a> AnalyzerSuppression<'a> {
         }
     }
 
+    pub fn as_rule_category(&self) -> RuleCategory {
+        match self.kind {
+            AnalyzerSuppressionKind::Everything(category) => {
+                RuleCategory::from_str(category).unwrap()
+            }
+            AnalyzerSuppressionKind::Rule(_) => RuleCategory::Lint,
+            AnalyzerSuppressionKind::Action(_) => RuleCategory::Action,
+            AnalyzerSuppressionKind::RuleInstance(_, _) => RuleCategory::Lint,
+            AnalyzerSuppressionKind::Plugin(_) => RuleCategory::Lint,
+        }
+    }
+
     #[must_use]
     pub fn with_ignore_range(mut self, ignore_range: TextRange) -> Self {
         self.ignore_range = Some(ignore_range);
@@ -751,6 +798,17 @@ impl AnalyzerSuppressionKind<'_> {
             AnalyzerSuppressionKind::Action(_) => true,
             AnalyzerSuppressionKind::RuleInstance(_, _) => false,
             AnalyzerSuppressionKind::Plugin(_) => false,
+        }
+    }
+
+    /// Retrieves the category of the current suppression
+    pub fn category(&self) -> &str {
+        match self {
+            AnalyzerSuppressionKind::Everything(category) => category,
+            AnalyzerSuppressionKind::Rule(_) => "lint",
+            AnalyzerSuppressionKind::Action(_) => "action",
+            AnalyzerSuppressionKind::RuleInstance(_, _) => "lint",
+            AnalyzerSuppressionKind::Plugin(_) => "lint",
         }
     }
 }

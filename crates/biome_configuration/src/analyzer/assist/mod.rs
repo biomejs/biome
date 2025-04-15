@@ -13,7 +13,7 @@ pub type AssistEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct AssistConfiguration {
-    /// Whether Biome should enable assist via LSP.
+    /// Whether Biome should enable assist via LSP and CLI.
     #[bpaf(long("assist-enabled"), argument("true|false"))]
     pub enabled: Option<AssistEnabled>,
 

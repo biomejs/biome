@@ -370,7 +370,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Actions" }, { "type": "null" }]
 				},
 				"enabled": {
-					"description": "Whether Biome should enable assist via LSP.",
+					"description": "Whether Biome should enable assist via LSP and CLI.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"includes": {
@@ -1660,8 +1660,8 @@
 		},
 		"GroupMatcher": {
 			"anyOf": [
-				{ "$ref": "#/definitions/PredefinedGroupMatcher" },
-				{ "$ref": "#/definitions/ImportSourceGlob" }
+				{ "$ref": "#/definitions/ImportMatcher" },
+				{ "$ref": "#/definitions/SourceMatcher" }
 			]
 		},
 		"GroupPlainConfiguration": {
@@ -1823,6 +1823,18 @@
 		"ImportGroups": {
 			"type": "array",
 			"items": { "$ref": "#/definitions/ImportGroup" }
+		},
+		"ImportMatcher": {
+			"type": "object",
+			"properties": {
+				"source": {
+					"anyOf": [
+						{ "$ref": "#/definitions/SourcesMatcher" },
+						{ "type": "null" }
+					]
+				},
+				"type": { "type": ["boolean", "null"] }
+			}
 		},
 		"ImportSourceGlob": {
 			"description": "Glob to match against import sources.",
@@ -3117,10 +3129,6 @@
 				"groups": {
 					"default": [],
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
-				},
-				"typePlacement": {
-					"default": "mixed",
-					"allOf": [{ "$ref": "#/definitions/TypePlacement" }]
 				}
 			},
 			"additionalProperties": false
@@ -4270,6 +4278,18 @@
 			},
 			"additionalProperties": false
 		},
+		"SourceMatcher": {
+			"anyOf": [
+				{ "$ref": "#/definitions/PredefinedGroupMatcher" },
+				{ "$ref": "#/definitions/ImportSourceGlob" }
+			]
+		},
+		"SourcesMatcher": {
+			"anyOf": [
+				{ "$ref": "#/definitions/SourceMatcher" },
+				{ "type": "array", "items": { "$ref": "#/definitions/SourceMatcher" } }
+			]
+		},
 		"StableHookResult": {
 			"oneOf": [
 				{
@@ -5147,20 +5167,6 @@
 					"description": "The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.",
 					"type": "string",
 					"enum": ["all"]
-				}
-			]
-		},
-		"TypePlacement": {
-			"oneOf": [
-				{
-					"description": "Mix type-only imports and exports with regular imports and exports",
-					"type": "string",
-					"enum": ["mixed"]
-				},
-				{
-					"description": "Separate type-only imports and exports from regular imports and exports",
-					"type": "string",
-					"enum": ["typesFirst"]
 				}
 			]
 		},

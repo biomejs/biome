@@ -1,13 +1,13 @@
-mod assist;
 mod check;
 mod format;
-mod lint;
+mod lint_and_assist;
 mod search;
 pub(crate) mod workspace_file;
 
 use crate::execute::TraversalMode;
 use crate::execute::diagnostics::{ResultExt, UnhandledDiagnostic};
 use crate::execute::traverse::TraversalOptions;
+use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, category};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
@@ -15,7 +15,7 @@ use biome_service::workspace::{
 };
 use check::check_file;
 use format::format;
-use lint::lint;
+use lint_and_assist::lint_and_assist;
 use search::search;
 use std::marker::PhantomData;
 use std::ops::Deref;
@@ -74,7 +74,6 @@ impl Message {
 #[derive(Debug)]
 pub(crate) enum DiffKind {
     Format,
-    Assist,
 }
 
 impl<D> From<D> for Message
@@ -215,12 +214,14 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
             suppress,
             ..
         } => {
+            let categories = RuleCategoriesBuilder::default().with_lint().with_syntax();
             // the unsupported case should be handled already at this point
-            lint(
+            lint_and_assist(
                 shared_context,
                 biome_path.clone(),
                 suppress,
                 suppression_reason.as_deref(),
+                categories.build(),
             )
         }
         TraversalMode::Format { .. } => {

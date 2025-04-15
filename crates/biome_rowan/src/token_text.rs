@@ -18,6 +18,18 @@ impl std::hash::Hash for TokenText {
     }
 }
 
+impl Ord for TokenText {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.text().cmp(other.text())
+    }
+}
+
+impl PartialOrd for TokenText {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 impl TokenText {
     #[inline]
     pub fn new_raw(kind: crate::RawSyntaxKind, text: &str) -> Self {

@@ -15,6 +15,6 @@ version              = "0.0.1"
 workspace = true
 
 [dependencies]
-biome_js_syntax   = { workspace = true }
-biome_rowan       = { workspace = true }
-static_assertions = { workspace = true }
+biome_js_syntax           = { workspace = true }
+biome_js_type_info_macros = { workspace = true }
+biome_rowan               = { workspace = true }

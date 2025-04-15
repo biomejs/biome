@@ -1,8 +1,10 @@
 use crate::WorkspaceError;
 use crate::settings::Settings;
 use biome_analyze::AnalyzerRules;
-use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
-use biome_configuration::editorconfig::parse_str;
+use biome_configuration::diagnostics::{
+    CantLoadExtendFile, EditorConfigDiagnostic, ParseFailedDiagnostic,
+};
+use biome_configuration::editorconfig::EditorConfig;
 use biome_configuration::{
     BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload, push_to_analyzer_rules,
 };
@@ -11,7 +13,7 @@ use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
-use biome_diagnostics::CaminoError;
+use biome_diagnostics::{CaminoError, Resource, SourceCode};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{
     AutoSearchResult, ConfigName, FileSystem, FileSystemDiagnostic, FsErrorKind, OpenOptions,
@@ -28,6 +30,7 @@ use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::ops::Deref;
 use std::path::Path;
+use std::str::FromStr;
 use tracing::instrument;
 
 /// Information regarding the configuration that was found.
@@ -196,30 +199,42 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
             return load_user_config(fs, config_file_path, external_resolution_base_path);
         }
     };
-    let Some(auto_search_result) = fs.auto_search_files(
+
+    // We search for the first non-root `biome.json` or `biome.jsonc` files:
+    let mut deserialized = None;
+    let mut predicate = |file_path: &Utf8Path, content: &str| -> bool {
+        let parser_options = match file_path.extension() {
+            Some("json") => JsonParserOptions::default(),
+            _ => JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas(),
+        };
+
+        let deserialized_content =
+            deserialize_from_json_str::<Configuration>(content, parser_options, "");
+        let is_root = deserialized_content
+            .deserialized
+            .as_ref()
+            .is_some_and(|config| config.root.is_none_or(|root| root.value()));
+        if is_root {
+            deserialized = Some(deserialized_content);
+        }
+        is_root
+    };
+
+    let Some(auto_search_result) = fs.auto_search_files_with_predicate(
         &configuration_directory,
         &[ConfigName::biome_json(), ConfigName::biome_jsonc()],
+        &mut predicate,
     ) else {
         return Ok(None);
     };
 
-    // We first search for `biome.json` or `biome.jsonc` files
-    let AutoSearchResult {
-        content, file_path, ..
-    } = auto_search_result;
-
-    let parser_options = match file_path.extension() {
-        Some("json") => JsonParserOptions::default(),
-        _ => JsonParserOptions::default()
-            .with_allow_comments()
-            .with_allow_trailing_commas(),
-    };
-
-    let deserialized = deserialize_from_json_str::<Configuration>(&content, parser_options, "");
-
     Ok(Some(ConfigurationPayload {
-        deserialized,
-        configuration_file_path: file_path,
+        // Unwrapping is safe because the predicate in the search above would
+        // only return `true` if it assigned `Some` value:
+        deserialized: deserialized.unwrap(),
+        configuration_file_path: auto_search_result.file_path,
         external_resolution_base_path,
     }))
 }
@@ -269,6 +284,14 @@ fn load_user_config(
 
         let content = fs.read_file_from_path(config_path.as_path())?;
         let deserialized = deserialize_from_json_str::<Configuration>(&content, parser_options, "");
+        if deserialized
+            .deserialized
+            .as_ref()
+            .is_some_and(|config| config.root.is_some_and(|root| !root.value()))
+        {
+            return Err(BiomeDiagnostic::non_root_configuration(config_file_path).into());
+        }
+
         Ok(Some(ConfigurationPayload {
             deserialized,
             configuration_file_path: config_path.to_path_buf(),
@@ -302,10 +325,20 @@ pub fn load_editorconfig(
     if let Some(auto_search_result) = fs.auto_search_files(&workspace_root, &[".editorconfig"]) {
         let AutoSearchResult {
             content,
+            file_path,
             directory_path,
-            ..
         } = auto_search_result;
-        let editorconfig = parse_str(&content)?;
+        let editorconfig = EditorConfig::from_str(&content).map_err(|err| {
+            EditorConfigDiagnostic::ParseFailed(ParseFailedDiagnostic {
+                kind: err.kind,
+                path: Resource::File(file_path.into_string().into()),
+                source_code: Some(Box::new(SourceCode {
+                    text: content.into(),
+                    line_starts: None,
+                })),
+                span: err.span,
+            })
+        })?;
         if let Some(config_path) = config_path {
             // if `.edirotconfig` is higher than `biome.json`
             if is_parent_of(directory_path, config_path) {
@@ -557,8 +590,10 @@ impl ConfigurationExt for Configuration {
 
 #[cfg(test)]
 mod test {
-    use crate::configuration::load_configuration;
-    use biome_configuration::ConfigurationPathHint;
+    use crate::{WorkspaceError, configuration::load_configuration};
+    use biome_configuration::{
+        BiomeDiagnostic, ConfigurationPathHint, diagnostics::ConfigurationDiagnostic,
+    };
     use biome_fs::MemoryFileSystem;
     use camino::Utf8PathBuf;
 
@@ -571,5 +606,59 @@ mod test {
         let result = load_configuration(&fs, path_hint);
 
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn should_skip_non_root_configuration() {
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/biome.json"),
+            r#"{ "linter": { "enabled": false } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/nested/biome.json"),
+            r#"{ "root": false, "linter": { "enabled": true } }"#.to_string(),
+        );
+        let path_hint = ConfigurationPathHint::FromWorkspace(Utf8PathBuf::from("/nested"));
+
+        match load_configuration(&fs, path_hint) {
+            Ok(loaded) => {
+                assert!(
+                    loaded
+                        .configuration
+                        .linter
+                        .is_some_and(|linter| !linter.is_enabled())
+                );
+            }
+            Err(err) => {
+                panic!("Config loading failed: {err}");
+            }
+        }
+    }
+
+    #[test]
+    fn should_refuse_user_provided_non_root_configuration() {
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/biome.json"),
+            r#"{ "linter": { "enabled": false } }"#.to_string(),
+        );
+        fs.insert(
+            Utf8PathBuf::from("/nested/biome.json"),
+            r#"{ "root": false, "linter": { "enabled": true } }"#.to_string(),
+        );
+        let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("/nested"));
+
+        match load_configuration(&fs, path_hint) {
+            Ok(_) => panic!("Config loading should have failed"),
+            Err(err) => {
+                assert!(matches!(
+                    err,
+                    WorkspaceError::Configuration(ConfigurationDiagnostic::Biome(
+                        BiomeDiagnostic::NonRootConfiguration(_)
+                    ))
+                ));
+            }
+        }
     }
 }

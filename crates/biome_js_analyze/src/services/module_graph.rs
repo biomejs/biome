@@ -2,7 +2,7 @@ use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
     Queryable, RuleKey, ServiceBag, SyntaxVisitor,
 };
-use biome_module_graph::{ModuleGraph, ModuleInfo};
+use biome_module_graph::{JsModuleInfo, ModuleGraph};
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
 use camino::Utf8Path;
 use std::sync::Arc;
@@ -15,7 +15,7 @@ impl ModuleGraphService {
         self.0.as_ref()
     }
 
-    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+    pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
         self.0.module_info_for_path(path)
     }
 }

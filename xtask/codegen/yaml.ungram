@@ -27,69 +27,260 @@
 SyntaxElement = SyntaxElement
 
 YamlBogus = SyntaxElement*
-YamlBogusValue = SyntaxElement*
+YamlBogusNode = SyntaxElement*
 
+// https://yaml.org/spec/1.2.2/#92-streams
 YamlRoot =
-	bom: 'UNICODE_BOM'?
 	documents: YamlDocumentList
 	eof: 'EOF'
 
 YamlDocumentList = YamlDocument*
+
+// https://yaml.org/spec/1.2.2/#91-documents
 YamlDocument =
-	'---'? // Document start marker
-	body: AnyYamlValue
+	// All documents in the same stream must use the same encoding,
+	// but documents are allowed to re-specify the encoding
+	// https://yaml.org/spec/1.2.2/#rule-l-document-prefix
+	bom: 'UNICODE_BOM'?
+	// https://yaml.org/spec/1.2.2/#rule-l-directive-document
+	directives: YamlDirectiveList
+	// https://yaml.org/spec/1.2.2/#rule-c-directives-end
+	'---'?
+	node: AnyYamlNode
+	// https://yaml.org/spec/1.2.2/#rule-c-document-end
 	'...'?
 
-AnyYamlScalar =
-	YamlStringValue
-	| YamlNumberValue
-	| YamlBooleanValue
-	| YamlNullValue
+YamlDirectiveList = YamlDirective*
 
-YamlArrayInline =
+// Since directive must be parsed in a single line, we must parse it as a single token
+// https://yaml.org/spec/1.2.2/#68-directives
+// %YAML 1.3
+YamlDirective = value: 'directive_literal'
+
+// https://yaml.org/spec/1.2.2/#rule-s-l+block-node
+AnyYamlNode =
+	AnyYamlBlockNode
+	| AnyYamlFlowNode
+	| YamlBogusNode
+
+// https://yaml.org/spec/1.2.2/#rule-ns-flow-node
+AnyYamlFlowNode =
+	YamlFlowJsonNode
+	| YamlFlowYamlNode
+	| YamlAliasNode
+
+// *abc
+// https://yaml.org/spec/1.2.2/#rule-c-ns-alias-node
+YamlAliasNode = value: 'alias_literal'
+
+// Superset of JSON
+// e.g {a: b, c: [d, {e: f}]}
+// https://yaml.org/spec/1.2.2/#rule-c-flow-json-node
+YamlFlowJsonNode =
+	properties: YamlPropertyList
+	content: AnyYamlJsonContent?
+
+// Plain YAML node
+// https://yaml.org/spec/1.2.2/#rule-ns-flow-yaml-node
+YamlFlowYamlNode =
+	properties: YamlPropertyList
+	content: YamlPlainScalar?
+
+// Yaml in JSON style
+// e.g. [a, b, {c: d, {e: "f"}: ['g']}]
+// https://yaml.org/spec/1.2.2/#rule-c-flow-json-content
+AnyYamlJsonContent =
+	YamlFlowSequence
+	| YamlFlowMapping
+	| YamlSingleQuotedScalar
+	| YamlDoubleQuotedScalar
+
+// https://yaml.org/spec/1.2.2/#rule-c-flow-sequence
+YamlFlowSequence =
 	'['
-	items: YamlArrayInlineList
+	entries: YamlFlowSequenceEntryList
 	']'
 
-YamlArrayInlineList = (AnyYamlScalar (',' AnyYamlScalar)* ','?)
+// https://yaml.org/spec/1.2.2/#rule-ns-s-flow-seq-entries
+YamlFlowSequenceEntryList = (AnyYamlFlowSequenceEntry (',' AnyYamlFlowSequenceEntry)*)
 
-AnyYamlValue =
-	AnyYamlScalar
-	| YamlArray
-	| YamlArrayInline
-	| YamlObject
-	| YamlBogusValue
+// https://yaml.org/spec/1.2.2/#rule-ns-flow-seq-entry
+AnyYamlFlowSequenceEntry =
+	AnyYamlFlowNode
+	// Compact form for a mapping of single key/value pair
+	// e.g. [a, b, c: d, e: f], which is equivalent to [a, b, {c: d}, {e: f}]
+	// https://yaml.org/spec/1.2.2/#rule-ns-flow-pair
+	| AnyYamlFlowMapEntry
 
-YamlArray =
-	items: YamlArrayItemList
+// https://yaml.org/spec/1.2.2/#rule-c-flow-mapping
+YamlFlowMapping =
+	'{'
+	entries: YamlFlowMapEntryList
+	'}'
 
-YamlArrayItem =
-	'-'
-	item: AnyYamlValue
+// https://yaml.org/spec/1.2.2/#rule-ns-s-flow-map-entries
+YamlFlowMapEntryList = (AnyYamlFlowMapEntry (',' AnyYamlFlowMapEntry)*)
 
-YamlArrayItemList = YamlArrayItem*
+AnyYamlFlowMapEntry =
+	YamlFlowMapExplicitEntry
+	| YamlFlowMapImplicitEntry
 
-YamlObject =
-	members: YamlObjectMemberList
+// ? a: b
+// https://yaml.org/spec/1.2.2/#rule-ns-flow-map-explicit-entry
+YamlFlowMapExplicitEntry =
+	'?'
+	entry: YamlFlowMapImplicitEntry?
 
-YamlObjectMember =
-	key: YamlIdentifier
+// a: b
+// https://yaml.org/spec/1.2.2/#rule-ns-flow-map-implicit-entry
+YamlFlowMapImplicitEntry =
+	key: AnyYamlFlowMapImplicitKey?
 	':'
-	value: AnyYamlValue
+	value: AnyYamlFlowNode
 
-YamlObjectMemberList = YamlObjectMember*
+AnyYamlFlowMapImplicitKey =
+	YamlFlowYamlNode
+	| YamlFlowJsonNode
 
-YamlBlockLiteral =
-	'|'
-	value: YamlBlockValue
+// https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
+AnyYamlBlockNode =
+	YamlBlockCollection
+	// https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
+	| YamlLiteralScalar
+	| YamlFoldedScalar
 
-YamlBlockFolded =
-	'>'
-	value: YamlBlockValue
+// https://yaml.org/spec/1.2.2/#rule-s-l+block-collection
+YamlBlockCollection =
+	properties: YamlPropertyList
+	content: AnyYamlBlockContent
 
-YamlNumberValue = value: 'yaml_number_value'
-YamlStringValue = value: 'yaml_string_value'
-YamlBooleanValue = value: 'yaml_boolean_value'
-YamlNullValue = value: 'yaml_null_value'
-YamlIdentifier = value: 'yaml_identifier'
-YamlBlockValue = 'yaml_block_value'
+AnyYamlBlockContent =
+	YamlBlockSequence
+	| YamlBlockMapping
+
+// a:
+//  - b
+//  - c
+//  - d
+// https://yaml.org/spec/1.2.2/#rule-l+block-sequence
+YamlBlockSequence =
+	// Indent block
+	'indent'?
+	entries: YamlBlockSequenceEntryList
+	// Dedent block, that is, go back to parent block's scope
+	'dedent'?
+
+YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
+
+YamlBlockSequenceEntry =
+	'-'
+	value: AnyYamlIndentedBlock
+
+// a:
+//  b: c
+//  c: d
+//  d: e
+// https://yaml.org/spec/1.2.2/#rule-l+block-mapping
+YamlBlockMapping =
+	// Indent block
+	'indent'
+	entries: YamlBlockMapEntryList
+	// Dedent block, that is, go back to parent block's scope
+	'dedent'?
+
+YamlBlockMapEntryList = AnyYamlBlockMapEntry*
+
+// https://yaml.org/spec/1.2.2/#rule-ns-l-block-map-entry
+AnyYamlBlockMapEntry =
+	YamlBlockMapExplicitEntry
+	| YamlBlockMapImplicitEntry
+
+// ? y
+// : 10
+// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-entry
+YamlBlockMapExplicitEntry =
+	key: YamlBlockMapExplicitKey
+	value: YamlBlockMapExplicitValue?
+
+// ? y
+// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
+YamlBlockMapExplicitKey =
+	'?'
+	key: AnyYamlIndentedBlock
+
+// : 10
+// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
+YamlBlockMapExplicitValue =
+	':'
+	value: AnyYamlIndentedBlock
+
+// https://yaml.org/spec/1.2.2/#rule-s-l+block-indented
+AnyYamlIndentedBlock =
+	YamlCompactSequence
+	| YamlCompactMapping
+	| AnyYamlNode
+
+// https://yaml.org/spec/1.2.2/#rule-ns-l-compact-sequence
+YamlCompactSequence =
+	entries: YamlBlockSequenceEntryList
+
+// https://yaml.org/spec/1.2.2/#rule-ns-l-compact-mapping
+YamlCompactMapping =
+	entries: YamlBlockSequenceEntryList
+
+// https://yaml.org/spec/1.2.2/#rule-ns-l-block-map-implicit-entry
+YamlBlockMapImplicitEntry =
+	key: AnyYamlBlockMapImplicitKey?
+	value: YamlBlockMapImplicitValue
+
+// https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
+AnyYamlBlockMapImplicitKey =
+	YamlFlowJsonNode
+	| YamlFlowYamlNode
+
+// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-implicit-value
+YamlBlockMapImplicitValue =
+	':'
+	value: AnyYamlNode
+
+// https://yaml.org/spec/1.2.2/#rule-c-ns-properties
+YamlPropertyList = AnyYamlProperty
+
+AnyYamlProperty =
+	YamlAnchorProperty
+	| YamlTagProperty
+
+// &abc
+// https://yaml.org/spec/1.2.2/#rule-c-ns-anchor-property
+YamlAnchorProperty = value: 'anchor_property_literal'
+
+// !<tag:yaml.org,2002:str>
+// https://yaml.org/spec/1.2.2/#rule-c-ns-tag-property
+YamlTagProperty = value: 'tag_property_literal'
+
+// Flow scalars
+// https://yaml.org/spec/1.2.2/#73-flow-scalar-styles
+// "abc"
+// https://yaml.org/spec/1.2.2/#rule-c-double-quoted
+YamlDoubleQuotedScalar = value: 'double_quoted_literal'
+// 'abc'
+// https://yaml.org/spec/1.2.2/#rule-c-single-quoted
+YamlSingleQuotedScalar = value: 'single_quoted_literal'
+// Just a plain yaml string
+// abc
+// https://yaml.org/spec/1.2.2/#rule-ns-plain
+YamlPlainScalar = value: 'plain_literal'
+
+// Block scalars
+// Since block scalars can be parsed differently based on the block header,
+// they must be parsed as a single token
+// x: |
+//  123
+//  456
+// https://yaml.org/spec/1.2.2/#rule-c-l+literal
+YamlLiteralScalar = value: 'literal_block_literal'
+// x: >
+//  123
+//  456
+// https://yaml.org/spec/1.2.2/#rule-c-l+folded
+YamlFoldedScalar = value: 'folded_block_literal'

@@ -1,0 +1,113 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+jsx_self_closing_element { 
+  name: identifier {
+    text: `img`
+  }
+  register_diagnostic(
+    span = $name,
+    message = "use Image component instead of img tag"
+  )
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritBogusDefinition {
+            items: [
+                GRIT_NAME@0..25 "jsx_self_closing_element" [] [Whitespace(" ")],
+                L_CURLY@25..27 "{" [] [Whitespace(" ")],
+                GRIT_NAME@27..34 "name" [Newline("\n"), Whitespace("  ")] [],
+                COLON@34..36 ":" [] [Whitespace(" ")],
+                GRIT_NAME@36..47 "identifier" [] [Whitespace(" ")],
+                L_CURLY@47..48 "{" [] [],
+                GRIT_NAME@48..57 "text" [Newline("\n"), Whitespace("    ")] [],
+                COLON@57..59 ":" [] [Whitespace(" ")],
+                GRIT_BACKTICK_SNIPPET@59..64 "`img`" [] [],
+                R_CURLY@64..68 "}" [Newline("\n"), Whitespace("  ")] [],
+                GRIT_NAME@68..90 "register_diagnostic" [Newline("\n"), Whitespace("  ")] [],
+                L_PAREN@90..91 "(" [] [],
+                GRIT_NAME@91..101 "span" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                EQ@101..103 "=" [] [Whitespace(" ")],
+                GRIT_VARIABLE@103..108 "$name" [] [],
+                COMMA@108..109 "," [] [],
+                GRIT_NAME@109..122 "message" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                EQ@122..124 "=" [] [Whitespace(" ")],
+                GRIT_STRING@124..164 "\"use Image component instead of img tag\"" [] [],
+                R_PAREN@164..168 ")" [Newline("\n"), Whitespace("  ")] [],
+                R_CURLY@168..170 "}" [Newline("\n")] [],
+            ],
+        },
+    ],
+    eof_token: EOF@170..171 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..171
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..170
+    0: GRIT_BOGUS_DEFINITION@0..170
+      0: GRIT_NAME@0..25 "jsx_self_closing_element" [] [Whitespace(" ")]
+      1: L_CURLY@25..27 "{" [] [Whitespace(" ")]
+      2: GRIT_NAME@27..34 "name" [Newline("\n"), Whitespace("  ")] []
+      3: COLON@34..36 ":" [] [Whitespace(" ")]
+      4: GRIT_NAME@36..47 "identifier" [] [Whitespace(" ")]
+      5: L_CURLY@47..48 "{" [] []
+      6: GRIT_NAME@48..57 "text" [Newline("\n"), Whitespace("    ")] []
+      7: COLON@57..59 ":" [] [Whitespace(" ")]
+      8: GRIT_BACKTICK_SNIPPET@59..64 "`img`" [] []
+      9: R_CURLY@64..68 "}" [Newline("\n"), Whitespace("  ")] []
+      10: GRIT_NAME@68..90 "register_diagnostic" [Newline("\n"), Whitespace("  ")] []
+      11: L_PAREN@90..91 "(" [] []
+      12: GRIT_NAME@91..101 "span" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+      13: EQ@101..103 "=" [] [Whitespace(" ")]
+      14: GRIT_VARIABLE@103..108 "$name" [] []
+      15: COMMA@108..109 "," [] []
+      16: GRIT_NAME@109..122 "message" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+      17: EQ@122..124 "=" [] [Whitespace(" ")]
+      18: GRIT_STRING@124..164 "\"use Image component instead of img tag\"" [] []
+      19: R_PAREN@164..168 ")" [Newline("\n"), Whitespace("  ")] []
+      20: R_CURLY@168..170 "}" [Newline("\n")] []
+  4: EOF@170..171 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+issue_5610.grit:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a definition.
+  
+   > 1 │ jsx_self_closing_element {·
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 2 │   name: identifier {
+   > 3 │     text: `img`
+   > 4 │   }
+   > 5 │   register_diagnostic(
+   > 6 │     span = $name,
+   > 7 │     message = "use Image component instead of img tag"
+   > 8 │   )
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i Definitions can be functions, patterns, or predicates.
+  
+```

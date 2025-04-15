@@ -100,6 +100,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
+                        EOF => "EOF",
                         JS_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -113,6 +114,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
+                        EOF => "EOF",
                         CSS_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -126,6 +128,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
+                        EOF => "EOF",
                         JSON_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -139,6 +142,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
+                        EOF => "EOF",
                         _ => return None,
                     };
                     Some(tok)
@@ -151,6 +155,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
+                        EOF => "EOF",
                         GRIT_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -164,6 +169,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
+                        EOF => "EOF",
                         HTML_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -177,6 +183,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
+                        EOF => "EOF",
                         GRAPHQL_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
@@ -190,11 +197,29 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        YAML_STRING_VALUE => "string value",
+                        EOF => "EOF",
                         _ => return None,
                     };
                     Some(tok)
                 }
+            }
+        }
+    };
+
+    let keyword_impl = if all_keywords.is_empty() {
+        quote! {
+            pub fn from_keyword(_ident: &str) -> Option<#syntax_kind> {
+                None
+            }
+        }
+    } else {
+        quote! {
+            pub fn from_keyword(ident: &str) -> Option<#syntax_kind> {
+                let kw = match ident {
+                    #(#all_keyword_strings => #full_keywords,)*
+                    _ => return None,
+                };
+                Some(kw)
             }
         }
     };
@@ -239,13 +264,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                 matches!(self, #(#lists)|*)
             }
 
-            pub fn from_keyword(ident: &str) -> Option<#syntax_kind> {
-                let kw = match ident {
-                    #(#all_keyword_strings => #full_keywords,)*
-                    _ => return None,
-                };
-                Some(kw)
-            }
+            #keyword_impl
 
             #syntax_kind_impl
 

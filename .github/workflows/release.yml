@@ -15,13 +15,13 @@ permissions:
 jobs:
   changesets:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js 20.x
-        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22.14.0
 
@@ -45,7 +45,7 @@ jobs:
 
   # Retrieve version of `@biomejs/biome` and `@biomejs/js-api`
   version:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     needs: changesets
     if: needs.changesets.outputs.hasChangesets == 'false' && github.head_ref == 'changeset-release/main'
     outputs:
@@ -113,7 +113,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Node.js
-        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
 
@@ -174,7 +174,7 @@ jobs:
 
   build-wasm:
     name: Build WASM
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     needs: version
     if: needs.cli-version-changed.outputs.changed == 'true'
     steps:
@@ -203,7 +203,7 @@ jobs:
 
   build-js-api:
     name: Package JavaScript APIs
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     needs: version
     if: needs.js-api-version-changed.outputs.changed == 'true'
     steps:
@@ -211,7 +211,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Node.js
-        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
 
@@ -252,7 +252,7 @@ jobs:
 
   publish-cli:
     name: Publish
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     needs:
       - build-binaries
       - build-wasm
@@ -276,7 +276,7 @@ jobs:
           path: packages/@biomejs
 
       - name: Install Node.js
-        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
@@ -296,7 +296,7 @@ jobs:
 
   publish-js-api:
     name: Publish
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-arm-16
     needs: build-js-api
     environment: npm-publish
     permissions:
@@ -312,7 +312,7 @@ jobs:
           path: packages/@biomejs/js-api/dist
 
       - name: Install Node.js
-        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'

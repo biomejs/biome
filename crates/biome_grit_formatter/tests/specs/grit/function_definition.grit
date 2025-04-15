@@ -1,4 +1,4 @@
-/ define a lines function
+// define a lines function
 function lines($string) {
     return split($string, separator=`\n`)
 }

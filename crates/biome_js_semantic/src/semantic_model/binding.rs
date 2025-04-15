@@ -120,8 +120,9 @@ impl Binding {
     }
 
     /// Returns all exports of the binding.
-    /// The node kind is either an identifier binding (tehd eclaration is self exported)
-    /// or an identifier usage.
+    ///
+    /// The node kind is either an identifier binding (if the declaration is
+    /// itself an `export` statement) or an identifier usage.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
         binding

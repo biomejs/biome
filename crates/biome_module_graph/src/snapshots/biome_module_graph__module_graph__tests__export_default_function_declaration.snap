@@ -1,0 +1,56 @@
+---
+source: crates/biome_module_graph/src/module_graph.tests.rs
+expression: data.exports
+---
+{
+    Static(
+        "default",
+    ): Own(
+        JsOwnExport {
+            jsdoc_comment: Some(
+                JsdocComment(
+                    "@public\n@returns {JSX.Element}",
+                ),
+            ),
+            local_name: Some(
+                "Component",
+            ),
+            ty: Type(
+                Function(
+                    Function {
+                        is_async: false,
+                        type_parameters: [],
+                        name: Some(
+                            Borrowed(
+                                "Component",
+                            ),
+                        ),
+                        parameters: [],
+                        return_type: Type(
+                            Type(
+                                Reference(
+                                    TypeReference {
+                                        qualifier: TypeReferenceQualifier(
+                                            [
+                                                Borrowed(
+                                                    "JSX",
+                                                ),
+                                                Borrowed(
+                                                    "Element",
+                                                ),
+                                            ],
+                                        ),
+                                        ty: Type(
+                                            Unknown,
+                                        ),
+                                        type_parameters: [],
+                                    },
+                                ),
+                            ),
+                        ),
+                    },
+                ),
+            ),
+        },
+    ),
+}

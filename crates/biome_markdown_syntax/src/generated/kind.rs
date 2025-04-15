@@ -165,6 +165,7 @@ impl MarkdownSyntaxKind {
             HASH => "#",
             COMMA => ",",
             NULL_KW => "null",
+            EOF => "EOF",
             _ => return None,
         };
         Some(tok)

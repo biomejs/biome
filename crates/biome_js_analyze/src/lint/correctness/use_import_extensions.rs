@@ -1,3 +1,4 @@
+use biome_module_graph::JsResolvedPath;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
 
@@ -149,8 +150,9 @@ impl Rule for UseImportExtensions {
         let force_js_extensions = ctx.options().force_js_extensions;
 
         let node = ctx.query();
-        let import = module_info.get_import_by_js_node(node)?;
-        let resolved_path = import.resolved_path.as_ref().ok()?;
+        let resolved_path = module_info
+            .get_import_path_by_js_node(node)
+            .and_then(JsResolvedPath::as_path)?;
 
         get_extensionless_import(node, resolved_path, force_js_extensions)
     }
@@ -225,6 +227,11 @@ fn get_extensionless_import(
         .file_stem()
         .is_some_and(|stem| stem.contains('.'));
     let existing_extension = path.extension();
+
+    if resolved_path_has_sub_extension && path.file_name()?.starts_with(resolved_path.file_name()?)
+    {
+        return None;
+    }
 
     if !resolved_path_has_sub_extension && existing_extension.is_some() {
         return None;
