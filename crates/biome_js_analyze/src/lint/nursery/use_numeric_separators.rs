@@ -192,26 +192,23 @@ fn format_num(raw: &str) -> String {
             b'_' => continue,
             b'0' if !prefix_parsed && !in_fraction => {
                 if let Some(&next) = bytes.peek() {
-                    match next {
-                        b'b' | b'B' => {
-                            (min_digits, group_len) = BINARY_OPTS;
-                        }
-                        b'o' | b'O' | b'0'..=b'7' => {
-                            (min_digits, group_len) = OCTAL_OPTS;
-                        }
-                        b'x' | b'X' => {
-                            (min_digits, group_len) = HEXADECIMAL_OPTS;
-                        }
-                        _ => {
-                            result.push(b);
-                            continue;
-                        }
+                    let opts = match next {
+                        b'b' | b'B' => Some(BINARY_OPTS),
+                        b'o' | b'O' | b'0'..=b'7' => Some(OCTAL_OPTS),
+                        b'x' | b'X' => Some(HEXADECIMAL_OPTS),
+                        _ => None,
+                    };
+
+                    if let Some(opts) = opts {
+                        (min_digits, group_len) = opts;
+                        result.push(b);
+                        // SAFETY: We already peeked and confirmed the existence of the `next` byte, so we can safely advance the iterator and push the value immediately.
+                        result.push(bytes.next().unwrap());
+                        is_base_10 = false;
+                        prefix_parsed = true;
+                    } else {
+                        result.push(b);
                     }
-                    result.push(b);
-                    // SAFETY: We already peeked and confirmed the existence of the `next` byte, so we can safely advance the iterator and push the value immediately.
-                    result.push(bytes.next().unwrap());
-                    is_base_10 = false;
-                    prefix_parsed = true;
                 }
             }
             b'e' | b'E' if is_base_10 => {
