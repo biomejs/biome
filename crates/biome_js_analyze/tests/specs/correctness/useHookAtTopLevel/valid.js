@@ -130,3 +130,15 @@ describe("foo", () => {
   beforeEach(() => jest.useFakeTimers('legacy'));
   afterEach(() => jest.useRealTimers());
 })
+
+class DemoMethod {
+    useHook() {
+        return useMemo(() => "string", []);
+    }
+}
+
+class DemoProperty {
+    useHook = () => {
+        return useMemo(() => "string", []);
+    }
+}

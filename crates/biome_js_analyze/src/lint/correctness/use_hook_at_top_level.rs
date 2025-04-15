@@ -13,11 +13,11 @@ use biome_deserialize::{
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsObjectMemberName,
-    JsArrayAssignmentPatternElement, JsArrayBindingPatternElement, JsCallExpression,
-    JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodObjectMember,
-    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
-    JsTryFinallyStatement, TextRange,
+    AnyFunctionLike, AnyJsBinding, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction,
+    AnyJsObjectMemberName, JsArrayAssignmentPatternElement, JsArrayBindingPatternElement,
+    JsCallExpression, JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternShorthandProperty,
+    JsReturnStatement, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
@@ -77,7 +77,7 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub AnyJsFunctionOrMethod = AnyJsFunction | JsMethodObjectMember
+    pub AnyJsFunctionOrMethod = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember
 }
 
 impl AnyJsFunctionOrMethod {
@@ -97,6 +97,11 @@ impl AnyJsFunctionOrMethod {
                 .binding()
                 .as_ref()
                 .map(AnyJsBinding::to_trimmed_string),
+            AnyJsFunctionOrMethod::JsMethodClassMember(method) => method
+                .name()
+                .ok()
+                .as_ref()
+                .map(AnyJsClassMemberName::to_trimmed_string),
             AnyJsFunctionOrMethod::JsMethodObjectMember(method) => method
                 .name()
                 .ok()
