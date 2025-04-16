@@ -132,6 +132,22 @@ impl Type {
                     }
                     _ => self.clone(),
                 },
+                TypeofExpression::Super(expr) => {
+                    let class = expr.parent.resolved(resolver, stack);
+                    match class.deref() {
+                        TypeInner::Class(class) => match class.extends.as_ref() {
+                            Some(super_class) => {
+                                Self::instance_of(super_class.resolved(resolver, stack))
+                            }
+                            None => Self::unknown(),
+                        },
+                        _ => Self::unknown(),
+                    }
+                }
+                TypeofExpression::This(expr) => {
+                    let class = expr.parent.resolved(resolver, stack);
+                    Self::instance_of(class)
+                }
             },
             TypeInner::TypeofValue(value) if value.ty.is_inferred() => {
                 value.ty.resolved(resolver, stack)

@@ -6,12 +6,13 @@ use biome_js_syntax::{
     AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMember, AnyJsParameter,
     AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, JsArrowFunctionExpression, JsCallArguments,
-    JsClassDeclaration, JsFunctionDeclaration, JsFunctionExpression, JsNewExpression,
-    JsObjectExpression, JsParameters, JsReferenceIdentifier, JsSyntaxToken, JsVariableDeclarator,
-    TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation,
-    TsTypeArguments, TsTypeParameter, TsTypeParameters, TsTypeofType,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsFunctionDeclaration,
+    JsFunctionExpression, JsNewExpression, JsObjectExpression, JsParameters, JsReferenceIdentifier,
+    JsSyntaxToken, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
+    TsTypeofType,
 };
-use biome_rowan::{SyntaxResult, Text, TokenText};
+use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
 use crate::{
     AssertsReturnType, CallArgumentType, CallSignatureTypeMember, Class, Constructor,
@@ -19,7 +20,8 @@ use crate::{
     Literal, MethodTypeMember, Object, PredicateReturnType, PropertyTypeMember, ReturnType, Tuple,
     TupleElementType, Type, TypeAlias, TypeId, TypeInner, TypeMember, TypeOperator,
     TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeofCallExpression,
-    TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression, TypeofValue, Union,
+    TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofValue, Union,
     globals::{ARRAY_TYPE, PROMISE_TYPE},
 };
 
@@ -228,6 +230,14 @@ impl Type {
                 }
                 _ => Self::unknown(),
             },
+            AnyJsExpression::JsSuperExpression(_) => TypeInner::TypeofExpression(Box::new(
+                TypeofExpression::Super(TypeofThisOrSuperExpression::from_any_js_expression(expr)),
+            ))
+            .into(),
+            AnyJsExpression::JsThisExpression(_) => TypeInner::TypeofExpression(Box::new(
+                TypeofExpression::This(TypeofThisOrSuperExpression::from_any_js_expression(expr)),
+            ))
+            .into(),
             _ => {
                 // TODO: Much
                 Self::unknown()
@@ -1028,6 +1038,35 @@ impl TypeReferenceQualifier {
 
     pub fn from_name(name: Text) -> Self {
         Self(Box::new([name]))
+    }
+}
+
+impl TypeofThisOrSuperExpression {
+    fn from_any_js_expression(expr: &AnyJsExpression) -> Self {
+        let parent = expr
+            .syntax()
+            .ancestors()
+            .find_map(|node| {
+                let binding = if let Some(class) = JsClassDeclaration::cast_ref(&node) {
+                    class.id().ok()
+                } else if let Some(class) = JsClassExportDefaultDeclaration::cast(node) {
+                    class.id()
+                } else {
+                    None
+                }?;
+
+                let binding = binding.as_js_identifier_binding()?;
+                let name = text_from_token(binding.name_token())?;
+                let ty = TypeInner::Reference(Box::new(TypeReference {
+                    qualifier: TypeReferenceQualifier::from_name(name),
+                    ty: Type::unknown(),
+                    type_parameters: Arc::new([]),
+                }));
+                Some(ty.into())
+            })
+            .unwrap_or_default();
+
+        Self { parent }
     }
 }
 

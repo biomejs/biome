@@ -786,6 +786,8 @@ pub enum TypeofExpression {
     Call(TypeofCallExpression),
     New(TypeofNewExpression),
     StaticMember(TypeofStaticMemberExpression),
+    Super(TypeofThisOrSuperExpression),
+    This(TypeofThisOrSuperExpression),
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
@@ -824,9 +826,9 @@ pub struct TypeofStaticMemberExpression {
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct NumericExpressionType {
-    pub left: Type,
-    pub right: Type,
+pub struct TypeofThisOrSuperExpression {
+    /// Type from which the `this` or `super` expression should be resolved.
+    pub parent: Type,
 }
 
 /// Reference to the type of a named JavaScript value.
