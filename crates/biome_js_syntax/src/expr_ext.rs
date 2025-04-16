@@ -1379,13 +1379,13 @@ impl AnyJsExpression {
             AnyJsExpression::JsTemplateExpression(tpl_expr) => tpl_expr.tag().is_none(),
             AnyJsExpression::JsUnaryExpression(unary_exp) => {
                 let kind = unary_exp.operator_token().map(|t| t.kind());
-                match kind {
-                    Ok(JsSyntaxKind::BANG)
-                    | Ok(JsSyntaxKind::MINUS)
-                    | Ok(JsSyntaxKind::PLUS)
-                    | Ok(JsSyntaxKind::VOID_KW) => true,
-                    _ => false,
-                }
+                matches!(
+                    kind,
+                    Ok(JsSyntaxKind::BANG
+                        | JsSyntaxKind::MINUS
+                        | JsSyntaxKind::PLUS
+                        | JsSyntaxKind::VOID_KW)
+                )
             }
             _ => false,
         }

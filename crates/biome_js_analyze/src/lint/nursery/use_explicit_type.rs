@@ -771,7 +771,7 @@ fn handle_variable_declarator(
     let is_top_level = declarator
         .syntax()
         .ancestors()
-        .find_map(|ancestor| JsVariableStatement::cast(ancestor))
+        .find_map(JsVariableStatement::cast)
         .is_some_and(|statement| {
             statement
                 .syntax()
@@ -786,7 +786,6 @@ fn handle_variable_declarator(
     let identifier = identifier.as_any_js_binding()?.as_js_identifier_binding()?;
     let is_exported = model.is_exported(identifier);
 
-    dbg!(is_top_level, is_exported);
     if !is_top_level || !is_exported {
         return None;
     }
