@@ -7,8 +7,8 @@ use std::sync::{Arc, LazyLock};
 use biome_rowan::Text;
 
 use crate::{
-    Class, GenericTypeParameter, MethodTypeMember, PropertyTypeMember, Type, TypeId, TypeInner,
-    TypeMember, TypeReference, TypeReferenceQualifier,
+    Class, GenericTypeParameter, MethodTypeMember, Object, PropertyTypeMember, Type, TypeId,
+    TypeInner, TypeMember, TypeReference, TypeReferenceQualifier,
 };
 
 pub(crate) static ARRAY_TYPE: LazyLock<Type> =
@@ -118,4 +118,22 @@ pub(crate) static PROMISE: LazyLock<Class> = LazyLock::new(|| {
             ),
         ]),
     }
+});
+
+pub(crate) static WINDOW_TYPE: LazyLock<Type> =
+    LazyLock::new(|| TypeInner::Object(Box::new(WINDOW.clone())).into());
+
+pub(crate) static WINDOW: LazyLock<Object> = LazyLock::new(|| Object {
+    prototype: None,
+    members: Arc::new([TypeMember::Property(PropertyTypeMember {
+        name: Text::Static("Promise"),
+        ty: TypeInner::Reference(Box::new(TypeReference {
+            qualifier: TypeReferenceQualifier::from_name(Text::Static("Promise")),
+            ty: Type::unknown(),
+            type_parameters: Arc::new([]),
+        }))
+        .into(),
+        is_optional: false,
+        is_static: false,
+    })]),
 });

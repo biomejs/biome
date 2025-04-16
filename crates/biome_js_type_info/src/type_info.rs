@@ -18,7 +18,7 @@ use biome_rowan::Text;
 
 use crate::{
     Resolvable,
-    globals::{ARRAY, PROMISE},
+    globals::{ARRAY, PROMISE, WINDOW_TYPE},
 };
 
 /// Unique identifier to distinguish between identically named, complex types.
@@ -111,6 +111,10 @@ impl Type {
 
     pub fn void() -> Self {
         Self(Arc::new(TypeInner::VoidKeyword))
+    }
+
+    pub fn window() -> Self {
+        WINDOW_TYPE.clone()
     }
 
     pub fn with_type_parameters(&self, type_parameters: &[Self]) -> Self {

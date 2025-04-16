@@ -33,11 +33,7 @@ impl<'a> AdHocScopeResolver<'a> {
 impl TypeResolver for AdHocScopeResolver<'_> {
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<Type> {
         if qualifier.parts().len() == 1 {
-            self.resolve_type_of(&qualifier.parts()[0]).or_else(|| {
-                qualifier
-                    .is_promise()
-                    .then(|| Type::promise_of(Type::unknown()))
-            })
+            self.resolve_type_of(&qualifier.parts()[0])
         } else {
             // TODO: Resolve nested qualifiers
             None
@@ -64,8 +60,16 @@ impl TypeResolver for AdHocScopeResolver<'_> {
 
             match scope.parent() {
                 Some(parent) => scope = parent,
-                None => return None,
+                None => break,
             }
+        }
+
+        // globals fallback
+        match identifier.text() {
+            "Array" => Some(Type::array_of(Type::unknown())),
+            "Promise" => Some(Type::promise_of(Type::unknown())),
+            "globalThis" | "window" => Some(Type::window()),
+            _ => None,
         }
     }
 }
