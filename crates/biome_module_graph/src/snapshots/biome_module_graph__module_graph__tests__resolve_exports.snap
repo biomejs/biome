@@ -91,10 +91,26 @@ expression: exports
                         parameters: [],
                         return_type: Type(
                             Type(
-                                Promise(
-                                    Type(
-                                        Unknown,
-                                    ),
+                                Class(
+                                    Class {
+                                        id: TypeId,
+                                        name: Some(
+                                            Static(
+                                                "Promise",
+                                            ),
+                                        ),
+                                        type_parameters: [
+                                            GenericTypeParameter {
+                                                name: Static(
+                                                    "T",
+                                                ),
+                                                ty: Type(
+                                                    Unknown,
+                                                ),
+                                            },
+                                        ],
+                                        extends: None,
+                                    },
                                 ),
                             ),
                         ),
@@ -252,7 +268,12 @@ expression: exports
                 "quz",
             ),
             ty: Type(
-                Unknown,
+                Object(
+                    Object {
+                        prototype: None,
+                        members: [],
+                    },
+                ),
             ),
         },
     ),

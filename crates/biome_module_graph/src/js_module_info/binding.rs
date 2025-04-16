@@ -3,7 +3,7 @@ use std::sync::Arc;
 use biome_js_semantic::{BindingId, ScopeId};
 use biome_js_syntax::{AnyJsDeclaration, JsImport, JsSyntaxNode, JsVariableKind, TextRange};
 use biome_js_type_info::Type;
-use biome_rowan::{AstNode, TextSize};
+use biome_rowan::{AstNode, Text, TextSize};
 
 use crate::jsdoc_comment::JsdocComment;
 
@@ -12,10 +12,10 @@ use super::{JsModuleInfoInner, scope::JsScope};
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]
 pub struct JsBindingData {
+    pub name: Text,
     pub range: TextRange,
     pub references: Vec<JsBindingReference>,
     pub scope_id: ScopeId,
-    #[expect(unused)] // TODO: I expect we'll start using this in a bit (famous last words)...
     pub declaration_kind: JsDeclarationKind,
     pub ty: Type,
     pub jsdoc: Option<JsdocComment>,
@@ -66,6 +66,18 @@ impl JsBinding {
     pub fn is_exported(&self) -> bool {
         let binding = self.data.binding(self.id);
         !binding.export_ranges.is_empty()
+    }
+
+    /// Returns whether the binding is imported.
+    pub fn is_imported(&self) -> bool {
+        let binding = self.data.binding(self.id);
+        binding.declaration_kind.is_import_declaration()
+    }
+
+    /// Returns the binding's name.
+    pub fn name(&self) -> Text {
+        let binding = self.data.binding(self.id);
+        binding.name.clone()
     }
 
     /// Returns the scope of this binding.
@@ -168,5 +180,9 @@ impl JsDeclarationKind {
             }
             AnyJsDeclaration::TsTypeAliasDeclaration(_) => Self::Type,
         }
+    }
+
+    pub fn is_import_declaration(&self) -> bool {
+        matches!(self, Self::Import | Self::ImportType)
     }
 }

@@ -200,7 +200,11 @@ pub fn get_added_paths<'a>(
                     .unwrap_or_default();
                 let parsed =
                     biome_js_parser::parse(&content, file_source, JsParserOptions::default());
-                assert!(parsed.diagnostics().is_empty());
+                let diagnostics = parsed.diagnostics();
+                assert!(
+                    diagnostics.is_empty(),
+                    "Unexpected diagnostics: {diagnostics:?}"
+                );
                 parsed.try_tree()
             });
             (path, root)

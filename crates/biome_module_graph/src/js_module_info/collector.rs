@@ -1,14 +1,19 @@
-use std::{collections::BTreeMap, sync::Arc};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    sync::Arc,
+};
 
 use biome_js_semantic::{
     BindingId, ReferenceId, ScopeId, SemanticEvent, SemanticEventExtractor, find_import_node,
 };
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsImportClause,
-    JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, inner_string_text,
+    JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    TsIdentifierBinding, inner_string_text,
 };
 use biome_js_type_info::Type;
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
+use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
 use crate::{
@@ -18,8 +23,8 @@ use crate::{
 
 use super::{
     JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsModuleInfoInner, JsOwnExport, JsReexport,
-    JsResolvedPath, binding::JsBindingData, scope::JsScopeData,
-    type_resolver::JsModuleTypeResolver,
+    JsResolvedPath, binding::JsBindingData, global_scope_resolver::GlobalScopeResolver,
+    scope::JsScopeData,
 };
 
 /// Responsible for collecting all the information from which to build the
@@ -48,6 +53,9 @@ pub(super) struct JsModuleInfoCollector {
     ///
     /// The first entry is always the module's global scope.
     pub(super) scopes: Vec<JsScopeData>,
+
+    /// Used to build the Lapper lookup tree for finding scopes by text range.
+    scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<u32, ScopeId>>>,
 
     /// Used for tracking the scope we are currently in.
     scope_stack: Vec<ScopeId>,
@@ -165,6 +173,16 @@ impl JsModuleInfoCollector {
                     self.scopes[parent_scope_id.index()].children.push(scope_id);
                 }
 
+                let start = range.start();
+                self.scope_range_by_start
+                    .entry(start)
+                    .or_default()
+                    .insert(Interval {
+                        start: start.into(),
+                        stop: range.end().into(),
+                        val: scope_id,
+                    });
+
                 self.scope_stack.push(scope_id);
             }
             ScopeEnded { .. } => {
@@ -188,20 +206,31 @@ impl JsModuleInfoCollector {
                 // may fail.
                 let node = self.binding_node_by_start.get(&range.start());
                 let name_token = node.and_then(|node| {
-                    JsIdentifierBinding::cast_ref(node).and_then(|node| node.name_token().ok())
+                    if let Some(node) = JsIdentifierBinding::cast_ref(node) {
+                        node.name_token().ok()
+                    } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
+                        node.name_token().ok()
+                    } else {
+                        None
+                    }
                 });
 
                 let name = name_token.as_ref().map(JsSyntaxToken::token_text_trimmed);
+                let ty = match (node, &name) {
+                    (Some(node), Some(name)) => infer_type(node, name),
+                    _ => Type::unknown(),
+                };
 
                 self.bindings.push(JsBindingData {
+                    name: name
+                        .as_ref()
+                        .map(|name| name.clone().into())
+                        .unwrap_or_default(),
                     range,
                     references: Vec::new(),
                     scope_id: *self.scope_stack.last().expect("scope must be present"),
                     declaration_kind: node.map(JsDeclarationKind::from_node).unwrap_or_default(),
-                    ty: match (node, &name) {
-                        (Some(node), Some(name)) => infer_type(node, name),
-                        _ => Type::unknown(),
-                    },
+                    ty,
                     jsdoc: node.and_then(find_jsdoc),
                     export_ranges: Vec::new(),
                 });
@@ -489,7 +518,7 @@ impl JsModuleInfoBag {
     /// Iterates over all exported symbols in the module and resolves them if
     /// they refer to any other symbols in scope of the module.
     fn resolve_module_types(&mut self, collector: &JsModuleInfoCollector) {
-        let resolver = JsModuleTypeResolver::from_collector(collector);
+        let resolver = GlobalScopeResolver::from_collector(collector);
 
         for export in self.exports.values_mut() {
             if let Some(export) = export.as_own_export_mut() {
@@ -512,6 +541,14 @@ impl JsModuleInfo {
             blanket_reexports: bag.blanket_reexports.into(),
             bindings: collector.bindings.into(),
             scopes: collector.scopes.into(),
+            scope_by_range: Lapper::new(
+                collector
+                    .scope_range_by_start
+                    .iter()
+                    .flat_map(|(_, scopes)| scopes.iter())
+                    .cloned()
+                    .collect(),
+            ),
         }))
     }
 }
@@ -527,31 +564,34 @@ fn find_jsdoc(node: &JsSyntaxNode) -> Option<JsdocComment> {
 }
 
 fn infer_type(node: &JsSyntaxNode, binding_name: &TokenText) -> Type {
-    let Some(declaration) = node.ancestors().find_map(AnyJsDeclaration::cast) else {
-        let Some(declaration) = node
-            .ancestors()
-            .find_map(AnyJsExportDefaultDeclaration::cast)
-        else {
-            return Type::unknown();
-        };
-
-        return Type::from_any_js_export_default_declaration(&declaration);
-    };
-
-    if let AnyJsDeclaration::JsVariableDeclaration(decl) = declaration {
-        decl.declarators()
-            .into_iter()
-            .filter_map(|decl| decl.ok())
-            .find_map(|decl| {
-                let binding = decl.id().ok()?;
-                // TODO: Handle object and array patterns
-                let binding = binding.as_any_js_binding()?.as_js_identifier_binding()?;
-                let name_token = binding.name_token().ok()?;
-                (*binding_name == name_token.text_trimmed()).then_some(decl)
-            })
-            .and_then(|declarator| Type::from_js_variable_declarator(&declarator))
-            .unwrap_or_default()
-    } else {
-        Type::from_any_js_declaration(&declaration)
+    for ancestor in node.ancestors() {
+        if let Some(declaration) = AnyJsDeclaration::cast_ref(&ancestor) {
+            return if let AnyJsDeclaration::JsVariableDeclaration(decl) = declaration {
+                decl.declarators()
+                    .into_iter()
+                    .filter_map(|decl| decl.ok())
+                    .find_map(|decl| {
+                        let binding = decl.id().ok()?;
+                        // TODO: Handle object and array patterns
+                        let binding = binding.as_any_js_binding()?.as_js_identifier_binding()?;
+                        let name_token = binding.name_token().ok()?;
+                        (*binding_name == name_token.text_trimmed()).then_some(decl)
+                    })
+                    .and_then(|declarator| Type::from_js_variable_declarator(&declarator))
+                    .unwrap_or_default()
+            } else {
+                Type::from_any_js_declaration(&declaration)
+            };
+        } else if let Some(declaration) = AnyJsExportDefaultDeclaration::cast_ref(&ancestor) {
+            return Type::from_any_js_export_default_declaration(&declaration);
+        } else if let Some(parameter) = JsFormalParameter::cast(ancestor) {
+            return parameter
+                .type_annotation()
+                .and_then(|annotation| annotation.ty().ok())
+                .map(|ty| Type::from_any_ts_type(&ty))
+                .unwrap_or_default();
+        }
     }
+
+    Type::unknown()
 }

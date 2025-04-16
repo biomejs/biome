@@ -1,9 +1,9 @@
 use crate::{
     AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsClass, AnyJsClassMember, AnyJsClassMemberName,
-    AnyJsFunction, AnyJsFunctionBody, AnyTsPropertyAnnotation, AnyTsVariableAnnotation,
-    JsClassMemberList, JsDecoratorList, JsExtendsClause, JsInitializerClause, JsSyntaxToken,
-    JsVariableDeclarator, TsImplementsClause, TsReturnTypeAnnotation, TsTypeAnnotation,
-    TsTypeParameters,
+    AnyJsFunction, AnyJsFunctionBody, AnyTsPropertyAnnotation, AnyTsPropertySignatureAnnotation,
+    AnyTsVariableAnnotation, JsClassMemberList, JsDecoratorList, JsExtendsClause,
+    JsInitializerClause, JsSyntaxToken, JsVariableDeclarator, TsImplementsClause,
+    TsReturnTypeAnnotation, TsTypeAnnotation, TsTypeParameters,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult};
 
@@ -280,15 +280,18 @@ impl AnyTsVariableAnnotation {
 impl AnyTsPropertyAnnotation {
     pub fn type_annotation(&self) -> SyntaxResult<Option<TsTypeAnnotation>> {
         match self {
-            AnyTsPropertyAnnotation::TsDefinitePropertyAnnotation(definite) => {
-                definite.type_annotation().map(Some)
-            }
-            AnyTsPropertyAnnotation::TsOptionalPropertyAnnotation(optional) => {
-                Ok(optional.type_annotation())
-            }
-            AnyTsPropertyAnnotation::TsTypeAnnotation(type_annotation) => {
-                Ok(Some(type_annotation.clone()))
-            }
+            Self::TsDefinitePropertyAnnotation(definite) => definite.type_annotation().map(Some),
+            Self::TsOptionalPropertyAnnotation(optional) => Ok(optional.type_annotation()),
+            Self::TsTypeAnnotation(type_annotation) => Ok(Some(type_annotation.clone())),
+        }
+    }
+}
+
+impl AnyTsPropertySignatureAnnotation {
+    pub fn type_annotation(&self) -> SyntaxResult<Option<TsTypeAnnotation>> {
+        match self {
+            Self::TsOptionalPropertyAnnotation(optional) => Ok(optional.type_annotation()),
+            Self::TsTypeAnnotation(annotation) => Ok(Some(annotation.clone())),
         }
     }
 }
