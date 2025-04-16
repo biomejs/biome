@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsFunctionExpression, JsNewExpression, JsObjectExpression, JsParameters, JsReferenceIdentifier,
     JsSyntaxToken, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
-    TsTypeofType,
+    TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -191,6 +191,27 @@ impl Type {
                 Err(_) => Self::unknown(),
             },
             AnyJsExpression::JsClassExpression(expr) => Self::from_js_class_expression(expr),
+            AnyJsExpression::JsComputedMemberExpression(expr) => {
+                match (expr.object(), expr.member()) {
+                    (
+                        Ok(object),
+                        Ok(AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsStringLiteralExpression(member),
+                        )),
+                    ) => unescaped_text_from_token(member.value_token())
+                        .map(|member| {
+                            TypeInner::TypeofExpression(Box::new(TypeofExpression::StaticMember(
+                                TypeofStaticMemberExpression {
+                                    object: Self::from_any_js_expression(&object),
+                                    member,
+                                },
+                            )))
+                        })
+                        .unwrap_or_default()
+                        .into(),
+                    _ => Self::unknown(),
+                }
+            }
             AnyJsExpression::JsFunctionExpression(expr) => Self::from_js_function_expression(expr),
             AnyJsExpression::JsIdentifierExpression(expr) => expr
                 .name()
@@ -1230,4 +1251,8 @@ fn type_from_annotation(annotation: Option<TsTypeAnnotation>) -> Option<Type> {
     annotation
         .and_then(|annotation| annotation.ty().ok())
         .map(|ty| Type::from_any_ts_type(&ty))
+}
+
+fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
+    Some(unescape_js_string(inner_string_text(&token.ok()?)))
 }
