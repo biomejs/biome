@@ -5,7 +5,7 @@ use biome_js_syntax::{
     AnyJsDeclaration, AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression,
     AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMember, AnyJsParameter,
     AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, JsArrowFunctionExpression, JsCallArguments,
+    AnyTsTypePredicateParameterName, ClassMemberName, JsArrowFunctionExpression, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsFunctionDeclaration,
     JsFunctionExpression, JsNewExpression, JsObjectExpression, JsParameters, JsReferenceIdentifier,
     JsSyntaxToken, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
@@ -215,19 +215,17 @@ impl Type {
                 .unwrap_or_default(),
             AnyJsExpression::JsStaticMemberExpression(expr) => match (expr.object(), expr.member())
             {
-                (Ok(object), Ok(AnyJsName::JsName(member))) => {
-                    text_from_token(member.value_token())
-                        .map(|member| {
-                            TypeInner::TypeofExpression(Box::new(TypeofExpression::StaticMember(
-                                TypeofStaticMemberExpression {
-                                    object: Self::from_any_js_expression(&object),
-                                    member,
-                                },
-                            )))
-                        })
-                        .unwrap_or_default()
-                        .into()
-                }
+                (Ok(object), Ok(member)) => text_from_any_js_name(member)
+                    .map(|member| {
+                        TypeInner::TypeofExpression(Box::new(TypeofExpression::StaticMember(
+                            TypeofStaticMemberExpression {
+                                object: Self::from_any_js_expression(&object),
+                                member,
+                            },
+                        )))
+                    })
+                    .unwrap_or_default()
+                    .into(),
                 _ => Self::unknown(),
             },
             AnyJsExpression::JsSuperExpression(_) => TypeInner::TypeofExpression(Box::new(
@@ -833,7 +831,7 @@ impl TypeMember {
                         type_parameters: generic_params_from_ts_type_params(
                             member.type_parameters(),
                         ),
-                        name: TokenText::from(name).into(),
+                        name: text_from_class_member_name(name),
                         parameters: function_params_from_js_params(member.parameters()),
                         return_type: return_type_from_annotation(member.return_type_annotation())
                             .unwrap_or_else(|| return_type_from_async_token(member.async_token())),
@@ -848,7 +846,7 @@ impl TypeMember {
             AnyJsClassMember::JsPropertyClassMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     Self::Property(PropertyTypeMember {
-                        name: TokenText::from(name).into(),
+                        name: text_from_class_member_name(name),
                         ty: member
                             .property_annotation()
                             .and_then(|annotation| annotation.type_annotation().ok())
@@ -874,7 +872,7 @@ impl TypeMember {
                 .and_then(|name| name.name())
                 .and_then(|name| {
                     Some(Self::Property(PropertyTypeMember {
-                        name: TokenText::from(name).into(),
+                        name: text_from_class_member_name(name),
                         ty: Type::from_any_js_expression(&member.value().ok()?.expression().ok()?),
                         is_optional: member.question_mark_token().is_some(),
                         is_static: member
@@ -886,7 +884,7 @@ impl TypeMember {
             AnyJsClassMember::TsPropertySignatureClassMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     Self::Property(PropertyTypeMember {
-                        name: TokenText::from(name).into(),
+                        name: text_from_class_member_name(name),
                         ty: member
                             .property_annotation()
                             .and_then(|annotation| annotation.type_annotation().ok())
@@ -1137,6 +1135,24 @@ fn return_type_from_async_token(async_token: Option<JsSyntaxToken>) -> ReturnTyp
         Some(_) => PROMISE_TYPE.clone(),
         None => Type::unknown(),
     })
+}
+
+fn text_from_any_js_name(name: AnyJsName) -> Option<Text> {
+    match name {
+        AnyJsName::JsMetavariable(_) => None,
+        AnyJsName::JsName(name) => text_from_token(name.value_token()),
+        AnyJsName::JsPrivateName(name) => name
+            .value_token()
+            .ok()
+            .map(|token| Text::Owned(format!("#{}", token.token_text_trimmed()))),
+    }
+}
+
+fn text_from_class_member_name(name: ClassMemberName) -> Text {
+    match name {
+        ClassMemberName::Private(name) => Text::Owned(format!("#{name}")),
+        ClassMemberName::Public(name) => Text::Borrowed(name),
+    }
 }
 
 fn text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
