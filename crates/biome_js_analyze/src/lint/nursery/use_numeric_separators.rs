@@ -109,7 +109,7 @@ impl Rule for UseNumericSeparators {
             ),
             State::UnnecessaryGrouping => (
                 markup!("Unnecessary grouping of digits in numeric literal."),
-                markup!("Separators are unnecessary in a number of this length."),
+                markup!("Short numbers don't require separators."),
             ),
         };
 
