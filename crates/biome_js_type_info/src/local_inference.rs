@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMember, AnyJsParameter,
     AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrowFunctionExpression, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsFunctionDeclaration,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsFunctionDeclaration,
     JsFunctionExpression, JsNewExpression, JsObjectExpression, JsParameters, JsReferenceIdentifier,
     JsSyntaxToken, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
@@ -190,6 +190,7 @@ impl Type {
                 .into(),
                 Err(_) => Self::unknown(),
             },
+            AnyJsExpression::JsClassExpression(expr) => Self::from_js_class_expression(expr),
             AnyJsExpression::JsFunctionExpression(expr) => Self::from_js_function_expression(expr),
             AnyJsExpression::JsIdentifierExpression(expr) => expr
                 .name()
@@ -459,6 +460,32 @@ impl Type {
             name: decl
                 .id()
                 .ok()
+                .as_ref()
+                .and_then(|id| id.as_js_identifier_binding())
+                .and_then(|id| id.name_token().ok())
+                .map(|token| token.token_text_trimmed().into()),
+            type_parameters: decl
+                .type_parameters()
+                .map(|params| GenericTypeParameter::params_from_ts_type_parameters(&params))
+                .unwrap_or_default(),
+            extends: decl
+                .extends_clause()
+                .and_then(|extends| extends.super_class().ok())
+                .map(|super_class| Self::from_any_js_expression(&super_class)),
+            members: decl
+                .members()
+                .into_iter()
+                .filter_map(|member| TypeMember::from_any_js_class_member(&member))
+                .collect(),
+        }))
+        .into()
+    }
+
+    pub fn from_js_class_expression(decl: &JsClassExpression) -> Self {
+        TypeInner::Class(Box::new(Class {
+            id: TypeId::new(),
+            name: decl
+                .id()
                 .as_ref()
                 .and_then(|id| id.as_js_identifier_binding())
                 .and_then(|id| id.name_token().ok())
@@ -1096,6 +1123,27 @@ impl TypeofThisOrSuperExpression {
             .find_map(|node| {
                 let binding = if let Some(class) = JsClassDeclaration::cast_ref(&node) {
                     class.id().ok()
+                } else if let Some(class) = JsClassExpression::cast_ref(&node) {
+                    if let Some(declarator) = class
+                        .syntax()
+                        .ancestors()
+                        .find_map(JsVariableDeclarator::cast)
+                        .filter(|declarator| {
+                            declarator.initializer().is_some_and(|initializer| {
+                                initializer.expression().is_ok_and(|expr| {
+                                    matches!(expr, AnyJsExpression::JsClassExpression(_))
+                                })
+                            })
+                        })
+                    {
+                        let pattern = declarator.id().ok();
+                        pattern
+                            .as_ref()
+                            .and_then(|pattern| pattern.as_any_js_binding())
+                            .cloned()
+                    } else {
+                        class.id()
+                    }
                 } else if let Some(class) = JsClassExportDefaultDeclaration::cast(node) {
                     class.id()
                 } else {
