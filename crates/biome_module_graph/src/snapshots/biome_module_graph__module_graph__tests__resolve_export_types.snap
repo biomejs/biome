@@ -18,9 +18,7 @@ expression: data.exports
                             Type(
                                 Class(
                                     Class {
-                                        id: TypeId(
-                                            1,
-                                        ),
+                                        id: TypeId,
                                         name: Some(
                                             Borrowed(
                                                 "DeepThought",

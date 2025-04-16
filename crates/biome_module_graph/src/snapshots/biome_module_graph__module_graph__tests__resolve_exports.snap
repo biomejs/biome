@@ -93,9 +93,7 @@ expression: exports
                             Type(
                                 Class(
                                     Class {
-                                        id: TypeId(
-                                            2,
-                                        ),
+                                        id: TypeId,
                                         name: Some(
                                             Static(
                                                 "Promise",

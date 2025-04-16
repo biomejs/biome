@@ -22,8 +22,16 @@ use crate::{
 };
 
 /// Unique identifier to distinguish between identically named, complex types.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Resolvable)]
+#[derive(Clone, Copy, Eq, PartialEq, Resolvable)]
 pub(super) struct TypeId(u64);
+
+// FIXME: This implementation is only necessary for test stability. Once we have
+//        better snapshots for types, this won't be necessary anymore.
+impl Debug for TypeId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TypeId").finish()
+    }
+}
 
 impl TypeId {
     pub fn new() -> Self {

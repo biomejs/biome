@@ -17,9 +17,7 @@ Type(
                 Type(
                     Class(
                         Class {
-                            id: TypeId(
-                                1,
-                            ),
+                            id: TypeId,
                             name: Some(
                                 Static(
                                     "Promise",
