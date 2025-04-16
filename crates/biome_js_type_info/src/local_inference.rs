@@ -595,11 +595,14 @@ impl Type {
             .ok()
             .and_then(|name| TypeReferenceQualifier::from_any_ts_name(&name))
             .map(|qualifier| {
-                TypeInner::TypeofType(Box::new(TypeReference {
-                    qualifier,
-                    ty: Type::unknown(),
-                    type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
-                }))
+                TypeInner::TypeofType(Box::new(
+                    TypeInner::Reference(Box::new(TypeReference {
+                        qualifier,
+                        ty: Type::unknown(),
+                        type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
+                    }))
+                    .into(),
+                ))
             })
             .map(Into::into)
             .unwrap_or_default()
@@ -843,6 +846,44 @@ impl TypeMember {
                 })
             }
             AnyJsClassMember::JsPropertyClassMember(member) => {
+                member.name().ok().and_then(|name| name.name()).map(|name| {
+                    Self::Property(PropertyTypeMember {
+                        name: TokenText::from(name).into(),
+                        ty: member
+                            .property_annotation()
+                            .and_then(|annotation| annotation.type_annotation().ok())
+                            .flatten()
+                            .and_then(|annotation| annotation.ty().ok())
+                            .map(|ty| Type::from_any_ts_type(&ty))
+                            .unwrap_or_default(),
+                        is_optional: member
+                            .property_annotation()
+                            .as_ref()
+                            .and_then(|annotation| annotation.as_ts_optional_property_annotation())
+                            .is_some(),
+                        is_static: member
+                            .modifiers()
+                            .into_iter()
+                            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                    })
+                })
+            }
+            AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => member
+                .name()
+                .ok()
+                .and_then(|name| name.name())
+                .and_then(|name| {
+                    Some(Self::Property(PropertyTypeMember {
+                        name: TokenText::from(name).into(),
+                        ty: Type::from_any_js_expression(&member.value().ok()?.expression().ok()?),
+                        is_optional: member.question_mark_token().is_some(),
+                        is_static: member
+                            .modifiers()
+                            .into_iter()
+                            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+                    }))
+                }),
+            AnyJsClassMember::TsPropertySignatureClassMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     Self::Property(PropertyTypeMember {
                         name: TokenText::from(name).into(),

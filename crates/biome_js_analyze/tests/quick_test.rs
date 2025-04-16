@@ -26,11 +26,10 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"async function returnsPromise() {
-  return 'value';
-}
-returnsPromise().then(() => { }).finally(() => { });
-"#;
+    const SOURCE: &str = r#"const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) =>
+	resolve("value")
+);
+promiseWithGlobalIdentifier.then(() => {});"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 

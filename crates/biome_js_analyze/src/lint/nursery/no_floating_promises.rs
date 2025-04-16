@@ -176,6 +176,9 @@ impl Rule for NoFloatingPromises {
         let node = ctx.query();
         let expression = node.expression().ok()?;
         let ty = ctx.type_for_expression(&expression);
+
+        // Uncomment the following line for debugging convenience:
+        //let printed = format!("type of {expression:?} = {ty:?}");
         if !ty.is_promise_instance() {
             return None;
         }

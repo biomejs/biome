@@ -44,15 +44,11 @@ impl Type {
     /// Type(TypeInner::Literal(Literal::Number(1)))
     /// ```
     pub fn flattened(&self, resolver: &dyn TypeResolver, stack: &[&TypeInner]) -> Self {
-        match &**self {
-            TypeInner::Reference(reference) | TypeInner::TypeofType(reference)
-                if reference.ty.is_inferred() =>
-            {
-                reference
-                    .ty
-                    .with_type_parameters(&reference.type_parameters)
-                    .resolved(resolver, stack)
-            }
+        match self.deref() {
+            TypeInner::Reference(reference) if reference.ty.is_inferred() => reference
+                .ty
+                .with_type_parameters(&reference.type_parameters)
+                .resolved(resolver, stack),
             TypeInner::TypeofExpression(expr) => match expr.as_ref() {
                 TypeofExpression::Addition(_expr) => {
                     // TODO
@@ -66,7 +62,7 @@ impl Type {
                     },
                     _ => self.clone(),
                 },
-                TypeofExpression::Call(expr) => match expr.callee.deref() {
+                TypeofExpression::Call(expr) => match expr.callee.inner_type() {
                     TypeInner::Function(function) => match function.return_type.as_type() {
                         Some(ty) => Self::instance_of(ty.clone()).resolved(resolver, stack),
                         None => self.clone(),
@@ -77,8 +73,7 @@ impl Type {
                             .iter()
                             .find(|member| member.has_name("constructor"))
                         {
-                            Some(member) => Self::instance_of(member.to_type(&expr.callee))
-                                .resolved(resolver, stack),
+                            Some(member) => member.to_type(&expr.callee),
                             None => Self::unknown(),
                         }
                     }
@@ -86,7 +81,7 @@ impl Type {
                 },
                 TypeofExpression::New(expr) => {
                     let callee = expr.callee.resolved(resolver, stack);
-                    match callee.deref() {
+                    match callee.inner_type() {
                         TypeInner::Class(class) => {
                             let num_args = expr.arguments.len();
                             let ty = class
@@ -102,39 +97,47 @@ impl Type {
                                     }
                                     _ => None,
                                 })
-                                .map_or_else(|| callee.clone(), |ty| ty.resolved(resolver, stack));
+                                .map_or_else(
+                                    || callee.owned_inner_type(),
+                                    |ty| ty.resolved(resolver, stack),
+                                );
                             Self::instance_of(ty)
                         }
                         // TODO: Handle objects with call signatures.
                         _ => self.clone(),
                     }
                 }
-                TypeofExpression::StaticMember(expr) => match expr.object.deref() {
-                    TypeInner::Class(class) => {
-                        let member = class
-                            .all_members()
-                            .find(|member| member.is_static() && member.has_name(&expr.member));
-                        match member {
-                            Some(member) => Self::instance_of(member.to_type(&expr.object))
-                                .resolved(resolver, stack),
-                            None => Self::unknown(),
+                TypeofExpression::StaticMember(expr) => {
+                    let object = expr.object.resolved(resolver, stack);
+                    match object.inner_type() {
+                        TypeInner::Class(class) => {
+                            let member = class
+                                .all_members()
+                                .find(|member| member.is_static() && member.has_name(&expr.member));
+                            match member {
+                                Some(member) => Type::instance_of(
+                                    member.to_type(&object).resolved(resolver, stack),
+                                ),
+                                None => Self::unknown(),
+                            }
                         }
-                    }
-                    TypeInner::Object(object) => {
-                        let member = object
-                            .all_members()
-                            .find(|member| !member.is_static() && member.has_name(&expr.member));
-                        match member {
-                            Some(member) => Self::instance_of(member.to_type(&expr.object))
-                                .resolved(resolver, stack),
-                            None => Self::unknown(),
+                        TypeInner::Object(inner) => {
+                            let member = inner.all_members().find(|member| {
+                                !member.is_static() && member.has_name(&expr.member)
+                            });
+                            match member {
+                                Some(member) => Type::instance_of(
+                                    member.to_type(&object).resolved(resolver, stack),
+                                ),
+                                None => Self::unknown(),
+                            }
                         }
+                        _ => self.clone(),
                     }
-                    _ => self.clone(),
-                },
+                }
                 TypeofExpression::Super(expr) => {
                     let class = expr.parent.resolved(resolver, stack);
-                    match class.deref() {
+                    match class.inner_type() {
                         TypeInner::Class(class) => match class.extends.as_ref() {
                             Some(super_class) => {
                                 Self::instance_of(super_class.resolved(resolver, stack))

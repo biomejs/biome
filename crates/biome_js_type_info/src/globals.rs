@@ -127,11 +127,14 @@ pub(crate) static WINDOW: LazyLock<Object> = LazyLock::new(|| Object {
     prototype: None,
     members: Arc::new([TypeMember::Property(PropertyTypeMember {
         name: Text::Static("Promise"),
-        ty: TypeInner::Reference(Box::new(TypeReference {
-            qualifier: TypeReferenceQualifier::from_name(Text::Static("Promise")),
-            ty: Type::unknown(),
-            type_parameters: Arc::new([]),
-        }))
+        ty: TypeInner::TypeofType(Box::new(
+            TypeInner::Reference(Box::new(TypeReference {
+                qualifier: TypeReferenceQualifier::from_name(Text::Static("Promise")),
+                ty: Type::unknown(),
+                type_parameters: Arc::new([]),
+            }))
+            .into(),
+        ))
         .into(),
         is_optional: false,
         is_static: false,

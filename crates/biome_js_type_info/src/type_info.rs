@@ -73,6 +73,20 @@ impl Type {
         Self(Arc::new(TypeInner::Function(Box::new(function))))
     }
 
+    /// Returns the `TypeInner` referenced by this type.
+    ///
+    /// This method follows `TypeofType` references and should be used instead
+    /// of [`Self::deref()`] when you know you want to use the inner type as a
+    /// type rather than an instance.
+    pub fn inner_type(&self) -> &TypeInner {
+        let inner = &**self;
+        if let TypeInner::TypeofType(ty) = inner {
+            ty.deref()
+        } else {
+            inner
+        }
+    }
+
     /// Returns a new instance of the given type.
     pub fn instance_of(ty: Type) -> Self {
         if matches!(ty.deref(), TypeInner::Class(_)) {
@@ -95,6 +109,19 @@ impl Type {
 
     pub fn number() -> Self {
         Self(Arc::new(TypeInner::Number))
+    }
+
+    /// Returns the `Type` referenced by this type.
+    ///
+    /// This method follows `TypeofType` references and should be used instead
+    /// of [`Self::deref()`] when you know you want to use the inner type as a
+    /// type rather than an instance.
+    pub fn owned_inner_type(&self) -> Self {
+        if let TypeInner::TypeofType(ty) = self.deref() {
+            ty.as_ref().clone()
+        } else {
+            self.clone()
+        }
     }
 
     pub fn promise_of(ty: Type) -> Self {
@@ -187,7 +214,7 @@ pub enum TypeInner {
     TypeofExpression(Box<TypeofExpression>),
 
     /// Reference to another type through the `typeof` operator.
-    TypeofType(Box<TypeReference>),
+    TypeofType(Box<Type>),
 
     /// Reference to the type of a named JavaScript value.
     TypeofValue(Box<TypeofValue>),
@@ -718,7 +745,7 @@ enum TypeMemberOwner<'a> {
 
 impl<'a> From<&'a Type> for Option<TypeMemberOwner<'a>> {
     fn from(ty: &'a Type) -> Self {
-        match ty.deref() {
+        match ty.inner_type() {
             TypeInner::Class(class) => Some(TypeMemberOwner::Class(class)),
             TypeInner::Object(object) => Some(TypeMemberOwner::Object(object)),
             _ => None,
