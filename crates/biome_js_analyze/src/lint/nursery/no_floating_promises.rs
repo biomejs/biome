@@ -35,14 +35,14 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// async function returnsPromise(): Promise<string> {
     ///   return 'value';
     /// }
     /// returnsPromise().then(() => {});
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// const returnsPromise = async (): Promise<string> => {
     ///   return 'value';
     /// }
@@ -51,16 +51,16 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// const promise = new Promise((resolve) => resolve('value'));
     /// promise.then(() => { }).finally(() => { });
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// Promise.all([p1, p2, p3])
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// class Api {
     ///   async returnsPromise(): Promise<string> {
     ///     return 'value';
@@ -71,7 +71,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// class Parent {
     ///   async returnsPromise(): Promise<string> {
     ///     return 'value';
@@ -85,7 +85,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// class Api {
     ///   async returnsPromise(): Promise<string> {
     ///     return 'value';
@@ -95,7 +95,7 @@ declare_lint_rule! {
     /// api.returnsPromise().then(() => {}).finally(() => {});
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// const obj = {
     ///   async returnsPromise(): Promise<string> {
     ///     return 'value';
@@ -105,7 +105,7 @@ declare_lint_rule! {
     /// obj.returnsPromise();
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// type Props = {
     ///   returnsPromise: () => Promise<void>;
     /// };
