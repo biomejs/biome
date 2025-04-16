@@ -852,8 +852,16 @@ impl TypeMember {
                             .and_then(|annotation| annotation.type_annotation().ok())
                             .flatten()
                             .and_then(|annotation| annotation.ty().ok())
-                            .map(|ty| Type::from_any_ts_type(&ty))
-                            .unwrap_or_default(),
+                            .map_or_else(
+                                || {
+                                    member
+                                        .value()
+                                        .and_then(|initializer| initializer.expression().ok())
+                                        .map(|expr| Type::from_any_js_expression(&expr))
+                                        .unwrap_or_default()
+                                },
+                                |ty| Type::from_any_ts_type(&ty),
+                            ),
                         is_optional: member
                             .property_annotation()
                             .as_ref()
