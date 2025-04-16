@@ -286,6 +286,12 @@ impl Object {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct ObjectLiteral(pub(super) Box<[TypeMember]>);
 
+impl ObjectLiteral {
+    pub fn members(&self) -> &[TypeMember] {
+        &self.0
+    }
+}
+
 /// Tuple type.
 ///
 /// Tuples in TypeScript are created using `Array`s of a fixed size.

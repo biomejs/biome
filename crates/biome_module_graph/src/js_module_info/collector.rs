@@ -17,8 +17,8 @@ use crate::{
 };
 
 use super::{
-    JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsModuleInfoInner, JsOwnExport, JsReexport,
-    JsResolvedPath, binding::JsBindingData, scope::JsScopeData,
+    Exports, JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsModuleInfoInner, JsOwnExport,
+    JsReexport, JsResolvedPath, binding::JsBindingData, scope::JsScopeData,
     type_resolver::JsModuleTypeResolver,
 };
 
@@ -508,7 +508,7 @@ impl JsModuleInfo {
             static_imports: bag.static_imports,
             static_import_paths: collector.static_import_paths,
             dynamic_import_paths: collector.dynamic_import_paths,
-            exports: bag.exports,
+            exports: Exports(bag.exports),
             blanket_reexports: bag.blanket_reexports.into(),
             bindings: collector.bindings.into(),
             scopes: collector.scopes.into(),
