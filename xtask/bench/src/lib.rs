@@ -8,12 +8,7 @@ use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 use biome_formatter::Printed;
 use biome_rowan::NodeCache;
 use criterion::measurement::WallTime;
-
-#[cfg(not(feature = "codspeed"))]
 pub use criterion::*;
-
-#[cfg(feature = "codspeed")]
-pub use codspeed_criterion_compat::*;
 
 pub fn run_format(format_node: &FormatNode) -> Printed {
     let formatted = format_node.format_node().unwrap();
