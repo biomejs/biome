@@ -67,11 +67,9 @@ impl TopLevelSuppression {
         }
         // The absence of a filter means that it's a suppression all
         match filter {
-            None => self
-                .suppressed_categories
-                .insert(suppression.as_rule_category()),
+            None => self.suppressed_categories.insert(suppression.category),
             Some(PLUGIN_LINT_RULE_FILTER) => self.insert_plugin(&suppression.kind),
-            Some(filter) => self.insert(suppression.as_rule_category(), filter),
+            Some(filter) => self.insert(suppression.category, filter),
         }
         self.comment_range = comment_range;
         Ok(())
@@ -194,6 +192,9 @@ pub(crate) struct RangeSuppression {
     /// Whether this suppression has suppressed a signal
     pub(crate) did_suppress_signal: bool,
 
+    /// Indicates if this suppression has found its end comment - if false, the suppression_range is not yet complete
+    pub(crate) is_ended: bool,
+
     /// The rules to suppress, grouped by [RuleCategory]
     pub(crate) filters_by_category: FxHashMap<RuleCategory, FxHashSet<RuleFilter<'static>>>,
 }
@@ -207,6 +208,7 @@ impl Default for RangeSuppression {
             already_suppressed: None,
             did_suppress_signal: false,
             filters_by_category: Default::default(),
+            is_ended: false,
         }
     }
 }
@@ -215,7 +217,7 @@ impl RangeSuppressions {
     /// Expands the range of all range suppressions
     pub(crate) fn expand_range(&mut self, text_range: TextRange) {
         for range_suppression in self.suppressions.iter_mut() {
-            if !range_suppression.filters_by_category.is_empty() {
+            if !range_suppression.is_ended {
                 range_suppression.suppression_range =
                     range_suppression.suppression_range.cover(text_range);
             }
@@ -238,42 +240,23 @@ impl RangeSuppressions {
             }.to_owned()));
         }
         if suppression.is_range_start() {
-            if let Some(range_suppression) = self.suppressions.last_mut() {
-                match filter {
-                    None => {
-                        range_suppression
-                            .suppressed_categories
-                            .insert(suppression.as_rule_category());
-                        range_suppression.already_suppressed = already_suppressed;
-                    }
-                    Some(filter) => {
-                        let filters = range_suppression
-                            .filters_by_category
-                            .entry(suppression.as_rule_category())
-                            .or_default();
-                        filters.insert(filter);
-                        range_suppression.already_suppressed = already_suppressed;
-                    }
+            let mut range_suppression = RangeSuppression::default();
+            match filter {
+                None => range_suppression
+                    .suppressed_categories
+                    .insert(suppression.category),
+                Some(filter) => {
+                    let filters = range_suppression
+                        .filters_by_category
+                        .entry(suppression.category)
+                        .or_default();
+                    filters.insert(filter);
                 }
-            } else {
-                let mut range_suppression = RangeSuppression::default();
-                match filter {
-                    None => range_suppression
-                        .suppressed_categories
-                        .insert(suppression.as_rule_category()),
-                    Some(filter) => {
-                        let filters = range_suppression
-                            .filters_by_category
-                            .entry(suppression.as_rule_category())
-                            .or_default();
-                        filters.insert(filter);
-                    }
-                }
-                range_suppression.suppression_range = text_range;
-                range_suppression.already_suppressed = already_suppressed;
-                range_suppression.start_comment_range = text_range;
-                self.suppressions.push(range_suppression);
             }
+            range_suppression.suppression_range = text_range;
+            range_suppression.already_suppressed = already_suppressed;
+            range_suppression.start_comment_range = text_range;
+            self.suppressions.push(range_suppression);
         } else if suppression.is_range_end() {
             if self.suppressions.is_empty() {
                 // This an error. We found a range end suppression without having a range start
@@ -291,15 +274,24 @@ impl RangeSuppressions {
                     self.suppressions.pop();
                 }
                 Some(filter) => {
-                    // SAFETY: we checked if the vector isn't empty at the beginning
-                    let range_suppression = self.suppressions.last_mut().unwrap();
-                    let filters = range_suppression
-                        .filters_by_category
-                        .entry(suppression.as_rule_category())
-                        .or_default();
-                    let present = filters.remove(&filter);
-                    // the user tried to remove a filter that wasn't added, let's fire a diagnostic
-                    if !present {
+                    let mut range_suppression: Option<&mut RangeSuppression> = None;
+                    for existing_suppression in self.suppressions.iter_mut().rev() {
+                        if !existing_suppression.is_ended {
+                            let filters = existing_suppression
+                                .filters_by_category
+                                .entry(suppression.category)
+                                .or_default();
+                            if filters.contains(&filter) {
+                                range_suppression = Some(existing_suppression);
+                                break;
+                            }
+                        }
+                    }
+                    if let Some(existing_suppression) = range_suppression {
+                        // Mark this as ended and expand it by the text range of this comment
+                        existing_suppression.suppression_range.cover(text_range);
+                        existing_suppression.is_ended = true;
+                    } else {
                         // This an error. We found a range end suppression without having a range start
                         return Err(AnalyzerSuppressionDiagnostic::new(
                             category!("suppressions/incorrect"),
@@ -315,34 +307,27 @@ impl RangeSuppressions {
         Ok(())
     }
 
-    /// Checks if there's a suppression that suppresses the current rule in the range provided
+    /// Checks if there's suppression that suppresses the current rule in the range provided
     pub(crate) fn suppress_rule(
         &mut self,
         rule_category: &RuleCategory,
         filter: &RuleKey,
         position: &TextRange,
     ) -> bool {
-        let range_suppression = self
-            .suppressions
-            .iter_mut()
-            .rev()
-            .find(|range_suppression| {
-                range_suppression
-                    .suppression_range
-                    .contains_range(*position)
-            });
-        let range_suppression = range_suppression.filter(|range_suppression| {
-            range_suppression
-                .filters_by_category
-                .get(rule_category)
-                .is_some_and(|filters| filters.iter().any(|f| f == filter))
-        });
-        if let Some(range_suppression) = range_suppression {
-            range_suppression.did_suppress_signal = true;
-            true
-        } else {
-            false
+        for range_suppression in self.suppressions.iter_mut().rev() {
+            if range_suppression
+                .suppression_range
+                .contains_range(*position)
+                && range_suppression
+                    .filters_by_category
+                    .get(rule_category)
+                    .is_some_and(|filters| filters.iter().any(|f| f == filter))
+            {
+                range_suppression.did_suppress_signal = true;
+                return true;
+            }
         }
+        false
     }
 
     /// Whether if the provided `filter` matches ones, given a range.
@@ -365,6 +350,26 @@ impl RangeSuppressions {
         }
 
         None
+    }
+
+    /// Finalizes the suppressions after having evaluated the suppression source (i.e. a file)
+    /// You would call then when you expect to be done adding suppressions to this object
+    pub fn finalize(&self) -> Result<(), Vec<AnalyzerSuppressionDiagnostic>> {
+        let mut errors = Vec::new();
+        for suppression in self.suppressions.iter() {
+            if !suppression.is_ended {
+                let diagnostic = AnalyzerSuppressionDiagnostic::new(
+                    category!("suppressions/incorrect"),
+                    suppression.start_comment_range,
+                    "Range suppressions must have a matching biome-ignore-end",
+                );
+                errors.push(diagnostic);
+            }
+        }
+        if !errors.is_empty() {
+            return Err(errors);
+        }
+        Ok(())
     }
 }
 
@@ -479,17 +484,16 @@ impl<'analyzer> Suppressions<'analyzer> {
     /// Maps a [suppression](AnalyzerSuppressionKind) to a [RuleFilter]
     fn map_to_rule_filter(
         &self,
-        suppression_kind: &AnalyzerSuppressionKind,
+        suppression: &AnalyzerSuppression,
         text_range: TextRange,
     ) -> Result<Option<RuleFilter<'static>>, AnalyzerSuppressionDiagnostic> {
-        let rule = match suppression_kind {
+        let rule = match suppression.kind {
             AnalyzerSuppressionKind::Everything(_) => return Ok(None),
             AnalyzerSuppressionKind::Rule(rule) => rule,
             AnalyzerSuppressionKind::RuleInstance(rule, _) => rule,
             AnalyzerSuppressionKind::Plugin(_) => return Ok(Some(PLUGIN_LINT_RULE_FILTER)),
-            AnalyzerSuppressionKind::Action(action) => action,
         };
-        let is_action = suppression_kind.is_action();
+        let is_action = suppression.category == RuleCategory::Action;
 
         let group_rule = rule.split_once('/');
 
@@ -527,7 +531,6 @@ impl<'analyzer> Suppressions<'analyzer> {
         match suppression_kind {
             AnalyzerSuppressionKind::Everything(_)
             | AnalyzerSuppressionKind::Rule(_)
-            | AnalyzerSuppressionKind::Action(_)
             | AnalyzerSuppressionKind::Plugin(_) => None,
             AnalyzerSuppressionKind::RuleInstance(_, instances) => Some((*instances).to_string()),
         }
@@ -546,7 +549,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         comment_range: TextRange,
         token_range_not_trimmed: TextRange,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        let filter = self.map_to_rule_filter(&suppression.kind, comment_range)?;
+        let filter = self.map_to_rule_filter(suppression, comment_range)?;
         let instances = self.map_to_rule_instances(&suppression.kind);
         let plugin_name: Option<String> = self.map_to_plugin_name(&suppression.kind);
         self.last_suppression = Some(suppression.variant.clone());
@@ -558,7 +561,7 @@ impl<'analyzer> Suppressions<'analyzer> {
                 instances,
                 comment_range,
                 already_suppressed,
-                suppression.as_rule_category(),
+                suppression.category,
             ),
             AnalyzerSuppressionVariant::TopLevel => self.top_level_suppression.push_suppression(
                 suppression,
@@ -636,5 +639,12 @@ impl<'analyzer> Suppressions<'analyzer> {
                     .range_suppressions
                     .matches_filter_in_range(filter, range))
         })
+    }
+
+    /// Finalizes the suppressions after having evaluated the suppression source (i.e. a file)
+    /// This exists to validate things like correctly ended range suppresions
+    pub fn finalize(&self) -> Result<(), Vec<AnalyzerSuppressionDiagnostic>> {
+        // Only range_suppressions have a finalize right now
+        self.range_suppressions.finalize()
     }
 }

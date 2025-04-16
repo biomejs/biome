@@ -359,7 +359,7 @@ mod tests {
             comment
                 .trim_start_matches("//")
                 .split(' ')
-                .map(AnalyzerSuppression::rule)
+                .map(|rule_str| AnalyzerSuppression::rule(RuleCategory::Lint, rule_str))
                 .map(Ok)
                 .collect()
         }
@@ -427,17 +427,18 @@ mod tests {
         assert_eq!(
             diagnostics.as_slice(),
             &[
+                // Suppression errors first since we check suppressions before syntax rules
                 (
                     category!("suppressions/unknownGroup"),
                     TextRange::new(TextSize::from(47), TextSize::from(62))
                 ),
                 (
-                    category!("args/fileNotFound"),
-                    TextRange::new(TextSize::from(63), TextSize::from(74))
-                ),
-                (
                     category!("suppressions/unknownRule"),
                     TextRange::new(TextSize::from(76), TextSize::from(96))
+                ),
+                (
+                    category!("args/fileNotFound"),
+                    TextRange::new(TextSize::from(63), TextSize::from(74))
                 ),
                 (
                     category!("args/fileNotFound"),
