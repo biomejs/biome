@@ -1137,15 +1137,26 @@ impl TypeofThisOrSuperExpression {
                         })
                     {
                         let pattern = declarator.id().ok();
-                        pattern
-                            .as_ref()
-                            .and_then(|pattern| pattern.as_any_js_binding())
-                            .cloned()
+                        pattern.and_then(|pattern| pattern.as_any_js_binding().cloned())
                     } else {
                         class.id()
                     }
-                } else if let Some(class) = JsClassExportDefaultDeclaration::cast(node) {
+                } else if let Some(class) = JsClassExportDefaultDeclaration::cast_ref(&node) {
                     class.id()
+                } else if let Some(object) = JsObjectExpression::cast(node) {
+                    object
+                        .syntax()
+                        .ancestors()
+                        .find_map(JsVariableDeclarator::cast)
+                        .filter(|declarator| {
+                            declarator.initializer().is_some_and(|initializer| {
+                                initializer.expression().is_ok_and(|expr| {
+                                    matches!(expr, AnyJsExpression::JsObjectExpression(_))
+                                })
+                            })
+                        })
+                        .and_then(|declarator| declarator.id().ok())
+                        .and_then(|pattern| pattern.as_any_js_binding().cloned())
                 } else {
                     None
                 }?;
