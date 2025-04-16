@@ -626,14 +626,14 @@ impl Type {
     }
 
     pub fn from_ts_type_alias_declaration(decl: &TsTypeAliasDeclaration) -> Option<Self> {
-        let inner = TypeInner::Alias(Box::new(TypeAlias {
-            ty: Self::from_any_ts_type(&decl.ty().ok()?),
-            type_parameters: GenericTypeParameter::params_from_ts_type_parameters(
-                &decl.type_parameters()?,
-            ),
-        }));
-
-        Some(inner.into())
+        Some(match decl.type_parameters() {
+            Some(params) => TypeInner::Alias(Box::new(TypeAlias {
+                ty: Self::from_any_ts_type(&decl.ty().ok()?),
+                type_parameters: GenericTypeParameter::params_from_ts_type_parameters(&params),
+            }))
+            .into(),
+            None => Self::from_any_ts_type(&decl.ty().ok()?),
+        })
     }
 
     pub fn from_ts_typeof_type(ty: &TsTypeofType) -> Self {
