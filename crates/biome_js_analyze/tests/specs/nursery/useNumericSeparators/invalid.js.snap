@@ -126,7 +126,7 @@ invalid.js:8:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━
      9 │ foo = 0XAB_C_D; // 0XAB_CD
     10 │ 
   
-  i Separators are unnecessary in a number of this length.
+  i Short numbers don't require separators.
   
   i Safe fix: Remove unnecessary numeric separators.
   
@@ -203,7 +203,7 @@ invalid.js:13:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
     14 │ foo = 0o010101010101; // 0o0101_0101_0101
     15 │ foo = 0O010101010101; // 0O0101_0101_0101
   
-  i Separators are unnecessary in a number of this length.
+  i Short numbers don't require separators.
   
   i Safe fix: Remove unnecessary numeric separators.
   
@@ -306,7 +306,7 @@ invalid.js:19:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
     20 │ foo = 0b10101010101010; // 0b10_1010_1010_1010
     21 │ foo = 0B10101010101010; // 0B10_1010_1010_1010
   
-  i Separators are unnecessary in a number of this length.
+  i Short numbers don't require separators.
   
   i Safe fix: Remove unnecessary numeric separators.
   
@@ -409,7 +409,7 @@ invalid.js:30:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━�
     31 │ foo = 1234567890; // 1_234_567_890
     32 │ 
   
-  i Separators are unnecessary in a number of this length.
+  i Short numbers don't require separators.
   
   i Safe fix: Remove unnecessary numeric separators.
   
