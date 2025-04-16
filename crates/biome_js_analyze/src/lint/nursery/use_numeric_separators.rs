@@ -234,13 +234,13 @@ fn format_numeric_literal(raw: &str) -> String {
 /// When right aligned, separators are added starting from the right (in reverse).
 /// ```
 /// 1234567; // -> 1_234_567
-/// //               ^ The "uneven" group of numbers is to the left of the first separator.
+/// //             ^ The "uneven" group of numbers is to the left of the first separator.
 /// ```
 ///
 /// When left aligned, separators are added starting from the left.
 /// ```
 /// 12345654; // -> 123_456_54
-/// //                            ^^ The "uneven" group of numbers is added to the right of the last separator.
+/// //                      ^^ The "uneven" group of numbers is added to the right of the last separator.
 /// ```
 fn insert_separators(
     number: &[u8],
