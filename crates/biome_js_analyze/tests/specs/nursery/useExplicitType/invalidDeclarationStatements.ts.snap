@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDeclarationStatements.ts
+snapshot_kind: text
+---
+# Input
+```ts
+export const foo = {};
+
+
+const bar = {};
+
+export {
+	bar
+}
+
+```
+
+# Diagnostics
+```
+invalidDeclarationStatements.ts:1:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+  > 1 │ export const foo = {};
+      │              ^^^
+    2 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalidDeclarationStatements.ts:4:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+  > 4 │ const bar = {};
+      │       ^^^
+    5 │ 
+    6 │ export {
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
