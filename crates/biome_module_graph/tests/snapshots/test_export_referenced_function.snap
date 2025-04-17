@@ -15,20 +15,21 @@ export { foo };
 
 ```
 
-
-
 ```
-Borrowed("foo") => [
-  ExportOwnExport => JsOwnExport(
-    Function(
-      [sync, Name: foo]
-      ReturnType(Type(Unknown))
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "foo" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: Unknown
+      }
+      Local name: foo
+      JsDoc(
+        @returns {string}
+      )
     )
-    Local name: foo
-    JsDoc(
-      @returns {string}
-    )
-  )
-]
-
-```
+  }
+}```

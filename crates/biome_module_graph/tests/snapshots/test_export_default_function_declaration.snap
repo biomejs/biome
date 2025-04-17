@@ -14,30 +14,25 @@ export default function Component(): JSX.Element {}
 
 ```
 
-
-
 ```
-Static("default") => [
-  ExportOwnExport => JsOwnExport(
-    Function(
-      [sync, Name: Component]
-      ReturnType(
-        Type(
-          Reference(
-            Qualifier(JSX.Element)
-            Type(
-              Unknown
-            )
-          )
-        )
+Exports {
+  "default" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "Component" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: "JSX.Element" {
+          ty: Unknown
+          type_args: No types
+        }
+      }
+      Local name: Component
+      JsDoc(
+        @public
+        @returns {JSX.Element}
       )
     )
-    Local name: Component
-    JsDoc(
-      @public
-      @returns {JSX.Element}
-    )
-  )
-]
-
-```
+  }
+}```

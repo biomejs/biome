@@ -38,36 +38,43 @@ export const superComputer = new DeepThought();
 
 ```
 
-
-
 ```
-Borrowed("superComputer") => [
-  ExportOwnExport => JsOwnExport(
-    Object(
-      Method(
-        [answerMe, sync, The parameter is not optional]
-        ReturnType(Type(Number))
+Exports {
+  "superComputer" => {
+    ExportOwnExport => JsOwnExport(
+      Object(
+        Method "answerMe" {
+          [sync, required]
+          accepts: {
+            ty: No parameters
+            type_args: No parameters
+          }
+          returns: Number
+        }
+        Method "giveMeABiggerAnswer" {
+          [sync, required]
+          accepts: {
+            ty: [delta, The parameter is not optional, The parameter is not rest]
+            type_args: No parameters
+          }
+          returns: Unknown
+        }
+        Method "whatWasTheUltimateQuestion" {
+          [sync, required]
+          accepts: {
+            ty: No parameters
+            type_args: No parameters
+          }
+          returns: UnknownKeyword
+        }
       )
-      Method(
-        [giveMeABiggerAnswer, sync, The parameter is not optional]
-        FunctionParameters(
-          [delta, The parameter is not optional, The parameter is not rest]
-        )
-        ReturnType(Type(Unknown))
-      )
-      Method(
-        [whatWasTheUltimateQuestion, sync, The parameter is not optional]
-        ReturnType(Type(UnknownKeyword))
-      )
+      Local name: superComputer
     )
-    Local name: superComputer
-  )
-]
-Borrowed("theAnswer") => [
-  ExportOwnExport => JsOwnExport(
-    Literal(Number: 42)
-    Local name: theAnswer
-  )
-]
-
-```
+  }
+  "theAnswer" => {
+    ExportOwnExport => JsOwnExport(
+      Literal(Number: 42)
+      Local name: theAnswer
+    )
+  }
+}```

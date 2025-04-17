@@ -49,282 +49,250 @@ export * as renamed2 from "./renamed-reexports";
 
 ```
 
-
-
 ```
-Borrowed("a") => [
-  ExportOwnExport => JsOwnExport(
-    Unknown
-    Local name: a
-    JsDoc(
-      TODO: No types can be detected on these yet.
-    )
-  )
-]
-Borrowed("b") => [
-  ExportOwnExport => JsOwnExport(
-    Unknown
-    Local name: b
-    JsDoc(
-      TODO: No types can be detected on these yet.
-    )
-  )
-]
-Borrowed("bar") => [
-  ExportOwnExport => JsOwnExport(
-    Function(
-      [sync, Name: bar]
-      ReturnType(Type(Unknown))
-    )
-    Local name: bar
-    JsDoc(
-      @package
-    )
-  )
-]
-Borrowed("baz") => [
-  ExportOwnExport => JsOwnExport(
-    Function(
-      [async, Name: baz]
-      ReturnType(
-        Type(
-          Class(
-            [Promise]
-            Members(
-              Method(
-                [all, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-              Method(
-                [allSettled, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-              Method(
-                [any, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-              Method(
-                [race, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-              Method(
-                [reject, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-              Method(
-                [resolve, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-              Method(
-                [try, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-              Method(
-                [catch, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-              Method(
-                [finally, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-              Method(
-                [then, sync, The parameter is not optional]
-                ReturnType(
-                  Type(
-                    Reference(
-                      Qualifier(Promise)
-                      Type(
-                        Unknown
-                      )
-                      Types(Unknown)
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
+Exports {
+  "a" => {
+    ExportOwnExport => JsOwnExport(
+      Unknown
+      Local name: a
+      JsDoc(
+        TODO: No types can be detected on these yet.
       )
     )
-    Local name: baz
-  )
-]
-Borrowed("d") => [
-  ExportOwnExport => JsOwnExport(
-    Unknown
-    Local name: d
-    JsDoc(
-      TODO: No types can be detected on these yet.
-    )
-  )
-]
-Static("default") => [
-  ExportOwnExport => JsOwnExport(
-    Function(
-      [sync, Name: Component]
-      ReturnType(
-        Type(
-          Reference(
-            Qualifier(JSX.Element)
-            Type(
-              Unknown
-            )
-          )
-        )
+  }
+  "b" => {
+    ExportOwnExport => JsOwnExport(
+      Unknown
+      Local name: b
+      JsDoc(
+        TODO: No types can be detected on these yet.
       )
     )
-    Local name: Component
-    JsDoc(
-      @public
-      @returns {JSX.Element}
+  }
+  "bar" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "bar" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: Unknown
+      }
+      Local name: bar
+      JsDoc(
+        @package
+      )
     )
-  )
-]
-Borrowed("e") => [
-  ExportOwnExport => JsOwnExport(
-    Unknown
-    Local name: e
-    JsDoc(
-      TODO: No types can be detected on these yet.
+  }
+  "baz" => {
+    ExportOwnExport => JsOwnExport(
+      async Function "baz" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: [Promise]
+        Members(
+          Method "all" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          Method "allSettled" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          Method "any" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          Method "race" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          Method "reject" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          Method "resolve" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          Method "try" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          Method "catch" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          Method "finally" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          Method "then" {
+            [sync, required]
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+        )
+      }
+      Local name: baz
     )
-  )
-]
-Borrowed("foo") => [
-  ExportOwnExport => JsOwnExport(
-    Function(
-      [sync, Name: foo]
-      ReturnType(Type(Unknown))
+  }
+  "d" => {
+    ExportOwnExport => JsOwnExport(
+      Unknown
+      Local name: d
+      JsDoc(
+        TODO: No types can be detected on these yet.
+      )
     )
-    Local name: foo
-    JsDoc(
-      @returns {string}
+  }
+  "default" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "Component" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: "JSX.Element" {
+          ty: Unknown
+          type_args: No types
+        }
+      }
+      Local name: Component
+      JsDoc(
+        @public
+        @returns {JSX.Element}
+      )
     )
-  )
-]
-Owned("oh\nno") => [
-  ExportReexport => Reexport(
-    Specifier: "./renamed-reexports"
-    Resolved path: /src/renamed-reexports.ts
-    Import Symbol: ohNo
-  )
-]
-Borrowed("qux") => [
-  ExportOwnExport => JsOwnExport(
-    Literal(Number: 1)
-    Local name: qux
-  )
-]
-Borrowed("quz") => [
-  ExportOwnExport => JsOwnExport(
-    Object()
-    Local name: quz
-    JsDoc(
-      @private
+  }
+  "e" => {
+    ExportOwnExport => JsOwnExport(
+      Unknown
+      Local name: e
+      JsDoc(
+        TODO: No types can be detected on these yet.
+      )
     )
-  )
-]
-Borrowed("renamed2") => [
-  ExportReexport => Reexport(
-    Specifier: "./renamed-reexports"
-    Resolved path: /src/renamed-reexports.ts
-    Import Symbol: All
-    JsDoc(
-      Hello, namespace 2.
+  }
+  "foo" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "foo" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: Unknown
+      }
+      Local name: foo
+      JsDoc(
+        @returns {string}
+      )
     )
-  )
-]
-
-```
+  }
+  "oh\nno" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: /src/renamed-reexports.ts
+      Import Symbol: ohNo
+    )
+  }
+  "qux" => {
+    ExportOwnExport => JsOwnExport(
+      Literal(Number: 1)
+      Local name: qux
+    )
+  }
+  "quz" => {
+    ExportOwnExport => JsOwnExport(
+      Object()
+      Local name: quz
+      JsDoc(
+        @private
+      )
+    )
+  }
+  "renamed2" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: /src/renamed-reexports.ts
+      Import Symbol: All
+      JsDoc(
+        Hello, namespace 2.
+      )
+    )
+  }
+}```
 
 ## /src/renamed-reexports.ts
 
@@ -333,20 +301,21 @@ export function ohNo() {}
 
 ```
 
-
-
 ```
-Borrowed("ohNo") => [
-  ExportOwnExport => JsOwnExport(
-    Function(
-      [sync, Name: ohNo]
-      ReturnType(Type(Unknown))
+Exports {
+  "ohNo" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "ohNo" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: Unknown
+      }
+      Local name: ohNo
     )
-    Local name: ohNo
-  )
-]
-
-```
+  }
+}```
 
 ## /src/reexports.ts
 
@@ -358,18 +327,16 @@ export * as renamed from "./renamed-reexports";
 
 ```
 
-
-
 ```
-Borrowed("renamed") => [
-  ExportReexport => Reexport(
-    Specifier: "./renamed-reexports"
-    Resolved path: /src/renamed-reexports.ts
-    Import Symbol: All
-    JsDoc(
-      Hello, namespace 1.
+Exports {
+  "renamed" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: /src/renamed-reexports.ts
+      Import Symbol: All
+      JsDoc(
+        Hello, namespace 1.
+      )
     )
-  )
-]
-
-```
+  }
+}```

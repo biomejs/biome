@@ -53,14 +53,14 @@ impl<'a> ModuleGraphSnapshot<'a> {
             content.push_str(extension);
             content.push('\n');
             content.push_str(formatted.as_code());
-            content.push_str("\n```\n\n");
+            content.push_str("\n```");
 
             let data = dependency_data.get(file_name.as_path()).unwrap().clone();
 
             content.push_str("\n\n");
             content.push_str("```\n");
-            content.push_str(&data.exports.to_string());
-            content.push_str("\n```\n\n");
+            content.push_str(&data.to_string());
+            content.push_str("```\n\n");
         }
 
         insta::with_settings!({
