@@ -21,7 +21,7 @@ Exports {
     ExportOwnExport => JsOwnExport(
       sync Function "foo" {
         accepts: {
-          ty: No parameters
+          params: []
           type_args: No parameters
         }
         returns: Unknown

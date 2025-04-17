@@ -557,7 +557,7 @@ impl Format<ModuleFormatContext> for TypeReference {
                 space(),
                 text("{"),
                 &group(&block_indent(&format_args![
-                    text("ty:"),
+                    text("params:"),
                     space(),
                     &self.ty,
                     hard_line_break(),
@@ -771,7 +771,7 @@ impl Format<ModuleFormatContext> for Function {
                     space(),
                     text("{"),
                     &group(&block_indent(&format_args![
-                        text("ty:"),
+                        text("params:"),
                         space(),
                         FmtFunctionParameters(&self.parameters),
                         hard_line_break(),
@@ -913,7 +913,7 @@ impl Format<ModuleFormatContext> for MethodTypeMember {
                     space(),
                     text("{"),
                     &group(&block_indent(&format_args![
-                        text("ty:"),
+                        text("params:"),
                         space(),
                         FmtFunctionParameters(&self.parameters),
                         hard_line_break(),
@@ -982,7 +982,7 @@ impl Format<ModuleFormatContext> for FmtFunctionParameters<'_> {
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
         if self.0.is_empty() {
-            return write!(f, [text("No parameters")]);
+            return write!(f, [text("[]")]);
         }
 
         let function_parameters = format_with(|f| {

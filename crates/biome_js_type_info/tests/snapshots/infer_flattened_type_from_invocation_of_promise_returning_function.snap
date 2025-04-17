@@ -1,0 +1,121 @@
+---
+source: crates/biome_js_type_info/tests/utils/mod.rs
+expression: content
+snapshot_kind: text
+---
+```ts
+function returnsPromise(): Promise<number> {
+	return Promise.resolved(true);
+}
+
+returnsPromise();
+
+```
+
+```
+Object {
+  prototype: "Promise" members: {
+    required sync Method "all" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+    required sync Method "allSettled" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+    required sync Method "any" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+    required sync Method "race" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+    required sync Method "reject" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+    required sync Method "resolve" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+    required sync Method "try" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+    required sync Method "catch" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+    required sync Method "finally" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+    required sync Method "then" {
+      accepts: {
+        params: []
+        type_args: []
+      }
+      returns: "Promise" {
+        params: unknown
+        type_args: unknown
+      }
+    }
+  }
+  members: {}
+}
+```

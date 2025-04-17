@@ -110,7 +110,7 @@ impl Type {
 
     /// Takes the owned [TypeInner] from a `Type`.
     ///
-    /// Returns `None` if the type has other owners.  
+    /// Returns `None` if the type has other owners.
     pub fn into_inner(self) -> Option<TypeInner> {
         Arc::into_inner(self.0)
     }
@@ -1000,7 +1000,3 @@ impl TypeReferenceQualifier {
 /// A union of types.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Union(pub(super) Box<[Type]>);
-
-#[cfg(test)]
-#[path = "type_info.tests.rs"]
-mod tests;
