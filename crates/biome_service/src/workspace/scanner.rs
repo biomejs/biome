@@ -218,7 +218,7 @@ pub(crate) struct ScanContext<'app> {
     target: ScanKind,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Copy, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum ScanKind {
@@ -231,15 +231,15 @@ pub enum ScanKind {
 }
 
 impl ScanKind {
-    pub const fn is_project(&self) -> bool {
+    pub const fn is_project(self) -> bool {
         matches!(self, ScanKind::Project)
     }
 
-    pub const fn is_known_files(&self) -> bool {
+    pub const fn is_known_files(self) -> bool {
         matches!(self, ScanKind::KnownFiles)
     }
 
-    pub const fn is_none(&self) -> bool {
+    pub const fn is_none(self) -> bool {
         matches!(self, ScanKind::None)
     }
 }
