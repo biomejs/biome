@@ -38,7 +38,7 @@ declare_lint_rule! {
         version: "next",
         name: "noTsIgnore",
         language: "js",
-        sources: &[RuleSource::Eslint("ban-ts-comment")],
+        sources: &[RuleSource::EslintTypeScript("ban-ts-comment")],
         recommended: true,
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Safe,
