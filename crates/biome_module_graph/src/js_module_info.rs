@@ -5,9 +5,8 @@ mod global_scope_resolver;
 mod scope;
 mod visitor;
 
-use std::{collections::BTreeMap, ops::Deref, sync::Arc};
-use ad_hoc_scope_resolver::AdHocScopeResolver;
 use crate::{ModuleGraph, jsdoc_comment::JsdocComment};
+use ad_hoc_scope_resolver::AdHocScopeResolver;
 use binding::JsBindingData;
 use biome_js_semantic::{BindingId, ScopeId};
 use biome_js_syntax::{AnyJsExpression, AnyJsImportLike};

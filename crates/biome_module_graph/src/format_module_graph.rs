@@ -9,10 +9,10 @@ use biome_formatter::{
     format_args, write,
 };
 use biome_js_type_info::{
-    CallSignatureTypeMember, Class, ClassMember, ConstructorTypeMember, Function,
-    FunctionParameter, GenericTypeParameter, Literal, MethodTypeMember, Object, ObjectLiteral,
-    PropertyTypeMember, ReturnType, Type, TypeInner, TypeMember, TypeReference,
-    TypeReferenceQualifier,
+    CallSignatureTypeMember, Class, ConstructorTypeMember, Function, FunctionParameter,
+    GenericTypeParameter, Literal, MethodTypeMember, Object, ObjectLiteral, PropertyTypeMember,
+    ReturnType, Type, TypeInner, TypeMember, TypeReference, TypeReferenceQualifier,
+    TypeofAwaitExpression, TypeofExpression,
 };
 use biome_rowan::{Text, TextSize};
 use std::fmt::{Debug, Formatter};
@@ -383,7 +383,6 @@ impl Format<ModuleFormatContext> for Type {
             ),
             TypeInner::Union(_) => todo!(),
             TypeInner::Intersection(_) => todo!(),
-            TypeInner::Array(_) => todo!(),
             TypeInner::Tuple(_) => todo!(),
             TypeInner::Namespace(_) => todo!(),
             TypeInner::Class(class) => write!(
@@ -396,17 +395,6 @@ impl Format<ModuleFormatContext> for Type {
                 ]]
             ),
             TypeInner::Constructor(_) => todo!(),
-            TypeInner::Promise(promise) => {
-                write!(
-                    f,
-                    [&format_args![
-                        text("Promise"),
-                        text("("),
-                        promise.as_ref(),
-                        text(")")
-                    ]]
-                )
-            }
             TypeInner::TypeOperator(_) => todo!(),
             TypeInner::Alias(_) => todo!(),
             TypeInner::Literal(literal) => write!(
@@ -435,6 +423,17 @@ impl Format<ModuleFormatContext> for Type {
             TypeInner::ThisKeyword => write!(f, [&format_args![text("ThisKeyword")]]),
             TypeInner::UnknownKeyword => write!(f, [&format_args![text("UnknownKeyword")]]),
             TypeInner::VoidKeyword => write!(f, [&format_args![text("VoidKeyword")]]),
+            TypeInner::TypeofExpression(typeof_expression) => {
+                write!(
+                    f,
+                    [&format_args![
+                        text("Reference"),
+                        text("("),
+                        group(&soft_block_indent(&typeof_expression.as_ref())),
+                        text(")")
+                    ]]
+                )
+            }
         }
     }
 }
@@ -533,7 +532,7 @@ impl Format<ModuleFormatContext> for JsResolvedPath {
             write!(
                 f,
                 [format_args![dynamic_text(
-                    value.as_str().replace("\\", "/").as_str(),
+                    value.as_str().replace('\\', "/").as_str(),
                     TextSize::default()
                 )]]
             )?;
@@ -606,7 +605,7 @@ impl Format<ModuleFormatContext> for Object {
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
         let mut joiner = f.join_with(soft_line_break());
-        for type_member in self.members() {
+        for type_member in self.all_members() {
             joiner.entry(&format_args![&type_member]);
         }
         joiner.finish()
@@ -631,7 +630,17 @@ impl Format<ModuleFormatContext> for TypeMember {
                 )
             }
             TypeMember::Constructor(_) => todo!(),
-            TypeMember::Method(_) => todo!(),
+            TypeMember::Method(method) => {
+                write!(
+                    f,
+                    [&format_args![
+                        text("Method"),
+                        text("("),
+                        &group(&soft_block_indent(&method)),
+                        text(")")
+                    ]]
+                )
+            }
             TypeMember::Property(property) => {
                 write!(
                     f,
@@ -680,8 +689,8 @@ impl Format<ModuleFormatContext> for GenericTypeParameter {
                 text("Name:"),
                 space(),
                 dynamic_text(&self.name, TextSize::default()),
-                text("Default Type:"),
-                &self.default_ty
+                text("Type:"),
+                &self.ty
             ]]
         )
     }
@@ -856,49 +865,6 @@ impl Format<ModuleFormatContext> for Class {
     }
 }
 
-impl Format<ModuleFormatContext> for ClassMember {
-    fn fmt(
-        &self,
-        f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
-    ) -> FormatResult<()> {
-        match self {
-            ClassMember::Constructor(constructor) => {
-                write!(
-                    f,
-                    [&format_args![
-                        text("Constructor"),
-                        text("("),
-                        group(&soft_block_indent(&constructor)),
-                        text(")")
-                    ]]
-                )
-            }
-            ClassMember::Method(method) => {
-                write!(
-                    f,
-                    [&format_args![
-                        text("Method"),
-                        text("("),
-                        group(&soft_block_indent(&method)),
-                        text(")")
-                    ]]
-                )
-            }
-            ClassMember::Property(property) => {
-                write!(
-                    f,
-                    [&format_args![
-                        text("Property"),
-                        text("("),
-                        group(&soft_block_indent(&property)),
-                        text(")")
-                    ]]
-                )
-            }
-        }
-    }
-}
-
 impl Format<ModuleFormatContext> for ConstructorTypeMember {
     fn fmt(
         &self,
@@ -965,6 +931,50 @@ impl Format<ModuleFormatContext> for MethodTypeMember {
                 text("ReturnType"),
                 text("("),
                 group(&soft_block_indent(&self.return_type)),
+                text(")")
+            ]]
+        )
+    }
+}
+
+impl Format<ModuleFormatContext> for TypeofExpression {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
+    ) -> FormatResult<()> {
+        match self {
+            TypeofExpression::Addition(_) => todo!(),
+            TypeofExpression::Await(await_expression) => {
+                write!(
+                    f,
+                    [&format_args![
+                        text("Await"),
+                        text("("),
+                        group(&soft_block_indent(await_expression)),
+                        text(")")
+                    ]]
+                )
+            }
+            TypeofExpression::Call(_) => todo!(),
+            TypeofExpression::New(_) => todo!(),
+            TypeofExpression::StaticMember(_) => todo!(),
+            TypeofExpression::Super(_) => todo!(),
+            TypeofExpression::This(_) => todo!(),
+        }
+    }
+}
+
+impl Format<ModuleFormatContext> for TypeofAwaitExpression {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
+    ) -> FormatResult<()> {
+        write!(
+            f,
+            [&format_args![
+                text("Type"),
+                text("("),
+                group(&soft_block_indent(&self.argument)),
                 text(")")
             ]]
         )

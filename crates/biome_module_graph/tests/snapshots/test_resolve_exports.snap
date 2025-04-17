@@ -86,7 +86,155 @@ Borrowed("baz") => [
   ExportOwnExport => JsOwnExport(
     Function(
       [async, Name: baz]
-      ReturnType(Type(Promise(Unknown)))
+      ReturnType(
+        Type(
+          Class(
+            [Promise]
+            Members(
+              Method(
+                [all, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+              Method(
+                [allSettled, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+              Method(
+                [any, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+              Method(
+                [race, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+              Method(
+                [reject, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+              Method(
+                [resolve, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+              Method(
+                [try, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+              Method(
+                [catch, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+              Method(
+                [finally, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+              Method(
+                [then, sync, The parameter is not optional]
+                ReturnType(
+                  Type(
+                    Reference(
+                      Qualifier(Promise)
+                      Type(
+                        Unknown
+                      )
+                      Types(Unknown)
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
     )
     Local name: baz
   )
@@ -158,7 +306,7 @@ Borrowed("qux") => [
 ]
 Borrowed("quz") => [
   ExportOwnExport => JsOwnExport(
-    Unknown
+    Object()
     Local name: quz
     JsDoc(
       @private
