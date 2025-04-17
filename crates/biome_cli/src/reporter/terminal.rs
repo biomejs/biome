@@ -166,6 +166,17 @@ impl fmt::Display for SummaryDetail<'_> {
         }
     }
 }
+
+struct ScanSummary<'a>(&'a Duration);
+
+impl fmt::Display for ScanSummary<'_> {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        fmt.write_markup(markup! {
+            "Scanned project folder in "{self.0}"."
+        })
+    }
+}
+
 struct SummaryTotal<'a>(&'a TraversalMode, usize, &'a Duration);
 
 impl fmt::Display for SummaryTotal<'_> {
@@ -221,7 +232,8 @@ impl fmt::Display for ConsoleTraversalSummary<'_> {
                 duration += scanner_duration;
             }
         } else if let Some(scanner_duration) = self.1.scanner_duration {
-            fmt.write_markup(markup!(<Info>"Scanned project in "{scanner_duration}</Info>))?;
+            let scanned = ScanSummary(&scanner_duration);
+            fmt.write_markup(markup!(<Info>{scanned}</Info>))?;
             fmt.write_str("\n")?;
         }
         let summary = SummaryTotal(self.0, self.1.changed + self.1.unchanged, &duration);
