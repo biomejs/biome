@@ -14,7 +14,7 @@ import TypeOnTypeDef from "mod";
  */
 
 /**
- * @param param {TypeOnFunctionParam}
+ * @param {TypeOnFunctionParam} param
  */
 function testTypeOnFunction(param) {}
 

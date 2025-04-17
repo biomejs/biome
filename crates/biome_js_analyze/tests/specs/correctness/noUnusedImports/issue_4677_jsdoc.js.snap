@@ -20,7 +20,7 @@ import TypeOnTypeDef from "mod";
  */
 
 /**
- * @param param {TypeOnFunctionParam}
+ * @param {TypeOnFunctionParam} param
  */
 function testTypeOnFunction(param) {}
 
@@ -65,83 +65,6 @@ function testTypeOnFunctionVariable() {
 
 # Diagnostics
 ```
-issue_4677_jsdoc.js:4:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This import is unused.
-  
-    3 │ // some types for the different locations
-  > 4 │ import TypeOnFunctionParam from "mod";
-      │        ^^^^^^^^^^^^^^^^^^^
-    5 │ import TypeOnClassMethodParam from "mod";
-    6 │ import TypeOnClassConstructorParam from "mod";
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused imports.
-  
-     1    │ - //·See·https://github.com/biomejs/biome/issues/4677
-     2    │ - 
-     3    │ - //·some·types·for·the·different·locations
-     4    │ - import·TypeOnFunctionParam·from·"mod";
-        1 │ + //·See·https://github.com/biomejs/biome/issues/4677
-        2 │ + 
-     5  3 │   import TypeOnClassMethodParam from "mod";
-     6  4 │   import TypeOnClassConstructorParam from "mod";
-  
-
-```
-
-```
-issue_4677_jsdoc.js:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This import is unused.
-  
-    3 │ // some types for the different locations
-    4 │ import TypeOnFunctionParam from "mod";
-  > 5 │ import TypeOnClassMethodParam from "mod";
-      │        ^^^^^^^^^^^^^^^^^^^^^^
-    6 │ import TypeOnClassConstructorParam from "mod";
-    7 │ import TypeOnClassField from "mod";
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused imports.
-  
-     3  3 │   // some types for the different locations
-     4  4 │   import TypeOnFunctionParam from "mod";
-     5    │ - import·TypeOnClassMethodParam·from·"mod";
-     6  5 │   import TypeOnClassConstructorParam from "mod";
-     7  6 │   import TypeOnClassField from "mod";
-  
-
-```
-
-```
-issue_4677_jsdoc.js:6:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This import is unused.
-  
-    4 │ import TypeOnFunctionParam from "mod";
-    5 │ import TypeOnClassMethodParam from "mod";
-  > 6 │ import TypeOnClassConstructorParam from "mod";
-      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ import TypeOnClassField from "mod";
-    8 │ import TypeOnGlobalVariable from "mod";
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused imports.
-  
-     4  4 │   import TypeOnFunctionParam from "mod";
-     5  5 │   import TypeOnClassMethodParam from "mod";
-     6    │ - import·TypeOnClassConstructorParam·from·"mod";
-     7  6 │   import TypeOnClassField from "mod";
-     8  7 │   import TypeOnGlobalVariable from "mod";
-  
-
-```
-
-```
 issue_4677_jsdoc.js:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This import is unused.
@@ -162,56 +85,6 @@ issue_4677_jsdoc.js:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━�
      7    │ - import·TypeOnClassField·from·"mod";
      8  7 │   import TypeOnGlobalVariable from "mod";
      9  8 │   import TypeOnFunctionVariable from "mod";
-  
-
-```
-
-```
-issue_4677_jsdoc.js:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This import is unused.
-  
-     6 │ import TypeOnClassConstructorParam from "mod";
-     7 │ import TypeOnClassField from "mod";
-   > 8 │ import TypeOnGlobalVariable from "mod";
-       │        ^^^^^^^^^^^^^^^^^^^^
-     9 │ import TypeOnFunctionVariable from "mod";
-    10 │ import TypeOnTypeDef from "mod";
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused imports.
-  
-     6  6 │   import TypeOnClassConstructorParam from "mod";
-     7  7 │   import TypeOnClassField from "mod";
-     8    │ - import·TypeOnGlobalVariable·from·"mod";
-     9  8 │   import TypeOnFunctionVariable from "mod";
-    10  9 │   import TypeOnTypeDef from "mod";
-  
-
-```
-
-```
-issue_4677_jsdoc.js:9:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This import is unused.
-  
-     7 │ import TypeOnClassField from "mod";
-     8 │ import TypeOnGlobalVariable from "mod";
-   > 9 │ import TypeOnFunctionVariable from "mod";
-       │        ^^^^^^^^^^^^^^^^^^^^^^
-    10 │ import TypeOnTypeDef from "mod";
-    11 │ 
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused imports.
-  
-     7  7 │   import TypeOnClassField from "mod";
-     8  8 │   import TypeOnGlobalVariable from "mod";
-     9    │ - import·TypeOnFunctionVariable·from·"mod";
-    10  9 │   import TypeOnTypeDef from "mod";
-    11 10 │   
   
 
 ```

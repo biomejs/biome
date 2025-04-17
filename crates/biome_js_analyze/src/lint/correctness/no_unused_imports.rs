@@ -5,8 +5,8 @@ use crate::{
 };
 
 use biome_analyze::{
-    AddVisitor, FixKind, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey,
-    Queryable, Rule, RuleDiagnostic, RuleKey, RuleSource, ServiceBag, SyntaxVisitor, Visitor,
+    AddVisitor, FixKind, FromServices, Phase, Phases, QueryKey, Queryable, Rule, RuleDiagnostic,
+    RuleKey, RuleMetadata, RuleSource, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor,
     VisitorContext, VisitorFinishContext, context::RuleContext, declare_lint_rule,
     options::JsxRuntime,
 };
@@ -15,15 +15,19 @@ use biome_js_factory::make;
 use biome_js_factory::make::{js_module, js_module_item_list};
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsCombinedSpecifier, AnyJsImportClause, AnyJsNamedImportSpecifier, JsLanguage,
-    JsNamedImportSpecifiers, JsSyntaxNode, T,
+    AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsImportClause,
+    AnyJsNamedImportSpecifier, AnyTsTypeMember, JsLanguage, JsNamedImportSpecifiers, JsSyntaxNode,
+    T, TsEnumMember,
 };
+use biome_module_graph::jsdoc_comment::JsdocComment;
 use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language, NodeOrToken,
-    SyntaxNode, TextRange, WalkEvent,
+    SyntaxNode, TextRange, WalkEvent, declare_node_union,
 };
+use regex::Regex;
 use rustc_hash::FxHashSet;
 use std::ops::{Deref, DerefMut};
+use std::sync::LazyLock;
 
 declare_lint_rule! {
     /// Disallow unused imports.
@@ -117,6 +121,10 @@ struct JsDocTypeCollectorVisitior {
     jsdoc_types: JsDocTypeModel,
 }
 
+declare_node_union! {
+    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember
+}
+
 impl Visitor for JsDocTypeCollectorVisitior {
     type Language = JsLanguage;
     fn visit(
@@ -125,9 +133,10 @@ impl Visitor for JsDocTypeCollectorVisitior {
         _ctx: VisitorContext<Self::Language>,
     ) {
         match event {
-            WalkEvent::Enter(_) => {
-                self.jsdoc_types.insert("LinkOnFunction".to_string());
-                // TODO: Collect types from comments
+            WalkEvent::Enter(node) => {
+                if AnyJsWithTypeReferencingJsDoc::can_cast(node.kind()) {
+                    load_jsdoc_types_from_node(&mut self.jsdoc_types, node);
+                }
             }
             WalkEvent::Leave(_) => {}
         }
@@ -135,6 +144,46 @@ impl Visitor for JsDocTypeCollectorVisitior {
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
         ctx.services.insert_service(self.jsdoc_types);
+    }
+}
+
+fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLanguage>) {
+    if let Ok(comment) = JsdocComment::try_from(node) {
+        load_jsdoc_types_from_jsdoc_comment(model, &comment)
+    }
+}
+
+static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\{@(link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap());
+
+static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)}").unwrap());
+
+static JSDOC_TYPE_PART_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\w+)").unwrap());
+
+fn load_jsdoc_types_from_jsdoc_comment(model: &mut JsDocTypeModel, comment: &JsdocComment) {
+    // regex matching for typical JSDoc patterns containing types `{@link ClassName}` and `@sometag {TypeSyntax}`
+    // This should likely become a proper parser.
+    // This will definitely fail in object types like { a: { b: number } }
+
+    for (_, [_tag_name, type_name]) in JSDOC_INLINE_TAG_REGEX
+        .captures_iter(comment)
+        .map(|c| c.extract())
+    {
+        model.insert(type_name.to_string());
+    }
+
+    for (_, [_tag_name, type_name]) in JSDOC_TYPE_TAG_REGEX
+        .captures_iter(comment)
+        .map(|c| c.extract())
+    {
+        // can the TS type parser be used here? for now we simply match with words
+        for (_, [type_part]) in JSDOC_TYPE_PART_REGEX
+            .captures_iter(type_name)
+            .map(|c| c.extract())
+        {
+            model.insert(type_part.to_string());
+        }
     }
 }
 
@@ -155,14 +204,15 @@ impl JsDocTypeServices {
 impl FromServices for JsDocTypeServices {
     fn from_services(
         rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic> {
-        let jsdoc_types: &JsDocTypeModel = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"])
-        })?;
+    ) -> Result<Self, ServicesDiagnostic> {
+        let jsdoc_types: &JsDocTypeModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"]))?;
         Ok(Self {
             jsdoc_types: jsdoc_types.clone(),
-            semantic_services: SemanticServices::from_services(rule_key, services)?,
+            semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
         })
     }
 }
