@@ -151,7 +151,6 @@ impl CliSnapshot {
 fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     let mut output = Cow::Borrowed(input);
 
-    dbg!(&output);
     // There are some logs that print the timing, and we can't snapshot that message
     // otherwise at each run we invalidate the previous snapshot.
     //

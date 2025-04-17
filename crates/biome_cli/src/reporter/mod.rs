@@ -29,6 +29,8 @@ pub struct TraversalSummary {
     // We skip it during testing because the time isn't predictable
     #[cfg_attr(debug_assertions, serde(skip))]
     pub duration: Duration,
+    // We skip it during testing because the time isn't predictable
+    #[cfg_attr(debug_assertions, serde(skip))]
     pub scanner_duration: Option<Duration>,
     pub errors: u32,
     pub warnings: u32,
