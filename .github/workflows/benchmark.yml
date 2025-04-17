@@ -50,7 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compile
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: cargo codspeed build -p xtask_bench
         env:
           CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
