@@ -141,6 +141,7 @@ pub(crate) fn traverse(
             changed,
             unchanged,
             duration,
+            scanner_duration: None,
             errors,
             matches,
             warnings,

@@ -14,7 +14,11 @@ pub(crate) struct JunitReporter {
 
 impl Reporter for JunitReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_summary(&self.execution, self.summary)?;
+        visitor.report_summary(
+            &self.execution,
+            self.summary,
+            self.diagnostics_payload.verbose,
+        )?;
         visitor.report_diagnostics(&self.execution, self.diagnostics_payload)?;
         Ok(())
     }
@@ -44,6 +48,7 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
         &mut self,
         _execution: &Execution,
         summary: TraversalSummary,
+        _verbose: bool,
     ) -> io::Result<()> {
         self.0.time = Some(summary.duration);
         self.0.errors = summary.errors as usize;

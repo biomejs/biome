@@ -21,7 +21,7 @@ impl Reporter for ConsoleReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
         let verbose = self.diagnostics_payload.verbose;
         visitor.report_diagnostics(&self.execution, self.diagnostics_payload)?;
-        visitor.report_summary(&self.execution, self.summary)?;
+        visitor.report_summary(&self.execution, self.summary, verbose)?;
         if verbose {
             visitor.report_handled_paths(self.evaluated_paths)?;
         }
@@ -58,6 +58,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
+        verbose: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
@@ -74,7 +75,7 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         }
 
         self.0.log(markup! {
-            {ConsoleTraversalSummary(execution.traversal_mode(), &summary)}
+            {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbose)}
         });
 
         Ok(())
@@ -210,10 +211,20 @@ impl fmt::Display for SummaryTotal<'_> {
 pub(crate) struct ConsoleTraversalSummary<'a>(
     pub(crate) &'a TraversalMode,
     pub(crate) &'a TraversalSummary,
+    pub(crate) bool,
 );
 impl fmt::Display for ConsoleTraversalSummary<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let summary = SummaryTotal(self.0, self.1.changed + self.1.unchanged, &self.1.duration);
+        let mut duration = self.1.duration;
+        if !self.2 {
+            if let Some(scanner_duration) = self.1.scanner_duration {
+                duration += scanner_duration;
+            }
+        } else if let Some(scanner_duration) = self.1.scanner_duration {
+            fmt.write_markup(markup!(<Info>"Scanned project in "{scanner_duration}</Info>))?;
+            fmt.write_str("\n")?;
+        }
+        let summary = SummaryTotal(self.0, self.1.changed + self.1.unchanged, &duration);
         let detail = SummaryDetail(self.0, self.1.changed);
         fmt.write_markup(markup!(<Info>{summary}{detail}</Info>))?;
 

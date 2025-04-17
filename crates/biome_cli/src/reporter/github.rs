@@ -21,6 +21,7 @@ impl ReporterVisitor for GithubReporterVisitor<'_> {
         &mut self,
         _execution: &Execution,
         _summary: TraversalSummary,
+        _verbose: bool,
     ) -> io::Result<()> {
         Ok(())
     }

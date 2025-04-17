@@ -59,7 +59,12 @@ impl<'a> GitLabReporterVisitor<'a> {
 }
 
 impl ReporterVisitor for GitLabReporterVisitor<'_> {
-    fn report_summary(&mut self, _: &Execution, _: TraversalSummary) -> std::io::Result<()> {
+    fn report_summary(
+        &mut self,
+        _: &Execution,
+        _: TraversalSummary,
+        _verbose: bool,
+    ) -> std::io::Result<()> {
         Ok(())
     }
 

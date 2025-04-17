@@ -27,7 +27,7 @@ use biome_grit_patterns::GritTargetLanguage;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     CloseFileParams, FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams,
-    OpenFileParams, PatternId,
+    OpenFileParams, PatternId, ScanKind,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
@@ -225,14 +225,25 @@ impl TraversalMode {
         }
     }
 
-    pub fn should_scan_project(&self) -> bool {
+    /// It returns the best [ScanKind] variant based on the [TraversalMode]
+    pub fn to_scan_kind(&self) -> ScanKind {
         match self {
-            Self::CI { .. } => true,
-            Self::Check { stdin, .. }
-            | Self::Format { stdin, .. }
-            | Self::Lint { stdin, .. }
-            | Self::Search { stdin, .. } => stdin.is_none(),
-            Self::Migrate { .. } => false,
+            Self::CI { .. } => ScanKind::Project,
+            Self::Format { stdin, .. } => {
+                if stdin.is_none() {
+                    ScanKind::KnownFiles
+                } else {
+                    ScanKind::None
+                }
+            }
+            Self::Check { stdin, .. } | Self::Lint { stdin, .. } | Self::Search { stdin, .. } => {
+                if stdin.is_none() {
+                    ScanKind::Project
+                } else {
+                    ScanKind::None
+                }
+            }
+            Self::Migrate { .. } => ScanKind::None,
         }
     }
 }
@@ -514,7 +525,7 @@ pub fn execute_mode(
     mut session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
-    duration: Option<Duration>,
+    scanner_duration: Option<Duration>,
 ) -> Result<(), CliDiagnostic> {
     // If a custom reporter was provided, let's lift the limit so users can see all of them
     execution.max_diagnostics = if cli_options.reporter.is_default() {
@@ -567,9 +578,7 @@ pub fn execute_mode(
         diagnostics,
     } = traverse(&execution, &mut session, project_key, cli_options, paths)?;
     // We join the duration of the scanning with the duration of the traverse.
-    if let Some(duration) = duration {
-        summary.duration += duration;
-    }
+    summary.scanner_duration = scanner_duration;
     let console = session.app.console;
     let errors = summary.errors;
     let skipped = summary.skipped;

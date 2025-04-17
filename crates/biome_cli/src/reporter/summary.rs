@@ -19,8 +19,9 @@ pub(crate) struct SummaryReporter {
 
 impl Reporter for SummaryReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
+        let verbose = self.diagnostics_payload.verbose;
         visitor.report_diagnostics(&self.execution, self.diagnostics_payload)?;
-        visitor.report_summary(&self.execution, self.summary)?;
+        visitor.report_summary(&self.execution, self.summary, verbose)?;
         Ok(())
     }
 }
@@ -32,6 +33,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
+        verbose: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
@@ -48,7 +50,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         }
 
         self.0.log(markup! {
-            {ConsoleTraversalSummary(execution.traversal_mode(), &summary)}
+            {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbose)}
         });
 
         Ok(())

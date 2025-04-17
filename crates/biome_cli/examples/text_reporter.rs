@@ -21,7 +21,7 @@ impl Reporter for TextReport {
                 changed: false,
             },
         );
-        visitor.report_summary(&execution, self.summary)?;
+        visitor.report_summary(&execution, self.summary, false)?;
         Ok(())
     }
 }
@@ -31,6 +31,7 @@ impl ReporterVisitor for BufferVisitor {
         &mut self,
         _execution: &Execution,
         summary: TraversalSummary,
+        _verbose: bool,
     ) -> std::io::Result<()> {
         self.0
             .push_str(&format!("Total is {}", summary.changed + summary.unchanged));

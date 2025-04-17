@@ -35,7 +35,7 @@ pub struct JsonReporter {
 
 impl Reporter for JsonReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_summary(&self.execution, self.summary)?;
+        visitor.report_summary(&self.execution, self.summary, self.diagnostics.verbose)?;
         visitor.report_diagnostics(&self.execution, self.diagnostics)?;
 
         Ok(())
@@ -47,6 +47,7 @@ impl ReporterVisitor for JsonReporterVisitor {
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
+        _verbose: bool,
     ) -> std::io::Result<()> {
         self.summary = summary;
         self.command = format!("{}", execution.traversal_mode());

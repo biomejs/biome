@@ -29,6 +29,7 @@ pub struct TraversalSummary {
     // We skip it during testing because the time isn't predictable
     #[cfg_attr(debug_assertions, serde(skip))]
     pub duration: Duration,
+    pub scanner_duration: Option<Duration>,
     pub errors: u32,
     pub warnings: u32,
     pub skipped: usize,
@@ -49,6 +50,7 @@ pub trait ReporterVisitor {
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
+        verbose: bool,
     ) -> io::Result<()>;
 
     /// Writes the paths that were handled during a run.
