@@ -17,6 +17,10 @@ import type LinkOnInterfaceField from "mod";
 import type LinkOnInterfaceMethod from "mod";
 import type LinkOnInterfaceIndexer from "mod";
 
+import type LinkOnEnum from "mod";
+import type LinkOnEnumMember from "mod";
+
+
 /**
  * {@link LinkOnFunction}
  */
@@ -91,4 +95,17 @@ interface TestLinkOnInterfaceIndexer {
      * {@link LinkOnInterfaceIndexer}
      */
     [index: number]: string;
+}
+
+/**
+ * {@link LinkOnEnum}
+ */
+enum TestLinkOnEnum {
+}
+
+enum TestLinkOnEnumMember {
+    /**
+     * {@link LinkOnEnumMember}
+     */
+    member
 }
