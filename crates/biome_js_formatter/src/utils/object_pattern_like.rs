@@ -102,11 +102,20 @@ impl JsObjectPatternLike {
                     {
                         let pattern = node.pattern();
 
+                        // In Prettier, object patterns with nested object patterns are always
+                        // expanded. However, it is not the case if the nested object pattern is in
+                        // an assignment pattern. Prettier's AST can have an AssignmentPattern as a
+                        // child of an ObjectPattern, while Biome's have an initializer **on** an
+                        // object pattern. Check an initializer is set to ensure it does not have an
+                        // assignment.
+                        // https://github.com/prettier/prettier/blob/2d6877fcd1b78f2624e22d0ddb17a895ab12ac07/src/language-js/print/object.js#L81-L95
+                        let is_assignment_pattern = node.init().is_some();
+
                         matches!(
                             pattern,
                             Ok(AnyJsBindingPattern::JsObjectBindingPattern(_)
                                 | AnyJsBindingPattern::JsArrayBindingPattern(_))
-                        )
+                        ) && !is_assignment_pattern
                     } else {
                         false
                     }
