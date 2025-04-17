@@ -5,8 +5,7 @@ mod global_scope_resolver;
 mod scope;
 mod visitor;
 
-use std::{collections::BTreeMap, ops::Deref, sync::Arc};
-
+use crate::{ModuleGraph, jsdoc_comment::JsdocComment};
 use ad_hoc_scope_resolver::AdHocScopeResolver;
 use binding::JsBindingData;
 use biome_js_semantic::{BindingId, ScopeId};
@@ -15,8 +14,7 @@ use biome_js_type_info::Type;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use scope::{JsScope, JsScopeData};
-
-use crate::{ModuleGraph, jsdoc_comment::JsdocComment};
+use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 pub(crate) use visitor::JsModuleVisitor;
 
@@ -141,10 +139,10 @@ pub struct JsModuleInfoInner {
     /// The keys are the names of the exports, where "default" is used for the
     /// default export. See [JsExport] for information tracked per export.
     ///
-    /// Re-exports are tracked in this map as well. The exception are "blanket"
+    /// Re-exports are tracked in this map as well. The exception is "blanket"
     /// re-exports, such as `export * from "other-module"`. Those are tracked in
     /// [Self::forwarding_exports] instead.
-    pub exports: BTreeMap<Text, JsExport>,
+    pub exports: Exports,
 
     /// Re-exports that apply to all symbols from another module, without
     /// assigning a name to them.
@@ -160,6 +158,17 @@ pub struct JsModuleInfoInner {
 
     /// Lookup tree to find scopes by text range.
     pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
+}
+
+#[derive(Debug)]
+pub struct Exports(pub(crate) BTreeMap<Text, JsExport>);
+
+impl Deref for Exports {
+    type Target = BTreeMap<Text, JsExport>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 static_assertions::assert_impl_all!(JsModuleInfo: Send, Sync);
@@ -316,8 +325,8 @@ impl JsResolvedPath {
         self.as_deref().ok()
     }
 
-    #[cfg(test)]
-    pub(super) fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
+    #[cfg(debug_assertions)]
+    pub fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
         Self::new(Ok(path.into()))
     }
 }

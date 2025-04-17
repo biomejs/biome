@@ -1,15 +1,17 @@
+mod snap;
+
+use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_fs::{MemoryFileSystem, OsFileSystem};
+use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
+use biome_module_graph::{JsExport, JsdocComment};
+use biome_module_graph::{JsImport, JsImportSymbol, JsReexport, JsResolvedPath, ModuleGraph};
 use biome_package::{Dependencies, PackageJson, Version};
+use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
 use biome_test_utils::get_added_paths;
-use insta::assert_debug_snapshot;
-
-use crate::{JsImport, JsResolvedPath, js_module_info::JsReexport, jsdoc_comment::JsdocComment};
-
-use super::*;
+use camino::{Utf8Path, Utf8PathBuf};
 
 fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
     let mut fs = MemoryFileSystem::default();
@@ -76,7 +78,7 @@ fn get_fixtures_path() -> Utf8PathBuf {
             .expect("couldn't find Cargo.lock")
             .to_path_buf();
     }
-    path.join("crates/biome_module_graph/fixtures")
+    path.join("crates/biome_module_graph/tests/fixtures")
 }
 
 #[test]
@@ -91,7 +93,7 @@ fn test_resolve_relative_import() {
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
-    let imports = module_graph.data.pin();
+    let imports = module_graph.data();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
 
     assert_eq!(file_imports.static_imports.len(), 2);
@@ -117,7 +119,7 @@ fn test_resolve_package_import() {
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
-    let imports = module_graph.data.pin();
+    let imports = module_graph.data();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
 
     assert_eq!(file_imports.static_imports.len(), 2);
@@ -195,7 +197,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
-    let imports = module_graph.data.pin();
+    let imports = module_graph.data();
     let file_imports = imports
         .get(Utf8Path::new(&format!(
             "{fixtures_path}/frontend/src/index.ts"
@@ -246,13 +248,9 @@ fn test_export_referenced_function() {
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
-    let dependency_data = module_graph.data.pin();
-    let data = dependency_data
-        .get(Utf8Path::new("/src/index.ts"))
-        .unwrap()
-        .clone();
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
 
-    assert_debug_snapshot!(data.exports);
+    snapshot.assert_snapshot("test_export_referenced_function");
 }
 
 #[test]
@@ -275,13 +273,9 @@ fn test_export_default_function_declaration() {
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
-    let dependency_data = module_graph.data.pin();
-    let data = dependency_data
-        .get(Utf8Path::new("/src/index.ts"))
-        .unwrap()
-        .clone();
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
 
-    assert_debug_snapshot!(data.exports);
+    snapshot.assert_snapshot("test_export_default_function_declaration");
 }
 
 #[test]
@@ -296,7 +290,7 @@ fn test_resolve_exports() {
             function foo() {}
 
             export { foo, qux };
-            
+
             /** @package */
             export function bar() {}
 
@@ -362,7 +356,7 @@ fn test_resolve_exports() {
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
 
-    let dependency_data = module_graph.data.pin();
+    let dependency_data = module_graph.data();
     let data = dependency_data
         .get(Utf8Path::new("/src/index.ts"))
         .unwrap()
@@ -395,7 +389,9 @@ fn test_resolve_exports() {
         }))
     );
 
-    assert_debug_snapshot!(exports);
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_exports");
 
     assert_eq!(
         data.blanket_reexports.as_ref(),
@@ -440,7 +436,7 @@ fn test_resolve_export_types() {
              * Built by a race of hyper-intelligent pan-dimensional beings to
              * calculate the Ultimate Answer to the Ultimate Question of Life,
              * The Universe, and Everything.
-             * 
+             *
              * This JSDoc comment should not be transferred to the exported
              * instance variable below.
              */
@@ -472,11 +468,7 @@ fn test_resolve_export_types() {
     let module_graph = ModuleGraph::default();
     module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
 
-    let dependency_data = module_graph.data.pin();
-    let data = dependency_data
-        .get(Utf8Path::new("/src/index.ts"))
-        .unwrap()
-        .clone();
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
 
-    assert_debug_snapshot!(data.exports);
+    snapshot.assert_snapshot("test_resolve_export_types");
 }

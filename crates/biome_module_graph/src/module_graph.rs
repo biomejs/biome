@@ -61,6 +61,11 @@ impl ModuleGraph {
         self.data.pin().get(path).cloned()
     }
 
+    #[cfg(debug_assertions)]
+    pub fn data(&self) -> HashMapRef<Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard> {
+        self.data.pin()
+    }
+
     /// Updates the module graph to add, update, or remove files.
     ///
     /// Only JavaScript/TypeScript files need to be provided as part of
@@ -200,7 +205,3 @@ impl ModuleGraph {
         find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths)
     }
 }
-
-#[cfg(test)]
-#[path = "module_graph.tests.rs"]
-mod tests;

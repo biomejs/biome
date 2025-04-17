@@ -1,0 +1,332 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+snapshot_kind: text
+---
+## /src/index.ts
+
+```ts
+/**
+ * @returns {string}
+ */
+function foo() {}
+
+export { foo, qux };
+
+/** @package */
+export function bar() {}
+
+/** @private */
+export const quz = {};
+
+/* @ignored because of incorrect amount of asterisks */
+export async function baz() {}
+
+var qux = 1;
+
+/**
+ * TODO: No types can be detected on these yet.
+ */
+export const {
+	a,
+	b,
+	c: [d, e],
+} = getObject();
+
+/**
+ * @public
+ * @returns {JSX.Element}
+ */
+export default function Component(): JSX.Element {}
+
+export * from "./reexports";
+export { ohNo as "oh\x0Ano" } from "./renamed-reexports";
+
+/**
+ * Hello, namespace 2.
+ */
+export * as renamed2 from "./renamed-reexports";
+
+```
+
+```
+Exports {
+  "a" => {
+    ExportOwnExport => JsOwnExport(
+      Unknown
+      Local name: a
+      JsDoc(
+        TODO: No types can be detected on these yet.
+      )
+    )
+  }
+  "b" => {
+    ExportOwnExport => JsOwnExport(
+      Unknown
+      Local name: b
+      JsDoc(
+        TODO: No types can be detected on these yet.
+      )
+    )
+  }
+  "bar" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "bar" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: Unknown
+      }
+      Local name: bar
+      JsDoc(
+        @package
+      )
+    )
+  }
+  "baz" => {
+    ExportOwnExport => JsOwnExport(
+      async Function "baz" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: [Promise]
+        Members(
+          required sync Method "all" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          required sync Method "allSettled" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          required sync Method "any" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          required sync Method "race" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          required sync Method "reject" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          required sync Method "resolve" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          required sync Method "try" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          required sync Method "catch" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          required sync Method "finally" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+          required sync Method "then" {
+            accepts: {
+              ty: No parameters
+              type_args: No parameters
+            }
+            returns: "Promise" {
+              ty: Unknown
+              type_args: Unknown
+            }
+          }
+        )
+      }
+      Local name: baz
+    )
+  }
+  "d" => {
+    ExportOwnExport => JsOwnExport(
+      Unknown
+      Local name: d
+      JsDoc(
+        TODO: No types can be detected on these yet.
+      )
+    )
+  }
+  "default" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "Component" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: "JSX.Element" {
+          ty: Unknown
+          type_args: No types
+        }
+      }
+      Local name: Component
+      JsDoc(
+        @public
+        @returns {JSX.Element}
+      )
+    )
+  }
+  "e" => {
+    ExportOwnExport => JsOwnExport(
+      Unknown
+      Local name: e
+      JsDoc(
+        TODO: No types can be detected on these yet.
+      )
+    )
+  }
+  "foo" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "foo" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: Unknown
+      }
+      Local name: foo
+      JsDoc(
+        @returns {string}
+      )
+    )
+  }
+  "oh\nno" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: /src/renamed-reexports.ts
+      Import Symbol: ohNo
+    )
+  }
+  "qux" => {
+    ExportOwnExport => JsOwnExport(
+      Literal(Number: 1)
+      Local name: qux
+    )
+  }
+  "quz" => {
+    ExportOwnExport => JsOwnExport(
+      Object()
+      Local name: quz
+      JsDoc(
+        @private
+      )
+    )
+  }
+  "renamed2" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: /src/renamed-reexports.ts
+      Import Symbol: All
+      JsDoc(
+        Hello, namespace 2.
+      )
+    )
+  }
+}```
+
+## /src/renamed-reexports.ts
+
+```ts
+export function ohNo() {}
+
+```
+
+```
+Exports {
+  "ohNo" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "ohNo" {
+        accepts: {
+          ty: No parameters
+          type_args: No parameters
+        }
+        returns: Unknown
+      }
+      Local name: ohNo
+    )
+  }
+}```
+
+## /src/reexports.ts
+
+```ts
+/**
+ * Hello, namespace 1.
+ */
+export * as renamed from "./renamed-reexports";
+
+```
+
+```
+Exports {
+  "renamed" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: /src/renamed-reexports.ts
+      Import Symbol: All
+      JsDoc(
+        Hello, namespace 1.
+      )
+    )
+  }
+}```
