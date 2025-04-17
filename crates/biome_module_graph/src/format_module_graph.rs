@@ -899,19 +899,16 @@ impl Format<ModuleFormatContext> for MethodTypeMember {
         write!(
             f,
             [&format_args![
+                is_optional,
+                space(),
+                is_async,
+                space(),
                 text("Method"),
                 space(),
                 dynamic_text(&std::format!("\"{}\"", &self.name), TextSize::default()),
                 space(),
                 text("{"),
                 &group(&soft_block_indent(&format_args![
-                    text("["),
-                    is_async,
-                    text(","),
-                    space(),
-                    is_optional,
-                    text("]"),
-                    hard_line_break(),
                     text("accepts:"),
                     space(),
                     text("{"),

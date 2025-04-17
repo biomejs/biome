@@ -43,24 +43,21 @@ Exports {
   "superComputer" => {
     ExportOwnExport => JsOwnExport(
       Object(
-        Method "answerMe" {
-          [sync, required]
+        required sync Method "answerMe" {
           accepts: {
             ty: No parameters
             type_args: No parameters
           }
           returns: Number
         }
-        Method "giveMeABiggerAnswer" {
-          [sync, required]
+        required sync Method "giveMeABiggerAnswer" {
           accepts: {
             ty: [delta, The parameter is not optional, The parameter is not rest]
             type_args: No parameters
           }
           returns: Unknown
         }
-        Method "whatWasTheUltimateQuestion" {
-          [sync, required]
+        required sync Method "whatWasTheUltimateQuestion" {
           accepts: {
             ty: No parameters
             type_args: No parameters

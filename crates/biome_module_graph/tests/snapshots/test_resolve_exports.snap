@@ -93,8 +93,7 @@ Exports {
         }
         returns: [Promise]
         Members(
-          Method "all" {
-            [sync, required]
+          required sync Method "all" {
             accepts: {
               ty: No parameters
               type_args: No parameters
@@ -104,8 +103,7 @@ Exports {
               type_args: Unknown
             }
           }
-          Method "allSettled" {
-            [sync, required]
+          required sync Method "allSettled" {
             accepts: {
               ty: No parameters
               type_args: No parameters
@@ -115,8 +113,7 @@ Exports {
               type_args: Unknown
             }
           }
-          Method "any" {
-            [sync, required]
+          required sync Method "any" {
             accepts: {
               ty: No parameters
               type_args: No parameters
@@ -126,8 +123,7 @@ Exports {
               type_args: Unknown
             }
           }
-          Method "race" {
-            [sync, required]
+          required sync Method "race" {
             accepts: {
               ty: No parameters
               type_args: No parameters
@@ -137,8 +133,7 @@ Exports {
               type_args: Unknown
             }
           }
-          Method "reject" {
-            [sync, required]
+          required sync Method "reject" {
             accepts: {
               ty: No parameters
               type_args: No parameters
@@ -148,8 +143,7 @@ Exports {
               type_args: Unknown
             }
           }
-          Method "resolve" {
-            [sync, required]
+          required sync Method "resolve" {
             accepts: {
               ty: No parameters
               type_args: No parameters
@@ -159,8 +153,7 @@ Exports {
               type_args: Unknown
             }
           }
-          Method "try" {
-            [sync, required]
+          required sync Method "try" {
             accepts: {
               ty: No parameters
               type_args: No parameters
@@ -170,8 +163,7 @@ Exports {
               type_args: Unknown
             }
           }
-          Method "catch" {
-            [sync, required]
+          required sync Method "catch" {
             accepts: {
               ty: No parameters
               type_args: No parameters
@@ -181,8 +173,7 @@ Exports {
               type_args: Unknown
             }
           }
-          Method "finally" {
-            [sync, required]
+          required sync Method "finally" {
             accepts: {
               ty: No parameters
               type_args: No parameters
@@ -192,8 +183,7 @@ Exports {
               type_args: Unknown
             }
           }
-          Method "then" {
-            [sync, required]
+          required sync Method "then" {
             accepts: {
               ty: No parameters
               type_args: No parameters
