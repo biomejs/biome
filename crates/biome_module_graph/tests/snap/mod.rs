@@ -51,7 +51,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
             content.push_str("\n\n");
             content.push_str("```");
             content.push_str(extension);
-            content.push_str("\n");
+            content.push('\n');
             content.push_str(formatted.as_code());
             content.push_str("\n```\n\n");
 

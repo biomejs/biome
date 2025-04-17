@@ -533,7 +533,7 @@ impl Format<ModuleFormatContext> for JsResolvedPath {
             write!(
                 f,
                 [format_args![dynamic_text(
-                    value.as_str(),
+                    value.as_str().replace("\\", "/").as_str(),
                     TextSize::default()
                 )]]
             )?;
@@ -692,13 +692,6 @@ impl Format<ModuleFormatContext> for FunctionParameter {
         &self,
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
-        let name = format_with(|f| {
-            if let Some(name) = self.name.as_ref() {
-                write!(f, [&format_args![dynamic_text(name, TextSize::default())]])
-            } else {
-                write!(f, [&format_args![text("No name")]])
-            }
-        });
         let optional = format_with(|f| {
             if self.is_optional {
                 write!(f, [&format_args![text("The parameter is optional")]])
@@ -717,7 +710,7 @@ impl Format<ModuleFormatContext> for FunctionParameter {
             f,
             [&group(&format_args![
                 text("["),
-                name,
+                self.name,
                 text(","),
                 space(),
                 optional,
@@ -768,14 +761,6 @@ impl Format<ModuleFormatContext> for Function {
             }
         });
 
-        let name = format_with(|f| {
-            if let Some(name) = self.name.as_ref() {
-                write!(f, [&format_args![dynamic_text(name, TextSize::default())]])
-            } else {
-                write!(f, [&format_args![text("No name")]])
-            }
-        });
-
         write!(
             f,
             [&format_args![
@@ -786,7 +771,7 @@ impl Format<ModuleFormatContext> for Function {
                 text("Name"),
                 text(":"),
                 space(),
-                name,
+                self.name,
                 text("]"),
                 hard_line_break(),
             ]]
@@ -843,14 +828,6 @@ impl Format<ModuleFormatContext> for Class {
         &self,
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
-        let name = format_with(|f| {
-            if let Some(name) = self.name.as_ref() {
-                write!(f, [&format_args![dynamic_text(name, TextSize::default())]])
-            } else {
-                write!(f, [&format_args![text("No name")]])
-            }
-        });
-
         let members = format_with(|f| {
             write!(f, [&format_args![text("Members"), text("("),]])?;
 
@@ -870,7 +847,7 @@ impl Format<ModuleFormatContext> for Class {
             f,
             [&format_args![
                 text("["),
-                name,
+                self.name,
                 text("]"),
                 hard_line_break(),
                 members
@@ -1091,6 +1068,19 @@ fn fmt_type_members(
         f,
         [&format_args![group(&soft_block_indent(&types)), text(")")]]
     )
+}
+
+impl Format<ModuleFormatContext> for Option<Text> {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
+    ) -> FormatResult<()> {
+        if let Some(name) = self.as_ref() {
+            write!(f, [&format_args![dynamic_text(name, TextSize::default())]])
+        } else {
+            write!(f, [&format_args![text("No name")]])
+        }
+    }
 }
 
 // #endregion
