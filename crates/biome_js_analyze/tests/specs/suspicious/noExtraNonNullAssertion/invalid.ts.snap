@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -82,14 +81,14 @@ invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   
     4 │ function case2(bar: number | undefined) {
   > 5 │   const bar1: number = bar!!!;
-      │                        ^^^^^
+      │                        ^^^^
     6 │ }
     7 │ 
   
   i Safe fix: Remove extra non-null assertion.
   
     5 │ ··const·bar1:·number·=·bar!!!;
-      │                            -  
+      │                           -   
 
 ```
 
@@ -100,14 +99,14 @@ invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   
     4 │ function case2(bar: number | undefined) {
   > 5 │   const bar1: number = bar!!!;
-      │                        ^^^^
+      │                        ^^^^^
     6 │ }
     7 │ 
   
   i Safe fix: Remove extra non-null assertion.
   
     5 │ ··const·bar1:·number·=·bar!!!;
-      │                           -   
+      │                            -  
 
 ```
 

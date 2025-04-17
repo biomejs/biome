@@ -30,6 +30,8 @@ impl Type {
         let stack = &[&**self];
         if self.needs_resolving(resolver, stack) {
             *self = self.resolved(resolver, stack);
+        } else {
+            self.flattened(resolver, stack);
         }
     }
 }
@@ -48,10 +50,10 @@ pub(crate) trait Resolvable {
 
 impl Resolvable for Type {
     fn needs_resolving(&self, resolver: &dyn TypeResolver, stack: &[&TypeInner]) -> bool {
-        debug_assert!(!stack.is_empty(), "stack must be initialised");
-
         let inner = &**self;
-        if stack.len() >= MAX_RESOLUTION_DEPTH || stack[0..stack.len() - 1].contains(&inner) {
+        if stack.len() >= MAX_RESOLUTION_DEPTH
+            || stack[0..stack.len().saturating_sub(1)].contains(&inner)
+        {
             return false;
         }
 
@@ -62,22 +64,34 @@ impl Resolvable for Type {
 
     /// Returns the resolved version of this type.
     ///
-    /// You should first call `Self::call_be_resolved()` to avoid making
+    /// You should first call `Self::needs_resolving()` to avoid making
     /// needless clones.
     fn resolved(&self, resolver: &dyn TypeResolver, stack: &[&TypeInner]) -> Self {
         let inner = &**self;
+        if stack.len() >= MAX_RESOLUTION_DEPTH
+            || stack[0..stack.len().saturating_sub(1)].contains(&inner)
+        {
+            return self.clone();
+        }
+
         let mut stack = stack.to_vec();
         stack.push(inner);
-        inner.resolved(resolver, &stack).into()
+        Self::from(inner.resolved(resolver, &stack)).flattened(resolver, &stack)
     }
 }
 
-impl Resolvable for bool {
-    fn needs_resolving(&self, _resolver: &dyn TypeResolver, _stack: &[&TypeInner]) -> bool {
-        false
-    }
+macro_rules! derive_primitive_resolved {
+    ($($ty:ty),+) => {
+        $(impl Resolvable for $ty {
+            fn needs_resolving(&self, _resolver: &dyn TypeResolver, _stack: &[&TypeInner]) -> bool {
+                false
+            }
 
-    fn resolved(&self, _resolver: &dyn TypeResolver, _stack: &[&TypeInner]) -> Self {
-        *self
-    }
+            fn resolved(&self, _resolver: &dyn TypeResolver, _stack: &[&TypeInner]) -> Self {
+                *self
+            }
+        })+
+    };
 }
+
+derive_primitive_resolved!(bool, u64);

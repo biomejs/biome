@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_type_info/src/flattening.tests.rs
+expression: expr_ty
+---
+Type(
+    Object(
+        Object {
+            prototype: Some(
+                Type(
+                    Class(
+                        Class {
+                            id: TypeId,
+                            name: Some(
+                                Static(
+                                    "Promise",
+                                ),
+                            ),
+                            type_parameters: [
+                                GenericTypeParameter {
+                                    name: Static(
+                                        "T",
+                                    ),
+                                    ty: Type(
+                                        Unknown,
+                                    ),
+                                },
+                            ],
+                            extends: None,
+                        },
+                    ),
+                ),
+            ),
+            members: [],
+        },
+    ),
+)

@@ -55,8 +55,8 @@ pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
-    AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextRange, TextSize,
-    TokenAtOffset, TriviaPieceKind, WalkEvent,
+    AstNode, BatchMutation, Direction, Language, SyntaxToken, TextRange, TextSize, TokenAtOffset,
+    TriviaPieceKind,
 };
 use biome_suppression::{Suppression, SuppressionKind};
 pub use suppression_action::{ApplySuppression, SuppressionAction};
@@ -360,22 +360,21 @@ where
     /// Runs phase 0 over nodes and tokens to process line breaks and
     /// suppression comments
     fn run_first_phase(mut self) -> ControlFlow<Break> {
-        let iter = self.root.syntax().preorder_with_tokens(Direction::Next);
+        let iter = self.root.syntax().preorder_tokens(Direction::Next);
+        // Iterate to evaluate suppressions
+        for token in iter {
+            self.handle_token(token)?;
+        }
+        // Emit any validation diagnostics from finalizing
+        if let Err(error_diagnostics) = self.suppressions.finalize() {
+            for diagnostic in error_diagnostics {
+                let signal = DiagnosticSignal::new(|| diagnostic.clone());
+                (self.emit_signal)(&signal)?;
+            }
+        }
+        // Iterate for syntax rules after we've established suppressions
+        let iter = self.root.syntax().preorder();
         for event in iter {
-            let node_event = match event {
-                WalkEvent::Enter(SyntaxElement::Node(node)) => WalkEvent::Enter(node),
-                WalkEvent::Leave(SyntaxElement::Node(node)) => WalkEvent::Leave(node),
-
-                // If this is a token enter event, process its text content
-                WalkEvent::Enter(SyntaxElement::Token(token)) => {
-                    self.handle_token(token)?;
-
-                    continue;
-                }
-                WalkEvent::Leave(SyntaxElement::Token(_)) => {
-                    continue;
-                }
-            };
             // If this is a node event pass it to the visitors for this phase
             for visitor in self.visitors.iter_mut() {
                 let ctx = VisitorContext {
@@ -389,7 +388,7 @@ where
                     options: self.options,
                 };
 
-                visitor.visit(&node_event, ctx);
+                visitor.visit(&event, ctx);
             }
         }
 
@@ -461,9 +460,7 @@ where
             }
         }
 
-        // Flush signals from the queue until the end of the current token is reached
-        let cutoff = token.text_range().end();
-        self.flush_matches(Some(cutoff))
+        ControlFlow::Continue(())
     }
 
     /// Flush all pending query signals in the queue.  If `cutoff` is specified,
@@ -488,7 +485,7 @@ where
                     .contains(entry.category)
             {
                 self.signal_queue.pop();
-                break;
+                continue;
             }
 
             if self.suppressions.range_suppressions.suppress_rule(
@@ -497,7 +494,7 @@ where
                 &entry.text_range,
             ) {
                 self.signal_queue.pop();
-                break;
+                continue;
             }
 
             // Search for an active line suppression comment covering the range of
@@ -516,22 +513,32 @@ where
             let suppression = match suppression {
                 Some(suppression) => Some(suppression),
                 None => {
-                    let index =
-                        self.suppressions
-                            .line_suppressions
-                            .binary_search_by(|suppression| {
-                                if suppression.text_range.end() < entry.text_range.start() {
-                                    Ordering::Less
-                                } else if entry.text_range.end() < suppression.text_range.start() {
-                                    Ordering::Greater
-                                } else {
-                                    Ordering::Equal
-                                }
-                            });
+                    let index = self
+                        .suppressions
+                        .line_suppressions
+                        .binary_search_by(|suppression| {
+                            if suppression.text_range.end() < entry.text_range.start() {
+                                Ordering::Less
+                            } else if entry.text_range.end() < suppression.text_range.start() {
+                                Ordering::Greater
+                            } else {
+                                Ordering::Equal
+                            }
+                        })
+                        .ok();
 
-                    index
-                        .ok()
-                        .map(|index| &mut self.suppressions.line_suppressions[index])
+                    if let Some(index) = index {
+                        let line_suppression = &mut self.suppressions.line_suppressions[index];
+                        if line_suppression.text_range.start() <= entry.text_range.start()
+                            && line_suppression.text_range.end() >= entry.text_range.start()
+                        {
+                            Some(line_suppression)
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
                 }
             };
 
@@ -576,8 +583,6 @@ where
         text: &str,
         range: TextRange,
     ) -> ControlFlow<Break> {
-        let mut has_suppressions = false;
-
         for result in (self.parse_suppression_comment)(text, range) {
             let suppression: AnalyzerSuppression = match result {
                 Ok(kind) => kind,
@@ -594,7 +599,7 @@ where
                 }
             };
 
-            if !self.categories.contains(suppression.as_rule_category()) {
+            if !self.categories.contains(suppression.category) {
                 let signal = DiagnosticSignal::new(|| {
                     AnalyzerSuppressionDiagnostic::new(
                         category!("suppressions/unused"),
@@ -615,15 +620,13 @@ where
                 continue;
             }
 
-            has_suppressions = true;
-        }
+            if let AnalyzerSuppressionVariant::Line = suppression.variant {
+                // Legacy varient - add the next line to a line comment
+                let line_index = *self.line_index + 1;
 
-        // Suppression comments apply to the next line
-        if has_suppressions {
-            let line_index = *self.line_index + 1;
-
-            self.suppressions
-                .overlap_last_suppression(line_index, range);
+                self.suppressions
+                    .overlap_last_suppression(line_index, range);
+            }
         }
 
         ControlFlow::Continue(())
@@ -686,6 +689,9 @@ pub struct AnalyzerSuppression<'a> {
 
     /// The kind of `biome-ignore` comment used for this suppression
     pub(crate) variant: AnalyzerSuppressionVariant,
+
+    /// The category that this suppression applies to
+    pub(crate) category: RuleCategory,
 }
 
 #[derive(Debug, Clone)]
@@ -712,34 +718,29 @@ impl From<&SuppressionKind> for AnalyzerSuppressionVariant {
 }
 
 impl<'a> AnalyzerSuppression<'a> {
-    pub fn everything(category: &'a str) -> Self {
+    pub fn everything(category: RuleCategory) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::Everything(category),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
+            category,
         }
     }
 
-    pub fn rule_instance(rule: &'a str, instance: &'a str) -> Self {
+    pub fn rule_instance(category: RuleCategory, rule: &'a str, instance: &'a str) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::RuleInstance(rule, instance),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
+            category,
         }
     }
-    pub fn rule(rule: &'a str) -> Self {
+    pub fn rule(category: RuleCategory, rule: &'a str) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::Rule(rule),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
-        }
-    }
-
-    pub fn action(action: &'a str) -> Self {
-        Self {
-            kind: AnalyzerSuppressionKind::Action(action),
-            ignore_range: None,
-            variant: AnalyzerSuppressionVariant::Line,
+            category,
         }
     }
 
@@ -748,18 +749,7 @@ impl<'a> AnalyzerSuppression<'a> {
             kind: AnalyzerSuppressionKind::Plugin(plugin_name),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
-        }
-    }
-
-    pub fn as_rule_category(&self) -> RuleCategory {
-        match self.kind {
-            AnalyzerSuppressionKind::Everything(category) => {
-                RuleCategory::from_str(category).unwrap()
-            }
-            AnalyzerSuppressionKind::Rule(_) => RuleCategory::Lint,
-            AnalyzerSuppressionKind::Action(_) => RuleCategory::Action,
-            AnalyzerSuppressionKind::RuleInstance(_, _) => RuleCategory::Lint,
-            AnalyzerSuppressionKind::Plugin(_) => RuleCategory::Lint,
+            category: RuleCategory::Lint,
         }
     }
 
@@ -778,39 +768,13 @@ impl<'a> AnalyzerSuppression<'a> {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum AnalyzerSuppressionKind<'a> {
     /// A suppression disabling all lints eg. `// biome-ignore lint`
-    Everything(&'a str),
+    Everything(RuleCategory),
     /// A suppression disabling a specific rule eg. `// biome-ignore lint/complexity/useWhile`
     Rule(&'a str),
-    /// A suppression disabling a specific rule eg. `// biome-ignore assist/source/organizeImports`
-    Action(&'a str),
     /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
     RuleInstance(&'a str, &'a str),
     /// A suppression disabling a plugin eg. `// lint/biome-ignore plugin/my-plugin`
     Plugin(Option<&'a str>),
-}
-
-impl AnalyzerSuppressionKind<'_> {
-    /// Whether this suppression is meant to suppress an action
-    pub fn is_action(&self) -> bool {
-        match self {
-            AnalyzerSuppressionKind::Everything(category) => *category == "assist",
-            AnalyzerSuppressionKind::Rule(_) => false,
-            AnalyzerSuppressionKind::Action(_) => true,
-            AnalyzerSuppressionKind::RuleInstance(_, _) => false,
-            AnalyzerSuppressionKind::Plugin(_) => false,
-        }
-    }
-
-    /// Retrieves the category of the current suppression
-    pub fn category(&self) -> &str {
-        match self {
-            AnalyzerSuppressionKind::Everything(category) => category,
-            AnalyzerSuppressionKind::Rule(_) => "lint",
-            AnalyzerSuppressionKind::Action(_) => "action",
-            AnalyzerSuppressionKind::RuleInstance(_, _) => "lint",
-            AnalyzerSuppressionKind::Plugin(_) => "lint",
-        }
-    }
 }
 
 /// Takes a [Suppression] and returns a [AnalyzerSuppression]
@@ -824,9 +788,13 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().end()).start(),
     );
     for (key, subcategory, value) in suppression.categories {
+        // Don't allow skipping of syntax since we want explicit bypasses as an escape hatch only
         if key == category!("lint") || key == category!("assist") {
-            result
-                .push(AnalyzerSuppression::everything(key.name()).with_variant(&suppression.kind));
+            if let Ok(category) = RuleCategory::from_str(key.name()) {
+                result.push(
+                    AnalyzerSuppression::everything(category).with_variant(&suppression.kind),
+                );
+            }
         } else if key == category!("lint/plugin") {
             let suppression = AnalyzerSuppression::plugin(subcategory)
                 .with_ignore_range(ignore_range)
@@ -836,16 +804,22 @@ pub fn to_analyzer_suppressions(
             let category = key.name();
             if let Some(rule) = category.strip_prefix("lint/") {
                 let suppression = if let Some(instance) = value {
-                    AnalyzerSuppression::rule_instance(rule, instance)
+                    AnalyzerSuppression::rule_instance(RuleCategory::Lint, rule, instance)
                         .with_ignore_range(ignore_range)
                 } else {
-                    AnalyzerSuppression::rule(rule).with_ignore_range(ignore_range)
+                    AnalyzerSuppression::rule(RuleCategory::Lint, rule)
+                        .with_ignore_range(ignore_range)
                 }
                 .with_variant(&suppression.kind);
                 result.push(suppression);
             } else if let Some(action) = category.strip_prefix("assist/") {
                 // action instances aren't supported yet
-                let suppression = AnalyzerSuppression::action(action)
+                let suppression = AnalyzerSuppression::rule(RuleCategory::Action, action)
+                    .with_ignore_range(ignore_range)
+                    .with_variant(&suppression.kind);
+                result.push(suppression);
+            } else if let Some(rule) = category.strip_prefix("syntax/") {
+                let suppression = AnalyzerSuppression::rule(RuleCategory::Syntax, rule)
                     .with_ignore_range(ignore_range)
                     .with_variant(&suppression.kind);
                 result.push(suppression);

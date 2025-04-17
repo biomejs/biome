@@ -4,7 +4,10 @@ async function returnsPromise() {
 
 await returnsPromise();
 void returnsPromise();
-return returnsPromise();
+
+function otherFunction() {
+  return returnsPromise();
+}
 
 returnsPromise().then(
   () => { },

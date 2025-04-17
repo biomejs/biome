@@ -1,4 +1,32 @@
+use insta::assert_debug_snapshot;
+
+use crate::test_util::{get_function_declaration, parse_ts};
+
 use super::*;
+
+#[test]
+fn infer_type_of_promise_returning_function() {
+    const CODE: &str = r#"function returnsPromise(): Promise<number> {
+    return Promise.resolved(true);
+}"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_function_declaration(&root);
+    let ty = Type::from_js_function_declaration(&decl);
+    assert_debug_snapshot!(ty);
+}
+
+#[test]
+fn infer_type_of_async_function() {
+    const CODE: &str = r#"async function returnsPromise(): Promise<string> {
+	return "value";
+}"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_function_declaration(&root);
+    let ty = Type::from_js_function_declaration(&decl);
+    assert_debug_snapshot!(ty);
+}
 
 #[test]
 #[cfg(target_pointer_width = "64")]

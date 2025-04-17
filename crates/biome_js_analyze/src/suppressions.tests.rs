@@ -550,7 +550,7 @@ let c;
 // biome-ignore-end lint/suspicious/noDoubleEquals: single rule
 a == b;
 let c;
-
+// biome-ignore-end lint/style/useConst: single rule
         ";
 
     let parsed = parse(
