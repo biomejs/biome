@@ -1,7 +1,8 @@
 use crate::utils::{
-    HardcodedSymbolResolver, PromiseResolver, assert_type_snapshot, get_expression_statement,
-    get_function_declaration, parse_ts,
+    HardcodedSymbolResolver, PromiseResolver, assert_type_snapshot, get_function_declaration,
+    parse_ts,
 };
+use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsExpressionStatement};
 use biome_js_type_info::Type;
 
 mod utils;
@@ -140,4 +141,20 @@ fn infer_flattened_type_from_static_promise_function() {
         expr_ty,
         "infer_flattened_type_from_static_promise_function",
     )
+}
+
+pub fn get_expression_statement(root: &AnyJsRoot) -> JsExpressionStatement {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::JsExpressionStatement(expr) => Some(expr),
+            _ => None,
+        })
+        .expect("cannot find expression statement")
 }

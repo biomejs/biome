@@ -1,7 +1,13 @@
 use crate::Type;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
+use biome_js_parser::{JsParserOptions, parse};
+use biome_js_syntax::{
+    AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFileSource, JsFunctionDeclaration,
+};
+use biome_js_type_info::{TypeReferenceQualifier, TypeResolver};
 use biome_rowan::AstNode;
+use biome_rowan::Text;
 
 pub fn assert_type_snapshot(source_code: &str, ty: Type, test_name: &str) {
     let mut content = String::new();
@@ -31,14 +37,6 @@ pub fn assert_type_snapshot(source_code: &str, ty: Type, test_name: &str) {
         insta::assert_snapshot!(test_name, content);
     });
 }
-
-use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{
-    AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsExpressionStatement, JsFileSource,
-    JsFunctionDeclaration,
-};
-use biome_js_type_info::{TypeReferenceQualifier, TypeResolver};
-use biome_rowan::Text;
 
 /// Test resolver that looks up a single hardcoded symbol.
 pub struct HardcodedSymbolResolver(pub &'static str, pub Type);
@@ -71,22 +69,6 @@ impl TypeResolver for PromiseResolver {
     fn resolve_type_of(&self, _identifier: &Text) -> Option<Type> {
         None
     }
-}
-
-pub fn get_expression_statement(root: &AnyJsRoot) -> JsExpressionStatement {
-    let module = root.as_js_module().unwrap();
-    module
-        .items()
-        .into_iter()
-        .filter_map(|item| match item {
-            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
-            _ => None,
-        })
-        .find_map(|statement| match statement {
-            AnyJsStatement::JsExpressionStatement(expr) => Some(expr),
-            _ => None,
-        })
-        .expect("cannot find expression statement")
 }
 
 pub fn get_function_declaration(root: &AnyJsRoot) -> JsFunctionDeclaration {

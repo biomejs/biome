@@ -1,25 +1,25 @@
 [package]
-authors.workspace = true
+authors.workspace    = true
 categories.workspace = true
-description = "Data structures for tracking type information"
-edition.workspace = true
-homepage.workspace = true
-keywords.workspace = true
-license.workspace = true
-name = "biome_js_type_info"
+description          = "Data structures for tracking type information"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_js_type_info"
 repository.workspace = true
-version = "0.0.1"
+version              = "0.0.1"
 
 [lints]
 workspace = true
 
 [dependencies]
-biome_js_syntax = { workspace = true }
+biome_formatter           = { workspace = true }
+biome_js_syntax           = { workspace = true }
 biome_js_type_info_macros = { workspace = true }
-biome_rowan = { workspace = true }
-biome_formatter = { workspace = true }
+biome_rowan               = { workspace = true }
 
 [dev-dependencies]
 biome_js_formatter = { workspace = true }
-biome_js_parser = { workspace = true }
-insta = { workspace = true }
+biome_js_parser    = { workspace = true }
+insta              = { workspace = true }
