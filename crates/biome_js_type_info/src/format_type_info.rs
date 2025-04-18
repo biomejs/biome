@@ -78,35 +78,35 @@ impl Format<FormatTypeContext> for Type {
 impl Format<FormatTypeContext> for TypeInner {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         match self {
-            TypeInner::Unknown => write!(f, [text("unknown")]),
-            TypeInner::BigInt => write!(f, [text("BigInt")]),
-            TypeInner::Boolean => write!(f, [text("boolean")]),
-            TypeInner::Null => write!(f, [text("null")]),
-            TypeInner::Number => write!(f, [text("number")]),
-            TypeInner::String => write!(f, [text("string")]),
-            TypeInner::Symbol => write!(f, [text("symbol")]),
-            TypeInner::Undefined => write!(f, [text("undefined")]),
-            TypeInner::Class(class) => write!(f, [&class.as_ref()]),
-            TypeInner::Constructor(_) => todo!(),
-            TypeInner::Function(function) => write!(f, [&function.as_ref()]),
-            TypeInner::Namespace(_) => todo!(),
-            TypeInner::Object(object) => write!(f, [&object.as_ref()]),
-            TypeInner::Tuple(_) => todo!(),
-            TypeInner::Intersection(_) => todo!(),
-            TypeInner::Union(_) => todo!(),
-            TypeInner::TypeOperator(_) => todo!(),
-            TypeInner::Alias(_) => todo!(),
-            TypeInner::Literal(_) => todo!(),
-            TypeInner::Reference(reference) => write!(f, [&reference.as_ref()]),
-            TypeInner::TypeofExpression(_) => todo!(),
-            TypeInner::TypeofType(_) => todo!(),
-            TypeInner::TypeofValue(_) => todo!(),
-            TypeInner::AnyKeyword => write!(f, [text("any")]),
-            TypeInner::NeverKeyword => write!(f, [text("never")]),
-            TypeInner::ObjectKeyword => write!(f, [text("object")]),
-            TypeInner::ThisKeyword => write!(f, [text("this")]),
-            TypeInner::UnknownKeyword => write!(f, [text("unknown")]),
-            TypeInner::VoidKeyword => write!(f, [text("void")]),
+            Self::Unknown => write!(f, [text("unknown")]),
+            Self::BigInt => write!(f, [text("BigInt")]),
+            Self::Boolean => write!(f, [text("boolean")]),
+            Self::Null => write!(f, [text("null")]),
+            Self::Number => write!(f, [text("number")]),
+            Self::String => write!(f, [text("string")]),
+            Self::Symbol => write!(f, [text("symbol")]),
+            Self::Undefined => write!(f, [text("undefined")]),
+            Self::Class(class) => write!(f, [&class.as_ref()]),
+            Self::Constructor(_) => todo!(),
+            Self::Function(function) => write!(f, [&function.as_ref()]),
+            Self::Namespace(_) => todo!(),
+            Self::Object(object) => write!(f, [&object.as_ref()]),
+            Self::Tuple(_) => todo!(),
+            Self::Intersection(_) => todo!(),
+            Self::Union(_) => todo!(),
+            Self::TypeOperator(_) => todo!(),
+            Self::Alias(_) => todo!(),
+            Self::Literal(_) => todo!(),
+            Self::Reference(reference) => write!(f, [&reference.as_ref()]),
+            Self::TypeofExpression(_) => todo!(),
+            Self::TypeofType(_) => todo!(),
+            Self::TypeofValue(_) => todo!(),
+            Self::AnyKeyword => write!(f, [text("any")]),
+            Self::NeverKeyword => write!(f, [text("never")]),
+            Self::ObjectKeyword => write!(f, [text("object")]),
+            Self::ThisKeyword => write!(f, [text("this")]),
+            Self::UnknownKeyword => write!(f, [text("unknown")]),
+            Self::VoidKeyword => write!(f, [text("void")]),
         }
     }
 }
@@ -206,11 +206,11 @@ impl Format<FormatTypeContext> for Function {
 impl Format<FormatTypeContext> for ReturnType {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         match self {
-            ReturnType::Type(ty) => {
+            Self::Type(ty) => {
                 write!(f, [&ty])
             }
-            ReturnType::Predicate(_) => todo!(),
-            ReturnType::Asserts(_asset) => {
+            Self::Predicate(_) => todo!(),
+            Self::Asserts(_asset) => {
                 todo!()
             }
         }
@@ -253,7 +253,7 @@ impl Format<FormatTypeContext> for FunctionParameter {
 impl Format<FormatTypeContext> for TypeMember {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         match self {
-            TypeMember::CallSignature(ty) => {
+            Self::CallSignature(ty) => {
                 write!(
                     f,
                     [&format_args![
@@ -264,11 +264,11 @@ impl Format<FormatTypeContext> for TypeMember {
                     ]]
                 )
             }
-            TypeMember::Constructor(_) => todo!(),
-            TypeMember::Method(method) => {
+            Self::Constructor(_) => todo!(),
+            Self::Method(method) => {
                 write!(f, [&format_args![&method]])
             }
-            TypeMember::Property(property) => {
+            Self::Property(property) => {
                 write!(
                     f,
                     [&format_args![
