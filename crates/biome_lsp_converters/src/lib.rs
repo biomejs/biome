@@ -1,5 +1,7 @@
 //! The crate contains a set of converters to translate between `lsp-types` and `biome_rowan` (and vice versa) types.
 
+#![deny(clippy::use_self)]
+
 use biome_rowan::TextSize;
 use tower_lsp::lsp_types::{ClientCapabilities, PositionEncodingKind};
 

@@ -1167,13 +1167,13 @@ pub enum AnyYamlBlockContent {
 impl AnyYamlBlockContent {
     pub fn as_yaml_block_mapping(&self) -> Option<&YamlBlockMapping> {
         match &self {
-            AnyYamlBlockContent::YamlBlockMapping(item) => Some(item),
+            Self::YamlBlockMapping(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_block_sequence(&self) -> Option<&YamlBlockSequence> {
         match &self {
-            AnyYamlBlockContent::YamlBlockSequence(item) => Some(item),
+            Self::YamlBlockSequence(item) => Some(item),
             _ => None,
         }
     }
@@ -1186,13 +1186,13 @@ pub enum AnyYamlBlockMapEntry {
 impl AnyYamlBlockMapEntry {
     pub fn as_yaml_block_map_explicit_entry(&self) -> Option<&YamlBlockMapExplicitEntry> {
         match &self {
-            AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(item) => Some(item),
+            Self::YamlBlockMapExplicitEntry(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_block_map_implicit_entry(&self) -> Option<&YamlBlockMapImplicitEntry> {
         match &self {
-            AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(item) => Some(item),
+            Self::YamlBlockMapImplicitEntry(item) => Some(item),
             _ => None,
         }
     }
@@ -1205,13 +1205,13 @@ pub enum AnyYamlBlockMapImplicitKey {
 impl AnyYamlBlockMapImplicitKey {
     pub fn as_yaml_flow_json_node(&self) -> Option<&YamlFlowJsonNode> {
         match &self {
-            AnyYamlBlockMapImplicitKey::YamlFlowJsonNode(item) => Some(item),
+            Self::YamlFlowJsonNode(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_flow_yaml_node(&self) -> Option<&YamlFlowYamlNode> {
         match &self {
-            AnyYamlBlockMapImplicitKey::YamlFlowYamlNode(item) => Some(item),
+            Self::YamlFlowYamlNode(item) => Some(item),
             _ => None,
         }
     }
@@ -1225,19 +1225,19 @@ pub enum AnyYamlBlockNode {
 impl AnyYamlBlockNode {
     pub fn as_yaml_block_collection(&self) -> Option<&YamlBlockCollection> {
         match &self {
-            AnyYamlBlockNode::YamlBlockCollection(item) => Some(item),
+            Self::YamlBlockCollection(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_folded_scalar(&self) -> Option<&YamlFoldedScalar> {
         match &self {
-            AnyYamlBlockNode::YamlFoldedScalar(item) => Some(item),
+            Self::YamlFoldedScalar(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_literal_scalar(&self) -> Option<&YamlLiteralScalar> {
         match &self {
-            AnyYamlBlockNode::YamlLiteralScalar(item) => Some(item),
+            Self::YamlLiteralScalar(item) => Some(item),
             _ => None,
         }
     }
@@ -1250,13 +1250,13 @@ pub enum AnyYamlFlowMapEntry {
 impl AnyYamlFlowMapEntry {
     pub fn as_yaml_flow_map_explicit_entry(&self) -> Option<&YamlFlowMapExplicitEntry> {
         match &self {
-            AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(item) => Some(item),
+            Self::YamlFlowMapExplicitEntry(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_flow_map_implicit_entry(&self) -> Option<&YamlFlowMapImplicitEntry> {
         match &self {
-            AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(item) => Some(item),
+            Self::YamlFlowMapImplicitEntry(item) => Some(item),
             _ => None,
         }
     }
@@ -1269,13 +1269,13 @@ pub enum AnyYamlFlowMapImplicitKey {
 impl AnyYamlFlowMapImplicitKey {
     pub fn as_yaml_flow_json_node(&self) -> Option<&YamlFlowJsonNode> {
         match &self {
-            AnyYamlFlowMapImplicitKey::YamlFlowJsonNode(item) => Some(item),
+            Self::YamlFlowJsonNode(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_flow_yaml_node(&self) -> Option<&YamlFlowYamlNode> {
         match &self {
-            AnyYamlFlowMapImplicitKey::YamlFlowYamlNode(item) => Some(item),
+            Self::YamlFlowYamlNode(item) => Some(item),
             _ => None,
         }
     }
@@ -1289,19 +1289,19 @@ pub enum AnyYamlFlowNode {
 impl AnyYamlFlowNode {
     pub fn as_yaml_alias_node(&self) -> Option<&YamlAliasNode> {
         match &self {
-            AnyYamlFlowNode::YamlAliasNode(item) => Some(item),
+            Self::YamlAliasNode(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_flow_json_node(&self) -> Option<&YamlFlowJsonNode> {
         match &self {
-            AnyYamlFlowNode::YamlFlowJsonNode(item) => Some(item),
+            Self::YamlFlowJsonNode(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_flow_yaml_node(&self) -> Option<&YamlFlowYamlNode> {
         match &self {
-            AnyYamlFlowNode::YamlFlowYamlNode(item) => Some(item),
+            Self::YamlFlowYamlNode(item) => Some(item),
             _ => None,
         }
     }
@@ -1314,13 +1314,13 @@ pub enum AnyYamlFlowSequenceEntry {
 impl AnyYamlFlowSequenceEntry {
     pub fn as_any_yaml_flow_map_entry(&self) -> Option<&AnyYamlFlowMapEntry> {
         match &self {
-            AnyYamlFlowSequenceEntry::AnyYamlFlowMapEntry(item) => Some(item),
+            Self::AnyYamlFlowMapEntry(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_any_yaml_flow_node(&self) -> Option<&AnyYamlFlowNode> {
         match &self {
-            AnyYamlFlowSequenceEntry::AnyYamlFlowNode(item) => Some(item),
+            Self::AnyYamlFlowNode(item) => Some(item),
             _ => None,
         }
     }
@@ -1334,19 +1334,19 @@ pub enum AnyYamlIndentedBlock {
 impl AnyYamlIndentedBlock {
     pub fn as_any_yaml_node(&self) -> Option<&AnyYamlNode> {
         match &self {
-            AnyYamlIndentedBlock::AnyYamlNode(item) => Some(item),
+            Self::AnyYamlNode(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_compact_mapping(&self) -> Option<&YamlCompactMapping> {
         match &self {
-            AnyYamlIndentedBlock::YamlCompactMapping(item) => Some(item),
+            Self::YamlCompactMapping(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_compact_sequence(&self) -> Option<&YamlCompactSequence> {
         match &self {
-            AnyYamlIndentedBlock::YamlCompactSequence(item) => Some(item),
+            Self::YamlCompactSequence(item) => Some(item),
             _ => None,
         }
     }
@@ -1361,25 +1361,25 @@ pub enum AnyYamlJsonContent {
 impl AnyYamlJsonContent {
     pub fn as_yaml_double_quoted_scalar(&self) -> Option<&YamlDoubleQuotedScalar> {
         match &self {
-            AnyYamlJsonContent::YamlDoubleQuotedScalar(item) => Some(item),
+            Self::YamlDoubleQuotedScalar(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_flow_mapping(&self) -> Option<&YamlFlowMapping> {
         match &self {
-            AnyYamlJsonContent::YamlFlowMapping(item) => Some(item),
+            Self::YamlFlowMapping(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_flow_sequence(&self) -> Option<&YamlFlowSequence> {
         match &self {
-            AnyYamlJsonContent::YamlFlowSequence(item) => Some(item),
+            Self::YamlFlowSequence(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_single_quoted_scalar(&self) -> Option<&YamlSingleQuotedScalar> {
         match &self {
-            AnyYamlJsonContent::YamlSingleQuotedScalar(item) => Some(item),
+            Self::YamlSingleQuotedScalar(item) => Some(item),
             _ => None,
         }
     }
@@ -1393,19 +1393,19 @@ pub enum AnyYamlNode {
 impl AnyYamlNode {
     pub fn as_any_yaml_block_node(&self) -> Option<&AnyYamlBlockNode> {
         match &self {
-            AnyYamlNode::AnyYamlBlockNode(item) => Some(item),
+            Self::AnyYamlBlockNode(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_any_yaml_flow_node(&self) -> Option<&AnyYamlFlowNode> {
         match &self {
-            AnyYamlNode::AnyYamlFlowNode(item) => Some(item),
+            Self::AnyYamlFlowNode(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_bogus_node(&self) -> Option<&YamlBogusNode> {
         match &self {
-            AnyYamlNode::YamlBogusNode(item) => Some(item),
+            Self::YamlBogusNode(item) => Some(item),
             _ => None,
         }
     }
@@ -1418,13 +1418,13 @@ pub enum AnyYamlProperty {
 impl AnyYamlProperty {
     pub fn as_yaml_anchor_property(&self) -> Option<&YamlAnchorProperty> {
         match &self {
-            AnyYamlProperty::YamlAnchorProperty(item) => Some(item),
+            Self::YamlAnchorProperty(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_yaml_tag_property(&self) -> Option<&YamlTagProperty> {
         match &self {
-            AnyYamlProperty::YamlTagProperty(item) => Some(item),
+            Self::YamlTagProperty(item) => Some(item),
             _ => None,
         }
     }
@@ -1470,12 +1470,12 @@ impl std::fmt::Debug for YamlAliasNode {
     }
 }
 impl From<YamlAliasNode> for SyntaxNode {
-    fn from(n: YamlAliasNode) -> SyntaxNode {
+    fn from(n: YamlAliasNode) -> Self {
         n.syntax
     }
 }
 impl From<YamlAliasNode> for SyntaxElement {
-    fn from(n: YamlAliasNode) -> SyntaxElement {
+    fn from(n: YamlAliasNode) -> Self {
         n.syntax.into()
     }
 }
@@ -1520,12 +1520,12 @@ impl std::fmt::Debug for YamlAnchorProperty {
     }
 }
 impl From<YamlAnchorProperty> for SyntaxNode {
-    fn from(n: YamlAnchorProperty) -> SyntaxNode {
+    fn from(n: YamlAnchorProperty) -> Self {
         n.syntax
     }
 }
 impl From<YamlAnchorProperty> for SyntaxElement {
-    fn from(n: YamlAnchorProperty) -> SyntaxElement {
+    fn from(n: YamlAnchorProperty) -> Self {
         n.syntax.into()
     }
 }
@@ -1568,12 +1568,12 @@ impl std::fmt::Debug for YamlBlockCollection {
     }
 }
 impl From<YamlBlockCollection> for SyntaxNode {
-    fn from(n: YamlBlockCollection) -> SyntaxNode {
+    fn from(n: YamlBlockCollection) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockCollection> for SyntaxElement {
-    fn from(n: YamlBlockCollection) -> SyntaxElement {
+    fn from(n: YamlBlockCollection) -> Self {
         n.syntax.into()
     }
 }
@@ -1616,12 +1616,12 @@ impl std::fmt::Debug for YamlBlockMapExplicitEntry {
     }
 }
 impl From<YamlBlockMapExplicitEntry> for SyntaxNode {
-    fn from(n: YamlBlockMapExplicitEntry) -> SyntaxNode {
+    fn from(n: YamlBlockMapExplicitEntry) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockMapExplicitEntry> for SyntaxElement {
-    fn from(n: YamlBlockMapExplicitEntry) -> SyntaxElement {
+    fn from(n: YamlBlockMapExplicitEntry) -> Self {
         n.syntax.into()
     }
 }
@@ -1667,12 +1667,12 @@ impl std::fmt::Debug for YamlBlockMapExplicitKey {
     }
 }
 impl From<YamlBlockMapExplicitKey> for SyntaxNode {
-    fn from(n: YamlBlockMapExplicitKey) -> SyntaxNode {
+    fn from(n: YamlBlockMapExplicitKey) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockMapExplicitKey> for SyntaxElement {
-    fn from(n: YamlBlockMapExplicitKey) -> SyntaxElement {
+    fn from(n: YamlBlockMapExplicitKey) -> Self {
         n.syntax.into()
     }
 }
@@ -1718,12 +1718,12 @@ impl std::fmt::Debug for YamlBlockMapExplicitValue {
     }
 }
 impl From<YamlBlockMapExplicitValue> for SyntaxNode {
-    fn from(n: YamlBlockMapExplicitValue) -> SyntaxNode {
+    fn from(n: YamlBlockMapExplicitValue) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockMapExplicitValue> for SyntaxElement {
-    fn from(n: YamlBlockMapExplicitValue) -> SyntaxElement {
+    fn from(n: YamlBlockMapExplicitValue) -> Self {
         n.syntax.into()
     }
 }
@@ -1766,12 +1766,12 @@ impl std::fmt::Debug for YamlBlockMapImplicitEntry {
     }
 }
 impl From<YamlBlockMapImplicitEntry> for SyntaxNode {
-    fn from(n: YamlBlockMapImplicitEntry) -> SyntaxNode {
+    fn from(n: YamlBlockMapImplicitEntry) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockMapImplicitEntry> for SyntaxElement {
-    fn from(n: YamlBlockMapImplicitEntry) -> SyntaxElement {
+    fn from(n: YamlBlockMapImplicitEntry) -> Self {
         n.syntax.into()
     }
 }
@@ -1817,12 +1817,12 @@ impl std::fmt::Debug for YamlBlockMapImplicitValue {
     }
 }
 impl From<YamlBlockMapImplicitValue> for SyntaxNode {
-    fn from(n: YamlBlockMapImplicitValue) -> SyntaxNode {
+    fn from(n: YamlBlockMapImplicitValue) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockMapImplicitValue> for SyntaxElement {
-    fn from(n: YamlBlockMapImplicitValue) -> SyntaxElement {
+    fn from(n: YamlBlockMapImplicitValue) -> Self {
         n.syntax.into()
     }
 }
@@ -1872,12 +1872,12 @@ impl std::fmt::Debug for YamlBlockMapping {
     }
 }
 impl From<YamlBlockMapping> for SyntaxNode {
-    fn from(n: YamlBlockMapping) -> SyntaxNode {
+    fn from(n: YamlBlockMapping) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockMapping> for SyntaxElement {
-    fn from(n: YamlBlockMapping) -> SyntaxElement {
+    fn from(n: YamlBlockMapping) -> Self {
         n.syntax.into()
     }
 }
@@ -1927,12 +1927,12 @@ impl std::fmt::Debug for YamlBlockSequence {
     }
 }
 impl From<YamlBlockSequence> for SyntaxNode {
-    fn from(n: YamlBlockSequence) -> SyntaxNode {
+    fn from(n: YamlBlockSequence) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockSequence> for SyntaxElement {
-    fn from(n: YamlBlockSequence) -> SyntaxElement {
+    fn from(n: YamlBlockSequence) -> Self {
         n.syntax.into()
     }
 }
@@ -1978,12 +1978,12 @@ impl std::fmt::Debug for YamlBlockSequenceEntry {
     }
 }
 impl From<YamlBlockSequenceEntry> for SyntaxNode {
-    fn from(n: YamlBlockSequenceEntry) -> SyntaxNode {
+    fn from(n: YamlBlockSequenceEntry) -> Self {
         n.syntax
     }
 }
 impl From<YamlBlockSequenceEntry> for SyntaxElement {
-    fn from(n: YamlBlockSequenceEntry) -> SyntaxElement {
+    fn from(n: YamlBlockSequenceEntry) -> Self {
         n.syntax.into()
     }
 }
@@ -2025,12 +2025,12 @@ impl std::fmt::Debug for YamlCompactMapping {
     }
 }
 impl From<YamlCompactMapping> for SyntaxNode {
-    fn from(n: YamlCompactMapping) -> SyntaxNode {
+    fn from(n: YamlCompactMapping) -> Self {
         n.syntax
     }
 }
 impl From<YamlCompactMapping> for SyntaxElement {
-    fn from(n: YamlCompactMapping) -> SyntaxElement {
+    fn from(n: YamlCompactMapping) -> Self {
         n.syntax.into()
     }
 }
@@ -2072,12 +2072,12 @@ impl std::fmt::Debug for YamlCompactSequence {
     }
 }
 impl From<YamlCompactSequence> for SyntaxNode {
-    fn from(n: YamlCompactSequence) -> SyntaxNode {
+    fn from(n: YamlCompactSequence) -> Self {
         n.syntax
     }
 }
 impl From<YamlCompactSequence> for SyntaxElement {
-    fn from(n: YamlCompactSequence) -> SyntaxElement {
+    fn from(n: YamlCompactSequence) -> Self {
         n.syntax.into()
     }
 }
@@ -2122,12 +2122,12 @@ impl std::fmt::Debug for YamlDirective {
     }
 }
 impl From<YamlDirective> for SyntaxNode {
-    fn from(n: YamlDirective) -> SyntaxNode {
+    fn from(n: YamlDirective) -> Self {
         n.syntax
     }
 }
 impl From<YamlDirective> for SyntaxElement {
-    fn from(n: YamlDirective) -> SyntaxElement {
+    fn from(n: YamlDirective) -> Self {
         n.syntax.into()
     }
 }
@@ -2182,12 +2182,12 @@ impl std::fmt::Debug for YamlDocument {
     }
 }
 impl From<YamlDocument> for SyntaxNode {
-    fn from(n: YamlDocument) -> SyntaxNode {
+    fn from(n: YamlDocument) -> Self {
         n.syntax
     }
 }
 impl From<YamlDocument> for SyntaxElement {
-    fn from(n: YamlDocument) -> SyntaxElement {
+    fn from(n: YamlDocument) -> Self {
         n.syntax.into()
     }
 }
@@ -2232,12 +2232,12 @@ impl std::fmt::Debug for YamlDoubleQuotedScalar {
     }
 }
 impl From<YamlDoubleQuotedScalar> for SyntaxNode {
-    fn from(n: YamlDoubleQuotedScalar) -> SyntaxNode {
+    fn from(n: YamlDoubleQuotedScalar) -> Self {
         n.syntax
     }
 }
 impl From<YamlDoubleQuotedScalar> for SyntaxElement {
-    fn from(n: YamlDoubleQuotedScalar) -> SyntaxElement {
+    fn from(n: YamlDoubleQuotedScalar) -> Self {
         n.syntax.into()
     }
 }
@@ -2280,12 +2280,12 @@ impl std::fmt::Debug for YamlFlowJsonNode {
     }
 }
 impl From<YamlFlowJsonNode> for SyntaxNode {
-    fn from(n: YamlFlowJsonNode) -> SyntaxNode {
+    fn from(n: YamlFlowJsonNode) -> Self {
         n.syntax
     }
 }
 impl From<YamlFlowJsonNode> for SyntaxElement {
-    fn from(n: YamlFlowJsonNode) -> SyntaxElement {
+    fn from(n: YamlFlowJsonNode) -> Self {
         n.syntax.into()
     }
 }
@@ -2331,12 +2331,12 @@ impl std::fmt::Debug for YamlFlowMapExplicitEntry {
     }
 }
 impl From<YamlFlowMapExplicitEntry> for SyntaxNode {
-    fn from(n: YamlFlowMapExplicitEntry) -> SyntaxNode {
+    fn from(n: YamlFlowMapExplicitEntry) -> Self {
         n.syntax
     }
 }
 impl From<YamlFlowMapExplicitEntry> for SyntaxElement {
-    fn from(n: YamlFlowMapExplicitEntry) -> SyntaxElement {
+    fn from(n: YamlFlowMapExplicitEntry) -> Self {
         n.syntax.into()
     }
 }
@@ -2383,12 +2383,12 @@ impl std::fmt::Debug for YamlFlowMapImplicitEntry {
     }
 }
 impl From<YamlFlowMapImplicitEntry> for SyntaxNode {
-    fn from(n: YamlFlowMapImplicitEntry) -> SyntaxNode {
+    fn from(n: YamlFlowMapImplicitEntry) -> Self {
         n.syntax
     }
 }
 impl From<YamlFlowMapImplicitEntry> for SyntaxElement {
-    fn from(n: YamlFlowMapImplicitEntry) -> SyntaxElement {
+    fn from(n: YamlFlowMapImplicitEntry) -> Self {
         n.syntax.into()
     }
 }
@@ -2438,12 +2438,12 @@ impl std::fmt::Debug for YamlFlowMapping {
     }
 }
 impl From<YamlFlowMapping> for SyntaxNode {
-    fn from(n: YamlFlowMapping) -> SyntaxNode {
+    fn from(n: YamlFlowMapping) -> Self {
         n.syntax
     }
 }
 impl From<YamlFlowMapping> for SyntaxElement {
-    fn from(n: YamlFlowMapping) -> SyntaxElement {
+    fn from(n: YamlFlowMapping) -> Self {
         n.syntax.into()
     }
 }
@@ -2493,12 +2493,12 @@ impl std::fmt::Debug for YamlFlowSequence {
     }
 }
 impl From<YamlFlowSequence> for SyntaxNode {
-    fn from(n: YamlFlowSequence) -> SyntaxNode {
+    fn from(n: YamlFlowSequence) -> Self {
         n.syntax
     }
 }
 impl From<YamlFlowSequence> for SyntaxElement {
-    fn from(n: YamlFlowSequence) -> SyntaxElement {
+    fn from(n: YamlFlowSequence) -> Self {
         n.syntax.into()
     }
 }
@@ -2541,12 +2541,12 @@ impl std::fmt::Debug for YamlFlowYamlNode {
     }
 }
 impl From<YamlFlowYamlNode> for SyntaxNode {
-    fn from(n: YamlFlowYamlNode) -> SyntaxNode {
+    fn from(n: YamlFlowYamlNode) -> Self {
         n.syntax
     }
 }
 impl From<YamlFlowYamlNode> for SyntaxElement {
-    fn from(n: YamlFlowYamlNode) -> SyntaxElement {
+    fn from(n: YamlFlowYamlNode) -> Self {
         n.syntax.into()
     }
 }
@@ -2591,12 +2591,12 @@ impl std::fmt::Debug for YamlFoldedScalar {
     }
 }
 impl From<YamlFoldedScalar> for SyntaxNode {
-    fn from(n: YamlFoldedScalar) -> SyntaxNode {
+    fn from(n: YamlFoldedScalar) -> Self {
         n.syntax
     }
 }
 impl From<YamlFoldedScalar> for SyntaxElement {
-    fn from(n: YamlFoldedScalar) -> SyntaxElement {
+    fn from(n: YamlFoldedScalar) -> Self {
         n.syntax.into()
     }
 }
@@ -2641,12 +2641,12 @@ impl std::fmt::Debug for YamlLiteralScalar {
     }
 }
 impl From<YamlLiteralScalar> for SyntaxNode {
-    fn from(n: YamlLiteralScalar) -> SyntaxNode {
+    fn from(n: YamlLiteralScalar) -> Self {
         n.syntax
     }
 }
 impl From<YamlLiteralScalar> for SyntaxElement {
-    fn from(n: YamlLiteralScalar) -> SyntaxElement {
+    fn from(n: YamlLiteralScalar) -> Self {
         n.syntax.into()
     }
 }
@@ -2691,12 +2691,12 @@ impl std::fmt::Debug for YamlPlainScalar {
     }
 }
 impl From<YamlPlainScalar> for SyntaxNode {
-    fn from(n: YamlPlainScalar) -> SyntaxNode {
+    fn from(n: YamlPlainScalar) -> Self {
         n.syntax
     }
 }
 impl From<YamlPlainScalar> for SyntaxElement {
-    fn from(n: YamlPlainScalar) -> SyntaxElement {
+    fn from(n: YamlPlainScalar) -> Self {
         n.syntax.into()
     }
 }
@@ -2741,12 +2741,12 @@ impl std::fmt::Debug for YamlPropertyList {
     }
 }
 impl From<YamlPropertyList> for SyntaxNode {
-    fn from(n: YamlPropertyList) -> SyntaxNode {
+    fn from(n: YamlPropertyList) -> Self {
         n.syntax
     }
 }
 impl From<YamlPropertyList> for SyntaxElement {
-    fn from(n: YamlPropertyList) -> SyntaxElement {
+    fn from(n: YamlPropertyList) -> Self {
         n.syntax.into()
     }
 }
@@ -2789,12 +2789,12 @@ impl std::fmt::Debug for YamlRoot {
     }
 }
 impl From<YamlRoot> for SyntaxNode {
-    fn from(n: YamlRoot) -> SyntaxNode {
+    fn from(n: YamlRoot) -> Self {
         n.syntax
     }
 }
 impl From<YamlRoot> for SyntaxElement {
-    fn from(n: YamlRoot) -> SyntaxElement {
+    fn from(n: YamlRoot) -> Self {
         n.syntax.into()
     }
 }
@@ -2839,12 +2839,12 @@ impl std::fmt::Debug for YamlSingleQuotedScalar {
     }
 }
 impl From<YamlSingleQuotedScalar> for SyntaxNode {
-    fn from(n: YamlSingleQuotedScalar) -> SyntaxNode {
+    fn from(n: YamlSingleQuotedScalar) -> Self {
         n.syntax
     }
 }
 impl From<YamlSingleQuotedScalar> for SyntaxElement {
-    fn from(n: YamlSingleQuotedScalar) -> SyntaxElement {
+    fn from(n: YamlSingleQuotedScalar) -> Self {
         n.syntax.into()
     }
 }
@@ -2889,23 +2889,23 @@ impl std::fmt::Debug for YamlTagProperty {
     }
 }
 impl From<YamlTagProperty> for SyntaxNode {
-    fn from(n: YamlTagProperty) -> SyntaxNode {
+    fn from(n: YamlTagProperty) -> Self {
         n.syntax
     }
 }
 impl From<YamlTagProperty> for SyntaxElement {
-    fn from(n: YamlTagProperty) -> SyntaxElement {
+    fn from(n: YamlTagProperty) -> Self {
         n.syntax.into()
     }
 }
 impl From<YamlBlockMapping> for AnyYamlBlockContent {
-    fn from(node: YamlBlockMapping) -> AnyYamlBlockContent {
-        AnyYamlBlockContent::YamlBlockMapping(node)
+    fn from(node: YamlBlockMapping) -> Self {
+        Self::YamlBlockMapping(node)
     }
 }
 impl From<YamlBlockSequence> for AnyYamlBlockContent {
-    fn from(node: YamlBlockSequence) -> AnyYamlBlockContent {
-        AnyYamlBlockContent::YamlBlockSequence(node)
+    fn from(node: YamlBlockSequence) -> Self {
+        Self::YamlBlockSequence(node)
     }
 }
 impl AstNode for AnyYamlBlockContent {
@@ -2917,39 +2917,35 @@ impl AstNode for AnyYamlBlockContent {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_BLOCK_MAPPING => {
-                AnyYamlBlockContent::YamlBlockMapping(YamlBlockMapping { syntax })
-            }
-            YAML_BLOCK_SEQUENCE => {
-                AnyYamlBlockContent::YamlBlockSequence(YamlBlockSequence { syntax })
-            }
+            YAML_BLOCK_MAPPING => Self::YamlBlockMapping(YamlBlockMapping { syntax }),
+            YAML_BLOCK_SEQUENCE => Self::YamlBlockSequence(YamlBlockSequence { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlBlockContent::YamlBlockMapping(it) => &it.syntax,
-            AnyYamlBlockContent::YamlBlockSequence(it) => &it.syntax,
+            Self::YamlBlockMapping(it) => &it.syntax,
+            Self::YamlBlockSequence(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlBlockContent::YamlBlockMapping(it) => it.syntax,
-            AnyYamlBlockContent::YamlBlockSequence(it) => it.syntax,
+            Self::YamlBlockMapping(it) => it.syntax,
+            Self::YamlBlockSequence(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlBlockContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlBlockContent::YamlBlockMapping(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlBlockContent::YamlBlockSequence(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlBlockMapping(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlBlockSequence(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlBlockContent> for SyntaxNode {
-    fn from(n: AnyYamlBlockContent) -> SyntaxNode {
+    fn from(n: AnyYamlBlockContent) -> Self {
         match n {
             AnyYamlBlockContent::YamlBlockMapping(it) => it.into(),
             AnyYamlBlockContent::YamlBlockSequence(it) => it.into(),
@@ -2957,19 +2953,19 @@ impl From<AnyYamlBlockContent> for SyntaxNode {
     }
 }
 impl From<AnyYamlBlockContent> for SyntaxElement {
-    fn from(n: AnyYamlBlockContent) -> SyntaxElement {
+    fn from(n: AnyYamlBlockContent) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlBlockMapExplicitEntry> for AnyYamlBlockMapEntry {
-    fn from(node: YamlBlockMapExplicitEntry) -> AnyYamlBlockMapEntry {
-        AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(node)
+    fn from(node: YamlBlockMapExplicitEntry) -> Self {
+        Self::YamlBlockMapExplicitEntry(node)
     }
 }
 impl From<YamlBlockMapImplicitEntry> for AnyYamlBlockMapEntry {
-    fn from(node: YamlBlockMapImplicitEntry) -> AnyYamlBlockMapEntry {
-        AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(node)
+    fn from(node: YamlBlockMapImplicitEntry) -> Self {
+        Self::YamlBlockMapImplicitEntry(node)
     }
 }
 impl AstNode for AnyYamlBlockMapEntry {
@@ -2985,14 +2981,10 @@ impl AstNode for AnyYamlBlockMapEntry {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             YAML_BLOCK_MAP_EXPLICIT_ENTRY => {
-                AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(YamlBlockMapExplicitEntry {
-                    syntax,
-                })
+                Self::YamlBlockMapExplicitEntry(YamlBlockMapExplicitEntry { syntax })
             }
             YAML_BLOCK_MAP_IMPLICIT_ENTRY => {
-                AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(YamlBlockMapImplicitEntry {
-                    syntax,
-                })
+                Self::YamlBlockMapImplicitEntry(YamlBlockMapImplicitEntry { syntax })
             }
             _ => return None,
         };
@@ -3000,27 +2992,27 @@ impl AstNode for AnyYamlBlockMapEntry {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(it) => &it.syntax,
-            AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(it) => &it.syntax,
+            Self::YamlBlockMapExplicitEntry(it) => &it.syntax,
+            Self::YamlBlockMapImplicitEntry(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(it) => it.syntax,
-            AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(it) => it.syntax,
+            Self::YamlBlockMapExplicitEntry(it) => it.syntax,
+            Self::YamlBlockMapImplicitEntry(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlBlockMapEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlBlockMapExplicitEntry(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlBlockMapImplicitEntry(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlBlockMapEntry> for SyntaxNode {
-    fn from(n: AnyYamlBlockMapEntry) -> SyntaxNode {
+    fn from(n: AnyYamlBlockMapEntry) -> Self {
         match n {
             AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(it) => it.into(),
             AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(it) => it.into(),
@@ -3028,19 +3020,19 @@ impl From<AnyYamlBlockMapEntry> for SyntaxNode {
     }
 }
 impl From<AnyYamlBlockMapEntry> for SyntaxElement {
-    fn from(n: AnyYamlBlockMapEntry) -> SyntaxElement {
+    fn from(n: AnyYamlBlockMapEntry) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlFlowJsonNode> for AnyYamlBlockMapImplicitKey {
-    fn from(node: YamlFlowJsonNode) -> AnyYamlBlockMapImplicitKey {
-        AnyYamlBlockMapImplicitKey::YamlFlowJsonNode(node)
+    fn from(node: YamlFlowJsonNode) -> Self {
+        Self::YamlFlowJsonNode(node)
     }
 }
 impl From<YamlFlowYamlNode> for AnyYamlBlockMapImplicitKey {
-    fn from(node: YamlFlowYamlNode) -> AnyYamlBlockMapImplicitKey {
-        AnyYamlBlockMapImplicitKey::YamlFlowYamlNode(node)
+    fn from(node: YamlFlowYamlNode) -> Self {
+        Self::YamlFlowYamlNode(node)
     }
 }
 impl AstNode for AnyYamlBlockMapImplicitKey {
@@ -3052,39 +3044,35 @@ impl AstNode for AnyYamlBlockMapImplicitKey {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_FLOW_JSON_NODE => {
-                AnyYamlBlockMapImplicitKey::YamlFlowJsonNode(YamlFlowJsonNode { syntax })
-            }
-            YAML_FLOW_YAML_NODE => {
-                AnyYamlBlockMapImplicitKey::YamlFlowYamlNode(YamlFlowYamlNode { syntax })
-            }
+            YAML_FLOW_JSON_NODE => Self::YamlFlowJsonNode(YamlFlowJsonNode { syntax }),
+            YAML_FLOW_YAML_NODE => Self::YamlFlowYamlNode(YamlFlowYamlNode { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlBlockMapImplicitKey::YamlFlowJsonNode(it) => &it.syntax,
-            AnyYamlBlockMapImplicitKey::YamlFlowYamlNode(it) => &it.syntax,
+            Self::YamlFlowJsonNode(it) => &it.syntax,
+            Self::YamlFlowYamlNode(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlBlockMapImplicitKey::YamlFlowJsonNode(it) => it.syntax,
-            AnyYamlBlockMapImplicitKey::YamlFlowYamlNode(it) => it.syntax,
+            Self::YamlFlowJsonNode(it) => it.syntax,
+            Self::YamlFlowYamlNode(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlBlockMapImplicitKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlBlockMapImplicitKey::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlBlockMapImplicitKey::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlBlockMapImplicitKey> for SyntaxNode {
-    fn from(n: AnyYamlBlockMapImplicitKey) -> SyntaxNode {
+    fn from(n: AnyYamlBlockMapImplicitKey) -> Self {
         match n {
             AnyYamlBlockMapImplicitKey::YamlFlowJsonNode(it) => it.into(),
             AnyYamlBlockMapImplicitKey::YamlFlowYamlNode(it) => it.into(),
@@ -3092,24 +3080,24 @@ impl From<AnyYamlBlockMapImplicitKey> for SyntaxNode {
     }
 }
 impl From<AnyYamlBlockMapImplicitKey> for SyntaxElement {
-    fn from(n: AnyYamlBlockMapImplicitKey) -> SyntaxElement {
+    fn from(n: AnyYamlBlockMapImplicitKey) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlBlockCollection> for AnyYamlBlockNode {
-    fn from(node: YamlBlockCollection) -> AnyYamlBlockNode {
-        AnyYamlBlockNode::YamlBlockCollection(node)
+    fn from(node: YamlBlockCollection) -> Self {
+        Self::YamlBlockCollection(node)
     }
 }
 impl From<YamlFoldedScalar> for AnyYamlBlockNode {
-    fn from(node: YamlFoldedScalar) -> AnyYamlBlockNode {
-        AnyYamlBlockNode::YamlFoldedScalar(node)
+    fn from(node: YamlFoldedScalar) -> Self {
+        Self::YamlFoldedScalar(node)
     }
 }
 impl From<YamlLiteralScalar> for AnyYamlBlockNode {
-    fn from(node: YamlLiteralScalar) -> AnyYamlBlockNode {
-        AnyYamlBlockNode::YamlLiteralScalar(node)
+    fn from(node: YamlLiteralScalar) -> Self {
+        Self::YamlLiteralScalar(node)
     }
 }
 impl AstNode for AnyYamlBlockNode {
@@ -3125,43 +3113,39 @@ impl AstNode for AnyYamlBlockNode {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_BLOCK_COLLECTION => {
-                AnyYamlBlockNode::YamlBlockCollection(YamlBlockCollection { syntax })
-            }
-            YAML_FOLDED_SCALAR => AnyYamlBlockNode::YamlFoldedScalar(YamlFoldedScalar { syntax }),
-            YAML_LITERAL_SCALAR => {
-                AnyYamlBlockNode::YamlLiteralScalar(YamlLiteralScalar { syntax })
-            }
+            YAML_BLOCK_COLLECTION => Self::YamlBlockCollection(YamlBlockCollection { syntax }),
+            YAML_FOLDED_SCALAR => Self::YamlFoldedScalar(YamlFoldedScalar { syntax }),
+            YAML_LITERAL_SCALAR => Self::YamlLiteralScalar(YamlLiteralScalar { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlBlockNode::YamlBlockCollection(it) => &it.syntax,
-            AnyYamlBlockNode::YamlFoldedScalar(it) => &it.syntax,
-            AnyYamlBlockNode::YamlLiteralScalar(it) => &it.syntax,
+            Self::YamlBlockCollection(it) => &it.syntax,
+            Self::YamlFoldedScalar(it) => &it.syntax,
+            Self::YamlLiteralScalar(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlBlockNode::YamlBlockCollection(it) => it.syntax,
-            AnyYamlBlockNode::YamlFoldedScalar(it) => it.syntax,
-            AnyYamlBlockNode::YamlLiteralScalar(it) => it.syntax,
+            Self::YamlBlockCollection(it) => it.syntax,
+            Self::YamlFoldedScalar(it) => it.syntax,
+            Self::YamlLiteralScalar(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlBlockNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlBlockNode::YamlBlockCollection(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlBlockNode::YamlFoldedScalar(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlBlockNode::YamlLiteralScalar(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlBlockCollection(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFoldedScalar(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlLiteralScalar(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlBlockNode> for SyntaxNode {
-    fn from(n: AnyYamlBlockNode) -> SyntaxNode {
+    fn from(n: AnyYamlBlockNode) -> Self {
         match n {
             AnyYamlBlockNode::YamlBlockCollection(it) => it.into(),
             AnyYamlBlockNode::YamlFoldedScalar(it) => it.into(),
@@ -3170,19 +3154,19 @@ impl From<AnyYamlBlockNode> for SyntaxNode {
     }
 }
 impl From<AnyYamlBlockNode> for SyntaxElement {
-    fn from(n: AnyYamlBlockNode) -> SyntaxElement {
+    fn from(n: AnyYamlBlockNode) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlFlowMapExplicitEntry> for AnyYamlFlowMapEntry {
-    fn from(node: YamlFlowMapExplicitEntry) -> AnyYamlFlowMapEntry {
-        AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(node)
+    fn from(node: YamlFlowMapExplicitEntry) -> Self {
+        Self::YamlFlowMapExplicitEntry(node)
     }
 }
 impl From<YamlFlowMapImplicitEntry> for AnyYamlFlowMapEntry {
-    fn from(node: YamlFlowMapImplicitEntry) -> AnyYamlFlowMapEntry {
-        AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(node)
+    fn from(node: YamlFlowMapImplicitEntry) -> Self {
+        Self::YamlFlowMapImplicitEntry(node)
     }
 }
 impl AstNode for AnyYamlFlowMapEntry {
@@ -3198,10 +3182,10 @@ impl AstNode for AnyYamlFlowMapEntry {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             YAML_FLOW_MAP_EXPLICIT_ENTRY => {
-                AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(YamlFlowMapExplicitEntry { syntax })
+                Self::YamlFlowMapExplicitEntry(YamlFlowMapExplicitEntry { syntax })
             }
             YAML_FLOW_MAP_IMPLICIT_ENTRY => {
-                AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(YamlFlowMapImplicitEntry { syntax })
+                Self::YamlFlowMapImplicitEntry(YamlFlowMapImplicitEntry { syntax })
             }
             _ => return None,
         };
@@ -3209,27 +3193,27 @@ impl AstNode for AnyYamlFlowMapEntry {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(it) => &it.syntax,
-            AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(it) => &it.syntax,
+            Self::YamlFlowMapExplicitEntry(it) => &it.syntax,
+            Self::YamlFlowMapImplicitEntry(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(it) => it.syntax,
-            AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(it) => it.syntax,
+            Self::YamlFlowMapExplicitEntry(it) => it.syntax,
+            Self::YamlFlowMapImplicitEntry(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlFlowMapEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowMapExplicitEntry(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowMapImplicitEntry(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlFlowMapEntry> for SyntaxNode {
-    fn from(n: AnyYamlFlowMapEntry) -> SyntaxNode {
+    fn from(n: AnyYamlFlowMapEntry) -> Self {
         match n {
             AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(it) => it.into(),
             AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(it) => it.into(),
@@ -3237,19 +3221,19 @@ impl From<AnyYamlFlowMapEntry> for SyntaxNode {
     }
 }
 impl From<AnyYamlFlowMapEntry> for SyntaxElement {
-    fn from(n: AnyYamlFlowMapEntry) -> SyntaxElement {
+    fn from(n: AnyYamlFlowMapEntry) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlFlowJsonNode> for AnyYamlFlowMapImplicitKey {
-    fn from(node: YamlFlowJsonNode) -> AnyYamlFlowMapImplicitKey {
-        AnyYamlFlowMapImplicitKey::YamlFlowJsonNode(node)
+    fn from(node: YamlFlowJsonNode) -> Self {
+        Self::YamlFlowJsonNode(node)
     }
 }
 impl From<YamlFlowYamlNode> for AnyYamlFlowMapImplicitKey {
-    fn from(node: YamlFlowYamlNode) -> AnyYamlFlowMapImplicitKey {
-        AnyYamlFlowMapImplicitKey::YamlFlowYamlNode(node)
+    fn from(node: YamlFlowYamlNode) -> Self {
+        Self::YamlFlowYamlNode(node)
     }
 }
 impl AstNode for AnyYamlFlowMapImplicitKey {
@@ -3261,39 +3245,35 @@ impl AstNode for AnyYamlFlowMapImplicitKey {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_FLOW_JSON_NODE => {
-                AnyYamlFlowMapImplicitKey::YamlFlowJsonNode(YamlFlowJsonNode { syntax })
-            }
-            YAML_FLOW_YAML_NODE => {
-                AnyYamlFlowMapImplicitKey::YamlFlowYamlNode(YamlFlowYamlNode { syntax })
-            }
+            YAML_FLOW_JSON_NODE => Self::YamlFlowJsonNode(YamlFlowJsonNode { syntax }),
+            YAML_FLOW_YAML_NODE => Self::YamlFlowYamlNode(YamlFlowYamlNode { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlFlowMapImplicitKey::YamlFlowJsonNode(it) => &it.syntax,
-            AnyYamlFlowMapImplicitKey::YamlFlowYamlNode(it) => &it.syntax,
+            Self::YamlFlowJsonNode(it) => &it.syntax,
+            Self::YamlFlowYamlNode(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlFlowMapImplicitKey::YamlFlowJsonNode(it) => it.syntax,
-            AnyYamlFlowMapImplicitKey::YamlFlowYamlNode(it) => it.syntax,
+            Self::YamlFlowJsonNode(it) => it.syntax,
+            Self::YamlFlowYamlNode(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlFlowMapImplicitKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlFlowMapImplicitKey::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlFlowMapImplicitKey::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlFlowMapImplicitKey> for SyntaxNode {
-    fn from(n: AnyYamlFlowMapImplicitKey) -> SyntaxNode {
+    fn from(n: AnyYamlFlowMapImplicitKey) -> Self {
         match n {
             AnyYamlFlowMapImplicitKey::YamlFlowJsonNode(it) => it.into(),
             AnyYamlFlowMapImplicitKey::YamlFlowYamlNode(it) => it.into(),
@@ -3301,24 +3281,24 @@ impl From<AnyYamlFlowMapImplicitKey> for SyntaxNode {
     }
 }
 impl From<AnyYamlFlowMapImplicitKey> for SyntaxElement {
-    fn from(n: AnyYamlFlowMapImplicitKey) -> SyntaxElement {
+    fn from(n: AnyYamlFlowMapImplicitKey) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlAliasNode> for AnyYamlFlowNode {
-    fn from(node: YamlAliasNode) -> AnyYamlFlowNode {
-        AnyYamlFlowNode::YamlAliasNode(node)
+    fn from(node: YamlAliasNode) -> Self {
+        Self::YamlAliasNode(node)
     }
 }
 impl From<YamlFlowJsonNode> for AnyYamlFlowNode {
-    fn from(node: YamlFlowJsonNode) -> AnyYamlFlowNode {
-        AnyYamlFlowNode::YamlFlowJsonNode(node)
+    fn from(node: YamlFlowJsonNode) -> Self {
+        Self::YamlFlowJsonNode(node)
     }
 }
 impl From<YamlFlowYamlNode> for AnyYamlFlowNode {
-    fn from(node: YamlFlowYamlNode) -> AnyYamlFlowNode {
-        AnyYamlFlowNode::YamlFlowYamlNode(node)
+    fn from(node: YamlFlowYamlNode) -> Self {
+        Self::YamlFlowYamlNode(node)
     }
 }
 impl AstNode for AnyYamlFlowNode {
@@ -3334,39 +3314,39 @@ impl AstNode for AnyYamlFlowNode {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_ALIAS_NODE => AnyYamlFlowNode::YamlAliasNode(YamlAliasNode { syntax }),
-            YAML_FLOW_JSON_NODE => AnyYamlFlowNode::YamlFlowJsonNode(YamlFlowJsonNode { syntax }),
-            YAML_FLOW_YAML_NODE => AnyYamlFlowNode::YamlFlowYamlNode(YamlFlowYamlNode { syntax }),
+            YAML_ALIAS_NODE => Self::YamlAliasNode(YamlAliasNode { syntax }),
+            YAML_FLOW_JSON_NODE => Self::YamlFlowJsonNode(YamlFlowJsonNode { syntax }),
+            YAML_FLOW_YAML_NODE => Self::YamlFlowYamlNode(YamlFlowYamlNode { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlFlowNode::YamlAliasNode(it) => &it.syntax,
-            AnyYamlFlowNode::YamlFlowJsonNode(it) => &it.syntax,
-            AnyYamlFlowNode::YamlFlowYamlNode(it) => &it.syntax,
+            Self::YamlAliasNode(it) => &it.syntax,
+            Self::YamlFlowJsonNode(it) => &it.syntax,
+            Self::YamlFlowYamlNode(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlFlowNode::YamlAliasNode(it) => it.syntax,
-            AnyYamlFlowNode::YamlFlowJsonNode(it) => it.syntax,
-            AnyYamlFlowNode::YamlFlowYamlNode(it) => it.syntax,
+            Self::YamlAliasNode(it) => it.syntax,
+            Self::YamlFlowJsonNode(it) => it.syntax,
+            Self::YamlFlowYamlNode(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlFlowNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlFlowNode::YamlAliasNode(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlFlowNode::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlFlowNode::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlAliasNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlFlowNode> for SyntaxNode {
-    fn from(n: AnyYamlFlowNode) -> SyntaxNode {
+    fn from(n: AnyYamlFlowNode) -> Self {
         match n {
             AnyYamlFlowNode::YamlAliasNode(it) => it.into(),
             AnyYamlFlowNode::YamlFlowJsonNode(it) => it.into(),
@@ -3375,7 +3355,7 @@ impl From<AnyYamlFlowNode> for SyntaxNode {
     }
 }
 impl From<AnyYamlFlowNode> for SyntaxElement {
-    fn from(n: AnyYamlFlowNode) -> SyntaxElement {
+    fn from(n: AnyYamlFlowNode) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -3394,42 +3374,38 @@ impl AstNode for AnyYamlFlowSequenceEntry {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let syntax = match AnyYamlFlowMapEntry::try_cast(syntax) {
             Ok(any_yaml_flow_map_entry) => {
-                return Some(AnyYamlFlowSequenceEntry::AnyYamlFlowMapEntry(
-                    any_yaml_flow_map_entry,
-                ));
+                return Some(Self::AnyYamlFlowMapEntry(any_yaml_flow_map_entry));
             }
             Err(syntax) => syntax,
         };
         if let Some(any_yaml_flow_node) = AnyYamlFlowNode::cast(syntax) {
-            return Some(AnyYamlFlowSequenceEntry::AnyYamlFlowNode(
-                any_yaml_flow_node,
-            ));
+            return Some(Self::AnyYamlFlowNode(any_yaml_flow_node));
         }
         None
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlFlowSequenceEntry::AnyYamlFlowMapEntry(it) => it.syntax(),
-            AnyYamlFlowSequenceEntry::AnyYamlFlowNode(it) => it.syntax(),
+            Self::AnyYamlFlowMapEntry(it) => it.syntax(),
+            Self::AnyYamlFlowNode(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlFlowSequenceEntry::AnyYamlFlowMapEntry(it) => it.into_syntax(),
-            AnyYamlFlowSequenceEntry::AnyYamlFlowNode(it) => it.into_syntax(),
+            Self::AnyYamlFlowMapEntry(it) => it.into_syntax(),
+            Self::AnyYamlFlowNode(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyYamlFlowSequenceEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlFlowSequenceEntry::AnyYamlFlowMapEntry(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlFlowSequenceEntry::AnyYamlFlowNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyYamlFlowMapEntry(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyYamlFlowNode(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlFlowSequenceEntry> for SyntaxNode {
-    fn from(n: AnyYamlFlowSequenceEntry) -> SyntaxNode {
+    fn from(n: AnyYamlFlowSequenceEntry) -> Self {
         match n {
             AnyYamlFlowSequenceEntry::AnyYamlFlowMapEntry(it) => it.into(),
             AnyYamlFlowSequenceEntry::AnyYamlFlowNode(it) => it.into(),
@@ -3437,19 +3413,19 @@ impl From<AnyYamlFlowSequenceEntry> for SyntaxNode {
     }
 }
 impl From<AnyYamlFlowSequenceEntry> for SyntaxElement {
-    fn from(n: AnyYamlFlowSequenceEntry) -> SyntaxElement {
+    fn from(n: AnyYamlFlowSequenceEntry) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlCompactMapping> for AnyYamlIndentedBlock {
-    fn from(node: YamlCompactMapping) -> AnyYamlIndentedBlock {
-        AnyYamlIndentedBlock::YamlCompactMapping(node)
+    fn from(node: YamlCompactMapping) -> Self {
+        Self::YamlCompactMapping(node)
     }
 }
 impl From<YamlCompactSequence> for AnyYamlIndentedBlock {
-    fn from(node: YamlCompactSequence) -> AnyYamlIndentedBlock {
-        AnyYamlIndentedBlock::YamlCompactSequence(node)
+    fn from(node: YamlCompactSequence) -> Self {
+        Self::YamlCompactSequence(node)
     }
 }
 impl AstNode for AnyYamlIndentedBlock {
@@ -3466,15 +3442,11 @@ impl AstNode for AnyYamlIndentedBlock {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_COMPACT_MAPPING => {
-                AnyYamlIndentedBlock::YamlCompactMapping(YamlCompactMapping { syntax })
-            }
-            YAML_COMPACT_SEQUENCE => {
-                AnyYamlIndentedBlock::YamlCompactSequence(YamlCompactSequence { syntax })
-            }
+            YAML_COMPACT_MAPPING => Self::YamlCompactMapping(YamlCompactMapping { syntax }),
+            YAML_COMPACT_SEQUENCE => Self::YamlCompactSequence(YamlCompactSequence { syntax }),
             _ => {
                 if let Some(any_yaml_node) = AnyYamlNode::cast(syntax) {
-                    return Some(AnyYamlIndentedBlock::AnyYamlNode(any_yaml_node));
+                    return Some(Self::AnyYamlNode(any_yaml_node));
                 }
                 return None;
             }
@@ -3483,30 +3455,30 @@ impl AstNode for AnyYamlIndentedBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlIndentedBlock::YamlCompactMapping(it) => &it.syntax,
-            AnyYamlIndentedBlock::YamlCompactSequence(it) => &it.syntax,
-            AnyYamlIndentedBlock::AnyYamlNode(it) => it.syntax(),
+            Self::YamlCompactMapping(it) => &it.syntax,
+            Self::YamlCompactSequence(it) => &it.syntax,
+            Self::AnyYamlNode(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlIndentedBlock::YamlCompactMapping(it) => it.syntax,
-            AnyYamlIndentedBlock::YamlCompactSequence(it) => it.syntax,
-            AnyYamlIndentedBlock::AnyYamlNode(it) => it.into_syntax(),
+            Self::YamlCompactMapping(it) => it.syntax,
+            Self::YamlCompactSequence(it) => it.syntax,
+            Self::AnyYamlNode(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyYamlIndentedBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlIndentedBlock::AnyYamlNode(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlIndentedBlock::YamlCompactMapping(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlIndentedBlock::YamlCompactSequence(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyYamlNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlCompactMapping(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlCompactSequence(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlIndentedBlock> for SyntaxNode {
-    fn from(n: AnyYamlIndentedBlock) -> SyntaxNode {
+    fn from(n: AnyYamlIndentedBlock) -> Self {
         match n {
             AnyYamlIndentedBlock::AnyYamlNode(it) => it.into(),
             AnyYamlIndentedBlock::YamlCompactMapping(it) => it.into(),
@@ -3515,29 +3487,29 @@ impl From<AnyYamlIndentedBlock> for SyntaxNode {
     }
 }
 impl From<AnyYamlIndentedBlock> for SyntaxElement {
-    fn from(n: AnyYamlIndentedBlock) -> SyntaxElement {
+    fn from(n: AnyYamlIndentedBlock) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlDoubleQuotedScalar> for AnyYamlJsonContent {
-    fn from(node: YamlDoubleQuotedScalar) -> AnyYamlJsonContent {
-        AnyYamlJsonContent::YamlDoubleQuotedScalar(node)
+    fn from(node: YamlDoubleQuotedScalar) -> Self {
+        Self::YamlDoubleQuotedScalar(node)
     }
 }
 impl From<YamlFlowMapping> for AnyYamlJsonContent {
-    fn from(node: YamlFlowMapping) -> AnyYamlJsonContent {
-        AnyYamlJsonContent::YamlFlowMapping(node)
+    fn from(node: YamlFlowMapping) -> Self {
+        Self::YamlFlowMapping(node)
     }
 }
 impl From<YamlFlowSequence> for AnyYamlJsonContent {
-    fn from(node: YamlFlowSequence) -> AnyYamlJsonContent {
-        AnyYamlJsonContent::YamlFlowSequence(node)
+    fn from(node: YamlFlowSequence) -> Self {
+        Self::YamlFlowSequence(node)
     }
 }
 impl From<YamlSingleQuotedScalar> for AnyYamlJsonContent {
-    fn from(node: YamlSingleQuotedScalar) -> AnyYamlJsonContent {
-        AnyYamlJsonContent::YamlSingleQuotedScalar(node)
+    fn from(node: YamlSingleQuotedScalar) -> Self {
+        Self::YamlSingleQuotedScalar(node)
     }
 }
 impl AstNode for AnyYamlJsonContent {
@@ -3558,12 +3530,12 @@ impl AstNode for AnyYamlJsonContent {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             YAML_DOUBLE_QUOTED_SCALAR => {
-                AnyYamlJsonContent::YamlDoubleQuotedScalar(YamlDoubleQuotedScalar { syntax })
+                Self::YamlDoubleQuotedScalar(YamlDoubleQuotedScalar { syntax })
             }
-            YAML_FLOW_MAPPING => AnyYamlJsonContent::YamlFlowMapping(YamlFlowMapping { syntax }),
-            YAML_FLOW_SEQUENCE => AnyYamlJsonContent::YamlFlowSequence(YamlFlowSequence { syntax }),
+            YAML_FLOW_MAPPING => Self::YamlFlowMapping(YamlFlowMapping { syntax }),
+            YAML_FLOW_SEQUENCE => Self::YamlFlowSequence(YamlFlowSequence { syntax }),
             YAML_SINGLE_QUOTED_SCALAR => {
-                AnyYamlJsonContent::YamlSingleQuotedScalar(YamlSingleQuotedScalar { syntax })
+                Self::YamlSingleQuotedScalar(YamlSingleQuotedScalar { syntax })
             }
             _ => return None,
         };
@@ -3571,33 +3543,33 @@ impl AstNode for AnyYamlJsonContent {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlJsonContent::YamlDoubleQuotedScalar(it) => &it.syntax,
-            AnyYamlJsonContent::YamlFlowMapping(it) => &it.syntax,
-            AnyYamlJsonContent::YamlFlowSequence(it) => &it.syntax,
-            AnyYamlJsonContent::YamlSingleQuotedScalar(it) => &it.syntax,
+            Self::YamlDoubleQuotedScalar(it) => &it.syntax,
+            Self::YamlFlowMapping(it) => &it.syntax,
+            Self::YamlFlowSequence(it) => &it.syntax,
+            Self::YamlSingleQuotedScalar(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlJsonContent::YamlDoubleQuotedScalar(it) => it.syntax,
-            AnyYamlJsonContent::YamlFlowMapping(it) => it.syntax,
-            AnyYamlJsonContent::YamlFlowSequence(it) => it.syntax,
-            AnyYamlJsonContent::YamlSingleQuotedScalar(it) => it.syntax,
+            Self::YamlDoubleQuotedScalar(it) => it.syntax,
+            Self::YamlFlowMapping(it) => it.syntax,
+            Self::YamlFlowSequence(it) => it.syntax,
+            Self::YamlSingleQuotedScalar(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlJsonContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlJsonContent::YamlDoubleQuotedScalar(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlJsonContent::YamlFlowMapping(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlJsonContent::YamlFlowSequence(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlJsonContent::YamlSingleQuotedScalar(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlDoubleQuotedScalar(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowMapping(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowSequence(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlSingleQuotedScalar(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlJsonContent> for SyntaxNode {
-    fn from(n: AnyYamlJsonContent) -> SyntaxNode {
+    fn from(n: AnyYamlJsonContent) -> Self {
         match n {
             AnyYamlJsonContent::YamlDoubleQuotedScalar(it) => it.into(),
             AnyYamlJsonContent::YamlFlowMapping(it) => it.into(),
@@ -3607,14 +3579,14 @@ impl From<AnyYamlJsonContent> for SyntaxNode {
     }
 }
 impl From<AnyYamlJsonContent> for SyntaxElement {
-    fn from(n: AnyYamlJsonContent) -> SyntaxElement {
+    fn from(n: AnyYamlJsonContent) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlBogusNode> for AnyYamlNode {
-    fn from(node: YamlBogusNode) -> AnyYamlNode {
-        AnyYamlNode::YamlBogusNode(node)
+    fn from(node: YamlBogusNode) -> Self {
+        Self::YamlBogusNode(node)
     }
 }
 impl AstNode for AnyYamlNode {
@@ -3632,16 +3604,16 @@ impl AstNode for AnyYamlNode {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_BOGUS_NODE => AnyYamlNode::YamlBogusNode(YamlBogusNode { syntax }),
+            YAML_BOGUS_NODE => Self::YamlBogusNode(YamlBogusNode { syntax }),
             _ => {
                 let syntax = match AnyYamlBlockNode::try_cast(syntax) {
                     Ok(any_yaml_block_node) => {
-                        return Some(AnyYamlNode::AnyYamlBlockNode(any_yaml_block_node));
+                        return Some(Self::AnyYamlBlockNode(any_yaml_block_node));
                     }
                     Err(syntax) => syntax,
                 };
                 if let Some(any_yaml_flow_node) = AnyYamlFlowNode::cast(syntax) {
-                    return Some(AnyYamlNode::AnyYamlFlowNode(any_yaml_flow_node));
+                    return Some(Self::AnyYamlFlowNode(any_yaml_flow_node));
                 }
                 return None;
             }
@@ -3650,30 +3622,30 @@ impl AstNode for AnyYamlNode {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlNode::YamlBogusNode(it) => &it.syntax,
-            AnyYamlNode::AnyYamlBlockNode(it) => it.syntax(),
-            AnyYamlNode::AnyYamlFlowNode(it) => it.syntax(),
+            Self::YamlBogusNode(it) => &it.syntax,
+            Self::AnyYamlBlockNode(it) => it.syntax(),
+            Self::AnyYamlFlowNode(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlNode::YamlBogusNode(it) => it.syntax,
-            AnyYamlNode::AnyYamlBlockNode(it) => it.into_syntax(),
-            AnyYamlNode::AnyYamlFlowNode(it) => it.into_syntax(),
+            Self::YamlBogusNode(it) => it.syntax,
+            Self::AnyYamlBlockNode(it) => it.into_syntax(),
+            Self::AnyYamlFlowNode(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyYamlNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlNode::AnyYamlBlockNode(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlNode::AnyYamlFlowNode(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlNode::YamlBogusNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyYamlBlockNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyYamlFlowNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlBogusNode(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlNode> for SyntaxNode {
-    fn from(n: AnyYamlNode) -> SyntaxNode {
+    fn from(n: AnyYamlNode) -> Self {
         match n {
             AnyYamlNode::AnyYamlBlockNode(it) => it.into(),
             AnyYamlNode::AnyYamlFlowNode(it) => it.into(),
@@ -3682,19 +3654,19 @@ impl From<AnyYamlNode> for SyntaxNode {
     }
 }
 impl From<AnyYamlNode> for SyntaxElement {
-    fn from(n: AnyYamlNode) -> SyntaxElement {
+    fn from(n: AnyYamlNode) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<YamlAnchorProperty> for AnyYamlProperty {
-    fn from(node: YamlAnchorProperty) -> AnyYamlProperty {
-        AnyYamlProperty::YamlAnchorProperty(node)
+    fn from(node: YamlAnchorProperty) -> Self {
+        Self::YamlAnchorProperty(node)
     }
 }
 impl From<YamlTagProperty> for AnyYamlProperty {
-    fn from(node: YamlTagProperty) -> AnyYamlProperty {
-        AnyYamlProperty::YamlTagProperty(node)
+    fn from(node: YamlTagProperty) -> Self {
+        Self::YamlTagProperty(node)
     }
 }
 impl AstNode for AnyYamlProperty {
@@ -3706,37 +3678,35 @@ impl AstNode for AnyYamlProperty {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            YAML_ANCHOR_PROPERTY => {
-                AnyYamlProperty::YamlAnchorProperty(YamlAnchorProperty { syntax })
-            }
-            YAML_TAG_PROPERTY => AnyYamlProperty::YamlTagProperty(YamlTagProperty { syntax }),
+            YAML_ANCHOR_PROPERTY => Self::YamlAnchorProperty(YamlAnchorProperty { syntax }),
+            YAML_TAG_PROPERTY => Self::YamlTagProperty(YamlTagProperty { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyYamlProperty::YamlAnchorProperty(it) => &it.syntax,
-            AnyYamlProperty::YamlTagProperty(it) => &it.syntax,
+            Self::YamlAnchorProperty(it) => &it.syntax,
+            Self::YamlTagProperty(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyYamlProperty::YamlAnchorProperty(it) => it.syntax,
-            AnyYamlProperty::YamlTagProperty(it) => it.syntax,
+            Self::YamlAnchorProperty(it) => it.syntax,
+            Self::YamlTagProperty(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyYamlProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyYamlProperty::YamlAnchorProperty(it) => std::fmt::Debug::fmt(it, f),
-            AnyYamlProperty::YamlTagProperty(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlAnchorProperty(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlTagProperty(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyYamlProperty> for SyntaxNode {
-    fn from(n: AnyYamlProperty) -> SyntaxNode {
+    fn from(n: AnyYamlProperty) -> Self {
         match n {
             AnyYamlProperty::YamlAnchorProperty(it) => it.into(),
             AnyYamlProperty::YamlTagProperty(it) => it.into(),
@@ -3744,7 +3714,7 @@ impl From<AnyYamlProperty> for SyntaxNode {
     }
 }
 impl From<AnyYamlProperty> for SyntaxElement {
-    fn from(n: AnyYamlProperty) -> SyntaxElement {
+    fn from(n: AnyYamlProperty) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -4001,12 +3971,12 @@ impl std::fmt::Debug for YamlBogus {
     }
 }
 impl From<YamlBogus> for SyntaxNode {
-    fn from(n: YamlBogus) -> SyntaxNode {
+    fn from(n: YamlBogus) -> Self {
         n.syntax
     }
 }
 impl From<YamlBogus> for SyntaxElement {
-    fn from(n: YamlBogus) -> SyntaxElement {
+    fn from(n: YamlBogus) -> Self {
         n.syntax.into()
     }
 }
@@ -4057,12 +4027,12 @@ impl std::fmt::Debug for YamlBogusNode {
     }
 }
 impl From<YamlBogusNode> for SyntaxNode {
-    fn from(n: YamlBogusNode) -> SyntaxNode {
+    fn from(n: YamlBogusNode) -> Self {
         n.syntax
     }
 }
 impl From<YamlBogusNode> for SyntaxElement {
-    fn from(n: YamlBogusNode) -> SyntaxElement {
+    fn from(n: YamlBogusNode) -> Self {
         n.syntax.into()
     }
 }
@@ -4091,9 +4061,9 @@ impl AstNode for YamlBlockMapEntryList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_BLOCK_MAP_ENTRY_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlBlockMapEntryList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlBlockMapEntryList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -4173,9 +4143,9 @@ impl AstNode for YamlBlockSequenceEntryList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_BLOCK_SEQUENCE_ENTRY_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlBlockSequenceEntryList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlBlockSequenceEntryList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -4255,9 +4225,9 @@ impl AstNode for YamlDirectiveList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_DIRECTIVE_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlDirectiveList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlDirectiveList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -4337,9 +4307,9 @@ impl AstNode for YamlDocumentList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_DOCUMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlDocumentList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlDocumentList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -4419,9 +4389,9 @@ impl AstNode for YamlFlowMapEntryList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_FLOW_MAP_ENTRY_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlFlowMapEntryList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlFlowMapEntryList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -4501,9 +4471,9 @@ impl AstNode for YamlFlowSequenceEntryList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == YAML_FLOW_SEQUENCE_ENTRY_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<YamlFlowSequenceEntryList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(YamlFlowSequenceEntryList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {

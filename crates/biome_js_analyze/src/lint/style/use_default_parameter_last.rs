@@ -73,8 +73,8 @@ impl AnyFormalParameter {
 
     pub(crate) fn initializer(&self) -> Option<JsInitializerClause> {
         match self {
-            AnyFormalParameter::JsFormalParameter(x) => x.initializer(),
-            AnyFormalParameter::TsPropertyParameter(x) => x
+            Self::JsFormalParameter(x) => x.initializer(),
+            Self::TsPropertyParameter(x) => x
                 .formal_parameter()
                 .ok()?
                 .as_js_formal_parameter()?
@@ -84,8 +84,8 @@ impl AnyFormalParameter {
 
     pub(crate) fn question_mark_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyFormalParameter::JsFormalParameter(x) => x.question_mark_token(),
-            AnyFormalParameter::TsPropertyParameter(x) => x
+            Self::JsFormalParameter(x) => x.question_mark_token(),
+            Self::TsPropertyParameter(x) => x
                 .formal_parameter()
                 .ok()?
                 .as_js_formal_parameter()?

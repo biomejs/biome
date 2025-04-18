@@ -103,7 +103,7 @@ pub enum VcsClientKind {
 impl VcsClientKind {
     pub const fn ignore_files(&self) -> &[&str] {
         match self {
-            VcsClientKind::Git => &[GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME],
+            Self::Git => &[GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME],
         }
     }
 }

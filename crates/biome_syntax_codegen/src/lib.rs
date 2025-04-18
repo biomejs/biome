@@ -9,6 +9,8 @@
 //! cargo run --example minigrammar
 //! ```
 
+#![deny(clippy::use_self)]
+
 mod ast;
 mod generate_macros;
 mod generate_node_factory;

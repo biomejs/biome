@@ -564,35 +564,28 @@ declare_node_union! {
 impl AnyAssignmentExpressionLike {
     fn member(&self) -> Option<AnyNameLike> {
         match self {
-            AnyAssignmentExpressionLike::JsStaticMemberExpression(node) => {
-                node.member().ok().map(AnyNameLike::from)
-            }
-            AnyAssignmentExpressionLike::JsComputedMemberExpression(node) => {
-                node.member().ok().and_then(|node| {
-                    Some(match node {
-                        AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.into(),
-                        AnyJsExpression::AnyJsLiteralExpression(node) => node.into(),
-                        _ => return None,
-                    })
+            Self::JsStaticMemberExpression(node) => node.member().ok().map(AnyNameLike::from),
+            Self::JsComputedMemberExpression(node) => node.member().ok().and_then(|node| {
+                Some(match node {
+                    AnyJsExpression::JsIdentifierExpression(node) => node.name().ok()?.into(),
+                    AnyJsExpression::AnyJsLiteralExpression(node) => node.into(),
+                    _ => return None,
                 })
-            }
+            }),
         }
     }
 
     fn object(&self) -> Option<AnyJsExpression> {
         match self {
-            AnyAssignmentExpressionLike::JsStaticMemberExpression(node) => node.object().ok(),
-            AnyAssignmentExpressionLike::JsComputedMemberExpression(node) => node.object().ok(),
+            Self::JsStaticMemberExpression(node) => node.object().ok(),
+            Self::JsComputedMemberExpression(node) => node.object().ok(),
         }
     }
 }
 
 impl AnyAssignmentLike {
     const fn has_sub_structures(&self) -> bool {
-        matches!(
-            self,
-            AnyAssignmentLike::Arrays { .. } | AnyAssignmentLike::Object { .. }
-        )
+        matches!(self, Self::Arrays { .. } | Self::Object { .. })
     }
 }
 
@@ -606,7 +599,7 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
             (
                 AnyJsAssignmentPattern::JsArrayAssignmentPattern(left),
                 AnyJsExpression::JsArrayExpression(right),
-            ) => AnyAssignmentLike::Arrays {
+            ) => Self::Arrays {
                 left: left.elements().iter(),
                 right: right.elements().iter(),
             },
@@ -614,7 +607,7 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
             (
                 AnyJsAssignmentPattern::JsObjectAssignmentPattern(left),
                 AnyJsExpression::JsObjectExpression(right),
-            ) => AnyAssignmentLike::Object {
+            ) => Self::Object {
                 left: left.properties().iter(),
                 right: right.members().iter(),
             },
@@ -624,16 +617,13 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
                     left,
                 )),
                 AnyJsExpression::JsIdentifierExpression(right),
-            ) => AnyAssignmentLike::Identifiers(IdentifiersLike::IdentifierAndReference(
-                left,
-                right.name()?,
-            )),
+            ) => Self::Identifiers(IdentifiersLike::IdentifierAndReference(left, right.name()?)),
             (
                 AnyJsAssignmentPattern::AnyJsAssignment(AnyJsAssignment::JsStaticMemberAssignment(
                     left,
                 )),
                 AnyJsExpression::JsStaticMemberExpression(right),
-            ) => AnyAssignmentLike::StaticExpression {
+            ) => Self::StaticExpression {
                 left: AnyJsAssignmentExpressionLikeIterator::from_static_member_assignment(&left)?,
                 right: AnyJsAssignmentExpressionLikeIterator::from_static_member_expression(
                     &right,
@@ -645,7 +635,7 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
                     AnyJsAssignment::JsComputedMemberAssignment(left),
                 ),
                 AnyJsExpression::JsComputedMemberExpression(right),
-            ) => AnyAssignmentLike::StaticExpression {
+            ) => Self::StaticExpression {
                 left: AnyJsAssignmentExpressionLikeIterator::from_computed_member_assignment(
                     &left,
                 )?,
@@ -653,7 +643,7 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
                     &right,
                 )?,
             },
-            _ => AnyAssignmentLike::None,
+            _ => Self::None,
         })
     }
 }
@@ -732,31 +722,31 @@ impl TryFrom<(AnyNameLike, AnyNameLike)> for IdentifiersLike {
 impl IdentifiersLike {
     fn left_range(&self) -> TextRange {
         match self {
-            IdentifiersLike::IdentifierAndReference(left, _) => left.range(),
-            IdentifiersLike::Name(left, _) => left.range(),
-            IdentifiersLike::PrivateName(left, _) => left.range(),
-            IdentifiersLike::References(left, _) => left.range(),
-            IdentifiersLike::Literal(left, _) => left.range(),
+            Self::IdentifierAndReference(left, _) => left.range(),
+            Self::Name(left, _) => left.range(),
+            Self::PrivateName(left, _) => left.range(),
+            Self::References(left, _) => left.range(),
+            Self::Literal(left, _) => left.range(),
         }
     }
 
     fn right_range(&self) -> TextRange {
         match self {
-            IdentifiersLike::IdentifierAndReference(_, right) => right.range(),
-            IdentifiersLike::Name(_, right) => right.range(),
-            IdentifiersLike::PrivateName(_, right) => right.range(),
-            IdentifiersLike::References(_, right) => right.range(),
-            IdentifiersLike::Literal(_, right) => right.range(),
+            Self::IdentifierAndReference(_, right) => right.range(),
+            Self::Name(_, right) => right.range(),
+            Self::PrivateName(_, right) => right.range(),
+            Self::References(_, right) => right.range(),
+            Self::Literal(_, right) => right.range(),
         }
     }
 
     fn name(&self) -> Option<JsSyntaxToken> {
         match self {
-            IdentifiersLike::IdentifierAndReference(_, right) => right.value_token().ok(),
-            IdentifiersLike::Name(_, right) => right.value_token().ok(),
-            IdentifiersLike::PrivateName(_, right) => right.value_token().ok(),
-            IdentifiersLike::References(_, right) => right.value_token().ok(),
-            IdentifiersLike::Literal(_, right) => right.value_token().ok(),
+            Self::IdentifierAndReference(_, right) => right.value_token().ok(),
+            Self::Name(_, right) => right.value_token().ok(),
+            Self::PrivateName(_, right) => right.value_token().ok(),
+            Self::References(_, right) => right.value_token().ok(),
+            Self::Literal(_, right) => right.value_token().ok(),
         }
     }
 }

@@ -51,9 +51,9 @@ impl ParsedSyntax {
 
     /// Calls `op` if the syntax is present and otherwise returns [ParsedSyntax::Absent]
     #[inline]
-    pub fn and_then<F>(self, op: F) -> ParsedSyntax
+    pub fn and_then<F>(self, op: F) -> Self
     where
-        F: FnOnce(CompletedMarker) -> ParsedSyntax,
+        F: FnOnce(CompletedMarker) -> Self,
     {
         match self {
             Absent => Absent,
@@ -63,9 +63,9 @@ impl ParsedSyntax {
 
     /// Calls `op` if the syntax is absent and otherwise returns [ParsedSyntax::Present]
     #[inline]
-    pub fn or_else<F>(self, op: F) -> ParsedSyntax
+    pub fn or_else<F>(self, op: F) -> Self
     where
-        F: FnOnce() -> ParsedSyntax,
+        F: FnOnce() -> Self,
     {
         match self {
             Absent => op(),
@@ -142,7 +142,7 @@ impl ParsedSyntax {
     /// leaving an [ParsedSyntax::Absent] value untouched.
     ///
     /// This function can be used to compose the results of two functions.
-    pub fn map<F>(self, mapper: F) -> ParsedSyntax
+    pub fn map<F>(self, mapper: F) -> Self
     where
         F: FnOnce(CompletedMarker) -> CompletedMarker,
     {

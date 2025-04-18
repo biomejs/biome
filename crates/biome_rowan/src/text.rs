@@ -95,7 +95,7 @@ impl From<Text> for String {
 
 impl From<Text> for Box<str> {
     fn from(value: Text) -> Self {
-        Box::from(value.text())
+        Self::from(value.text())
     }
 }
 

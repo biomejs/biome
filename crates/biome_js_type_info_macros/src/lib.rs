@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod resolvable_derive;
 
 use proc_macro::TokenStream;

@@ -1,5 +1,7 @@
 //! A simple implementation of feature flags.
 
+#![deny(clippy::use_self)]
+
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{DebugDisplay, KeyValuePair, markup};
 use std::env;

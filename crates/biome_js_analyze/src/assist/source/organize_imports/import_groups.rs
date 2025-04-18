@@ -77,11 +77,9 @@ enum ImportGroup {
 impl ImportGroup {
     fn contains(&self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
-            ImportGroup::BlankLine => false,
-            ImportGroup::Matcher(matcher) => matcher.is_match(candidate),
-            ImportGroup::MatcherList(matchers) => {
-                candidate.matches_with_exceptions(matchers.iter())
-            }
+            Self::BlankLine => false,
+            Self::Matcher(matcher) => matcher.is_match(candidate),
+            Self::MatcherList(matchers) => candidate.matches_with_exceptions(matchers.iter()),
         }
     }
 }
@@ -202,8 +200,8 @@ impl SourcesMatcher {
     /// Tests whether the given `candidate` matches this matcher.
     pub fn is_match(&self, candidate: &ImportSourceCandidate) -> bool {
         match self {
-            SourcesMatcher::Matcher(matcher) => candidate.matches(matcher),
-            SourcesMatcher::MatcherList(matchers) => candidate.matches_with_exceptions(matchers),
+            Self::Matcher(matcher) => candidate.matches(matcher),
+            Self::MatcherList(matchers) => candidate.matches_with_exceptions(matchers),
         }
     }
 }
@@ -367,13 +365,13 @@ impl std::fmt::Display for PredefinedSourceMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
             // Don't forget to update `impl std::str::FromStr for PredefinedImportGroup`
-            PredefinedSourceMatcher::Alias => "ALIAS",
-            PredefinedSourceMatcher::Bun => "BUN",
-            PredefinedSourceMatcher::Node => "NODE",
-            PredefinedSourceMatcher::Package => "PACKAGE",
-            PredefinedSourceMatcher::ProtocolPackage => "PACKAGE_WITH_PROTOCOL",
-            PredefinedSourceMatcher::Path => "PATH",
-            PredefinedSourceMatcher::Url => "URL",
+            Self::Alias => "ALIAS",
+            Self::Bun => "BUN",
+            Self::Node => "NODE",
+            Self::Package => "PACKAGE",
+            Self::ProtocolPackage => "PACKAGE_WITH_PROTOCOL",
+            Self::Path => "PATH",
+            Self::Url => "URL",
         };
         f.write_str(repr)
     }

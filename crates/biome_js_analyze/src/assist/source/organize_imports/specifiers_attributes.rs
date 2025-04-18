@@ -17,10 +17,8 @@ pub enum JsNamedSpecifiers {
 impl JsNamedSpecifiers {
     pub fn are_sorted(&self) -> bool {
         match self {
-            JsNamedSpecifiers::JsNamedImportSpecifiers(specifeirs) => {
-                are_import_specifiers_sorted(specifeirs)
-            }
-            JsNamedSpecifiers::JsExportNamedFromSpecifierList(specifeirs) => {
+            Self::JsNamedImportSpecifiers(specifeirs) => are_import_specifiers_sorted(specifeirs),
+            Self::JsExportNamedFromSpecifierList(specifeirs) => {
                 are_export_specifiers_sorted(specifeirs)
             }
         }

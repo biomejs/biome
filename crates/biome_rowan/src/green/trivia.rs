@@ -85,12 +85,12 @@ impl GreenTrivia {
         let data =
             ThinArc::from_header_and_iter(GreenTriviaHead { _c: Count::new() }, pieces.into_iter());
 
-        GreenTrivia { ptr: Some(data) }
+        Self { ptr: Some(data) }
     }
 
     /// Creates an empty trivia
     pub fn empty() -> Self {
-        GreenTrivia { ptr: None }
+        Self { ptr: None }
     }
 
     /// Returns the total length of all pieces

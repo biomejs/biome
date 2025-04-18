@@ -321,13 +321,13 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     }
 
                     impl From<#name> for SyntaxNode {
-                        fn from(n: #name) -> SyntaxNode {
+                        fn from(n: #name) -> Self {
                             n.syntax
                         }
                     }
 
                     impl From<#name> for SyntaxElement {
-                        fn from(n: #name) -> SyntaxElement {
+                        fn from(n: #name) -> Self {
                             n.syntax.into()
                         }
                     }
@@ -355,7 +355,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .variants
                 .iter()
                 .map(|variant| {
-                    let variant_name = format_ident!("{}", variant);
+                    let variant_name = format_ident!("{variant}");
                     quote! {
                         #variant_name(#variant_name)
                     }
@@ -366,14 +366,14 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .variants
                 .iter()
                 .map(|variant| {
-                    let variant_name = format_ident!("{}", variant);
+                    let variant_name = format_ident!("{variant}");
                     let fn_name = format_ident!("as_{}", Case::Snake.convert(variant));
                     quote! {
                         pub fn #fn_name(&self) -> Option<&#variant_name> {
-                           match &self {
-                            #name::#variant_name(item) => Some(item),
-                               _ => None
-                           }
+                            match &self {
+                                Self::#variant_name(item) => Some(item),
+                                _ => None
+                            }
                         }
                     }
                 })
@@ -394,7 +394,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
             let variants: Vec<_> = simple_variants
                 .iter()
-                .map(|var| format_ident!("{}", var))
+                .map(|var| format_ident!("{var}"))
                 .collect();
 
             let kinds: Vec<_> = variants
@@ -406,7 +406,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .iter()
                 .map(|current_enum| {
                     let variant_is_enum = ast.unions.iter().find(|e| &e.name == *current_enum);
-                    let variant_name = format_ident!("{}", current_enum);
+                    let variant_name = format_ident!("{current_enum}");
 
                     let variant_is_dynamic = ast
                         .nodes
@@ -430,16 +430,16 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             let vv: Vec<_> = variant_of_variants
                 .iter()
                 .enumerate()
-                .map(|(i, en)| {
-                    let variant_name = format_ident!("{}", en);
-                    let variable_name = format_ident!("{}", Case::Snake.convert(en.as_str()));
+                .map(|(i, name)| {
+                    let variant_name = format_ident!("{name}");
+                    let variable_name = format_ident!("{}", Case::Snake.convert(name.as_str()));
                     (
                         // try_cast() code
                         if i != variant_of_variants.len() - 1 {
                             quote! {
                             let syntax = match #variant_name::try_cast(syntax) {
                                 Ok(#variable_name) => {
-                                    return Some(#name::#variant_name(#variable_name));
+                                    return Some(Self::#variant_name(#variable_name));
                                 }
                                 Err(syntax) => syntax,
                             };}
@@ -447,7 +447,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                             // if this is the last variant, do not clone syntax
                             quote! {
                                 if let Some(#variable_name) = #variant_name::cast(syntax) {
-                                    return Some(#name::#variant_name(#variable_name));
+                                    return Some(Self::#variant_name(#variable_name));
                             }}
                         },
                         // can_cast() code
@@ -456,11 +456,11 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         },
                         // syntax() code
                         quote! {
-                            #name::#variant_name(it) => it.syntax()
+                            Self::#variant_name(it) => it.syntax()
                         },
                         // into_syntax() code
                         quote! {
-                            #name::#variant_name(it) => it.into_syntax()
+                            Self::#variant_name(it) => it.into_syntax()
                         },
                     )
                 })
@@ -484,7 +484,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 quote! {
                     let res = match syntax.kind() {
                         #(
-                            #kinds => #name::#variants(#variant_cast),
+                            #kinds => Self::#variants(#variant_cast),
                         )*
                         _ =>  {
                             #(
@@ -522,8 +522,8 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 .variants
                 .iter()
                 .enumerate()
-                .map(|(index, v)| {
-                    let ident = format_ident!("{}", v);
+                .map(|(index, variant)| {
+                    let ident = format_ident!("{variant}");
                     if index == 0 {
                         quote!( #ident::KIND_SET )
                     } else {
@@ -549,7 +549,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             let all_variant_names: Vec<_> = union
                 .variants
                 .iter()
-                .map(|variant| format_ident!("{}", variant))
+                .map(|variant| format_ident!("{variant}"))
                 .collect();
 
             (
@@ -567,8 +567,8 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 quote! {
                     #(
                     impl From<#variants> for #name {
-                        fn from(node: #variants) -> #name {
-                            #name::#variants(node)
+                        fn from(node: #variants) -> Self {
+                            Self::#variants(node)
                         }
                     }
                     )*
@@ -586,22 +586,14 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         }
                         fn syntax(&self) -> &SyntaxNode {
                             match self {
-                                #(
-                                #name::#variants(it) => #variant_syntax,
-                                )*
-                                #(
-                                    #vv_syntax
-                                ),*
+                                #(Self::#variants(it) => #variant_syntax,)*
+                                #(#vv_syntax),*
                             }
                         }
                         fn into_syntax(self) -> SyntaxNode {
                             match self {
-                                #(
-                                #name::#variants(it) => #variant_into_syntax,
-                                )*
-                                #(
-                                    #vv_into_syntax
-                                ),*
+                                #(Self::#variants(it) => #variant_into_syntax,)*
+                                #(#vv_into_syntax),*
                             }
                         }
                     }
@@ -609,25 +601,21 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     impl std::fmt::Debug for #name {
                         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                             match self {
-                            #(
-                                #name::#all_variant_names(it) => std::fmt::Debug::fmt(it, f),
-                            )*
-                        }
+                                #(Self::#all_variant_names(it) => std::fmt::Debug::fmt(it, f),)*
                             }
+                        }
                     }
 
                     impl From<#name> for SyntaxNode {
-                        fn from(n: #name) -> SyntaxNode {
+                        fn from(n: #name) -> Self {
                             match n {
-                                #(
-                                #name::#all_variant_names(it) => it.into(),
-                                )*
+                                #(#name::#all_variant_names(it) => it.into(),)*
                             }
                         }
                     }
 
                     impl From<#name> for SyntaxElement {
-                        fn from(n: #name) -> SyntaxElement {
+                        fn from(n: #name) -> Self {
                             let node: SyntaxNode = n.into();
                             node.into()
                         }
@@ -714,13 +702,13 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             }
 
             impl From<#ident> for SyntaxNode {
-                fn from(n: #ident) -> SyntaxNode {
+                fn from(n: #ident) -> Self {
                     n.syntax
                 }
             }
 
             impl From<#ident> for SyntaxElement {
-                fn from(n: #ident) -> SyntaxElement {
+                fn from(n: #ident) -> Self {
                     n.syntax.into()
                 }
             }
@@ -778,9 +766,9 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     kind == #list_kind
                 }
 
-                fn cast(syntax: SyntaxNode) -> Option<#list_name> {
+                fn cast(syntax: SyntaxNode) -> Option<Self> {
                     if Self::can_cast(syntax.kind()) {
-                        Some(#list_name { syntax_list: syntax.into_list() })
+                        Some(Self { syntax_list: syntax.into_list() })
                     } else {
                         None
                     }

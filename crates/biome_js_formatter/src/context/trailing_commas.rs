@@ -24,14 +24,14 @@ impl FormatTrailingCommas {
         }
 
         match self {
-            FormatTrailingCommas::All => {
+            Self::All => {
                 if options.trailing_commas.is_all() {
                     TrailingSeparator::Allowed
                 } else {
                     TrailingSeparator::Omit
                 }
             }
-            FormatTrailingCommas::ES5 => TrailingSeparator::Allowed,
+            Self::ES5 => TrailingSeparator::Allowed,
         }
     }
 }
@@ -42,7 +42,7 @@ impl Format<JsFormatContext> for FormatTrailingCommas {
             return Ok(());
         }
 
-        if matches!(self, FormatTrailingCommas::ES5) || f.options().trailing_commas().is_all() {
+        if matches!(self, Self::ES5) || f.options().trailing_commas().is_all() {
             write!(f, [if_group_breaks(&text(","))])?
         }
 
@@ -70,13 +70,13 @@ pub enum TrailingCommas {
 
 impl TrailingCommas {
     pub const fn is_es5(&self) -> bool {
-        matches!(self, TrailingCommas::Es5)
+        matches!(self, Self::Es5)
     }
     pub const fn is_all(&self) -> bool {
-        matches!(self, TrailingCommas::All)
+        matches!(self, Self::All)
     }
     pub const fn is_none(&self) -> bool {
-        matches!(self, TrailingCommas::None)
+        matches!(self, Self::None)
     }
 }
 
@@ -97,9 +97,9 @@ impl FromStr for TrailingCommas {
 impl fmt::Display for TrailingCommas {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TrailingCommas::Es5 => std::write!(f, "ES5"),
-            TrailingCommas::All => std::write!(f, "All"),
-            TrailingCommas::None => std::write!(f, "None"),
+            Self::Es5 => std::write!(f, "ES5"),
+            Self::All => std::write!(f, "All"),
+            Self::None => std::write!(f, "None"),
         }
     }
 }

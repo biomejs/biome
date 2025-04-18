@@ -184,10 +184,10 @@ impl From<ArrowParens> for ArrowParentheses {
 impl From<EndOfLine> for LineEnding {
     fn from(value: EndOfLine) -> Self {
         match value {
-            EndOfLine::Lf => LineEnding::Lf,
-            EndOfLine::Crlf => LineEnding::Crlf,
-            EndOfLine::Cr => LineEnding::Cr,
-            EndOfLine::Auto => LineEnding::default(),
+            EndOfLine::Lf => Self::Lf,
+            EndOfLine::Crlf => Self::Crlf,
+            EndOfLine::Cr => Self::Cr,
+            EndOfLine::Auto => Self::default(),
         }
     }
 }
@@ -213,7 +213,7 @@ impl From<ObjectWrap> for Expand {
 impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
     type Error = Error;
     fn try_from(value: PrettierConfiguration) -> anyhow::Result<Self> {
-        let mut result = biome_configuration::Configuration::default();
+        let mut result = Self::default();
 
         let line_width = LineWidth::try_from(value.print_width)
             .with_context(|| "top-level Prettier configuration")?;
@@ -310,7 +310,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
 impl TryFrom<Override> for biome_configuration::OverridePattern {
     type Error = Error;
     fn try_from(Override { files, options }: Override) -> anyhow::Result<Self> {
-        let mut result = biome_configuration::OverridePattern {
+        let mut result = Self {
             includes: Some(biome_configuration::OverrideGlobs::Globs(
                 files
                     .into_iter()

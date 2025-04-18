@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod capabilities;
 mod diagnostics;
 mod documents;

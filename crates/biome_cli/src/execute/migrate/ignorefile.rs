@@ -38,7 +38,7 @@ impl IgnorePatterns {
                 patterns.push(glob);
             }
         }
-        IgnorePatterns {
+        Self {
             patterns: patterns.into_boxed_slice(),
         }
     }

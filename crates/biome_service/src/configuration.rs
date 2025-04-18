@@ -111,7 +111,7 @@ impl LoadedConfiguration {
         fs: &dyn FileSystem,
     ) -> Result<Self, WorkspaceError> {
         let Some(value) = value else {
-            return Ok(LoadedConfiguration::default());
+            return Ok(Self::default());
         };
 
         let ConfigurationPayload {
@@ -568,7 +568,7 @@ impl ConfigurationExt for Configuration {
                     }
                 )
             })?;
-            let deserialized = deserialize_from_json_str::<Configuration>(
+            let deserialized = deserialize_from_json_str::<Self>(
                 content.as_str(),
                 match extend_configuration_file_path.extension() {
                     Some("json") => JsonParserOptions::default(),

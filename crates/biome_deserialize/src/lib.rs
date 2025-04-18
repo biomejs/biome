@@ -29,6 +29,9 @@
 //!
 //! You can find a guide and more examples in the README.
 //!
+
+#![deny(clippy::use_self)]
+
 mod diagnostics;
 mod impls;
 pub mod json;

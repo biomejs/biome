@@ -58,7 +58,7 @@ impl TokenText {
 
     /// Returns a subslice of the text.
     /// `range.end()` must be lower or equal to `self.len()`
-    pub fn slice(mut self, range: TextRange) -> TokenText {
+    pub fn slice(mut self, range: TextRange) -> Self {
         assert!(
             range.end() <= self.len(),
             "Range {range:?} exceeds the text length {:?}",

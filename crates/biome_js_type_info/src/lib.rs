@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod flattening;
 mod globals;
 mod local_inference;

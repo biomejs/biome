@@ -62,7 +62,7 @@ impl JsonSyntaxKind {
     pub const fn is_list(self) -> bool {
         matches!(self, JSON_MEMBER_LIST | JSON_ARRAY_ELEMENT_LIST)
     }
-    pub fn from_keyword(ident: &str) -> Option<JsonSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "null" => NULL_KW,
             "true" => TRUE_KW,

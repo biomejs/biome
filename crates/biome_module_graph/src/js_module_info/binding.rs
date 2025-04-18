@@ -167,7 +167,7 @@ impl JsDeclarationKind {
                 // TODO: Handle this
                 Self::Unknown
             }
-            AnyJsDeclaration::TsInterfaceDeclaration(_) => JsDeclarationKind::Interface,
+            AnyJsDeclaration::TsInterfaceDeclaration(_) => Self::Interface,
             AnyJsDeclaration::TsModuleDeclaration(decl) => {
                 if decl
                     .module_or_namespace()

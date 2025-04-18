@@ -203,12 +203,12 @@ pub enum TraversalMode {
 impl Display for TraversalMode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            TraversalMode::Check { .. } => write!(f, "check"),
-            TraversalMode::CI { .. } => write!(f, "ci"),
-            TraversalMode::Format { .. } => write!(f, "format"),
-            TraversalMode::Migrate { .. } => write!(f, "migrate"),
-            TraversalMode::Lint { .. } => write!(f, "lint"),
-            TraversalMode::Search { .. } => write!(f, "search"),
+            Self::Check { .. } => write!(f, "check"),
+            Self::CI { .. } => write!(f, "ci"),
+            Self::Format { .. } => write!(f, "format"),
+            Self::Migrate { .. } => write!(f, "migrate"),
+            Self::Lint { .. } => write!(f, "lint"),
+            Self::Search { .. } => write!(f, "search"),
         }
     }
 }
