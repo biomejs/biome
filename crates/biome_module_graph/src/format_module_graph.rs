@@ -380,14 +380,14 @@ impl Format<ModuleFormatContext> for Type {
                 ]]
             ),
             TypeInner::Function(func) => write!(f, [&func.as_ref(),]),
-            TypeInner::Union(_) => todo!(),
-            TypeInner::Intersection(_) => todo!(),
-            TypeInner::Tuple(_) => todo!(),
-            TypeInner::Namespace(_) => todo!(),
+            TypeInner::Union(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            TypeInner::Intersection(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            TypeInner::Tuple(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            TypeInner::Namespace(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             TypeInner::Class(class) => write!(f, [&class.as_ref()]),
-            TypeInner::Constructor(_) => todo!(),
-            TypeInner::TypeOperator(_) => todo!(),
-            TypeInner::Alias(_) => todo!(),
+            TypeInner::Constructor(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            TypeInner::TypeOperator(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            TypeInner::Alias(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             TypeInner::Literal(literal) => write!(
                 f,
                 [&format_args![
@@ -398,8 +398,8 @@ impl Format<ModuleFormatContext> for Type {
                 ]]
             ),
             TypeInner::Reference(reference) => write!(f, [&reference.as_ref(),]),
-            TypeInner::TypeofType(_) => todo!(),
-            TypeInner::TypeofValue(_) => todo!(),
+            TypeInner::TypeofType(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            TypeInner::TypeofValue(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             TypeInner::AnyKeyword => write!(f, [&format_args![text("AnyKeyword")]]),
             TypeInner::NeverKeyword => write!(f, [&format_args![text("NeverKeyword")]]),
             TypeInner::ObjectKeyword => write!(f, [&format_args![text("ObjectKeyword")]]),
@@ -618,7 +618,7 @@ impl Format<ModuleFormatContext> for TypeMember {
                     ]]
                 )
             }
-            Self::Constructor(_) => todo!(),
+            Self::Constructor(ty) => write!(f, [FmtVerbatim(&ty)]),
             Self::Method(method) => {
                 write!(f, [&format_args![&method]])
             }
@@ -721,7 +721,7 @@ impl Format<ModuleFormatContext> for ReturnType {
             Self::Type(ty) => {
                 write!(f, [&ty])
             }
-            Self::Predicate(_) => todo!(),
+            Self::Predicate(ty) => write!(f, [FmtVerbatim(&ty)]),
             Self::Asserts(_asset) => {
                 todo!()
             }
@@ -940,7 +940,7 @@ impl Format<ModuleFormatContext> for TypeofExpression {
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
         match self {
-            Self::Addition(_) => todo!(),
+            Self::Addition(ty) => write!(f, [FmtVerbatim(&ty)]),
             Self::Await(await_expression) => {
                 write!(
                     f,
@@ -952,11 +952,11 @@ impl Format<ModuleFormatContext> for TypeofExpression {
                     ]]
                 )
             }
-            Self::Call(_) => todo!(),
-            Self::New(_) => todo!(),
-            Self::StaticMember(_) => todo!(),
-            Self::Super(_) => todo!(),
-            Self::This(_) => todo!(),
+            Self::Call(ty) => write!(f, [FmtVerbatim(&ty)]),
+            Self::New(ty) => write!(f, [FmtVerbatim(&ty)]),
+            Self::StaticMember(ty) => write!(f, [FmtVerbatim(&ty)]),
+            Self::Super(ty) => write!(f, [FmtVerbatim(&ty)]),
+            Self::This(ty) => write!(f, [FmtVerbatim(&ty)]),
         }
     }
 }
@@ -1077,6 +1077,23 @@ impl Format<ModuleFormatContext> for Option<Text> {
         } else {
             write!(f, [&format_args![text("No name")]])
         }
+    }
+}
+struct FmtVerbatim<'a, T>(&'a T);
+
+impl<T> Format<ModuleFormatContext> for FmtVerbatim<'_, T>
+where
+    T: Debug,
+{
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
+    ) -> FormatResult<()> {
+        let text = std::format!("{:#?}", self.0);
+        write!(
+            f,
+            [&format_args![dynamic_text(&text, TextSize::default()),]]
+        )
     }
 }
 

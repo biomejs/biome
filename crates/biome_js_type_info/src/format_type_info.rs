@@ -11,6 +11,7 @@ use biome_formatter::{
 use biome_formatter::{format_args, write};
 use biome_js_syntax::TextSize;
 use biome_rowan::Text;
+use std::fmt::Debug;
 use std::ops::Deref;
 
 struct FormatTypeOptions;
@@ -87,20 +88,20 @@ impl Format<FormatTypeContext> for TypeInner {
             Self::Symbol => write!(f, [text("symbol")]),
             Self::Undefined => write!(f, [text("undefined")]),
             Self::Class(class) => write!(f, [&class.as_ref()]),
-            Self::Constructor(_) => todo!(),
+            Self::Constructor(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Function(function) => write!(f, [&function.as_ref()]),
-            Self::Namespace(_) => todo!(),
-            Self::Object(object) => write!(f, [&object.as_ref()]),
-            Self::Tuple(_) => todo!(),
-            Self::Intersection(_) => todo!(),
-            Self::Union(_) => todo!(),
-            Self::TypeOperator(_) => todo!(),
-            Self::Alias(_) => todo!(),
-            Self::Literal(_) => todo!(),
+            Self::Namespace(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
+            Self::Object(object) => write!(f, [object.as_ref()]),
+            Self::Tuple(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::Intersection(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::Union(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::TypeOperator(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::Alias(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::Literal(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::Reference(reference) => write!(f, [&reference.as_ref()]),
-            Self::TypeofExpression(_) => todo!(),
-            Self::TypeofType(_) => todo!(),
-            Self::TypeofValue(_) => todo!(),
+            Self::TypeofExpression(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::TypeofType(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::TypeofValue(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::AnyKeyword => write!(f, [text("any")]),
             Self::NeverKeyword => write!(f, [text("never")]),
             Self::ObjectKeyword => write!(f, [text("object")]),
@@ -209,10 +210,8 @@ impl Format<FormatTypeContext> for ReturnType {
             Self::Type(ty) => {
                 write!(f, [&ty])
             }
-            Self::Predicate(_) => todo!(),
-            Self::Asserts(_asset) => {
-                todo!()
-            }
+            Self::Predicate(ty) => write!(f, [FmtVerbatim(&ty)]),
+            Self::Asserts(ty) => write!(f, [FmtVerbatim(&ty)]),
         }
     }
 }
@@ -264,7 +263,7 @@ impl Format<FormatTypeContext> for TypeMember {
                     ]]
                 )
             }
-            Self::Constructor(_) => todo!(),
+            Self::Constructor(ty) => write!(f, [FmtVerbatim(&ty)]),
             Self::Method(method) => {
                 write!(f, [&format_args![&method]])
             }
@@ -584,6 +583,21 @@ impl Format<FormatTypeContext> for Option<Text> {
         } else {
             write!(f, [&format_args![text("No name")]])
         }
+    }
+}
+
+struct FmtVerbatim<'a, T>(&'a T);
+
+impl<T> Format<FormatTypeContext> for FmtVerbatim<'_, T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        let text = std::format!("{:#?}", self.0);
+        write!(
+            f,
+            [&format_args![dynamic_text(&text, TextSize::default()),]]
+        )
     }
 }
 
