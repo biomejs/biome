@@ -57,10 +57,12 @@ mod scanner;
 mod server;
 mod watcher;
 
+use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
-pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-pub use server::WorkspaceServer;
-
+use crate::projects::ProjectKey;
+use crate::settings::WorkspaceSettingsHandle;
+pub use crate::workspace::scanner::ScanKind;
+use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::Configuration;
 use biome_configuration::analyzer::RuleSelector;
@@ -73,22 +75,19 @@ use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
+pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use core::str;
 use crossbeam::channel::bounded;
 use enumflags2::{BitFlags, bitflags};
 #[cfg(feature = "schema")]
 use schemars::{r#gen::SchemaGenerator, schema::Schema};
+pub use server::WorkspaceServer;
 use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe};
 use tokio::sync::watch;
 use tracing::{debug, instrument};
-
-use crate::file_handlers::Capabilities;
-use crate::projects::ProjectKey;
-use crate::settings::WorkspaceSettingsHandle;
-use crate::{Deserialize, Serialize, WorkspaceError};
 
 /// Notification regarding a workspace's service data.
 #[derive(Clone, Copy, Debug)]
@@ -1032,6 +1031,8 @@ pub struct ScanProjectFolderParams {
 
     /// Forces scanning of the folder, even if it is already being watched.
     pub force: bool,
+
+    pub scan_kind: ScanKind,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

@@ -15,13 +15,13 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
-use biome_service::workspace::ScanProjectFolderParams;
 use biome_service::workspace::ServiceDataNotification;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
     SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
+use biome_service::workspace::{ScanKind, ScanProjectFolderParams};
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::StreamExt;
@@ -590,6 +590,7 @@ impl Session {
                     path: Some(project_path),
                     watch: true,
                     force: false,
+                    scan_kind: ScanKind::Project,
                 });
 
             match result {
