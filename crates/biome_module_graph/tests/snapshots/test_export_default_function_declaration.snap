@@ -20,11 +20,11 @@ Exports {
     ExportOwnExport => JsOwnExport(
       sync Function "Component" {
         accepts: {
-          ty: No parameters
+          params: []
           type_args: No parameters
         }
         returns: "JSX.Element" {
-          ty: Unknown
+          params: Unknown
           type_args: No types
         }
       }

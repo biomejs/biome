@@ -73,7 +73,7 @@ Exports {
     ExportOwnExport => JsOwnExport(
       sync Function "bar" {
         accepts: {
-          ty: No parameters
+          params: []
           type_args: No parameters
         }
         returns: Unknown
@@ -88,108 +88,108 @@ Exports {
     ExportOwnExport => JsOwnExport(
       async Function "baz" {
         accepts: {
-          ty: No parameters
+          params: []
           type_args: No parameters
         }
         returns: [Promise]
         Members(
           required sync Method "all" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
           required sync Method "allSettled" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
           required sync Method "any" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
           required sync Method "race" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
           required sync Method "reject" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
           required sync Method "resolve" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
           required sync Method "try" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
           required sync Method "catch" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
           required sync Method "finally" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
           required sync Method "then" {
             accepts: {
-              ty: No parameters
+              params: []
               type_args: No parameters
             }
             returns: "Promise" {
-              ty: Unknown
+              params: Unknown
               type_args: Unknown
             }
           }
@@ -211,11 +211,11 @@ Exports {
     ExportOwnExport => JsOwnExport(
       sync Function "Component" {
         accepts: {
-          ty: No parameters
+          params: []
           type_args: No parameters
         }
         returns: "JSX.Element" {
-          ty: Unknown
+          params: Unknown
           type_args: No types
         }
       }
@@ -239,7 +239,7 @@ Exports {
     ExportOwnExport => JsOwnExport(
       sync Function "foo" {
         accepts: {
-          ty: No parameters
+          params: []
           type_args: No parameters
         }
         returns: Unknown
@@ -297,7 +297,7 @@ Exports {
     ExportOwnExport => JsOwnExport(
       sync Function "ohNo" {
         accepts: {
-          ty: No parameters
+          params: []
           type_args: No parameters
         }
         returns: Unknown

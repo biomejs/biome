@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_type_info/tests/utils/mod.rs
+expression: content
+snapshot_kind: text
+---
+```ts
+async function returnsPromise(): Promise<string> {
+	return "value";
+}
+
+```
+
+```
+async Function "returnsPromise" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: "Promise" {
+    params: unknown
+    type_args: string
+  }
+}
+```

@@ -159,7 +159,3 @@ impl Type {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "flattening.tests.rs"]
-mod tests;

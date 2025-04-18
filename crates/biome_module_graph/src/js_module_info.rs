@@ -325,7 +325,6 @@ impl JsResolvedPath {
         self.as_deref().ok()
     }
 
-    #[cfg(debug_assertions)]
     pub fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
         Self::new(Ok(path.into()))
     }

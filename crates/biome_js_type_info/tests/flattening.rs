@@ -1,11 +1,11 @@
-use insta::assert_debug_snapshot;
-
-use crate::test_util::{
-    HardcodedSymbolResolver, PromiseResolver, get_expression_statement, get_function_declaration,
+use crate::utils::{
+    HardcodedSymbolResolver, PromiseResolver, assert_type_snapshot, get_function_declaration,
     parse_ts,
 };
+use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsExpressionStatement};
+use biome_js_type_info::Type;
 
-use super::*;
+mod utils;
 
 #[test]
 fn infer_flattened_type_of_promise_returning_function() {
@@ -18,7 +18,11 @@ fn infer_flattened_type_of_promise_returning_function() {
     let mut ty = Type::from_js_function_declaration(&decl);
     ty.resolve(&PromiseResolver);
 
-    assert_debug_snapshot!(ty);
+    assert_type_snapshot(
+        CODE,
+        ty,
+        "infer_flattened_type_of_promise_returning_function",
+    )
 }
 
 #[test]
@@ -32,7 +36,7 @@ fn infer_flattened_type_of_async_function() {
     let mut ty = Type::from_js_function_declaration(&decl);
     ty.resolve(&PromiseResolver);
 
-    assert_debug_snapshot!(ty);
+    assert_type_snapshot(CODE, ty, "infer_flattened_type_of_async_function")
 }
 
 #[test]
@@ -52,7 +56,11 @@ returnsPromise()"#;
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
     expr_ty.resolve(&HardcodedSymbolResolver("returnsPromise", function_ty));
 
-    assert_debug_snapshot!(expr_ty);
+    assert_type_snapshot(
+        CODE,
+        expr_ty,
+        "infer_flattened_type_from_invocation_of_promise_returning_function",
+    )
 }
 
 #[test]
@@ -72,7 +80,11 @@ returnsPromise().then(() => {})"#;
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
     expr_ty.resolve(&HardcodedSymbolResolver("returnsPromise", function_ty));
 
-    assert_debug_snapshot!(expr_ty);
+    assert_type_snapshot(
+        CODE,
+        expr_ty,
+        "infer_flattened_type_from_chained_invocation_of_promise_returning_function",
+    )
 }
 
 #[test]
@@ -92,7 +104,11 @@ returnsPromise().then(() => {}).finally(() => {})"#;
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
     expr_ty.resolve(&HardcodedSymbolResolver("returnsPromise", function_ty));
 
-    assert_debug_snapshot!(expr_ty);
+    assert_type_snapshot(
+        CODE,
+        expr_ty,
+        "infer_flattened_type_from_double_chained_invocation_of_promise_returning_function",
+    )
 }
 
 #[test]
@@ -104,7 +120,11 @@ fn infer_flattened_type_from_direct_promise_instance() {
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
     expr_ty.resolve(&PromiseResolver);
 
-    assert_debug_snapshot!(expr_ty);
+    assert_type_snapshot(
+        CODE,
+        expr_ty,
+        "infer_flattened_type_from_direct_promise_instance",
+    )
 }
 
 #[test]
@@ -116,5 +136,25 @@ fn infer_flattened_type_from_static_promise_function() {
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
     expr_ty.resolve(&PromiseResolver);
 
-    assert_debug_snapshot!(expr_ty);
+    assert_type_snapshot(
+        CODE,
+        expr_ty,
+        "infer_flattened_type_from_static_promise_function",
+    )
+}
+
+pub fn get_expression_statement(root: &AnyJsRoot) -> JsExpressionStatement {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::JsExpressionStatement(expr) => Some(expr),
+            _ => None,
+        })
+        .expect("cannot find expression statement")
 }

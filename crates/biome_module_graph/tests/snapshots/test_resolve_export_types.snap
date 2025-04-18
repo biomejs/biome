@@ -45,21 +45,21 @@ Exports {
       Object(
         required sync Method "answerMe" {
           accepts: {
-            ty: No parameters
+            params: []
             type_args: No parameters
           }
           returns: Number
         }
         required sync Method "giveMeABiggerAnswer" {
           accepts: {
-            ty: [delta, The parameter is not optional, The parameter is not rest]
+            params: [delta, The parameter is not optional, The parameter is not rest]
             type_args: No parameters
           }
           returns: Unknown
         }
         required sync Method "whatWasTheUltimateQuestion" {
           accepts: {
-            ty: No parameters
+            params: []
             type_args: No parameters
           }
           returns: UnknownKeyword

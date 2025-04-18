@@ -1,8 +1,7 @@
-use insta::assert_debug_snapshot;
+use crate::utils::{assert_type_snapshot, get_function_declaration, parse_ts};
+use biome_js_type_info::{Type, TypeInner};
 
-use crate::test_util::{get_function_declaration, parse_ts};
-
-use super::*;
+mod utils;
 
 #[test]
 fn infer_type_of_promise_returning_function() {
@@ -13,7 +12,7 @@ fn infer_type_of_promise_returning_function() {
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let ty = Type::from_js_function_declaration(&decl);
-    assert_debug_snapshot!(ty);
+    assert_type_snapshot(CODE, ty, "infer_type_of_promise_returning_function");
 }
 
 #[test]
@@ -25,7 +24,7 @@ fn infer_type_of_async_function() {
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let ty = Type::from_js_function_declaration(&decl);
-    assert_debug_snapshot!(ty);
+    assert_type_snapshot(CODE, ty, "infer_type_of_async_function");
 }
 
 #[test]

@@ -61,7 +61,7 @@ impl ModuleGraph {
         self.data.pin().get(path).cloned()
     }
 
-    #[cfg(debug_assertions)]
+    /// Returns the data of the module graph in test
     pub fn data(&self) -> HashMapRef<Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard> {
         self.data.pin()
     }
