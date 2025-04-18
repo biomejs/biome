@@ -387,10 +387,10 @@ impl Format<FormatTypeContext> for GenericTypeParameter {
         write!(
             f,
             [&format_args![
-                text("Name:"),
-                space(),
                 dynamic_text(&self.name, TextSize::default()),
-                text("Type:"),
+                space(),
+                text("->"),
+                space(),
                 &self.ty
             ]]
         )
@@ -436,16 +436,6 @@ impl Format<FormatTypeContext> for TypeReferenceQualifier {
 
 impl Format<FormatTypeContext> for Class {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
-        let members = format_with(|f| {
-            let types = format_with(|f| {
-                let mut joiner = f.join_with(soft_line_break());
-                for part in self.members.as_ref() {
-                    joiner.entry(&format_args![part]);
-                }
-                joiner.finish()
-            });
-            write!(f, [&types])
-        });
         let name = format_with(|f| {
             if let Some(name) = &self.name {
                 write!(
@@ -459,15 +449,30 @@ impl Format<FormatTypeContext> for Class {
                 Ok(())
             }
         });
+        let extends = format_with(|f| {
+            if let Some(extends) = &self.extends {
+                write!(f, [extends])
+            } else {
+                write!(f, [text("none")])
+            }
+        });
+        // NOTE: members are hidden on purpose until we find a way to distinguish own members
+        // from the ones inherited from the global prototype
         write!(
             f,
             [&format_args![
                 name,
                 space(),
-                text("members:"),
-                space(),
                 text("{"),
-                &group(&block_indent(&members)),
+                &group(&block_indent(&format_args![
+                    text("extends:"),
+                    space(),
+                    extends,
+                    hard_line_break(),
+                    text("type_args:"),
+                    space(),
+                    FmtGenericTypeParameters(&self.type_parameters),
+                ])),
                 text("}")
             ]]
         )
@@ -484,13 +489,21 @@ impl Format<FormatTypeContext> for FmtFunctionParameters<'_> {
         }
 
         let function_parameters = format_with(|f| {
-            let mut joiner = f.join_with(soft_line_break());
+            let separator = format_with(|f| write!(f, [&format_args![text(","), space()]]));
+            let mut joiner = f.join_with(separator);
             for part in self.0 {
                 joiner.entry(&format_args![part]);
             }
             joiner.finish()
         });
-        write!(f, [&function_parameters])
+        write!(
+            f,
+            [&format_args![
+                text("["),
+                &group(&soft_block_indent(&function_parameters)),
+                text("]")
+            ]]
+        )
     }
 }
 
@@ -503,13 +516,21 @@ impl Format<FormatTypeContext> for FmtGenericTypeParameters<'_> {
         }
 
         let type_parameters = format_with(|f| {
-            let mut joiner = f.join_with(soft_line_break());
+            let separator = format_with(|f| write!(f, [&format_args![text(","), space()]]));
+            let mut joiner = f.join_with(separator);
             for part in self.0 {
                 joiner.entry(&format_args![part]);
             }
             joiner.finish()
         });
-        write!(f, [&format_args![&type_parameters]])
+        write!(
+            f,
+            [&format_args![
+                text("["),
+                &group(&soft_block_indent(&type_parameters)),
+                text("]")
+            ]]
+        )
     }
 }
 
