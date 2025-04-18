@@ -62,15 +62,17 @@ impl FormatRule<HtmlElementList> for FormatHtmlElementList {
         let result = self.fmt_children(node, f)?;
         match result {
             FormatChildrenResult::ForceMultiline(format_multiline) => {
-                write!(f, [format_multiline])
+                write!(f, [format_multiline])?;
             }
             FormatChildrenResult::BestFitting {
                 flat_children,
                 expanded_children,
             } => {
-                write!(f, [best_fitting![flat_children, expanded_children]])
+                write!(f, [best_fitting![flat_children, expanded_children]])?;
             }
         }
+
+        Ok(())
     }
 }
 
@@ -113,8 +115,6 @@ impl FormatHtmlElementList {
         list: &HtmlElementList,
         f: &mut HtmlFormatter,
     ) -> FormatResult<FormatChildrenResult> {
-        self.disarm_debug_assertions(list, f);
-
         let borrowed_opening_r_angle = self
             .borrowed_tokens
             .borrowed_opening_r_angle
@@ -147,7 +147,7 @@ impl FormatHtmlElementList {
 
         let mut force_multiline = layout.is_multiline();
 
-        let mut children = html_split_children(list.iter(), f.context().comments())?;
+        let mut children = html_split_children(list.iter(), f)?;
 
         // Trim trailing new lines
         if let Some(HtmlChild::EmptyLine | HtmlChild::Newline) = children.last() {
@@ -181,6 +181,11 @@ impl FormatHtmlElementList {
                             Some(WordSeparator::BetweenWords)
                         }
 
+                        Some(HtmlChild::Comment(_)) => {
+                            // FIXME: probably not correct behavior here
+                            Some(WordSeparator::Lines(0))
+                        }
+
                         // Last word or last word before an element without any whitespace in between
                         Some(HtmlChild::NonText(next_child)) => Some(WordSeparator::EndOfText {
                             is_soft_line_break: !matches!(
@@ -190,6 +195,8 @@ impl FormatHtmlElementList {
                             is_next_element_whitespace_sensitive:
                                 is_element_whitespace_sensitive_from_element(f, next_child),
                         }),
+
+                        Some(HtmlChild::Verbatim(_)) => None,
 
                         Some(HtmlChild::Newline | HtmlChild::Whitespace | HtmlChild::EmptyLine) => {
                             None
@@ -208,6 +215,21 @@ impl FormatHtmlElementList {
                         // it's safe to write without a separator because None means that next element is a separator or end of the iterator
                         multiline.write_content(word, f);
                     }
+                }
+
+                HtmlChild::Comment(comment) => {
+                    let memoized = comment.memoized();
+                    flat.write(&memoized, f);
+                    multiline.write_content(&memoized, f);
+                }
+
+                HtmlChild::Verbatim(element) => {
+                    // HACK: We need the condition on formatting comments because otherwise comments will get printed twice.
+                    let should_format_comments = !matches!(element, AnyHtmlElement::HtmlContent(_));
+                    let memoized = format_suppressed_node(element.syntax())
+                        .with_format_comments(should_format_comments);
+                    flat.write(&memoized, f);
+                    multiline.write_content(&memoized, f);
                 }
 
                 // * Whitespace after the opening tag and before a meaningful text: `<div> a`
@@ -315,8 +337,12 @@ impl FormatHtmlElementList {
                             }
                         }
 
+                        Some(HtmlChild::Comment(_)) => Some(LineMode::Hard),
+
                         // Add a hard line break if what comes after the element is not a text or is all whitespace
-                        Some(HtmlChild::NonText(next_non_text)) => {
+                        Some(
+                            HtmlChild::NonText(next_non_text) | HtmlChild::Verbatim(next_non_text),
+                        ) => {
                             // In the case of the formatter using the multiline layout, we want to treat inline elements like we do words.
                             //
                             // ```html
@@ -355,7 +381,7 @@ impl FormatHtmlElementList {
                                 if has_whitespace_between {
                                     Some(LineMode::SoftOrSpace)
                                 } else {
-                                    Some(LineMode::Soft)
+                                    None
                                 }
                             } else {
                                 Some(LineMode::Hard)
@@ -422,36 +448,6 @@ impl FormatHtmlElementList {
             })
         }
     }
-
-    /// Tracks the tokens of [HtmlContent] nodes to be formatted and
-    /// asserts that the suppression comments are checked (they get ignored).
-    ///
-    /// This is necessary because the formatting of [HtmlContentList] bypasses the node formatting for
-    /// [HtmlContent] and instead, formats the nodes itself.
-    #[cfg(debug_assertions)]
-    fn disarm_debug_assertions(&self, node: &HtmlElementList, f: &mut HtmlFormatter) {
-        use AnyHtmlElement::*;
-        use biome_formatter::CstFormatContext;
-
-        for child in node {
-            match child {
-                HtmlContent(text) => {
-                    f.state_mut().track_token(&text.value_token().unwrap());
-
-                    // You can't suppress a text node
-                    f.context()
-                        .comments()
-                        .mark_suppression_checked(text.syntax());
-                }
-                _ => {
-                    continue;
-                }
-            }
-        }
-    }
-
-    #[cfg(not(debug_assertions))]
-    fn disarm_debug_assertions(&self, _: &HtmlElementList, _: &mut HtmlFormatter) {}
 
     fn layout(&self, meta: ChildrenMeta) -> HtmlChildListLayout {
         match self.layout {
@@ -524,6 +520,9 @@ enum WordSeparator {
     /// `a b`
     BetweenWords,
 
+    /// Seperator between 2 lines. Creates hard line breaks.
+    Lines(usize),
+
     /// A separator of a word at the end of a [HtmlText] element. Either because it is the last
     /// child in its parent OR it is right before the start of another child (element, expression, ...).
     ///
@@ -571,6 +570,11 @@ impl Format<HtmlFormatContext> for WordSeparator {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         match self {
             WordSeparator::BetweenWords => soft_line_break_or_space().fmt(f),
+            WordSeparator::Lines(count) => match count {
+                0 => Ok(()),
+                1 => hard_line_break().fmt(f),
+                _ => empty_line().fmt(f),
+            },
             WordSeparator::EndOfText {
                 is_soft_line_break,
                 is_next_element_whitespace_sensitive,
