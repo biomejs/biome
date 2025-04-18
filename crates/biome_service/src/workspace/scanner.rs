@@ -232,15 +232,15 @@ pub enum ScanKind {
 
 impl ScanKind {
     pub const fn is_project(self) -> bool {
-        matches!(self, ScanKind::Project)
+        matches!(self, Self::Project)
     }
 
     pub const fn is_known_files(self) -> bool {
-        matches!(self, ScanKind::KnownFiles)
+        matches!(self, Self::KnownFiles)
     }
 
     pub const fn is_none(self) -> bool {
-        matches!(self, ScanKind::None)
+        matches!(self, Self::None)
     }
 }
 
