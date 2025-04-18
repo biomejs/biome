@@ -308,7 +308,7 @@ async function testCallingReturnsPromise(props: Props) {
 const testDestructuringAndCallingReturnsPromise = async ({
 	returnsPromise,
 }: Props) => {
-	returnsPromise(); // FIXME: REGRESSION
+	returnsPromise();
 };
 async function testPassingReturnsPromiseDirectly(
 	returnsPromise: () => Promise<void>

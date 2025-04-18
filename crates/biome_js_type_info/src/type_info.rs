@@ -77,6 +77,16 @@ impl Type {
         Self(Arc::new(TypeInner::Boolean))
     }
 
+    pub fn destructuring_of(ty: Self, destructure_field: DestructureField) -> Self {
+        TypeInner::TypeofExpression(Box::new(TypeofExpression::Destructure(
+            TypeofDestructureExpression {
+                ty,
+                destructure_field,
+            },
+        )))
+        .into()
+    }
+
     pub fn function(function: Function) -> Self {
         Self(Arc::new(TypeInner::Function(Box::new(function))))
     }
@@ -97,14 +107,14 @@ impl Type {
 
     /// Returns a new instance of the given type.
     pub fn instance_of(ty: Self) -> Self {
-        if matches!(ty.deref(), TypeInner::Class(_)) {
-            TypeInner::Object(Box::new(Object {
+        match ty.deref() {
+            TypeInner::Class(_) => TypeInner::Object(Box::new(Object {
                 prototype: Some(ty),
                 members: Arc::new([]),
             }))
-            .into()
-        } else {
-            ty
+            .into(),
+            TypeInner::Reference(_) => TypeInner::InstanceOf(Box::new(ty)).into(),
+            _ => ty,
         }
     }
 
@@ -117,6 +127,13 @@ impl Type {
 
     pub fn number() -> Self {
         Self(Arc::new(TypeInner::Number))
+    }
+
+    pub fn object_with_members(members: Arc<[TypeMember]>) -> Self {
+        Self(Arc::new(TypeInner::Object(Box::new(Object {
+            prototype: None,
+            members,
+        }))))
     }
 
     /// Returns the `Type` referenced by this type.
@@ -138,6 +155,21 @@ impl Type {
 
     pub fn undefined() -> Self {
         Self(Arc::new(TypeInner::Undefined))
+    }
+
+    pub fn union_with(&self, ty: Self) -> Self {
+        if let TypeInner::Union(union) = self.inner_type() {
+            if union.contains(&ty) {
+                self.clone()
+            } else {
+                Self(Arc::new(TypeInner::Union(Box::new(union.with_type(ty)))))
+            }
+        } else {
+            Self(Arc::new(TypeInner::Union(Box::new(Union(Box::new([
+                self.clone(),
+                ty,
+            ]))))))
+        }
     }
 
     pub fn unknown() -> Self {
@@ -214,6 +246,9 @@ pub enum TypeInner {
 
     /// Literal value used as a type.
     Literal(Box<Literal>),
+
+    /// Instance of another type.
+    InstanceOf(Box<Type>),
 
     /// Reference to another type.
     Reference(Box<TypeReference>),
@@ -408,11 +443,21 @@ pub struct FunctionParameter {
     /// Type of the argument.
     pub ty: Type,
 
+    /// Bindings created for the parameter within the function body.
+    pub bindings: Box<[FunctionParameterBinding]>,
+
     /// Whether the argument is optional or not.
     pub is_optional: bool,
 
     /// Whether this is a rest argument (`...`) or not.
     pub is_rest: bool,
+}
+
+/// An individual binding created from a function parameter.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct FunctionParameterBinding {
+    pub name: Text,
+    pub ty: Type,
 }
 
 /// Definition of a generic type parameter.
@@ -534,6 +579,35 @@ impl ObjectLiteral {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Tuple(pub(super) Box<[TupleElementType]>);
 
+impl Tuple {
+    pub fn elements(&self) -> &[TupleElementType] {
+        &self.0
+    }
+
+    /// Returns the type at the given index.
+    pub fn get_ty(&self, index: usize) -> Type {
+        if let Some(elem_type) = self.0.get(index) {
+            let ty = &elem_type.ty;
+            if elem_type.is_optional {
+                ty.union_with(Type::undefined())
+            } else {
+                ty.clone()
+            }
+        } else {
+            self.0
+                .last()
+                .filter(|last| last.is_rest)
+                .map(|last| last.ty.union_with(Type::undefined()))
+                .unwrap_or_default()
+        }
+    }
+
+    /// Returns a new tuple starting at the given index.
+    pub fn slice_from(&self, index: usize) -> Self {
+        Self(self.0.iter().skip(index).cloned().collect())
+    }
+}
+
 /// An individual element within a tuple.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TupleElementType {
@@ -578,6 +652,15 @@ impl TypeMember {
         }
     }
 
+    pub fn name(&self) -> Option<Text> {
+        match self {
+            Self::CallSignature(_) => None,
+            Self::Constructor(_) => Some(Text::Static("constructor")),
+            Self::Method(member) => Some(member.name.clone()),
+            Self::Property(member) => Some(member.name.clone()),
+        }
+    }
+
     pub fn to_type(&self, object: &Type) -> Type {
         match self {
             Self::CallSignature(member) => TypeInner::Function(Box::new(Function {
@@ -592,17 +675,27 @@ impl TypeMember {
                 member.return_type.clone().unwrap_or_else(|| object.clone())
             }
             Self::Method(member) => {
-                // TODO: Create union type with `undefined` if member is optional.
-                TypeInner::Function(Box::new(Function {
+                let ty: Type = TypeInner::Function(Box::new(Function {
                     is_async: member.is_async,
                     type_parameters: member.type_parameters.clone(),
                     name: Some(member.name.clone()),
                     parameters: member.parameters.clone(),
                     return_type: member.return_type.clone(),
                 }))
-                .into()
+                .into();
+                if member.is_optional {
+                    ty.union_with(Type::undefined())
+                } else {
+                    ty
+                }
             }
-            Self::Property(member) => member.ty.clone(),
+            Self::Property(member) => {
+                if member.is_optional {
+                    member.ty.union_with(Type::undefined())
+                } else {
+                    member.ty.clone()
+                }
+            }
         }
     }
 }
@@ -825,6 +918,7 @@ pub enum TypeofExpression {
     Addition(TypeofAdditionExpression),
     Await(TypeofAwaitExpression),
     Call(TypeofCallExpression),
+    Destructure(TypeofDestructureExpression),
     New(TypeofNewExpression),
     StaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
@@ -846,6 +940,23 @@ pub struct TypeofAwaitExpression {
 pub struct TypeofCallExpression {
     pub callee: Type,
     pub arguments: Arc<[CallArgumentType]>,
+}
+
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct TypeofDestructureExpression {
+    /// The type being destructured.
+    pub ty: Type,
+
+    /// The field being destructured.
+    pub destructure_field: DestructureField,
+}
+
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub enum DestructureField {
+    Index(usize),
+    Name(Text),
+    RestExcept(Box<[Text]>),
+    RestFrom(usize),
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
@@ -981,6 +1092,17 @@ impl Resolvable for TypeReference {
 pub struct TypeReferenceQualifier(pub(super) Box<[Text]>);
 
 impl TypeReferenceQualifier {
+    /// Checks whether this type qualifier references an `Array` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Array`, without considering whether another symbol named `Array` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Array` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_array(&self) -> bool {
+        self.0.len() == 1 && self.0[0] == "Array"
+    }
+
     /// Checks whether this type qualifier references a `Promise` type.
     ///
     /// This method simply checks whether the reference is for a literal
@@ -1000,3 +1122,13 @@ impl TypeReferenceQualifier {
 /// A union of types.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Union(pub(super) Box<[Type]>);
+
+impl Union {
+    pub fn contains(&self, ty: &Type) -> bool {
+        self.0.contains(ty)
+    }
+
+    pub fn with_type(&self, ty: Type) -> Self {
+        Self(self.0.iter().cloned().chain(Some(ty)).collect())
+    }
+}

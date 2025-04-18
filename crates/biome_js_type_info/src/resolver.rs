@@ -28,11 +28,11 @@ impl Type {
     /// Attempts to resolve all unresolved types using the given resolver.
     pub fn resolve(&mut self, resolver: &dyn TypeResolver) {
         let stack = &[&**self];
-        if self.needs_resolving(resolver, stack) {
-            *self = self.resolved(resolver, stack);
+        *self = if self.needs_resolving(resolver, stack) {
+            self.resolved(resolver, stack)
         } else {
-            self.flattened(resolver, stack);
-        }
+            self.flattened(resolver, stack)
+        };
     }
 }
 
@@ -94,4 +94,4 @@ macro_rules! derive_primitive_resolved {
     };
 }
 
-derive_primitive_resolved!(bool, u64);
+derive_primitive_resolved!(bool, u64, usize);

@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_type_info/tests/type_info.rs
+expression: content
+---
+```ts
+const [a]: Array<string> = [];
+
+```
+
+```
+a => "Array" {
+  params: unknown
+  type_args: string
+}[0]
+
+```

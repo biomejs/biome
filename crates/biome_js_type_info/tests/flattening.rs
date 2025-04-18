@@ -1,11 +1,12 @@
-use crate::utils::{
-    HardcodedSymbolResolver, PromiseResolver, assert_type_snapshot, get_function_declaration,
-    parse_ts,
-};
+mod utils;
+
 use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsExpressionStatement};
 use biome_js_type_info::Type;
 
-mod utils;
+use utils::{
+    GlobalsResolver, HardcodedSymbolResolver, assert_type_snapshot, assert_typed_bindings_snapshot,
+    get_function_declaration, get_variable_declaration, parse_ts,
+};
 
 #[test]
 fn infer_flattened_type_of_promise_returning_function() {
@@ -16,7 +17,7 @@ fn infer_flattened_type_of_promise_returning_function() {
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut ty = Type::from_js_function_declaration(&decl);
-    ty.resolve(&PromiseResolver);
+    ty.resolve(&GlobalsResolver);
 
     assert_type_snapshot(
         CODE,
@@ -34,7 +35,7 @@ fn infer_flattened_type_of_async_function() {
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut ty = Type::from_js_function_declaration(&decl);
-    ty.resolve(&PromiseResolver);
+    ty.resolve(&GlobalsResolver);
 
     assert_type_snapshot(CODE, ty, "infer_flattened_type_of_async_function")
 }
@@ -50,7 +51,7 @@ returnsPromise()"#;
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut function_ty = Type::from_js_function_declaration(&decl);
-    function_ty.resolve(&PromiseResolver);
+    function_ty.resolve(&GlobalsResolver);
 
     let expr = get_expression_statement(&root);
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
@@ -74,7 +75,7 @@ returnsPromise().then(() => {})"#;
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut function_ty = Type::from_js_function_declaration(&decl);
-    function_ty.resolve(&PromiseResolver);
+    function_ty.resolve(&GlobalsResolver);
 
     let expr = get_expression_statement(&root);
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
@@ -98,7 +99,7 @@ returnsPromise().then(() => {}).finally(() => {})"#;
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut function_ty = Type::from_js_function_declaration(&decl);
-    function_ty.resolve(&PromiseResolver);
+    function_ty.resolve(&GlobalsResolver);
 
     let expr = get_expression_statement(&root);
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
@@ -118,7 +119,7 @@ fn infer_flattened_type_from_direct_promise_instance() {
     let root = parse_ts(CODE);
     let expr = get_expression_statement(&root);
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
-    expr_ty.resolve(&PromiseResolver);
+    expr_ty.resolve(&GlobalsResolver);
 
     assert_type_snapshot(
         CODE,
@@ -134,13 +135,32 @@ fn infer_flattened_type_from_static_promise_function() {
     let root = parse_ts(CODE);
     let expr = get_expression_statement(&root);
     let mut expr_ty = Type::from_any_js_expression(&expr.expression().unwrap());
-    expr_ty.resolve(&PromiseResolver);
+    expr_ty.resolve(&GlobalsResolver);
 
     assert_type_snapshot(
         CODE,
         expr_ty,
         "infer_flattened_type_from_static_promise_function",
     )
+}
+
+#[test]
+fn infer_flattened_type_of_destructured_array_element() {
+    const CODE: &str = r#"const [a]: Array<string> = [];"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_variable_declaration(&root);
+    let resolver = GlobalsResolver;
+    let mut bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
+    for (_name, binding) in &mut bindings {
+        binding.resolve(&resolver);
+    }
+
+    assert_typed_bindings_snapshot(
+        CODE,
+        &bindings,
+        "infer_flattened_type_of_destructured_array_element",
+    );
 }
 
 pub fn get_expression_statement(root: &AnyJsRoot) -> JsExpressionStatement {
