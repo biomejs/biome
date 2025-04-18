@@ -61,13 +61,9 @@ impl ModuleGraph {
         self.data.pin().get(path).cloned()
     }
 
-    /// Returns the data of the module graph in test. It panics otherwise
+    /// Returns the data of the module graph in test
     pub fn data(&self) -> HashMapRef<Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard> {
-        if !cfg!(test) {
-            self.data.pin()
-        } else {
-            panic!("This method shouldn't be used in production.")
-        }
+        self.data.pin()
     }
 
     /// Updates the module graph to add, update, or remove files.
