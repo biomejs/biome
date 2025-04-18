@@ -296,10 +296,10 @@ impl DefinedProperties {
 impl From<DefinedProperty> for DefinedProperties {
     fn from(value: DefinedProperty) -> Self {
         match value {
-            DefinedProperty::Get(index) => DefinedProperties::Get(index),
-            DefinedProperty::Set(index) => DefinedProperties::Set(index),
-            DefinedProperty::Method(index) => DefinedProperties::Method(index),
-            DefinedProperty::Property(index) => DefinedProperties::Property(index),
+            DefinedProperty::Get(index) => Self::Get(index),
+            DefinedProperty::Set(index) => Self::Set(index),
+            DefinedProperty::Method(index) => Self::Method(index),
+            DefinedProperty::Property(index) => Self::Property(index),
         }
     }
 }

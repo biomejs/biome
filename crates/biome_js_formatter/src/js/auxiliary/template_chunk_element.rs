@@ -24,8 +24,8 @@ declare_node_union! {
 impl AnyTemplateChunkElement {
     pub(crate) fn template_chunk_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyTemplateChunkElement::JsTemplateChunkElement(chunk) => chunk.template_chunk_token(),
-            AnyTemplateChunkElement::TsTemplateChunkElement(chunk) => chunk.template_chunk_token(),
+            Self::JsTemplateChunkElement(chunk) => chunk.template_chunk_token(),
+            Self::TsTemplateChunkElement(chunk) => chunk.template_chunk_token(),
         }
     }
 }

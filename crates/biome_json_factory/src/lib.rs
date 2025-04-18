@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_json_syntax::JsonLanguage;
 use biome_rowan::TreeBuilder;
 

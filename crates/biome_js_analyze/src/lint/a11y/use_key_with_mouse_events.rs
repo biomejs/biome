@@ -58,10 +58,10 @@ pub enum UseKeyWithMouseEventsState {
 impl UseKeyWithMouseEventsState {
     fn message(&self) -> MarkupBuf {
         match self {
-            UseKeyWithMouseEventsState::MissingOnBlur => {
+            Self::MissingOnBlur => {
                 markup! {"onMouseOut must be accompanied by onBlur for accessibility."}.to_owned()
             }
-            UseKeyWithMouseEventsState::MissingOnFocus => {
+            Self::MissingOnFocus => {
                 markup! {"onMouseOver must be accompanied by onFocus for accessibility."}.to_owned()
             }
         }

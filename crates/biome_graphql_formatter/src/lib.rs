@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod comments;
 pub mod context;
 mod cst;
@@ -236,7 +238,7 @@ where
 pub(crate) type FormatGraphqlSyntaxToken = FormatToken<GraphqlFormatContext>;
 
 impl AsFormat<GraphqlFormatContext> for GraphqlSyntaxToken {
-    type Format<'a> = FormatRefWithRule<'a, GraphqlSyntaxToken, FormatGraphqlSyntaxToken>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatGraphqlSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatGraphqlSyntaxToken::default())
@@ -244,7 +246,7 @@ impl AsFormat<GraphqlFormatContext> for GraphqlSyntaxToken {
 }
 
 impl IntoFormat<GraphqlFormatContext> for GraphqlSyntaxToken {
-    type Format = FormatOwnedWithRule<GraphqlSyntaxToken, FormatGraphqlSyntaxToken>;
+    type Format = FormatOwnedWithRule<Self, FormatGraphqlSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatGraphqlSyntaxToken::default())

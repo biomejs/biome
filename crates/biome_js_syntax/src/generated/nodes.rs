@@ -13412,7 +13412,7 @@ impl AnyJsArrayAssignmentPatternElement {
         &self,
     ) -> Option<&JsArrayAssignmentPatternElement> {
         match &self {
-            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(item) => Some(item),
+            Self::JsArrayAssignmentPatternElement(item) => Some(item),
             _ => None,
         }
     }
@@ -13420,15 +13420,13 @@ impl AnyJsArrayAssignmentPatternElement {
         &self,
     ) -> Option<&JsArrayAssignmentPatternRestElement> {
         match &self {
-            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(item) => {
-                Some(item)
-            }
+            Self::JsArrayAssignmentPatternRestElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_array_hole(&self) -> Option<&JsArrayHole> {
         match &self {
-            AnyJsArrayAssignmentPatternElement::JsArrayHole(item) => Some(item),
+            Self::JsArrayHole(item) => Some(item),
             _ => None,
         }
     }
@@ -13442,7 +13440,7 @@ pub enum AnyJsArrayBindingPatternElement {
 impl AnyJsArrayBindingPatternElement {
     pub fn as_js_array_binding_pattern_element(&self) -> Option<&JsArrayBindingPatternElement> {
         match &self {
-            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(item) => Some(item),
+            Self::JsArrayBindingPatternElement(item) => Some(item),
             _ => None,
         }
     }
@@ -13450,13 +13448,13 @@ impl AnyJsArrayBindingPatternElement {
         &self,
     ) -> Option<&JsArrayBindingPatternRestElement> {
         match &self {
-            AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(item) => Some(item),
+            Self::JsArrayBindingPatternRestElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_array_hole(&self) -> Option<&JsArrayHole> {
         match &self {
-            AnyJsArrayBindingPatternElement::JsArrayHole(item) => Some(item),
+            Self::JsArrayHole(item) => Some(item),
             _ => None,
         }
     }
@@ -13470,19 +13468,19 @@ pub enum AnyJsArrayElement {
 impl AnyJsArrayElement {
     pub fn as_any_js_expression(&self) -> Option<&AnyJsExpression> {
         match &self {
-            AnyJsArrayElement::AnyJsExpression(item) => Some(item),
+            Self::AnyJsExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_array_hole(&self) -> Option<&JsArrayHole> {
         match &self {
-            AnyJsArrayElement::JsArrayHole(item) => Some(item),
+            Self::JsArrayHole(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_spread(&self) -> Option<&JsSpread> {
         match &self {
-            AnyJsArrayElement::JsSpread(item) => Some(item),
+            Self::JsSpread(item) => Some(item),
             _ => None,
         }
     }
@@ -13495,13 +13493,13 @@ pub enum AnyJsArrowFunctionParameters {
 impl AnyJsArrowFunctionParameters {
     pub fn as_any_js_binding(&self) -> Option<&AnyJsBinding> {
         match &self {
-            AnyJsArrowFunctionParameters::AnyJsBinding(item) => Some(item),
+            Self::AnyJsBinding(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_parameters(&self) -> Option<&JsParameters> {
         match &self {
-            AnyJsArrowFunctionParameters::JsParameters(item) => Some(item),
+            Self::JsParameters(item) => Some(item),
             _ => None,
         }
     }
@@ -13521,55 +13519,55 @@ pub enum AnyJsAssignment {
 impl AnyJsAssignment {
     pub fn as_js_bogus_assignment(&self) -> Option<&JsBogusAssignment> {
         match &self {
-            AnyJsAssignment::JsBogusAssignment(item) => Some(item),
+            Self::JsBogusAssignment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_computed_member_assignment(&self) -> Option<&JsComputedMemberAssignment> {
         match &self {
-            AnyJsAssignment::JsComputedMemberAssignment(item) => Some(item),
+            Self::JsComputedMemberAssignment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_identifier_assignment(&self) -> Option<&JsIdentifierAssignment> {
         match &self {
-            AnyJsAssignment::JsIdentifierAssignment(item) => Some(item),
+            Self::JsIdentifierAssignment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_parenthesized_assignment(&self) -> Option<&JsParenthesizedAssignment> {
         match &self {
-            AnyJsAssignment::JsParenthesizedAssignment(item) => Some(item),
+            Self::JsParenthesizedAssignment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_static_member_assignment(&self) -> Option<&JsStaticMemberAssignment> {
         match &self {
-            AnyJsAssignment::JsStaticMemberAssignment(item) => Some(item),
+            Self::JsStaticMemberAssignment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_as_assignment(&self) -> Option<&TsAsAssignment> {
         match &self {
-            AnyJsAssignment::TsAsAssignment(item) => Some(item),
+            Self::TsAsAssignment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_non_null_assertion_assignment(&self) -> Option<&TsNonNullAssertionAssignment> {
         match &self {
-            AnyJsAssignment::TsNonNullAssertionAssignment(item) => Some(item),
+            Self::TsNonNullAssertionAssignment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_satisfies_assignment(&self) -> Option<&TsSatisfiesAssignment> {
         match &self {
-            AnyJsAssignment::TsSatisfiesAssignment(item) => Some(item),
+            Self::TsSatisfiesAssignment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_type_assertion_assignment(&self) -> Option<&TsTypeAssertionAssignment> {
         match &self {
-            AnyJsAssignment::TsTypeAssertionAssignment(item) => Some(item),
+            Self::TsTypeAssertionAssignment(item) => Some(item),
             _ => None,
         }
     }
@@ -13583,19 +13581,19 @@ pub enum AnyJsAssignmentPattern {
 impl AnyJsAssignmentPattern {
     pub fn as_any_js_assignment(&self) -> Option<&AnyJsAssignment> {
         match &self {
-            AnyJsAssignmentPattern::AnyJsAssignment(item) => Some(item),
+            Self::AnyJsAssignment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_array_assignment_pattern(&self) -> Option<&JsArrayAssignmentPattern> {
         match &self {
-            AnyJsAssignmentPattern::JsArrayAssignmentPattern(item) => Some(item),
+            Self::JsArrayAssignmentPattern(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_object_assignment_pattern(&self) -> Option<&JsObjectAssignmentPattern> {
         match &self {
-            AnyJsAssignmentPattern::JsObjectAssignmentPattern(item) => Some(item),
+            Self::JsObjectAssignmentPattern(item) => Some(item),
             _ => None,
         }
     }
@@ -13609,19 +13607,19 @@ pub enum AnyJsBinding {
 impl AnyJsBinding {
     pub fn as_js_bogus_binding(&self) -> Option<&JsBogusBinding> {
         match &self {
-            AnyJsBinding::JsBogusBinding(item) => Some(item),
+            Self::JsBogusBinding(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_identifier_binding(&self) -> Option<&JsIdentifierBinding> {
         match &self {
-            AnyJsBinding::JsIdentifierBinding(item) => Some(item),
+            Self::JsIdentifierBinding(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsBinding::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -13635,19 +13633,19 @@ pub enum AnyJsBindingPattern {
 impl AnyJsBindingPattern {
     pub fn as_any_js_binding(&self) -> Option<&AnyJsBinding> {
         match &self {
-            AnyJsBindingPattern::AnyJsBinding(item) => Some(item),
+            Self::AnyJsBinding(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_array_binding_pattern(&self) -> Option<&JsArrayBindingPattern> {
         match &self {
-            AnyJsBindingPattern::JsArrayBindingPattern(item) => Some(item),
+            Self::JsArrayBindingPattern(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_object_binding_pattern(&self) -> Option<&JsObjectBindingPattern> {
         match &self {
-            AnyJsBindingPattern::JsObjectBindingPattern(item) => Some(item),
+            Self::JsObjectBindingPattern(item) => Some(item),
             _ => None,
         }
     }
@@ -13660,13 +13658,13 @@ pub enum AnyJsCallArgument {
 impl AnyJsCallArgument {
     pub fn as_any_js_expression(&self) -> Option<&AnyJsExpression> {
         match &self {
-            AnyJsCallArgument::AnyJsExpression(item) => Some(item),
+            Self::AnyJsExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_spread(&self) -> Option<&JsSpread> {
         match &self {
-            AnyJsCallArgument::JsSpread(item) => Some(item),
+            Self::JsSpread(item) => Some(item),
             _ => None,
         }
     }
@@ -13680,7 +13678,7 @@ pub enum AnyJsClass {
 impl AnyJsClass {
     pub fn as_js_class_declaration(&self) -> Option<&JsClassDeclaration> {
         match &self {
-            AnyJsClass::JsClassDeclaration(item) => Some(item),
+            Self::JsClassDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -13688,13 +13686,13 @@ impl AnyJsClass {
         &self,
     ) -> Option<&JsClassExportDefaultDeclaration> {
         match &self {
-            AnyJsClass::JsClassExportDefaultDeclaration(item) => Some(item),
+            Self::JsClassExportDefaultDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_class_expression(&self) -> Option<&JsClassExpression> {
         match &self {
-            AnyJsClass::JsClassExpression(item) => Some(item),
+            Self::JsClassExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -13721,49 +13719,49 @@ pub enum AnyJsClassMember {
 impl AnyJsClassMember {
     pub fn as_js_bogus_member(&self) -> Option<&JsBogusMember> {
         match &self {
-            AnyJsClassMember::JsBogusMember(item) => Some(item),
+            Self::JsBogusMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_constructor_class_member(&self) -> Option<&JsConstructorClassMember> {
         match &self {
-            AnyJsClassMember::JsConstructorClassMember(item) => Some(item),
+            Self::JsConstructorClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_empty_class_member(&self) -> Option<&JsEmptyClassMember> {
         match &self {
-            AnyJsClassMember::JsEmptyClassMember(item) => Some(item),
+            Self::JsEmptyClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_getter_class_member(&self) -> Option<&JsGetterClassMember> {
         match &self {
-            AnyJsClassMember::JsGetterClassMember(item) => Some(item),
+            Self::JsGetterClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsClassMember::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_method_class_member(&self) -> Option<&JsMethodClassMember> {
         match &self {
-            AnyJsClassMember::JsMethodClassMember(item) => Some(item),
+            Self::JsMethodClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_property_class_member(&self) -> Option<&JsPropertyClassMember> {
         match &self {
-            AnyJsClassMember::JsPropertyClassMember(item) => Some(item),
+            Self::JsPropertyClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_setter_class_member(&self) -> Option<&JsSetterClassMember> {
         match &self {
-            AnyJsClassMember::JsSetterClassMember(item) => Some(item),
+            Self::JsSetterClassMember(item) => Some(item),
             _ => None,
         }
     }
@@ -13771,7 +13769,7 @@ impl AnyJsClassMember {
         &self,
     ) -> Option<&JsStaticInitializationBlockClassMember> {
         match &self {
-            AnyJsClassMember::JsStaticInitializationBlockClassMember(item) => Some(item),
+            Self::JsStaticInitializationBlockClassMember(item) => Some(item),
             _ => None,
         }
     }
@@ -13779,19 +13777,19 @@ impl AnyJsClassMember {
         &self,
     ) -> Option<&TsConstructorSignatureClassMember> {
         match &self {
-            AnyJsClassMember::TsConstructorSignatureClassMember(item) => Some(item),
+            Self::TsConstructorSignatureClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_getter_signature_class_member(&self) -> Option<&TsGetterSignatureClassMember> {
         match &self {
-            AnyJsClassMember::TsGetterSignatureClassMember(item) => Some(item),
+            Self::TsGetterSignatureClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_index_signature_class_member(&self) -> Option<&TsIndexSignatureClassMember> {
         match &self {
-            AnyJsClassMember::TsIndexSignatureClassMember(item) => Some(item),
+            Self::TsIndexSignatureClassMember(item) => Some(item),
             _ => None,
         }
     }
@@ -13799,25 +13797,25 @@ impl AnyJsClassMember {
         &self,
     ) -> Option<&TsInitializedPropertySignatureClassMember> {
         match &self {
-            AnyJsClassMember::TsInitializedPropertySignatureClassMember(item) => Some(item),
+            Self::TsInitializedPropertySignatureClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_method_signature_class_member(&self) -> Option<&TsMethodSignatureClassMember> {
         match &self {
-            AnyJsClassMember::TsMethodSignatureClassMember(item) => Some(item),
+            Self::TsMethodSignatureClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_property_signature_class_member(&self) -> Option<&TsPropertySignatureClassMember> {
         match &self {
-            AnyJsClassMember::TsPropertySignatureClassMember(item) => Some(item),
+            Self::TsPropertySignatureClassMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_setter_signature_class_member(&self) -> Option<&TsSetterSignatureClassMember> {
         match &self {
-            AnyJsClassMember::TsSetterSignatureClassMember(item) => Some(item),
+            Self::TsSetterSignatureClassMember(item) => Some(item),
             _ => None,
         }
     }
@@ -13832,25 +13830,25 @@ pub enum AnyJsClassMemberName {
 impl AnyJsClassMemberName {
     pub fn as_js_computed_member_name(&self) -> Option<&JsComputedMemberName> {
         match &self {
-            AnyJsClassMemberName::JsComputedMemberName(item) => Some(item),
+            Self::JsComputedMemberName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_literal_member_name(&self) -> Option<&JsLiteralMemberName> {
         match &self {
-            AnyJsClassMemberName::JsLiteralMemberName(item) => Some(item),
+            Self::JsLiteralMemberName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsClassMemberName::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_private_class_member_name(&self) -> Option<&JsPrivateClassMemberName> {
         match &self {
-            AnyJsClassMemberName::JsPrivateClassMemberName(item) => Some(item),
+            Self::JsPrivateClassMemberName(item) => Some(item),
             _ => None,
         }
     }
@@ -13863,13 +13861,13 @@ pub enum AnyJsCombinedSpecifier {
 impl AnyJsCombinedSpecifier {
     pub fn as_js_named_import_specifiers(&self) -> Option<&JsNamedImportSpecifiers> {
         match &self {
-            AnyJsCombinedSpecifier::JsNamedImportSpecifiers(item) => Some(item),
+            Self::JsNamedImportSpecifiers(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_namespace_import_specifier(&self) -> Option<&JsNamespaceImportSpecifier> {
         match &self {
-            AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(item) => Some(item),
+            Self::JsNamespaceImportSpecifier(item) => Some(item),
             _ => None,
         }
     }
@@ -13883,19 +13881,19 @@ pub enum AnyJsConstructorParameter {
 impl AnyJsConstructorParameter {
     pub fn as_any_js_formal_parameter(&self) -> Option<&AnyJsFormalParameter> {
         match &self {
-            AnyJsConstructorParameter::AnyJsFormalParameter(item) => Some(item),
+            Self::AnyJsFormalParameter(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_rest_parameter(&self) -> Option<&JsRestParameter> {
         match &self {
-            AnyJsConstructorParameter::JsRestParameter(item) => Some(item),
+            Self::JsRestParameter(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_property_parameter(&self) -> Option<&TsPropertyParameter> {
         match &self {
-            AnyJsConstructorParameter::TsPropertyParameter(item) => Some(item),
+            Self::TsPropertyParameter(item) => Some(item),
             _ => None,
         }
     }
@@ -13917,67 +13915,67 @@ pub enum AnyJsDeclaration {
 impl AnyJsDeclaration {
     pub fn as_js_class_declaration(&self) -> Option<&JsClassDeclaration> {
         match &self {
-            AnyJsDeclaration::JsClassDeclaration(item) => Some(item),
+            Self::JsClassDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_function_declaration(&self) -> Option<&JsFunctionDeclaration> {
         match &self {
-            AnyJsDeclaration::JsFunctionDeclaration(item) => Some(item),
+            Self::JsFunctionDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_variable_declaration(&self) -> Option<&JsVariableDeclaration> {
         match &self {
-            AnyJsDeclaration::JsVariableDeclaration(item) => Some(item),
+            Self::JsVariableDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_declare_function_declaration(&self) -> Option<&TsDeclareFunctionDeclaration> {
         match &self {
-            AnyJsDeclaration::TsDeclareFunctionDeclaration(item) => Some(item),
+            Self::TsDeclareFunctionDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_enum_declaration(&self) -> Option<&TsEnumDeclaration> {
         match &self {
-            AnyJsDeclaration::TsEnumDeclaration(item) => Some(item),
+            Self::TsEnumDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_external_module_declaration(&self) -> Option<&TsExternalModuleDeclaration> {
         match &self {
-            AnyJsDeclaration::TsExternalModuleDeclaration(item) => Some(item),
+            Self::TsExternalModuleDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_global_declaration(&self) -> Option<&TsGlobalDeclaration> {
         match &self {
-            AnyJsDeclaration::TsGlobalDeclaration(item) => Some(item),
+            Self::TsGlobalDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_import_equals_declaration(&self) -> Option<&TsImportEqualsDeclaration> {
         match &self {
-            AnyJsDeclaration::TsImportEqualsDeclaration(item) => Some(item),
+            Self::TsImportEqualsDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_interface_declaration(&self) -> Option<&TsInterfaceDeclaration> {
         match &self {
-            AnyJsDeclaration::TsInterfaceDeclaration(item) => Some(item),
+            Self::TsInterfaceDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_module_declaration(&self) -> Option<&TsModuleDeclaration> {
         match &self {
-            AnyJsDeclaration::TsModuleDeclaration(item) => Some(item),
+            Self::TsModuleDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_type_alias_declaration(&self) -> Option<&TsTypeAliasDeclaration> {
         match &self {
-            AnyJsDeclaration::TsTypeAliasDeclaration(item) => Some(item),
+            Self::TsTypeAliasDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -13999,67 +13997,67 @@ pub enum AnyJsDeclarationClause {
 impl AnyJsDeclarationClause {
     pub fn as_js_class_declaration(&self) -> Option<&JsClassDeclaration> {
         match &self {
-            AnyJsDeclarationClause::JsClassDeclaration(item) => Some(item),
+            Self::JsClassDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_function_declaration(&self) -> Option<&JsFunctionDeclaration> {
         match &self {
-            AnyJsDeclarationClause::JsFunctionDeclaration(item) => Some(item),
+            Self::JsFunctionDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_variable_declaration_clause(&self) -> Option<&JsVariableDeclarationClause> {
         match &self {
-            AnyJsDeclarationClause::JsVariableDeclarationClause(item) => Some(item),
+            Self::JsVariableDeclarationClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_declare_function_declaration(&self) -> Option<&TsDeclareFunctionDeclaration> {
         match &self {
-            AnyJsDeclarationClause::TsDeclareFunctionDeclaration(item) => Some(item),
+            Self::TsDeclareFunctionDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_enum_declaration(&self) -> Option<&TsEnumDeclaration> {
         match &self {
-            AnyJsDeclarationClause::TsEnumDeclaration(item) => Some(item),
+            Self::TsEnumDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_external_module_declaration(&self) -> Option<&TsExternalModuleDeclaration> {
         match &self {
-            AnyJsDeclarationClause::TsExternalModuleDeclaration(item) => Some(item),
+            Self::TsExternalModuleDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_global_declaration(&self) -> Option<&TsGlobalDeclaration> {
         match &self {
-            AnyJsDeclarationClause::TsGlobalDeclaration(item) => Some(item),
+            Self::TsGlobalDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_import_equals_declaration(&self) -> Option<&TsImportEqualsDeclaration> {
         match &self {
-            AnyJsDeclarationClause::TsImportEqualsDeclaration(item) => Some(item),
+            Self::TsImportEqualsDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_interface_declaration(&self) -> Option<&TsInterfaceDeclaration> {
         match &self {
-            AnyJsDeclarationClause::TsInterfaceDeclaration(item) => Some(item),
+            Self::TsInterfaceDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_module_declaration(&self) -> Option<&TsModuleDeclaration> {
         match &self {
-            AnyJsDeclarationClause::TsModuleDeclaration(item) => Some(item),
+            Self::TsModuleDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_type_alias_declaration(&self) -> Option<&TsTypeAliasDeclaration> {
         match &self {
-            AnyJsDeclarationClause::TsTypeAliasDeclaration(item) => Some(item),
+            Self::TsTypeAliasDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -14075,31 +14073,31 @@ pub enum AnyJsDecorator {
 impl AnyJsDecorator {
     pub fn as_js_bogus_expression(&self) -> Option<&JsBogusExpression> {
         match &self {
-            AnyJsDecorator::JsBogusExpression(item) => Some(item),
+            Self::JsBogusExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_call_expression(&self) -> Option<&JsCallExpression> {
         match &self {
-            AnyJsDecorator::JsCallExpression(item) => Some(item),
+            Self::JsCallExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_identifier_expression(&self) -> Option<&JsIdentifierExpression> {
         match &self {
-            AnyJsDecorator::JsIdentifierExpression(item) => Some(item),
+            Self::JsIdentifierExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_parenthesized_expression(&self) -> Option<&JsParenthesizedExpression> {
         match &self {
-            AnyJsDecorator::JsParenthesizedExpression(item) => Some(item),
+            Self::JsParenthesizedExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_static_member_expression(&self) -> Option<&JsStaticMemberExpression> {
         match &self {
-            AnyJsDecorator::JsStaticMemberExpression(item) => Some(item),
+            Self::JsStaticMemberExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -14119,7 +14117,7 @@ pub enum AnyJsExportClause {
 impl AnyJsExportClause {
     pub fn as_any_js_declaration_clause(&self) -> Option<&AnyJsDeclarationClause> {
         match &self {
-            AnyJsExportClause::AnyJsDeclarationClause(item) => Some(item),
+            Self::AnyJsDeclarationClause(item) => Some(item),
             _ => None,
         }
     }
@@ -14127,7 +14125,7 @@ impl AnyJsExportClause {
         &self,
     ) -> Option<&JsExportDefaultDeclarationClause> {
         match &self {
-            AnyJsExportClause::JsExportDefaultDeclarationClause(item) => Some(item),
+            Self::JsExportDefaultDeclarationClause(item) => Some(item),
             _ => None,
         }
     }
@@ -14135,43 +14133,43 @@ impl AnyJsExportClause {
         &self,
     ) -> Option<&JsExportDefaultExpressionClause> {
         match &self {
-            AnyJsExportClause::JsExportDefaultExpressionClause(item) => Some(item),
+            Self::JsExportDefaultExpressionClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_export_from_clause(&self) -> Option<&JsExportFromClause> {
         match &self {
-            AnyJsExportClause::JsExportFromClause(item) => Some(item),
+            Self::JsExportFromClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_export_named_clause(&self) -> Option<&JsExportNamedClause> {
         match &self {
-            AnyJsExportClause::JsExportNamedClause(item) => Some(item),
+            Self::JsExportNamedClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_export_named_from_clause(&self) -> Option<&JsExportNamedFromClause> {
         match &self {
-            AnyJsExportClause::JsExportNamedFromClause(item) => Some(item),
+            Self::JsExportNamedFromClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_export_as_namespace_clause(&self) -> Option<&TsExportAsNamespaceClause> {
         match &self {
-            AnyJsExportClause::TsExportAsNamespaceClause(item) => Some(item),
+            Self::TsExportAsNamespaceClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_export_assignment_clause(&self) -> Option<&TsExportAssignmentClause> {
         match &self {
-            AnyJsExportClause::TsExportAssignmentClause(item) => Some(item),
+            Self::TsExportAssignmentClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_export_declare_clause(&self) -> Option<&TsExportDeclareClause> {
         match &self {
-            AnyJsExportClause::TsExportDeclareClause(item) => Some(item),
+            Self::TsExportDeclareClause(item) => Some(item),
             _ => None,
         }
     }
@@ -14188,7 +14186,7 @@ impl AnyJsExportDefaultDeclaration {
         &self,
     ) -> Option<&JsClassExportDefaultDeclaration> {
         match &self {
-            AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(item) => Some(item),
+            Self::JsClassExportDefaultDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -14196,7 +14194,7 @@ impl AnyJsExportDefaultDeclaration {
         &self,
     ) -> Option<&JsFunctionExportDefaultDeclaration> {
         match &self {
-            AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(item) => Some(item),
+            Self::JsFunctionExportDefaultDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -14204,15 +14202,13 @@ impl AnyJsExportDefaultDeclaration {
         &self,
     ) -> Option<&TsDeclareFunctionExportDefaultDeclaration> {
         match &self {
-            AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(item) => {
-                Some(item)
-            }
+            Self::TsDeclareFunctionExportDefaultDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_interface_declaration(&self) -> Option<&TsInterfaceDeclaration> {
         match &self {
-            AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(item) => Some(item),
+            Self::TsInterfaceDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -14227,13 +14223,13 @@ impl AnyJsExportNamedSpecifier {
         &self,
     ) -> Option<&JsExportNamedShorthandSpecifier> {
         match &self {
-            AnyJsExportNamedSpecifier::JsExportNamedShorthandSpecifier(item) => Some(item),
+            Self::JsExportNamedShorthandSpecifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_export_named_specifier(&self) -> Option<&JsExportNamedSpecifier> {
         match &self {
-            AnyJsExportNamedSpecifier::JsExportNamedSpecifier(item) => Some(item),
+            Self::JsExportNamedSpecifier(item) => Some(item),
             _ => None,
         }
     }
@@ -14282,229 +14278,229 @@ pub enum AnyJsExpression {
 impl AnyJsExpression {
     pub fn as_any_js_literal_expression(&self) -> Option<&AnyJsLiteralExpression> {
         match &self {
-            AnyJsExpression::AnyJsLiteralExpression(item) => Some(item),
+            Self::AnyJsLiteralExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_array_expression(&self) -> Option<&JsArrayExpression> {
         match &self {
-            AnyJsExpression::JsArrayExpression(item) => Some(item),
+            Self::JsArrayExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_arrow_function_expression(&self) -> Option<&JsArrowFunctionExpression> {
         match &self {
-            AnyJsExpression::JsArrowFunctionExpression(item) => Some(item),
+            Self::JsArrowFunctionExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_assignment_expression(&self) -> Option<&JsAssignmentExpression> {
         match &self {
-            AnyJsExpression::JsAssignmentExpression(item) => Some(item),
+            Self::JsAssignmentExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_await_expression(&self) -> Option<&JsAwaitExpression> {
         match &self {
-            AnyJsExpression::JsAwaitExpression(item) => Some(item),
+            Self::JsAwaitExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_binary_expression(&self) -> Option<&JsBinaryExpression> {
         match &self {
-            AnyJsExpression::JsBinaryExpression(item) => Some(item),
+            Self::JsBinaryExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_bogus_expression(&self) -> Option<&JsBogusExpression> {
         match &self {
-            AnyJsExpression::JsBogusExpression(item) => Some(item),
+            Self::JsBogusExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_call_expression(&self) -> Option<&JsCallExpression> {
         match &self {
-            AnyJsExpression::JsCallExpression(item) => Some(item),
+            Self::JsCallExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_class_expression(&self) -> Option<&JsClassExpression> {
         match &self {
-            AnyJsExpression::JsClassExpression(item) => Some(item),
+            Self::JsClassExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_computed_member_expression(&self) -> Option<&JsComputedMemberExpression> {
         match &self {
-            AnyJsExpression::JsComputedMemberExpression(item) => Some(item),
+            Self::JsComputedMemberExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_conditional_expression(&self) -> Option<&JsConditionalExpression> {
         match &self {
-            AnyJsExpression::JsConditionalExpression(item) => Some(item),
+            Self::JsConditionalExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_function_expression(&self) -> Option<&JsFunctionExpression> {
         match &self {
-            AnyJsExpression::JsFunctionExpression(item) => Some(item),
+            Self::JsFunctionExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_identifier_expression(&self) -> Option<&JsIdentifierExpression> {
         match &self {
-            AnyJsExpression::JsIdentifierExpression(item) => Some(item),
+            Self::JsIdentifierExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_import_call_expression(&self) -> Option<&JsImportCallExpression> {
         match &self {
-            AnyJsExpression::JsImportCallExpression(item) => Some(item),
+            Self::JsImportCallExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_import_meta_expression(&self) -> Option<&JsImportMetaExpression> {
         match &self {
-            AnyJsExpression::JsImportMetaExpression(item) => Some(item),
+            Self::JsImportMetaExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_in_expression(&self) -> Option<&JsInExpression> {
         match &self {
-            AnyJsExpression::JsInExpression(item) => Some(item),
+            Self::JsInExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_instanceof_expression(&self) -> Option<&JsInstanceofExpression> {
         match &self {
-            AnyJsExpression::JsInstanceofExpression(item) => Some(item),
+            Self::JsInstanceofExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_logical_expression(&self) -> Option<&JsLogicalExpression> {
         match &self {
-            AnyJsExpression::JsLogicalExpression(item) => Some(item),
+            Self::JsLogicalExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsExpression::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_new_expression(&self) -> Option<&JsNewExpression> {
         match &self {
-            AnyJsExpression::JsNewExpression(item) => Some(item),
+            Self::JsNewExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_new_target_expression(&self) -> Option<&JsNewTargetExpression> {
         match &self {
-            AnyJsExpression::JsNewTargetExpression(item) => Some(item),
+            Self::JsNewTargetExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_object_expression(&self) -> Option<&JsObjectExpression> {
         match &self {
-            AnyJsExpression::JsObjectExpression(item) => Some(item),
+            Self::JsObjectExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_parenthesized_expression(&self) -> Option<&JsParenthesizedExpression> {
         match &self {
-            AnyJsExpression::JsParenthesizedExpression(item) => Some(item),
+            Self::JsParenthesizedExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_post_update_expression(&self) -> Option<&JsPostUpdateExpression> {
         match &self {
-            AnyJsExpression::JsPostUpdateExpression(item) => Some(item),
+            Self::JsPostUpdateExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_pre_update_expression(&self) -> Option<&JsPreUpdateExpression> {
         match &self {
-            AnyJsExpression::JsPreUpdateExpression(item) => Some(item),
+            Self::JsPreUpdateExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_sequence_expression(&self) -> Option<&JsSequenceExpression> {
         match &self {
-            AnyJsExpression::JsSequenceExpression(item) => Some(item),
+            Self::JsSequenceExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_static_member_expression(&self) -> Option<&JsStaticMemberExpression> {
         match &self {
-            AnyJsExpression::JsStaticMemberExpression(item) => Some(item),
+            Self::JsStaticMemberExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_super_expression(&self) -> Option<&JsSuperExpression> {
         match &self {
-            AnyJsExpression::JsSuperExpression(item) => Some(item),
+            Self::JsSuperExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_template_expression(&self) -> Option<&JsTemplateExpression> {
         match &self {
-            AnyJsExpression::JsTemplateExpression(item) => Some(item),
+            Self::JsTemplateExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_this_expression(&self) -> Option<&JsThisExpression> {
         match &self {
-            AnyJsExpression::JsThisExpression(item) => Some(item),
+            Self::JsThisExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_unary_expression(&self) -> Option<&JsUnaryExpression> {
         match &self {
-            AnyJsExpression::JsUnaryExpression(item) => Some(item),
+            Self::JsUnaryExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_yield_expression(&self) -> Option<&JsYieldExpression> {
         match &self {
-            AnyJsExpression::JsYieldExpression(item) => Some(item),
+            Self::JsYieldExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_tag_expression(&self) -> Option<&JsxTagExpression> {
         match &self {
-            AnyJsExpression::JsxTagExpression(item) => Some(item),
+            Self::JsxTagExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_as_expression(&self) -> Option<&TsAsExpression> {
         match &self {
-            AnyJsExpression::TsAsExpression(item) => Some(item),
+            Self::TsAsExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_instantiation_expression(&self) -> Option<&TsInstantiationExpression> {
         match &self {
-            AnyJsExpression::TsInstantiationExpression(item) => Some(item),
+            Self::TsInstantiationExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_non_null_assertion_expression(&self) -> Option<&TsNonNullAssertionExpression> {
         match &self {
-            AnyJsExpression::TsNonNullAssertionExpression(item) => Some(item),
+            Self::TsNonNullAssertionExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_satisfies_expression(&self) -> Option<&TsSatisfiesExpression> {
         match &self {
-            AnyJsExpression::TsSatisfiesExpression(item) => Some(item),
+            Self::TsSatisfiesExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_type_assertion_expression(&self) -> Option<&TsTypeAssertionExpression> {
         match &self {
-            AnyJsExpression::TsTypeAssertionExpression(item) => Some(item),
+            Self::TsTypeAssertionExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -14517,13 +14513,13 @@ pub enum AnyJsForInOrOfInitializer {
 impl AnyJsForInOrOfInitializer {
     pub fn as_any_js_assignment_pattern(&self) -> Option<&AnyJsAssignmentPattern> {
         match &self {
-            AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(item) => Some(item),
+            Self::AnyJsAssignmentPattern(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_for_variable_declaration(&self) -> Option<&JsForVariableDeclaration> {
         match &self {
-            AnyJsForInOrOfInitializer::JsForVariableDeclaration(item) => Some(item),
+            Self::JsForVariableDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -14536,13 +14532,13 @@ pub enum AnyJsForInitializer {
 impl AnyJsForInitializer {
     pub fn as_any_js_expression(&self) -> Option<&AnyJsExpression> {
         match &self {
-            AnyJsForInitializer::AnyJsExpression(item) => Some(item),
+            Self::AnyJsExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_variable_declaration(&self) -> Option<&JsVariableDeclaration> {
         match &self {
-            AnyJsForInitializer::JsVariableDeclaration(item) => Some(item),
+            Self::JsVariableDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -14556,19 +14552,19 @@ pub enum AnyJsFormalParameter {
 impl AnyJsFormalParameter {
     pub fn as_js_bogus_parameter(&self) -> Option<&JsBogusParameter> {
         match &self {
-            AnyJsFormalParameter::JsBogusParameter(item) => Some(item),
+            Self::JsBogusParameter(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_formal_parameter(&self) -> Option<&JsFormalParameter> {
         match &self {
-            AnyJsFormalParameter::JsFormalParameter(item) => Some(item),
+            Self::JsFormalParameter(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsFormalParameter::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -14583,13 +14579,13 @@ pub enum AnyJsFunction {
 impl AnyJsFunction {
     pub fn as_js_arrow_function_expression(&self) -> Option<&JsArrowFunctionExpression> {
         match &self {
-            AnyJsFunction::JsArrowFunctionExpression(item) => Some(item),
+            Self::JsArrowFunctionExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_function_declaration(&self) -> Option<&JsFunctionDeclaration> {
         match &self {
-            AnyJsFunction::JsFunctionDeclaration(item) => Some(item),
+            Self::JsFunctionDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -14597,13 +14593,13 @@ impl AnyJsFunction {
         &self,
     ) -> Option<&JsFunctionExportDefaultDeclaration> {
         match &self {
-            AnyJsFunction::JsFunctionExportDefaultDeclaration(item) => Some(item),
+            Self::JsFunctionExportDefaultDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_function_expression(&self) -> Option<&JsFunctionExpression> {
         match &self {
-            AnyJsFunction::JsFunctionExpression(item) => Some(item),
+            Self::JsFunctionExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -14616,13 +14612,13 @@ pub enum AnyJsFunctionBody {
 impl AnyJsFunctionBody {
     pub fn as_any_js_expression(&self) -> Option<&AnyJsExpression> {
         match &self {
-            AnyJsFunctionBody::AnyJsExpression(item) => Some(item),
+            Self::AnyJsExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_function_body(&self) -> Option<&JsFunctionBody> {
         match &self {
-            AnyJsFunctionBody::JsFunctionBody(item) => Some(item),
+            Self::JsFunctionBody(item) => Some(item),
             _ => None,
         }
     }
@@ -14635,13 +14631,13 @@ pub enum AnyJsImportAssertionEntry {
 impl AnyJsImportAssertionEntry {
     pub fn as_js_bogus_import_assertion_entry(&self) -> Option<&JsBogusImportAssertionEntry> {
         match &self {
-            AnyJsImportAssertionEntry::JsBogusImportAssertionEntry(item) => Some(item),
+            Self::JsBogusImportAssertionEntry(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_import_assertion_entry(&self) -> Option<&JsImportAssertionEntry> {
         match &self {
-            AnyJsImportAssertionEntry::JsImportAssertionEntry(item) => Some(item),
+            Self::JsImportAssertionEntry(item) => Some(item),
             _ => None,
         }
     }
@@ -14657,31 +14653,31 @@ pub enum AnyJsImportClause {
 impl AnyJsImportClause {
     pub fn as_js_import_bare_clause(&self) -> Option<&JsImportBareClause> {
         match &self {
-            AnyJsImportClause::JsImportBareClause(item) => Some(item),
+            Self::JsImportBareClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_import_combined_clause(&self) -> Option<&JsImportCombinedClause> {
         match &self {
-            AnyJsImportClause::JsImportCombinedClause(item) => Some(item),
+            Self::JsImportCombinedClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_import_default_clause(&self) -> Option<&JsImportDefaultClause> {
         match &self {
-            AnyJsImportClause::JsImportDefaultClause(item) => Some(item),
+            Self::JsImportDefaultClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_import_named_clause(&self) -> Option<&JsImportNamedClause> {
         match &self {
-            AnyJsImportClause::JsImportNamedClause(item) => Some(item),
+            Self::JsImportNamedClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_import_namespace_clause(&self) -> Option<&JsImportNamespaceClause> {
         match &self {
-            AnyJsImportClause::JsImportNamespaceClause(item) => Some(item),
+            Self::JsImportNamespaceClause(item) => Some(item),
             _ => None,
         }
     }
@@ -14694,13 +14690,13 @@ pub enum AnyJsInProperty {
 impl AnyJsInProperty {
     pub fn as_any_js_expression(&self) -> Option<&AnyJsExpression> {
         match &self {
-            AnyJsInProperty::AnyJsExpression(item) => Some(item),
+            Self::AnyJsExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_private_name(&self) -> Option<&JsPrivateName> {
         match &self {
-            AnyJsInProperty::JsPrivateName(item) => Some(item),
+            Self::JsPrivateName(item) => Some(item),
             _ => None,
         }
     }
@@ -14717,37 +14713,37 @@ pub enum AnyJsLiteralExpression {
 impl AnyJsLiteralExpression {
     pub fn as_js_bigint_literal_expression(&self) -> Option<&JsBigintLiteralExpression> {
         match &self {
-            AnyJsLiteralExpression::JsBigintLiteralExpression(item) => Some(item),
+            Self::JsBigintLiteralExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_boolean_literal_expression(&self) -> Option<&JsBooleanLiteralExpression> {
         match &self {
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(item) => Some(item),
+            Self::JsBooleanLiteralExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_null_literal_expression(&self) -> Option<&JsNullLiteralExpression> {
         match &self {
-            AnyJsLiteralExpression::JsNullLiteralExpression(item) => Some(item),
+            Self::JsNullLiteralExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_number_literal_expression(&self) -> Option<&JsNumberLiteralExpression> {
         match &self {
-            AnyJsLiteralExpression::JsNumberLiteralExpression(item) => Some(item),
+            Self::JsNumberLiteralExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_regex_literal_expression(&self) -> Option<&JsRegexLiteralExpression> {
         match &self {
-            AnyJsLiteralExpression::JsRegexLiteralExpression(item) => Some(item),
+            Self::JsRegexLiteralExpression(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_string_literal_expression(&self) -> Option<&JsStringLiteralExpression> {
         match &self {
-            AnyJsLiteralExpression::JsStringLiteralExpression(item) => Some(item),
+            Self::JsStringLiteralExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -14762,25 +14758,25 @@ pub enum AnyJsMethodModifier {
 impl AnyJsMethodModifier {
     pub fn as_js_decorator(&self) -> Option<&JsDecorator> {
         match &self {
-            AnyJsMethodModifier::JsDecorator(item) => Some(item),
+            Self::JsDecorator(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_static_modifier(&self) -> Option<&JsStaticModifier> {
         match &self {
-            AnyJsMethodModifier::JsStaticModifier(item) => Some(item),
+            Self::JsStaticModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_accessibility_modifier(&self) -> Option<&TsAccessibilityModifier> {
         match &self {
-            AnyJsMethodModifier::TsAccessibilityModifier(item) => Some(item),
+            Self::TsAccessibilityModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_override_modifier(&self) -> Option<&TsOverrideModifier> {
         match &self {
-            AnyJsMethodModifier::TsOverrideModifier(item) => Some(item),
+            Self::TsOverrideModifier(item) => Some(item),
             _ => None,
         }
     }
@@ -14794,19 +14790,19 @@ pub enum AnyJsModuleItem {
 impl AnyJsModuleItem {
     pub fn as_any_js_statement(&self) -> Option<&AnyJsStatement> {
         match &self {
-            AnyJsModuleItem::AnyJsStatement(item) => Some(item),
+            Self::AnyJsStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_export(&self) -> Option<&JsExport> {
         match &self {
-            AnyJsModuleItem::JsExport(item) => Some(item),
+            Self::JsExport(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_import(&self) -> Option<&JsImport> {
         match &self {
-            AnyJsModuleItem::JsImport(item) => Some(item),
+            Self::JsImport(item) => Some(item),
             _ => None,
         }
     }
@@ -14819,13 +14815,13 @@ pub enum AnyJsModuleSource {
 impl AnyJsModuleSource {
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsModuleSource::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_module_source(&self) -> Option<&JsModuleSource> {
         match &self {
-            AnyJsModuleSource::JsModuleSource(item) => Some(item),
+            Self::JsModuleSource(item) => Some(item),
             _ => None,
         }
     }
@@ -14839,19 +14835,19 @@ pub enum AnyJsName {
 impl AnyJsName {
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsName::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_name(&self) -> Option<&JsName> {
         match &self {
-            AnyJsName::JsName(item) => Some(item),
+            Self::JsName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_private_name(&self) -> Option<&JsPrivateName> {
         match &self {
-            AnyJsName::JsPrivateName(item) => Some(item),
+            Self::JsPrivateName(item) => Some(item),
             _ => None,
         }
     }
@@ -14865,13 +14861,13 @@ pub enum AnyJsNamedImportSpecifier {
 impl AnyJsNamedImportSpecifier {
     pub fn as_js_bogus_named_import_specifier(&self) -> Option<&JsBogusNamedImportSpecifier> {
         match &self {
-            AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(item) => Some(item),
+            Self::JsBogusNamedImportSpecifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_named_import_specifier(&self) -> Option<&JsNamedImportSpecifier> {
         match &self {
-            AnyJsNamedImportSpecifier::JsNamedImportSpecifier(item) => Some(item),
+            Self::JsNamedImportSpecifier(item) => Some(item),
             _ => None,
         }
     }
@@ -14879,7 +14875,7 @@ impl AnyJsNamedImportSpecifier {
         &self,
     ) -> Option<&JsShorthandNamedImportSpecifier> {
         match &self {
-            AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(item) => Some(item),
+            Self::JsShorthandNamedImportSpecifier(item) => Some(item),
             _ => None,
         }
     }
@@ -14894,7 +14890,7 @@ pub enum AnyJsObjectAssignmentPatternMember {
 impl AnyJsObjectAssignmentPatternMember {
     pub fn as_js_bogus_assignment(&self) -> Option<&JsBogusAssignment> {
         match &self {
-            AnyJsObjectAssignmentPatternMember::JsBogusAssignment(item) => Some(item),
+            Self::JsBogusAssignment(item) => Some(item),
             _ => None,
         }
     }
@@ -14902,15 +14898,13 @@ impl AnyJsObjectAssignmentPatternMember {
         &self,
     ) -> Option<&JsObjectAssignmentPatternProperty> {
         match &self {
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(item) => {
-                Some(item)
-            }
+            Self::JsObjectAssignmentPatternProperty(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_object_assignment_pattern_rest(&self) -> Option<&JsObjectAssignmentPatternRest> {
         match &self {
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(item) => Some(item),
+            Self::JsObjectAssignmentPatternRest(item) => Some(item),
             _ => None,
         }
     }
@@ -14918,9 +14912,7 @@ impl AnyJsObjectAssignmentPatternMember {
         &self,
     ) -> Option<&JsObjectAssignmentPatternShorthandProperty> {
         match &self {
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(
-                item,
-            ) => Some(item),
+            Self::JsObjectAssignmentPatternShorthandProperty(item) => Some(item),
             _ => None,
         }
     }
@@ -14936,25 +14928,25 @@ pub enum AnyJsObjectBindingPatternMember {
 impl AnyJsObjectBindingPatternMember {
     pub fn as_js_bogus_binding(&self) -> Option<&JsBogusBinding> {
         match &self {
-            AnyJsObjectBindingPatternMember::JsBogusBinding(item) => Some(item),
+            Self::JsBogusBinding(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsObjectBindingPatternMember::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_object_binding_pattern_property(&self) -> Option<&JsObjectBindingPatternProperty> {
         match &self {
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(item) => Some(item),
+            Self::JsObjectBindingPatternProperty(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_object_binding_pattern_rest(&self) -> Option<&JsObjectBindingPatternRest> {
         match &self {
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(item) => Some(item),
+            Self::JsObjectBindingPatternRest(item) => Some(item),
             _ => None,
         }
     }
@@ -14962,9 +14954,7 @@ impl AnyJsObjectBindingPatternMember {
         &self,
     ) -> Option<&JsObjectBindingPatternShorthandProperty> {
         match &self {
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(item) => {
-                Some(item)
-            }
+            Self::JsObjectBindingPatternShorthandProperty(item) => Some(item),
             _ => None,
         }
     }
@@ -14982,31 +14972,31 @@ pub enum AnyJsObjectMember {
 impl AnyJsObjectMember {
     pub fn as_js_bogus_member(&self) -> Option<&JsBogusMember> {
         match &self {
-            AnyJsObjectMember::JsBogusMember(item) => Some(item),
+            Self::JsBogusMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_getter_object_member(&self) -> Option<&JsGetterObjectMember> {
         match &self {
-            AnyJsObjectMember::JsGetterObjectMember(item) => Some(item),
+            Self::JsGetterObjectMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_method_object_member(&self) -> Option<&JsMethodObjectMember> {
         match &self {
-            AnyJsObjectMember::JsMethodObjectMember(item) => Some(item),
+            Self::JsMethodObjectMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_property_object_member(&self) -> Option<&JsPropertyObjectMember> {
         match &self {
-            AnyJsObjectMember::JsPropertyObjectMember(item) => Some(item),
+            Self::JsPropertyObjectMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_setter_object_member(&self) -> Option<&JsSetterObjectMember> {
         match &self {
-            AnyJsObjectMember::JsSetterObjectMember(item) => Some(item),
+            Self::JsSetterObjectMember(item) => Some(item),
             _ => None,
         }
     }
@@ -15014,13 +15004,13 @@ impl AnyJsObjectMember {
         &self,
     ) -> Option<&JsShorthandPropertyObjectMember> {
         match &self {
-            AnyJsObjectMember::JsShorthandPropertyObjectMember(item) => Some(item),
+            Self::JsShorthandPropertyObjectMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_spread(&self) -> Option<&JsSpread> {
         match &self {
-            AnyJsObjectMember::JsSpread(item) => Some(item),
+            Self::JsSpread(item) => Some(item),
             _ => None,
         }
     }
@@ -15034,19 +15024,19 @@ pub enum AnyJsObjectMemberName {
 impl AnyJsObjectMemberName {
     pub fn as_js_computed_member_name(&self) -> Option<&JsComputedMemberName> {
         match &self {
-            AnyJsObjectMemberName::JsComputedMemberName(item) => Some(item),
+            Self::JsComputedMemberName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_literal_member_name(&self) -> Option<&JsLiteralMemberName> {
         match &self {
-            AnyJsObjectMemberName::JsLiteralMemberName(item) => Some(item),
+            Self::JsLiteralMemberName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsObjectMemberName::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -15060,19 +15050,19 @@ pub enum AnyJsParameter {
 impl AnyJsParameter {
     pub fn as_any_js_formal_parameter(&self) -> Option<&AnyJsFormalParameter> {
         match &self {
-            AnyJsParameter::AnyJsFormalParameter(item) => Some(item),
+            Self::AnyJsFormalParameter(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_rest_parameter(&self) -> Option<&JsRestParameter> {
         match &self {
-            AnyJsParameter::JsRestParameter(item) => Some(item),
+            Self::JsRestParameter(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_this_parameter(&self) -> Option<&TsThisParameter> {
         match &self {
-            AnyJsParameter::TsThisParameter(item) => Some(item),
+            Self::TsThisParameter(item) => Some(item),
             _ => None,
         }
     }
@@ -15089,37 +15079,37 @@ pub enum AnyJsPropertyModifier {
 impl AnyJsPropertyModifier {
     pub fn as_js_accessor_modifier(&self) -> Option<&JsAccessorModifier> {
         match &self {
-            AnyJsPropertyModifier::JsAccessorModifier(item) => Some(item),
+            Self::JsAccessorModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_decorator(&self) -> Option<&JsDecorator> {
         match &self {
-            AnyJsPropertyModifier::JsDecorator(item) => Some(item),
+            Self::JsDecorator(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_static_modifier(&self) -> Option<&JsStaticModifier> {
         match &self {
-            AnyJsPropertyModifier::JsStaticModifier(item) => Some(item),
+            Self::JsStaticModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_accessibility_modifier(&self) -> Option<&TsAccessibilityModifier> {
         match &self {
-            AnyJsPropertyModifier::TsAccessibilityModifier(item) => Some(item),
+            Self::TsAccessibilityModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_override_modifier(&self) -> Option<&TsOverrideModifier> {
         match &self {
-            AnyJsPropertyModifier::TsOverrideModifier(item) => Some(item),
+            Self::TsOverrideModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_readonly_modifier(&self) -> Option<&TsReadonlyModifier> {
         match &self {
-            AnyJsPropertyModifier::TsReadonlyModifier(item) => Some(item),
+            Self::TsReadonlyModifier(item) => Some(item),
             _ => None,
         }
     }
@@ -15134,25 +15124,25 @@ pub enum AnyJsRoot {
 impl AnyJsRoot {
     pub fn as_js_expression_snipped(&self) -> Option<&JsExpressionSnipped> {
         match &self {
-            AnyJsRoot::JsExpressionSnipped(item) => Some(item),
+            Self::JsExpressionSnipped(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_module(&self) -> Option<&JsModule> {
         match &self {
-            AnyJsRoot::JsModule(item) => Some(item),
+            Self::JsModule(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_script(&self) -> Option<&JsScript> {
         match &self {
-            AnyJsRoot::JsScript(item) => Some(item),
+            Self::JsScript(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_declaration_module(&self) -> Option<&TsDeclarationModule> {
         match &self {
-            AnyJsRoot::TsDeclarationModule(item) => Some(item),
+            Self::TsDeclarationModule(item) => Some(item),
             _ => None,
         }
     }
@@ -15196,199 +15186,199 @@ pub enum AnyJsStatement {
 impl AnyJsStatement {
     pub fn as_js_block_statement(&self) -> Option<&JsBlockStatement> {
         match &self {
-            AnyJsStatement::JsBlockStatement(item) => Some(item),
+            Self::JsBlockStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_bogus_statement(&self) -> Option<&JsBogusStatement> {
         match &self {
-            AnyJsStatement::JsBogusStatement(item) => Some(item),
+            Self::JsBogusStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_break_statement(&self) -> Option<&JsBreakStatement> {
         match &self {
-            AnyJsStatement::JsBreakStatement(item) => Some(item),
+            Self::JsBreakStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_class_declaration(&self) -> Option<&JsClassDeclaration> {
         match &self {
-            AnyJsStatement::JsClassDeclaration(item) => Some(item),
+            Self::JsClassDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_continue_statement(&self) -> Option<&JsContinueStatement> {
         match &self {
-            AnyJsStatement::JsContinueStatement(item) => Some(item),
+            Self::JsContinueStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_debugger_statement(&self) -> Option<&JsDebuggerStatement> {
         match &self {
-            AnyJsStatement::JsDebuggerStatement(item) => Some(item),
+            Self::JsDebuggerStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_do_while_statement(&self) -> Option<&JsDoWhileStatement> {
         match &self {
-            AnyJsStatement::JsDoWhileStatement(item) => Some(item),
+            Self::JsDoWhileStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_empty_statement(&self) -> Option<&JsEmptyStatement> {
         match &self {
-            AnyJsStatement::JsEmptyStatement(item) => Some(item),
+            Self::JsEmptyStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_expression_statement(&self) -> Option<&JsExpressionStatement> {
         match &self {
-            AnyJsStatement::JsExpressionStatement(item) => Some(item),
+            Self::JsExpressionStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_for_in_statement(&self) -> Option<&JsForInStatement> {
         match &self {
-            AnyJsStatement::JsForInStatement(item) => Some(item),
+            Self::JsForInStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_for_of_statement(&self) -> Option<&JsForOfStatement> {
         match &self {
-            AnyJsStatement::JsForOfStatement(item) => Some(item),
+            Self::JsForOfStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_for_statement(&self) -> Option<&JsForStatement> {
         match &self {
-            AnyJsStatement::JsForStatement(item) => Some(item),
+            Self::JsForStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_function_declaration(&self) -> Option<&JsFunctionDeclaration> {
         match &self {
-            AnyJsStatement::JsFunctionDeclaration(item) => Some(item),
+            Self::JsFunctionDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_if_statement(&self) -> Option<&JsIfStatement> {
         match &self {
-            AnyJsStatement::JsIfStatement(item) => Some(item),
+            Self::JsIfStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_labeled_statement(&self) -> Option<&JsLabeledStatement> {
         match &self {
-            AnyJsStatement::JsLabeledStatement(item) => Some(item),
+            Self::JsLabeledStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsStatement::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_return_statement(&self) -> Option<&JsReturnStatement> {
         match &self {
-            AnyJsStatement::JsReturnStatement(item) => Some(item),
+            Self::JsReturnStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_switch_statement(&self) -> Option<&JsSwitchStatement> {
         match &self {
-            AnyJsStatement::JsSwitchStatement(item) => Some(item),
+            Self::JsSwitchStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_throw_statement(&self) -> Option<&JsThrowStatement> {
         match &self {
-            AnyJsStatement::JsThrowStatement(item) => Some(item),
+            Self::JsThrowStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_try_finally_statement(&self) -> Option<&JsTryFinallyStatement> {
         match &self {
-            AnyJsStatement::JsTryFinallyStatement(item) => Some(item),
+            Self::JsTryFinallyStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_try_statement(&self) -> Option<&JsTryStatement> {
         match &self {
-            AnyJsStatement::JsTryStatement(item) => Some(item),
+            Self::JsTryStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_variable_statement(&self) -> Option<&JsVariableStatement> {
         match &self {
-            AnyJsStatement::JsVariableStatement(item) => Some(item),
+            Self::JsVariableStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_while_statement(&self) -> Option<&JsWhileStatement> {
         match &self {
-            AnyJsStatement::JsWhileStatement(item) => Some(item),
+            Self::JsWhileStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_with_statement(&self) -> Option<&JsWithStatement> {
         match &self {
-            AnyJsStatement::JsWithStatement(item) => Some(item),
+            Self::JsWithStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_declare_function_declaration(&self) -> Option<&TsDeclareFunctionDeclaration> {
         match &self {
-            AnyJsStatement::TsDeclareFunctionDeclaration(item) => Some(item),
+            Self::TsDeclareFunctionDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_declare_statement(&self) -> Option<&TsDeclareStatement> {
         match &self {
-            AnyJsStatement::TsDeclareStatement(item) => Some(item),
+            Self::TsDeclareStatement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_enum_declaration(&self) -> Option<&TsEnumDeclaration> {
         match &self {
-            AnyJsStatement::TsEnumDeclaration(item) => Some(item),
+            Self::TsEnumDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_external_module_declaration(&self) -> Option<&TsExternalModuleDeclaration> {
         match &self {
-            AnyJsStatement::TsExternalModuleDeclaration(item) => Some(item),
+            Self::TsExternalModuleDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_global_declaration(&self) -> Option<&TsGlobalDeclaration> {
         match &self {
-            AnyJsStatement::TsGlobalDeclaration(item) => Some(item),
+            Self::TsGlobalDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_import_equals_declaration(&self) -> Option<&TsImportEqualsDeclaration> {
         match &self {
-            AnyJsStatement::TsImportEqualsDeclaration(item) => Some(item),
+            Self::TsImportEqualsDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_interface_declaration(&self) -> Option<&TsInterfaceDeclaration> {
         match &self {
-            AnyJsStatement::TsInterfaceDeclaration(item) => Some(item),
+            Self::TsInterfaceDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_module_declaration(&self) -> Option<&TsModuleDeclaration> {
         match &self {
-            AnyJsStatement::TsModuleDeclaration(item) => Some(item),
+            Self::TsModuleDeclaration(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_type_alias_declaration(&self) -> Option<&TsTypeAliasDeclaration> {
         match &self {
-            AnyJsStatement::TsTypeAliasDeclaration(item) => Some(item),
+            Self::TsTypeAliasDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -15401,13 +15391,13 @@ pub enum AnyJsSwitchClause {
 impl AnyJsSwitchClause {
     pub fn as_js_case_clause(&self) -> Option<&JsCaseClause> {
         match &self {
-            AnyJsSwitchClause::JsCaseClause(item) => Some(item),
+            Self::JsCaseClause(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_default_clause(&self) -> Option<&JsDefaultClause> {
         match &self {
-            AnyJsSwitchClause::JsDefaultClause(item) => Some(item),
+            Self::JsDefaultClause(item) => Some(item),
             _ => None,
         }
     }
@@ -15420,13 +15410,13 @@ pub enum AnyJsTemplateElement {
 impl AnyJsTemplateElement {
     pub fn as_js_template_chunk_element(&self) -> Option<&JsTemplateChunkElement> {
         match &self {
-            AnyJsTemplateElement::JsTemplateChunkElement(item) => Some(item),
+            Self::JsTemplateChunkElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_template_element(&self) -> Option<&JsTemplateElement> {
         match &self {
-            AnyJsTemplateElement::JsTemplateElement(item) => Some(item),
+            Self::JsTemplateElement(item) => Some(item),
             _ => None,
         }
     }
@@ -15440,19 +15430,19 @@ pub enum AnyJsxAttribute {
 impl AnyJsxAttribute {
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsxAttribute::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_attribute(&self) -> Option<&JsxAttribute> {
         match &self {
-            AnyJsxAttribute::JsxAttribute(item) => Some(item),
+            Self::JsxAttribute(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_spread_attribute(&self) -> Option<&JsxSpreadAttribute> {
         match &self {
-            AnyJsxAttribute::JsxSpreadAttribute(item) => Some(item),
+            Self::JsxSpreadAttribute(item) => Some(item),
             _ => None,
         }
     }
@@ -15465,13 +15455,13 @@ pub enum AnyJsxAttributeName {
 impl AnyJsxAttributeName {
     pub fn as_jsx_name(&self) -> Option<&JsxName> {
         match &self {
-            AnyJsxAttributeName::JsxName(item) => Some(item),
+            Self::JsxName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_namespace_name(&self) -> Option<&JsxNamespaceName> {
         match &self {
-            AnyJsxAttributeName::JsxNamespaceName(item) => Some(item),
+            Self::JsxNamespaceName(item) => Some(item),
             _ => None,
         }
     }
@@ -15485,19 +15475,19 @@ pub enum AnyJsxAttributeValue {
 impl AnyJsxAttributeValue {
     pub fn as_any_jsx_tag(&self) -> Option<&AnyJsxTag> {
         match &self {
-            AnyJsxAttributeValue::AnyJsxTag(item) => Some(item),
+            Self::AnyJsxTag(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_expression_attribute_value(&self) -> Option<&JsxExpressionAttributeValue> {
         match &self {
-            AnyJsxAttributeValue::JsxExpressionAttributeValue(item) => Some(item),
+            Self::JsxExpressionAttributeValue(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_string(&self) -> Option<&JsxString> {
         match &self {
-            AnyJsxAttributeValue::JsxString(item) => Some(item),
+            Self::JsxString(item) => Some(item),
             _ => None,
         }
     }
@@ -15515,43 +15505,43 @@ pub enum AnyJsxChild {
 impl AnyJsxChild {
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsxChild::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_element(&self) -> Option<&JsxElement> {
         match &self {
-            AnyJsxChild::JsxElement(item) => Some(item),
+            Self::JsxElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_expression_child(&self) -> Option<&JsxExpressionChild> {
         match &self {
-            AnyJsxChild::JsxExpressionChild(item) => Some(item),
+            Self::JsxExpressionChild(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_fragment(&self) -> Option<&JsxFragment> {
         match &self {
-            AnyJsxChild::JsxFragment(item) => Some(item),
+            Self::JsxFragment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_self_closing_element(&self) -> Option<&JsxSelfClosingElement> {
         match &self {
-            AnyJsxChild::JsxSelfClosingElement(item) => Some(item),
+            Self::JsxSelfClosingElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_spread_child(&self) -> Option<&JsxSpreadChild> {
         match &self {
-            AnyJsxChild::JsxSpreadChild(item) => Some(item),
+            Self::JsxSpreadChild(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_text(&self) -> Option<&JsxText> {
         match &self {
-            AnyJsxChild::JsxText(item) => Some(item),
+            Self::JsxText(item) => Some(item),
             _ => None,
         }
     }
@@ -15567,31 +15557,31 @@ pub enum AnyJsxElementName {
 impl AnyJsxElementName {
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyJsxElementName::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_member_name(&self) -> Option<&JsxMemberName> {
         match &self {
-            AnyJsxElementName::JsxMemberName(item) => Some(item),
+            Self::JsxMemberName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_name(&self) -> Option<&JsxName> {
         match &self {
-            AnyJsxElementName::JsxName(item) => Some(item),
+            Self::JsxName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_namespace_name(&self) -> Option<&JsxNamespaceName> {
         match &self {
-            AnyJsxElementName::JsxNamespaceName(item) => Some(item),
+            Self::JsxNamespaceName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_reference_identifier(&self) -> Option<&JsxReferenceIdentifier> {
         match &self {
-            AnyJsxElementName::JsxReferenceIdentifier(item) => Some(item),
+            Self::JsxReferenceIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -15604,13 +15594,13 @@ pub enum AnyJsxName {
 impl AnyJsxName {
     pub fn as_jsx_name(&self) -> Option<&JsxName> {
         match &self {
-            AnyJsxName::JsxName(item) => Some(item),
+            Self::JsxName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_namespace_name(&self) -> Option<&JsxNamespaceName> {
         match &self {
-            AnyJsxName::JsxNamespaceName(item) => Some(item),
+            Self::JsxNamespaceName(item) => Some(item),
             _ => None,
         }
     }
@@ -15624,19 +15614,19 @@ pub enum AnyJsxObjectName {
 impl AnyJsxObjectName {
     pub fn as_jsx_member_name(&self) -> Option<&JsxMemberName> {
         match &self {
-            AnyJsxObjectName::JsxMemberName(item) => Some(item),
+            Self::JsxMemberName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_namespace_name(&self) -> Option<&JsxNamespaceName> {
         match &self {
-            AnyJsxObjectName::JsxNamespaceName(item) => Some(item),
+            Self::JsxNamespaceName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_reference_identifier(&self) -> Option<&JsxReferenceIdentifier> {
         match &self {
-            AnyJsxObjectName::JsxReferenceIdentifier(item) => Some(item),
+            Self::JsxReferenceIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -15650,19 +15640,19 @@ pub enum AnyJsxTag {
 impl AnyJsxTag {
     pub fn as_jsx_element(&self) -> Option<&JsxElement> {
         match &self {
-            AnyJsxTag::JsxElement(item) => Some(item),
+            Self::JsxElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_fragment(&self) -> Option<&JsxFragment> {
         match &self {
-            AnyJsxTag::JsxFragment(item) => Some(item),
+            Self::JsxFragment(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_jsx_self_closing_element(&self) -> Option<&JsxSelfClosingElement> {
         match &self {
-            AnyJsxTag::JsxSelfClosingElement(item) => Some(item),
+            Self::JsxSelfClosingElement(item) => Some(item),
             _ => None,
         }
     }
@@ -15675,13 +15665,13 @@ pub enum AnyTsEnumMemberName {
 impl AnyTsEnumMemberName {
     pub fn as_js_computed_member_name(&self) -> Option<&JsComputedMemberName> {
         match &self {
-            AnyTsEnumMemberName::JsComputedMemberName(item) => Some(item),
+            Self::JsComputedMemberName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_literal_enum_member_name(&self) -> Option<&TsLiteralEnumMemberName> {
         match &self {
-            AnyTsEnumMemberName::TsLiteralEnumMemberName(item) => Some(item),
+            Self::TsLiteralEnumMemberName(item) => Some(item),
             _ => None,
         }
     }
@@ -15696,15 +15686,13 @@ impl AnyTsExternalModuleDeclarationBody {
         &self,
     ) -> Option<&TsEmptyExternalModuleDeclarationBody> {
         match &self {
-            AnyTsExternalModuleDeclarationBody::TsEmptyExternalModuleDeclarationBody(item) => {
-                Some(item)
-            }
+            Self::TsEmptyExternalModuleDeclarationBody(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_module_block(&self) -> Option<&TsModuleBlock> {
         match &self {
-            AnyTsExternalModuleDeclarationBody::TsModuleBlock(item) => Some(item),
+            Self::TsModuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -15717,13 +15705,13 @@ pub enum AnyTsIdentifierBinding {
 impl AnyTsIdentifierBinding {
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyTsIdentifierBinding::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_identifier_binding(&self) -> Option<&TsIdentifierBinding> {
         match &self {
-            AnyTsIdentifierBinding::TsIdentifierBinding(item) => Some(item),
+            Self::TsIdentifierBinding(item) => Some(item),
             _ => None,
         }
     }
@@ -15736,13 +15724,13 @@ pub enum AnyTsIndexSignatureModifier {
 impl AnyTsIndexSignatureModifier {
     pub fn as_js_static_modifier(&self) -> Option<&JsStaticModifier> {
         match &self {
-            AnyTsIndexSignatureModifier::JsStaticModifier(item) => Some(item),
+            Self::JsStaticModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_readonly_modifier(&self) -> Option<&TsReadonlyModifier> {
         match &self {
-            AnyTsIndexSignatureModifier::TsReadonlyModifier(item) => Some(item),
+            Self::TsReadonlyModifier(item) => Some(item),
             _ => None,
         }
     }
@@ -15758,31 +15746,31 @@ pub enum AnyTsMethodSignatureModifier {
 impl AnyTsMethodSignatureModifier {
     pub fn as_js_decorator(&self) -> Option<&JsDecorator> {
         match &self {
-            AnyTsMethodSignatureModifier::JsDecorator(item) => Some(item),
+            Self::JsDecorator(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_static_modifier(&self) -> Option<&JsStaticModifier> {
         match &self {
-            AnyTsMethodSignatureModifier::JsStaticModifier(item) => Some(item),
+            Self::JsStaticModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_abstract_modifier(&self) -> Option<&TsAbstractModifier> {
         match &self {
-            AnyTsMethodSignatureModifier::TsAbstractModifier(item) => Some(item),
+            Self::TsAbstractModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_accessibility_modifier(&self) -> Option<&TsAccessibilityModifier> {
         match &self {
-            AnyTsMethodSignatureModifier::TsAccessibilityModifier(item) => Some(item),
+            Self::TsAccessibilityModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_override_modifier(&self) -> Option<&TsOverrideModifier> {
         match &self {
-            AnyTsMethodSignatureModifier::TsOverrideModifier(item) => Some(item),
+            Self::TsOverrideModifier(item) => Some(item),
             _ => None,
         }
     }
@@ -15795,13 +15783,13 @@ pub enum AnyTsModuleName {
 impl AnyTsModuleName {
     pub fn as_any_ts_identifier_binding(&self) -> Option<&AnyTsIdentifierBinding> {
         match &self {
-            AnyTsModuleName::AnyTsIdentifierBinding(item) => Some(item),
+            Self::AnyTsIdentifierBinding(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_qualified_module_name(&self) -> Option<&TsQualifiedModuleName> {
         match &self {
-            AnyTsModuleName::TsQualifiedModuleName(item) => Some(item),
+            Self::TsQualifiedModuleName(item) => Some(item),
             _ => None,
         }
     }
@@ -15814,13 +15802,13 @@ pub enum AnyTsModuleReference {
 impl AnyTsModuleReference {
     pub fn as_any_ts_name(&self) -> Option<&AnyTsName> {
         match &self {
-            AnyTsModuleReference::AnyTsName(item) => Some(item),
+            Self::AnyTsName(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_external_module_reference(&self) -> Option<&TsExternalModuleReference> {
         match &self {
-            AnyTsModuleReference::TsExternalModuleReference(item) => Some(item),
+            Self::TsExternalModuleReference(item) => Some(item),
             _ => None,
         }
     }
@@ -15833,13 +15821,13 @@ pub enum AnyTsName {
 impl AnyTsName {
     pub fn as_js_reference_identifier(&self) -> Option<&JsReferenceIdentifier> {
         match &self {
-            AnyTsName::JsReferenceIdentifier(item) => Some(item),
+            Self::JsReferenceIdentifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_qualified_name(&self) -> Option<&TsQualifiedName> {
         match &self {
-            AnyTsName::TsQualifiedName(item) => Some(item),
+            Self::TsQualifiedName(item) => Some(item),
             _ => None,
         }
     }
@@ -15853,19 +15841,19 @@ pub enum AnyTsPropertyAnnotation {
 impl AnyTsPropertyAnnotation {
     pub fn as_ts_definite_property_annotation(&self) -> Option<&TsDefinitePropertyAnnotation> {
         match &self {
-            AnyTsPropertyAnnotation::TsDefinitePropertyAnnotation(item) => Some(item),
+            Self::TsDefinitePropertyAnnotation(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_optional_property_annotation(&self) -> Option<&TsOptionalPropertyAnnotation> {
         match &self {
-            AnyTsPropertyAnnotation::TsOptionalPropertyAnnotation(item) => Some(item),
+            Self::TsOptionalPropertyAnnotation(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_type_annotation(&self) -> Option<&TsTypeAnnotation> {
         match &self {
-            AnyTsPropertyAnnotation::TsTypeAnnotation(item) => Some(item),
+            Self::TsTypeAnnotation(item) => Some(item),
             _ => None,
         }
     }
@@ -15879,19 +15867,19 @@ pub enum AnyTsPropertyParameterModifier {
 impl AnyTsPropertyParameterModifier {
     pub fn as_ts_accessibility_modifier(&self) -> Option<&TsAccessibilityModifier> {
         match &self {
-            AnyTsPropertyParameterModifier::TsAccessibilityModifier(item) => Some(item),
+            Self::TsAccessibilityModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_override_modifier(&self) -> Option<&TsOverrideModifier> {
         match &self {
-            AnyTsPropertyParameterModifier::TsOverrideModifier(item) => Some(item),
+            Self::TsOverrideModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_readonly_modifier(&self) -> Option<&TsReadonlyModifier> {
         match &self {
-            AnyTsPropertyParameterModifier::TsReadonlyModifier(item) => Some(item),
+            Self::TsReadonlyModifier(item) => Some(item),
             _ => None,
         }
     }
@@ -15904,13 +15892,13 @@ pub enum AnyTsPropertySignatureAnnotation {
 impl AnyTsPropertySignatureAnnotation {
     pub fn as_ts_optional_property_annotation(&self) -> Option<&TsOptionalPropertyAnnotation> {
         match &self {
-            AnyTsPropertySignatureAnnotation::TsOptionalPropertyAnnotation(item) => Some(item),
+            Self::TsOptionalPropertyAnnotation(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_type_annotation(&self) -> Option<&TsTypeAnnotation> {
         match &self {
-            AnyTsPropertySignatureAnnotation::TsTypeAnnotation(item) => Some(item),
+            Self::TsTypeAnnotation(item) => Some(item),
             _ => None,
         }
     }
@@ -15929,49 +15917,49 @@ pub enum AnyTsPropertySignatureModifier {
 impl AnyTsPropertySignatureModifier {
     pub fn as_js_accessor_modifier(&self) -> Option<&JsAccessorModifier> {
         match &self {
-            AnyTsPropertySignatureModifier::JsAccessorModifier(item) => Some(item),
+            Self::JsAccessorModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_decorator(&self) -> Option<&JsDecorator> {
         match &self {
-            AnyTsPropertySignatureModifier::JsDecorator(item) => Some(item),
+            Self::JsDecorator(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_js_static_modifier(&self) -> Option<&JsStaticModifier> {
         match &self {
-            AnyTsPropertySignatureModifier::JsStaticModifier(item) => Some(item),
+            Self::JsStaticModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_abstract_modifier(&self) -> Option<&TsAbstractModifier> {
         match &self {
-            AnyTsPropertySignatureModifier::TsAbstractModifier(item) => Some(item),
+            Self::TsAbstractModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_accessibility_modifier(&self) -> Option<&TsAccessibilityModifier> {
         match &self {
-            AnyTsPropertySignatureModifier::TsAccessibilityModifier(item) => Some(item),
+            Self::TsAccessibilityModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_declare_modifier(&self) -> Option<&TsDeclareModifier> {
         match &self {
-            AnyTsPropertySignatureModifier::TsDeclareModifier(item) => Some(item),
+            Self::TsDeclareModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_override_modifier(&self) -> Option<&TsOverrideModifier> {
         match &self {
-            AnyTsPropertySignatureModifier::TsOverrideModifier(item) => Some(item),
+            Self::TsOverrideModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_readonly_modifier(&self) -> Option<&TsReadonlyModifier> {
         match &self {
-            AnyTsPropertySignatureModifier::TsReadonlyModifier(item) => Some(item),
+            Self::TsReadonlyModifier(item) => Some(item),
             _ => None,
         }
     }
@@ -15985,19 +15973,19 @@ pub enum AnyTsReturnType {
 impl AnyTsReturnType {
     pub fn as_any_ts_type(&self) -> Option<&AnyTsType> {
         match &self {
-            AnyTsReturnType::AnyTsType(item) => Some(item),
+            Self::AnyTsType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_asserts_return_type(&self) -> Option<&TsAssertsReturnType> {
         match &self {
-            AnyTsReturnType::TsAssertsReturnType(item) => Some(item),
+            Self::TsAssertsReturnType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_predicate_return_type(&self) -> Option<&TsPredicateReturnType> {
         match &self {
-            AnyTsReturnType::TsPredicateReturnType(item) => Some(item),
+            Self::TsPredicateReturnType(item) => Some(item),
             _ => None,
         }
     }
@@ -16010,13 +15998,13 @@ pub enum AnyTsTemplateElement {
 impl AnyTsTemplateElement {
     pub fn as_ts_template_chunk_element(&self) -> Option<&TsTemplateChunkElement> {
         match &self {
-            AnyTsTemplateElement::TsTemplateChunkElement(item) => Some(item),
+            Self::TsTemplateChunkElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_template_element(&self) -> Option<&TsTemplateElement> {
         match &self {
-            AnyTsTemplateElement::TsTemplateElement(item) => Some(item),
+            Self::TsTemplateElement(item) => Some(item),
             _ => None,
         }
     }
@@ -16031,25 +16019,25 @@ pub enum AnyTsTupleTypeElement {
 impl AnyTsTupleTypeElement {
     pub fn as_any_ts_type(&self) -> Option<&AnyTsType> {
         match &self {
-            AnyTsTupleTypeElement::AnyTsType(item) => Some(item),
+            Self::AnyTsType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_named_tuple_type_element(&self) -> Option<&TsNamedTupleTypeElement> {
         match &self {
-            AnyTsTupleTypeElement::TsNamedTupleTypeElement(item) => Some(item),
+            Self::TsNamedTupleTypeElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_optional_tuple_type_element(&self) -> Option<&TsOptionalTupleTypeElement> {
         match &self {
-            AnyTsTupleTypeElement::TsOptionalTupleTypeElement(item) => Some(item),
+            Self::TsOptionalTupleTypeElement(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_rest_tuple_type_element(&self) -> Option<&TsRestTupleTypeElement> {
         match &self {
-            AnyTsTupleTypeElement::TsRestTupleTypeElement(item) => Some(item),
+            Self::TsRestTupleTypeElement(item) => Some(item),
             _ => None,
         }
     }
@@ -16096,217 +16084,217 @@ pub enum AnyTsType {
 impl AnyTsType {
     pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
         match &self {
-            AnyTsType::JsMetavariable(item) => Some(item),
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_any_type(&self) -> Option<&TsAnyType> {
         match &self {
-            AnyTsType::TsAnyType(item) => Some(item),
+            Self::TsAnyType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_array_type(&self) -> Option<&TsArrayType> {
         match &self {
-            AnyTsType::TsArrayType(item) => Some(item),
+            Self::TsArrayType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_bigint_literal_type(&self) -> Option<&TsBigintLiteralType> {
         match &self {
-            AnyTsType::TsBigintLiteralType(item) => Some(item),
+            Self::TsBigintLiteralType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_bigint_type(&self) -> Option<&TsBigintType> {
         match &self {
-            AnyTsType::TsBigintType(item) => Some(item),
+            Self::TsBigintType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_bogus_type(&self) -> Option<&TsBogusType> {
         match &self {
-            AnyTsType::TsBogusType(item) => Some(item),
+            Self::TsBogusType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_boolean_literal_type(&self) -> Option<&TsBooleanLiteralType> {
         match &self {
-            AnyTsType::TsBooleanLiteralType(item) => Some(item),
+            Self::TsBooleanLiteralType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_boolean_type(&self) -> Option<&TsBooleanType> {
         match &self {
-            AnyTsType::TsBooleanType(item) => Some(item),
+            Self::TsBooleanType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_conditional_type(&self) -> Option<&TsConditionalType> {
         match &self {
-            AnyTsType::TsConditionalType(item) => Some(item),
+            Self::TsConditionalType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_constructor_type(&self) -> Option<&TsConstructorType> {
         match &self {
-            AnyTsType::TsConstructorType(item) => Some(item),
+            Self::TsConstructorType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_function_type(&self) -> Option<&TsFunctionType> {
         match &self {
-            AnyTsType::TsFunctionType(item) => Some(item),
+            Self::TsFunctionType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_import_type(&self) -> Option<&TsImportType> {
         match &self {
-            AnyTsType::TsImportType(item) => Some(item),
+            Self::TsImportType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_indexed_access_type(&self) -> Option<&TsIndexedAccessType> {
         match &self {
-            AnyTsType::TsIndexedAccessType(item) => Some(item),
+            Self::TsIndexedAccessType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_infer_type(&self) -> Option<&TsInferType> {
         match &self {
-            AnyTsType::TsInferType(item) => Some(item),
+            Self::TsInferType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_intersection_type(&self) -> Option<&TsIntersectionType> {
         match &self {
-            AnyTsType::TsIntersectionType(item) => Some(item),
+            Self::TsIntersectionType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_mapped_type(&self) -> Option<&TsMappedType> {
         match &self {
-            AnyTsType::TsMappedType(item) => Some(item),
+            Self::TsMappedType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_never_type(&self) -> Option<&TsNeverType> {
         match &self {
-            AnyTsType::TsNeverType(item) => Some(item),
+            Self::TsNeverType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_non_primitive_type(&self) -> Option<&TsNonPrimitiveType> {
         match &self {
-            AnyTsType::TsNonPrimitiveType(item) => Some(item),
+            Self::TsNonPrimitiveType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_null_literal_type(&self) -> Option<&TsNullLiteralType> {
         match &self {
-            AnyTsType::TsNullLiteralType(item) => Some(item),
+            Self::TsNullLiteralType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_number_literal_type(&self) -> Option<&TsNumberLiteralType> {
         match &self {
-            AnyTsType::TsNumberLiteralType(item) => Some(item),
+            Self::TsNumberLiteralType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_number_type(&self) -> Option<&TsNumberType> {
         match &self {
-            AnyTsType::TsNumberType(item) => Some(item),
+            Self::TsNumberType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_object_type(&self) -> Option<&TsObjectType> {
         match &self {
-            AnyTsType::TsObjectType(item) => Some(item),
+            Self::TsObjectType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_parenthesized_type(&self) -> Option<&TsParenthesizedType> {
         match &self {
-            AnyTsType::TsParenthesizedType(item) => Some(item),
+            Self::TsParenthesizedType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_reference_type(&self) -> Option<&TsReferenceType> {
         match &self {
-            AnyTsType::TsReferenceType(item) => Some(item),
+            Self::TsReferenceType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_string_literal_type(&self) -> Option<&TsStringLiteralType> {
         match &self {
-            AnyTsType::TsStringLiteralType(item) => Some(item),
+            Self::TsStringLiteralType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_string_type(&self) -> Option<&TsStringType> {
         match &self {
-            AnyTsType::TsStringType(item) => Some(item),
+            Self::TsStringType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_symbol_type(&self) -> Option<&TsSymbolType> {
         match &self {
-            AnyTsType::TsSymbolType(item) => Some(item),
+            Self::TsSymbolType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_template_literal_type(&self) -> Option<&TsTemplateLiteralType> {
         match &self {
-            AnyTsType::TsTemplateLiteralType(item) => Some(item),
+            Self::TsTemplateLiteralType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_this_type(&self) -> Option<&TsThisType> {
         match &self {
-            AnyTsType::TsThisType(item) => Some(item),
+            Self::TsThisType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_tuple_type(&self) -> Option<&TsTupleType> {
         match &self {
-            AnyTsType::TsTupleType(item) => Some(item),
+            Self::TsTupleType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_type_operator_type(&self) -> Option<&TsTypeOperatorType> {
         match &self {
-            AnyTsType::TsTypeOperatorType(item) => Some(item),
+            Self::TsTypeOperatorType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_typeof_type(&self) -> Option<&TsTypeofType> {
         match &self {
-            AnyTsType::TsTypeofType(item) => Some(item),
+            Self::TsTypeofType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_undefined_type(&self) -> Option<&TsUndefinedType> {
         match &self {
-            AnyTsType::TsUndefinedType(item) => Some(item),
+            Self::TsUndefinedType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_union_type(&self) -> Option<&TsUnionType> {
         match &self {
-            AnyTsType::TsUnionType(item) => Some(item),
+            Self::TsUnionType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_unknown_type(&self) -> Option<&TsUnknownType> {
         match &self {
-            AnyTsType::TsUnknownType(item) => Some(item),
+            Self::TsUnknownType(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_void_type(&self) -> Option<&TsVoidType> {
         match &self {
-            AnyTsType::TsVoidType(item) => Some(item),
+            Self::TsVoidType(item) => Some(item),
             _ => None,
         }
     }
@@ -16325,49 +16313,49 @@ pub enum AnyTsTypeMember {
 impl AnyTsTypeMember {
     pub fn as_js_bogus_member(&self) -> Option<&JsBogusMember> {
         match &self {
-            AnyTsTypeMember::JsBogusMember(item) => Some(item),
+            Self::JsBogusMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_call_signature_type_member(&self) -> Option<&TsCallSignatureTypeMember> {
         match &self {
-            AnyTsTypeMember::TsCallSignatureTypeMember(item) => Some(item),
+            Self::TsCallSignatureTypeMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_construct_signature_type_member(&self) -> Option<&TsConstructSignatureTypeMember> {
         match &self {
-            AnyTsTypeMember::TsConstructSignatureTypeMember(item) => Some(item),
+            Self::TsConstructSignatureTypeMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_getter_signature_type_member(&self) -> Option<&TsGetterSignatureTypeMember> {
         match &self {
-            AnyTsTypeMember::TsGetterSignatureTypeMember(item) => Some(item),
+            Self::TsGetterSignatureTypeMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_index_signature_type_member(&self) -> Option<&TsIndexSignatureTypeMember> {
         match &self {
-            AnyTsTypeMember::TsIndexSignatureTypeMember(item) => Some(item),
+            Self::TsIndexSignatureTypeMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_method_signature_type_member(&self) -> Option<&TsMethodSignatureTypeMember> {
         match &self {
-            AnyTsTypeMember::TsMethodSignatureTypeMember(item) => Some(item),
+            Self::TsMethodSignatureTypeMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_property_signature_type_member(&self) -> Option<&TsPropertySignatureTypeMember> {
         match &self {
-            AnyTsTypeMember::TsPropertySignatureTypeMember(item) => Some(item),
+            Self::TsPropertySignatureTypeMember(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_setter_signature_type_member(&self) -> Option<&TsSetterSignatureTypeMember> {
         match &self {
-            AnyTsTypeMember::TsSetterSignatureTypeMember(item) => Some(item),
+            Self::TsSetterSignatureTypeMember(item) => Some(item),
             _ => None,
         }
     }
@@ -16381,19 +16369,19 @@ pub enum AnyTsTypeParameterModifier {
 impl AnyTsTypeParameterModifier {
     pub fn as_ts_const_modifier(&self) -> Option<&TsConstModifier> {
         match &self {
-            AnyTsTypeParameterModifier::TsConstModifier(item) => Some(item),
+            Self::TsConstModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_in_modifier(&self) -> Option<&TsInModifier> {
         match &self {
-            AnyTsTypeParameterModifier::TsInModifier(item) => Some(item),
+            Self::TsInModifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_out_modifier(&self) -> Option<&TsOutModifier> {
         match &self {
-            AnyTsTypeParameterModifier::TsOutModifier(item) => Some(item),
+            Self::TsOutModifier(item) => Some(item),
             _ => None,
         }
     }
@@ -16406,13 +16394,13 @@ pub enum AnyTsTypePredicateParameterName {
 impl AnyTsTypePredicateParameterName {
     pub fn as_js_reference_identifier(&self) -> Option<&JsReferenceIdentifier> {
         match &self {
-            AnyTsTypePredicateParameterName::JsReferenceIdentifier(item) => Some(item),
+            Self::JsReferenceIdentifier(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_this_type(&self) -> Option<&TsThisType> {
         match &self {
-            AnyTsTypePredicateParameterName::TsThisType(item) => Some(item),
+            Self::TsThisType(item) => Some(item),
             _ => None,
         }
     }
@@ -16425,13 +16413,13 @@ pub enum AnyTsVariableAnnotation {
 impl AnyTsVariableAnnotation {
     pub fn as_ts_definite_variable_annotation(&self) -> Option<&TsDefiniteVariableAnnotation> {
         match &self {
-            AnyTsVariableAnnotation::TsDefiniteVariableAnnotation(item) => Some(item),
+            Self::TsDefiniteVariableAnnotation(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_ts_type_annotation(&self) -> Option<&TsTypeAnnotation> {
         match &self {
-            AnyTsVariableAnnotation::TsTypeAnnotation(item) => Some(item),
+            Self::TsTypeAnnotation(item) => Some(item),
             _ => None,
         }
     }
@@ -16477,12 +16465,12 @@ impl std::fmt::Debug for JsAccessorModifier {
     }
 }
 impl From<JsAccessorModifier> for SyntaxNode {
-    fn from(n: JsAccessorModifier) -> SyntaxNode {
+    fn from(n: JsAccessorModifier) -> Self {
         n.syntax
     }
 }
 impl From<JsAccessorModifier> for SyntaxElement {
-    fn from(n: JsAccessorModifier) -> SyntaxElement {
+    fn from(n: JsAccessorModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -16532,12 +16520,12 @@ impl std::fmt::Debug for JsArrayAssignmentPattern {
     }
 }
 impl From<JsArrayAssignmentPattern> for SyntaxNode {
-    fn from(n: JsArrayAssignmentPattern) -> SyntaxNode {
+    fn from(n: JsArrayAssignmentPattern) -> Self {
         n.syntax
     }
 }
 impl From<JsArrayAssignmentPattern> for SyntaxElement {
-    fn from(n: JsArrayAssignmentPattern) -> SyntaxElement {
+    fn from(n: JsArrayAssignmentPattern) -> Self {
         n.syntax.into()
     }
 }
@@ -16580,12 +16568,12 @@ impl std::fmt::Debug for JsArrayAssignmentPatternElement {
     }
 }
 impl From<JsArrayAssignmentPatternElement> for SyntaxNode {
-    fn from(n: JsArrayAssignmentPatternElement) -> SyntaxNode {
+    fn from(n: JsArrayAssignmentPatternElement) -> Self {
         n.syntax
     }
 }
 impl From<JsArrayAssignmentPatternElement> for SyntaxElement {
-    fn from(n: JsArrayAssignmentPatternElement) -> SyntaxElement {
+    fn from(n: JsArrayAssignmentPatternElement) -> Self {
         n.syntax.into()
     }
 }
@@ -16633,12 +16621,12 @@ impl std::fmt::Debug for JsArrayAssignmentPatternRestElement {
     }
 }
 impl From<JsArrayAssignmentPatternRestElement> for SyntaxNode {
-    fn from(n: JsArrayAssignmentPatternRestElement) -> SyntaxNode {
+    fn from(n: JsArrayAssignmentPatternRestElement) -> Self {
         n.syntax
     }
 }
 impl From<JsArrayAssignmentPatternRestElement> for SyntaxElement {
-    fn from(n: JsArrayAssignmentPatternRestElement) -> SyntaxElement {
+    fn from(n: JsArrayAssignmentPatternRestElement) -> Self {
         n.syntax.into()
     }
 }
@@ -16688,12 +16676,12 @@ impl std::fmt::Debug for JsArrayBindingPattern {
     }
 }
 impl From<JsArrayBindingPattern> for SyntaxNode {
-    fn from(n: JsArrayBindingPattern) -> SyntaxNode {
+    fn from(n: JsArrayBindingPattern) -> Self {
         n.syntax
     }
 }
 impl From<JsArrayBindingPattern> for SyntaxElement {
-    fn from(n: JsArrayBindingPattern) -> SyntaxElement {
+    fn from(n: JsArrayBindingPattern) -> Self {
         n.syntax.into()
     }
 }
@@ -16736,12 +16724,12 @@ impl std::fmt::Debug for JsArrayBindingPatternElement {
     }
 }
 impl From<JsArrayBindingPatternElement> for SyntaxNode {
-    fn from(n: JsArrayBindingPatternElement) -> SyntaxNode {
+    fn from(n: JsArrayBindingPatternElement) -> Self {
         n.syntax
     }
 }
 impl From<JsArrayBindingPatternElement> for SyntaxElement {
-    fn from(n: JsArrayBindingPatternElement) -> SyntaxElement {
+    fn from(n: JsArrayBindingPatternElement) -> Self {
         n.syntax.into()
     }
 }
@@ -16787,12 +16775,12 @@ impl std::fmt::Debug for JsArrayBindingPatternRestElement {
     }
 }
 impl From<JsArrayBindingPatternRestElement> for SyntaxNode {
-    fn from(n: JsArrayBindingPatternRestElement) -> SyntaxNode {
+    fn from(n: JsArrayBindingPatternRestElement) -> Self {
         n.syntax
     }
 }
 impl From<JsArrayBindingPatternRestElement> for SyntaxElement {
-    fn from(n: JsArrayBindingPatternRestElement) -> SyntaxElement {
+    fn from(n: JsArrayBindingPatternRestElement) -> Self {
         n.syntax.into()
     }
 }
@@ -16842,12 +16830,12 @@ impl std::fmt::Debug for JsArrayExpression {
     }
 }
 impl From<JsArrayExpression> for SyntaxNode {
-    fn from(n: JsArrayExpression) -> SyntaxNode {
+    fn from(n: JsArrayExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsArrayExpression> for SyntaxElement {
-    fn from(n: JsArrayExpression) -> SyntaxElement {
+    fn from(n: JsArrayExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -16878,12 +16866,12 @@ impl std::fmt::Debug for JsArrayHole {
     }
 }
 impl From<JsArrayHole> for SyntaxNode {
-    fn from(n: JsArrayHole) -> SyntaxNode {
+    fn from(n: JsArrayHole) -> Self {
         n.syntax
     }
 }
 impl From<JsArrayHole> for SyntaxElement {
-    fn from(n: JsArrayHole) -> SyntaxElement {
+    fn from(n: JsArrayHole) -> Self {
         n.syntax.into()
     }
 }
@@ -16942,12 +16930,12 @@ impl std::fmt::Debug for JsArrowFunctionExpression {
     }
 }
 impl From<JsArrowFunctionExpression> for SyntaxNode {
-    fn from(n: JsArrowFunctionExpression) -> SyntaxNode {
+    fn from(n: JsArrowFunctionExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsArrowFunctionExpression> for SyntaxElement {
-    fn from(n: JsArrowFunctionExpression) -> SyntaxElement {
+    fn from(n: JsArrowFunctionExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -16994,12 +16982,12 @@ impl std::fmt::Debug for JsAssignmentExpression {
     }
 }
 impl From<JsAssignmentExpression> for SyntaxNode {
-    fn from(n: JsAssignmentExpression) -> SyntaxNode {
+    fn from(n: JsAssignmentExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsAssignmentExpression> for SyntaxElement {
-    fn from(n: JsAssignmentExpression) -> SyntaxElement {
+    fn from(n: JsAssignmentExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -17045,12 +17033,12 @@ impl std::fmt::Debug for JsAwaitExpression {
     }
 }
 impl From<JsAwaitExpression> for SyntaxNode {
-    fn from(n: JsAwaitExpression) -> SyntaxNode {
+    fn from(n: JsAwaitExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsAwaitExpression> for SyntaxElement {
-    fn from(n: JsAwaitExpression) -> SyntaxElement {
+    fn from(n: JsAwaitExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -17095,12 +17083,12 @@ impl std::fmt::Debug for JsBigintLiteralExpression {
     }
 }
 impl From<JsBigintLiteralExpression> for SyntaxNode {
-    fn from(n: JsBigintLiteralExpression) -> SyntaxNode {
+    fn from(n: JsBigintLiteralExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsBigintLiteralExpression> for SyntaxElement {
-    fn from(n: JsBigintLiteralExpression) -> SyntaxElement {
+    fn from(n: JsBigintLiteralExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -17147,12 +17135,12 @@ impl std::fmt::Debug for JsBinaryExpression {
     }
 }
 impl From<JsBinaryExpression> for SyntaxNode {
-    fn from(n: JsBinaryExpression) -> SyntaxNode {
+    fn from(n: JsBinaryExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsBinaryExpression> for SyntaxElement {
-    fn from(n: JsBinaryExpression) -> SyntaxElement {
+    fn from(n: JsBinaryExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -17202,12 +17190,12 @@ impl std::fmt::Debug for JsBlockStatement {
     }
 }
 impl From<JsBlockStatement> for SyntaxNode {
-    fn from(n: JsBlockStatement) -> SyntaxNode {
+    fn from(n: JsBlockStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsBlockStatement> for SyntaxElement {
-    fn from(n: JsBlockStatement) -> SyntaxElement {
+    fn from(n: JsBlockStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -17252,12 +17240,12 @@ impl std::fmt::Debug for JsBooleanLiteralExpression {
     }
 }
 impl From<JsBooleanLiteralExpression> for SyntaxNode {
-    fn from(n: JsBooleanLiteralExpression) -> SyntaxNode {
+    fn from(n: JsBooleanLiteralExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsBooleanLiteralExpression> for SyntaxElement {
-    fn from(n: JsBooleanLiteralExpression) -> SyntaxElement {
+    fn from(n: JsBooleanLiteralExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -17307,12 +17295,12 @@ impl std::fmt::Debug for JsBreakStatement {
     }
 }
 impl From<JsBreakStatement> for SyntaxNode {
-    fn from(n: JsBreakStatement) -> SyntaxNode {
+    fn from(n: JsBreakStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsBreakStatement> for SyntaxElement {
-    fn from(n: JsBreakStatement) -> SyntaxElement {
+    fn from(n: JsBreakStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -17362,12 +17350,12 @@ impl std::fmt::Debug for JsCallArguments {
     }
 }
 impl From<JsCallArguments> for SyntaxNode {
-    fn from(n: JsCallArguments) -> SyntaxNode {
+    fn from(n: JsCallArguments) -> Self {
         n.syntax
     }
 }
 impl From<JsCallArguments> for SyntaxElement {
-    fn from(n: JsCallArguments) -> SyntaxElement {
+    fn from(n: JsCallArguments) -> Self {
         n.syntax.into()
     }
 }
@@ -17418,12 +17406,12 @@ impl std::fmt::Debug for JsCallExpression {
     }
 }
 impl From<JsCallExpression> for SyntaxNode {
-    fn from(n: JsCallExpression) -> SyntaxNode {
+    fn from(n: JsCallExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsCallExpression> for SyntaxElement {
-    fn from(n: JsCallExpression) -> SyntaxElement {
+    fn from(n: JsCallExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -17471,12 +17459,12 @@ impl std::fmt::Debug for JsCaseClause {
     }
 }
 impl From<JsCaseClause> for SyntaxNode {
-    fn from(n: JsCaseClause) -> SyntaxNode {
+    fn from(n: JsCaseClause) -> Self {
         n.syntax
     }
 }
 impl From<JsCaseClause> for SyntaxElement {
-    fn from(n: JsCaseClause) -> SyntaxElement {
+    fn from(n: JsCaseClause) -> Self {
         n.syntax.into()
     }
 }
@@ -17526,12 +17514,12 @@ impl std::fmt::Debug for JsCatchClause {
     }
 }
 impl From<JsCatchClause> for SyntaxNode {
-    fn from(n: JsCatchClause) -> SyntaxNode {
+    fn from(n: JsCatchClause) -> Self {
         n.syntax
     }
 }
 impl From<JsCatchClause> for SyntaxElement {
-    fn from(n: JsCatchClause) -> SyntaxElement {
+    fn from(n: JsCatchClause) -> Self {
         n.syntax.into()
     }
 }
@@ -17585,12 +17573,12 @@ impl std::fmt::Debug for JsCatchDeclaration {
     }
 }
 impl From<JsCatchDeclaration> for SyntaxNode {
-    fn from(n: JsCatchDeclaration) -> SyntaxNode {
+    fn from(n: JsCatchDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<JsCatchDeclaration> for SyntaxElement {
-    fn from(n: JsCatchDeclaration) -> SyntaxElement {
+    fn from(n: JsCatchDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -17662,12 +17650,12 @@ impl std::fmt::Debug for JsClassDeclaration {
     }
 }
 impl From<JsClassDeclaration> for SyntaxNode {
-    fn from(n: JsClassDeclaration) -> SyntaxNode {
+    fn from(n: JsClassDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<JsClassDeclaration> for SyntaxElement {
-    fn from(n: JsClassDeclaration) -> SyntaxElement {
+    fn from(n: JsClassDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -17739,12 +17727,12 @@ impl std::fmt::Debug for JsClassExportDefaultDeclaration {
     }
 }
 impl From<JsClassExportDefaultDeclaration> for SyntaxNode {
-    fn from(n: JsClassExportDefaultDeclaration) -> SyntaxNode {
+    fn from(n: JsClassExportDefaultDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<JsClassExportDefaultDeclaration> for SyntaxElement {
-    fn from(n: JsClassExportDefaultDeclaration) -> SyntaxElement {
+    fn from(n: JsClassExportDefaultDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -17812,12 +17800,12 @@ impl std::fmt::Debug for JsClassExpression {
     }
 }
 impl From<JsClassExpression> for SyntaxNode {
-    fn from(n: JsClassExpression) -> SyntaxNode {
+    fn from(n: JsClassExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsClassExpression> for SyntaxElement {
-    fn from(n: JsClassExpression) -> SyntaxElement {
+    fn from(n: JsClassExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -17868,12 +17856,12 @@ impl std::fmt::Debug for JsComputedMemberAssignment {
     }
 }
 impl From<JsComputedMemberAssignment> for SyntaxNode {
-    fn from(n: JsComputedMemberAssignment) -> SyntaxNode {
+    fn from(n: JsComputedMemberAssignment) -> Self {
         n.syntax
     }
 }
 impl From<JsComputedMemberAssignment> for SyntaxElement {
-    fn from(n: JsComputedMemberAssignment) -> SyntaxElement {
+    fn from(n: JsComputedMemberAssignment) -> Self {
         n.syntax.into()
     }
 }
@@ -17928,12 +17916,12 @@ impl std::fmt::Debug for JsComputedMemberExpression {
     }
 }
 impl From<JsComputedMemberExpression> for SyntaxNode {
-    fn from(n: JsComputedMemberExpression) -> SyntaxNode {
+    fn from(n: JsComputedMemberExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsComputedMemberExpression> for SyntaxElement {
-    fn from(n: JsComputedMemberExpression) -> SyntaxElement {
+    fn from(n: JsComputedMemberExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -17983,12 +17971,12 @@ impl std::fmt::Debug for JsComputedMemberName {
     }
 }
 impl From<JsComputedMemberName> for SyntaxNode {
-    fn from(n: JsComputedMemberName) -> SyntaxNode {
+    fn from(n: JsComputedMemberName) -> Self {
         n.syntax
     }
 }
 impl From<JsComputedMemberName> for SyntaxElement {
-    fn from(n: JsComputedMemberName) -> SyntaxElement {
+    fn from(n: JsComputedMemberName) -> Self {
         n.syntax.into()
     }
 }
@@ -18040,12 +18028,12 @@ impl std::fmt::Debug for JsConditionalExpression {
     }
 }
 impl From<JsConditionalExpression> for SyntaxNode {
-    fn from(n: JsConditionalExpression) -> SyntaxNode {
+    fn from(n: JsConditionalExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsConditionalExpression> for SyntaxElement {
-    fn from(n: JsConditionalExpression) -> SyntaxElement {
+    fn from(n: JsConditionalExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -18090,12 +18078,12 @@ impl std::fmt::Debug for JsConstructorClassMember {
     }
 }
 impl From<JsConstructorClassMember> for SyntaxNode {
-    fn from(n: JsConstructorClassMember) -> SyntaxNode {
+    fn from(n: JsConstructorClassMember) -> Self {
         n.syntax
     }
 }
 impl From<JsConstructorClassMember> for SyntaxElement {
-    fn from(n: JsConstructorClassMember) -> SyntaxElement {
+    fn from(n: JsConstructorClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -18145,12 +18133,12 @@ impl std::fmt::Debug for JsConstructorParameters {
     }
 }
 impl From<JsConstructorParameters> for SyntaxNode {
-    fn from(n: JsConstructorParameters) -> SyntaxNode {
+    fn from(n: JsConstructorParameters) -> Self {
         n.syntax
     }
 }
 impl From<JsConstructorParameters> for SyntaxElement {
-    fn from(n: JsConstructorParameters) -> SyntaxElement {
+    fn from(n: JsConstructorParameters) -> Self {
         n.syntax.into()
     }
 }
@@ -18200,12 +18188,12 @@ impl std::fmt::Debug for JsContinueStatement {
     }
 }
 impl From<JsContinueStatement> for SyntaxNode {
-    fn from(n: JsContinueStatement) -> SyntaxNode {
+    fn from(n: JsContinueStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsContinueStatement> for SyntaxElement {
-    fn from(n: JsContinueStatement) -> SyntaxElement {
+    fn from(n: JsContinueStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -18254,12 +18242,12 @@ impl std::fmt::Debug for JsDebuggerStatement {
     }
 }
 impl From<JsDebuggerStatement> for SyntaxNode {
-    fn from(n: JsDebuggerStatement) -> SyntaxNode {
+    fn from(n: JsDebuggerStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsDebuggerStatement> for SyntaxElement {
-    fn from(n: JsDebuggerStatement) -> SyntaxElement {
+    fn from(n: JsDebuggerStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -18302,12 +18290,12 @@ impl std::fmt::Debug for JsDecorator {
     }
 }
 impl From<JsDecorator> for SyntaxNode {
-    fn from(n: JsDecorator) -> SyntaxNode {
+    fn from(n: JsDecorator) -> Self {
         n.syntax
     }
 }
 impl From<JsDecorator> for SyntaxElement {
-    fn from(n: JsDecorator) -> SyntaxElement {
+    fn from(n: JsDecorator) -> Self {
         n.syntax.into()
     }
 }
@@ -18357,12 +18345,12 @@ impl std::fmt::Debug for JsDefaultClause {
     }
 }
 impl From<JsDefaultClause> for SyntaxNode {
-    fn from(n: JsDefaultClause) -> SyntaxNode {
+    fn from(n: JsDefaultClause) -> Self {
         n.syntax
     }
 }
 impl From<JsDefaultClause> for SyntaxElement {
-    fn from(n: JsDefaultClause) -> SyntaxElement {
+    fn from(n: JsDefaultClause) -> Self {
         n.syntax.into()
     }
 }
@@ -18404,12 +18392,12 @@ impl std::fmt::Debug for JsDefaultImportSpecifier {
     }
 }
 impl From<JsDefaultImportSpecifier> for SyntaxNode {
-    fn from(n: JsDefaultImportSpecifier) -> SyntaxNode {
+    fn from(n: JsDefaultImportSpecifier) -> Self {
         n.syntax
     }
 }
 impl From<JsDefaultImportSpecifier> for SyntaxElement {
-    fn from(n: JsDefaultImportSpecifier) -> SyntaxElement {
+    fn from(n: JsDefaultImportSpecifier) -> Self {
         n.syntax.into()
     }
 }
@@ -18458,12 +18446,12 @@ impl std::fmt::Debug for JsDirective {
     }
 }
 impl From<JsDirective> for SyntaxNode {
-    fn from(n: JsDirective) -> SyntaxNode {
+    fn from(n: JsDirective) -> Self {
         n.syntax
     }
 }
 impl From<JsDirective> for SyntaxElement {
-    fn from(n: JsDirective) -> SyntaxElement {
+    fn from(n: JsDirective) -> Self {
         n.syntax.into()
     }
 }
@@ -18523,12 +18511,12 @@ impl std::fmt::Debug for JsDoWhileStatement {
     }
 }
 impl From<JsDoWhileStatement> for SyntaxNode {
-    fn from(n: JsDoWhileStatement) -> SyntaxNode {
+    fn from(n: JsDoWhileStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsDoWhileStatement> for SyntaxElement {
-    fn from(n: JsDoWhileStatement) -> SyntaxElement {
+    fn from(n: JsDoWhileStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -18571,12 +18559,12 @@ impl std::fmt::Debug for JsElseClause {
     }
 }
 impl From<JsElseClause> for SyntaxNode {
-    fn from(n: JsElseClause) -> SyntaxNode {
+    fn from(n: JsElseClause) -> Self {
         n.syntax
     }
 }
 impl From<JsElseClause> for SyntaxElement {
-    fn from(n: JsElseClause) -> SyntaxElement {
+    fn from(n: JsElseClause) -> Self {
         n.syntax.into()
     }
 }
@@ -18621,12 +18609,12 @@ impl std::fmt::Debug for JsEmptyClassMember {
     }
 }
 impl From<JsEmptyClassMember> for SyntaxNode {
-    fn from(n: JsEmptyClassMember) -> SyntaxNode {
+    fn from(n: JsEmptyClassMember) -> Self {
         n.syntax
     }
 }
 impl From<JsEmptyClassMember> for SyntaxElement {
-    fn from(n: JsEmptyClassMember) -> SyntaxElement {
+    fn from(n: JsEmptyClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -18671,12 +18659,12 @@ impl std::fmt::Debug for JsEmptyStatement {
     }
 }
 impl From<JsEmptyStatement> for SyntaxNode {
-    fn from(n: JsEmptyStatement) -> SyntaxNode {
+    fn from(n: JsEmptyStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsEmptyStatement> for SyntaxElement {
-    fn from(n: JsEmptyStatement) -> SyntaxElement {
+    fn from(n: JsEmptyStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -18726,12 +18714,12 @@ impl std::fmt::Debug for JsExport {
     }
 }
 impl From<JsExport> for SyntaxNode {
-    fn from(n: JsExport) -> SyntaxNode {
+    fn from(n: JsExport) -> Self {
         n.syntax
     }
 }
 impl From<JsExport> for SyntaxElement {
-    fn from(n: JsExport) -> SyntaxElement {
+    fn from(n: JsExport) -> Self {
         n.syntax.into()
     }
 }
@@ -18777,12 +18765,12 @@ impl std::fmt::Debug for JsExportAsClause {
     }
 }
 impl From<JsExportAsClause> for SyntaxNode {
-    fn from(n: JsExportAsClause) -> SyntaxNode {
+    fn from(n: JsExportAsClause) -> Self {
         n.syntax
     }
 }
 impl From<JsExportAsClause> for SyntaxElement {
-    fn from(n: JsExportAsClause) -> SyntaxElement {
+    fn from(n: JsExportAsClause) -> Self {
         n.syntax.into()
     }
 }
@@ -18835,12 +18823,12 @@ impl std::fmt::Debug for JsExportDefaultDeclarationClause {
     }
 }
 impl From<JsExportDefaultDeclarationClause> for SyntaxNode {
-    fn from(n: JsExportDefaultDeclarationClause) -> SyntaxNode {
+    fn from(n: JsExportDefaultDeclarationClause) -> Self {
         n.syntax
     }
 }
 impl From<JsExportDefaultDeclarationClause> for SyntaxElement {
-    fn from(n: JsExportDefaultDeclarationClause) -> SyntaxElement {
+    fn from(n: JsExportDefaultDeclarationClause) -> Self {
         n.syntax.into()
     }
 }
@@ -18890,12 +18878,12 @@ impl std::fmt::Debug for JsExportDefaultExpressionClause {
     }
 }
 impl From<JsExportDefaultExpressionClause> for SyntaxNode {
-    fn from(n: JsExportDefaultExpressionClause) -> SyntaxNode {
+    fn from(n: JsExportDefaultExpressionClause) -> Self {
         n.syntax
     }
 }
 impl From<JsExportDefaultExpressionClause> for SyntaxElement {
-    fn from(n: JsExportDefaultExpressionClause) -> SyntaxElement {
+    fn from(n: JsExportDefaultExpressionClause) -> Self {
         n.syntax.into()
     }
 }
@@ -18955,12 +18943,12 @@ impl std::fmt::Debug for JsExportFromClause {
     }
 }
 impl From<JsExportFromClause> for SyntaxNode {
-    fn from(n: JsExportFromClause) -> SyntaxNode {
+    fn from(n: JsExportFromClause) -> Self {
         n.syntax
     }
 }
 impl From<JsExportFromClause> for SyntaxElement {
-    fn from(n: JsExportFromClause) -> SyntaxElement {
+    fn from(n: JsExportFromClause) -> Self {
         n.syntax.into()
     }
 }
@@ -19018,12 +19006,12 @@ impl std::fmt::Debug for JsExportNamedClause {
     }
 }
 impl From<JsExportNamedClause> for SyntaxNode {
-    fn from(n: JsExportNamedClause) -> SyntaxNode {
+    fn from(n: JsExportNamedClause) -> Self {
         n.syntax
     }
 }
 impl From<JsExportNamedClause> for SyntaxElement {
-    fn from(n: JsExportNamedClause) -> SyntaxElement {
+    fn from(n: JsExportNamedClause) -> Self {
         n.syntax.into()
     }
 }
@@ -19087,12 +19075,12 @@ impl std::fmt::Debug for JsExportNamedFromClause {
     }
 }
 impl From<JsExportNamedFromClause> for SyntaxNode {
-    fn from(n: JsExportNamedFromClause) -> SyntaxNode {
+    fn from(n: JsExportNamedFromClause) -> Self {
         n.syntax
     }
 }
 impl From<JsExportNamedFromClause> for SyntaxElement {
-    fn from(n: JsExportNamedFromClause) -> SyntaxElement {
+    fn from(n: JsExportNamedFromClause) -> Self {
         n.syntax.into()
     }
 }
@@ -19145,12 +19133,12 @@ impl std::fmt::Debug for JsExportNamedFromSpecifier {
     }
 }
 impl From<JsExportNamedFromSpecifier> for SyntaxNode {
-    fn from(n: JsExportNamedFromSpecifier) -> SyntaxNode {
+    fn from(n: JsExportNamedFromSpecifier) -> Self {
         n.syntax
     }
 }
 impl From<JsExportNamedFromSpecifier> for SyntaxElement {
-    fn from(n: JsExportNamedFromSpecifier) -> SyntaxElement {
+    fn from(n: JsExportNamedFromSpecifier) -> Self {
         n.syntax.into()
     }
 }
@@ -19196,12 +19184,12 @@ impl std::fmt::Debug for JsExportNamedShorthandSpecifier {
     }
 }
 impl From<JsExportNamedShorthandSpecifier> for SyntaxNode {
-    fn from(n: JsExportNamedShorthandSpecifier) -> SyntaxNode {
+    fn from(n: JsExportNamedShorthandSpecifier) -> Self {
         n.syntax
     }
 }
 impl From<JsExportNamedShorthandSpecifier> for SyntaxElement {
-    fn from(n: JsExportNamedShorthandSpecifier) -> SyntaxElement {
+    fn from(n: JsExportNamedShorthandSpecifier) -> Self {
         n.syntax.into()
     }
 }
@@ -19252,12 +19240,12 @@ impl std::fmt::Debug for JsExportNamedSpecifier {
     }
 }
 impl From<JsExportNamedSpecifier> for SyntaxNode {
-    fn from(n: JsExportNamedSpecifier) -> SyntaxNode {
+    fn from(n: JsExportNamedSpecifier) -> Self {
         n.syntax
     }
 }
 impl From<JsExportNamedSpecifier> for SyntaxElement {
-    fn from(n: JsExportNamedSpecifier) -> SyntaxElement {
+    fn from(n: JsExportNamedSpecifier) -> Self {
         n.syntax.into()
     }
 }
@@ -19300,12 +19288,12 @@ impl std::fmt::Debug for JsExpressionSnipped {
     }
 }
 impl From<JsExpressionSnipped> for SyntaxNode {
-    fn from(n: JsExpressionSnipped) -> SyntaxNode {
+    fn from(n: JsExpressionSnipped) -> Self {
         n.syntax
     }
 }
 impl From<JsExpressionSnipped> for SyntaxElement {
-    fn from(n: JsExpressionSnipped) -> SyntaxElement {
+    fn from(n: JsExpressionSnipped) -> Self {
         n.syntax.into()
     }
 }
@@ -19351,12 +19339,12 @@ impl std::fmt::Debug for JsExpressionStatement {
     }
 }
 impl From<JsExpressionStatement> for SyntaxNode {
-    fn from(n: JsExpressionStatement) -> SyntaxNode {
+    fn from(n: JsExpressionStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsExpressionStatement> for SyntaxElement {
-    fn from(n: JsExpressionStatement) -> SyntaxElement {
+    fn from(n: JsExpressionStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -19409,12 +19397,12 @@ impl std::fmt::Debug for JsExtendsClause {
     }
 }
 impl From<JsExtendsClause> for SyntaxNode {
-    fn from(n: JsExtendsClause) -> SyntaxNode {
+    fn from(n: JsExtendsClause) -> Self {
         n.syntax
     }
 }
 impl From<JsExtendsClause> for SyntaxElement {
-    fn from(n: JsExtendsClause) -> SyntaxElement {
+    fn from(n: JsExtendsClause) -> Self {
         n.syntax.into()
     }
 }
@@ -19460,12 +19448,12 @@ impl std::fmt::Debug for JsFinallyClause {
     }
 }
 impl From<JsFinallyClause> for SyntaxNode {
-    fn from(n: JsFinallyClause) -> SyntaxNode {
+    fn from(n: JsFinallyClause) -> Self {
         n.syntax
     }
 }
 impl From<JsFinallyClause> for SyntaxElement {
-    fn from(n: JsFinallyClause) -> SyntaxElement {
+    fn from(n: JsFinallyClause) -> Self {
         n.syntax.into()
     }
 }
@@ -19522,12 +19510,12 @@ impl std::fmt::Debug for JsForInStatement {
     }
 }
 impl From<JsForInStatement> for SyntaxNode {
-    fn from(n: JsForInStatement) -> SyntaxNode {
+    fn from(n: JsForInStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsForInStatement> for SyntaxElement {
-    fn from(n: JsForInStatement) -> SyntaxElement {
+    fn from(n: JsForInStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -19588,12 +19576,12 @@ impl std::fmt::Debug for JsForOfStatement {
     }
 }
 impl From<JsForOfStatement> for SyntaxNode {
-    fn from(n: JsForOfStatement) -> SyntaxNode {
+    fn from(n: JsForOfStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsForOfStatement> for SyntaxElement {
-    fn from(n: JsForOfStatement) -> SyntaxElement {
+    fn from(n: JsForOfStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -19658,12 +19646,12 @@ impl std::fmt::Debug for JsForStatement {
     }
 }
 impl From<JsForStatement> for SyntaxNode {
-    fn from(n: JsForStatement) -> SyntaxNode {
+    fn from(n: JsForStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsForStatement> for SyntaxElement {
-    fn from(n: JsForStatement) -> SyntaxElement {
+    fn from(n: JsForStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -19710,12 +19698,12 @@ impl std::fmt::Debug for JsForVariableDeclaration {
     }
 }
 impl From<JsForVariableDeclaration> for SyntaxNode {
-    fn from(n: JsForVariableDeclaration) -> SyntaxNode {
+    fn from(n: JsForVariableDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<JsForVariableDeclaration> for SyntaxElement {
-    fn from(n: JsForVariableDeclaration) -> SyntaxElement {
+    fn from(n: JsForVariableDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -19770,12 +19758,12 @@ impl std::fmt::Debug for JsFormalParameter {
     }
 }
 impl From<JsFormalParameter> for SyntaxNode {
-    fn from(n: JsFormalParameter) -> SyntaxNode {
+    fn from(n: JsFormalParameter) -> Self {
         n.syntax
     }
 }
 impl From<JsFormalParameter> for SyntaxElement {
-    fn from(n: JsFormalParameter) -> SyntaxElement {
+    fn from(n: JsFormalParameter) -> Self {
         n.syntax.into()
     }
 }
@@ -19826,12 +19814,12 @@ impl std::fmt::Debug for JsFunctionBody {
     }
 }
 impl From<JsFunctionBody> for SyntaxNode {
-    fn from(n: JsFunctionBody) -> SyntaxNode {
+    fn from(n: JsFunctionBody) -> Self {
         n.syntax
     }
 }
 impl From<JsFunctionBody> for SyntaxElement {
-    fn from(n: JsFunctionBody) -> SyntaxElement {
+    fn from(n: JsFunctionBody) -> Self {
         n.syntax.into()
     }
 }
@@ -19895,12 +19883,12 @@ impl std::fmt::Debug for JsFunctionDeclaration {
     }
 }
 impl From<JsFunctionDeclaration> for SyntaxNode {
-    fn from(n: JsFunctionDeclaration) -> SyntaxNode {
+    fn from(n: JsFunctionDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<JsFunctionDeclaration> for SyntaxElement {
-    fn from(n: JsFunctionDeclaration) -> SyntaxElement {
+    fn from(n: JsFunctionDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -19965,12 +19953,12 @@ impl std::fmt::Debug for JsFunctionExportDefaultDeclaration {
     }
 }
 impl From<JsFunctionExportDefaultDeclaration> for SyntaxNode {
-    fn from(n: JsFunctionExportDefaultDeclaration) -> SyntaxNode {
+    fn from(n: JsFunctionExportDefaultDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<JsFunctionExportDefaultDeclaration> for SyntaxElement {
-    fn from(n: JsFunctionExportDefaultDeclaration) -> SyntaxElement {
+    fn from(n: JsFunctionExportDefaultDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -20034,12 +20022,12 @@ impl std::fmt::Debug for JsFunctionExpression {
     }
 }
 impl From<JsFunctionExpression> for SyntaxNode {
-    fn from(n: JsFunctionExpression) -> SyntaxNode {
+    fn from(n: JsFunctionExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsFunctionExpression> for SyntaxElement {
-    fn from(n: JsFunctionExpression) -> SyntaxElement {
+    fn from(n: JsFunctionExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -20096,12 +20084,12 @@ impl std::fmt::Debug for JsGetterClassMember {
     }
 }
 impl From<JsGetterClassMember> for SyntaxNode {
-    fn from(n: JsGetterClassMember) -> SyntaxNode {
+    fn from(n: JsGetterClassMember) -> Self {
         n.syntax
     }
 }
 impl From<JsGetterClassMember> for SyntaxElement {
-    fn from(n: JsGetterClassMember) -> SyntaxElement {
+    fn from(n: JsGetterClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -20157,12 +20145,12 @@ impl std::fmt::Debug for JsGetterObjectMember {
     }
 }
 impl From<JsGetterObjectMember> for SyntaxNode {
-    fn from(n: JsGetterObjectMember) -> SyntaxNode {
+    fn from(n: JsGetterObjectMember) -> Self {
         n.syntax
     }
 }
 impl From<JsGetterObjectMember> for SyntaxElement {
-    fn from(n: JsGetterObjectMember) -> SyntaxElement {
+    fn from(n: JsGetterObjectMember) -> Self {
         n.syntax.into()
     }
 }
@@ -20204,12 +20192,12 @@ impl std::fmt::Debug for JsIdentifierAssignment {
     }
 }
 impl From<JsIdentifierAssignment> for SyntaxNode {
-    fn from(n: JsIdentifierAssignment) -> SyntaxNode {
+    fn from(n: JsIdentifierAssignment) -> Self {
         n.syntax
     }
 }
 impl From<JsIdentifierAssignment> for SyntaxElement {
-    fn from(n: JsIdentifierAssignment) -> SyntaxElement {
+    fn from(n: JsIdentifierAssignment) -> Self {
         n.syntax.into()
     }
 }
@@ -20251,12 +20239,12 @@ impl std::fmt::Debug for JsIdentifierBinding {
     }
 }
 impl From<JsIdentifierBinding> for SyntaxNode {
-    fn from(n: JsIdentifierBinding) -> SyntaxNode {
+    fn from(n: JsIdentifierBinding) -> Self {
         n.syntax
     }
 }
 impl From<JsIdentifierBinding> for SyntaxElement {
-    fn from(n: JsIdentifierBinding) -> SyntaxElement {
+    fn from(n: JsIdentifierBinding) -> Self {
         n.syntax.into()
     }
 }
@@ -20298,12 +20286,12 @@ impl std::fmt::Debug for JsIdentifierExpression {
     }
 }
 impl From<JsIdentifierExpression> for SyntaxNode {
-    fn from(n: JsIdentifierExpression) -> SyntaxNode {
+    fn from(n: JsIdentifierExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsIdentifierExpression> for SyntaxElement {
-    fn from(n: JsIdentifierExpression) -> SyntaxElement {
+    fn from(n: JsIdentifierExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -20359,12 +20347,12 @@ impl std::fmt::Debug for JsIfStatement {
     }
 }
 impl From<JsIfStatement> for SyntaxNode {
-    fn from(n: JsIfStatement) -> SyntaxNode {
+    fn from(n: JsIfStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsIfStatement> for SyntaxElement {
-    fn from(n: JsIfStatement) -> SyntaxElement {
+    fn from(n: JsIfStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -20417,12 +20405,12 @@ impl std::fmt::Debug for JsImport {
     }
 }
 impl From<JsImport> for SyntaxNode {
-    fn from(n: JsImport) -> SyntaxNode {
+    fn from(n: JsImport) -> Self {
         n.syntax
     }
 }
 impl From<JsImport> for SyntaxElement {
-    fn from(n: JsImport) -> SyntaxElement {
+    fn from(n: JsImport) -> Self {
         n.syntax.into()
     }
 }
@@ -20473,12 +20461,12 @@ impl std::fmt::Debug for JsImportAssertion {
     }
 }
 impl From<JsImportAssertion> for SyntaxNode {
-    fn from(n: JsImportAssertion) -> SyntaxNode {
+    fn from(n: JsImportAssertion) -> Self {
         n.syntax
     }
 }
 impl From<JsImportAssertion> for SyntaxElement {
-    fn from(n: JsImportAssertion) -> SyntaxElement {
+    fn from(n: JsImportAssertion) -> Self {
         n.syntax.into()
     }
 }
@@ -20528,12 +20516,12 @@ impl std::fmt::Debug for JsImportAssertionEntry {
     }
 }
 impl From<JsImportAssertionEntry> for SyntaxNode {
-    fn from(n: JsImportAssertionEntry) -> SyntaxNode {
+    fn from(n: JsImportAssertionEntry) -> Self {
         n.syntax
     }
 }
 impl From<JsImportAssertionEntry> for SyntaxElement {
-    fn from(n: JsImportAssertionEntry) -> SyntaxElement {
+    fn from(n: JsImportAssertionEntry) -> Self {
         n.syntax.into()
     }
 }
@@ -20579,12 +20567,12 @@ impl std::fmt::Debug for JsImportBareClause {
     }
 }
 impl From<JsImportBareClause> for SyntaxNode {
-    fn from(n: JsImportBareClause) -> SyntaxNode {
+    fn from(n: JsImportBareClause) -> Self {
         n.syntax
     }
 }
 impl From<JsImportBareClause> for SyntaxElement {
-    fn from(n: JsImportBareClause) -> SyntaxElement {
+    fn from(n: JsImportBareClause) -> Self {
         n.syntax.into()
     }
 }
@@ -20630,12 +20618,12 @@ impl std::fmt::Debug for JsImportCallExpression {
     }
 }
 impl From<JsImportCallExpression> for SyntaxNode {
-    fn from(n: JsImportCallExpression) -> SyntaxNode {
+    fn from(n: JsImportCallExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsImportCallExpression> for SyntaxElement {
-    fn from(n: JsImportCallExpression) -> SyntaxElement {
+    fn from(n: JsImportCallExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -20691,12 +20679,12 @@ impl std::fmt::Debug for JsImportCombinedClause {
     }
 }
 impl From<JsImportCombinedClause> for SyntaxNode {
-    fn from(n: JsImportCombinedClause) -> SyntaxNode {
+    fn from(n: JsImportCombinedClause) -> Self {
         n.syntax
     }
 }
 impl From<JsImportCombinedClause> for SyntaxElement {
-    fn from(n: JsImportCombinedClause) -> SyntaxElement {
+    fn from(n: JsImportCombinedClause) -> Self {
         n.syntax.into()
     }
 }
@@ -20751,12 +20739,12 @@ impl std::fmt::Debug for JsImportDefaultClause {
     }
 }
 impl From<JsImportDefaultClause> for SyntaxNode {
-    fn from(n: JsImportDefaultClause) -> SyntaxNode {
+    fn from(n: JsImportDefaultClause) -> Self {
         n.syntax
     }
 }
 impl From<JsImportDefaultClause> for SyntaxElement {
-    fn from(n: JsImportDefaultClause) -> SyntaxElement {
+    fn from(n: JsImportDefaultClause) -> Self {
         n.syntax.into()
     }
 }
@@ -20803,12 +20791,12 @@ impl std::fmt::Debug for JsImportMetaExpression {
     }
 }
 impl From<JsImportMetaExpression> for SyntaxNode {
-    fn from(n: JsImportMetaExpression) -> SyntaxNode {
+    fn from(n: JsImportMetaExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsImportMetaExpression> for SyntaxElement {
-    fn from(n: JsImportMetaExpression) -> SyntaxElement {
+    fn from(n: JsImportMetaExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -20863,12 +20851,12 @@ impl std::fmt::Debug for JsImportNamedClause {
     }
 }
 impl From<JsImportNamedClause> for SyntaxNode {
-    fn from(n: JsImportNamedClause) -> SyntaxNode {
+    fn from(n: JsImportNamedClause) -> Self {
         n.syntax
     }
 }
 impl From<JsImportNamedClause> for SyntaxElement {
-    fn from(n: JsImportNamedClause) -> SyntaxElement {
+    fn from(n: JsImportNamedClause) -> Self {
         n.syntax.into()
     }
 }
@@ -20923,12 +20911,12 @@ impl std::fmt::Debug for JsImportNamespaceClause {
     }
 }
 impl From<JsImportNamespaceClause> for SyntaxNode {
-    fn from(n: JsImportNamespaceClause) -> SyntaxNode {
+    fn from(n: JsImportNamespaceClause) -> Self {
         n.syntax
     }
 }
 impl From<JsImportNamespaceClause> for SyntaxElement {
-    fn from(n: JsImportNamespaceClause) -> SyntaxElement {
+    fn from(n: JsImportNamespaceClause) -> Self {
         n.syntax.into()
     }
 }
@@ -20972,12 +20960,12 @@ impl std::fmt::Debug for JsInExpression {
     }
 }
 impl From<JsInExpression> for SyntaxNode {
-    fn from(n: JsInExpression) -> SyntaxNode {
+    fn from(n: JsInExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsInExpression> for SyntaxElement {
-    fn from(n: JsInExpression) -> SyntaxElement {
+    fn from(n: JsInExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -21020,12 +21008,12 @@ impl std::fmt::Debug for JsInitializerClause {
     }
 }
 impl From<JsInitializerClause> for SyntaxNode {
-    fn from(n: JsInitializerClause) -> SyntaxNode {
+    fn from(n: JsInitializerClause) -> Self {
         n.syntax
     }
 }
 impl From<JsInitializerClause> for SyntaxElement {
-    fn from(n: JsInitializerClause) -> SyntaxElement {
+    fn from(n: JsInitializerClause) -> Self {
         n.syntax.into()
     }
 }
@@ -21072,12 +21060,12 @@ impl std::fmt::Debug for JsInstanceofExpression {
     }
 }
 impl From<JsInstanceofExpression> for SyntaxNode {
-    fn from(n: JsInstanceofExpression) -> SyntaxNode {
+    fn from(n: JsInstanceofExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsInstanceofExpression> for SyntaxElement {
-    fn from(n: JsInstanceofExpression) -> SyntaxElement {
+    fn from(n: JsInstanceofExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -21122,12 +21110,12 @@ impl std::fmt::Debug for JsLabel {
     }
 }
 impl From<JsLabel> for SyntaxNode {
-    fn from(n: JsLabel) -> SyntaxNode {
+    fn from(n: JsLabel) -> Self {
         n.syntax
     }
 }
 impl From<JsLabel> for SyntaxElement {
-    fn from(n: JsLabel) -> SyntaxElement {
+    fn from(n: JsLabel) -> Self {
         n.syntax.into()
     }
 }
@@ -21174,12 +21162,12 @@ impl std::fmt::Debug for JsLabeledStatement {
     }
 }
 impl From<JsLabeledStatement> for SyntaxNode {
-    fn from(n: JsLabeledStatement) -> SyntaxNode {
+    fn from(n: JsLabeledStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsLabeledStatement> for SyntaxElement {
-    fn from(n: JsLabeledStatement) -> SyntaxElement {
+    fn from(n: JsLabeledStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -21221,12 +21209,12 @@ impl std::fmt::Debug for JsLiteralExportName {
     }
 }
 impl From<JsLiteralExportName> for SyntaxNode {
-    fn from(n: JsLiteralExportName) -> SyntaxNode {
+    fn from(n: JsLiteralExportName) -> Self {
         n.syntax
     }
 }
 impl From<JsLiteralExportName> for SyntaxElement {
-    fn from(n: JsLiteralExportName) -> SyntaxElement {
+    fn from(n: JsLiteralExportName) -> Self {
         n.syntax.into()
     }
 }
@@ -21268,12 +21256,12 @@ impl std::fmt::Debug for JsLiteralMemberName {
     }
 }
 impl From<JsLiteralMemberName> for SyntaxNode {
-    fn from(n: JsLiteralMemberName) -> SyntaxNode {
+    fn from(n: JsLiteralMemberName) -> Self {
         n.syntax
     }
 }
 impl From<JsLiteralMemberName> for SyntaxElement {
-    fn from(n: JsLiteralMemberName) -> SyntaxElement {
+    fn from(n: JsLiteralMemberName) -> Self {
         n.syntax.into()
     }
 }
@@ -21320,12 +21308,12 @@ impl std::fmt::Debug for JsLogicalExpression {
     }
 }
 impl From<JsLogicalExpression> for SyntaxNode {
-    fn from(n: JsLogicalExpression) -> SyntaxNode {
+    fn from(n: JsLogicalExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsLogicalExpression> for SyntaxElement {
-    fn from(n: JsLogicalExpression) -> SyntaxElement {
+    fn from(n: JsLogicalExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -21370,12 +21358,12 @@ impl std::fmt::Debug for JsMetavariable {
     }
 }
 impl From<JsMetavariable> for SyntaxNode {
-    fn from(n: JsMetavariable) -> SyntaxNode {
+    fn from(n: JsMetavariable) -> Self {
         n.syntax
     }
 }
 impl From<JsMetavariable> for SyntaxElement {
-    fn from(n: JsMetavariable) -> SyntaxElement {
+    fn from(n: JsMetavariable) -> Self {
         n.syntax.into()
     }
 }
@@ -21440,12 +21428,12 @@ impl std::fmt::Debug for JsMethodClassMember {
     }
 }
 impl From<JsMethodClassMember> for SyntaxNode {
-    fn from(n: JsMethodClassMember) -> SyntaxNode {
+    fn from(n: JsMethodClassMember) -> Self {
         n.syntax
     }
 }
 impl From<JsMethodClassMember> for SyntaxElement {
-    fn from(n: JsMethodClassMember) -> SyntaxElement {
+    fn from(n: JsMethodClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -21505,12 +21493,12 @@ impl std::fmt::Debug for JsMethodObjectMember {
     }
 }
 impl From<JsMethodObjectMember> for SyntaxNode {
-    fn from(n: JsMethodObjectMember) -> SyntaxNode {
+    fn from(n: JsMethodObjectMember) -> Self {
         n.syntax
     }
 }
 impl From<JsMethodObjectMember> for SyntaxElement {
-    fn from(n: JsMethodObjectMember) -> SyntaxElement {
+    fn from(n: JsMethodObjectMember) -> Self {
         n.syntax.into()
     }
 }
@@ -21562,12 +21550,12 @@ impl std::fmt::Debug for JsModule {
     }
 }
 impl From<JsModule> for SyntaxNode {
-    fn from(n: JsModule) -> SyntaxNode {
+    fn from(n: JsModule) -> Self {
         n.syntax
     }
 }
 impl From<JsModule> for SyntaxElement {
-    fn from(n: JsModule) -> SyntaxElement {
+    fn from(n: JsModule) -> Self {
         n.syntax.into()
     }
 }
@@ -21612,12 +21600,12 @@ impl std::fmt::Debug for JsModuleSource {
     }
 }
 impl From<JsModuleSource> for SyntaxNode {
-    fn from(n: JsModuleSource) -> SyntaxNode {
+    fn from(n: JsModuleSource) -> Self {
         n.syntax
     }
 }
 impl From<JsModuleSource> for SyntaxElement {
-    fn from(n: JsModuleSource) -> SyntaxElement {
+    fn from(n: JsModuleSource) -> Self {
         n.syntax.into()
     }
 }
@@ -21662,12 +21650,12 @@ impl std::fmt::Debug for JsName {
     }
 }
 impl From<JsName> for SyntaxNode {
-    fn from(n: JsName) -> SyntaxNode {
+    fn from(n: JsName) -> Self {
         n.syntax
     }
 }
 impl From<JsName> for SyntaxElement {
-    fn from(n: JsName) -> SyntaxElement {
+    fn from(n: JsName) -> Self {
         n.syntax.into()
     }
 }
@@ -21715,12 +21703,12 @@ impl std::fmt::Debug for JsNamedImportSpecifier {
     }
 }
 impl From<JsNamedImportSpecifier> for SyntaxNode {
-    fn from(n: JsNamedImportSpecifier) -> SyntaxNode {
+    fn from(n: JsNamedImportSpecifier) -> Self {
         n.syntax
     }
 }
 impl From<JsNamedImportSpecifier> for SyntaxElement {
-    fn from(n: JsNamedImportSpecifier) -> SyntaxElement {
+    fn from(n: JsNamedImportSpecifier) -> Self {
         n.syntax.into()
     }
 }
@@ -21770,12 +21758,12 @@ impl std::fmt::Debug for JsNamedImportSpecifiers {
     }
 }
 impl From<JsNamedImportSpecifiers> for SyntaxNode {
-    fn from(n: JsNamedImportSpecifiers) -> SyntaxNode {
+    fn from(n: JsNamedImportSpecifiers) -> Self {
         n.syntax
     }
 }
 impl From<JsNamedImportSpecifiers> for SyntaxElement {
-    fn from(n: JsNamedImportSpecifiers) -> SyntaxElement {
+    fn from(n: JsNamedImportSpecifiers) -> Self {
         n.syntax.into()
     }
 }
@@ -21819,12 +21807,12 @@ impl std::fmt::Debug for JsNamespaceImportSpecifier {
     }
 }
 impl From<JsNamespaceImportSpecifier> for SyntaxNode {
-    fn from(n: JsNamespaceImportSpecifier) -> SyntaxNode {
+    fn from(n: JsNamespaceImportSpecifier) -> Self {
         n.syntax
     }
 }
 impl From<JsNamespaceImportSpecifier> for SyntaxElement {
-    fn from(n: JsNamespaceImportSpecifier) -> SyntaxElement {
+    fn from(n: JsNamespaceImportSpecifier) -> Self {
         n.syntax.into()
     }
 }
@@ -21875,12 +21863,12 @@ impl std::fmt::Debug for JsNewExpression {
     }
 }
 impl From<JsNewExpression> for SyntaxNode {
-    fn from(n: JsNewExpression) -> SyntaxNode {
+    fn from(n: JsNewExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsNewExpression> for SyntaxElement {
-    fn from(n: JsNewExpression) -> SyntaxElement {
+    fn from(n: JsNewExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -21927,12 +21915,12 @@ impl std::fmt::Debug for JsNewTargetExpression {
     }
 }
 impl From<JsNewTargetExpression> for SyntaxNode {
-    fn from(n: JsNewTargetExpression) -> SyntaxNode {
+    fn from(n: JsNewTargetExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsNewTargetExpression> for SyntaxElement {
-    fn from(n: JsNewTargetExpression) -> SyntaxElement {
+    fn from(n: JsNewTargetExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -21977,12 +21965,12 @@ impl std::fmt::Debug for JsNullLiteralExpression {
     }
 }
 impl From<JsNullLiteralExpression> for SyntaxNode {
-    fn from(n: JsNullLiteralExpression) -> SyntaxNode {
+    fn from(n: JsNullLiteralExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsNullLiteralExpression> for SyntaxElement {
-    fn from(n: JsNullLiteralExpression) -> SyntaxElement {
+    fn from(n: JsNullLiteralExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -22027,12 +22015,12 @@ impl std::fmt::Debug for JsNumberLiteralExpression {
     }
 }
 impl From<JsNumberLiteralExpression> for SyntaxNode {
-    fn from(n: JsNumberLiteralExpression) -> SyntaxNode {
+    fn from(n: JsNumberLiteralExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsNumberLiteralExpression> for SyntaxElement {
-    fn from(n: JsNumberLiteralExpression) -> SyntaxElement {
+    fn from(n: JsNumberLiteralExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -22082,12 +22070,12 @@ impl std::fmt::Debug for JsObjectAssignmentPattern {
     }
 }
 impl From<JsObjectAssignmentPattern> for SyntaxNode {
-    fn from(n: JsObjectAssignmentPattern) -> SyntaxNode {
+    fn from(n: JsObjectAssignmentPattern) -> Self {
         n.syntax
     }
 }
 impl From<JsObjectAssignmentPattern> for SyntaxElement {
-    fn from(n: JsObjectAssignmentPattern) -> SyntaxElement {
+    fn from(n: JsObjectAssignmentPattern) -> Self {
         n.syntax.into()
     }
 }
@@ -22135,12 +22123,12 @@ impl std::fmt::Debug for JsObjectAssignmentPatternProperty {
     }
 }
 impl From<JsObjectAssignmentPatternProperty> for SyntaxNode {
-    fn from(n: JsObjectAssignmentPatternProperty) -> SyntaxNode {
+    fn from(n: JsObjectAssignmentPatternProperty) -> Self {
         n.syntax
     }
 }
 impl From<JsObjectAssignmentPatternProperty> for SyntaxElement {
-    fn from(n: JsObjectAssignmentPatternProperty) -> SyntaxElement {
+    fn from(n: JsObjectAssignmentPatternProperty) -> Self {
         n.syntax.into()
     }
 }
@@ -22186,12 +22174,12 @@ impl std::fmt::Debug for JsObjectAssignmentPatternRest {
     }
 }
 impl From<JsObjectAssignmentPatternRest> for SyntaxNode {
-    fn from(n: JsObjectAssignmentPatternRest) -> SyntaxNode {
+    fn from(n: JsObjectAssignmentPatternRest) -> Self {
         n.syntax
     }
 }
 impl From<JsObjectAssignmentPatternRest> for SyntaxElement {
-    fn from(n: JsObjectAssignmentPatternRest) -> SyntaxElement {
+    fn from(n: JsObjectAssignmentPatternRest) -> Self {
         n.syntax.into()
     }
 }
@@ -22236,12 +22224,12 @@ impl std::fmt::Debug for JsObjectAssignmentPatternShorthandProperty {
     }
 }
 impl From<JsObjectAssignmentPatternShorthandProperty> for SyntaxNode {
-    fn from(n: JsObjectAssignmentPatternShorthandProperty) -> SyntaxNode {
+    fn from(n: JsObjectAssignmentPatternShorthandProperty) -> Self {
         n.syntax
     }
 }
 impl From<JsObjectAssignmentPatternShorthandProperty> for SyntaxElement {
-    fn from(n: JsObjectAssignmentPatternShorthandProperty) -> SyntaxElement {
+    fn from(n: JsObjectAssignmentPatternShorthandProperty) -> Self {
         n.syntax.into()
     }
 }
@@ -22291,12 +22279,12 @@ impl std::fmt::Debug for JsObjectBindingPattern {
     }
 }
 impl From<JsObjectBindingPattern> for SyntaxNode {
-    fn from(n: JsObjectBindingPattern) -> SyntaxNode {
+    fn from(n: JsObjectBindingPattern) -> Self {
         n.syntax
     }
 }
 impl From<JsObjectBindingPattern> for SyntaxElement {
-    fn from(n: JsObjectBindingPattern) -> SyntaxElement {
+    fn from(n: JsObjectBindingPattern) -> Self {
         n.syntax.into()
     }
 }
@@ -22344,12 +22332,12 @@ impl std::fmt::Debug for JsObjectBindingPatternProperty {
     }
 }
 impl From<JsObjectBindingPatternProperty> for SyntaxNode {
-    fn from(n: JsObjectBindingPatternProperty) -> SyntaxNode {
+    fn from(n: JsObjectBindingPatternProperty) -> Self {
         n.syntax
     }
 }
 impl From<JsObjectBindingPatternProperty> for SyntaxElement {
-    fn from(n: JsObjectBindingPatternProperty) -> SyntaxElement {
+    fn from(n: JsObjectBindingPatternProperty) -> Self {
         n.syntax.into()
     }
 }
@@ -22395,12 +22383,12 @@ impl std::fmt::Debug for JsObjectBindingPatternRest {
     }
 }
 impl From<JsObjectBindingPatternRest> for SyntaxNode {
-    fn from(n: JsObjectBindingPatternRest) -> SyntaxNode {
+    fn from(n: JsObjectBindingPatternRest) -> Self {
         n.syntax
     }
 }
 impl From<JsObjectBindingPatternRest> for SyntaxElement {
-    fn from(n: JsObjectBindingPatternRest) -> SyntaxElement {
+    fn from(n: JsObjectBindingPatternRest) -> Self {
         n.syntax.into()
     }
 }
@@ -22445,12 +22433,12 @@ impl std::fmt::Debug for JsObjectBindingPatternShorthandProperty {
     }
 }
 impl From<JsObjectBindingPatternShorthandProperty> for SyntaxNode {
-    fn from(n: JsObjectBindingPatternShorthandProperty) -> SyntaxNode {
+    fn from(n: JsObjectBindingPatternShorthandProperty) -> Self {
         n.syntax
     }
 }
 impl From<JsObjectBindingPatternShorthandProperty> for SyntaxElement {
-    fn from(n: JsObjectBindingPatternShorthandProperty) -> SyntaxElement {
+    fn from(n: JsObjectBindingPatternShorthandProperty) -> Self {
         n.syntax.into()
     }
 }
@@ -22500,12 +22488,12 @@ impl std::fmt::Debug for JsObjectExpression {
     }
 }
 impl From<JsObjectExpression> for SyntaxNode {
-    fn from(n: JsObjectExpression) -> SyntaxNode {
+    fn from(n: JsObjectExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsObjectExpression> for SyntaxElement {
-    fn from(n: JsObjectExpression) -> SyntaxElement {
+    fn from(n: JsObjectExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -22555,12 +22543,12 @@ impl std::fmt::Debug for JsParameters {
     }
 }
 impl From<JsParameters> for SyntaxNode {
-    fn from(n: JsParameters) -> SyntaxNode {
+    fn from(n: JsParameters) -> Self {
         n.syntax
     }
 }
 impl From<JsParameters> for SyntaxElement {
-    fn from(n: JsParameters) -> SyntaxElement {
+    fn from(n: JsParameters) -> Self {
         n.syntax.into()
     }
 }
@@ -22610,12 +22598,12 @@ impl std::fmt::Debug for JsParenthesizedAssignment {
     }
 }
 impl From<JsParenthesizedAssignment> for SyntaxNode {
-    fn from(n: JsParenthesizedAssignment) -> SyntaxNode {
+    fn from(n: JsParenthesizedAssignment) -> Self {
         n.syntax
     }
 }
 impl From<JsParenthesizedAssignment> for SyntaxElement {
-    fn from(n: JsParenthesizedAssignment) -> SyntaxElement {
+    fn from(n: JsParenthesizedAssignment) -> Self {
         n.syntax.into()
     }
 }
@@ -22665,12 +22653,12 @@ impl std::fmt::Debug for JsParenthesizedExpression {
     }
 }
 impl From<JsParenthesizedExpression> for SyntaxNode {
-    fn from(n: JsParenthesizedExpression) -> SyntaxNode {
+    fn from(n: JsParenthesizedExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsParenthesizedExpression> for SyntaxElement {
-    fn from(n: JsParenthesizedExpression) -> SyntaxElement {
+    fn from(n: JsParenthesizedExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -22716,12 +22704,12 @@ impl std::fmt::Debug for JsPostUpdateExpression {
     }
 }
 impl From<JsPostUpdateExpression> for SyntaxNode {
-    fn from(n: JsPostUpdateExpression) -> SyntaxNode {
+    fn from(n: JsPostUpdateExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsPostUpdateExpression> for SyntaxElement {
-    fn from(n: JsPostUpdateExpression) -> SyntaxElement {
+    fn from(n: JsPostUpdateExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -22767,12 +22755,12 @@ impl std::fmt::Debug for JsPreUpdateExpression {
     }
 }
 impl From<JsPreUpdateExpression> for SyntaxNode {
-    fn from(n: JsPreUpdateExpression) -> SyntaxNode {
+    fn from(n: JsPreUpdateExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsPreUpdateExpression> for SyntaxElement {
-    fn from(n: JsPreUpdateExpression) -> SyntaxElement {
+    fn from(n: JsPreUpdateExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -22815,12 +22803,12 @@ impl std::fmt::Debug for JsPrivateClassMemberName {
     }
 }
 impl From<JsPrivateClassMemberName> for SyntaxNode {
-    fn from(n: JsPrivateClassMemberName) -> SyntaxNode {
+    fn from(n: JsPrivateClassMemberName) -> Self {
         n.syntax
     }
 }
 impl From<JsPrivateClassMemberName> for SyntaxElement {
-    fn from(n: JsPrivateClassMemberName) -> SyntaxElement {
+    fn from(n: JsPrivateClassMemberName) -> Self {
         n.syntax.into()
     }
 }
@@ -22866,12 +22854,12 @@ impl std::fmt::Debug for JsPrivateName {
     }
 }
 impl From<JsPrivateName> for SyntaxNode {
-    fn from(n: JsPrivateName) -> SyntaxNode {
+    fn from(n: JsPrivateName) -> Self {
         n.syntax
     }
 }
 impl From<JsPrivateName> for SyntaxElement {
-    fn from(n: JsPrivateName) -> SyntaxElement {
+    fn from(n: JsPrivateName) -> Self {
         n.syntax.into()
     }
 }
@@ -22923,12 +22911,12 @@ impl std::fmt::Debug for JsPropertyClassMember {
     }
 }
 impl From<JsPropertyClassMember> for SyntaxNode {
-    fn from(n: JsPropertyClassMember) -> SyntaxNode {
+    fn from(n: JsPropertyClassMember) -> Self {
         n.syntax
     }
 }
 impl From<JsPropertyClassMember> for SyntaxElement {
-    fn from(n: JsPropertyClassMember) -> SyntaxElement {
+    fn from(n: JsPropertyClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -22975,12 +22963,12 @@ impl std::fmt::Debug for JsPropertyObjectMember {
     }
 }
 impl From<JsPropertyObjectMember> for SyntaxNode {
-    fn from(n: JsPropertyObjectMember) -> SyntaxNode {
+    fn from(n: JsPropertyObjectMember) -> Self {
         n.syntax
     }
 }
 impl From<JsPropertyObjectMember> for SyntaxElement {
-    fn from(n: JsPropertyObjectMember) -> SyntaxElement {
+    fn from(n: JsPropertyObjectMember) -> Self {
         n.syntax.into()
     }
 }
@@ -23025,12 +23013,12 @@ impl std::fmt::Debug for JsReferenceIdentifier {
     }
 }
 impl From<JsReferenceIdentifier> for SyntaxNode {
-    fn from(n: JsReferenceIdentifier) -> SyntaxNode {
+    fn from(n: JsReferenceIdentifier) -> Self {
         n.syntax
     }
 }
 impl From<JsReferenceIdentifier> for SyntaxElement {
-    fn from(n: JsReferenceIdentifier) -> SyntaxElement {
+    fn from(n: JsReferenceIdentifier) -> Self {
         n.syntax.into()
     }
 }
@@ -23075,12 +23063,12 @@ impl std::fmt::Debug for JsRegexLiteralExpression {
     }
 }
 impl From<JsRegexLiteralExpression> for SyntaxNode {
-    fn from(n: JsRegexLiteralExpression) -> SyntaxNode {
+    fn from(n: JsRegexLiteralExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsRegexLiteralExpression> for SyntaxElement {
-    fn from(n: JsRegexLiteralExpression) -> SyntaxElement {
+    fn from(n: JsRegexLiteralExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -23131,12 +23119,12 @@ impl std::fmt::Debug for JsRestParameter {
     }
 }
 impl From<JsRestParameter> for SyntaxNode {
-    fn from(n: JsRestParameter) -> SyntaxNode {
+    fn from(n: JsRestParameter) -> Self {
         n.syntax
     }
 }
 impl From<JsRestParameter> for SyntaxElement {
-    fn from(n: JsRestParameter) -> SyntaxElement {
+    fn from(n: JsRestParameter) -> Self {
         n.syntax.into()
     }
 }
@@ -23186,12 +23174,12 @@ impl std::fmt::Debug for JsReturnStatement {
     }
 }
 impl From<JsReturnStatement> for SyntaxNode {
-    fn from(n: JsReturnStatement) -> SyntaxNode {
+    fn from(n: JsReturnStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsReturnStatement> for SyntaxElement {
-    fn from(n: JsReturnStatement) -> SyntaxElement {
+    fn from(n: JsReturnStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -23243,12 +23231,12 @@ impl std::fmt::Debug for JsScript {
     }
 }
 impl From<JsScript> for SyntaxNode {
-    fn from(n: JsScript) -> SyntaxNode {
+    fn from(n: JsScript) -> Self {
         n.syntax
     }
 }
 impl From<JsScript> for SyntaxElement {
-    fn from(n: JsScript) -> SyntaxElement {
+    fn from(n: JsScript) -> Self {
         n.syntax.into()
     }
 }
@@ -23295,12 +23283,12 @@ impl std::fmt::Debug for JsSequenceExpression {
     }
 }
 impl From<JsSequenceExpression> for SyntaxNode {
-    fn from(n: JsSequenceExpression) -> SyntaxNode {
+    fn from(n: JsSequenceExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsSequenceExpression> for SyntaxElement {
-    fn from(n: JsSequenceExpression) -> SyntaxElement {
+    fn from(n: JsSequenceExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -23358,12 +23346,12 @@ impl std::fmt::Debug for JsSetterClassMember {
     }
 }
 impl From<JsSetterClassMember> for SyntaxNode {
-    fn from(n: JsSetterClassMember) -> SyntaxNode {
+    fn from(n: JsSetterClassMember) -> Self {
         n.syntax
     }
 }
 impl From<JsSetterClassMember> for SyntaxElement {
-    fn from(n: JsSetterClassMember) -> SyntaxElement {
+    fn from(n: JsSetterClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -23420,12 +23408,12 @@ impl std::fmt::Debug for JsSetterObjectMember {
     }
 }
 impl From<JsSetterObjectMember> for SyntaxNode {
-    fn from(n: JsSetterObjectMember) -> SyntaxNode {
+    fn from(n: JsSetterObjectMember) -> Self {
         n.syntax
     }
 }
 impl From<JsSetterObjectMember> for SyntaxElement {
-    fn from(n: JsSetterObjectMember) -> SyntaxElement {
+    fn from(n: JsSetterObjectMember) -> Self {
         n.syntax.into()
     }
 }
@@ -23471,12 +23459,12 @@ impl std::fmt::Debug for JsShorthandNamedImportSpecifier {
     }
 }
 impl From<JsShorthandNamedImportSpecifier> for SyntaxNode {
-    fn from(n: JsShorthandNamedImportSpecifier) -> SyntaxNode {
+    fn from(n: JsShorthandNamedImportSpecifier) -> Self {
         n.syntax
     }
 }
 impl From<JsShorthandNamedImportSpecifier> for SyntaxElement {
-    fn from(n: JsShorthandNamedImportSpecifier) -> SyntaxElement {
+    fn from(n: JsShorthandNamedImportSpecifier) -> Self {
         n.syntax.into()
     }
 }
@@ -23518,12 +23506,12 @@ impl std::fmt::Debug for JsShorthandPropertyObjectMember {
     }
 }
 impl From<JsShorthandPropertyObjectMember> for SyntaxNode {
-    fn from(n: JsShorthandPropertyObjectMember) -> SyntaxNode {
+    fn from(n: JsShorthandPropertyObjectMember) -> Self {
         n.syntax
     }
 }
 impl From<JsShorthandPropertyObjectMember> for SyntaxElement {
-    fn from(n: JsShorthandPropertyObjectMember) -> SyntaxElement {
+    fn from(n: JsShorthandPropertyObjectMember) -> Self {
         n.syntax.into()
     }
 }
@@ -23569,12 +23557,12 @@ impl std::fmt::Debug for JsSpread {
     }
 }
 impl From<JsSpread> for SyntaxNode {
-    fn from(n: JsSpread) -> SyntaxNode {
+    fn from(n: JsSpread) -> Self {
         n.syntax
     }
 }
 impl From<JsSpread> for SyntaxElement {
-    fn from(n: JsSpread) -> SyntaxElement {
+    fn from(n: JsSpread) -> Self {
         n.syntax.into()
     }
 }
@@ -23630,12 +23618,12 @@ impl std::fmt::Debug for JsStaticInitializationBlockClassMember {
     }
 }
 impl From<JsStaticInitializationBlockClassMember> for SyntaxNode {
-    fn from(n: JsStaticInitializationBlockClassMember) -> SyntaxNode {
+    fn from(n: JsStaticInitializationBlockClassMember) -> Self {
         n.syntax
     }
 }
 impl From<JsStaticInitializationBlockClassMember> for SyntaxElement {
-    fn from(n: JsStaticInitializationBlockClassMember) -> SyntaxElement {
+    fn from(n: JsStaticInitializationBlockClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -23679,12 +23667,12 @@ impl std::fmt::Debug for JsStaticMemberAssignment {
     }
 }
 impl From<JsStaticMemberAssignment> for SyntaxNode {
-    fn from(n: JsStaticMemberAssignment) -> SyntaxNode {
+    fn from(n: JsStaticMemberAssignment) -> Self {
         n.syntax
     }
 }
 impl From<JsStaticMemberAssignment> for SyntaxElement {
-    fn from(n: JsStaticMemberAssignment) -> SyntaxElement {
+    fn from(n: JsStaticMemberAssignment) -> Self {
         n.syntax.into()
     }
 }
@@ -23731,12 +23719,12 @@ impl std::fmt::Debug for JsStaticMemberExpression {
     }
 }
 impl From<JsStaticMemberExpression> for SyntaxNode {
-    fn from(n: JsStaticMemberExpression) -> SyntaxNode {
+    fn from(n: JsStaticMemberExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsStaticMemberExpression> for SyntaxElement {
-    fn from(n: JsStaticMemberExpression) -> SyntaxElement {
+    fn from(n: JsStaticMemberExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -23781,12 +23769,12 @@ impl std::fmt::Debug for JsStaticModifier {
     }
 }
 impl From<JsStaticModifier> for SyntaxNode {
-    fn from(n: JsStaticModifier) -> SyntaxNode {
+    fn from(n: JsStaticModifier) -> Self {
         n.syntax
     }
 }
 impl From<JsStaticModifier> for SyntaxElement {
-    fn from(n: JsStaticModifier) -> SyntaxElement {
+    fn from(n: JsStaticModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -23831,12 +23819,12 @@ impl std::fmt::Debug for JsStringLiteralExpression {
     }
 }
 impl From<JsStringLiteralExpression> for SyntaxNode {
-    fn from(n: JsStringLiteralExpression) -> SyntaxNode {
+    fn from(n: JsStringLiteralExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsStringLiteralExpression> for SyntaxElement {
-    fn from(n: JsStringLiteralExpression) -> SyntaxElement {
+    fn from(n: JsStringLiteralExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -23881,12 +23869,12 @@ impl std::fmt::Debug for JsSuperExpression {
     }
 }
 impl From<JsSuperExpression> for SyntaxNode {
-    fn from(n: JsSuperExpression) -> SyntaxNode {
+    fn from(n: JsSuperExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsSuperExpression> for SyntaxElement {
-    fn from(n: JsSuperExpression) -> SyntaxElement {
+    fn from(n: JsSuperExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -23952,12 +23940,12 @@ impl std::fmt::Debug for JsSwitchStatement {
     }
 }
 impl From<JsSwitchStatement> for SyntaxNode {
-    fn from(n: JsSwitchStatement) -> SyntaxNode {
+    fn from(n: JsSwitchStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsSwitchStatement> for SyntaxElement {
-    fn from(n: JsSwitchStatement) -> SyntaxElement {
+    fn from(n: JsSwitchStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -24002,12 +23990,12 @@ impl std::fmt::Debug for JsTemplateChunkElement {
     }
 }
 impl From<JsTemplateChunkElement> for SyntaxNode {
-    fn from(n: JsTemplateChunkElement) -> SyntaxNode {
+    fn from(n: JsTemplateChunkElement) -> Self {
         n.syntax
     }
 }
 impl From<JsTemplateChunkElement> for SyntaxElement {
-    fn from(n: JsTemplateChunkElement) -> SyntaxElement {
+    fn from(n: JsTemplateChunkElement) -> Self {
         n.syntax.into()
     }
 }
@@ -24057,12 +24045,12 @@ impl std::fmt::Debug for JsTemplateElement {
     }
 }
 impl From<JsTemplateElement> for SyntaxNode {
-    fn from(n: JsTemplateElement) -> SyntaxNode {
+    fn from(n: JsTemplateElement) -> Self {
         n.syntax
     }
 }
 impl From<JsTemplateElement> for SyntaxElement {
-    fn from(n: JsTemplateElement) -> SyntaxElement {
+    fn from(n: JsTemplateElement) -> Self {
         n.syntax.into()
     }
 }
@@ -24117,12 +24105,12 @@ impl std::fmt::Debug for JsTemplateExpression {
     }
 }
 impl From<JsTemplateExpression> for SyntaxNode {
-    fn from(n: JsTemplateExpression) -> SyntaxNode {
+    fn from(n: JsTemplateExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsTemplateExpression> for SyntaxElement {
-    fn from(n: JsTemplateExpression) -> SyntaxElement {
+    fn from(n: JsTemplateExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -24164,12 +24152,12 @@ impl std::fmt::Debug for JsThisExpression {
     }
 }
 impl From<JsThisExpression> for SyntaxNode {
-    fn from(n: JsThisExpression) -> SyntaxNode {
+    fn from(n: JsThisExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsThisExpression> for SyntaxElement {
-    fn from(n: JsThisExpression) -> SyntaxElement {
+    fn from(n: JsThisExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -24219,12 +24207,12 @@ impl std::fmt::Debug for JsThrowStatement {
     }
 }
 impl From<JsThrowStatement> for SyntaxNode {
-    fn from(n: JsThrowStatement) -> SyntaxNode {
+    fn from(n: JsThrowStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsThrowStatement> for SyntaxElement {
-    fn from(n: JsThrowStatement) -> SyntaxElement {
+    fn from(n: JsThrowStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -24275,12 +24263,12 @@ impl std::fmt::Debug for JsTryFinallyStatement {
     }
 }
 impl From<JsTryFinallyStatement> for SyntaxNode {
-    fn from(n: JsTryFinallyStatement) -> SyntaxNode {
+    fn from(n: JsTryFinallyStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsTryFinallyStatement> for SyntaxElement {
-    fn from(n: JsTryFinallyStatement) -> SyntaxElement {
+    fn from(n: JsTryFinallyStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -24327,12 +24315,12 @@ impl std::fmt::Debug for JsTryStatement {
     }
 }
 impl From<JsTryStatement> for SyntaxNode {
-    fn from(n: JsTryStatement) -> SyntaxNode {
+    fn from(n: JsTryStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsTryStatement> for SyntaxElement {
-    fn from(n: JsTryStatement) -> SyntaxElement {
+    fn from(n: JsTryStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -24378,12 +24366,12 @@ impl std::fmt::Debug for JsUnaryExpression {
     }
 }
 impl From<JsUnaryExpression> for SyntaxNode {
-    fn from(n: JsUnaryExpression) -> SyntaxNode {
+    fn from(n: JsUnaryExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsUnaryExpression> for SyntaxElement {
-    fn from(n: JsUnaryExpression) -> SyntaxElement {
+    fn from(n: JsUnaryExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -24430,12 +24418,12 @@ impl std::fmt::Debug for JsVariableDeclaration {
     }
 }
 impl From<JsVariableDeclaration> for SyntaxNode {
-    fn from(n: JsVariableDeclaration) -> SyntaxNode {
+    fn from(n: JsVariableDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<JsVariableDeclaration> for SyntaxElement {
-    fn from(n: JsVariableDeclaration) -> SyntaxElement {
+    fn from(n: JsVariableDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -24484,12 +24472,12 @@ impl std::fmt::Debug for JsVariableDeclarationClause {
     }
 }
 impl From<JsVariableDeclarationClause> for SyntaxNode {
-    fn from(n: JsVariableDeclarationClause) -> SyntaxNode {
+    fn from(n: JsVariableDeclarationClause) -> Self {
         n.syntax
     }
 }
 impl From<JsVariableDeclarationClause> for SyntaxElement {
-    fn from(n: JsVariableDeclarationClause) -> SyntaxElement {
+    fn from(n: JsVariableDeclarationClause) -> Self {
         n.syntax.into()
     }
 }
@@ -24539,12 +24527,12 @@ impl std::fmt::Debug for JsVariableDeclarator {
     }
 }
 impl From<JsVariableDeclarator> for SyntaxNode {
-    fn from(n: JsVariableDeclarator) -> SyntaxNode {
+    fn from(n: JsVariableDeclarator) -> Self {
         n.syntax
     }
 }
 impl From<JsVariableDeclarator> for SyntaxElement {
-    fn from(n: JsVariableDeclarator) -> SyntaxElement {
+    fn from(n: JsVariableDeclarator) -> Self {
         n.syntax.into()
     }
 }
@@ -24593,12 +24581,12 @@ impl std::fmt::Debug for JsVariableStatement {
     }
 }
 impl From<JsVariableStatement> for SyntaxNode {
-    fn from(n: JsVariableStatement) -> SyntaxNode {
+    fn from(n: JsVariableStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsVariableStatement> for SyntaxElement {
-    fn from(n: JsVariableStatement) -> SyntaxElement {
+    fn from(n: JsVariableStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -24653,12 +24641,12 @@ impl std::fmt::Debug for JsWhileStatement {
     }
 }
 impl From<JsWhileStatement> for SyntaxNode {
-    fn from(n: JsWhileStatement) -> SyntaxNode {
+    fn from(n: JsWhileStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsWhileStatement> for SyntaxElement {
-    fn from(n: JsWhileStatement) -> SyntaxElement {
+    fn from(n: JsWhileStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -24710,12 +24698,12 @@ impl std::fmt::Debug for JsWithStatement {
     }
 }
 impl From<JsWithStatement> for SyntaxNode {
-    fn from(n: JsWithStatement) -> SyntaxNode {
+    fn from(n: JsWithStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsWithStatement> for SyntaxElement {
-    fn from(n: JsWithStatement) -> SyntaxElement {
+    fn from(n: JsWithStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -24761,12 +24749,12 @@ impl std::fmt::Debug for JsYieldArgument {
     }
 }
 impl From<JsYieldArgument> for SyntaxNode {
-    fn from(n: JsYieldArgument) -> SyntaxNode {
+    fn from(n: JsYieldArgument) -> Self {
         n.syntax
     }
 }
 impl From<JsYieldArgument> for SyntaxElement {
-    fn from(n: JsYieldArgument) -> SyntaxElement {
+    fn from(n: JsYieldArgument) -> Self {
         n.syntax.into()
     }
 }
@@ -24812,12 +24800,12 @@ impl std::fmt::Debug for JsYieldExpression {
     }
 }
 impl From<JsYieldExpression> for SyntaxNode {
-    fn from(n: JsYieldExpression) -> SyntaxNode {
+    fn from(n: JsYieldExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsYieldExpression> for SyntaxElement {
-    fn from(n: JsYieldExpression) -> SyntaxElement {
+    fn from(n: JsYieldExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -24863,12 +24851,12 @@ impl std::fmt::Debug for JsxAttribute {
     }
 }
 impl From<JsxAttribute> for SyntaxNode {
-    fn from(n: JsxAttribute) -> SyntaxNode {
+    fn from(n: JsxAttribute) -> Self {
         n.syntax
     }
 }
 impl From<JsxAttribute> for SyntaxElement {
-    fn from(n: JsxAttribute) -> SyntaxElement {
+    fn from(n: JsxAttribute) -> Self {
         n.syntax.into()
     }
 }
@@ -24911,12 +24899,12 @@ impl std::fmt::Debug for JsxAttributeInitializerClause {
     }
 }
 impl From<JsxAttributeInitializerClause> for SyntaxNode {
-    fn from(n: JsxAttributeInitializerClause) -> SyntaxNode {
+    fn from(n: JsxAttributeInitializerClause) -> Self {
         n.syntax
     }
 }
 impl From<JsxAttributeInitializerClause> for SyntaxElement {
-    fn from(n: JsxAttributeInitializerClause) -> SyntaxElement {
+    fn from(n: JsxAttributeInitializerClause) -> Self {
         n.syntax.into()
     }
 }
@@ -24970,12 +24958,12 @@ impl std::fmt::Debug for JsxClosingElement {
     }
 }
 impl From<JsxClosingElement> for SyntaxNode {
-    fn from(n: JsxClosingElement) -> SyntaxNode {
+    fn from(n: JsxClosingElement) -> Self {
         n.syntax
     }
 }
 impl From<JsxClosingElement> for SyntaxElement {
-    fn from(n: JsxClosingElement) -> SyntaxElement {
+    fn from(n: JsxClosingElement) -> Self {
         n.syntax.into()
     }
 }
@@ -25028,12 +25016,12 @@ impl std::fmt::Debug for JsxClosingFragment {
     }
 }
 impl From<JsxClosingFragment> for SyntaxNode {
-    fn from(n: JsxClosingFragment) -> SyntaxNode {
+    fn from(n: JsxClosingFragment) -> Self {
         n.syntax
     }
 }
 impl From<JsxClosingFragment> for SyntaxElement {
-    fn from(n: JsxClosingFragment) -> SyntaxElement {
+    fn from(n: JsxClosingFragment) -> Self {
         n.syntax.into()
     }
 }
@@ -25083,12 +25071,12 @@ impl std::fmt::Debug for JsxElement {
     }
 }
 impl From<JsxElement> for SyntaxNode {
-    fn from(n: JsxElement) -> SyntaxNode {
+    fn from(n: JsxElement) -> Self {
         n.syntax
     }
 }
 impl From<JsxElement> for SyntaxElement {
-    fn from(n: JsxElement) -> SyntaxElement {
+    fn from(n: JsxElement) -> Self {
         n.syntax.into()
     }
 }
@@ -25138,12 +25126,12 @@ impl std::fmt::Debug for JsxExpressionAttributeValue {
     }
 }
 impl From<JsxExpressionAttributeValue> for SyntaxNode {
-    fn from(n: JsxExpressionAttributeValue) -> SyntaxNode {
+    fn from(n: JsxExpressionAttributeValue) -> Self {
         n.syntax
     }
 }
 impl From<JsxExpressionAttributeValue> for SyntaxElement {
-    fn from(n: JsxExpressionAttributeValue) -> SyntaxElement {
+    fn from(n: JsxExpressionAttributeValue) -> Self {
         n.syntax.into()
     }
 }
@@ -25196,12 +25184,12 @@ impl std::fmt::Debug for JsxExpressionChild {
     }
 }
 impl From<JsxExpressionChild> for SyntaxNode {
-    fn from(n: JsxExpressionChild) -> SyntaxNode {
+    fn from(n: JsxExpressionChild) -> Self {
         n.syntax
     }
 }
 impl From<JsxExpressionChild> for SyntaxElement {
-    fn from(n: JsxExpressionChild) -> SyntaxElement {
+    fn from(n: JsxExpressionChild) -> Self {
         n.syntax.into()
     }
 }
@@ -25251,12 +25239,12 @@ impl std::fmt::Debug for JsxFragment {
     }
 }
 impl From<JsxFragment> for SyntaxNode {
-    fn from(n: JsxFragment) -> SyntaxNode {
+    fn from(n: JsxFragment) -> Self {
         n.syntax
     }
 }
 impl From<JsxFragment> for SyntaxElement {
-    fn from(n: JsxFragment) -> SyntaxElement {
+    fn from(n: JsxFragment) -> Self {
         n.syntax.into()
     }
 }
@@ -25300,12 +25288,12 @@ impl std::fmt::Debug for JsxMemberName {
     }
 }
 impl From<JsxMemberName> for SyntaxNode {
-    fn from(n: JsxMemberName) -> SyntaxNode {
+    fn from(n: JsxMemberName) -> Self {
         n.syntax
     }
 }
 impl From<JsxMemberName> for SyntaxElement {
-    fn from(n: JsxMemberName) -> SyntaxElement {
+    fn from(n: JsxMemberName) -> Self {
         n.syntax.into()
     }
 }
@@ -25350,12 +25338,12 @@ impl std::fmt::Debug for JsxName {
     }
 }
 impl From<JsxName> for SyntaxNode {
-    fn from(n: JsxName) -> SyntaxNode {
+    fn from(n: JsxName) -> Self {
         n.syntax
     }
 }
 impl From<JsxName> for SyntaxElement {
-    fn from(n: JsxName) -> SyntaxElement {
+    fn from(n: JsxName) -> Self {
         n.syntax.into()
     }
 }
@@ -25402,12 +25390,12 @@ impl std::fmt::Debug for JsxNamespaceName {
     }
 }
 impl From<JsxNamespaceName> for SyntaxNode {
-    fn from(n: JsxNamespaceName) -> SyntaxNode {
+    fn from(n: JsxNamespaceName) -> Self {
         n.syntax
     }
 }
 impl From<JsxNamespaceName> for SyntaxElement {
-    fn from(n: JsxNamespaceName) -> SyntaxElement {
+    fn from(n: JsxNamespaceName) -> Self {
         n.syntax.into()
     }
 }
@@ -25462,12 +25450,12 @@ impl std::fmt::Debug for JsxOpeningElement {
     }
 }
 impl From<JsxOpeningElement> for SyntaxNode {
-    fn from(n: JsxOpeningElement) -> SyntaxNode {
+    fn from(n: JsxOpeningElement) -> Self {
         n.syntax
     }
 }
 impl From<JsxOpeningElement> for SyntaxElement {
-    fn from(n: JsxOpeningElement) -> SyntaxElement {
+    fn from(n: JsxOpeningElement) -> Self {
         n.syntax.into()
     }
 }
@@ -25516,12 +25504,12 @@ impl std::fmt::Debug for JsxOpeningFragment {
     }
 }
 impl From<JsxOpeningFragment> for SyntaxNode {
-    fn from(n: JsxOpeningFragment) -> SyntaxNode {
+    fn from(n: JsxOpeningFragment) -> Self {
         n.syntax
     }
 }
 impl From<JsxOpeningFragment> for SyntaxElement {
-    fn from(n: JsxOpeningFragment) -> SyntaxElement {
+    fn from(n: JsxOpeningFragment) -> Self {
         n.syntax.into()
     }
 }
@@ -25566,12 +25554,12 @@ impl std::fmt::Debug for JsxReferenceIdentifier {
     }
 }
 impl From<JsxReferenceIdentifier> for SyntaxNode {
-    fn from(n: JsxReferenceIdentifier) -> SyntaxNode {
+    fn from(n: JsxReferenceIdentifier) -> Self {
         n.syntax
     }
 }
 impl From<JsxReferenceIdentifier> for SyntaxElement {
-    fn from(n: JsxReferenceIdentifier) -> SyntaxElement {
+    fn from(n: JsxReferenceIdentifier) -> Self {
         n.syntax.into()
     }
 }
@@ -25630,12 +25618,12 @@ impl std::fmt::Debug for JsxSelfClosingElement {
     }
 }
 impl From<JsxSelfClosingElement> for SyntaxNode {
-    fn from(n: JsxSelfClosingElement) -> SyntaxNode {
+    fn from(n: JsxSelfClosingElement) -> Self {
         n.syntax
     }
 }
 impl From<JsxSelfClosingElement> for SyntaxElement {
-    fn from(n: JsxSelfClosingElement) -> SyntaxElement {
+    fn from(n: JsxSelfClosingElement) -> Self {
         n.syntax.into()
     }
 }
@@ -25689,12 +25677,12 @@ impl std::fmt::Debug for JsxSpreadAttribute {
     }
 }
 impl From<JsxSpreadAttribute> for SyntaxNode {
-    fn from(n: JsxSpreadAttribute) -> SyntaxNode {
+    fn from(n: JsxSpreadAttribute) -> Self {
         n.syntax
     }
 }
 impl From<JsxSpreadAttribute> for SyntaxElement {
-    fn from(n: JsxSpreadAttribute) -> SyntaxElement {
+    fn from(n: JsxSpreadAttribute) -> Self {
         n.syntax.into()
     }
 }
@@ -25748,12 +25736,12 @@ impl std::fmt::Debug for JsxSpreadChild {
     }
 }
 impl From<JsxSpreadChild> for SyntaxNode {
-    fn from(n: JsxSpreadChild) -> SyntaxNode {
+    fn from(n: JsxSpreadChild) -> Self {
         n.syntax
     }
 }
 impl From<JsxSpreadChild> for SyntaxElement {
-    fn from(n: JsxSpreadChild) -> SyntaxElement {
+    fn from(n: JsxSpreadChild) -> Self {
         n.syntax.into()
     }
 }
@@ -25798,12 +25786,12 @@ impl std::fmt::Debug for JsxString {
     }
 }
 impl From<JsxString> for SyntaxNode {
-    fn from(n: JsxString) -> SyntaxNode {
+    fn from(n: JsxString) -> Self {
         n.syntax
     }
 }
 impl From<JsxString> for SyntaxElement {
-    fn from(n: JsxString) -> SyntaxElement {
+    fn from(n: JsxString) -> Self {
         n.syntax.into()
     }
 }
@@ -25845,12 +25833,12 @@ impl std::fmt::Debug for JsxTagExpression {
     }
 }
 impl From<JsxTagExpression> for SyntaxNode {
-    fn from(n: JsxTagExpression) -> SyntaxNode {
+    fn from(n: JsxTagExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsxTagExpression> for SyntaxElement {
-    fn from(n: JsxTagExpression) -> SyntaxElement {
+    fn from(n: JsxTagExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -25895,12 +25883,12 @@ impl std::fmt::Debug for JsxText {
     }
 }
 impl From<JsxText> for SyntaxNode {
-    fn from(n: JsxText) -> SyntaxNode {
+    fn from(n: JsxText) -> Self {
         n.syntax
     }
 }
 impl From<JsxText> for SyntaxElement {
-    fn from(n: JsxText) -> SyntaxElement {
+    fn from(n: JsxText) -> Self {
         n.syntax.into()
     }
 }
@@ -25945,12 +25933,12 @@ impl std::fmt::Debug for TsAbstractModifier {
     }
 }
 impl From<TsAbstractModifier> for SyntaxNode {
-    fn from(n: TsAbstractModifier) -> SyntaxNode {
+    fn from(n: TsAbstractModifier) -> Self {
         n.syntax
     }
 }
 impl From<TsAbstractModifier> for SyntaxElement {
-    fn from(n: TsAbstractModifier) -> SyntaxElement {
+    fn from(n: TsAbstractModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -25995,12 +25983,12 @@ impl std::fmt::Debug for TsAccessibilityModifier {
     }
 }
 impl From<TsAccessibilityModifier> for SyntaxNode {
-    fn from(n: TsAccessibilityModifier) -> SyntaxNode {
+    fn from(n: TsAccessibilityModifier) -> Self {
         n.syntax
     }
 }
 impl From<TsAccessibilityModifier> for SyntaxElement {
-    fn from(n: TsAccessibilityModifier) -> SyntaxElement {
+    fn from(n: TsAccessibilityModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -26042,12 +26030,12 @@ impl std::fmt::Debug for TsAnyType {
     }
 }
 impl From<TsAnyType> for SyntaxNode {
-    fn from(n: TsAnyType) -> SyntaxNode {
+    fn from(n: TsAnyType) -> Self {
         n.syntax
     }
 }
 impl From<TsAnyType> for SyntaxElement {
-    fn from(n: TsAnyType) -> SyntaxElement {
+    fn from(n: TsAnyType) -> Self {
         n.syntax.into()
     }
 }
@@ -26100,12 +26088,12 @@ impl std::fmt::Debug for TsArrayType {
     }
 }
 impl From<TsArrayType> for SyntaxNode {
-    fn from(n: TsArrayType) -> SyntaxNode {
+    fn from(n: TsArrayType) -> Self {
         n.syntax
     }
 }
 impl From<TsArrayType> for SyntaxElement {
-    fn from(n: TsArrayType) -> SyntaxElement {
+    fn from(n: TsArrayType) -> Self {
         n.syntax.into()
     }
 }
@@ -26149,12 +26137,12 @@ impl std::fmt::Debug for TsAsAssignment {
     }
 }
 impl From<TsAsAssignment> for SyntaxNode {
-    fn from(n: TsAsAssignment) -> SyntaxNode {
+    fn from(n: TsAsAssignment) -> Self {
         n.syntax
     }
 }
 impl From<TsAsAssignment> for SyntaxElement {
-    fn from(n: TsAsAssignment) -> SyntaxElement {
+    fn from(n: TsAsAssignment) -> Self {
         n.syntax.into()
     }
 }
@@ -26198,12 +26186,12 @@ impl std::fmt::Debug for TsAsExpression {
     }
 }
 impl From<TsAsExpression> for SyntaxNode {
-    fn from(n: TsAsExpression) -> SyntaxNode {
+    fn from(n: TsAsExpression) -> Self {
         n.syntax
     }
 }
 impl From<TsAsExpression> for SyntaxElement {
-    fn from(n: TsAsExpression) -> SyntaxElement {
+    fn from(n: TsAsExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -26246,12 +26234,12 @@ impl std::fmt::Debug for TsAssertsCondition {
     }
 }
 impl From<TsAssertsCondition> for SyntaxNode {
-    fn from(n: TsAssertsCondition) -> SyntaxNode {
+    fn from(n: TsAssertsCondition) -> Self {
         n.syntax
     }
 }
 impl From<TsAssertsCondition> for SyntaxElement {
-    fn from(n: TsAssertsCondition) -> SyntaxElement {
+    fn from(n: TsAssertsCondition) -> Self {
         n.syntax.into()
     }
 }
@@ -26304,12 +26292,12 @@ impl std::fmt::Debug for TsAssertsReturnType {
     }
 }
 impl From<TsAssertsReturnType> for SyntaxNode {
-    fn from(n: TsAssertsReturnType) -> SyntaxNode {
+    fn from(n: TsAssertsReturnType) -> Self {
         n.syntax
     }
 }
 impl From<TsAssertsReturnType> for SyntaxElement {
-    fn from(n: TsAssertsReturnType) -> SyntaxElement {
+    fn from(n: TsAssertsReturnType) -> Self {
         n.syntax.into()
     }
 }
@@ -26358,12 +26346,12 @@ impl std::fmt::Debug for TsBigintLiteralType {
     }
 }
 impl From<TsBigintLiteralType> for SyntaxNode {
-    fn from(n: TsBigintLiteralType) -> SyntaxNode {
+    fn from(n: TsBigintLiteralType) -> Self {
         n.syntax
     }
 }
 impl From<TsBigintLiteralType> for SyntaxElement {
-    fn from(n: TsBigintLiteralType) -> SyntaxElement {
+    fn from(n: TsBigintLiteralType) -> Self {
         n.syntax.into()
     }
 }
@@ -26408,12 +26396,12 @@ impl std::fmt::Debug for TsBigintType {
     }
 }
 impl From<TsBigintType> for SyntaxNode {
-    fn from(n: TsBigintType) -> SyntaxNode {
+    fn from(n: TsBigintType) -> Self {
         n.syntax
     }
 }
 impl From<TsBigintType> for SyntaxElement {
-    fn from(n: TsBigintType) -> SyntaxElement {
+    fn from(n: TsBigintType) -> Self {
         n.syntax.into()
     }
 }
@@ -26455,12 +26443,12 @@ impl std::fmt::Debug for TsBooleanLiteralType {
     }
 }
 impl From<TsBooleanLiteralType> for SyntaxNode {
-    fn from(n: TsBooleanLiteralType) -> SyntaxNode {
+    fn from(n: TsBooleanLiteralType) -> Self {
         n.syntax
     }
 }
 impl From<TsBooleanLiteralType> for SyntaxElement {
-    fn from(n: TsBooleanLiteralType) -> SyntaxElement {
+    fn from(n: TsBooleanLiteralType) -> Self {
         n.syntax.into()
     }
 }
@@ -26505,12 +26493,12 @@ impl std::fmt::Debug for TsBooleanType {
     }
 }
 impl From<TsBooleanType> for SyntaxNode {
-    fn from(n: TsBooleanType) -> SyntaxNode {
+    fn from(n: TsBooleanType) -> Self {
         n.syntax
     }
 }
 impl From<TsBooleanType> for SyntaxElement {
-    fn from(n: TsBooleanType) -> SyntaxElement {
+    fn from(n: TsBooleanType) -> Self {
         n.syntax.into()
     }
 }
@@ -26564,12 +26552,12 @@ impl std::fmt::Debug for TsCallSignatureTypeMember {
     }
 }
 impl From<TsCallSignatureTypeMember> for SyntaxNode {
-    fn from(n: TsCallSignatureTypeMember) -> SyntaxNode {
+    fn from(n: TsCallSignatureTypeMember) -> Self {
         n.syntax
     }
 }
 impl From<TsCallSignatureTypeMember> for SyntaxElement {
-    fn from(n: TsCallSignatureTypeMember) -> SyntaxElement {
+    fn from(n: TsCallSignatureTypeMember) -> Self {
         n.syntax.into()
     }
 }
@@ -26629,12 +26617,12 @@ impl std::fmt::Debug for TsConditionalType {
     }
 }
 impl From<TsConditionalType> for SyntaxNode {
-    fn from(n: TsConditionalType) -> SyntaxNode {
+    fn from(n: TsConditionalType) -> Self {
         n.syntax
     }
 }
 impl From<TsConditionalType> for SyntaxElement {
-    fn from(n: TsConditionalType) -> SyntaxElement {
+    fn from(n: TsConditionalType) -> Self {
         n.syntax.into()
     }
 }
@@ -26679,12 +26667,12 @@ impl std::fmt::Debug for TsConstModifier {
     }
 }
 impl From<TsConstModifier> for SyntaxNode {
-    fn from(n: TsConstModifier) -> SyntaxNode {
+    fn from(n: TsConstModifier) -> Self {
         n.syntax
     }
 }
 impl From<TsConstModifier> for SyntaxElement {
-    fn from(n: TsConstModifier) -> SyntaxElement {
+    fn from(n: TsConstModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -26739,12 +26727,12 @@ impl std::fmt::Debug for TsConstructSignatureTypeMember {
     }
 }
 impl From<TsConstructSignatureTypeMember> for SyntaxNode {
-    fn from(n: TsConstructSignatureTypeMember) -> SyntaxNode {
+    fn from(n: TsConstructSignatureTypeMember) -> Self {
         n.syntax
     }
 }
 impl From<TsConstructSignatureTypeMember> for SyntaxElement {
-    fn from(n: TsConstructSignatureTypeMember) -> SyntaxElement {
+    fn from(n: TsConstructSignatureTypeMember) -> Self {
         n.syntax.into()
     }
 }
@@ -26792,12 +26780,12 @@ impl std::fmt::Debug for TsConstructorSignatureClassMember {
     }
 }
 impl From<TsConstructorSignatureClassMember> for SyntaxNode {
-    fn from(n: TsConstructorSignatureClassMember) -> SyntaxNode {
+    fn from(n: TsConstructorSignatureClassMember) -> Self {
         n.syntax
     }
 }
 impl From<TsConstructorSignatureClassMember> for SyntaxElement {
-    fn from(n: TsConstructorSignatureClassMember) -> SyntaxElement {
+    fn from(n: TsConstructorSignatureClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -26856,12 +26844,12 @@ impl std::fmt::Debug for TsConstructorType {
     }
 }
 impl From<TsConstructorType> for SyntaxNode {
-    fn from(n: TsConstructorType) -> SyntaxNode {
+    fn from(n: TsConstructorType) -> Self {
         n.syntax
     }
 }
 impl From<TsConstructorType> for SyntaxElement {
-    fn from(n: TsConstructorType) -> SyntaxElement {
+    fn from(n: TsConstructorType) -> Self {
         n.syntax.into()
     }
 }
@@ -26913,12 +26901,12 @@ impl std::fmt::Debug for TsDeclarationModule {
     }
 }
 impl From<TsDeclarationModule> for SyntaxNode {
-    fn from(n: TsDeclarationModule) -> SyntaxNode {
+    fn from(n: TsDeclarationModule) -> Self {
         n.syntax
     }
 }
 impl From<TsDeclarationModule> for SyntaxElement {
-    fn from(n: TsDeclarationModule) -> SyntaxElement {
+    fn from(n: TsDeclarationModule) -> Self {
         n.syntax.into()
     }
 }
@@ -26981,12 +26969,12 @@ impl std::fmt::Debug for TsDeclareFunctionDeclaration {
     }
 }
 impl From<TsDeclareFunctionDeclaration> for SyntaxNode {
-    fn from(n: TsDeclareFunctionDeclaration) -> SyntaxNode {
+    fn from(n: TsDeclareFunctionDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<TsDeclareFunctionDeclaration> for SyntaxElement {
-    fn from(n: TsDeclareFunctionDeclaration) -> SyntaxElement {
+    fn from(n: TsDeclareFunctionDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -27051,12 +27039,12 @@ impl std::fmt::Debug for TsDeclareFunctionExportDefaultDeclaration {
     }
 }
 impl From<TsDeclareFunctionExportDefaultDeclaration> for SyntaxNode {
-    fn from(n: TsDeclareFunctionExportDefaultDeclaration) -> SyntaxNode {
+    fn from(n: TsDeclareFunctionExportDefaultDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<TsDeclareFunctionExportDefaultDeclaration> for SyntaxElement {
-    fn from(n: TsDeclareFunctionExportDefaultDeclaration) -> SyntaxElement {
+    fn from(n: TsDeclareFunctionExportDefaultDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -27101,12 +27089,12 @@ impl std::fmt::Debug for TsDeclareModifier {
     }
 }
 impl From<TsDeclareModifier> for SyntaxNode {
-    fn from(n: TsDeclareModifier) -> SyntaxNode {
+    fn from(n: TsDeclareModifier) -> Self {
         n.syntax
     }
 }
 impl From<TsDeclareModifier> for SyntaxElement {
-    fn from(n: TsDeclareModifier) -> SyntaxElement {
+    fn from(n: TsDeclareModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -27155,12 +27143,12 @@ impl std::fmt::Debug for TsDeclareStatement {
     }
 }
 impl From<TsDeclareStatement> for SyntaxNode {
-    fn from(n: TsDeclareStatement) -> SyntaxNode {
+    fn from(n: TsDeclareStatement) -> Self {
         n.syntax
     }
 }
 impl From<TsDeclareStatement> for SyntaxElement {
-    fn from(n: TsDeclareStatement) -> SyntaxElement {
+    fn from(n: TsDeclareStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -27203,12 +27191,12 @@ impl std::fmt::Debug for TsDefaultTypeClause {
     }
 }
 impl From<TsDefaultTypeClause> for SyntaxNode {
-    fn from(n: TsDefaultTypeClause) -> SyntaxNode {
+    fn from(n: TsDefaultTypeClause) -> Self {
         n.syntax
     }
 }
 impl From<TsDefaultTypeClause> for SyntaxElement {
-    fn from(n: TsDefaultTypeClause) -> SyntaxElement {
+    fn from(n: TsDefaultTypeClause) -> Self {
         n.syntax.into()
     }
 }
@@ -27254,12 +27242,12 @@ impl std::fmt::Debug for TsDefinitePropertyAnnotation {
     }
 }
 impl From<TsDefinitePropertyAnnotation> for SyntaxNode {
-    fn from(n: TsDefinitePropertyAnnotation) -> SyntaxNode {
+    fn from(n: TsDefinitePropertyAnnotation) -> Self {
         n.syntax
     }
 }
 impl From<TsDefinitePropertyAnnotation> for SyntaxElement {
-    fn from(n: TsDefinitePropertyAnnotation) -> SyntaxElement {
+    fn from(n: TsDefinitePropertyAnnotation) -> Self {
         n.syntax.into()
     }
 }
@@ -27305,12 +27293,12 @@ impl std::fmt::Debug for TsDefiniteVariableAnnotation {
     }
 }
 impl From<TsDefiniteVariableAnnotation> for SyntaxNode {
-    fn from(n: TsDefiniteVariableAnnotation) -> SyntaxNode {
+    fn from(n: TsDefiniteVariableAnnotation) -> Self {
         n.syntax
     }
 }
 impl From<TsDefiniteVariableAnnotation> for SyntaxElement {
-    fn from(n: TsDefiniteVariableAnnotation) -> SyntaxElement {
+    fn from(n: TsDefiniteVariableAnnotation) -> Self {
         n.syntax.into()
     }
 }
@@ -27357,12 +27345,12 @@ impl std::fmt::Debug for TsEmptyExternalModuleDeclarationBody {
     }
 }
 impl From<TsEmptyExternalModuleDeclarationBody> for SyntaxNode {
-    fn from(n: TsEmptyExternalModuleDeclarationBody) -> SyntaxNode {
+    fn from(n: TsEmptyExternalModuleDeclarationBody) -> Self {
         n.syntax
     }
 }
 impl From<TsEmptyExternalModuleDeclarationBody> for SyntaxElement {
-    fn from(n: TsEmptyExternalModuleDeclarationBody) -> SyntaxElement {
+    fn from(n: TsEmptyExternalModuleDeclarationBody) -> Self {
         n.syntax.into()
     }
 }
@@ -27418,12 +27406,12 @@ impl std::fmt::Debug for TsEnumDeclaration {
     }
 }
 impl From<TsEnumDeclaration> for SyntaxNode {
-    fn from(n: TsEnumDeclaration) -> SyntaxNode {
+    fn from(n: TsEnumDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<TsEnumDeclaration> for SyntaxElement {
-    fn from(n: TsEnumDeclaration) -> SyntaxElement {
+    fn from(n: TsEnumDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -27469,12 +27457,12 @@ impl std::fmt::Debug for TsEnumMember {
     }
 }
 impl From<TsEnumMember> for SyntaxNode {
-    fn from(n: TsEnumMember) -> SyntaxNode {
+    fn from(n: TsEnumMember) -> Self {
         n.syntax
     }
 }
 impl From<TsEnumMember> for SyntaxElement {
-    fn from(n: TsEnumMember) -> SyntaxElement {
+    fn from(n: TsEnumMember) -> Self {
         n.syntax.into()
     }
 }
@@ -27525,12 +27513,12 @@ impl std::fmt::Debug for TsExportAsNamespaceClause {
     }
 }
 impl From<TsExportAsNamespaceClause> for SyntaxNode {
-    fn from(n: TsExportAsNamespaceClause) -> SyntaxNode {
+    fn from(n: TsExportAsNamespaceClause) -> Self {
         n.syntax
     }
 }
 impl From<TsExportAsNamespaceClause> for SyntaxElement {
-    fn from(n: TsExportAsNamespaceClause) -> SyntaxElement {
+    fn from(n: TsExportAsNamespaceClause) -> Self {
         n.syntax.into()
     }
 }
@@ -27577,12 +27565,12 @@ impl std::fmt::Debug for TsExportAssignmentClause {
     }
 }
 impl From<TsExportAssignmentClause> for SyntaxNode {
-    fn from(n: TsExportAssignmentClause) -> SyntaxNode {
+    fn from(n: TsExportAssignmentClause) -> Self {
         n.syntax
     }
 }
 impl From<TsExportAssignmentClause> for SyntaxElement {
-    fn from(n: TsExportAssignmentClause) -> SyntaxElement {
+    fn from(n: TsExportAssignmentClause) -> Self {
         n.syntax.into()
     }
 }
@@ -27631,12 +27619,12 @@ impl std::fmt::Debug for TsExportDeclareClause {
     }
 }
 impl From<TsExportDeclareClause> for SyntaxNode {
-    fn from(n: TsExportDeclareClause) -> SyntaxNode {
+    fn from(n: TsExportDeclareClause) -> Self {
         n.syntax
     }
 }
 impl From<TsExportDeclareClause> for SyntaxElement {
-    fn from(n: TsExportDeclareClause) -> SyntaxElement {
+    fn from(n: TsExportDeclareClause) -> Self {
         n.syntax.into()
     }
 }
@@ -27682,12 +27670,12 @@ impl std::fmt::Debug for TsExtendsClause {
     }
 }
 impl From<TsExtendsClause> for SyntaxNode {
-    fn from(n: TsExtendsClause) -> SyntaxNode {
+    fn from(n: TsExtendsClause) -> Self {
         n.syntax
     }
 }
 impl From<TsExtendsClause> for SyntaxElement {
-    fn from(n: TsExtendsClause) -> SyntaxElement {
+    fn from(n: TsExtendsClause) -> Self {
         n.syntax.into()
     }
 }
@@ -27734,12 +27722,12 @@ impl std::fmt::Debug for TsExternalModuleDeclaration {
     }
 }
 impl From<TsExternalModuleDeclaration> for SyntaxNode {
-    fn from(n: TsExternalModuleDeclaration) -> SyntaxNode {
+    fn from(n: TsExternalModuleDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<TsExternalModuleDeclaration> for SyntaxElement {
-    fn from(n: TsExternalModuleDeclaration) -> SyntaxElement {
+    fn from(n: TsExternalModuleDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -27793,12 +27781,12 @@ impl std::fmt::Debug for TsExternalModuleReference {
     }
 }
 impl From<TsExternalModuleReference> for SyntaxNode {
-    fn from(n: TsExternalModuleReference) -> SyntaxNode {
+    fn from(n: TsExternalModuleReference) -> Self {
         n.syntax
     }
 }
 impl From<TsExternalModuleReference> for SyntaxElement {
-    fn from(n: TsExternalModuleReference) -> SyntaxElement {
+    fn from(n: TsExternalModuleReference) -> Self {
         n.syntax.into()
     }
 }
@@ -27852,12 +27840,12 @@ impl std::fmt::Debug for TsFunctionType {
     }
 }
 impl From<TsFunctionType> for SyntaxNode {
-    fn from(n: TsFunctionType) -> SyntaxNode {
+    fn from(n: TsFunctionType) -> Self {
         n.syntax
     }
 }
 impl From<TsFunctionType> for SyntaxElement {
-    fn from(n: TsFunctionType) -> SyntaxElement {
+    fn from(n: TsFunctionType) -> Self {
         n.syntax.into()
     }
 }
@@ -27917,12 +27905,12 @@ impl std::fmt::Debug for TsGetterSignatureClassMember {
     }
 }
 impl From<TsGetterSignatureClassMember> for SyntaxNode {
-    fn from(n: TsGetterSignatureClassMember) -> SyntaxNode {
+    fn from(n: TsGetterSignatureClassMember) -> Self {
         n.syntax
     }
 }
 impl From<TsGetterSignatureClassMember> for SyntaxElement {
-    fn from(n: TsGetterSignatureClassMember) -> SyntaxElement {
+    fn from(n: TsGetterSignatureClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -27981,12 +27969,12 @@ impl std::fmt::Debug for TsGetterSignatureTypeMember {
     }
 }
 impl From<TsGetterSignatureTypeMember> for SyntaxNode {
-    fn from(n: TsGetterSignatureTypeMember) -> SyntaxNode {
+    fn from(n: TsGetterSignatureTypeMember) -> Self {
         n.syntax
     }
 }
 impl From<TsGetterSignatureTypeMember> for SyntaxElement {
-    fn from(n: TsGetterSignatureTypeMember) -> SyntaxElement {
+    fn from(n: TsGetterSignatureTypeMember) -> Self {
         n.syntax.into()
     }
 }
@@ -28032,12 +28020,12 @@ impl std::fmt::Debug for TsGlobalDeclaration {
     }
 }
 impl From<TsGlobalDeclaration> for SyntaxNode {
-    fn from(n: TsGlobalDeclaration) -> SyntaxNode {
+    fn from(n: TsGlobalDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<TsGlobalDeclaration> for SyntaxElement {
-    fn from(n: TsGlobalDeclaration) -> SyntaxElement {
+    fn from(n: TsGlobalDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -28079,12 +28067,12 @@ impl std::fmt::Debug for TsIdentifierBinding {
     }
 }
 impl From<TsIdentifierBinding> for SyntaxNode {
-    fn from(n: TsIdentifierBinding) -> SyntaxNode {
+    fn from(n: TsIdentifierBinding) -> Self {
         n.syntax
     }
 }
 impl From<TsIdentifierBinding> for SyntaxElement {
-    fn from(n: TsIdentifierBinding) -> SyntaxElement {
+    fn from(n: TsIdentifierBinding) -> Self {
         n.syntax.into()
     }
 }
@@ -28130,12 +28118,12 @@ impl std::fmt::Debug for TsImplementsClause {
     }
 }
 impl From<TsImplementsClause> for SyntaxNode {
-    fn from(n: TsImplementsClause) -> SyntaxNode {
+    fn from(n: TsImplementsClause) -> Self {
         n.syntax
     }
 }
 impl From<TsImplementsClause> for SyntaxElement {
-    fn from(n: TsImplementsClause) -> SyntaxElement {
+    fn from(n: TsImplementsClause) -> Self {
         n.syntax.into()
     }
 }
@@ -28194,12 +28182,12 @@ impl std::fmt::Debug for TsImportEqualsDeclaration {
     }
 }
 impl From<TsImportEqualsDeclaration> for SyntaxNode {
-    fn from(n: TsImportEqualsDeclaration) -> SyntaxNode {
+    fn from(n: TsImportEqualsDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<TsImportEqualsDeclaration> for SyntaxElement {
-    fn from(n: TsImportEqualsDeclaration) -> SyntaxElement {
+    fn from(n: TsImportEqualsDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -28257,12 +28245,12 @@ impl std::fmt::Debug for TsImportType {
     }
 }
 impl From<TsImportType> for SyntaxNode {
-    fn from(n: TsImportType) -> SyntaxNode {
+    fn from(n: TsImportType) -> Self {
         n.syntax
     }
 }
 impl From<TsImportType> for SyntaxElement {
-    fn from(n: TsImportType) -> SyntaxElement {
+    fn from(n: TsImportType) -> Self {
         n.syntax.into()
     }
 }
@@ -28320,12 +28308,12 @@ impl std::fmt::Debug for TsImportTypeArguments {
     }
 }
 impl From<TsImportTypeArguments> for SyntaxNode {
-    fn from(n: TsImportTypeArguments) -> SyntaxNode {
+    fn from(n: TsImportTypeArguments) -> Self {
         n.syntax
     }
 }
 impl From<TsImportTypeArguments> for SyntaxElement {
-    fn from(n: TsImportTypeArguments) -> SyntaxElement {
+    fn from(n: TsImportTypeArguments) -> Self {
         n.syntax.into()
     }
 }
@@ -28380,12 +28368,12 @@ impl std::fmt::Debug for TsImportTypeAssertion {
     }
 }
 impl From<TsImportTypeAssertion> for SyntaxNode {
-    fn from(n: TsImportTypeAssertion) -> SyntaxNode {
+    fn from(n: TsImportTypeAssertion) -> Self {
         n.syntax
     }
 }
 impl From<TsImportTypeAssertion> for SyntaxElement {
-    fn from(n: TsImportTypeAssertion) -> SyntaxElement {
+    fn from(n: TsImportTypeAssertion) -> Self {
         n.syntax.into()
     }
 }
@@ -28438,12 +28426,12 @@ impl std::fmt::Debug for TsImportTypeAssertionBlock {
     }
 }
 impl From<TsImportTypeAssertionBlock> for SyntaxNode {
-    fn from(n: TsImportTypeAssertionBlock) -> SyntaxNode {
+    fn from(n: TsImportTypeAssertionBlock) -> Self {
         n.syntax
     }
 }
 impl From<TsImportTypeAssertionBlock> for SyntaxElement {
-    fn from(n: TsImportTypeAssertionBlock) -> SyntaxElement {
+    fn from(n: TsImportTypeAssertionBlock) -> Self {
         n.syntax.into()
     }
 }
@@ -28486,12 +28474,12 @@ impl std::fmt::Debug for TsImportTypeQualifier {
     }
 }
 impl From<TsImportTypeQualifier> for SyntaxNode {
-    fn from(n: TsImportTypeQualifier) -> SyntaxNode {
+    fn from(n: TsImportTypeQualifier) -> Self {
         n.syntax
     }
 }
 impl From<TsImportTypeQualifier> for SyntaxElement {
-    fn from(n: TsImportTypeQualifier) -> SyntaxElement {
+    fn from(n: TsImportTypeQualifier) -> Self {
         n.syntax.into()
     }
 }
@@ -28536,12 +28524,12 @@ impl std::fmt::Debug for TsInModifier {
     }
 }
 impl From<TsInModifier> for SyntaxNode {
-    fn from(n: TsInModifier) -> SyntaxNode {
+    fn from(n: TsInModifier) -> Self {
         n.syntax
     }
 }
 impl From<TsInModifier> for SyntaxElement {
-    fn from(n: TsInModifier) -> SyntaxElement {
+    fn from(n: TsInModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -28600,12 +28588,12 @@ impl std::fmt::Debug for TsIndexSignatureClassMember {
     }
 }
 impl From<TsIndexSignatureClassMember> for SyntaxNode {
-    fn from(n: TsIndexSignatureClassMember) -> SyntaxNode {
+    fn from(n: TsIndexSignatureClassMember) -> Self {
         n.syntax
     }
 }
 impl From<TsIndexSignatureClassMember> for SyntaxElement {
-    fn from(n: TsIndexSignatureClassMember) -> SyntaxElement {
+    fn from(n: TsIndexSignatureClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -28651,12 +28639,12 @@ impl std::fmt::Debug for TsIndexSignatureParameter {
     }
 }
 impl From<TsIndexSignatureParameter> for SyntaxNode {
-    fn from(n: TsIndexSignatureParameter) -> SyntaxNode {
+    fn from(n: TsIndexSignatureParameter) -> Self {
         n.syntax
     }
 }
 impl From<TsIndexSignatureParameter> for SyntaxElement {
-    fn from(n: TsIndexSignatureParameter) -> SyntaxElement {
+    fn from(n: TsIndexSignatureParameter) -> Self {
         n.syntax.into()
     }
 }
@@ -28718,12 +28706,12 @@ impl std::fmt::Debug for TsIndexSignatureTypeMember {
     }
 }
 impl From<TsIndexSignatureTypeMember> for SyntaxNode {
-    fn from(n: TsIndexSignatureTypeMember) -> SyntaxNode {
+    fn from(n: TsIndexSignatureTypeMember) -> Self {
         n.syntax
     }
 }
 impl From<TsIndexSignatureTypeMember> for SyntaxElement {
-    fn from(n: TsIndexSignatureTypeMember) -> SyntaxElement {
+    fn from(n: TsIndexSignatureTypeMember) -> Self {
         n.syntax.into()
     }
 }
@@ -28777,12 +28765,12 @@ impl std::fmt::Debug for TsIndexedAccessType {
     }
 }
 impl From<TsIndexedAccessType> for SyntaxNode {
-    fn from(n: TsIndexedAccessType) -> SyntaxNode {
+    fn from(n: TsIndexedAccessType) -> Self {
         n.syntax
     }
 }
 impl From<TsIndexedAccessType> for SyntaxElement {
-    fn from(n: TsIndexedAccessType) -> SyntaxElement {
+    fn from(n: TsIndexedAccessType) -> Self {
         n.syntax.into()
     }
 }
@@ -28832,12 +28820,12 @@ impl std::fmt::Debug for TsInferType {
     }
 }
 impl From<TsInferType> for SyntaxNode {
-    fn from(n: TsInferType) -> SyntaxNode {
+    fn from(n: TsInferType) -> Self {
         n.syntax
     }
 }
 impl From<TsInferType> for SyntaxElement {
-    fn from(n: TsInferType) -> SyntaxElement {
+    fn from(n: TsInferType) -> Self {
         n.syntax.into()
     }
 }
@@ -28891,12 +28879,12 @@ impl std::fmt::Debug for TsInitializedPropertySignatureClassMember {
     }
 }
 impl From<TsInitializedPropertySignatureClassMember> for SyntaxNode {
-    fn from(n: TsInitializedPropertySignatureClassMember) -> SyntaxNode {
+    fn from(n: TsInitializedPropertySignatureClassMember) -> Self {
         n.syntax
     }
 }
 impl From<TsInitializedPropertySignatureClassMember> for SyntaxElement {
-    fn from(n: TsInitializedPropertySignatureClassMember) -> SyntaxElement {
+    fn from(n: TsInitializedPropertySignatureClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -28939,12 +28927,12 @@ impl std::fmt::Debug for TsInstantiationExpression {
     }
 }
 impl From<TsInstantiationExpression> for SyntaxNode {
-    fn from(n: TsInstantiationExpression) -> SyntaxNode {
+    fn from(n: TsInstantiationExpression) -> Self {
         n.syntax
     }
 }
 impl From<TsInstantiationExpression> for SyntaxElement {
-    fn from(n: TsInstantiationExpression) -> SyntaxElement {
+    fn from(n: TsInstantiationExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -29007,12 +28995,12 @@ impl std::fmt::Debug for TsInterfaceDeclaration {
     }
 }
 impl From<TsInterfaceDeclaration> for SyntaxNode {
-    fn from(n: TsInterfaceDeclaration) -> SyntaxNode {
+    fn from(n: TsInterfaceDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<TsInterfaceDeclaration> for SyntaxElement {
-    fn from(n: TsInterfaceDeclaration) -> SyntaxElement {
+    fn from(n: TsInterfaceDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -29058,12 +29046,12 @@ impl std::fmt::Debug for TsIntersectionType {
     }
 }
 impl From<TsIntersectionType> for SyntaxNode {
-    fn from(n: TsIntersectionType) -> SyntaxNode {
+    fn from(n: TsIntersectionType) -> Self {
         n.syntax
     }
 }
 impl From<TsIntersectionType> for SyntaxElement {
-    fn from(n: TsIntersectionType) -> SyntaxElement {
+    fn from(n: TsIntersectionType) -> Self {
         n.syntax.into()
     }
 }
@@ -29105,12 +29093,12 @@ impl std::fmt::Debug for TsLiteralEnumMemberName {
     }
 }
 impl From<TsLiteralEnumMemberName> for SyntaxNode {
-    fn from(n: TsLiteralEnumMemberName) -> SyntaxNode {
+    fn from(n: TsLiteralEnumMemberName) -> Self {
         n.syntax
     }
 }
 impl From<TsLiteralEnumMemberName> for SyntaxElement {
-    fn from(n: TsLiteralEnumMemberName) -> SyntaxElement {
+    fn from(n: TsLiteralEnumMemberName) -> Self {
         n.syntax.into()
     }
 }
@@ -29193,12 +29181,12 @@ impl std::fmt::Debug for TsMappedType {
     }
 }
 impl From<TsMappedType> for SyntaxNode {
-    fn from(n: TsMappedType) -> SyntaxNode {
+    fn from(n: TsMappedType) -> Self {
         n.syntax
     }
 }
 impl From<TsMappedType> for SyntaxElement {
-    fn from(n: TsMappedType) -> SyntaxElement {
+    fn from(n: TsMappedType) -> Self {
         n.syntax.into()
     }
 }
@@ -29241,12 +29229,12 @@ impl std::fmt::Debug for TsMappedTypeAsClause {
     }
 }
 impl From<TsMappedTypeAsClause> for SyntaxNode {
-    fn from(n: TsMappedTypeAsClause) -> SyntaxNode {
+    fn from(n: TsMappedTypeAsClause) -> Self {
         n.syntax
     }
 }
 impl From<TsMappedTypeAsClause> for SyntaxElement {
-    fn from(n: TsMappedTypeAsClause) -> SyntaxElement {
+    fn from(n: TsMappedTypeAsClause) -> Self {
         n.syntax.into()
     }
 }
@@ -29297,12 +29285,12 @@ impl std::fmt::Debug for TsMappedTypeOptionalModifierClause {
     }
 }
 impl From<TsMappedTypeOptionalModifierClause> for SyntaxNode {
-    fn from(n: TsMappedTypeOptionalModifierClause) -> SyntaxNode {
+    fn from(n: TsMappedTypeOptionalModifierClause) -> Self {
         n.syntax
     }
 }
 impl From<TsMappedTypeOptionalModifierClause> for SyntaxElement {
-    fn from(n: TsMappedTypeOptionalModifierClause) -> SyntaxElement {
+    fn from(n: TsMappedTypeOptionalModifierClause) -> Self {
         n.syntax.into()
     }
 }
@@ -29353,12 +29341,12 @@ impl std::fmt::Debug for TsMappedTypeReadonlyModifierClause {
     }
 }
 impl From<TsMappedTypeReadonlyModifierClause> for SyntaxNode {
-    fn from(n: TsMappedTypeReadonlyModifierClause) -> SyntaxNode {
+    fn from(n: TsMappedTypeReadonlyModifierClause) -> Self {
         n.syntax
     }
 }
 impl From<TsMappedTypeReadonlyModifierClause> for SyntaxElement {
-    fn from(n: TsMappedTypeReadonlyModifierClause) -> SyntaxElement {
+    fn from(n: TsMappedTypeReadonlyModifierClause) -> Self {
         n.syntax.into()
     }
 }
@@ -29422,12 +29410,12 @@ impl std::fmt::Debug for TsMethodSignatureClassMember {
     }
 }
 impl From<TsMethodSignatureClassMember> for SyntaxNode {
-    fn from(n: TsMethodSignatureClassMember) -> SyntaxNode {
+    fn from(n: TsMethodSignatureClassMember) -> Self {
         n.syntax
     }
 }
 impl From<TsMethodSignatureClassMember> for SyntaxElement {
-    fn from(n: TsMethodSignatureClassMember) -> SyntaxElement {
+    fn from(n: TsMethodSignatureClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -29486,12 +29474,12 @@ impl std::fmt::Debug for TsMethodSignatureTypeMember {
     }
 }
 impl From<TsMethodSignatureTypeMember> for SyntaxNode {
-    fn from(n: TsMethodSignatureTypeMember) -> SyntaxNode {
+    fn from(n: TsMethodSignatureTypeMember) -> Self {
         n.syntax
     }
 }
 impl From<TsMethodSignatureTypeMember> for SyntaxElement {
-    fn from(n: TsMethodSignatureTypeMember) -> SyntaxElement {
+    fn from(n: TsMethodSignatureTypeMember) -> Self {
         n.syntax.into()
     }
 }
@@ -29541,12 +29529,12 @@ impl std::fmt::Debug for TsModuleBlock {
     }
 }
 impl From<TsModuleBlock> for SyntaxNode {
-    fn from(n: TsModuleBlock) -> SyntaxNode {
+    fn from(n: TsModuleBlock) -> Self {
         n.syntax
     }
 }
 impl From<TsModuleBlock> for SyntaxElement {
-    fn from(n: TsModuleBlock) -> SyntaxElement {
+    fn from(n: TsModuleBlock) -> Self {
         n.syntax.into()
     }
 }
@@ -29593,12 +29581,12 @@ impl std::fmt::Debug for TsModuleDeclaration {
     }
 }
 impl From<TsModuleDeclaration> for SyntaxNode {
-    fn from(n: TsModuleDeclaration) -> SyntaxNode {
+    fn from(n: TsModuleDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<TsModuleDeclaration> for SyntaxElement {
-    fn from(n: TsModuleDeclaration) -> SyntaxElement {
+    fn from(n: TsModuleDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -29653,12 +29641,12 @@ impl std::fmt::Debug for TsNamedTupleTypeElement {
     }
 }
 impl From<TsNamedTupleTypeElement> for SyntaxNode {
-    fn from(n: TsNamedTupleTypeElement) -> SyntaxNode {
+    fn from(n: TsNamedTupleTypeElement) -> Self {
         n.syntax
     }
 }
 impl From<TsNamedTupleTypeElement> for SyntaxElement {
-    fn from(n: TsNamedTupleTypeElement) -> SyntaxElement {
+    fn from(n: TsNamedTupleTypeElement) -> Self {
         n.syntax.into()
     }
 }
@@ -29703,12 +29691,12 @@ impl std::fmt::Debug for TsNeverType {
     }
 }
 impl From<TsNeverType> for SyntaxNode {
-    fn from(n: TsNeverType) -> SyntaxNode {
+    fn from(n: TsNeverType) -> Self {
         n.syntax
     }
 }
 impl From<TsNeverType> for SyntaxElement {
-    fn from(n: TsNeverType) -> SyntaxElement {
+    fn from(n: TsNeverType) -> Self {
         n.syntax.into()
     }
 }
@@ -29751,12 +29739,12 @@ impl std::fmt::Debug for TsNonNullAssertionAssignment {
     }
 }
 impl From<TsNonNullAssertionAssignment> for SyntaxNode {
-    fn from(n: TsNonNullAssertionAssignment) -> SyntaxNode {
+    fn from(n: TsNonNullAssertionAssignment) -> Self {
         n.syntax
     }
 }
 impl From<TsNonNullAssertionAssignment> for SyntaxElement {
-    fn from(n: TsNonNullAssertionAssignment) -> SyntaxElement {
+    fn from(n: TsNonNullAssertionAssignment) -> Self {
         n.syntax.into()
     }
 }
@@ -29799,12 +29787,12 @@ impl std::fmt::Debug for TsNonNullAssertionExpression {
     }
 }
 impl From<TsNonNullAssertionExpression> for SyntaxNode {
-    fn from(n: TsNonNullAssertionExpression) -> SyntaxNode {
+    fn from(n: TsNonNullAssertionExpression) -> Self {
         n.syntax
     }
 }
 impl From<TsNonNullAssertionExpression> for SyntaxElement {
-    fn from(n: TsNonNullAssertionExpression) -> SyntaxElement {
+    fn from(n: TsNonNullAssertionExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -29849,12 +29837,12 @@ impl std::fmt::Debug for TsNonPrimitiveType {
     }
 }
 impl From<TsNonPrimitiveType> for SyntaxNode {
-    fn from(n: TsNonPrimitiveType) -> SyntaxNode {
+    fn from(n: TsNonPrimitiveType) -> Self {
         n.syntax
     }
 }
 impl From<TsNonPrimitiveType> for SyntaxElement {
-    fn from(n: TsNonPrimitiveType) -> SyntaxElement {
+    fn from(n: TsNonPrimitiveType) -> Self {
         n.syntax.into()
     }
 }
@@ -29899,12 +29887,12 @@ impl std::fmt::Debug for TsNullLiteralType {
     }
 }
 impl From<TsNullLiteralType> for SyntaxNode {
-    fn from(n: TsNullLiteralType) -> SyntaxNode {
+    fn from(n: TsNullLiteralType) -> Self {
         n.syntax
     }
 }
 impl From<TsNullLiteralType> for SyntaxElement {
-    fn from(n: TsNullLiteralType) -> SyntaxElement {
+    fn from(n: TsNullLiteralType) -> Self {
         n.syntax.into()
     }
 }
@@ -29953,12 +29941,12 @@ impl std::fmt::Debug for TsNumberLiteralType {
     }
 }
 impl From<TsNumberLiteralType> for SyntaxNode {
-    fn from(n: TsNumberLiteralType) -> SyntaxNode {
+    fn from(n: TsNumberLiteralType) -> Self {
         n.syntax
     }
 }
 impl From<TsNumberLiteralType> for SyntaxElement {
-    fn from(n: TsNumberLiteralType) -> SyntaxElement {
+    fn from(n: TsNumberLiteralType) -> Self {
         n.syntax.into()
     }
 }
@@ -30003,12 +29991,12 @@ impl std::fmt::Debug for TsNumberType {
     }
 }
 impl From<TsNumberType> for SyntaxNode {
-    fn from(n: TsNumberType) -> SyntaxNode {
+    fn from(n: TsNumberType) -> Self {
         n.syntax
     }
 }
 impl From<TsNumberType> for SyntaxElement {
-    fn from(n: TsNumberType) -> SyntaxElement {
+    fn from(n: TsNumberType) -> Self {
         n.syntax.into()
     }
 }
@@ -30058,12 +30046,12 @@ impl std::fmt::Debug for TsObjectType {
     }
 }
 impl From<TsObjectType> for SyntaxNode {
-    fn from(n: TsObjectType) -> SyntaxNode {
+    fn from(n: TsObjectType) -> Self {
         n.syntax
     }
 }
 impl From<TsObjectType> for SyntaxElement {
-    fn from(n: TsObjectType) -> SyntaxElement {
+    fn from(n: TsObjectType) -> Self {
         n.syntax.into()
     }
 }
@@ -30112,12 +30100,12 @@ impl std::fmt::Debug for TsOptionalPropertyAnnotation {
     }
 }
 impl From<TsOptionalPropertyAnnotation> for SyntaxNode {
-    fn from(n: TsOptionalPropertyAnnotation) -> SyntaxNode {
+    fn from(n: TsOptionalPropertyAnnotation) -> Self {
         n.syntax
     }
 }
 impl From<TsOptionalPropertyAnnotation> for SyntaxElement {
-    fn from(n: TsOptionalPropertyAnnotation) -> SyntaxElement {
+    fn from(n: TsOptionalPropertyAnnotation) -> Self {
         n.syntax.into()
     }
 }
@@ -30163,12 +30151,12 @@ impl std::fmt::Debug for TsOptionalTupleTypeElement {
     }
 }
 impl From<TsOptionalTupleTypeElement> for SyntaxNode {
-    fn from(n: TsOptionalTupleTypeElement) -> SyntaxNode {
+    fn from(n: TsOptionalTupleTypeElement) -> Self {
         n.syntax
     }
 }
 impl From<TsOptionalTupleTypeElement> for SyntaxElement {
-    fn from(n: TsOptionalTupleTypeElement) -> SyntaxElement {
+    fn from(n: TsOptionalTupleTypeElement) -> Self {
         n.syntax.into()
     }
 }
@@ -30213,12 +30201,12 @@ impl std::fmt::Debug for TsOutModifier {
     }
 }
 impl From<TsOutModifier> for SyntaxNode {
-    fn from(n: TsOutModifier) -> SyntaxNode {
+    fn from(n: TsOutModifier) -> Self {
         n.syntax
     }
 }
 impl From<TsOutModifier> for SyntaxElement {
-    fn from(n: TsOutModifier) -> SyntaxElement {
+    fn from(n: TsOutModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -30263,12 +30251,12 @@ impl std::fmt::Debug for TsOverrideModifier {
     }
 }
 impl From<TsOverrideModifier> for SyntaxNode {
-    fn from(n: TsOverrideModifier) -> SyntaxNode {
+    fn from(n: TsOverrideModifier) -> Self {
         n.syntax
     }
 }
 impl From<TsOverrideModifier> for SyntaxElement {
-    fn from(n: TsOverrideModifier) -> SyntaxElement {
+    fn from(n: TsOverrideModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -30318,12 +30306,12 @@ impl std::fmt::Debug for TsParenthesizedType {
     }
 }
 impl From<TsParenthesizedType> for SyntaxNode {
-    fn from(n: TsParenthesizedType) -> SyntaxNode {
+    fn from(n: TsParenthesizedType) -> Self {
         n.syntax
     }
 }
 impl From<TsParenthesizedType> for SyntaxElement {
-    fn from(n: TsParenthesizedType) -> SyntaxElement {
+    fn from(n: TsParenthesizedType) -> Self {
         n.syntax.into()
     }
 }
@@ -30370,12 +30358,12 @@ impl std::fmt::Debug for TsPredicateReturnType {
     }
 }
 impl From<TsPredicateReturnType> for SyntaxNode {
-    fn from(n: TsPredicateReturnType) -> SyntaxNode {
+    fn from(n: TsPredicateReturnType) -> Self {
         n.syntax
     }
 }
 impl From<TsPredicateReturnType> for SyntaxElement {
-    fn from(n: TsPredicateReturnType) -> SyntaxElement {
+    fn from(n: TsPredicateReturnType) -> Self {
         n.syntax.into()
     }
 }
@@ -30422,12 +30410,12 @@ impl std::fmt::Debug for TsPropertyParameter {
     }
 }
 impl From<TsPropertyParameter> for SyntaxNode {
-    fn from(n: TsPropertyParameter) -> SyntaxNode {
+    fn from(n: TsPropertyParameter) -> Self {
         n.syntax
     }
 }
 impl From<TsPropertyParameter> for SyntaxElement {
-    fn from(n: TsPropertyParameter) -> SyntaxElement {
+    fn from(n: TsPropertyParameter) -> Self {
         n.syntax.into()
     }
 }
@@ -30478,12 +30466,12 @@ impl std::fmt::Debug for TsPropertySignatureClassMember {
     }
 }
 impl From<TsPropertySignatureClassMember> for SyntaxNode {
-    fn from(n: TsPropertySignatureClassMember) -> SyntaxNode {
+    fn from(n: TsPropertySignatureClassMember) -> Self {
         n.syntax
     }
 }
 impl From<TsPropertySignatureClassMember> for SyntaxElement {
-    fn from(n: TsPropertySignatureClassMember) -> SyntaxElement {
+    fn from(n: TsPropertySignatureClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -30541,12 +30529,12 @@ impl std::fmt::Debug for TsPropertySignatureTypeMember {
     }
 }
 impl From<TsPropertySignatureTypeMember> for SyntaxNode {
-    fn from(n: TsPropertySignatureTypeMember) -> SyntaxNode {
+    fn from(n: TsPropertySignatureTypeMember) -> Self {
         n.syntax
     }
 }
 impl From<TsPropertySignatureTypeMember> for SyntaxElement {
-    fn from(n: TsPropertySignatureTypeMember) -> SyntaxElement {
+    fn from(n: TsPropertySignatureTypeMember) -> Self {
         n.syntax.into()
     }
 }
@@ -30590,12 +30578,12 @@ impl std::fmt::Debug for TsQualifiedModuleName {
     }
 }
 impl From<TsQualifiedModuleName> for SyntaxNode {
-    fn from(n: TsQualifiedModuleName) -> SyntaxNode {
+    fn from(n: TsQualifiedModuleName) -> Self {
         n.syntax
     }
 }
 impl From<TsQualifiedModuleName> for SyntaxElement {
-    fn from(n: TsQualifiedModuleName) -> SyntaxElement {
+    fn from(n: TsQualifiedModuleName) -> Self {
         n.syntax.into()
     }
 }
@@ -30639,12 +30627,12 @@ impl std::fmt::Debug for TsQualifiedName {
     }
 }
 impl From<TsQualifiedName> for SyntaxNode {
-    fn from(n: TsQualifiedName) -> SyntaxNode {
+    fn from(n: TsQualifiedName) -> Self {
         n.syntax
     }
 }
 impl From<TsQualifiedName> for SyntaxElement {
-    fn from(n: TsQualifiedName) -> SyntaxElement {
+    fn from(n: TsQualifiedName) -> Self {
         n.syntax.into()
     }
 }
@@ -30689,12 +30677,12 @@ impl std::fmt::Debug for TsReadonlyModifier {
     }
 }
 impl From<TsReadonlyModifier> for SyntaxNode {
-    fn from(n: TsReadonlyModifier) -> SyntaxNode {
+    fn from(n: TsReadonlyModifier) -> Self {
         n.syntax
     }
 }
 impl From<TsReadonlyModifier> for SyntaxElement {
-    fn from(n: TsReadonlyModifier) -> SyntaxElement {
+    fn from(n: TsReadonlyModifier) -> Self {
         n.syntax.into()
     }
 }
@@ -30740,12 +30728,12 @@ impl std::fmt::Debug for TsReferenceType {
     }
 }
 impl From<TsReferenceType> for SyntaxNode {
-    fn from(n: TsReferenceType) -> SyntaxNode {
+    fn from(n: TsReferenceType) -> Self {
         n.syntax
     }
 }
 impl From<TsReferenceType> for SyntaxElement {
-    fn from(n: TsReferenceType) -> SyntaxElement {
+    fn from(n: TsReferenceType) -> Self {
         n.syntax.into()
     }
 }
@@ -30791,12 +30779,12 @@ impl std::fmt::Debug for TsRestTupleTypeElement {
     }
 }
 impl From<TsRestTupleTypeElement> for SyntaxNode {
-    fn from(n: TsRestTupleTypeElement) -> SyntaxNode {
+    fn from(n: TsRestTupleTypeElement) -> Self {
         n.syntax
     }
 }
 impl From<TsRestTupleTypeElement> for SyntaxElement {
-    fn from(n: TsRestTupleTypeElement) -> SyntaxElement {
+    fn from(n: TsRestTupleTypeElement) -> Self {
         n.syntax.into()
     }
 }
@@ -30842,12 +30830,12 @@ impl std::fmt::Debug for TsReturnTypeAnnotation {
     }
 }
 impl From<TsReturnTypeAnnotation> for SyntaxNode {
-    fn from(n: TsReturnTypeAnnotation) -> SyntaxNode {
+    fn from(n: TsReturnTypeAnnotation) -> Self {
         n.syntax
     }
 }
 impl From<TsReturnTypeAnnotation> for SyntaxElement {
-    fn from(n: TsReturnTypeAnnotation) -> SyntaxElement {
+    fn from(n: TsReturnTypeAnnotation) -> Self {
         n.syntax.into()
     }
 }
@@ -30894,12 +30882,12 @@ impl std::fmt::Debug for TsSatisfiesAssignment {
     }
 }
 impl From<TsSatisfiesAssignment> for SyntaxNode {
-    fn from(n: TsSatisfiesAssignment) -> SyntaxNode {
+    fn from(n: TsSatisfiesAssignment) -> Self {
         n.syntax
     }
 }
 impl From<TsSatisfiesAssignment> for SyntaxElement {
-    fn from(n: TsSatisfiesAssignment) -> SyntaxElement {
+    fn from(n: TsSatisfiesAssignment) -> Self {
         n.syntax.into()
     }
 }
@@ -30946,12 +30934,12 @@ impl std::fmt::Debug for TsSatisfiesExpression {
     }
 }
 impl From<TsSatisfiesExpression> for SyntaxNode {
-    fn from(n: TsSatisfiesExpression) -> SyntaxNode {
+    fn from(n: TsSatisfiesExpression) -> Self {
         n.syntax
     }
 }
 impl From<TsSatisfiesExpression> for SyntaxElement {
-    fn from(n: TsSatisfiesExpression) -> SyntaxElement {
+    fn from(n: TsSatisfiesExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -31012,12 +31000,12 @@ impl std::fmt::Debug for TsSetterSignatureClassMember {
     }
 }
 impl From<TsSetterSignatureClassMember> for SyntaxNode {
-    fn from(n: TsSetterSignatureClassMember) -> SyntaxNode {
+    fn from(n: TsSetterSignatureClassMember) -> Self {
         n.syntax
     }
 }
 impl From<TsSetterSignatureClassMember> for SyntaxElement {
-    fn from(n: TsSetterSignatureClassMember) -> SyntaxElement {
+    fn from(n: TsSetterSignatureClassMember) -> Self {
         n.syntax.into()
     }
 }
@@ -31077,12 +31065,12 @@ impl std::fmt::Debug for TsSetterSignatureTypeMember {
     }
 }
 impl From<TsSetterSignatureTypeMember> for SyntaxNode {
-    fn from(n: TsSetterSignatureTypeMember) -> SyntaxNode {
+    fn from(n: TsSetterSignatureTypeMember) -> Self {
         n.syntax
     }
 }
 impl From<TsSetterSignatureTypeMember> for SyntaxElement {
-    fn from(n: TsSetterSignatureTypeMember) -> SyntaxElement {
+    fn from(n: TsSetterSignatureTypeMember) -> Self {
         n.syntax.into()
     }
 }
@@ -31127,12 +31115,12 @@ impl std::fmt::Debug for TsStringLiteralType {
     }
 }
 impl From<TsStringLiteralType> for SyntaxNode {
-    fn from(n: TsStringLiteralType) -> SyntaxNode {
+    fn from(n: TsStringLiteralType) -> Self {
         n.syntax
     }
 }
 impl From<TsStringLiteralType> for SyntaxElement {
-    fn from(n: TsStringLiteralType) -> SyntaxElement {
+    fn from(n: TsStringLiteralType) -> Self {
         n.syntax.into()
     }
 }
@@ -31177,12 +31165,12 @@ impl std::fmt::Debug for TsStringType {
     }
 }
 impl From<TsStringType> for SyntaxNode {
-    fn from(n: TsStringType) -> SyntaxNode {
+    fn from(n: TsStringType) -> Self {
         n.syntax
     }
 }
 impl From<TsStringType> for SyntaxElement {
-    fn from(n: TsStringType) -> SyntaxElement {
+    fn from(n: TsStringType) -> Self {
         n.syntax.into()
     }
 }
@@ -31227,12 +31215,12 @@ impl std::fmt::Debug for TsSymbolType {
     }
 }
 impl From<TsSymbolType> for SyntaxNode {
-    fn from(n: TsSymbolType) -> SyntaxNode {
+    fn from(n: TsSymbolType) -> Self {
         n.syntax
     }
 }
 impl From<TsSymbolType> for SyntaxElement {
-    fn from(n: TsSymbolType) -> SyntaxElement {
+    fn from(n: TsSymbolType) -> Self {
         n.syntax.into()
     }
 }
@@ -31277,12 +31265,12 @@ impl std::fmt::Debug for TsTemplateChunkElement {
     }
 }
 impl From<TsTemplateChunkElement> for SyntaxNode {
-    fn from(n: TsTemplateChunkElement) -> SyntaxNode {
+    fn from(n: TsTemplateChunkElement) -> Self {
         n.syntax
     }
 }
 impl From<TsTemplateChunkElement> for SyntaxElement {
-    fn from(n: TsTemplateChunkElement) -> SyntaxElement {
+    fn from(n: TsTemplateChunkElement) -> Self {
         n.syntax.into()
     }
 }
@@ -31332,12 +31320,12 @@ impl std::fmt::Debug for TsTemplateElement {
     }
 }
 impl From<TsTemplateElement> for SyntaxNode {
-    fn from(n: TsTemplateElement) -> SyntaxNode {
+    fn from(n: TsTemplateElement) -> Self {
         n.syntax
     }
 }
 impl From<TsTemplateElement> for SyntaxElement {
-    fn from(n: TsTemplateElement) -> SyntaxElement {
+    fn from(n: TsTemplateElement) -> Self {
         n.syntax.into()
     }
 }
@@ -31387,12 +31375,12 @@ impl std::fmt::Debug for TsTemplateLiteralType {
     }
 }
 impl From<TsTemplateLiteralType> for SyntaxNode {
-    fn from(n: TsTemplateLiteralType) -> SyntaxNode {
+    fn from(n: TsTemplateLiteralType) -> Self {
         n.syntax
     }
 }
 impl From<TsTemplateLiteralType> for SyntaxElement {
-    fn from(n: TsTemplateLiteralType) -> SyntaxElement {
+    fn from(n: TsTemplateLiteralType) -> Self {
         n.syntax.into()
     }
 }
@@ -31438,12 +31426,12 @@ impl std::fmt::Debug for TsThisParameter {
     }
 }
 impl From<TsThisParameter> for SyntaxNode {
-    fn from(n: TsThisParameter) -> SyntaxNode {
+    fn from(n: TsThisParameter) -> Self {
         n.syntax
     }
 }
 impl From<TsThisParameter> for SyntaxElement {
-    fn from(n: TsThisParameter) -> SyntaxElement {
+    fn from(n: TsThisParameter) -> Self {
         n.syntax.into()
     }
 }
@@ -31485,12 +31473,12 @@ impl std::fmt::Debug for TsThisType {
     }
 }
 impl From<TsThisType> for SyntaxNode {
-    fn from(n: TsThisType) -> SyntaxNode {
+    fn from(n: TsThisType) -> Self {
         n.syntax
     }
 }
 impl From<TsThisType> for SyntaxElement {
-    fn from(n: TsThisType) -> SyntaxElement {
+    fn from(n: TsThisType) -> Self {
         n.syntax.into()
     }
 }
@@ -31540,12 +31528,12 @@ impl std::fmt::Debug for TsTupleType {
     }
 }
 impl From<TsTupleType> for SyntaxNode {
-    fn from(n: TsTupleType) -> SyntaxNode {
+    fn from(n: TsTupleType) -> Self {
         n.syntax
     }
 }
 impl From<TsTupleType> for SyntaxElement {
-    fn from(n: TsTupleType) -> SyntaxElement {
+    fn from(n: TsTupleType) -> Self {
         n.syntax.into()
     }
 }
@@ -31601,12 +31589,12 @@ impl std::fmt::Debug for TsTypeAliasDeclaration {
     }
 }
 impl From<TsTypeAliasDeclaration> for SyntaxNode {
-    fn from(n: TsTypeAliasDeclaration) -> SyntaxNode {
+    fn from(n: TsTypeAliasDeclaration) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeAliasDeclaration> for SyntaxElement {
-    fn from(n: TsTypeAliasDeclaration) -> SyntaxElement {
+    fn from(n: TsTypeAliasDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -31652,12 +31640,12 @@ impl std::fmt::Debug for TsTypeAnnotation {
     }
 }
 impl From<TsTypeAnnotation> for SyntaxNode {
-    fn from(n: TsTypeAnnotation) -> SyntaxNode {
+    fn from(n: TsTypeAnnotation) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeAnnotation> for SyntaxElement {
-    fn from(n: TsTypeAnnotation) -> SyntaxElement {
+    fn from(n: TsTypeAnnotation) -> Self {
         n.syntax.into()
     }
 }
@@ -31707,12 +31695,12 @@ impl std::fmt::Debug for TsTypeArguments {
     }
 }
 impl From<TsTypeArguments> for SyntaxNode {
-    fn from(n: TsTypeArguments) -> SyntaxNode {
+    fn from(n: TsTypeArguments) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeArguments> for SyntaxElement {
-    fn from(n: TsTypeArguments) -> SyntaxElement {
+    fn from(n: TsTypeArguments) -> Self {
         n.syntax.into()
     }
 }
@@ -31763,12 +31751,12 @@ impl std::fmt::Debug for TsTypeAssertionAssignment {
     }
 }
 impl From<TsTypeAssertionAssignment> for SyntaxNode {
-    fn from(n: TsTypeAssertionAssignment) -> SyntaxNode {
+    fn from(n: TsTypeAssertionAssignment) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeAssertionAssignment> for SyntaxElement {
-    fn from(n: TsTypeAssertionAssignment) -> SyntaxElement {
+    fn from(n: TsTypeAssertionAssignment) -> Self {
         n.syntax.into()
     }
 }
@@ -31819,12 +31807,12 @@ impl std::fmt::Debug for TsTypeAssertionExpression {
     }
 }
 impl From<TsTypeAssertionExpression> for SyntaxNode {
-    fn from(n: TsTypeAssertionExpression) -> SyntaxNode {
+    fn from(n: TsTypeAssertionExpression) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeAssertionExpression> for SyntaxElement {
-    fn from(n: TsTypeAssertionExpression) -> SyntaxElement {
+    fn from(n: TsTypeAssertionExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -31870,12 +31858,12 @@ impl std::fmt::Debug for TsTypeConstraintClause {
     }
 }
 impl From<TsTypeConstraintClause> for SyntaxNode {
-    fn from(n: TsTypeConstraintClause) -> SyntaxNode {
+    fn from(n: TsTypeConstraintClause) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeConstraintClause> for SyntaxElement {
-    fn from(n: TsTypeConstraintClause) -> SyntaxElement {
+    fn from(n: TsTypeConstraintClause) -> Self {
         n.syntax.into()
     }
 }
@@ -31921,12 +31909,12 @@ impl std::fmt::Debug for TsTypeOperatorType {
     }
 }
 impl From<TsTypeOperatorType> for SyntaxNode {
-    fn from(n: TsTypeOperatorType) -> SyntaxNode {
+    fn from(n: TsTypeOperatorType) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeOperatorType> for SyntaxElement {
-    fn from(n: TsTypeOperatorType) -> SyntaxElement {
+    fn from(n: TsTypeOperatorType) -> Self {
         n.syntax.into()
     }
 }
@@ -31974,12 +31962,12 @@ impl std::fmt::Debug for TsTypeParameter {
     }
 }
 impl From<TsTypeParameter> for SyntaxNode {
-    fn from(n: TsTypeParameter) -> SyntaxNode {
+    fn from(n: TsTypeParameter) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeParameter> for SyntaxElement {
-    fn from(n: TsTypeParameter) -> SyntaxElement {
+    fn from(n: TsTypeParameter) -> Self {
         n.syntax.into()
     }
 }
@@ -32024,12 +32012,12 @@ impl std::fmt::Debug for TsTypeParameterName {
     }
 }
 impl From<TsTypeParameterName> for SyntaxNode {
-    fn from(n: TsTypeParameterName) -> SyntaxNode {
+    fn from(n: TsTypeParameterName) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeParameterName> for SyntaxElement {
-    fn from(n: TsTypeParameterName) -> SyntaxElement {
+    fn from(n: TsTypeParameterName) -> Self {
         n.syntax.into()
     }
 }
@@ -32079,12 +32067,12 @@ impl std::fmt::Debug for TsTypeParameters {
     }
 }
 impl From<TsTypeParameters> for SyntaxNode {
-    fn from(n: TsTypeParameters) -> SyntaxNode {
+    fn from(n: TsTypeParameters) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeParameters> for SyntaxElement {
-    fn from(n: TsTypeParameters) -> SyntaxElement {
+    fn from(n: TsTypeParameters) -> Self {
         n.syntax.into()
     }
 }
@@ -32137,12 +32125,12 @@ impl std::fmt::Debug for TsTypeofType {
     }
 }
 impl From<TsTypeofType> for SyntaxNode {
-    fn from(n: TsTypeofType) -> SyntaxNode {
+    fn from(n: TsTypeofType) -> Self {
         n.syntax
     }
 }
 impl From<TsTypeofType> for SyntaxElement {
-    fn from(n: TsTypeofType) -> SyntaxElement {
+    fn from(n: TsTypeofType) -> Self {
         n.syntax.into()
     }
 }
@@ -32187,12 +32175,12 @@ impl std::fmt::Debug for TsUndefinedType {
     }
 }
 impl From<TsUndefinedType> for SyntaxNode {
-    fn from(n: TsUndefinedType) -> SyntaxNode {
+    fn from(n: TsUndefinedType) -> Self {
         n.syntax
     }
 }
 impl From<TsUndefinedType> for SyntaxElement {
-    fn from(n: TsUndefinedType) -> SyntaxElement {
+    fn from(n: TsUndefinedType) -> Self {
         n.syntax.into()
     }
 }
@@ -32238,12 +32226,12 @@ impl std::fmt::Debug for TsUnionType {
     }
 }
 impl From<TsUnionType> for SyntaxNode {
-    fn from(n: TsUnionType) -> SyntaxNode {
+    fn from(n: TsUnionType) -> Self {
         n.syntax
     }
 }
 impl From<TsUnionType> for SyntaxElement {
-    fn from(n: TsUnionType) -> SyntaxElement {
+    fn from(n: TsUnionType) -> Self {
         n.syntax.into()
     }
 }
@@ -32288,12 +32276,12 @@ impl std::fmt::Debug for TsUnknownType {
     }
 }
 impl From<TsUnknownType> for SyntaxNode {
-    fn from(n: TsUnknownType) -> SyntaxNode {
+    fn from(n: TsUnknownType) -> Self {
         n.syntax
     }
 }
 impl From<TsUnknownType> for SyntaxElement {
-    fn from(n: TsUnknownType) -> SyntaxElement {
+    fn from(n: TsUnknownType) -> Self {
         n.syntax.into()
     }
 }
@@ -32335,28 +32323,28 @@ impl std::fmt::Debug for TsVoidType {
     }
 }
 impl From<TsVoidType> for SyntaxNode {
-    fn from(n: TsVoidType) -> SyntaxNode {
+    fn from(n: TsVoidType) -> Self {
         n.syntax
     }
 }
 impl From<TsVoidType> for SyntaxElement {
-    fn from(n: TsVoidType) -> SyntaxElement {
+    fn from(n: TsVoidType) -> Self {
         n.syntax.into()
     }
 }
 impl From<JsArrayAssignmentPatternElement> for AnyJsArrayAssignmentPatternElement {
-    fn from(node: JsArrayAssignmentPatternElement) -> AnyJsArrayAssignmentPatternElement {
-        AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(node)
+    fn from(node: JsArrayAssignmentPatternElement) -> Self {
+        Self::JsArrayAssignmentPatternElement(node)
     }
 }
 impl From<JsArrayAssignmentPatternRestElement> for AnyJsArrayAssignmentPatternElement {
-    fn from(node: JsArrayAssignmentPatternRestElement) -> AnyJsArrayAssignmentPatternElement {
-        AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(node)
+    fn from(node: JsArrayAssignmentPatternRestElement) -> Self {
+        Self::JsArrayAssignmentPatternRestElement(node)
     }
 }
 impl From<JsArrayHole> for AnyJsArrayAssignmentPatternElement {
-    fn from(node: JsArrayHole) -> AnyJsArrayAssignmentPatternElement {
-        AnyJsArrayAssignmentPatternElement::JsArrayHole(node)
+    fn from(node: JsArrayHole) -> Self {
+        Self::JsArrayHole(node)
     }
 }
 impl AstNode for AnyJsArrayAssignmentPatternElement {
@@ -32375,56 +32363,44 @@ impl AstNode for AnyJsArrayAssignmentPatternElement {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT => {
-                AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(
-                    JsArrayAssignmentPatternElement { syntax },
-                )
+                Self::JsArrayAssignmentPatternElement(JsArrayAssignmentPatternElement { syntax })
             }
             JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT => {
-                AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(
-                    JsArrayAssignmentPatternRestElement { syntax },
-                )
+                Self::JsArrayAssignmentPatternRestElement(JsArrayAssignmentPatternRestElement {
+                    syntax,
+                })
             }
-            JS_ARRAY_HOLE => {
-                AnyJsArrayAssignmentPatternElement::JsArrayHole(JsArrayHole { syntax })
-            }
+            JS_ARRAY_HOLE => Self::JsArrayHole(JsArrayHole { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(it) => &it.syntax,
-            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(it) => {
-                &it.syntax
-            }
-            AnyJsArrayAssignmentPatternElement::JsArrayHole(it) => &it.syntax,
+            Self::JsArrayAssignmentPatternElement(it) => &it.syntax,
+            Self::JsArrayAssignmentPatternRestElement(it) => &it.syntax,
+            Self::JsArrayHole(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(it) => it.syntax,
-            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(it) => {
-                it.syntax
-            }
-            AnyJsArrayAssignmentPatternElement::JsArrayHole(it) => it.syntax,
+            Self::JsArrayAssignmentPatternElement(it) => it.syntax,
+            Self::JsArrayAssignmentPatternRestElement(it) => it.syntax,
+            Self::JsArrayHole(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsArrayAssignmentPatternElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsArrayAssignmentPatternElement::JsArrayHole(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayAssignmentPatternElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayAssignmentPatternRestElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayHole(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsArrayAssignmentPatternElement> for SyntaxNode {
-    fn from(n: AnyJsArrayAssignmentPatternElement) -> SyntaxNode {
+    fn from(n: AnyJsArrayAssignmentPatternElement) -> Self {
         match n {
             AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(it) => it.into(),
             AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(it) => {
@@ -32435,24 +32411,24 @@ impl From<AnyJsArrayAssignmentPatternElement> for SyntaxNode {
     }
 }
 impl From<AnyJsArrayAssignmentPatternElement> for SyntaxElement {
-    fn from(n: AnyJsArrayAssignmentPatternElement) -> SyntaxElement {
+    fn from(n: AnyJsArrayAssignmentPatternElement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsArrayBindingPatternElement> for AnyJsArrayBindingPatternElement {
-    fn from(node: JsArrayBindingPatternElement) -> AnyJsArrayBindingPatternElement {
-        AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(node)
+    fn from(node: JsArrayBindingPatternElement) -> Self {
+        Self::JsArrayBindingPatternElement(node)
     }
 }
 impl From<JsArrayBindingPatternRestElement> for AnyJsArrayBindingPatternElement {
-    fn from(node: JsArrayBindingPatternRestElement) -> AnyJsArrayBindingPatternElement {
-        AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(node)
+    fn from(node: JsArrayBindingPatternRestElement) -> Self {
+        Self::JsArrayBindingPatternRestElement(node)
     }
 }
 impl From<JsArrayHole> for AnyJsArrayBindingPatternElement {
-    fn from(node: JsArrayHole) -> AnyJsArrayBindingPatternElement {
-        AnyJsArrayBindingPatternElement::JsArrayHole(node)
+    fn from(node: JsArrayHole) -> Self {
+        Self::JsArrayHole(node)
     }
 }
 impl AstNode for AnyJsArrayBindingPatternElement {
@@ -32471,50 +32447,42 @@ impl AstNode for AnyJsArrayBindingPatternElement {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_ARRAY_BINDING_PATTERN_ELEMENT => {
-                AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(
-                    JsArrayBindingPatternElement { syntax },
-                )
+                Self::JsArrayBindingPatternElement(JsArrayBindingPatternElement { syntax })
             }
             JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => {
-                AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(
-                    JsArrayBindingPatternRestElement { syntax },
-                )
+                Self::JsArrayBindingPatternRestElement(JsArrayBindingPatternRestElement { syntax })
             }
-            JS_ARRAY_HOLE => AnyJsArrayBindingPatternElement::JsArrayHole(JsArrayHole { syntax }),
+            JS_ARRAY_HOLE => Self::JsArrayHole(JsArrayHole { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(it) => &it.syntax,
-            AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(it) => &it.syntax,
-            AnyJsArrayBindingPatternElement::JsArrayHole(it) => &it.syntax,
+            Self::JsArrayBindingPatternElement(it) => &it.syntax,
+            Self::JsArrayBindingPatternRestElement(it) => &it.syntax,
+            Self::JsArrayHole(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(it) => it.syntax,
-            AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(it) => it.syntax,
-            AnyJsArrayBindingPatternElement::JsArrayHole(it) => it.syntax,
+            Self::JsArrayBindingPatternElement(it) => it.syntax,
+            Self::JsArrayBindingPatternRestElement(it) => it.syntax,
+            Self::JsArrayHole(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsArrayBindingPatternElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsArrayBindingPatternElement::JsArrayHole(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayBindingPatternElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayBindingPatternRestElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayHole(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsArrayBindingPatternElement> for SyntaxNode {
-    fn from(n: AnyJsArrayBindingPatternElement) -> SyntaxNode {
+    fn from(n: AnyJsArrayBindingPatternElement) -> Self {
         match n {
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(it) => it.into(),
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(it) => it.into(),
@@ -32523,19 +32491,19 @@ impl From<AnyJsArrayBindingPatternElement> for SyntaxNode {
     }
 }
 impl From<AnyJsArrayBindingPatternElement> for SyntaxElement {
-    fn from(n: AnyJsArrayBindingPatternElement) -> SyntaxElement {
+    fn from(n: AnyJsArrayBindingPatternElement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsArrayHole> for AnyJsArrayElement {
-    fn from(node: JsArrayHole) -> AnyJsArrayElement {
-        AnyJsArrayElement::JsArrayHole(node)
+    fn from(node: JsArrayHole) -> Self {
+        Self::JsArrayHole(node)
     }
 }
 impl From<JsSpread> for AnyJsArrayElement {
-    fn from(node: JsSpread) -> AnyJsArrayElement {
-        AnyJsArrayElement::JsSpread(node)
+    fn from(node: JsSpread) -> Self {
+        Self::JsSpread(node)
     }
 }
 impl AstNode for AnyJsArrayElement {
@@ -32552,11 +32520,11 @@ impl AstNode for AnyJsArrayElement {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_ARRAY_HOLE => AnyJsArrayElement::JsArrayHole(JsArrayHole { syntax }),
-            JS_SPREAD => AnyJsArrayElement::JsSpread(JsSpread { syntax }),
+            JS_ARRAY_HOLE => Self::JsArrayHole(JsArrayHole { syntax }),
+            JS_SPREAD => Self::JsSpread(JsSpread { syntax }),
             _ => {
                 if let Some(any_js_expression) = AnyJsExpression::cast(syntax) {
-                    return Some(AnyJsArrayElement::AnyJsExpression(any_js_expression));
+                    return Some(Self::AnyJsExpression(any_js_expression));
                 }
                 return None;
             }
@@ -32565,30 +32533,30 @@ impl AstNode for AnyJsArrayElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsArrayElement::JsArrayHole(it) => &it.syntax,
-            AnyJsArrayElement::JsSpread(it) => &it.syntax,
-            AnyJsArrayElement::AnyJsExpression(it) => it.syntax(),
+            Self::JsArrayHole(it) => &it.syntax,
+            Self::JsSpread(it) => &it.syntax,
+            Self::AnyJsExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsArrayElement::JsArrayHole(it) => it.syntax,
-            AnyJsArrayElement::JsSpread(it) => it.syntax,
-            AnyJsArrayElement::AnyJsExpression(it) => it.into_syntax(),
+            Self::JsArrayHole(it) => it.syntax,
+            Self::JsSpread(it) => it.syntax,
+            Self::AnyJsExpression(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsArrayElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsArrayElement::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsArrayElement::JsArrayHole(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsArrayElement::JsSpread(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayHole(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSpread(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsArrayElement> for SyntaxNode {
-    fn from(n: AnyJsArrayElement) -> SyntaxNode {
+    fn from(n: AnyJsArrayElement) -> Self {
         match n {
             AnyJsArrayElement::AnyJsExpression(it) => it.into(),
             AnyJsArrayElement::JsArrayHole(it) => it.into(),
@@ -32597,14 +32565,14 @@ impl From<AnyJsArrayElement> for SyntaxNode {
     }
 }
 impl From<AnyJsArrayElement> for SyntaxElement {
-    fn from(n: AnyJsArrayElement) -> SyntaxElement {
+    fn from(n: AnyJsArrayElement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsParameters> for AnyJsArrowFunctionParameters {
-    fn from(node: JsParameters) -> AnyJsArrowFunctionParameters {
-        AnyJsArrowFunctionParameters::JsParameters(node)
+    fn from(node: JsParameters) -> Self {
+        Self::JsParameters(node)
     }
 }
 impl AstNode for AnyJsArrowFunctionParameters {
@@ -32619,10 +32587,10 @@ impl AstNode for AnyJsArrowFunctionParameters {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_PARAMETERS => AnyJsArrowFunctionParameters::JsParameters(JsParameters { syntax }),
+            JS_PARAMETERS => Self::JsParameters(JsParameters { syntax }),
             _ => {
                 if let Some(any_js_binding) = AnyJsBinding::cast(syntax) {
-                    return Some(AnyJsArrowFunctionParameters::AnyJsBinding(any_js_binding));
+                    return Some(Self::AnyJsBinding(any_js_binding));
                 }
                 return None;
             }
@@ -32631,27 +32599,27 @@ impl AstNode for AnyJsArrowFunctionParameters {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsArrowFunctionParameters::JsParameters(it) => &it.syntax,
-            AnyJsArrowFunctionParameters::AnyJsBinding(it) => it.syntax(),
+            Self::JsParameters(it) => &it.syntax,
+            Self::AnyJsBinding(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsArrowFunctionParameters::JsParameters(it) => it.syntax,
-            AnyJsArrowFunctionParameters::AnyJsBinding(it) => it.into_syntax(),
+            Self::JsParameters(it) => it.syntax,
+            Self::AnyJsBinding(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsArrowFunctionParameters {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsArrowFunctionParameters::AnyJsBinding(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsArrowFunctionParameters::JsParameters(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsParameters(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsArrowFunctionParameters> for SyntaxNode {
-    fn from(n: AnyJsArrowFunctionParameters) -> SyntaxNode {
+    fn from(n: AnyJsArrowFunctionParameters) -> Self {
         match n {
             AnyJsArrowFunctionParameters::AnyJsBinding(it) => it.into(),
             AnyJsArrowFunctionParameters::JsParameters(it) => it.into(),
@@ -32659,54 +32627,54 @@ impl From<AnyJsArrowFunctionParameters> for SyntaxNode {
     }
 }
 impl From<AnyJsArrowFunctionParameters> for SyntaxElement {
-    fn from(n: AnyJsArrowFunctionParameters) -> SyntaxElement {
+    fn from(n: AnyJsArrowFunctionParameters) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusAssignment> for AnyJsAssignment {
-    fn from(node: JsBogusAssignment) -> AnyJsAssignment {
-        AnyJsAssignment::JsBogusAssignment(node)
+    fn from(node: JsBogusAssignment) -> Self {
+        Self::JsBogusAssignment(node)
     }
 }
 impl From<JsComputedMemberAssignment> for AnyJsAssignment {
-    fn from(node: JsComputedMemberAssignment) -> AnyJsAssignment {
-        AnyJsAssignment::JsComputedMemberAssignment(node)
+    fn from(node: JsComputedMemberAssignment) -> Self {
+        Self::JsComputedMemberAssignment(node)
     }
 }
 impl From<JsIdentifierAssignment> for AnyJsAssignment {
-    fn from(node: JsIdentifierAssignment) -> AnyJsAssignment {
-        AnyJsAssignment::JsIdentifierAssignment(node)
+    fn from(node: JsIdentifierAssignment) -> Self {
+        Self::JsIdentifierAssignment(node)
     }
 }
 impl From<JsParenthesizedAssignment> for AnyJsAssignment {
-    fn from(node: JsParenthesizedAssignment) -> AnyJsAssignment {
-        AnyJsAssignment::JsParenthesizedAssignment(node)
+    fn from(node: JsParenthesizedAssignment) -> Self {
+        Self::JsParenthesizedAssignment(node)
     }
 }
 impl From<JsStaticMemberAssignment> for AnyJsAssignment {
-    fn from(node: JsStaticMemberAssignment) -> AnyJsAssignment {
-        AnyJsAssignment::JsStaticMemberAssignment(node)
+    fn from(node: JsStaticMemberAssignment) -> Self {
+        Self::JsStaticMemberAssignment(node)
     }
 }
 impl From<TsAsAssignment> for AnyJsAssignment {
-    fn from(node: TsAsAssignment) -> AnyJsAssignment {
-        AnyJsAssignment::TsAsAssignment(node)
+    fn from(node: TsAsAssignment) -> Self {
+        Self::TsAsAssignment(node)
     }
 }
 impl From<TsNonNullAssertionAssignment> for AnyJsAssignment {
-    fn from(node: TsNonNullAssertionAssignment) -> AnyJsAssignment {
-        AnyJsAssignment::TsNonNullAssertionAssignment(node)
+    fn from(node: TsNonNullAssertionAssignment) -> Self {
+        Self::TsNonNullAssertionAssignment(node)
     }
 }
 impl From<TsSatisfiesAssignment> for AnyJsAssignment {
-    fn from(node: TsSatisfiesAssignment) -> AnyJsAssignment {
-        AnyJsAssignment::TsSatisfiesAssignment(node)
+    fn from(node: TsSatisfiesAssignment) -> Self {
+        Self::TsSatisfiesAssignment(node)
     }
 }
 impl From<TsTypeAssertionAssignment> for AnyJsAssignment {
-    fn from(node: TsTypeAssertionAssignment) -> AnyJsAssignment {
-        AnyJsAssignment::TsTypeAssertionAssignment(node)
+    fn from(node: TsTypeAssertionAssignment) -> Self {
+        Self::TsTypeAssertionAssignment(node)
     }
 }
 impl AstNode for AnyJsAssignment {
@@ -32736,30 +32704,28 @@ impl AstNode for AnyJsAssignment {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BOGUS_ASSIGNMENT => AnyJsAssignment::JsBogusAssignment(JsBogusAssignment { syntax }),
+            JS_BOGUS_ASSIGNMENT => Self::JsBogusAssignment(JsBogusAssignment { syntax }),
             JS_COMPUTED_MEMBER_ASSIGNMENT => {
-                AnyJsAssignment::JsComputedMemberAssignment(JsComputedMemberAssignment { syntax })
+                Self::JsComputedMemberAssignment(JsComputedMemberAssignment { syntax })
             }
             JS_IDENTIFIER_ASSIGNMENT => {
-                AnyJsAssignment::JsIdentifierAssignment(JsIdentifierAssignment { syntax })
+                Self::JsIdentifierAssignment(JsIdentifierAssignment { syntax })
             }
             JS_PARENTHESIZED_ASSIGNMENT => {
-                AnyJsAssignment::JsParenthesizedAssignment(JsParenthesizedAssignment { syntax })
+                Self::JsParenthesizedAssignment(JsParenthesizedAssignment { syntax })
             }
             JS_STATIC_MEMBER_ASSIGNMENT => {
-                AnyJsAssignment::JsStaticMemberAssignment(JsStaticMemberAssignment { syntax })
+                Self::JsStaticMemberAssignment(JsStaticMemberAssignment { syntax })
             }
-            TS_AS_ASSIGNMENT => AnyJsAssignment::TsAsAssignment(TsAsAssignment { syntax }),
+            TS_AS_ASSIGNMENT => Self::TsAsAssignment(TsAsAssignment { syntax }),
             TS_NON_NULL_ASSERTION_ASSIGNMENT => {
-                AnyJsAssignment::TsNonNullAssertionAssignment(TsNonNullAssertionAssignment {
-                    syntax,
-                })
+                Self::TsNonNullAssertionAssignment(TsNonNullAssertionAssignment { syntax })
             }
             TS_SATISFIES_ASSIGNMENT => {
-                AnyJsAssignment::TsSatisfiesAssignment(TsSatisfiesAssignment { syntax })
+                Self::TsSatisfiesAssignment(TsSatisfiesAssignment { syntax })
             }
             TS_TYPE_ASSERTION_ASSIGNMENT => {
-                AnyJsAssignment::TsTypeAssertionAssignment(TsTypeAssertionAssignment { syntax })
+                Self::TsTypeAssertionAssignment(TsTypeAssertionAssignment { syntax })
             }
             _ => return None,
         };
@@ -32767,48 +32733,48 @@ impl AstNode for AnyJsAssignment {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsAssignment::JsBogusAssignment(it) => &it.syntax,
-            AnyJsAssignment::JsComputedMemberAssignment(it) => &it.syntax,
-            AnyJsAssignment::JsIdentifierAssignment(it) => &it.syntax,
-            AnyJsAssignment::JsParenthesizedAssignment(it) => &it.syntax,
-            AnyJsAssignment::JsStaticMemberAssignment(it) => &it.syntax,
-            AnyJsAssignment::TsAsAssignment(it) => &it.syntax,
-            AnyJsAssignment::TsNonNullAssertionAssignment(it) => &it.syntax,
-            AnyJsAssignment::TsSatisfiesAssignment(it) => &it.syntax,
-            AnyJsAssignment::TsTypeAssertionAssignment(it) => &it.syntax,
+            Self::JsBogusAssignment(it) => &it.syntax,
+            Self::JsComputedMemberAssignment(it) => &it.syntax,
+            Self::JsIdentifierAssignment(it) => &it.syntax,
+            Self::JsParenthesizedAssignment(it) => &it.syntax,
+            Self::JsStaticMemberAssignment(it) => &it.syntax,
+            Self::TsAsAssignment(it) => &it.syntax,
+            Self::TsNonNullAssertionAssignment(it) => &it.syntax,
+            Self::TsSatisfiesAssignment(it) => &it.syntax,
+            Self::TsTypeAssertionAssignment(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsAssignment::JsBogusAssignment(it) => it.syntax,
-            AnyJsAssignment::JsComputedMemberAssignment(it) => it.syntax,
-            AnyJsAssignment::JsIdentifierAssignment(it) => it.syntax,
-            AnyJsAssignment::JsParenthesizedAssignment(it) => it.syntax,
-            AnyJsAssignment::JsStaticMemberAssignment(it) => it.syntax,
-            AnyJsAssignment::TsAsAssignment(it) => it.syntax,
-            AnyJsAssignment::TsNonNullAssertionAssignment(it) => it.syntax,
-            AnyJsAssignment::TsSatisfiesAssignment(it) => it.syntax,
-            AnyJsAssignment::TsTypeAssertionAssignment(it) => it.syntax,
+            Self::JsBogusAssignment(it) => it.syntax,
+            Self::JsComputedMemberAssignment(it) => it.syntax,
+            Self::JsIdentifierAssignment(it) => it.syntax,
+            Self::JsParenthesizedAssignment(it) => it.syntax,
+            Self::JsStaticMemberAssignment(it) => it.syntax,
+            Self::TsAsAssignment(it) => it.syntax,
+            Self::TsNonNullAssertionAssignment(it) => it.syntax,
+            Self::TsSatisfiesAssignment(it) => it.syntax,
+            Self::TsTypeAssertionAssignment(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsAssignment::JsBogusAssignment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignment::JsComputedMemberAssignment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignment::JsIdentifierAssignment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignment::JsParenthesizedAssignment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignment::JsStaticMemberAssignment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignment::TsAsAssignment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignment::TsNonNullAssertionAssignment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignment::TsSatisfiesAssignment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignment::TsTypeAssertionAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsComputedMemberAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsIdentifierAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsParenthesizedAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStaticMemberAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAsAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsNonNullAssertionAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsSatisfiesAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeAssertionAssignment(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsAssignment> for SyntaxNode {
-    fn from(n: AnyJsAssignment) -> SyntaxNode {
+    fn from(n: AnyJsAssignment) -> Self {
         match n {
             AnyJsAssignment::JsBogusAssignment(it) => it.into(),
             AnyJsAssignment::JsComputedMemberAssignment(it) => it.into(),
@@ -32823,19 +32789,19 @@ impl From<AnyJsAssignment> for SyntaxNode {
     }
 }
 impl From<AnyJsAssignment> for SyntaxElement {
-    fn from(n: AnyJsAssignment) -> SyntaxElement {
+    fn from(n: AnyJsAssignment) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsArrayAssignmentPattern> for AnyJsAssignmentPattern {
-    fn from(node: JsArrayAssignmentPattern) -> AnyJsAssignmentPattern {
-        AnyJsAssignmentPattern::JsArrayAssignmentPattern(node)
+    fn from(node: JsArrayAssignmentPattern) -> Self {
+        Self::JsArrayAssignmentPattern(node)
     }
 }
 impl From<JsObjectAssignmentPattern> for AnyJsAssignmentPattern {
-    fn from(node: JsObjectAssignmentPattern) -> AnyJsAssignmentPattern {
-        AnyJsAssignmentPattern::JsObjectAssignmentPattern(node)
+    fn from(node: JsObjectAssignmentPattern) -> Self {
+        Self::JsObjectAssignmentPattern(node)
     }
 }
 impl AstNode for AnyJsAssignmentPattern {
@@ -32853,18 +32819,14 @@ impl AstNode for AnyJsAssignmentPattern {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_ARRAY_ASSIGNMENT_PATTERN => {
-                AnyJsAssignmentPattern::JsArrayAssignmentPattern(JsArrayAssignmentPattern {
-                    syntax,
-                })
+                Self::JsArrayAssignmentPattern(JsArrayAssignmentPattern { syntax })
             }
             JS_OBJECT_ASSIGNMENT_PATTERN => {
-                AnyJsAssignmentPattern::JsObjectAssignmentPattern(JsObjectAssignmentPattern {
-                    syntax,
-                })
+                Self::JsObjectAssignmentPattern(JsObjectAssignmentPattern { syntax })
             }
             _ => {
                 if let Some(any_js_assignment) = AnyJsAssignment::cast(syntax) {
-                    return Some(AnyJsAssignmentPattern::AnyJsAssignment(any_js_assignment));
+                    return Some(Self::AnyJsAssignment(any_js_assignment));
                 }
                 return None;
             }
@@ -32873,30 +32835,30 @@ impl AstNode for AnyJsAssignmentPattern {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsAssignmentPattern::JsArrayAssignmentPattern(it) => &it.syntax,
-            AnyJsAssignmentPattern::JsObjectAssignmentPattern(it) => &it.syntax,
-            AnyJsAssignmentPattern::AnyJsAssignment(it) => it.syntax(),
+            Self::JsArrayAssignmentPattern(it) => &it.syntax,
+            Self::JsObjectAssignmentPattern(it) => &it.syntax,
+            Self::AnyJsAssignment(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsAssignmentPattern::JsArrayAssignmentPattern(it) => it.syntax,
-            AnyJsAssignmentPattern::JsObjectAssignmentPattern(it) => it.syntax,
-            AnyJsAssignmentPattern::AnyJsAssignment(it) => it.into_syntax(),
+            Self::JsArrayAssignmentPattern(it) => it.syntax,
+            Self::JsObjectAssignmentPattern(it) => it.syntax,
+            Self::AnyJsAssignment(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsAssignmentPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsAssignmentPattern::AnyJsAssignment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignmentPattern::JsArrayAssignmentPattern(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsAssignmentPattern::JsObjectAssignmentPattern(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayAssignmentPattern(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsObjectAssignmentPattern(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsAssignmentPattern> for SyntaxNode {
-    fn from(n: AnyJsAssignmentPattern) -> SyntaxNode {
+    fn from(n: AnyJsAssignmentPattern) -> Self {
         match n {
             AnyJsAssignmentPattern::AnyJsAssignment(it) => it.into(),
             AnyJsAssignmentPattern::JsArrayAssignmentPattern(it) => it.into(),
@@ -32905,24 +32867,24 @@ impl From<AnyJsAssignmentPattern> for SyntaxNode {
     }
 }
 impl From<AnyJsAssignmentPattern> for SyntaxElement {
-    fn from(n: AnyJsAssignmentPattern) -> SyntaxElement {
+    fn from(n: AnyJsAssignmentPattern) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusBinding> for AnyJsBinding {
-    fn from(node: JsBogusBinding) -> AnyJsBinding {
-        AnyJsBinding::JsBogusBinding(node)
+    fn from(node: JsBogusBinding) -> Self {
+        Self::JsBogusBinding(node)
     }
 }
 impl From<JsIdentifierBinding> for AnyJsBinding {
-    fn from(node: JsIdentifierBinding) -> AnyJsBinding {
-        AnyJsBinding::JsIdentifierBinding(node)
+    fn from(node: JsIdentifierBinding) -> Self {
+        Self::JsIdentifierBinding(node)
     }
 }
 impl From<JsMetavariable> for AnyJsBinding {
-    fn from(node: JsMetavariable) -> AnyJsBinding {
-        AnyJsBinding::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl AstNode for AnyJsBinding {
@@ -32938,41 +32900,39 @@ impl AstNode for AnyJsBinding {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BOGUS_BINDING => AnyJsBinding::JsBogusBinding(JsBogusBinding { syntax }),
-            JS_IDENTIFIER_BINDING => {
-                AnyJsBinding::JsIdentifierBinding(JsIdentifierBinding { syntax })
-            }
-            JS_METAVARIABLE => AnyJsBinding::JsMetavariable(JsMetavariable { syntax }),
+            JS_BOGUS_BINDING => Self::JsBogusBinding(JsBogusBinding { syntax }),
+            JS_IDENTIFIER_BINDING => Self::JsIdentifierBinding(JsIdentifierBinding { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsBinding::JsBogusBinding(it) => &it.syntax,
-            AnyJsBinding::JsIdentifierBinding(it) => &it.syntax,
-            AnyJsBinding::JsMetavariable(it) => &it.syntax,
+            Self::JsBogusBinding(it) => &it.syntax,
+            Self::JsIdentifierBinding(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsBinding::JsBogusBinding(it) => it.syntax,
-            AnyJsBinding::JsIdentifierBinding(it) => it.syntax,
-            AnyJsBinding::JsMetavariable(it) => it.syntax,
+            Self::JsBogusBinding(it) => it.syntax,
+            Self::JsIdentifierBinding(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsBinding::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsBinding::JsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsBinding::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsBinding> for SyntaxNode {
-    fn from(n: AnyJsBinding) -> SyntaxNode {
+    fn from(n: AnyJsBinding) -> Self {
         match n {
             AnyJsBinding::JsBogusBinding(it) => it.into(),
             AnyJsBinding::JsIdentifierBinding(it) => it.into(),
@@ -32981,19 +32941,19 @@ impl From<AnyJsBinding> for SyntaxNode {
     }
 }
 impl From<AnyJsBinding> for SyntaxElement {
-    fn from(n: AnyJsBinding) -> SyntaxElement {
+    fn from(n: AnyJsBinding) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsArrayBindingPattern> for AnyJsBindingPattern {
-    fn from(node: JsArrayBindingPattern) -> AnyJsBindingPattern {
-        AnyJsBindingPattern::JsArrayBindingPattern(node)
+    fn from(node: JsArrayBindingPattern) -> Self {
+        Self::JsArrayBindingPattern(node)
     }
 }
 impl From<JsObjectBindingPattern> for AnyJsBindingPattern {
-    fn from(node: JsObjectBindingPattern) -> AnyJsBindingPattern {
-        AnyJsBindingPattern::JsObjectBindingPattern(node)
+    fn from(node: JsObjectBindingPattern) -> Self {
+        Self::JsObjectBindingPattern(node)
     }
 }
 impl AstNode for AnyJsBindingPattern {
@@ -33011,14 +32971,14 @@ impl AstNode for AnyJsBindingPattern {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_ARRAY_BINDING_PATTERN => {
-                AnyJsBindingPattern::JsArrayBindingPattern(JsArrayBindingPattern { syntax })
+                Self::JsArrayBindingPattern(JsArrayBindingPattern { syntax })
             }
             JS_OBJECT_BINDING_PATTERN => {
-                AnyJsBindingPattern::JsObjectBindingPattern(JsObjectBindingPattern { syntax })
+                Self::JsObjectBindingPattern(JsObjectBindingPattern { syntax })
             }
             _ => {
                 if let Some(any_js_binding) = AnyJsBinding::cast(syntax) {
-                    return Some(AnyJsBindingPattern::AnyJsBinding(any_js_binding));
+                    return Some(Self::AnyJsBinding(any_js_binding));
                 }
                 return None;
             }
@@ -33027,30 +32987,30 @@ impl AstNode for AnyJsBindingPattern {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsBindingPattern::JsArrayBindingPattern(it) => &it.syntax,
-            AnyJsBindingPattern::JsObjectBindingPattern(it) => &it.syntax,
-            AnyJsBindingPattern::AnyJsBinding(it) => it.syntax(),
+            Self::JsArrayBindingPattern(it) => &it.syntax,
+            Self::JsObjectBindingPattern(it) => &it.syntax,
+            Self::AnyJsBinding(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsBindingPattern::JsArrayBindingPattern(it) => it.syntax,
-            AnyJsBindingPattern::JsObjectBindingPattern(it) => it.syntax,
-            AnyJsBindingPattern::AnyJsBinding(it) => it.into_syntax(),
+            Self::JsArrayBindingPattern(it) => it.syntax,
+            Self::JsObjectBindingPattern(it) => it.syntax,
+            Self::AnyJsBinding(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsBindingPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsBindingPattern::AnyJsBinding(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsBindingPattern::JsArrayBindingPattern(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsBindingPattern::JsObjectBindingPattern(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayBindingPattern(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsObjectBindingPattern(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsBindingPattern> for SyntaxNode {
-    fn from(n: AnyJsBindingPattern) -> SyntaxNode {
+    fn from(n: AnyJsBindingPattern) -> Self {
         match n {
             AnyJsBindingPattern::AnyJsBinding(it) => it.into(),
             AnyJsBindingPattern::JsArrayBindingPattern(it) => it.into(),
@@ -33059,14 +33019,14 @@ impl From<AnyJsBindingPattern> for SyntaxNode {
     }
 }
 impl From<AnyJsBindingPattern> for SyntaxElement {
-    fn from(n: AnyJsBindingPattern) -> SyntaxElement {
+    fn from(n: AnyJsBindingPattern) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsSpread> for AnyJsCallArgument {
-    fn from(node: JsSpread) -> AnyJsCallArgument {
-        AnyJsCallArgument::JsSpread(node)
+    fn from(node: JsSpread) -> Self {
+        Self::JsSpread(node)
     }
 }
 impl AstNode for AnyJsCallArgument {
@@ -33081,10 +33041,10 @@ impl AstNode for AnyJsCallArgument {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_SPREAD => AnyJsCallArgument::JsSpread(JsSpread { syntax }),
+            JS_SPREAD => Self::JsSpread(JsSpread { syntax }),
             _ => {
                 if let Some(any_js_expression) = AnyJsExpression::cast(syntax) {
-                    return Some(AnyJsCallArgument::AnyJsExpression(any_js_expression));
+                    return Some(Self::AnyJsExpression(any_js_expression));
                 }
                 return None;
             }
@@ -33093,27 +33053,27 @@ impl AstNode for AnyJsCallArgument {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsCallArgument::JsSpread(it) => &it.syntax,
-            AnyJsCallArgument::AnyJsExpression(it) => it.syntax(),
+            Self::JsSpread(it) => &it.syntax,
+            Self::AnyJsExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsCallArgument::JsSpread(it) => it.syntax,
-            AnyJsCallArgument::AnyJsExpression(it) => it.into_syntax(),
+            Self::JsSpread(it) => it.syntax,
+            Self::AnyJsExpression(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsCallArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsCallArgument::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsCallArgument::JsSpread(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSpread(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsCallArgument> for SyntaxNode {
-    fn from(n: AnyJsCallArgument) -> SyntaxNode {
+    fn from(n: AnyJsCallArgument) -> Self {
         match n {
             AnyJsCallArgument::AnyJsExpression(it) => it.into(),
             AnyJsCallArgument::JsSpread(it) => it.into(),
@@ -33121,24 +33081,24 @@ impl From<AnyJsCallArgument> for SyntaxNode {
     }
 }
 impl From<AnyJsCallArgument> for SyntaxElement {
-    fn from(n: AnyJsCallArgument) -> SyntaxElement {
+    fn from(n: AnyJsCallArgument) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsClassDeclaration> for AnyJsClass {
-    fn from(node: JsClassDeclaration) -> AnyJsClass {
-        AnyJsClass::JsClassDeclaration(node)
+    fn from(node: JsClassDeclaration) -> Self {
+        Self::JsClassDeclaration(node)
     }
 }
 impl From<JsClassExportDefaultDeclaration> for AnyJsClass {
-    fn from(node: JsClassExportDefaultDeclaration) -> AnyJsClass {
-        AnyJsClass::JsClassExportDefaultDeclaration(node)
+    fn from(node: JsClassExportDefaultDeclaration) -> Self {
+        Self::JsClassExportDefaultDeclaration(node)
     }
 }
 impl From<JsClassExpression> for AnyJsClass {
-    fn from(node: JsClassExpression) -> AnyJsClass {
-        AnyJsClass::JsClassExpression(node)
+    fn from(node: JsClassExpression) -> Self {
+        Self::JsClassExpression(node)
     }
 }
 impl AstNode for AnyJsClass {
@@ -33154,43 +33114,41 @@ impl AstNode for AnyJsClass {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_CLASS_DECLARATION => AnyJsClass::JsClassDeclaration(JsClassDeclaration { syntax }),
+            JS_CLASS_DECLARATION => Self::JsClassDeclaration(JsClassDeclaration { syntax }),
             JS_CLASS_EXPORT_DEFAULT_DECLARATION => {
-                AnyJsClass::JsClassExportDefaultDeclaration(JsClassExportDefaultDeclaration {
-                    syntax,
-                })
+                Self::JsClassExportDefaultDeclaration(JsClassExportDefaultDeclaration { syntax })
             }
-            JS_CLASS_EXPRESSION => AnyJsClass::JsClassExpression(JsClassExpression { syntax }),
+            JS_CLASS_EXPRESSION => Self::JsClassExpression(JsClassExpression { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsClass::JsClassDeclaration(it) => &it.syntax,
-            AnyJsClass::JsClassExportDefaultDeclaration(it) => &it.syntax,
-            AnyJsClass::JsClassExpression(it) => &it.syntax,
+            Self::JsClassDeclaration(it) => &it.syntax,
+            Self::JsClassExportDefaultDeclaration(it) => &it.syntax,
+            Self::JsClassExpression(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsClass::JsClassDeclaration(it) => it.syntax,
-            AnyJsClass::JsClassExportDefaultDeclaration(it) => it.syntax,
-            AnyJsClass::JsClassExpression(it) => it.syntax,
+            Self::JsClassDeclaration(it) => it.syntax,
+            Self::JsClassExportDefaultDeclaration(it) => it.syntax,
+            Self::JsClassExpression(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsClass {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsClass::JsClassDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClass::JsClassExportDefaultDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClass::JsClassExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsClassDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsClassExportDefaultDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsClassExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsClass> for SyntaxNode {
-    fn from(n: AnyJsClass) -> SyntaxNode {
+    fn from(n: AnyJsClass) -> Self {
         match n {
             AnyJsClass::JsClassDeclaration(it) => it.into(),
             AnyJsClass::JsClassExportDefaultDeclaration(it) => it.into(),
@@ -33199,89 +33157,89 @@ impl From<AnyJsClass> for SyntaxNode {
     }
 }
 impl From<AnyJsClass> for SyntaxElement {
-    fn from(n: AnyJsClass) -> SyntaxElement {
+    fn from(n: AnyJsClass) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusMember> for AnyJsClassMember {
-    fn from(node: JsBogusMember) -> AnyJsClassMember {
-        AnyJsClassMember::JsBogusMember(node)
+    fn from(node: JsBogusMember) -> Self {
+        Self::JsBogusMember(node)
     }
 }
 impl From<JsConstructorClassMember> for AnyJsClassMember {
-    fn from(node: JsConstructorClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::JsConstructorClassMember(node)
+    fn from(node: JsConstructorClassMember) -> Self {
+        Self::JsConstructorClassMember(node)
     }
 }
 impl From<JsEmptyClassMember> for AnyJsClassMember {
-    fn from(node: JsEmptyClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::JsEmptyClassMember(node)
+    fn from(node: JsEmptyClassMember) -> Self {
+        Self::JsEmptyClassMember(node)
     }
 }
 impl From<JsGetterClassMember> for AnyJsClassMember {
-    fn from(node: JsGetterClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::JsGetterClassMember(node)
+    fn from(node: JsGetterClassMember) -> Self {
+        Self::JsGetterClassMember(node)
     }
 }
 impl From<JsMetavariable> for AnyJsClassMember {
-    fn from(node: JsMetavariable) -> AnyJsClassMember {
-        AnyJsClassMember::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsMethodClassMember> for AnyJsClassMember {
-    fn from(node: JsMethodClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::JsMethodClassMember(node)
+    fn from(node: JsMethodClassMember) -> Self {
+        Self::JsMethodClassMember(node)
     }
 }
 impl From<JsPropertyClassMember> for AnyJsClassMember {
-    fn from(node: JsPropertyClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::JsPropertyClassMember(node)
+    fn from(node: JsPropertyClassMember) -> Self {
+        Self::JsPropertyClassMember(node)
     }
 }
 impl From<JsSetterClassMember> for AnyJsClassMember {
-    fn from(node: JsSetterClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::JsSetterClassMember(node)
+    fn from(node: JsSetterClassMember) -> Self {
+        Self::JsSetterClassMember(node)
     }
 }
 impl From<JsStaticInitializationBlockClassMember> for AnyJsClassMember {
-    fn from(node: JsStaticInitializationBlockClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::JsStaticInitializationBlockClassMember(node)
+    fn from(node: JsStaticInitializationBlockClassMember) -> Self {
+        Self::JsStaticInitializationBlockClassMember(node)
     }
 }
 impl From<TsConstructorSignatureClassMember> for AnyJsClassMember {
-    fn from(node: TsConstructorSignatureClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::TsConstructorSignatureClassMember(node)
+    fn from(node: TsConstructorSignatureClassMember) -> Self {
+        Self::TsConstructorSignatureClassMember(node)
     }
 }
 impl From<TsGetterSignatureClassMember> for AnyJsClassMember {
-    fn from(node: TsGetterSignatureClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::TsGetterSignatureClassMember(node)
+    fn from(node: TsGetterSignatureClassMember) -> Self {
+        Self::TsGetterSignatureClassMember(node)
     }
 }
 impl From<TsIndexSignatureClassMember> for AnyJsClassMember {
-    fn from(node: TsIndexSignatureClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::TsIndexSignatureClassMember(node)
+    fn from(node: TsIndexSignatureClassMember) -> Self {
+        Self::TsIndexSignatureClassMember(node)
     }
 }
 impl From<TsInitializedPropertySignatureClassMember> for AnyJsClassMember {
-    fn from(node: TsInitializedPropertySignatureClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::TsInitializedPropertySignatureClassMember(node)
+    fn from(node: TsInitializedPropertySignatureClassMember) -> Self {
+        Self::TsInitializedPropertySignatureClassMember(node)
     }
 }
 impl From<TsMethodSignatureClassMember> for AnyJsClassMember {
-    fn from(node: TsMethodSignatureClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::TsMethodSignatureClassMember(node)
+    fn from(node: TsMethodSignatureClassMember) -> Self {
+        Self::TsMethodSignatureClassMember(node)
     }
 }
 impl From<TsPropertySignatureClassMember> for AnyJsClassMember {
-    fn from(node: TsPropertySignatureClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::TsPropertySignatureClassMember(node)
+    fn from(node: TsPropertySignatureClassMember) -> Self {
+        Self::TsPropertySignatureClassMember(node)
     }
 }
 impl From<TsSetterSignatureClassMember> for AnyJsClassMember {
-    fn from(node: TsSetterSignatureClassMember) -> AnyJsClassMember {
-        AnyJsClassMember::TsSetterSignatureClassMember(node)
+    fn from(node: TsSetterSignatureClassMember) -> Self {
+        Self::TsSetterSignatureClassMember(node)
     }
 }
 impl AstNode for AnyJsClassMember {
@@ -33325,65 +33283,47 @@ impl AstNode for AnyJsClassMember {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BOGUS_MEMBER => AnyJsClassMember::JsBogusMember(JsBogusMember { syntax }),
+            JS_BOGUS_MEMBER => Self::JsBogusMember(JsBogusMember { syntax }),
             JS_CONSTRUCTOR_CLASS_MEMBER => {
-                AnyJsClassMember::JsConstructorClassMember(JsConstructorClassMember { syntax })
+                Self::JsConstructorClassMember(JsConstructorClassMember { syntax })
             }
-            JS_EMPTY_CLASS_MEMBER => {
-                AnyJsClassMember::JsEmptyClassMember(JsEmptyClassMember { syntax })
-            }
-            JS_GETTER_CLASS_MEMBER => {
-                AnyJsClassMember::JsGetterClassMember(JsGetterClassMember { syntax })
-            }
-            JS_METAVARIABLE => AnyJsClassMember::JsMetavariable(JsMetavariable { syntax }),
-            JS_METHOD_CLASS_MEMBER => {
-                AnyJsClassMember::JsMethodClassMember(JsMethodClassMember { syntax })
-            }
+            JS_EMPTY_CLASS_MEMBER => Self::JsEmptyClassMember(JsEmptyClassMember { syntax }),
+            JS_GETTER_CLASS_MEMBER => Self::JsGetterClassMember(JsGetterClassMember { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            JS_METHOD_CLASS_MEMBER => Self::JsMethodClassMember(JsMethodClassMember { syntax }),
             JS_PROPERTY_CLASS_MEMBER => {
-                AnyJsClassMember::JsPropertyClassMember(JsPropertyClassMember { syntax })
+                Self::JsPropertyClassMember(JsPropertyClassMember { syntax })
             }
-            JS_SETTER_CLASS_MEMBER => {
-                AnyJsClassMember::JsSetterClassMember(JsSetterClassMember { syntax })
-            }
+            JS_SETTER_CLASS_MEMBER => Self::JsSetterClassMember(JsSetterClassMember { syntax }),
             JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER => {
-                AnyJsClassMember::JsStaticInitializationBlockClassMember(
+                Self::JsStaticInitializationBlockClassMember(
                     JsStaticInitializationBlockClassMember { syntax },
                 )
             }
             TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER => {
-                AnyJsClassMember::TsConstructorSignatureClassMember(
-                    TsConstructorSignatureClassMember { syntax },
-                )
+                Self::TsConstructorSignatureClassMember(TsConstructorSignatureClassMember {
+                    syntax,
+                })
             }
             TS_GETTER_SIGNATURE_CLASS_MEMBER => {
-                AnyJsClassMember::TsGetterSignatureClassMember(TsGetterSignatureClassMember {
-                    syntax,
-                })
+                Self::TsGetterSignatureClassMember(TsGetterSignatureClassMember { syntax })
             }
             TS_INDEX_SIGNATURE_CLASS_MEMBER => {
-                AnyJsClassMember::TsIndexSignatureClassMember(TsIndexSignatureClassMember {
-                    syntax,
-                })
+                Self::TsIndexSignatureClassMember(TsIndexSignatureClassMember { syntax })
             }
             TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER => {
-                AnyJsClassMember::TsInitializedPropertySignatureClassMember(
+                Self::TsInitializedPropertySignatureClassMember(
                     TsInitializedPropertySignatureClassMember { syntax },
                 )
             }
             TS_METHOD_SIGNATURE_CLASS_MEMBER => {
-                AnyJsClassMember::TsMethodSignatureClassMember(TsMethodSignatureClassMember {
-                    syntax,
-                })
+                Self::TsMethodSignatureClassMember(TsMethodSignatureClassMember { syntax })
             }
             TS_PROPERTY_SIGNATURE_CLASS_MEMBER => {
-                AnyJsClassMember::TsPropertySignatureClassMember(TsPropertySignatureClassMember {
-                    syntax,
-                })
+                Self::TsPropertySignatureClassMember(TsPropertySignatureClassMember { syntax })
             }
             TS_SETTER_SIGNATURE_CLASS_MEMBER => {
-                AnyJsClassMember::TsSetterSignatureClassMember(TsSetterSignatureClassMember {
-                    syntax,
-                })
+                Self::TsSetterSignatureClassMember(TsSetterSignatureClassMember { syntax })
             }
             _ => return None,
         };
@@ -33391,73 +33331,69 @@ impl AstNode for AnyJsClassMember {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsClassMember::JsBogusMember(it) => &it.syntax,
-            AnyJsClassMember::JsConstructorClassMember(it) => &it.syntax,
-            AnyJsClassMember::JsEmptyClassMember(it) => &it.syntax,
-            AnyJsClassMember::JsGetterClassMember(it) => &it.syntax,
-            AnyJsClassMember::JsMetavariable(it) => &it.syntax,
-            AnyJsClassMember::JsMethodClassMember(it) => &it.syntax,
-            AnyJsClassMember::JsPropertyClassMember(it) => &it.syntax,
-            AnyJsClassMember::JsSetterClassMember(it) => &it.syntax,
-            AnyJsClassMember::JsStaticInitializationBlockClassMember(it) => &it.syntax,
-            AnyJsClassMember::TsConstructorSignatureClassMember(it) => &it.syntax,
-            AnyJsClassMember::TsGetterSignatureClassMember(it) => &it.syntax,
-            AnyJsClassMember::TsIndexSignatureClassMember(it) => &it.syntax,
-            AnyJsClassMember::TsInitializedPropertySignatureClassMember(it) => &it.syntax,
-            AnyJsClassMember::TsMethodSignatureClassMember(it) => &it.syntax,
-            AnyJsClassMember::TsPropertySignatureClassMember(it) => &it.syntax,
-            AnyJsClassMember::TsSetterSignatureClassMember(it) => &it.syntax,
+            Self::JsBogusMember(it) => &it.syntax,
+            Self::JsConstructorClassMember(it) => &it.syntax,
+            Self::JsEmptyClassMember(it) => &it.syntax,
+            Self::JsGetterClassMember(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsMethodClassMember(it) => &it.syntax,
+            Self::JsPropertyClassMember(it) => &it.syntax,
+            Self::JsSetterClassMember(it) => &it.syntax,
+            Self::JsStaticInitializationBlockClassMember(it) => &it.syntax,
+            Self::TsConstructorSignatureClassMember(it) => &it.syntax,
+            Self::TsGetterSignatureClassMember(it) => &it.syntax,
+            Self::TsIndexSignatureClassMember(it) => &it.syntax,
+            Self::TsInitializedPropertySignatureClassMember(it) => &it.syntax,
+            Self::TsMethodSignatureClassMember(it) => &it.syntax,
+            Self::TsPropertySignatureClassMember(it) => &it.syntax,
+            Self::TsSetterSignatureClassMember(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsClassMember::JsBogusMember(it) => it.syntax,
-            AnyJsClassMember::JsConstructorClassMember(it) => it.syntax,
-            AnyJsClassMember::JsEmptyClassMember(it) => it.syntax,
-            AnyJsClassMember::JsGetterClassMember(it) => it.syntax,
-            AnyJsClassMember::JsMetavariable(it) => it.syntax,
-            AnyJsClassMember::JsMethodClassMember(it) => it.syntax,
-            AnyJsClassMember::JsPropertyClassMember(it) => it.syntax,
-            AnyJsClassMember::JsSetterClassMember(it) => it.syntax,
-            AnyJsClassMember::JsStaticInitializationBlockClassMember(it) => it.syntax,
-            AnyJsClassMember::TsConstructorSignatureClassMember(it) => it.syntax,
-            AnyJsClassMember::TsGetterSignatureClassMember(it) => it.syntax,
-            AnyJsClassMember::TsIndexSignatureClassMember(it) => it.syntax,
-            AnyJsClassMember::TsInitializedPropertySignatureClassMember(it) => it.syntax,
-            AnyJsClassMember::TsMethodSignatureClassMember(it) => it.syntax,
-            AnyJsClassMember::TsPropertySignatureClassMember(it) => it.syntax,
-            AnyJsClassMember::TsSetterSignatureClassMember(it) => it.syntax,
+            Self::JsBogusMember(it) => it.syntax,
+            Self::JsConstructorClassMember(it) => it.syntax,
+            Self::JsEmptyClassMember(it) => it.syntax,
+            Self::JsGetterClassMember(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsMethodClassMember(it) => it.syntax,
+            Self::JsPropertyClassMember(it) => it.syntax,
+            Self::JsSetterClassMember(it) => it.syntax,
+            Self::JsStaticInitializationBlockClassMember(it) => it.syntax,
+            Self::TsConstructorSignatureClassMember(it) => it.syntax,
+            Self::TsGetterSignatureClassMember(it) => it.syntax,
+            Self::TsIndexSignatureClassMember(it) => it.syntax,
+            Self::TsInitializedPropertySignatureClassMember(it) => it.syntax,
+            Self::TsMethodSignatureClassMember(it) => it.syntax,
+            Self::TsPropertySignatureClassMember(it) => it.syntax,
+            Self::TsSetterSignatureClassMember(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsClassMember::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::JsConstructorClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::JsEmptyClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::JsGetterClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::JsMethodClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::JsPropertyClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::JsSetterClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::JsStaticInitializationBlockClassMember(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsClassMember::TsConstructorSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::TsGetterSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::TsIndexSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::TsInitializedPropertySignatureClassMember(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsClassMember::TsMethodSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::TsPropertySignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMember::TsSetterSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsConstructorClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsEmptyClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsGetterClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMethodClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsPropertyClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSetterClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStaticInitializationBlockClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsConstructorSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsGetterSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsIndexSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsInitializedPropertySignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsMethodSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsPropertySignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsSetterSignatureClassMember(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsClassMember> for SyntaxNode {
-    fn from(n: AnyJsClassMember) -> SyntaxNode {
+    fn from(n: AnyJsClassMember) -> Self {
         match n {
             AnyJsClassMember::JsBogusMember(it) => it.into(),
             AnyJsClassMember::JsConstructorClassMember(it) => it.into(),
@@ -33479,29 +33415,29 @@ impl From<AnyJsClassMember> for SyntaxNode {
     }
 }
 impl From<AnyJsClassMember> for SyntaxElement {
-    fn from(n: AnyJsClassMember) -> SyntaxElement {
+    fn from(n: AnyJsClassMember) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsComputedMemberName> for AnyJsClassMemberName {
-    fn from(node: JsComputedMemberName) -> AnyJsClassMemberName {
-        AnyJsClassMemberName::JsComputedMemberName(node)
+    fn from(node: JsComputedMemberName) -> Self {
+        Self::JsComputedMemberName(node)
     }
 }
 impl From<JsLiteralMemberName> for AnyJsClassMemberName {
-    fn from(node: JsLiteralMemberName) -> AnyJsClassMemberName {
-        AnyJsClassMemberName::JsLiteralMemberName(node)
+    fn from(node: JsLiteralMemberName) -> Self {
+        Self::JsLiteralMemberName(node)
     }
 }
 impl From<JsMetavariable> for AnyJsClassMemberName {
-    fn from(node: JsMetavariable) -> AnyJsClassMemberName {
-        AnyJsClassMemberName::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsPrivateClassMemberName> for AnyJsClassMemberName {
-    fn from(node: JsPrivateClassMemberName) -> AnyJsClassMemberName {
-        AnyJsClassMemberName::JsPrivateClassMemberName(node)
+    fn from(node: JsPrivateClassMemberName) -> Self {
+        Self::JsPrivateClassMemberName(node)
     }
 }
 impl AstNode for AnyJsClassMemberName {
@@ -33521,15 +33457,11 @@ impl AstNode for AnyJsClassMemberName {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_COMPUTED_MEMBER_NAME => {
-                AnyJsClassMemberName::JsComputedMemberName(JsComputedMemberName { syntax })
-            }
-            JS_LITERAL_MEMBER_NAME => {
-                AnyJsClassMemberName::JsLiteralMemberName(JsLiteralMemberName { syntax })
-            }
-            JS_METAVARIABLE => AnyJsClassMemberName::JsMetavariable(JsMetavariable { syntax }),
+            JS_COMPUTED_MEMBER_NAME => Self::JsComputedMemberName(JsComputedMemberName { syntax }),
+            JS_LITERAL_MEMBER_NAME => Self::JsLiteralMemberName(JsLiteralMemberName { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             JS_PRIVATE_CLASS_MEMBER_NAME => {
-                AnyJsClassMemberName::JsPrivateClassMemberName(JsPrivateClassMemberName { syntax })
+                Self::JsPrivateClassMemberName(JsPrivateClassMemberName { syntax })
             }
             _ => return None,
         };
@@ -33537,33 +33469,33 @@ impl AstNode for AnyJsClassMemberName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsClassMemberName::JsComputedMemberName(it) => &it.syntax,
-            AnyJsClassMemberName::JsLiteralMemberName(it) => &it.syntax,
-            AnyJsClassMemberName::JsMetavariable(it) => &it.syntax,
-            AnyJsClassMemberName::JsPrivateClassMemberName(it) => &it.syntax,
+            Self::JsComputedMemberName(it) => &it.syntax,
+            Self::JsLiteralMemberName(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsPrivateClassMemberName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsClassMemberName::JsComputedMemberName(it) => it.syntax,
-            AnyJsClassMemberName::JsLiteralMemberName(it) => it.syntax,
-            AnyJsClassMemberName::JsMetavariable(it) => it.syntax,
-            AnyJsClassMemberName::JsPrivateClassMemberName(it) => it.syntax,
+            Self::JsComputedMemberName(it) => it.syntax,
+            Self::JsLiteralMemberName(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsPrivateClassMemberName(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsClassMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsClassMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMemberName::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMemberName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsClassMemberName::JsPrivateClassMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsPrivateClassMemberName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsClassMemberName> for SyntaxNode {
-    fn from(n: AnyJsClassMemberName) -> SyntaxNode {
+    fn from(n: AnyJsClassMemberName) -> Self {
         match n {
             AnyJsClassMemberName::JsComputedMemberName(it) => it.into(),
             AnyJsClassMemberName::JsLiteralMemberName(it) => it.into(),
@@ -33573,19 +33505,19 @@ impl From<AnyJsClassMemberName> for SyntaxNode {
     }
 }
 impl From<AnyJsClassMemberName> for SyntaxElement {
-    fn from(n: AnyJsClassMemberName) -> SyntaxElement {
+    fn from(n: AnyJsClassMemberName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsNamedImportSpecifiers> for AnyJsCombinedSpecifier {
-    fn from(node: JsNamedImportSpecifiers) -> AnyJsCombinedSpecifier {
-        AnyJsCombinedSpecifier::JsNamedImportSpecifiers(node)
+    fn from(node: JsNamedImportSpecifiers) -> Self {
+        Self::JsNamedImportSpecifiers(node)
     }
 }
 impl From<JsNamespaceImportSpecifier> for AnyJsCombinedSpecifier {
-    fn from(node: JsNamespaceImportSpecifier) -> AnyJsCombinedSpecifier {
-        AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(node)
+    fn from(node: JsNamespaceImportSpecifier) -> Self {
+        Self::JsNamespaceImportSpecifier(node)
     }
 }
 impl AstNode for AnyJsCombinedSpecifier {
@@ -33601,12 +33533,10 @@ impl AstNode for AnyJsCombinedSpecifier {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_NAMED_IMPORT_SPECIFIERS => {
-                AnyJsCombinedSpecifier::JsNamedImportSpecifiers(JsNamedImportSpecifiers { syntax })
+                Self::JsNamedImportSpecifiers(JsNamedImportSpecifiers { syntax })
             }
             JS_NAMESPACE_IMPORT_SPECIFIER => {
-                AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(JsNamespaceImportSpecifier {
-                    syntax,
-                })
+                Self::JsNamespaceImportSpecifier(JsNamespaceImportSpecifier { syntax })
             }
             _ => return None,
         };
@@ -33614,27 +33544,27 @@ impl AstNode for AnyJsCombinedSpecifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsCombinedSpecifier::JsNamedImportSpecifiers(it) => &it.syntax,
-            AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(it) => &it.syntax,
+            Self::JsNamedImportSpecifiers(it) => &it.syntax,
+            Self::JsNamespaceImportSpecifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsCombinedSpecifier::JsNamedImportSpecifiers(it) => it.syntax,
-            AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(it) => it.syntax,
+            Self::JsNamedImportSpecifiers(it) => it.syntax,
+            Self::JsNamespaceImportSpecifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsCombinedSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsCombinedSpecifier::JsNamedImportSpecifiers(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsNamedImportSpecifiers(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsNamespaceImportSpecifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsCombinedSpecifier> for SyntaxNode {
-    fn from(n: AnyJsCombinedSpecifier) -> SyntaxNode {
+    fn from(n: AnyJsCombinedSpecifier) -> Self {
         match n {
             AnyJsCombinedSpecifier::JsNamedImportSpecifiers(it) => it.into(),
             AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(it) => it.into(),
@@ -33642,19 +33572,19 @@ impl From<AnyJsCombinedSpecifier> for SyntaxNode {
     }
 }
 impl From<AnyJsCombinedSpecifier> for SyntaxElement {
-    fn from(n: AnyJsCombinedSpecifier) -> SyntaxElement {
+    fn from(n: AnyJsCombinedSpecifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsRestParameter> for AnyJsConstructorParameter {
-    fn from(node: JsRestParameter) -> AnyJsConstructorParameter {
-        AnyJsConstructorParameter::JsRestParameter(node)
+    fn from(node: JsRestParameter) -> Self {
+        Self::JsRestParameter(node)
     }
 }
 impl From<TsPropertyParameter> for AnyJsConstructorParameter {
-    fn from(node: TsPropertyParameter) -> AnyJsConstructorParameter {
-        AnyJsConstructorParameter::TsPropertyParameter(node)
+    fn from(node: TsPropertyParameter) -> Self {
+        Self::TsPropertyParameter(node)
     }
 }
 impl AstNode for AnyJsConstructorParameter {
@@ -33671,17 +33601,11 @@ impl AstNode for AnyJsConstructorParameter {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_REST_PARAMETER => {
-                AnyJsConstructorParameter::JsRestParameter(JsRestParameter { syntax })
-            }
-            TS_PROPERTY_PARAMETER => {
-                AnyJsConstructorParameter::TsPropertyParameter(TsPropertyParameter { syntax })
-            }
+            JS_REST_PARAMETER => Self::JsRestParameter(JsRestParameter { syntax }),
+            TS_PROPERTY_PARAMETER => Self::TsPropertyParameter(TsPropertyParameter { syntax }),
             _ => {
                 if let Some(any_js_formal_parameter) = AnyJsFormalParameter::cast(syntax) {
-                    return Some(AnyJsConstructorParameter::AnyJsFormalParameter(
-                        any_js_formal_parameter,
-                    ));
+                    return Some(Self::AnyJsFormalParameter(any_js_formal_parameter));
                 }
                 return None;
             }
@@ -33690,30 +33614,30 @@ impl AstNode for AnyJsConstructorParameter {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsConstructorParameter::JsRestParameter(it) => &it.syntax,
-            AnyJsConstructorParameter::TsPropertyParameter(it) => &it.syntax,
-            AnyJsConstructorParameter::AnyJsFormalParameter(it) => it.syntax(),
+            Self::JsRestParameter(it) => &it.syntax,
+            Self::TsPropertyParameter(it) => &it.syntax,
+            Self::AnyJsFormalParameter(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsConstructorParameter::JsRestParameter(it) => it.syntax,
-            AnyJsConstructorParameter::TsPropertyParameter(it) => it.syntax,
-            AnyJsConstructorParameter::AnyJsFormalParameter(it) => it.into_syntax(),
+            Self::JsRestParameter(it) => it.syntax,
+            Self::TsPropertyParameter(it) => it.syntax,
+            Self::AnyJsFormalParameter(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsConstructorParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsConstructorParameter::AnyJsFormalParameter(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsConstructorParameter::JsRestParameter(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsConstructorParameter::TsPropertyParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsFormalParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsRestParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsPropertyParameter(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsConstructorParameter> for SyntaxNode {
-    fn from(n: AnyJsConstructorParameter) -> SyntaxNode {
+    fn from(n: AnyJsConstructorParameter) -> Self {
         match n {
             AnyJsConstructorParameter::AnyJsFormalParameter(it) => it.into(),
             AnyJsConstructorParameter::JsRestParameter(it) => it.into(),
@@ -33722,64 +33646,64 @@ impl From<AnyJsConstructorParameter> for SyntaxNode {
     }
 }
 impl From<AnyJsConstructorParameter> for SyntaxElement {
-    fn from(n: AnyJsConstructorParameter) -> SyntaxElement {
+    fn from(n: AnyJsConstructorParameter) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsClassDeclaration> for AnyJsDeclaration {
-    fn from(node: JsClassDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::JsClassDeclaration(node)
+    fn from(node: JsClassDeclaration) -> Self {
+        Self::JsClassDeclaration(node)
     }
 }
 impl From<JsFunctionDeclaration> for AnyJsDeclaration {
-    fn from(node: JsFunctionDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::JsFunctionDeclaration(node)
+    fn from(node: JsFunctionDeclaration) -> Self {
+        Self::JsFunctionDeclaration(node)
     }
 }
 impl From<JsVariableDeclaration> for AnyJsDeclaration {
-    fn from(node: JsVariableDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::JsVariableDeclaration(node)
+    fn from(node: JsVariableDeclaration) -> Self {
+        Self::JsVariableDeclaration(node)
     }
 }
 impl From<TsDeclareFunctionDeclaration> for AnyJsDeclaration {
-    fn from(node: TsDeclareFunctionDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::TsDeclareFunctionDeclaration(node)
+    fn from(node: TsDeclareFunctionDeclaration) -> Self {
+        Self::TsDeclareFunctionDeclaration(node)
     }
 }
 impl From<TsEnumDeclaration> for AnyJsDeclaration {
-    fn from(node: TsEnumDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::TsEnumDeclaration(node)
+    fn from(node: TsEnumDeclaration) -> Self {
+        Self::TsEnumDeclaration(node)
     }
 }
 impl From<TsExternalModuleDeclaration> for AnyJsDeclaration {
-    fn from(node: TsExternalModuleDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::TsExternalModuleDeclaration(node)
+    fn from(node: TsExternalModuleDeclaration) -> Self {
+        Self::TsExternalModuleDeclaration(node)
     }
 }
 impl From<TsGlobalDeclaration> for AnyJsDeclaration {
-    fn from(node: TsGlobalDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::TsGlobalDeclaration(node)
+    fn from(node: TsGlobalDeclaration) -> Self {
+        Self::TsGlobalDeclaration(node)
     }
 }
 impl From<TsImportEqualsDeclaration> for AnyJsDeclaration {
-    fn from(node: TsImportEqualsDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::TsImportEqualsDeclaration(node)
+    fn from(node: TsImportEqualsDeclaration) -> Self {
+        Self::TsImportEqualsDeclaration(node)
     }
 }
 impl From<TsInterfaceDeclaration> for AnyJsDeclaration {
-    fn from(node: TsInterfaceDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::TsInterfaceDeclaration(node)
+    fn from(node: TsInterfaceDeclaration) -> Self {
+        Self::TsInterfaceDeclaration(node)
     }
 }
 impl From<TsModuleDeclaration> for AnyJsDeclaration {
-    fn from(node: TsModuleDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::TsModuleDeclaration(node)
+    fn from(node: TsModuleDeclaration) -> Self {
+        Self::TsModuleDeclaration(node)
     }
 }
 impl From<TsTypeAliasDeclaration> for AnyJsDeclaration {
-    fn from(node: TsTypeAliasDeclaration) -> AnyJsDeclaration {
-        AnyJsDeclaration::TsTypeAliasDeclaration(node)
+    fn from(node: TsTypeAliasDeclaration) -> Self {
+        Self::TsTypeAliasDeclaration(node)
     }
 }
 impl AstNode for AnyJsDeclaration {
@@ -33813,42 +33737,30 @@ impl AstNode for AnyJsDeclaration {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_CLASS_DECLARATION => {
-                AnyJsDeclaration::JsClassDeclaration(JsClassDeclaration { syntax })
-            }
+            JS_CLASS_DECLARATION => Self::JsClassDeclaration(JsClassDeclaration { syntax }),
             JS_FUNCTION_DECLARATION => {
-                AnyJsDeclaration::JsFunctionDeclaration(JsFunctionDeclaration { syntax })
+                Self::JsFunctionDeclaration(JsFunctionDeclaration { syntax })
             }
             JS_VARIABLE_DECLARATION => {
-                AnyJsDeclaration::JsVariableDeclaration(JsVariableDeclaration { syntax })
+                Self::JsVariableDeclaration(JsVariableDeclaration { syntax })
             }
             TS_DECLARE_FUNCTION_DECLARATION => {
-                AnyJsDeclaration::TsDeclareFunctionDeclaration(TsDeclareFunctionDeclaration {
-                    syntax,
-                })
+                Self::TsDeclareFunctionDeclaration(TsDeclareFunctionDeclaration { syntax })
             }
-            TS_ENUM_DECLARATION => {
-                AnyJsDeclaration::TsEnumDeclaration(TsEnumDeclaration { syntax })
-            }
+            TS_ENUM_DECLARATION => Self::TsEnumDeclaration(TsEnumDeclaration { syntax }),
             TS_EXTERNAL_MODULE_DECLARATION => {
-                AnyJsDeclaration::TsExternalModuleDeclaration(TsExternalModuleDeclaration {
-                    syntax,
-                })
+                Self::TsExternalModuleDeclaration(TsExternalModuleDeclaration { syntax })
             }
-            TS_GLOBAL_DECLARATION => {
-                AnyJsDeclaration::TsGlobalDeclaration(TsGlobalDeclaration { syntax })
-            }
+            TS_GLOBAL_DECLARATION => Self::TsGlobalDeclaration(TsGlobalDeclaration { syntax }),
             TS_IMPORT_EQUALS_DECLARATION => {
-                AnyJsDeclaration::TsImportEqualsDeclaration(TsImportEqualsDeclaration { syntax })
+                Self::TsImportEqualsDeclaration(TsImportEqualsDeclaration { syntax })
             }
             TS_INTERFACE_DECLARATION => {
-                AnyJsDeclaration::TsInterfaceDeclaration(TsInterfaceDeclaration { syntax })
+                Self::TsInterfaceDeclaration(TsInterfaceDeclaration { syntax })
             }
-            TS_MODULE_DECLARATION => {
-                AnyJsDeclaration::TsModuleDeclaration(TsModuleDeclaration { syntax })
-            }
+            TS_MODULE_DECLARATION => Self::TsModuleDeclaration(TsModuleDeclaration { syntax }),
             TS_TYPE_ALIAS_DECLARATION => {
-                AnyJsDeclaration::TsTypeAliasDeclaration(TsTypeAliasDeclaration { syntax })
+                Self::TsTypeAliasDeclaration(TsTypeAliasDeclaration { syntax })
             }
             _ => return None,
         };
@@ -33856,54 +33768,54 @@ impl AstNode for AnyJsDeclaration {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsDeclaration::JsClassDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::JsFunctionDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::JsVariableDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::TsDeclareFunctionDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::TsEnumDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::TsExternalModuleDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::TsGlobalDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::TsImportEqualsDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::TsInterfaceDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::TsModuleDeclaration(it) => &it.syntax,
-            AnyJsDeclaration::TsTypeAliasDeclaration(it) => &it.syntax,
+            Self::JsClassDeclaration(it) => &it.syntax,
+            Self::JsFunctionDeclaration(it) => &it.syntax,
+            Self::JsVariableDeclaration(it) => &it.syntax,
+            Self::TsDeclareFunctionDeclaration(it) => &it.syntax,
+            Self::TsEnumDeclaration(it) => &it.syntax,
+            Self::TsExternalModuleDeclaration(it) => &it.syntax,
+            Self::TsGlobalDeclaration(it) => &it.syntax,
+            Self::TsImportEqualsDeclaration(it) => &it.syntax,
+            Self::TsInterfaceDeclaration(it) => &it.syntax,
+            Self::TsModuleDeclaration(it) => &it.syntax,
+            Self::TsTypeAliasDeclaration(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsDeclaration::JsClassDeclaration(it) => it.syntax,
-            AnyJsDeclaration::JsFunctionDeclaration(it) => it.syntax,
-            AnyJsDeclaration::JsVariableDeclaration(it) => it.syntax,
-            AnyJsDeclaration::TsDeclareFunctionDeclaration(it) => it.syntax,
-            AnyJsDeclaration::TsEnumDeclaration(it) => it.syntax,
-            AnyJsDeclaration::TsExternalModuleDeclaration(it) => it.syntax,
-            AnyJsDeclaration::TsGlobalDeclaration(it) => it.syntax,
-            AnyJsDeclaration::TsImportEqualsDeclaration(it) => it.syntax,
-            AnyJsDeclaration::TsInterfaceDeclaration(it) => it.syntax,
-            AnyJsDeclaration::TsModuleDeclaration(it) => it.syntax,
-            AnyJsDeclaration::TsTypeAliasDeclaration(it) => it.syntax,
+            Self::JsClassDeclaration(it) => it.syntax,
+            Self::JsFunctionDeclaration(it) => it.syntax,
+            Self::JsVariableDeclaration(it) => it.syntax,
+            Self::TsDeclareFunctionDeclaration(it) => it.syntax,
+            Self::TsEnumDeclaration(it) => it.syntax,
+            Self::TsExternalModuleDeclaration(it) => it.syntax,
+            Self::TsGlobalDeclaration(it) => it.syntax,
+            Self::TsImportEqualsDeclaration(it) => it.syntax,
+            Self::TsInterfaceDeclaration(it) => it.syntax,
+            Self::TsModuleDeclaration(it) => it.syntax,
+            Self::TsTypeAliasDeclaration(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsDeclaration::JsClassDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::JsVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::TsDeclareFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::TsEnumDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::TsExternalModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::TsGlobalDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::TsImportEqualsDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::TsInterfaceDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::TsModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclaration::TsTypeAliasDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsClassDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsDeclareFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsEnumDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsExternalModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsGlobalDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsImportEqualsDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsInterfaceDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeAliasDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsDeclaration> for SyntaxNode {
-    fn from(n: AnyJsDeclaration) -> SyntaxNode {
+    fn from(n: AnyJsDeclaration) -> Self {
         match n {
             AnyJsDeclaration::JsClassDeclaration(it) => it.into(),
             AnyJsDeclaration::JsFunctionDeclaration(it) => it.into(),
@@ -33920,64 +33832,64 @@ impl From<AnyJsDeclaration> for SyntaxNode {
     }
 }
 impl From<AnyJsDeclaration> for SyntaxElement {
-    fn from(n: AnyJsDeclaration) -> SyntaxElement {
+    fn from(n: AnyJsDeclaration) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsClassDeclaration> for AnyJsDeclarationClause {
-    fn from(node: JsClassDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::JsClassDeclaration(node)
+    fn from(node: JsClassDeclaration) -> Self {
+        Self::JsClassDeclaration(node)
     }
 }
 impl From<JsFunctionDeclaration> for AnyJsDeclarationClause {
-    fn from(node: JsFunctionDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::JsFunctionDeclaration(node)
+    fn from(node: JsFunctionDeclaration) -> Self {
+        Self::JsFunctionDeclaration(node)
     }
 }
 impl From<JsVariableDeclarationClause> for AnyJsDeclarationClause {
-    fn from(node: JsVariableDeclarationClause) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::JsVariableDeclarationClause(node)
+    fn from(node: JsVariableDeclarationClause) -> Self {
+        Self::JsVariableDeclarationClause(node)
     }
 }
 impl From<TsDeclareFunctionDeclaration> for AnyJsDeclarationClause {
-    fn from(node: TsDeclareFunctionDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::TsDeclareFunctionDeclaration(node)
+    fn from(node: TsDeclareFunctionDeclaration) -> Self {
+        Self::TsDeclareFunctionDeclaration(node)
     }
 }
 impl From<TsEnumDeclaration> for AnyJsDeclarationClause {
-    fn from(node: TsEnumDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::TsEnumDeclaration(node)
+    fn from(node: TsEnumDeclaration) -> Self {
+        Self::TsEnumDeclaration(node)
     }
 }
 impl From<TsExternalModuleDeclaration> for AnyJsDeclarationClause {
-    fn from(node: TsExternalModuleDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::TsExternalModuleDeclaration(node)
+    fn from(node: TsExternalModuleDeclaration) -> Self {
+        Self::TsExternalModuleDeclaration(node)
     }
 }
 impl From<TsGlobalDeclaration> for AnyJsDeclarationClause {
-    fn from(node: TsGlobalDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::TsGlobalDeclaration(node)
+    fn from(node: TsGlobalDeclaration) -> Self {
+        Self::TsGlobalDeclaration(node)
     }
 }
 impl From<TsImportEqualsDeclaration> for AnyJsDeclarationClause {
-    fn from(node: TsImportEqualsDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::TsImportEqualsDeclaration(node)
+    fn from(node: TsImportEqualsDeclaration) -> Self {
+        Self::TsImportEqualsDeclaration(node)
     }
 }
 impl From<TsInterfaceDeclaration> for AnyJsDeclarationClause {
-    fn from(node: TsInterfaceDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::TsInterfaceDeclaration(node)
+    fn from(node: TsInterfaceDeclaration) -> Self {
+        Self::TsInterfaceDeclaration(node)
     }
 }
 impl From<TsModuleDeclaration> for AnyJsDeclarationClause {
-    fn from(node: TsModuleDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::TsModuleDeclaration(node)
+    fn from(node: TsModuleDeclaration) -> Self {
+        Self::TsModuleDeclaration(node)
     }
 }
 impl From<TsTypeAliasDeclaration> for AnyJsDeclarationClause {
-    fn from(node: TsTypeAliasDeclaration) -> AnyJsDeclarationClause {
-        AnyJsDeclarationClause::TsTypeAliasDeclaration(node)
+    fn from(node: TsTypeAliasDeclaration) -> Self {
+        Self::TsTypeAliasDeclaration(node)
     }
 }
 impl AstNode for AnyJsDeclarationClause {
@@ -34011,46 +33923,30 @@ impl AstNode for AnyJsDeclarationClause {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_CLASS_DECLARATION => {
-                AnyJsDeclarationClause::JsClassDeclaration(JsClassDeclaration { syntax })
-            }
+            JS_CLASS_DECLARATION => Self::JsClassDeclaration(JsClassDeclaration { syntax }),
             JS_FUNCTION_DECLARATION => {
-                AnyJsDeclarationClause::JsFunctionDeclaration(JsFunctionDeclaration { syntax })
+                Self::JsFunctionDeclaration(JsFunctionDeclaration { syntax })
             }
             JS_VARIABLE_DECLARATION_CLAUSE => {
-                AnyJsDeclarationClause::JsVariableDeclarationClause(JsVariableDeclarationClause {
-                    syntax,
-                })
+                Self::JsVariableDeclarationClause(JsVariableDeclarationClause { syntax })
             }
             TS_DECLARE_FUNCTION_DECLARATION => {
-                AnyJsDeclarationClause::TsDeclareFunctionDeclaration(TsDeclareFunctionDeclaration {
-                    syntax,
-                })
+                Self::TsDeclareFunctionDeclaration(TsDeclareFunctionDeclaration { syntax })
             }
-            TS_ENUM_DECLARATION => {
-                AnyJsDeclarationClause::TsEnumDeclaration(TsEnumDeclaration { syntax })
-            }
+            TS_ENUM_DECLARATION => Self::TsEnumDeclaration(TsEnumDeclaration { syntax }),
             TS_EXTERNAL_MODULE_DECLARATION => {
-                AnyJsDeclarationClause::TsExternalModuleDeclaration(TsExternalModuleDeclaration {
-                    syntax,
-                })
+                Self::TsExternalModuleDeclaration(TsExternalModuleDeclaration { syntax })
             }
-            TS_GLOBAL_DECLARATION => {
-                AnyJsDeclarationClause::TsGlobalDeclaration(TsGlobalDeclaration { syntax })
-            }
+            TS_GLOBAL_DECLARATION => Self::TsGlobalDeclaration(TsGlobalDeclaration { syntax }),
             TS_IMPORT_EQUALS_DECLARATION => {
-                AnyJsDeclarationClause::TsImportEqualsDeclaration(TsImportEqualsDeclaration {
-                    syntax,
-                })
+                Self::TsImportEqualsDeclaration(TsImportEqualsDeclaration { syntax })
             }
             TS_INTERFACE_DECLARATION => {
-                AnyJsDeclarationClause::TsInterfaceDeclaration(TsInterfaceDeclaration { syntax })
+                Self::TsInterfaceDeclaration(TsInterfaceDeclaration { syntax })
             }
-            TS_MODULE_DECLARATION => {
-                AnyJsDeclarationClause::TsModuleDeclaration(TsModuleDeclaration { syntax })
-            }
+            TS_MODULE_DECLARATION => Self::TsModuleDeclaration(TsModuleDeclaration { syntax }),
             TS_TYPE_ALIAS_DECLARATION => {
-                AnyJsDeclarationClause::TsTypeAliasDeclaration(TsTypeAliasDeclaration { syntax })
+                Self::TsTypeAliasDeclaration(TsTypeAliasDeclaration { syntax })
             }
             _ => return None,
         };
@@ -34058,54 +33954,54 @@ impl AstNode for AnyJsDeclarationClause {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsDeclarationClause::JsClassDeclaration(it) => &it.syntax,
-            AnyJsDeclarationClause::JsFunctionDeclaration(it) => &it.syntax,
-            AnyJsDeclarationClause::JsVariableDeclarationClause(it) => &it.syntax,
-            AnyJsDeclarationClause::TsDeclareFunctionDeclaration(it) => &it.syntax,
-            AnyJsDeclarationClause::TsEnumDeclaration(it) => &it.syntax,
-            AnyJsDeclarationClause::TsExternalModuleDeclaration(it) => &it.syntax,
-            AnyJsDeclarationClause::TsGlobalDeclaration(it) => &it.syntax,
-            AnyJsDeclarationClause::TsImportEqualsDeclaration(it) => &it.syntax,
-            AnyJsDeclarationClause::TsInterfaceDeclaration(it) => &it.syntax,
-            AnyJsDeclarationClause::TsModuleDeclaration(it) => &it.syntax,
-            AnyJsDeclarationClause::TsTypeAliasDeclaration(it) => &it.syntax,
+            Self::JsClassDeclaration(it) => &it.syntax,
+            Self::JsFunctionDeclaration(it) => &it.syntax,
+            Self::JsVariableDeclarationClause(it) => &it.syntax,
+            Self::TsDeclareFunctionDeclaration(it) => &it.syntax,
+            Self::TsEnumDeclaration(it) => &it.syntax,
+            Self::TsExternalModuleDeclaration(it) => &it.syntax,
+            Self::TsGlobalDeclaration(it) => &it.syntax,
+            Self::TsImportEqualsDeclaration(it) => &it.syntax,
+            Self::TsInterfaceDeclaration(it) => &it.syntax,
+            Self::TsModuleDeclaration(it) => &it.syntax,
+            Self::TsTypeAliasDeclaration(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsDeclarationClause::JsClassDeclaration(it) => it.syntax,
-            AnyJsDeclarationClause::JsFunctionDeclaration(it) => it.syntax,
-            AnyJsDeclarationClause::JsVariableDeclarationClause(it) => it.syntax,
-            AnyJsDeclarationClause::TsDeclareFunctionDeclaration(it) => it.syntax,
-            AnyJsDeclarationClause::TsEnumDeclaration(it) => it.syntax,
-            AnyJsDeclarationClause::TsExternalModuleDeclaration(it) => it.syntax,
-            AnyJsDeclarationClause::TsGlobalDeclaration(it) => it.syntax,
-            AnyJsDeclarationClause::TsImportEqualsDeclaration(it) => it.syntax,
-            AnyJsDeclarationClause::TsInterfaceDeclaration(it) => it.syntax,
-            AnyJsDeclarationClause::TsModuleDeclaration(it) => it.syntax,
-            AnyJsDeclarationClause::TsTypeAliasDeclaration(it) => it.syntax,
+            Self::JsClassDeclaration(it) => it.syntax,
+            Self::JsFunctionDeclaration(it) => it.syntax,
+            Self::JsVariableDeclarationClause(it) => it.syntax,
+            Self::TsDeclareFunctionDeclaration(it) => it.syntax,
+            Self::TsEnumDeclaration(it) => it.syntax,
+            Self::TsExternalModuleDeclaration(it) => it.syntax,
+            Self::TsGlobalDeclaration(it) => it.syntax,
+            Self::TsImportEqualsDeclaration(it) => it.syntax,
+            Self::TsInterfaceDeclaration(it) => it.syntax,
+            Self::TsModuleDeclaration(it) => it.syntax,
+            Self::TsTypeAliasDeclaration(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsDeclarationClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsDeclarationClause::JsClassDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::JsVariableDeclarationClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::TsDeclareFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::TsEnumDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::TsExternalModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::TsGlobalDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::TsImportEqualsDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::TsInterfaceDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::TsModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDeclarationClause::TsTypeAliasDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsClassDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsVariableDeclarationClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsDeclareFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsEnumDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsExternalModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsGlobalDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsImportEqualsDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsInterfaceDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeAliasDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsDeclarationClause> for SyntaxNode {
-    fn from(n: AnyJsDeclarationClause) -> SyntaxNode {
+    fn from(n: AnyJsDeclarationClause) -> Self {
         match n {
             AnyJsDeclarationClause::JsClassDeclaration(it) => it.into(),
             AnyJsDeclarationClause::JsFunctionDeclaration(it) => it.into(),
@@ -34122,34 +34018,34 @@ impl From<AnyJsDeclarationClause> for SyntaxNode {
     }
 }
 impl From<AnyJsDeclarationClause> for SyntaxElement {
-    fn from(n: AnyJsDeclarationClause) -> SyntaxElement {
+    fn from(n: AnyJsDeclarationClause) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusExpression> for AnyJsDecorator {
-    fn from(node: JsBogusExpression) -> AnyJsDecorator {
-        AnyJsDecorator::JsBogusExpression(node)
+    fn from(node: JsBogusExpression) -> Self {
+        Self::JsBogusExpression(node)
     }
 }
 impl From<JsCallExpression> for AnyJsDecorator {
-    fn from(node: JsCallExpression) -> AnyJsDecorator {
-        AnyJsDecorator::JsCallExpression(node)
+    fn from(node: JsCallExpression) -> Self {
+        Self::JsCallExpression(node)
     }
 }
 impl From<JsIdentifierExpression> for AnyJsDecorator {
-    fn from(node: JsIdentifierExpression) -> AnyJsDecorator {
-        AnyJsDecorator::JsIdentifierExpression(node)
+    fn from(node: JsIdentifierExpression) -> Self {
+        Self::JsIdentifierExpression(node)
     }
 }
 impl From<JsParenthesizedExpression> for AnyJsDecorator {
-    fn from(node: JsParenthesizedExpression) -> AnyJsDecorator {
-        AnyJsDecorator::JsParenthesizedExpression(node)
+    fn from(node: JsParenthesizedExpression) -> Self {
+        Self::JsParenthesizedExpression(node)
     }
 }
 impl From<JsStaticMemberExpression> for AnyJsDecorator {
-    fn from(node: JsStaticMemberExpression) -> AnyJsDecorator {
-        AnyJsDecorator::JsStaticMemberExpression(node)
+    fn from(node: JsStaticMemberExpression) -> Self {
+        Self::JsStaticMemberExpression(node)
     }
 }
 impl AstNode for AnyJsDecorator {
@@ -34171,16 +34067,16 @@ impl AstNode for AnyJsDecorator {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BOGUS_EXPRESSION => AnyJsDecorator::JsBogusExpression(JsBogusExpression { syntax }),
-            JS_CALL_EXPRESSION => AnyJsDecorator::JsCallExpression(JsCallExpression { syntax }),
+            JS_BOGUS_EXPRESSION => Self::JsBogusExpression(JsBogusExpression { syntax }),
+            JS_CALL_EXPRESSION => Self::JsCallExpression(JsCallExpression { syntax }),
             JS_IDENTIFIER_EXPRESSION => {
-                AnyJsDecorator::JsIdentifierExpression(JsIdentifierExpression { syntax })
+                Self::JsIdentifierExpression(JsIdentifierExpression { syntax })
             }
             JS_PARENTHESIZED_EXPRESSION => {
-                AnyJsDecorator::JsParenthesizedExpression(JsParenthesizedExpression { syntax })
+                Self::JsParenthesizedExpression(JsParenthesizedExpression { syntax })
             }
             JS_STATIC_MEMBER_EXPRESSION => {
-                AnyJsDecorator::JsStaticMemberExpression(JsStaticMemberExpression { syntax })
+                Self::JsStaticMemberExpression(JsStaticMemberExpression { syntax })
             }
             _ => return None,
         };
@@ -34188,36 +34084,36 @@ impl AstNode for AnyJsDecorator {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsDecorator::JsBogusExpression(it) => &it.syntax,
-            AnyJsDecorator::JsCallExpression(it) => &it.syntax,
-            AnyJsDecorator::JsIdentifierExpression(it) => &it.syntax,
-            AnyJsDecorator::JsParenthesizedExpression(it) => &it.syntax,
-            AnyJsDecorator::JsStaticMemberExpression(it) => &it.syntax,
+            Self::JsBogusExpression(it) => &it.syntax,
+            Self::JsCallExpression(it) => &it.syntax,
+            Self::JsIdentifierExpression(it) => &it.syntax,
+            Self::JsParenthesizedExpression(it) => &it.syntax,
+            Self::JsStaticMemberExpression(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsDecorator::JsBogusExpression(it) => it.syntax,
-            AnyJsDecorator::JsCallExpression(it) => it.syntax,
-            AnyJsDecorator::JsIdentifierExpression(it) => it.syntax,
-            AnyJsDecorator::JsParenthesizedExpression(it) => it.syntax,
-            AnyJsDecorator::JsStaticMemberExpression(it) => it.syntax,
+            Self::JsBogusExpression(it) => it.syntax,
+            Self::JsCallExpression(it) => it.syntax,
+            Self::JsIdentifierExpression(it) => it.syntax,
+            Self::JsParenthesizedExpression(it) => it.syntax,
+            Self::JsStaticMemberExpression(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsDecorator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsDecorator::JsBogusExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDecorator::JsCallExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDecorator::JsIdentifierExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDecorator::JsParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsDecorator::JsStaticMemberExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsCallExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsIdentifierExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStaticMemberExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsDecorator> for SyntaxNode {
-    fn from(n: AnyJsDecorator) -> SyntaxNode {
+    fn from(n: AnyJsDecorator) -> Self {
         match n {
             AnyJsDecorator::JsBogusExpression(it) => it.into(),
             AnyJsDecorator::JsCallExpression(it) => it.into(),
@@ -34228,49 +34124,49 @@ impl From<AnyJsDecorator> for SyntaxNode {
     }
 }
 impl From<AnyJsDecorator> for SyntaxElement {
-    fn from(n: AnyJsDecorator) -> SyntaxElement {
+    fn from(n: AnyJsDecorator) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsExportDefaultDeclarationClause> for AnyJsExportClause {
-    fn from(node: JsExportDefaultDeclarationClause) -> AnyJsExportClause {
-        AnyJsExportClause::JsExportDefaultDeclarationClause(node)
+    fn from(node: JsExportDefaultDeclarationClause) -> Self {
+        Self::JsExportDefaultDeclarationClause(node)
     }
 }
 impl From<JsExportDefaultExpressionClause> for AnyJsExportClause {
-    fn from(node: JsExportDefaultExpressionClause) -> AnyJsExportClause {
-        AnyJsExportClause::JsExportDefaultExpressionClause(node)
+    fn from(node: JsExportDefaultExpressionClause) -> Self {
+        Self::JsExportDefaultExpressionClause(node)
     }
 }
 impl From<JsExportFromClause> for AnyJsExportClause {
-    fn from(node: JsExportFromClause) -> AnyJsExportClause {
-        AnyJsExportClause::JsExportFromClause(node)
+    fn from(node: JsExportFromClause) -> Self {
+        Self::JsExportFromClause(node)
     }
 }
 impl From<JsExportNamedClause> for AnyJsExportClause {
-    fn from(node: JsExportNamedClause) -> AnyJsExportClause {
-        AnyJsExportClause::JsExportNamedClause(node)
+    fn from(node: JsExportNamedClause) -> Self {
+        Self::JsExportNamedClause(node)
     }
 }
 impl From<JsExportNamedFromClause> for AnyJsExportClause {
-    fn from(node: JsExportNamedFromClause) -> AnyJsExportClause {
-        AnyJsExportClause::JsExportNamedFromClause(node)
+    fn from(node: JsExportNamedFromClause) -> Self {
+        Self::JsExportNamedFromClause(node)
     }
 }
 impl From<TsExportAsNamespaceClause> for AnyJsExportClause {
-    fn from(node: TsExportAsNamespaceClause) -> AnyJsExportClause {
-        AnyJsExportClause::TsExportAsNamespaceClause(node)
+    fn from(node: TsExportAsNamespaceClause) -> Self {
+        Self::TsExportAsNamespaceClause(node)
     }
 }
 impl From<TsExportAssignmentClause> for AnyJsExportClause {
-    fn from(node: TsExportAssignmentClause) -> AnyJsExportClause {
-        AnyJsExportClause::TsExportAssignmentClause(node)
+    fn from(node: TsExportAssignmentClause) -> Self {
+        Self::TsExportAssignmentClause(node)
     }
 }
 impl From<TsExportDeclareClause> for AnyJsExportClause {
-    fn from(node: TsExportDeclareClause) -> AnyJsExportClause {
-        AnyJsExportClause::TsExportDeclareClause(node)
+    fn from(node: TsExportDeclareClause) -> Self {
+        Self::TsExportDeclareClause(node)
     }
 }
 impl AstNode for AnyJsExportClause {
@@ -34301,38 +34197,28 @@ impl AstNode for AnyJsExportClause {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_EXPORT_DEFAULT_DECLARATION_CLAUSE => {
-                AnyJsExportClause::JsExportDefaultDeclarationClause(
-                    JsExportDefaultDeclarationClause { syntax },
-                )
+                Self::JsExportDefaultDeclarationClause(JsExportDefaultDeclarationClause { syntax })
             }
             JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE => {
-                AnyJsExportClause::JsExportDefaultExpressionClause(
-                    JsExportDefaultExpressionClause { syntax },
-                )
+                Self::JsExportDefaultExpressionClause(JsExportDefaultExpressionClause { syntax })
             }
-            JS_EXPORT_FROM_CLAUSE => {
-                AnyJsExportClause::JsExportFromClause(JsExportFromClause { syntax })
-            }
-            JS_EXPORT_NAMED_CLAUSE => {
-                AnyJsExportClause::JsExportNamedClause(JsExportNamedClause { syntax })
-            }
+            JS_EXPORT_FROM_CLAUSE => Self::JsExportFromClause(JsExportFromClause { syntax }),
+            JS_EXPORT_NAMED_CLAUSE => Self::JsExportNamedClause(JsExportNamedClause { syntax }),
             JS_EXPORT_NAMED_FROM_CLAUSE => {
-                AnyJsExportClause::JsExportNamedFromClause(JsExportNamedFromClause { syntax })
+                Self::JsExportNamedFromClause(JsExportNamedFromClause { syntax })
             }
             TS_EXPORT_AS_NAMESPACE_CLAUSE => {
-                AnyJsExportClause::TsExportAsNamespaceClause(TsExportAsNamespaceClause { syntax })
+                Self::TsExportAsNamespaceClause(TsExportAsNamespaceClause { syntax })
             }
             TS_EXPORT_ASSIGNMENT_CLAUSE => {
-                AnyJsExportClause::TsExportAssignmentClause(TsExportAssignmentClause { syntax })
+                Self::TsExportAssignmentClause(TsExportAssignmentClause { syntax })
             }
             TS_EXPORT_DECLARE_CLAUSE => {
-                AnyJsExportClause::TsExportDeclareClause(TsExportDeclareClause { syntax })
+                Self::TsExportDeclareClause(TsExportDeclareClause { syntax })
             }
             _ => {
                 if let Some(any_js_declaration_clause) = AnyJsDeclarationClause::cast(syntax) {
-                    return Some(AnyJsExportClause::AnyJsDeclarationClause(
-                        any_js_declaration_clause,
-                    ));
+                    return Some(Self::AnyJsDeclarationClause(any_js_declaration_clause));
                 }
                 return None;
             }
@@ -34341,48 +34227,48 @@ impl AstNode for AnyJsExportClause {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsExportClause::JsExportDefaultDeclarationClause(it) => &it.syntax,
-            AnyJsExportClause::JsExportDefaultExpressionClause(it) => &it.syntax,
-            AnyJsExportClause::JsExportFromClause(it) => &it.syntax,
-            AnyJsExportClause::JsExportNamedClause(it) => &it.syntax,
-            AnyJsExportClause::JsExportNamedFromClause(it) => &it.syntax,
-            AnyJsExportClause::TsExportAsNamespaceClause(it) => &it.syntax,
-            AnyJsExportClause::TsExportAssignmentClause(it) => &it.syntax,
-            AnyJsExportClause::TsExportDeclareClause(it) => &it.syntax,
-            AnyJsExportClause::AnyJsDeclarationClause(it) => it.syntax(),
+            Self::JsExportDefaultDeclarationClause(it) => &it.syntax,
+            Self::JsExportDefaultExpressionClause(it) => &it.syntax,
+            Self::JsExportFromClause(it) => &it.syntax,
+            Self::JsExportNamedClause(it) => &it.syntax,
+            Self::JsExportNamedFromClause(it) => &it.syntax,
+            Self::TsExportAsNamespaceClause(it) => &it.syntax,
+            Self::TsExportAssignmentClause(it) => &it.syntax,
+            Self::TsExportDeclareClause(it) => &it.syntax,
+            Self::AnyJsDeclarationClause(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsExportClause::JsExportDefaultDeclarationClause(it) => it.syntax,
-            AnyJsExportClause::JsExportDefaultExpressionClause(it) => it.syntax,
-            AnyJsExportClause::JsExportFromClause(it) => it.syntax,
-            AnyJsExportClause::JsExportNamedClause(it) => it.syntax,
-            AnyJsExportClause::JsExportNamedFromClause(it) => it.syntax,
-            AnyJsExportClause::TsExportAsNamespaceClause(it) => it.syntax,
-            AnyJsExportClause::TsExportAssignmentClause(it) => it.syntax,
-            AnyJsExportClause::TsExportDeclareClause(it) => it.syntax,
-            AnyJsExportClause::AnyJsDeclarationClause(it) => it.into_syntax(),
+            Self::JsExportDefaultDeclarationClause(it) => it.syntax,
+            Self::JsExportDefaultExpressionClause(it) => it.syntax,
+            Self::JsExportFromClause(it) => it.syntax,
+            Self::JsExportNamedClause(it) => it.syntax,
+            Self::JsExportNamedFromClause(it) => it.syntax,
+            Self::TsExportAsNamespaceClause(it) => it.syntax,
+            Self::TsExportAssignmentClause(it) => it.syntax,
+            Self::TsExportDeclareClause(it) => it.syntax,
+            Self::AnyJsDeclarationClause(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsExportClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsExportClause::AnyJsDeclarationClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExportClause::JsExportDefaultDeclarationClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExportClause::JsExportDefaultExpressionClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExportClause::JsExportFromClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExportClause::JsExportNamedClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExportClause::JsExportNamedFromClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExportClause::TsExportAsNamespaceClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExportClause::TsExportAssignmentClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExportClause::TsExportDeclareClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsDeclarationClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExportDefaultDeclarationClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExportDefaultExpressionClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExportFromClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExportNamedClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExportNamedFromClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsExportAsNamespaceClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsExportAssignmentClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsExportDeclareClause(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsExportClause> for SyntaxNode {
-    fn from(n: AnyJsExportClause) -> SyntaxNode {
+    fn from(n: AnyJsExportClause) -> Self {
         match n {
             AnyJsExportClause::AnyJsDeclarationClause(it) => it.into(),
             AnyJsExportClause::JsExportDefaultDeclarationClause(it) => it.into(),
@@ -34397,29 +34283,29 @@ impl From<AnyJsExportClause> for SyntaxNode {
     }
 }
 impl From<AnyJsExportClause> for SyntaxElement {
-    fn from(n: AnyJsExportClause) -> SyntaxElement {
+    fn from(n: AnyJsExportClause) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsClassExportDefaultDeclaration> for AnyJsExportDefaultDeclaration {
-    fn from(node: JsClassExportDefaultDeclaration) -> AnyJsExportDefaultDeclaration {
-        AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(node)
+    fn from(node: JsClassExportDefaultDeclaration) -> Self {
+        Self::JsClassExportDefaultDeclaration(node)
     }
 }
 impl From<JsFunctionExportDefaultDeclaration> for AnyJsExportDefaultDeclaration {
-    fn from(node: JsFunctionExportDefaultDeclaration) -> AnyJsExportDefaultDeclaration {
-        AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(node)
+    fn from(node: JsFunctionExportDefaultDeclaration) -> Self {
+        Self::JsFunctionExportDefaultDeclaration(node)
     }
 }
 impl From<TsDeclareFunctionExportDefaultDeclaration> for AnyJsExportDefaultDeclaration {
-    fn from(node: TsDeclareFunctionExportDefaultDeclaration) -> AnyJsExportDefaultDeclaration {
-        AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(node)
+    fn from(node: TsDeclareFunctionExportDefaultDeclaration) -> Self {
+        Self::TsDeclareFunctionExportDefaultDeclaration(node)
     }
 }
 impl From<TsInterfaceDeclaration> for AnyJsExportDefaultDeclaration {
-    fn from(node: TsInterfaceDeclaration) -> AnyJsExportDefaultDeclaration {
-        AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(node)
+    fn from(node: TsInterfaceDeclaration) -> Self {
+        Self::TsInterfaceDeclaration(node)
     }
 }
 impl AstNode for AnyJsExportDefaultDeclaration {
@@ -34440,24 +34326,20 @@ impl AstNode for AnyJsExportDefaultDeclaration {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_CLASS_EXPORT_DEFAULT_DECLARATION => {
-                AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(
-                    JsClassExportDefaultDeclaration { syntax },
-                )
+                Self::JsClassExportDefaultDeclaration(JsClassExportDefaultDeclaration { syntax })
             }
             JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
-                AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(
-                    JsFunctionExportDefaultDeclaration { syntax },
-                )
+                Self::JsFunctionExportDefaultDeclaration(JsFunctionExportDefaultDeclaration {
+                    syntax,
+                })
             }
             TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
-                AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(
+                Self::TsDeclareFunctionExportDefaultDeclaration(
                     TsDeclareFunctionExportDefaultDeclaration { syntax },
                 )
             }
             TS_INTERFACE_DECLARATION => {
-                AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(TsInterfaceDeclaration {
-                    syntax,
-                })
+                Self::TsInterfaceDeclaration(TsInterfaceDeclaration { syntax })
             }
             _ => return None,
         };
@@ -34465,45 +34347,33 @@ impl AstNode for AnyJsExportDefaultDeclaration {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(it) => &it.syntax,
-            AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(it) => &it.syntax,
-            AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(it) => {
-                &it.syntax
-            }
-            AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(it) => &it.syntax,
+            Self::JsClassExportDefaultDeclaration(it) => &it.syntax,
+            Self::JsFunctionExportDefaultDeclaration(it) => &it.syntax,
+            Self::TsDeclareFunctionExportDefaultDeclaration(it) => &it.syntax,
+            Self::TsInterfaceDeclaration(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(it) => it.syntax,
-            AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(it) => it.syntax,
-            AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(it) => {
-                it.syntax
-            }
-            AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(it) => it.syntax,
+            Self::JsClassExportDefaultDeclaration(it) => it.syntax,
+            Self::JsFunctionExportDefaultDeclaration(it) => it.syntax,
+            Self::TsDeclareFunctionExportDefaultDeclaration(it) => it.syntax,
+            Self::TsInterfaceDeclaration(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsExportDefaultDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
+            Self::JsClassExportDefaultDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFunctionExportDefaultDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsDeclareFunctionExportDefaultDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsInterfaceDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsExportDefaultDeclaration> for SyntaxNode {
-    fn from(n: AnyJsExportDefaultDeclaration) -> SyntaxNode {
+    fn from(n: AnyJsExportDefaultDeclaration) -> Self {
         match n {
             AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(it) => it.into(),
             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(it) => it.into(),
@@ -34515,19 +34385,19 @@ impl From<AnyJsExportDefaultDeclaration> for SyntaxNode {
     }
 }
 impl From<AnyJsExportDefaultDeclaration> for SyntaxElement {
-    fn from(n: AnyJsExportDefaultDeclaration) -> SyntaxElement {
+    fn from(n: AnyJsExportDefaultDeclaration) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsExportNamedShorthandSpecifier> for AnyJsExportNamedSpecifier {
-    fn from(node: JsExportNamedShorthandSpecifier) -> AnyJsExportNamedSpecifier {
-        AnyJsExportNamedSpecifier::JsExportNamedShorthandSpecifier(node)
+    fn from(node: JsExportNamedShorthandSpecifier) -> Self {
+        Self::JsExportNamedShorthandSpecifier(node)
     }
 }
 impl From<JsExportNamedSpecifier> for AnyJsExportNamedSpecifier {
-    fn from(node: JsExportNamedSpecifier) -> AnyJsExportNamedSpecifier {
-        AnyJsExportNamedSpecifier::JsExportNamedSpecifier(node)
+    fn from(node: JsExportNamedSpecifier) -> Self {
+        Self::JsExportNamedSpecifier(node)
     }
 }
 impl AstNode for AnyJsExportNamedSpecifier {
@@ -34543,12 +34413,10 @@ impl AstNode for AnyJsExportNamedSpecifier {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_EXPORT_NAMED_SHORTHAND_SPECIFIER => {
-                AnyJsExportNamedSpecifier::JsExportNamedShorthandSpecifier(
-                    JsExportNamedShorthandSpecifier { syntax },
-                )
+                Self::JsExportNamedShorthandSpecifier(JsExportNamedShorthandSpecifier { syntax })
             }
             JS_EXPORT_NAMED_SPECIFIER => {
-                AnyJsExportNamedSpecifier::JsExportNamedSpecifier(JsExportNamedSpecifier { syntax })
+                Self::JsExportNamedSpecifier(JsExportNamedSpecifier { syntax })
             }
             _ => return None,
         };
@@ -34556,29 +34424,27 @@ impl AstNode for AnyJsExportNamedSpecifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsExportNamedSpecifier::JsExportNamedShorthandSpecifier(it) => &it.syntax,
-            AnyJsExportNamedSpecifier::JsExportNamedSpecifier(it) => &it.syntax,
+            Self::JsExportNamedShorthandSpecifier(it) => &it.syntax,
+            Self::JsExportNamedSpecifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsExportNamedSpecifier::JsExportNamedShorthandSpecifier(it) => it.syntax,
-            AnyJsExportNamedSpecifier::JsExportNamedSpecifier(it) => it.syntax,
+            Self::JsExportNamedShorthandSpecifier(it) => it.syntax,
+            Self::JsExportNamedSpecifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsExportNamedSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsExportNamedSpecifier::JsExportNamedShorthandSpecifier(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsExportNamedSpecifier::JsExportNamedSpecifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExportNamedShorthandSpecifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExportNamedSpecifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsExportNamedSpecifier> for SyntaxNode {
-    fn from(n: AnyJsExportNamedSpecifier) -> SyntaxNode {
+    fn from(n: AnyJsExportNamedSpecifier) -> Self {
         match n {
             AnyJsExportNamedSpecifier::JsExportNamedShorthandSpecifier(it) => it.into(),
             AnyJsExportNamedSpecifier::JsExportNamedSpecifier(it) => it.into(),
@@ -34586,194 +34452,194 @@ impl From<AnyJsExportNamedSpecifier> for SyntaxNode {
     }
 }
 impl From<AnyJsExportNamedSpecifier> for SyntaxElement {
-    fn from(n: AnyJsExportNamedSpecifier) -> SyntaxElement {
+    fn from(n: AnyJsExportNamedSpecifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsArrayExpression> for AnyJsExpression {
-    fn from(node: JsArrayExpression) -> AnyJsExpression {
-        AnyJsExpression::JsArrayExpression(node)
+    fn from(node: JsArrayExpression) -> Self {
+        Self::JsArrayExpression(node)
     }
 }
 impl From<JsArrowFunctionExpression> for AnyJsExpression {
-    fn from(node: JsArrowFunctionExpression) -> AnyJsExpression {
-        AnyJsExpression::JsArrowFunctionExpression(node)
+    fn from(node: JsArrowFunctionExpression) -> Self {
+        Self::JsArrowFunctionExpression(node)
     }
 }
 impl From<JsAssignmentExpression> for AnyJsExpression {
-    fn from(node: JsAssignmentExpression) -> AnyJsExpression {
-        AnyJsExpression::JsAssignmentExpression(node)
+    fn from(node: JsAssignmentExpression) -> Self {
+        Self::JsAssignmentExpression(node)
     }
 }
 impl From<JsAwaitExpression> for AnyJsExpression {
-    fn from(node: JsAwaitExpression) -> AnyJsExpression {
-        AnyJsExpression::JsAwaitExpression(node)
+    fn from(node: JsAwaitExpression) -> Self {
+        Self::JsAwaitExpression(node)
     }
 }
 impl From<JsBinaryExpression> for AnyJsExpression {
-    fn from(node: JsBinaryExpression) -> AnyJsExpression {
-        AnyJsExpression::JsBinaryExpression(node)
+    fn from(node: JsBinaryExpression) -> Self {
+        Self::JsBinaryExpression(node)
     }
 }
 impl From<JsBogusExpression> for AnyJsExpression {
-    fn from(node: JsBogusExpression) -> AnyJsExpression {
-        AnyJsExpression::JsBogusExpression(node)
+    fn from(node: JsBogusExpression) -> Self {
+        Self::JsBogusExpression(node)
     }
 }
 impl From<JsCallExpression> for AnyJsExpression {
-    fn from(node: JsCallExpression) -> AnyJsExpression {
-        AnyJsExpression::JsCallExpression(node)
+    fn from(node: JsCallExpression) -> Self {
+        Self::JsCallExpression(node)
     }
 }
 impl From<JsClassExpression> for AnyJsExpression {
-    fn from(node: JsClassExpression) -> AnyJsExpression {
-        AnyJsExpression::JsClassExpression(node)
+    fn from(node: JsClassExpression) -> Self {
+        Self::JsClassExpression(node)
     }
 }
 impl From<JsComputedMemberExpression> for AnyJsExpression {
-    fn from(node: JsComputedMemberExpression) -> AnyJsExpression {
-        AnyJsExpression::JsComputedMemberExpression(node)
+    fn from(node: JsComputedMemberExpression) -> Self {
+        Self::JsComputedMemberExpression(node)
     }
 }
 impl From<JsConditionalExpression> for AnyJsExpression {
-    fn from(node: JsConditionalExpression) -> AnyJsExpression {
-        AnyJsExpression::JsConditionalExpression(node)
+    fn from(node: JsConditionalExpression) -> Self {
+        Self::JsConditionalExpression(node)
     }
 }
 impl From<JsFunctionExpression> for AnyJsExpression {
-    fn from(node: JsFunctionExpression) -> AnyJsExpression {
-        AnyJsExpression::JsFunctionExpression(node)
+    fn from(node: JsFunctionExpression) -> Self {
+        Self::JsFunctionExpression(node)
     }
 }
 impl From<JsIdentifierExpression> for AnyJsExpression {
-    fn from(node: JsIdentifierExpression) -> AnyJsExpression {
-        AnyJsExpression::JsIdentifierExpression(node)
+    fn from(node: JsIdentifierExpression) -> Self {
+        Self::JsIdentifierExpression(node)
     }
 }
 impl From<JsImportCallExpression> for AnyJsExpression {
-    fn from(node: JsImportCallExpression) -> AnyJsExpression {
-        AnyJsExpression::JsImportCallExpression(node)
+    fn from(node: JsImportCallExpression) -> Self {
+        Self::JsImportCallExpression(node)
     }
 }
 impl From<JsImportMetaExpression> for AnyJsExpression {
-    fn from(node: JsImportMetaExpression) -> AnyJsExpression {
-        AnyJsExpression::JsImportMetaExpression(node)
+    fn from(node: JsImportMetaExpression) -> Self {
+        Self::JsImportMetaExpression(node)
     }
 }
 impl From<JsInExpression> for AnyJsExpression {
-    fn from(node: JsInExpression) -> AnyJsExpression {
-        AnyJsExpression::JsInExpression(node)
+    fn from(node: JsInExpression) -> Self {
+        Self::JsInExpression(node)
     }
 }
 impl From<JsInstanceofExpression> for AnyJsExpression {
-    fn from(node: JsInstanceofExpression) -> AnyJsExpression {
-        AnyJsExpression::JsInstanceofExpression(node)
+    fn from(node: JsInstanceofExpression) -> Self {
+        Self::JsInstanceofExpression(node)
     }
 }
 impl From<JsLogicalExpression> for AnyJsExpression {
-    fn from(node: JsLogicalExpression) -> AnyJsExpression {
-        AnyJsExpression::JsLogicalExpression(node)
+    fn from(node: JsLogicalExpression) -> Self {
+        Self::JsLogicalExpression(node)
     }
 }
 impl From<JsMetavariable> for AnyJsExpression {
-    fn from(node: JsMetavariable) -> AnyJsExpression {
-        AnyJsExpression::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsNewExpression> for AnyJsExpression {
-    fn from(node: JsNewExpression) -> AnyJsExpression {
-        AnyJsExpression::JsNewExpression(node)
+    fn from(node: JsNewExpression) -> Self {
+        Self::JsNewExpression(node)
     }
 }
 impl From<JsNewTargetExpression> for AnyJsExpression {
-    fn from(node: JsNewTargetExpression) -> AnyJsExpression {
-        AnyJsExpression::JsNewTargetExpression(node)
+    fn from(node: JsNewTargetExpression) -> Self {
+        Self::JsNewTargetExpression(node)
     }
 }
 impl From<JsObjectExpression> for AnyJsExpression {
-    fn from(node: JsObjectExpression) -> AnyJsExpression {
-        AnyJsExpression::JsObjectExpression(node)
+    fn from(node: JsObjectExpression) -> Self {
+        Self::JsObjectExpression(node)
     }
 }
 impl From<JsParenthesizedExpression> for AnyJsExpression {
-    fn from(node: JsParenthesizedExpression) -> AnyJsExpression {
-        AnyJsExpression::JsParenthesizedExpression(node)
+    fn from(node: JsParenthesizedExpression) -> Self {
+        Self::JsParenthesizedExpression(node)
     }
 }
 impl From<JsPostUpdateExpression> for AnyJsExpression {
-    fn from(node: JsPostUpdateExpression) -> AnyJsExpression {
-        AnyJsExpression::JsPostUpdateExpression(node)
+    fn from(node: JsPostUpdateExpression) -> Self {
+        Self::JsPostUpdateExpression(node)
     }
 }
 impl From<JsPreUpdateExpression> for AnyJsExpression {
-    fn from(node: JsPreUpdateExpression) -> AnyJsExpression {
-        AnyJsExpression::JsPreUpdateExpression(node)
+    fn from(node: JsPreUpdateExpression) -> Self {
+        Self::JsPreUpdateExpression(node)
     }
 }
 impl From<JsSequenceExpression> for AnyJsExpression {
-    fn from(node: JsSequenceExpression) -> AnyJsExpression {
-        AnyJsExpression::JsSequenceExpression(node)
+    fn from(node: JsSequenceExpression) -> Self {
+        Self::JsSequenceExpression(node)
     }
 }
 impl From<JsStaticMemberExpression> for AnyJsExpression {
-    fn from(node: JsStaticMemberExpression) -> AnyJsExpression {
-        AnyJsExpression::JsStaticMemberExpression(node)
+    fn from(node: JsStaticMemberExpression) -> Self {
+        Self::JsStaticMemberExpression(node)
     }
 }
 impl From<JsSuperExpression> for AnyJsExpression {
-    fn from(node: JsSuperExpression) -> AnyJsExpression {
-        AnyJsExpression::JsSuperExpression(node)
+    fn from(node: JsSuperExpression) -> Self {
+        Self::JsSuperExpression(node)
     }
 }
 impl From<JsTemplateExpression> for AnyJsExpression {
-    fn from(node: JsTemplateExpression) -> AnyJsExpression {
-        AnyJsExpression::JsTemplateExpression(node)
+    fn from(node: JsTemplateExpression) -> Self {
+        Self::JsTemplateExpression(node)
     }
 }
 impl From<JsThisExpression> for AnyJsExpression {
-    fn from(node: JsThisExpression) -> AnyJsExpression {
-        AnyJsExpression::JsThisExpression(node)
+    fn from(node: JsThisExpression) -> Self {
+        Self::JsThisExpression(node)
     }
 }
 impl From<JsUnaryExpression> for AnyJsExpression {
-    fn from(node: JsUnaryExpression) -> AnyJsExpression {
-        AnyJsExpression::JsUnaryExpression(node)
+    fn from(node: JsUnaryExpression) -> Self {
+        Self::JsUnaryExpression(node)
     }
 }
 impl From<JsYieldExpression> for AnyJsExpression {
-    fn from(node: JsYieldExpression) -> AnyJsExpression {
-        AnyJsExpression::JsYieldExpression(node)
+    fn from(node: JsYieldExpression) -> Self {
+        Self::JsYieldExpression(node)
     }
 }
 impl From<JsxTagExpression> for AnyJsExpression {
-    fn from(node: JsxTagExpression) -> AnyJsExpression {
-        AnyJsExpression::JsxTagExpression(node)
+    fn from(node: JsxTagExpression) -> Self {
+        Self::JsxTagExpression(node)
     }
 }
 impl From<TsAsExpression> for AnyJsExpression {
-    fn from(node: TsAsExpression) -> AnyJsExpression {
-        AnyJsExpression::TsAsExpression(node)
+    fn from(node: TsAsExpression) -> Self {
+        Self::TsAsExpression(node)
     }
 }
 impl From<TsInstantiationExpression> for AnyJsExpression {
-    fn from(node: TsInstantiationExpression) -> AnyJsExpression {
-        AnyJsExpression::TsInstantiationExpression(node)
+    fn from(node: TsInstantiationExpression) -> Self {
+        Self::TsInstantiationExpression(node)
     }
 }
 impl From<TsNonNullAssertionExpression> for AnyJsExpression {
-    fn from(node: TsNonNullAssertionExpression) -> AnyJsExpression {
-        AnyJsExpression::TsNonNullAssertionExpression(node)
+    fn from(node: TsNonNullAssertionExpression) -> Self {
+        Self::TsNonNullAssertionExpression(node)
     }
 }
 impl From<TsSatisfiesExpression> for AnyJsExpression {
-    fn from(node: TsSatisfiesExpression) -> AnyJsExpression {
-        AnyJsExpression::TsSatisfiesExpression(node)
+    fn from(node: TsSatisfiesExpression) -> Self {
+        Self::TsSatisfiesExpression(node)
     }
 }
 impl From<TsTypeAssertionExpression> for AnyJsExpression {
-    fn from(node: TsTypeAssertionExpression) -> AnyJsExpression {
-        AnyJsExpression::TsTypeAssertionExpression(node)
+    fn from(node: TsTypeAssertionExpression) -> Self {
+        Self::TsTypeAssertionExpression(node)
     }
 }
 impl AstNode for AnyJsExpression {
@@ -34861,96 +34727,80 @@ impl AstNode for AnyJsExpression {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_ARRAY_EXPRESSION => AnyJsExpression::JsArrayExpression(JsArrayExpression { syntax }),
+            JS_ARRAY_EXPRESSION => Self::JsArrayExpression(JsArrayExpression { syntax }),
             JS_ARROW_FUNCTION_EXPRESSION => {
-                AnyJsExpression::JsArrowFunctionExpression(JsArrowFunctionExpression { syntax })
+                Self::JsArrowFunctionExpression(JsArrowFunctionExpression { syntax })
             }
             JS_ASSIGNMENT_EXPRESSION => {
-                AnyJsExpression::JsAssignmentExpression(JsAssignmentExpression { syntax })
+                Self::JsAssignmentExpression(JsAssignmentExpression { syntax })
             }
-            JS_AWAIT_EXPRESSION => AnyJsExpression::JsAwaitExpression(JsAwaitExpression { syntax }),
-            JS_BINARY_EXPRESSION => {
-                AnyJsExpression::JsBinaryExpression(JsBinaryExpression { syntax })
-            }
-            JS_BOGUS_EXPRESSION => AnyJsExpression::JsBogusExpression(JsBogusExpression { syntax }),
-            JS_CALL_EXPRESSION => AnyJsExpression::JsCallExpression(JsCallExpression { syntax }),
-            JS_CLASS_EXPRESSION => AnyJsExpression::JsClassExpression(JsClassExpression { syntax }),
+            JS_AWAIT_EXPRESSION => Self::JsAwaitExpression(JsAwaitExpression { syntax }),
+            JS_BINARY_EXPRESSION => Self::JsBinaryExpression(JsBinaryExpression { syntax }),
+            JS_BOGUS_EXPRESSION => Self::JsBogusExpression(JsBogusExpression { syntax }),
+            JS_CALL_EXPRESSION => Self::JsCallExpression(JsCallExpression { syntax }),
+            JS_CLASS_EXPRESSION => Self::JsClassExpression(JsClassExpression { syntax }),
             JS_COMPUTED_MEMBER_EXPRESSION => {
-                AnyJsExpression::JsComputedMemberExpression(JsComputedMemberExpression { syntax })
+                Self::JsComputedMemberExpression(JsComputedMemberExpression { syntax })
             }
             JS_CONDITIONAL_EXPRESSION => {
-                AnyJsExpression::JsConditionalExpression(JsConditionalExpression { syntax })
+                Self::JsConditionalExpression(JsConditionalExpression { syntax })
             }
-            JS_FUNCTION_EXPRESSION => {
-                AnyJsExpression::JsFunctionExpression(JsFunctionExpression { syntax })
-            }
+            JS_FUNCTION_EXPRESSION => Self::JsFunctionExpression(JsFunctionExpression { syntax }),
             JS_IDENTIFIER_EXPRESSION => {
-                AnyJsExpression::JsIdentifierExpression(JsIdentifierExpression { syntax })
+                Self::JsIdentifierExpression(JsIdentifierExpression { syntax })
             }
             JS_IMPORT_CALL_EXPRESSION => {
-                AnyJsExpression::JsImportCallExpression(JsImportCallExpression { syntax })
+                Self::JsImportCallExpression(JsImportCallExpression { syntax })
             }
             JS_IMPORT_META_EXPRESSION => {
-                AnyJsExpression::JsImportMetaExpression(JsImportMetaExpression { syntax })
+                Self::JsImportMetaExpression(JsImportMetaExpression { syntax })
             }
-            JS_IN_EXPRESSION => AnyJsExpression::JsInExpression(JsInExpression { syntax }),
+            JS_IN_EXPRESSION => Self::JsInExpression(JsInExpression { syntax }),
             JS_INSTANCEOF_EXPRESSION => {
-                AnyJsExpression::JsInstanceofExpression(JsInstanceofExpression { syntax })
+                Self::JsInstanceofExpression(JsInstanceofExpression { syntax })
             }
-            JS_LOGICAL_EXPRESSION => {
-                AnyJsExpression::JsLogicalExpression(JsLogicalExpression { syntax })
-            }
-            JS_METAVARIABLE => AnyJsExpression::JsMetavariable(JsMetavariable { syntax }),
-            JS_NEW_EXPRESSION => AnyJsExpression::JsNewExpression(JsNewExpression { syntax }),
+            JS_LOGICAL_EXPRESSION => Self::JsLogicalExpression(JsLogicalExpression { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            JS_NEW_EXPRESSION => Self::JsNewExpression(JsNewExpression { syntax }),
             JS_NEW_TARGET_EXPRESSION => {
-                AnyJsExpression::JsNewTargetExpression(JsNewTargetExpression { syntax })
+                Self::JsNewTargetExpression(JsNewTargetExpression { syntax })
             }
-            JS_OBJECT_EXPRESSION => {
-                AnyJsExpression::JsObjectExpression(JsObjectExpression { syntax })
-            }
+            JS_OBJECT_EXPRESSION => Self::JsObjectExpression(JsObjectExpression { syntax }),
             JS_PARENTHESIZED_EXPRESSION => {
-                AnyJsExpression::JsParenthesizedExpression(JsParenthesizedExpression { syntax })
+                Self::JsParenthesizedExpression(JsParenthesizedExpression { syntax })
             }
             JS_POST_UPDATE_EXPRESSION => {
-                AnyJsExpression::JsPostUpdateExpression(JsPostUpdateExpression { syntax })
+                Self::JsPostUpdateExpression(JsPostUpdateExpression { syntax })
             }
             JS_PRE_UPDATE_EXPRESSION => {
-                AnyJsExpression::JsPreUpdateExpression(JsPreUpdateExpression { syntax })
+                Self::JsPreUpdateExpression(JsPreUpdateExpression { syntax })
             }
-            JS_SEQUENCE_EXPRESSION => {
-                AnyJsExpression::JsSequenceExpression(JsSequenceExpression { syntax })
-            }
+            JS_SEQUENCE_EXPRESSION => Self::JsSequenceExpression(JsSequenceExpression { syntax }),
             JS_STATIC_MEMBER_EXPRESSION => {
-                AnyJsExpression::JsStaticMemberExpression(JsStaticMemberExpression { syntax })
+                Self::JsStaticMemberExpression(JsStaticMemberExpression { syntax })
             }
-            JS_SUPER_EXPRESSION => AnyJsExpression::JsSuperExpression(JsSuperExpression { syntax }),
-            JS_TEMPLATE_EXPRESSION => {
-                AnyJsExpression::JsTemplateExpression(JsTemplateExpression { syntax })
-            }
-            JS_THIS_EXPRESSION => AnyJsExpression::JsThisExpression(JsThisExpression { syntax }),
-            JS_UNARY_EXPRESSION => AnyJsExpression::JsUnaryExpression(JsUnaryExpression { syntax }),
-            JS_YIELD_EXPRESSION => AnyJsExpression::JsYieldExpression(JsYieldExpression { syntax }),
-            JSX_TAG_EXPRESSION => AnyJsExpression::JsxTagExpression(JsxTagExpression { syntax }),
-            TS_AS_EXPRESSION => AnyJsExpression::TsAsExpression(TsAsExpression { syntax }),
+            JS_SUPER_EXPRESSION => Self::JsSuperExpression(JsSuperExpression { syntax }),
+            JS_TEMPLATE_EXPRESSION => Self::JsTemplateExpression(JsTemplateExpression { syntax }),
+            JS_THIS_EXPRESSION => Self::JsThisExpression(JsThisExpression { syntax }),
+            JS_UNARY_EXPRESSION => Self::JsUnaryExpression(JsUnaryExpression { syntax }),
+            JS_YIELD_EXPRESSION => Self::JsYieldExpression(JsYieldExpression { syntax }),
+            JSX_TAG_EXPRESSION => Self::JsxTagExpression(JsxTagExpression { syntax }),
+            TS_AS_EXPRESSION => Self::TsAsExpression(TsAsExpression { syntax }),
             TS_INSTANTIATION_EXPRESSION => {
-                AnyJsExpression::TsInstantiationExpression(TsInstantiationExpression { syntax })
+                Self::TsInstantiationExpression(TsInstantiationExpression { syntax })
             }
             TS_NON_NULL_ASSERTION_EXPRESSION => {
-                AnyJsExpression::TsNonNullAssertionExpression(TsNonNullAssertionExpression {
-                    syntax,
-                })
+                Self::TsNonNullAssertionExpression(TsNonNullAssertionExpression { syntax })
             }
             TS_SATISFIES_EXPRESSION => {
-                AnyJsExpression::TsSatisfiesExpression(TsSatisfiesExpression { syntax })
+                Self::TsSatisfiesExpression(TsSatisfiesExpression { syntax })
             }
             TS_TYPE_ASSERTION_EXPRESSION => {
-                AnyJsExpression::TsTypeAssertionExpression(TsTypeAssertionExpression { syntax })
+                Self::TsTypeAssertionExpression(TsTypeAssertionExpression { syntax })
             }
             _ => {
                 if let Some(any_js_literal_expression) = AnyJsLiteralExpression::cast(syntax) {
-                    return Some(AnyJsExpression::AnyJsLiteralExpression(
-                        any_js_literal_expression,
-                    ));
+                    return Some(Self::AnyJsLiteralExpression(any_js_literal_expression));
                 }
                 return None;
             }
@@ -34959,135 +34809,135 @@ impl AstNode for AnyJsExpression {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsExpression::JsArrayExpression(it) => &it.syntax,
-            AnyJsExpression::JsArrowFunctionExpression(it) => &it.syntax,
-            AnyJsExpression::JsAssignmentExpression(it) => &it.syntax,
-            AnyJsExpression::JsAwaitExpression(it) => &it.syntax,
-            AnyJsExpression::JsBinaryExpression(it) => &it.syntax,
-            AnyJsExpression::JsBogusExpression(it) => &it.syntax,
-            AnyJsExpression::JsCallExpression(it) => &it.syntax,
-            AnyJsExpression::JsClassExpression(it) => &it.syntax,
-            AnyJsExpression::JsComputedMemberExpression(it) => &it.syntax,
-            AnyJsExpression::JsConditionalExpression(it) => &it.syntax,
-            AnyJsExpression::JsFunctionExpression(it) => &it.syntax,
-            AnyJsExpression::JsIdentifierExpression(it) => &it.syntax,
-            AnyJsExpression::JsImportCallExpression(it) => &it.syntax,
-            AnyJsExpression::JsImportMetaExpression(it) => &it.syntax,
-            AnyJsExpression::JsInExpression(it) => &it.syntax,
-            AnyJsExpression::JsInstanceofExpression(it) => &it.syntax,
-            AnyJsExpression::JsLogicalExpression(it) => &it.syntax,
-            AnyJsExpression::JsMetavariable(it) => &it.syntax,
-            AnyJsExpression::JsNewExpression(it) => &it.syntax,
-            AnyJsExpression::JsNewTargetExpression(it) => &it.syntax,
-            AnyJsExpression::JsObjectExpression(it) => &it.syntax,
-            AnyJsExpression::JsParenthesizedExpression(it) => &it.syntax,
-            AnyJsExpression::JsPostUpdateExpression(it) => &it.syntax,
-            AnyJsExpression::JsPreUpdateExpression(it) => &it.syntax,
-            AnyJsExpression::JsSequenceExpression(it) => &it.syntax,
-            AnyJsExpression::JsStaticMemberExpression(it) => &it.syntax,
-            AnyJsExpression::JsSuperExpression(it) => &it.syntax,
-            AnyJsExpression::JsTemplateExpression(it) => &it.syntax,
-            AnyJsExpression::JsThisExpression(it) => &it.syntax,
-            AnyJsExpression::JsUnaryExpression(it) => &it.syntax,
-            AnyJsExpression::JsYieldExpression(it) => &it.syntax,
-            AnyJsExpression::JsxTagExpression(it) => &it.syntax,
-            AnyJsExpression::TsAsExpression(it) => &it.syntax,
-            AnyJsExpression::TsInstantiationExpression(it) => &it.syntax,
-            AnyJsExpression::TsNonNullAssertionExpression(it) => &it.syntax,
-            AnyJsExpression::TsSatisfiesExpression(it) => &it.syntax,
-            AnyJsExpression::TsTypeAssertionExpression(it) => &it.syntax,
-            AnyJsExpression::AnyJsLiteralExpression(it) => it.syntax(),
+            Self::JsArrayExpression(it) => &it.syntax,
+            Self::JsArrowFunctionExpression(it) => &it.syntax,
+            Self::JsAssignmentExpression(it) => &it.syntax,
+            Self::JsAwaitExpression(it) => &it.syntax,
+            Self::JsBinaryExpression(it) => &it.syntax,
+            Self::JsBogusExpression(it) => &it.syntax,
+            Self::JsCallExpression(it) => &it.syntax,
+            Self::JsClassExpression(it) => &it.syntax,
+            Self::JsComputedMemberExpression(it) => &it.syntax,
+            Self::JsConditionalExpression(it) => &it.syntax,
+            Self::JsFunctionExpression(it) => &it.syntax,
+            Self::JsIdentifierExpression(it) => &it.syntax,
+            Self::JsImportCallExpression(it) => &it.syntax,
+            Self::JsImportMetaExpression(it) => &it.syntax,
+            Self::JsInExpression(it) => &it.syntax,
+            Self::JsInstanceofExpression(it) => &it.syntax,
+            Self::JsLogicalExpression(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsNewExpression(it) => &it.syntax,
+            Self::JsNewTargetExpression(it) => &it.syntax,
+            Self::JsObjectExpression(it) => &it.syntax,
+            Self::JsParenthesizedExpression(it) => &it.syntax,
+            Self::JsPostUpdateExpression(it) => &it.syntax,
+            Self::JsPreUpdateExpression(it) => &it.syntax,
+            Self::JsSequenceExpression(it) => &it.syntax,
+            Self::JsStaticMemberExpression(it) => &it.syntax,
+            Self::JsSuperExpression(it) => &it.syntax,
+            Self::JsTemplateExpression(it) => &it.syntax,
+            Self::JsThisExpression(it) => &it.syntax,
+            Self::JsUnaryExpression(it) => &it.syntax,
+            Self::JsYieldExpression(it) => &it.syntax,
+            Self::JsxTagExpression(it) => &it.syntax,
+            Self::TsAsExpression(it) => &it.syntax,
+            Self::TsInstantiationExpression(it) => &it.syntax,
+            Self::TsNonNullAssertionExpression(it) => &it.syntax,
+            Self::TsSatisfiesExpression(it) => &it.syntax,
+            Self::TsTypeAssertionExpression(it) => &it.syntax,
+            Self::AnyJsLiteralExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsExpression::JsArrayExpression(it) => it.syntax,
-            AnyJsExpression::JsArrowFunctionExpression(it) => it.syntax,
-            AnyJsExpression::JsAssignmentExpression(it) => it.syntax,
-            AnyJsExpression::JsAwaitExpression(it) => it.syntax,
-            AnyJsExpression::JsBinaryExpression(it) => it.syntax,
-            AnyJsExpression::JsBogusExpression(it) => it.syntax,
-            AnyJsExpression::JsCallExpression(it) => it.syntax,
-            AnyJsExpression::JsClassExpression(it) => it.syntax,
-            AnyJsExpression::JsComputedMemberExpression(it) => it.syntax,
-            AnyJsExpression::JsConditionalExpression(it) => it.syntax,
-            AnyJsExpression::JsFunctionExpression(it) => it.syntax,
-            AnyJsExpression::JsIdentifierExpression(it) => it.syntax,
-            AnyJsExpression::JsImportCallExpression(it) => it.syntax,
-            AnyJsExpression::JsImportMetaExpression(it) => it.syntax,
-            AnyJsExpression::JsInExpression(it) => it.syntax,
-            AnyJsExpression::JsInstanceofExpression(it) => it.syntax,
-            AnyJsExpression::JsLogicalExpression(it) => it.syntax,
-            AnyJsExpression::JsMetavariable(it) => it.syntax,
-            AnyJsExpression::JsNewExpression(it) => it.syntax,
-            AnyJsExpression::JsNewTargetExpression(it) => it.syntax,
-            AnyJsExpression::JsObjectExpression(it) => it.syntax,
-            AnyJsExpression::JsParenthesizedExpression(it) => it.syntax,
-            AnyJsExpression::JsPostUpdateExpression(it) => it.syntax,
-            AnyJsExpression::JsPreUpdateExpression(it) => it.syntax,
-            AnyJsExpression::JsSequenceExpression(it) => it.syntax,
-            AnyJsExpression::JsStaticMemberExpression(it) => it.syntax,
-            AnyJsExpression::JsSuperExpression(it) => it.syntax,
-            AnyJsExpression::JsTemplateExpression(it) => it.syntax,
-            AnyJsExpression::JsThisExpression(it) => it.syntax,
-            AnyJsExpression::JsUnaryExpression(it) => it.syntax,
-            AnyJsExpression::JsYieldExpression(it) => it.syntax,
-            AnyJsExpression::JsxTagExpression(it) => it.syntax,
-            AnyJsExpression::TsAsExpression(it) => it.syntax,
-            AnyJsExpression::TsInstantiationExpression(it) => it.syntax,
-            AnyJsExpression::TsNonNullAssertionExpression(it) => it.syntax,
-            AnyJsExpression::TsSatisfiesExpression(it) => it.syntax,
-            AnyJsExpression::TsTypeAssertionExpression(it) => it.syntax,
-            AnyJsExpression::AnyJsLiteralExpression(it) => it.into_syntax(),
+            Self::JsArrayExpression(it) => it.syntax,
+            Self::JsArrowFunctionExpression(it) => it.syntax,
+            Self::JsAssignmentExpression(it) => it.syntax,
+            Self::JsAwaitExpression(it) => it.syntax,
+            Self::JsBinaryExpression(it) => it.syntax,
+            Self::JsBogusExpression(it) => it.syntax,
+            Self::JsCallExpression(it) => it.syntax,
+            Self::JsClassExpression(it) => it.syntax,
+            Self::JsComputedMemberExpression(it) => it.syntax,
+            Self::JsConditionalExpression(it) => it.syntax,
+            Self::JsFunctionExpression(it) => it.syntax,
+            Self::JsIdentifierExpression(it) => it.syntax,
+            Self::JsImportCallExpression(it) => it.syntax,
+            Self::JsImportMetaExpression(it) => it.syntax,
+            Self::JsInExpression(it) => it.syntax,
+            Self::JsInstanceofExpression(it) => it.syntax,
+            Self::JsLogicalExpression(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsNewExpression(it) => it.syntax,
+            Self::JsNewTargetExpression(it) => it.syntax,
+            Self::JsObjectExpression(it) => it.syntax,
+            Self::JsParenthesizedExpression(it) => it.syntax,
+            Self::JsPostUpdateExpression(it) => it.syntax,
+            Self::JsPreUpdateExpression(it) => it.syntax,
+            Self::JsSequenceExpression(it) => it.syntax,
+            Self::JsStaticMemberExpression(it) => it.syntax,
+            Self::JsSuperExpression(it) => it.syntax,
+            Self::JsTemplateExpression(it) => it.syntax,
+            Self::JsThisExpression(it) => it.syntax,
+            Self::JsUnaryExpression(it) => it.syntax,
+            Self::JsYieldExpression(it) => it.syntax,
+            Self::JsxTagExpression(it) => it.syntax,
+            Self::TsAsExpression(it) => it.syntax,
+            Self::TsInstantiationExpression(it) => it.syntax,
+            Self::TsNonNullAssertionExpression(it) => it.syntax,
+            Self::TsSatisfiesExpression(it) => it.syntax,
+            Self::TsTypeAssertionExpression(it) => it.syntax,
+            Self::AnyJsLiteralExpression(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsExpression::AnyJsLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsArrayExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsArrowFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsAssignmentExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsAwaitExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsBogusExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsCallExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsClassExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsComputedMemberExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsConditionalExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsIdentifierExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsImportCallExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsImportMetaExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsInExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsInstanceofExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsLogicalExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsNewExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsNewTargetExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsObjectExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsPostUpdateExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsPreUpdateExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsSequenceExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsStaticMemberExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsSuperExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsTemplateExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsThisExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsYieldExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::JsxTagExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::TsAsExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::TsInstantiationExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::TsNonNullAssertionExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::TsSatisfiesExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsExpression::TsTypeAssertionExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrayExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrowFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsAssignmentExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsAwaitExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsCallExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsClassExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsComputedMemberExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsConditionalExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsIdentifierExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsImportCallExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsImportMetaExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsInExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsInstanceofExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsLogicalExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsNewExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsNewTargetExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsObjectExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsPostUpdateExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsPreUpdateExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSequenceExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStaticMemberExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSuperExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsTemplateExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsThisExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsYieldExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxTagExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAsExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsInstantiationExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsNonNullAssertionExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsSatisfiesExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeAssertionExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsExpression> for SyntaxNode {
-    fn from(n: AnyJsExpression) -> SyntaxNode {
+    fn from(n: AnyJsExpression) -> Self {
         match n {
             AnyJsExpression::AnyJsLiteralExpression(it) => it.into(),
             AnyJsExpression::JsArrayExpression(it) => it.into(),
@@ -35131,14 +34981,14 @@ impl From<AnyJsExpression> for SyntaxNode {
     }
 }
 impl From<AnyJsExpression> for SyntaxElement {
-    fn from(n: AnyJsExpression) -> SyntaxElement {
+    fn from(n: AnyJsExpression) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsForVariableDeclaration> for AnyJsForInOrOfInitializer {
-    fn from(node: JsForVariableDeclaration) -> AnyJsForInOrOfInitializer {
-        AnyJsForInOrOfInitializer::JsForVariableDeclaration(node)
+    fn from(node: JsForVariableDeclaration) -> Self {
+        Self::JsForVariableDeclaration(node)
     }
 }
 impl AstNode for AnyJsForInOrOfInitializer {
@@ -35155,15 +35005,11 @@ impl AstNode for AnyJsForInOrOfInitializer {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_FOR_VARIABLE_DECLARATION => {
-                AnyJsForInOrOfInitializer::JsForVariableDeclaration(JsForVariableDeclaration {
-                    syntax,
-                })
+                Self::JsForVariableDeclaration(JsForVariableDeclaration { syntax })
             }
             _ => {
                 if let Some(any_js_assignment_pattern) = AnyJsAssignmentPattern::cast(syntax) {
-                    return Some(AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(
-                        any_js_assignment_pattern,
-                    ));
+                    return Some(Self::AnyJsAssignmentPattern(any_js_assignment_pattern));
                 }
                 return None;
             }
@@ -35172,27 +35018,27 @@ impl AstNode for AnyJsForInOrOfInitializer {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsForInOrOfInitializer::JsForVariableDeclaration(it) => &it.syntax,
-            AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(it) => it.syntax(),
+            Self::JsForVariableDeclaration(it) => &it.syntax,
+            Self::AnyJsAssignmentPattern(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsForInOrOfInitializer::JsForVariableDeclaration(it) => it.syntax,
-            AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(it) => it.into_syntax(),
+            Self::JsForVariableDeclaration(it) => it.syntax,
+            Self::AnyJsAssignmentPattern(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsForInOrOfInitializer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsForInOrOfInitializer::JsForVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsAssignmentPattern(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsForVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsForInOrOfInitializer> for SyntaxNode {
-    fn from(n: AnyJsForInOrOfInitializer) -> SyntaxNode {
+    fn from(n: AnyJsForInOrOfInitializer) -> Self {
         match n {
             AnyJsForInOrOfInitializer::AnyJsAssignmentPattern(it) => it.into(),
             AnyJsForInOrOfInitializer::JsForVariableDeclaration(it) => it.into(),
@@ -35200,14 +35046,14 @@ impl From<AnyJsForInOrOfInitializer> for SyntaxNode {
     }
 }
 impl From<AnyJsForInOrOfInitializer> for SyntaxElement {
-    fn from(n: AnyJsForInOrOfInitializer) -> SyntaxElement {
+    fn from(n: AnyJsForInOrOfInitializer) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsVariableDeclaration> for AnyJsForInitializer {
-    fn from(node: JsVariableDeclaration) -> AnyJsForInitializer {
-        AnyJsForInitializer::JsVariableDeclaration(node)
+    fn from(node: JsVariableDeclaration) -> Self {
+        Self::JsVariableDeclaration(node)
     }
 }
 impl AstNode for AnyJsForInitializer {
@@ -35224,11 +35070,11 @@ impl AstNode for AnyJsForInitializer {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_VARIABLE_DECLARATION => {
-                AnyJsForInitializer::JsVariableDeclaration(JsVariableDeclaration { syntax })
+                Self::JsVariableDeclaration(JsVariableDeclaration { syntax })
             }
             _ => {
                 if let Some(any_js_expression) = AnyJsExpression::cast(syntax) {
-                    return Some(AnyJsForInitializer::AnyJsExpression(any_js_expression));
+                    return Some(Self::AnyJsExpression(any_js_expression));
                 }
                 return None;
             }
@@ -35237,27 +35083,27 @@ impl AstNode for AnyJsForInitializer {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsForInitializer::JsVariableDeclaration(it) => &it.syntax,
-            AnyJsForInitializer::AnyJsExpression(it) => it.syntax(),
+            Self::JsVariableDeclaration(it) => &it.syntax,
+            Self::AnyJsExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsForInitializer::JsVariableDeclaration(it) => it.syntax,
-            AnyJsForInitializer::AnyJsExpression(it) => it.into_syntax(),
+            Self::JsVariableDeclaration(it) => it.syntax,
+            Self::AnyJsExpression(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsForInitializer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsForInitializer::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsForInitializer::JsVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsForInitializer> for SyntaxNode {
-    fn from(n: AnyJsForInitializer) -> SyntaxNode {
+    fn from(n: AnyJsForInitializer) -> Self {
         match n {
             AnyJsForInitializer::AnyJsExpression(it) => it.into(),
             AnyJsForInitializer::JsVariableDeclaration(it) => it.into(),
@@ -35265,24 +35111,24 @@ impl From<AnyJsForInitializer> for SyntaxNode {
     }
 }
 impl From<AnyJsForInitializer> for SyntaxElement {
-    fn from(n: AnyJsForInitializer) -> SyntaxElement {
+    fn from(n: AnyJsForInitializer) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusParameter> for AnyJsFormalParameter {
-    fn from(node: JsBogusParameter) -> AnyJsFormalParameter {
-        AnyJsFormalParameter::JsBogusParameter(node)
+    fn from(node: JsBogusParameter) -> Self {
+        Self::JsBogusParameter(node)
     }
 }
 impl From<JsFormalParameter> for AnyJsFormalParameter {
-    fn from(node: JsFormalParameter) -> AnyJsFormalParameter {
-        AnyJsFormalParameter::JsFormalParameter(node)
+    fn from(node: JsFormalParameter) -> Self {
+        Self::JsFormalParameter(node)
     }
 }
 impl From<JsMetavariable> for AnyJsFormalParameter {
-    fn from(node: JsMetavariable) -> AnyJsFormalParameter {
-        AnyJsFormalParameter::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl AstNode for AnyJsFormalParameter {
@@ -35298,43 +35144,39 @@ impl AstNode for AnyJsFormalParameter {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BOGUS_PARAMETER => {
-                AnyJsFormalParameter::JsBogusParameter(JsBogusParameter { syntax })
-            }
-            JS_FORMAL_PARAMETER => {
-                AnyJsFormalParameter::JsFormalParameter(JsFormalParameter { syntax })
-            }
-            JS_METAVARIABLE => AnyJsFormalParameter::JsMetavariable(JsMetavariable { syntax }),
+            JS_BOGUS_PARAMETER => Self::JsBogusParameter(JsBogusParameter { syntax }),
+            JS_FORMAL_PARAMETER => Self::JsFormalParameter(JsFormalParameter { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsFormalParameter::JsBogusParameter(it) => &it.syntax,
-            AnyJsFormalParameter::JsFormalParameter(it) => &it.syntax,
-            AnyJsFormalParameter::JsMetavariable(it) => &it.syntax,
+            Self::JsBogusParameter(it) => &it.syntax,
+            Self::JsFormalParameter(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsFormalParameter::JsBogusParameter(it) => it.syntax,
-            AnyJsFormalParameter::JsFormalParameter(it) => it.syntax,
-            AnyJsFormalParameter::JsMetavariable(it) => it.syntax,
+            Self::JsBogusParameter(it) => it.syntax,
+            Self::JsFormalParameter(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsFormalParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsFormalParameter::JsBogusParameter(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsFormalParameter::JsFormalParameter(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsFormalParameter::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFormalParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsFormalParameter> for SyntaxNode {
-    fn from(n: AnyJsFormalParameter) -> SyntaxNode {
+    fn from(n: AnyJsFormalParameter) -> Self {
         match n {
             AnyJsFormalParameter::JsBogusParameter(it) => it.into(),
             AnyJsFormalParameter::JsFormalParameter(it) => it.into(),
@@ -35343,29 +35185,29 @@ impl From<AnyJsFormalParameter> for SyntaxNode {
     }
 }
 impl From<AnyJsFormalParameter> for SyntaxElement {
-    fn from(n: AnyJsFormalParameter) -> SyntaxElement {
+    fn from(n: AnyJsFormalParameter) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsArrowFunctionExpression> for AnyJsFunction {
-    fn from(node: JsArrowFunctionExpression) -> AnyJsFunction {
-        AnyJsFunction::JsArrowFunctionExpression(node)
+    fn from(node: JsArrowFunctionExpression) -> Self {
+        Self::JsArrowFunctionExpression(node)
     }
 }
 impl From<JsFunctionDeclaration> for AnyJsFunction {
-    fn from(node: JsFunctionDeclaration) -> AnyJsFunction {
-        AnyJsFunction::JsFunctionDeclaration(node)
+    fn from(node: JsFunctionDeclaration) -> Self {
+        Self::JsFunctionDeclaration(node)
     }
 }
 impl From<JsFunctionExportDefaultDeclaration> for AnyJsFunction {
-    fn from(node: JsFunctionExportDefaultDeclaration) -> AnyJsFunction {
-        AnyJsFunction::JsFunctionExportDefaultDeclaration(node)
+    fn from(node: JsFunctionExportDefaultDeclaration) -> Self {
+        Self::JsFunctionExportDefaultDeclaration(node)
     }
 }
 impl From<JsFunctionExpression> for AnyJsFunction {
-    fn from(node: JsFunctionExpression) -> AnyJsFunction {
-        AnyJsFunction::JsFunctionExpression(node)
+    fn from(node: JsFunctionExpression) -> Self {
+        Self::JsFunctionExpression(node)
     }
 }
 impl AstNode for AnyJsFunction {
@@ -35386,52 +35228,50 @@ impl AstNode for AnyJsFunction {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_ARROW_FUNCTION_EXPRESSION => {
-                AnyJsFunction::JsArrowFunctionExpression(JsArrowFunctionExpression { syntax })
+                Self::JsArrowFunctionExpression(JsArrowFunctionExpression { syntax })
             }
             JS_FUNCTION_DECLARATION => {
-                AnyJsFunction::JsFunctionDeclaration(JsFunctionDeclaration { syntax })
+                Self::JsFunctionDeclaration(JsFunctionDeclaration { syntax })
             }
             JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
-                AnyJsFunction::JsFunctionExportDefaultDeclaration(
-                    JsFunctionExportDefaultDeclaration { syntax },
-                )
+                Self::JsFunctionExportDefaultDeclaration(JsFunctionExportDefaultDeclaration {
+                    syntax,
+                })
             }
-            JS_FUNCTION_EXPRESSION => {
-                AnyJsFunction::JsFunctionExpression(JsFunctionExpression { syntax })
-            }
+            JS_FUNCTION_EXPRESSION => Self::JsFunctionExpression(JsFunctionExpression { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsFunction::JsArrowFunctionExpression(it) => &it.syntax,
-            AnyJsFunction::JsFunctionDeclaration(it) => &it.syntax,
-            AnyJsFunction::JsFunctionExportDefaultDeclaration(it) => &it.syntax,
-            AnyJsFunction::JsFunctionExpression(it) => &it.syntax,
+            Self::JsArrowFunctionExpression(it) => &it.syntax,
+            Self::JsFunctionDeclaration(it) => &it.syntax,
+            Self::JsFunctionExportDefaultDeclaration(it) => &it.syntax,
+            Self::JsFunctionExpression(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsFunction::JsArrowFunctionExpression(it) => it.syntax,
-            AnyJsFunction::JsFunctionDeclaration(it) => it.syntax,
-            AnyJsFunction::JsFunctionExportDefaultDeclaration(it) => it.syntax,
-            AnyJsFunction::JsFunctionExpression(it) => it.syntax,
+            Self::JsArrowFunctionExpression(it) => it.syntax,
+            Self::JsFunctionDeclaration(it) => it.syntax,
+            Self::JsFunctionExportDefaultDeclaration(it) => it.syntax,
+            Self::JsFunctionExpression(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsFunction::JsArrowFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsFunction::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsFunction::JsFunctionExportDefaultDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsFunction::JsFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsArrowFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFunctionExportDefaultDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFunctionExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsFunction> for SyntaxNode {
-    fn from(n: AnyJsFunction) -> SyntaxNode {
+    fn from(n: AnyJsFunction) -> Self {
         match n {
             AnyJsFunction::JsArrowFunctionExpression(it) => it.into(),
             AnyJsFunction::JsFunctionDeclaration(it) => it.into(),
@@ -35441,14 +35281,14 @@ impl From<AnyJsFunction> for SyntaxNode {
     }
 }
 impl From<AnyJsFunction> for SyntaxElement {
-    fn from(n: AnyJsFunction) -> SyntaxElement {
+    fn from(n: AnyJsFunction) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsFunctionBody> for AnyJsFunctionBody {
-    fn from(node: JsFunctionBody) -> AnyJsFunctionBody {
-        AnyJsFunctionBody::JsFunctionBody(node)
+    fn from(node: JsFunctionBody) -> Self {
+        Self::JsFunctionBody(node)
     }
 }
 impl AstNode for AnyJsFunctionBody {
@@ -35464,10 +35304,10 @@ impl AstNode for AnyJsFunctionBody {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_FUNCTION_BODY => AnyJsFunctionBody::JsFunctionBody(JsFunctionBody { syntax }),
+            JS_FUNCTION_BODY => Self::JsFunctionBody(JsFunctionBody { syntax }),
             _ => {
                 if let Some(any_js_expression) = AnyJsExpression::cast(syntax) {
-                    return Some(AnyJsFunctionBody::AnyJsExpression(any_js_expression));
+                    return Some(Self::AnyJsExpression(any_js_expression));
                 }
                 return None;
             }
@@ -35476,27 +35316,27 @@ impl AstNode for AnyJsFunctionBody {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsFunctionBody::JsFunctionBody(it) => &it.syntax,
-            AnyJsFunctionBody::AnyJsExpression(it) => it.syntax(),
+            Self::JsFunctionBody(it) => &it.syntax,
+            Self::AnyJsExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsFunctionBody::JsFunctionBody(it) => it.syntax,
-            AnyJsFunctionBody::AnyJsExpression(it) => it.into_syntax(),
+            Self::JsFunctionBody(it) => it.syntax,
+            Self::AnyJsExpression(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsFunctionBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsFunctionBody::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsFunctionBody::JsFunctionBody(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFunctionBody(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsFunctionBody> for SyntaxNode {
-    fn from(n: AnyJsFunctionBody) -> SyntaxNode {
+    fn from(n: AnyJsFunctionBody) -> Self {
         match n {
             AnyJsFunctionBody::AnyJsExpression(it) => it.into(),
             AnyJsFunctionBody::JsFunctionBody(it) => it.into(),
@@ -35504,19 +35344,19 @@ impl From<AnyJsFunctionBody> for SyntaxNode {
     }
 }
 impl From<AnyJsFunctionBody> for SyntaxElement {
-    fn from(n: AnyJsFunctionBody) -> SyntaxElement {
+    fn from(n: AnyJsFunctionBody) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusImportAssertionEntry> for AnyJsImportAssertionEntry {
-    fn from(node: JsBogusImportAssertionEntry) -> AnyJsImportAssertionEntry {
-        AnyJsImportAssertionEntry::JsBogusImportAssertionEntry(node)
+    fn from(node: JsBogusImportAssertionEntry) -> Self {
+        Self::JsBogusImportAssertionEntry(node)
     }
 }
 impl From<JsImportAssertionEntry> for AnyJsImportAssertionEntry {
-    fn from(node: JsImportAssertionEntry) -> AnyJsImportAssertionEntry {
-        AnyJsImportAssertionEntry::JsImportAssertionEntry(node)
+    fn from(node: JsImportAssertionEntry) -> Self {
+        Self::JsImportAssertionEntry(node)
     }
 }
 impl AstNode for AnyJsImportAssertionEntry {
@@ -35532,12 +35372,10 @@ impl AstNode for AnyJsImportAssertionEntry {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_BOGUS_IMPORT_ASSERTION_ENTRY => {
-                AnyJsImportAssertionEntry::JsBogusImportAssertionEntry(
-                    JsBogusImportAssertionEntry { syntax },
-                )
+                Self::JsBogusImportAssertionEntry(JsBogusImportAssertionEntry { syntax })
             }
             JS_IMPORT_ASSERTION_ENTRY => {
-                AnyJsImportAssertionEntry::JsImportAssertionEntry(JsImportAssertionEntry { syntax })
+                Self::JsImportAssertionEntry(JsImportAssertionEntry { syntax })
             }
             _ => return None,
         };
@@ -35545,29 +35383,27 @@ impl AstNode for AnyJsImportAssertionEntry {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsImportAssertionEntry::JsBogusImportAssertionEntry(it) => &it.syntax,
-            AnyJsImportAssertionEntry::JsImportAssertionEntry(it) => &it.syntax,
+            Self::JsBogusImportAssertionEntry(it) => &it.syntax,
+            Self::JsImportAssertionEntry(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsImportAssertionEntry::JsBogusImportAssertionEntry(it) => it.syntax,
-            AnyJsImportAssertionEntry::JsImportAssertionEntry(it) => it.syntax,
+            Self::JsBogusImportAssertionEntry(it) => it.syntax,
+            Self::JsImportAssertionEntry(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsImportAssertionEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsImportAssertionEntry::JsBogusImportAssertionEntry(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsImportAssertionEntry::JsImportAssertionEntry(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusImportAssertionEntry(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsImportAssertionEntry(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsImportAssertionEntry> for SyntaxNode {
-    fn from(n: AnyJsImportAssertionEntry) -> SyntaxNode {
+    fn from(n: AnyJsImportAssertionEntry) -> Self {
         match n {
             AnyJsImportAssertionEntry::JsBogusImportAssertionEntry(it) => it.into(),
             AnyJsImportAssertionEntry::JsImportAssertionEntry(it) => it.into(),
@@ -35575,34 +35411,34 @@ impl From<AnyJsImportAssertionEntry> for SyntaxNode {
     }
 }
 impl From<AnyJsImportAssertionEntry> for SyntaxElement {
-    fn from(n: AnyJsImportAssertionEntry) -> SyntaxElement {
+    fn from(n: AnyJsImportAssertionEntry) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsImportBareClause> for AnyJsImportClause {
-    fn from(node: JsImportBareClause) -> AnyJsImportClause {
-        AnyJsImportClause::JsImportBareClause(node)
+    fn from(node: JsImportBareClause) -> Self {
+        Self::JsImportBareClause(node)
     }
 }
 impl From<JsImportCombinedClause> for AnyJsImportClause {
-    fn from(node: JsImportCombinedClause) -> AnyJsImportClause {
-        AnyJsImportClause::JsImportCombinedClause(node)
+    fn from(node: JsImportCombinedClause) -> Self {
+        Self::JsImportCombinedClause(node)
     }
 }
 impl From<JsImportDefaultClause> for AnyJsImportClause {
-    fn from(node: JsImportDefaultClause) -> AnyJsImportClause {
-        AnyJsImportClause::JsImportDefaultClause(node)
+    fn from(node: JsImportDefaultClause) -> Self {
+        Self::JsImportDefaultClause(node)
     }
 }
 impl From<JsImportNamedClause> for AnyJsImportClause {
-    fn from(node: JsImportNamedClause) -> AnyJsImportClause {
-        AnyJsImportClause::JsImportNamedClause(node)
+    fn from(node: JsImportNamedClause) -> Self {
+        Self::JsImportNamedClause(node)
     }
 }
 impl From<JsImportNamespaceClause> for AnyJsImportClause {
-    fn from(node: JsImportNamespaceClause) -> AnyJsImportClause {
-        AnyJsImportClause::JsImportNamespaceClause(node)
+    fn from(node: JsImportNamespaceClause) -> Self {
+        Self::JsImportNamespaceClause(node)
     }
 }
 impl AstNode for AnyJsImportClause {
@@ -35624,20 +35460,16 @@ impl AstNode for AnyJsImportClause {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_IMPORT_BARE_CLAUSE => {
-                AnyJsImportClause::JsImportBareClause(JsImportBareClause { syntax })
-            }
+            JS_IMPORT_BARE_CLAUSE => Self::JsImportBareClause(JsImportBareClause { syntax }),
             JS_IMPORT_COMBINED_CLAUSE => {
-                AnyJsImportClause::JsImportCombinedClause(JsImportCombinedClause { syntax })
+                Self::JsImportCombinedClause(JsImportCombinedClause { syntax })
             }
             JS_IMPORT_DEFAULT_CLAUSE => {
-                AnyJsImportClause::JsImportDefaultClause(JsImportDefaultClause { syntax })
+                Self::JsImportDefaultClause(JsImportDefaultClause { syntax })
             }
-            JS_IMPORT_NAMED_CLAUSE => {
-                AnyJsImportClause::JsImportNamedClause(JsImportNamedClause { syntax })
-            }
+            JS_IMPORT_NAMED_CLAUSE => Self::JsImportNamedClause(JsImportNamedClause { syntax }),
             JS_IMPORT_NAMESPACE_CLAUSE => {
-                AnyJsImportClause::JsImportNamespaceClause(JsImportNamespaceClause { syntax })
+                Self::JsImportNamespaceClause(JsImportNamespaceClause { syntax })
             }
             _ => return None,
         };
@@ -35645,36 +35477,36 @@ impl AstNode for AnyJsImportClause {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsImportClause::JsImportBareClause(it) => &it.syntax,
-            AnyJsImportClause::JsImportCombinedClause(it) => &it.syntax,
-            AnyJsImportClause::JsImportDefaultClause(it) => &it.syntax,
-            AnyJsImportClause::JsImportNamedClause(it) => &it.syntax,
-            AnyJsImportClause::JsImportNamespaceClause(it) => &it.syntax,
+            Self::JsImportBareClause(it) => &it.syntax,
+            Self::JsImportCombinedClause(it) => &it.syntax,
+            Self::JsImportDefaultClause(it) => &it.syntax,
+            Self::JsImportNamedClause(it) => &it.syntax,
+            Self::JsImportNamespaceClause(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsImportClause::JsImportBareClause(it) => it.syntax,
-            AnyJsImportClause::JsImportCombinedClause(it) => it.syntax,
-            AnyJsImportClause::JsImportDefaultClause(it) => it.syntax,
-            AnyJsImportClause::JsImportNamedClause(it) => it.syntax,
-            AnyJsImportClause::JsImportNamespaceClause(it) => it.syntax,
+            Self::JsImportBareClause(it) => it.syntax,
+            Self::JsImportCombinedClause(it) => it.syntax,
+            Self::JsImportDefaultClause(it) => it.syntax,
+            Self::JsImportNamedClause(it) => it.syntax,
+            Self::JsImportNamespaceClause(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsImportClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsImportClause::JsImportBareClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsImportClause::JsImportCombinedClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsImportClause::JsImportDefaultClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsImportClause::JsImportNamedClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsImportClause::JsImportNamespaceClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsImportBareClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsImportCombinedClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsImportDefaultClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsImportNamedClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsImportNamespaceClause(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsImportClause> for SyntaxNode {
-    fn from(n: AnyJsImportClause) -> SyntaxNode {
+    fn from(n: AnyJsImportClause) -> Self {
         match n {
             AnyJsImportClause::JsImportBareClause(it) => it.into(),
             AnyJsImportClause::JsImportCombinedClause(it) => it.into(),
@@ -35685,14 +35517,14 @@ impl From<AnyJsImportClause> for SyntaxNode {
     }
 }
 impl From<AnyJsImportClause> for SyntaxElement {
-    fn from(n: AnyJsImportClause) -> SyntaxElement {
+    fn from(n: AnyJsImportClause) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsPrivateName> for AnyJsInProperty {
-    fn from(node: JsPrivateName) -> AnyJsInProperty {
-        AnyJsInProperty::JsPrivateName(node)
+    fn from(node: JsPrivateName) -> Self {
+        Self::JsPrivateName(node)
     }
 }
 impl AstNode for AnyJsInProperty {
@@ -35708,10 +35540,10 @@ impl AstNode for AnyJsInProperty {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_PRIVATE_NAME => AnyJsInProperty::JsPrivateName(JsPrivateName { syntax }),
+            JS_PRIVATE_NAME => Self::JsPrivateName(JsPrivateName { syntax }),
             _ => {
                 if let Some(any_js_expression) = AnyJsExpression::cast(syntax) {
-                    return Some(AnyJsInProperty::AnyJsExpression(any_js_expression));
+                    return Some(Self::AnyJsExpression(any_js_expression));
                 }
                 return None;
             }
@@ -35720,27 +35552,27 @@ impl AstNode for AnyJsInProperty {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsInProperty::JsPrivateName(it) => &it.syntax,
-            AnyJsInProperty::AnyJsExpression(it) => it.syntax(),
+            Self::JsPrivateName(it) => &it.syntax,
+            Self::AnyJsExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsInProperty::JsPrivateName(it) => it.syntax,
-            AnyJsInProperty::AnyJsExpression(it) => it.into_syntax(),
+            Self::JsPrivateName(it) => it.syntax,
+            Self::AnyJsExpression(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsInProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsInProperty::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsInProperty::JsPrivateName(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsPrivateName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsInProperty> for SyntaxNode {
-    fn from(n: AnyJsInProperty) -> SyntaxNode {
+    fn from(n: AnyJsInProperty) -> Self {
         match n {
             AnyJsInProperty::AnyJsExpression(it) => it.into(),
             AnyJsInProperty::JsPrivateName(it) => it.into(),
@@ -35748,39 +35580,39 @@ impl From<AnyJsInProperty> for SyntaxNode {
     }
 }
 impl From<AnyJsInProperty> for SyntaxElement {
-    fn from(n: AnyJsInProperty) -> SyntaxElement {
+    fn from(n: AnyJsInProperty) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBigintLiteralExpression> for AnyJsLiteralExpression {
-    fn from(node: JsBigintLiteralExpression) -> AnyJsLiteralExpression {
-        AnyJsLiteralExpression::JsBigintLiteralExpression(node)
+    fn from(node: JsBigintLiteralExpression) -> Self {
+        Self::JsBigintLiteralExpression(node)
     }
 }
 impl From<JsBooleanLiteralExpression> for AnyJsLiteralExpression {
-    fn from(node: JsBooleanLiteralExpression) -> AnyJsLiteralExpression {
-        AnyJsLiteralExpression::JsBooleanLiteralExpression(node)
+    fn from(node: JsBooleanLiteralExpression) -> Self {
+        Self::JsBooleanLiteralExpression(node)
     }
 }
 impl From<JsNullLiteralExpression> for AnyJsLiteralExpression {
-    fn from(node: JsNullLiteralExpression) -> AnyJsLiteralExpression {
-        AnyJsLiteralExpression::JsNullLiteralExpression(node)
+    fn from(node: JsNullLiteralExpression) -> Self {
+        Self::JsNullLiteralExpression(node)
     }
 }
 impl From<JsNumberLiteralExpression> for AnyJsLiteralExpression {
-    fn from(node: JsNumberLiteralExpression) -> AnyJsLiteralExpression {
-        AnyJsLiteralExpression::JsNumberLiteralExpression(node)
+    fn from(node: JsNumberLiteralExpression) -> Self {
+        Self::JsNumberLiteralExpression(node)
     }
 }
 impl From<JsRegexLiteralExpression> for AnyJsLiteralExpression {
-    fn from(node: JsRegexLiteralExpression) -> AnyJsLiteralExpression {
-        AnyJsLiteralExpression::JsRegexLiteralExpression(node)
+    fn from(node: JsRegexLiteralExpression) -> Self {
+        Self::JsRegexLiteralExpression(node)
     }
 }
 impl From<JsStringLiteralExpression> for AnyJsLiteralExpression {
-    fn from(node: JsStringLiteralExpression) -> AnyJsLiteralExpression {
-        AnyJsLiteralExpression::JsStringLiteralExpression(node)
+    fn from(node: JsStringLiteralExpression) -> Self {
+        Self::JsStringLiteralExpression(node)
     }
 }
 impl AstNode for AnyJsLiteralExpression {
@@ -35805,32 +35637,22 @@ impl AstNode for AnyJsLiteralExpression {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_BIGINT_LITERAL_EXPRESSION => {
-                AnyJsLiteralExpression::JsBigintLiteralExpression(JsBigintLiteralExpression {
-                    syntax,
-                })
+                Self::JsBigintLiteralExpression(JsBigintLiteralExpression { syntax })
             }
             JS_BOOLEAN_LITERAL_EXPRESSION => {
-                AnyJsLiteralExpression::JsBooleanLiteralExpression(JsBooleanLiteralExpression {
-                    syntax,
-                })
+                Self::JsBooleanLiteralExpression(JsBooleanLiteralExpression { syntax })
             }
             JS_NULL_LITERAL_EXPRESSION => {
-                AnyJsLiteralExpression::JsNullLiteralExpression(JsNullLiteralExpression { syntax })
+                Self::JsNullLiteralExpression(JsNullLiteralExpression { syntax })
             }
             JS_NUMBER_LITERAL_EXPRESSION => {
-                AnyJsLiteralExpression::JsNumberLiteralExpression(JsNumberLiteralExpression {
-                    syntax,
-                })
+                Self::JsNumberLiteralExpression(JsNumberLiteralExpression { syntax })
             }
             JS_REGEX_LITERAL_EXPRESSION => {
-                AnyJsLiteralExpression::JsRegexLiteralExpression(JsRegexLiteralExpression {
-                    syntax,
-                })
+                Self::JsRegexLiteralExpression(JsRegexLiteralExpression { syntax })
             }
             JS_STRING_LITERAL_EXPRESSION => {
-                AnyJsLiteralExpression::JsStringLiteralExpression(JsStringLiteralExpression {
-                    syntax,
-                })
+                Self::JsStringLiteralExpression(JsStringLiteralExpression { syntax })
             }
             _ => return None,
         };
@@ -35838,39 +35660,39 @@ impl AstNode for AnyJsLiteralExpression {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsLiteralExpression::JsBigintLiteralExpression(it) => &it.syntax,
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(it) => &it.syntax,
-            AnyJsLiteralExpression::JsNullLiteralExpression(it) => &it.syntax,
-            AnyJsLiteralExpression::JsNumberLiteralExpression(it) => &it.syntax,
-            AnyJsLiteralExpression::JsRegexLiteralExpression(it) => &it.syntax,
-            AnyJsLiteralExpression::JsStringLiteralExpression(it) => &it.syntax,
+            Self::JsBigintLiteralExpression(it) => &it.syntax,
+            Self::JsBooleanLiteralExpression(it) => &it.syntax,
+            Self::JsNullLiteralExpression(it) => &it.syntax,
+            Self::JsNumberLiteralExpression(it) => &it.syntax,
+            Self::JsRegexLiteralExpression(it) => &it.syntax,
+            Self::JsStringLiteralExpression(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsLiteralExpression::JsBigintLiteralExpression(it) => it.syntax,
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(it) => it.syntax,
-            AnyJsLiteralExpression::JsNullLiteralExpression(it) => it.syntax,
-            AnyJsLiteralExpression::JsNumberLiteralExpression(it) => it.syntax,
-            AnyJsLiteralExpression::JsRegexLiteralExpression(it) => it.syntax,
-            AnyJsLiteralExpression::JsStringLiteralExpression(it) => it.syntax,
+            Self::JsBigintLiteralExpression(it) => it.syntax,
+            Self::JsBooleanLiteralExpression(it) => it.syntax,
+            Self::JsNullLiteralExpression(it) => it.syntax,
+            Self::JsNumberLiteralExpression(it) => it.syntax,
+            Self::JsRegexLiteralExpression(it) => it.syntax,
+            Self::JsStringLiteralExpression(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsLiteralExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsLiteralExpression::JsBigintLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsLiteralExpression::JsNullLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsLiteralExpression::JsNumberLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsLiteralExpression::JsRegexLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsLiteralExpression::JsStringLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBigintLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBooleanLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsNullLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsNumberLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsRegexLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStringLiteralExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsLiteralExpression> for SyntaxNode {
-    fn from(n: AnyJsLiteralExpression) -> SyntaxNode {
+    fn from(n: AnyJsLiteralExpression) -> Self {
         match n {
             AnyJsLiteralExpression::JsBigintLiteralExpression(it) => it.into(),
             AnyJsLiteralExpression::JsBooleanLiteralExpression(it) => it.into(),
@@ -35882,29 +35704,29 @@ impl From<AnyJsLiteralExpression> for SyntaxNode {
     }
 }
 impl From<AnyJsLiteralExpression> for SyntaxElement {
-    fn from(n: AnyJsLiteralExpression) -> SyntaxElement {
+    fn from(n: AnyJsLiteralExpression) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsDecorator> for AnyJsMethodModifier {
-    fn from(node: JsDecorator) -> AnyJsMethodModifier {
-        AnyJsMethodModifier::JsDecorator(node)
+    fn from(node: JsDecorator) -> Self {
+        Self::JsDecorator(node)
     }
 }
 impl From<JsStaticModifier> for AnyJsMethodModifier {
-    fn from(node: JsStaticModifier) -> AnyJsMethodModifier {
-        AnyJsMethodModifier::JsStaticModifier(node)
+    fn from(node: JsStaticModifier) -> Self {
+        Self::JsStaticModifier(node)
     }
 }
 impl From<TsAccessibilityModifier> for AnyJsMethodModifier {
-    fn from(node: TsAccessibilityModifier) -> AnyJsMethodModifier {
-        AnyJsMethodModifier::TsAccessibilityModifier(node)
+    fn from(node: TsAccessibilityModifier) -> Self {
+        Self::TsAccessibilityModifier(node)
     }
 }
 impl From<TsOverrideModifier> for AnyJsMethodModifier {
-    fn from(node: TsOverrideModifier) -> AnyJsMethodModifier {
-        AnyJsMethodModifier::TsOverrideModifier(node)
+    fn from(node: TsOverrideModifier) -> Self {
+        Self::TsOverrideModifier(node)
     }
 }
 impl AstNode for AnyJsMethodModifier {
@@ -35921,49 +35743,45 @@ impl AstNode for AnyJsMethodModifier {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_DECORATOR => AnyJsMethodModifier::JsDecorator(JsDecorator { syntax }),
-            JS_STATIC_MODIFIER => {
-                AnyJsMethodModifier::JsStaticModifier(JsStaticModifier { syntax })
-            }
+            JS_DECORATOR => Self::JsDecorator(JsDecorator { syntax }),
+            JS_STATIC_MODIFIER => Self::JsStaticModifier(JsStaticModifier { syntax }),
             TS_ACCESSIBILITY_MODIFIER => {
-                AnyJsMethodModifier::TsAccessibilityModifier(TsAccessibilityModifier { syntax })
+                Self::TsAccessibilityModifier(TsAccessibilityModifier { syntax })
             }
-            TS_OVERRIDE_MODIFIER => {
-                AnyJsMethodModifier::TsOverrideModifier(TsOverrideModifier { syntax })
-            }
+            TS_OVERRIDE_MODIFIER => Self::TsOverrideModifier(TsOverrideModifier { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsMethodModifier::JsDecorator(it) => &it.syntax,
-            AnyJsMethodModifier::JsStaticModifier(it) => &it.syntax,
-            AnyJsMethodModifier::TsAccessibilityModifier(it) => &it.syntax,
-            AnyJsMethodModifier::TsOverrideModifier(it) => &it.syntax,
+            Self::JsDecorator(it) => &it.syntax,
+            Self::JsStaticModifier(it) => &it.syntax,
+            Self::TsAccessibilityModifier(it) => &it.syntax,
+            Self::TsOverrideModifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsMethodModifier::JsDecorator(it) => it.syntax,
-            AnyJsMethodModifier::JsStaticModifier(it) => it.syntax,
-            AnyJsMethodModifier::TsAccessibilityModifier(it) => it.syntax,
-            AnyJsMethodModifier::TsOverrideModifier(it) => it.syntax,
+            Self::JsDecorator(it) => it.syntax,
+            Self::JsStaticModifier(it) => it.syntax,
+            Self::TsAccessibilityModifier(it) => it.syntax,
+            Self::TsOverrideModifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsMethodModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsMethodModifier::JsDecorator(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsMethodModifier::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsMethodModifier::TsAccessibilityModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsMethodModifier::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsDecorator(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAccessibilityModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsMethodModifier> for SyntaxNode {
-    fn from(n: AnyJsMethodModifier) -> SyntaxNode {
+    fn from(n: AnyJsMethodModifier) -> Self {
         match n {
             AnyJsMethodModifier::JsDecorator(it) => it.into(),
             AnyJsMethodModifier::JsStaticModifier(it) => it.into(),
@@ -35973,19 +35791,19 @@ impl From<AnyJsMethodModifier> for SyntaxNode {
     }
 }
 impl From<AnyJsMethodModifier> for SyntaxElement {
-    fn from(n: AnyJsMethodModifier) -> SyntaxElement {
+    fn from(n: AnyJsMethodModifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsExport> for AnyJsModuleItem {
-    fn from(node: JsExport) -> AnyJsModuleItem {
-        AnyJsModuleItem::JsExport(node)
+    fn from(node: JsExport) -> Self {
+        Self::JsExport(node)
     }
 }
 impl From<JsImport> for AnyJsModuleItem {
-    fn from(node: JsImport) -> AnyJsModuleItem {
-        AnyJsModuleItem::JsImport(node)
+    fn from(node: JsImport) -> Self {
+        Self::JsImport(node)
     }
 }
 impl AstNode for AnyJsModuleItem {
@@ -36002,11 +35820,11 @@ impl AstNode for AnyJsModuleItem {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_EXPORT => AnyJsModuleItem::JsExport(JsExport { syntax }),
-            JS_IMPORT => AnyJsModuleItem::JsImport(JsImport { syntax }),
+            JS_EXPORT => Self::JsExport(JsExport { syntax }),
+            JS_IMPORT => Self::JsImport(JsImport { syntax }),
             _ => {
                 if let Some(any_js_statement) = AnyJsStatement::cast(syntax) {
-                    return Some(AnyJsModuleItem::AnyJsStatement(any_js_statement));
+                    return Some(Self::AnyJsStatement(any_js_statement));
                 }
                 return None;
             }
@@ -36015,30 +35833,30 @@ impl AstNode for AnyJsModuleItem {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsModuleItem::JsExport(it) => &it.syntax,
-            AnyJsModuleItem::JsImport(it) => &it.syntax,
-            AnyJsModuleItem::AnyJsStatement(it) => it.syntax(),
+            Self::JsExport(it) => &it.syntax,
+            Self::JsImport(it) => &it.syntax,
+            Self::AnyJsStatement(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsModuleItem::JsExport(it) => it.syntax,
-            AnyJsModuleItem::JsImport(it) => it.syntax,
-            AnyJsModuleItem::AnyJsStatement(it) => it.into_syntax(),
+            Self::JsExport(it) => it.syntax,
+            Self::JsImport(it) => it.syntax,
+            Self::AnyJsStatement(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsModuleItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsModuleItem::AnyJsStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsModuleItem::JsExport(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsModuleItem::JsImport(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExport(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsImport(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsModuleItem> for SyntaxNode {
-    fn from(n: AnyJsModuleItem) -> SyntaxNode {
+    fn from(n: AnyJsModuleItem) -> Self {
         match n {
             AnyJsModuleItem::AnyJsStatement(it) => it.into(),
             AnyJsModuleItem::JsExport(it) => it.into(),
@@ -36047,19 +35865,19 @@ impl From<AnyJsModuleItem> for SyntaxNode {
     }
 }
 impl From<AnyJsModuleItem> for SyntaxElement {
-    fn from(n: AnyJsModuleItem) -> SyntaxElement {
+    fn from(n: AnyJsModuleItem) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsMetavariable> for AnyJsModuleSource {
-    fn from(node: JsMetavariable) -> AnyJsModuleSource {
-        AnyJsModuleSource::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsModuleSource> for AnyJsModuleSource {
-    fn from(node: JsModuleSource) -> AnyJsModuleSource {
-        AnyJsModuleSource::JsModuleSource(node)
+    fn from(node: JsModuleSource) -> Self {
+        Self::JsModuleSource(node)
     }
 }
 impl AstNode for AnyJsModuleSource {
@@ -36071,35 +35889,35 @@ impl AstNode for AnyJsModuleSource {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_METAVARIABLE => AnyJsModuleSource::JsMetavariable(JsMetavariable { syntax }),
-            JS_MODULE_SOURCE => AnyJsModuleSource::JsModuleSource(JsModuleSource { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            JS_MODULE_SOURCE => Self::JsModuleSource(JsModuleSource { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsModuleSource::JsMetavariable(it) => &it.syntax,
-            AnyJsModuleSource::JsModuleSource(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsModuleSource(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsModuleSource::JsMetavariable(it) => it.syntax,
-            AnyJsModuleSource::JsModuleSource(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsModuleSource(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsModuleSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsModuleSource::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsModuleSource::JsModuleSource(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsModuleSource(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsModuleSource> for SyntaxNode {
-    fn from(n: AnyJsModuleSource) -> SyntaxNode {
+    fn from(n: AnyJsModuleSource) -> Self {
         match n {
             AnyJsModuleSource::JsMetavariable(it) => it.into(),
             AnyJsModuleSource::JsModuleSource(it) => it.into(),
@@ -36107,24 +35925,24 @@ impl From<AnyJsModuleSource> for SyntaxNode {
     }
 }
 impl From<AnyJsModuleSource> for SyntaxElement {
-    fn from(n: AnyJsModuleSource) -> SyntaxElement {
+    fn from(n: AnyJsModuleSource) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsMetavariable> for AnyJsName {
-    fn from(node: JsMetavariable) -> AnyJsName {
-        AnyJsName::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsName> for AnyJsName {
-    fn from(node: JsName) -> AnyJsName {
-        AnyJsName::JsName(node)
+    fn from(node: JsName) -> Self {
+        Self::JsName(node)
     }
 }
 impl From<JsPrivateName> for AnyJsName {
-    fn from(node: JsPrivateName) -> AnyJsName {
-        AnyJsName::JsPrivateName(node)
+    fn from(node: JsPrivateName) -> Self {
+        Self::JsPrivateName(node)
     }
 }
 impl AstNode for AnyJsName {
@@ -36137,39 +35955,39 @@ impl AstNode for AnyJsName {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_METAVARIABLE => AnyJsName::JsMetavariable(JsMetavariable { syntax }),
-            JS_NAME => AnyJsName::JsName(JsName { syntax }),
-            JS_PRIVATE_NAME => AnyJsName::JsPrivateName(JsPrivateName { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            JS_NAME => Self::JsName(JsName { syntax }),
+            JS_PRIVATE_NAME => Self::JsPrivateName(JsPrivateName { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsName::JsMetavariable(it) => &it.syntax,
-            AnyJsName::JsName(it) => &it.syntax,
-            AnyJsName::JsPrivateName(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsName(it) => &it.syntax,
+            Self::JsPrivateName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsName::JsMetavariable(it) => it.syntax,
-            AnyJsName::JsName(it) => it.syntax,
-            AnyJsName::JsPrivateName(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsName(it) => it.syntax,
+            Self::JsPrivateName(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsName::JsName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsName::JsPrivateName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsPrivateName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsName> for SyntaxNode {
-    fn from(n: AnyJsName) -> SyntaxNode {
+    fn from(n: AnyJsName) -> Self {
         match n {
             AnyJsName::JsMetavariable(it) => it.into(),
             AnyJsName::JsName(it) => it.into(),
@@ -36178,24 +35996,24 @@ impl From<AnyJsName> for SyntaxNode {
     }
 }
 impl From<AnyJsName> for SyntaxElement {
-    fn from(n: AnyJsName) -> SyntaxElement {
+    fn from(n: AnyJsName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusNamedImportSpecifier> for AnyJsNamedImportSpecifier {
-    fn from(node: JsBogusNamedImportSpecifier) -> AnyJsNamedImportSpecifier {
-        AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(node)
+    fn from(node: JsBogusNamedImportSpecifier) -> Self {
+        Self::JsBogusNamedImportSpecifier(node)
     }
 }
 impl From<JsNamedImportSpecifier> for AnyJsNamedImportSpecifier {
-    fn from(node: JsNamedImportSpecifier) -> AnyJsNamedImportSpecifier {
-        AnyJsNamedImportSpecifier::JsNamedImportSpecifier(node)
+    fn from(node: JsNamedImportSpecifier) -> Self {
+        Self::JsNamedImportSpecifier(node)
     }
 }
 impl From<JsShorthandNamedImportSpecifier> for AnyJsNamedImportSpecifier {
-    fn from(node: JsShorthandNamedImportSpecifier) -> AnyJsNamedImportSpecifier {
-        AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(node)
+    fn from(node: JsShorthandNamedImportSpecifier) -> Self {
+        Self::JsShorthandNamedImportSpecifier(node)
     }
 }
 impl AstNode for AnyJsNamedImportSpecifier {
@@ -36214,17 +36032,13 @@ impl AstNode for AnyJsNamedImportSpecifier {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_BOGUS_NAMED_IMPORT_SPECIFIER => {
-                AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(
-                    JsBogusNamedImportSpecifier { syntax },
-                )
+                Self::JsBogusNamedImportSpecifier(JsBogusNamedImportSpecifier { syntax })
             }
             JS_NAMED_IMPORT_SPECIFIER => {
-                AnyJsNamedImportSpecifier::JsNamedImportSpecifier(JsNamedImportSpecifier { syntax })
+                Self::JsNamedImportSpecifier(JsNamedImportSpecifier { syntax })
             }
             JS_SHORTHAND_NAMED_IMPORT_SPECIFIER => {
-                AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(
-                    JsShorthandNamedImportSpecifier { syntax },
-                )
+                Self::JsShorthandNamedImportSpecifier(JsShorthandNamedImportSpecifier { syntax })
             }
             _ => return None,
         };
@@ -36232,34 +36046,30 @@ impl AstNode for AnyJsNamedImportSpecifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(it) => &it.syntax,
-            AnyJsNamedImportSpecifier::JsNamedImportSpecifier(it) => &it.syntax,
-            AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(it) => &it.syntax,
+            Self::JsBogusNamedImportSpecifier(it) => &it.syntax,
+            Self::JsNamedImportSpecifier(it) => &it.syntax,
+            Self::JsShorthandNamedImportSpecifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(it) => it.syntax,
-            AnyJsNamedImportSpecifier::JsNamedImportSpecifier(it) => it.syntax,
-            AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(it) => it.syntax,
+            Self::JsBogusNamedImportSpecifier(it) => it.syntax,
+            Self::JsNamedImportSpecifier(it) => it.syntax,
+            Self::JsShorthandNamedImportSpecifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsNamedImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsNamedImportSpecifier::JsNamedImportSpecifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
+            Self::JsBogusNamedImportSpecifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsNamedImportSpecifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsShorthandNamedImportSpecifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsNamedImportSpecifier> for SyntaxNode {
-    fn from(n: AnyJsNamedImportSpecifier) -> SyntaxNode {
+    fn from(n: AnyJsNamedImportSpecifier) -> Self {
         match n {
             AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(it) => it.into(),
             AnyJsNamedImportSpecifier::JsNamedImportSpecifier(it) => it.into(),
@@ -36268,31 +36078,29 @@ impl From<AnyJsNamedImportSpecifier> for SyntaxNode {
     }
 }
 impl From<AnyJsNamedImportSpecifier> for SyntaxElement {
-    fn from(n: AnyJsNamedImportSpecifier) -> SyntaxElement {
+    fn from(n: AnyJsNamedImportSpecifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusAssignment> for AnyJsObjectAssignmentPatternMember {
-    fn from(node: JsBogusAssignment) -> AnyJsObjectAssignmentPatternMember {
-        AnyJsObjectAssignmentPatternMember::JsBogusAssignment(node)
+    fn from(node: JsBogusAssignment) -> Self {
+        Self::JsBogusAssignment(node)
     }
 }
 impl From<JsObjectAssignmentPatternProperty> for AnyJsObjectAssignmentPatternMember {
-    fn from(node: JsObjectAssignmentPatternProperty) -> AnyJsObjectAssignmentPatternMember {
-        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(node)
+    fn from(node: JsObjectAssignmentPatternProperty) -> Self {
+        Self::JsObjectAssignmentPatternProperty(node)
     }
 }
 impl From<JsObjectAssignmentPatternRest> for AnyJsObjectAssignmentPatternMember {
-    fn from(node: JsObjectAssignmentPatternRest) -> AnyJsObjectAssignmentPatternMember {
-        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(node)
+    fn from(node: JsObjectAssignmentPatternRest) -> Self {
+        Self::JsObjectAssignmentPatternRest(node)
     }
 }
 impl From<JsObjectAssignmentPatternShorthandProperty> for AnyJsObjectAssignmentPatternMember {
-    fn from(
-        node: JsObjectAssignmentPatternShorthandProperty,
-    ) -> AnyJsObjectAssignmentPatternMember {
-        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(node)
+    fn from(node: JsObjectAssignmentPatternShorthandProperty) -> Self {
+        Self::JsObjectAssignmentPatternShorthandProperty(node)
     }
 }
 impl AstNode for AnyJsObjectAssignmentPatternMember {
@@ -36312,21 +36120,17 @@ impl AstNode for AnyJsObjectAssignmentPatternMember {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BOGUS_ASSIGNMENT => {
-                AnyJsObjectAssignmentPatternMember::JsBogusAssignment(JsBogusAssignment { syntax })
-            }
+            JS_BOGUS_ASSIGNMENT => Self::JsBogusAssignment(JsBogusAssignment { syntax }),
             JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY => {
-                AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(
-                    JsObjectAssignmentPatternProperty { syntax },
-                )
+                Self::JsObjectAssignmentPatternProperty(JsObjectAssignmentPatternProperty {
+                    syntax,
+                })
             }
             JS_OBJECT_ASSIGNMENT_PATTERN_REST => {
-                AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(
-                    JsObjectAssignmentPatternRest { syntax },
-                )
+                Self::JsObjectAssignmentPatternRest(JsObjectAssignmentPatternRest { syntax })
             }
             JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY => {
-                AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(
+                Self::JsObjectAssignmentPatternShorthandProperty(
                     JsObjectAssignmentPatternShorthandProperty { syntax },
                 )
             }
@@ -36336,45 +36140,33 @@ impl AstNode for AnyJsObjectAssignmentPatternMember {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsObjectAssignmentPatternMember::JsBogusAssignment(it) => &it.syntax,
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(it) => &it.syntax,
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(it) => &it.syntax,
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(it) => {
-                &it.syntax
-            }
+            Self::JsBogusAssignment(it) => &it.syntax,
+            Self::JsObjectAssignmentPatternProperty(it) => &it.syntax,
+            Self::JsObjectAssignmentPatternRest(it) => &it.syntax,
+            Self::JsObjectAssignmentPatternShorthandProperty(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsObjectAssignmentPatternMember::JsBogusAssignment(it) => it.syntax,
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(it) => it.syntax,
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(it) => it.syntax,
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(it) => {
-                it.syntax
-            }
+            Self::JsBogusAssignment(it) => it.syntax,
+            Self::JsObjectAssignmentPatternProperty(it) => it.syntax,
+            Self::JsObjectAssignmentPatternRest(it) => it.syntax,
+            Self::JsObjectAssignmentPatternShorthandProperty(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsObjectAssignmentPatternMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsObjectAssignmentPatternMember::JsBogusAssignment(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
+            Self::JsBogusAssignment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsObjectAssignmentPatternProperty(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsObjectAssignmentPatternRest(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsObjectAssignmentPatternShorthandProperty(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsObjectAssignmentPatternMember> for SyntaxNode {
-    fn from(n: AnyJsObjectAssignmentPatternMember) -> SyntaxNode {
+    fn from(n: AnyJsObjectAssignmentPatternMember) -> Self {
         match n {
             AnyJsObjectAssignmentPatternMember::JsBogusAssignment(it) => it.into(),
             AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(it) => it.into(),
@@ -36386,34 +36178,34 @@ impl From<AnyJsObjectAssignmentPatternMember> for SyntaxNode {
     }
 }
 impl From<AnyJsObjectAssignmentPatternMember> for SyntaxElement {
-    fn from(n: AnyJsObjectAssignmentPatternMember) -> SyntaxElement {
+    fn from(n: AnyJsObjectAssignmentPatternMember) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusBinding> for AnyJsObjectBindingPatternMember {
-    fn from(node: JsBogusBinding) -> AnyJsObjectBindingPatternMember {
-        AnyJsObjectBindingPatternMember::JsBogusBinding(node)
+    fn from(node: JsBogusBinding) -> Self {
+        Self::JsBogusBinding(node)
     }
 }
 impl From<JsMetavariable> for AnyJsObjectBindingPatternMember {
-    fn from(node: JsMetavariable) -> AnyJsObjectBindingPatternMember {
-        AnyJsObjectBindingPatternMember::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsObjectBindingPatternProperty> for AnyJsObjectBindingPatternMember {
-    fn from(node: JsObjectBindingPatternProperty) -> AnyJsObjectBindingPatternMember {
-        AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(node)
+    fn from(node: JsObjectBindingPatternProperty) -> Self {
+        Self::JsObjectBindingPatternProperty(node)
     }
 }
 impl From<JsObjectBindingPatternRest> for AnyJsObjectBindingPatternMember {
-    fn from(node: JsObjectBindingPatternRest) -> AnyJsObjectBindingPatternMember {
-        AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(node)
+    fn from(node: JsObjectBindingPatternRest) -> Self {
+        Self::JsObjectBindingPatternRest(node)
     }
 }
 impl From<JsObjectBindingPatternShorthandProperty> for AnyJsObjectBindingPatternMember {
-    fn from(node: JsObjectBindingPatternShorthandProperty) -> AnyJsObjectBindingPatternMember {
-        AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(node)
+    fn from(node: JsObjectBindingPatternShorthandProperty) -> Self {
+        Self::JsObjectBindingPatternShorthandProperty(node)
     }
 }
 impl AstNode for AnyJsObjectBindingPatternMember {
@@ -36435,24 +36227,16 @@ impl AstNode for AnyJsObjectBindingPatternMember {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BOGUS_BINDING => {
-                AnyJsObjectBindingPatternMember::JsBogusBinding(JsBogusBinding { syntax })
-            }
-            JS_METAVARIABLE => {
-                AnyJsObjectBindingPatternMember::JsMetavariable(JsMetavariable { syntax })
-            }
+            JS_BOGUS_BINDING => Self::JsBogusBinding(JsBogusBinding { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             JS_OBJECT_BINDING_PATTERN_PROPERTY => {
-                AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
-                    JsObjectBindingPatternProperty { syntax },
-                )
+                Self::JsObjectBindingPatternProperty(JsObjectBindingPatternProperty { syntax })
             }
             JS_OBJECT_BINDING_PATTERN_REST => {
-                AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(
-                    JsObjectBindingPatternRest { syntax },
-                )
+                Self::JsObjectBindingPatternRest(JsObjectBindingPatternRest { syntax })
             }
             JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY => {
-                AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                Self::JsObjectBindingPatternShorthandProperty(
                     JsObjectBindingPatternShorthandProperty { syntax },
                 )
             }
@@ -36462,46 +36246,36 @@ impl AstNode for AnyJsObjectBindingPatternMember {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsObjectBindingPatternMember::JsBogusBinding(it) => &it.syntax,
-            AnyJsObjectBindingPatternMember::JsMetavariable(it) => &it.syntax,
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => &it.syntax,
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => &it.syntax,
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
-                &it.syntax
-            }
+            Self::JsBogusBinding(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsObjectBindingPatternProperty(it) => &it.syntax,
+            Self::JsObjectBindingPatternRest(it) => &it.syntax,
+            Self::JsObjectBindingPatternShorthandProperty(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsObjectBindingPatternMember::JsBogusBinding(it) => it.syntax,
-            AnyJsObjectBindingPatternMember::JsMetavariable(it) => it.syntax,
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => it.syntax,
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => it.syntax,
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
-                it.syntax
-            }
+            Self::JsBogusBinding(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsObjectBindingPatternProperty(it) => it.syntax,
+            Self::JsObjectBindingPatternRest(it) => it.syntax,
+            Self::JsObjectBindingPatternShorthandProperty(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsObjectBindingPatternMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsObjectBindingPatternMember::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectBindingPatternMember::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
+            Self::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsObjectBindingPatternProperty(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsObjectBindingPatternRest(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsObjectBindingPatternShorthandProperty(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsObjectBindingPatternMember> for SyntaxNode {
-    fn from(n: AnyJsObjectBindingPatternMember) -> SyntaxNode {
+    fn from(n: AnyJsObjectBindingPatternMember) -> Self {
         match n {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsMetavariable(it) => it.into(),
@@ -36514,44 +36288,44 @@ impl From<AnyJsObjectBindingPatternMember> for SyntaxNode {
     }
 }
 impl From<AnyJsObjectBindingPatternMember> for SyntaxElement {
-    fn from(n: AnyJsObjectBindingPatternMember) -> SyntaxElement {
+    fn from(n: AnyJsObjectBindingPatternMember) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusMember> for AnyJsObjectMember {
-    fn from(node: JsBogusMember) -> AnyJsObjectMember {
-        AnyJsObjectMember::JsBogusMember(node)
+    fn from(node: JsBogusMember) -> Self {
+        Self::JsBogusMember(node)
     }
 }
 impl From<JsGetterObjectMember> for AnyJsObjectMember {
-    fn from(node: JsGetterObjectMember) -> AnyJsObjectMember {
-        AnyJsObjectMember::JsGetterObjectMember(node)
+    fn from(node: JsGetterObjectMember) -> Self {
+        Self::JsGetterObjectMember(node)
     }
 }
 impl From<JsMethodObjectMember> for AnyJsObjectMember {
-    fn from(node: JsMethodObjectMember) -> AnyJsObjectMember {
-        AnyJsObjectMember::JsMethodObjectMember(node)
+    fn from(node: JsMethodObjectMember) -> Self {
+        Self::JsMethodObjectMember(node)
     }
 }
 impl From<JsPropertyObjectMember> for AnyJsObjectMember {
-    fn from(node: JsPropertyObjectMember) -> AnyJsObjectMember {
-        AnyJsObjectMember::JsPropertyObjectMember(node)
+    fn from(node: JsPropertyObjectMember) -> Self {
+        Self::JsPropertyObjectMember(node)
     }
 }
 impl From<JsSetterObjectMember> for AnyJsObjectMember {
-    fn from(node: JsSetterObjectMember) -> AnyJsObjectMember {
-        AnyJsObjectMember::JsSetterObjectMember(node)
+    fn from(node: JsSetterObjectMember) -> Self {
+        Self::JsSetterObjectMember(node)
     }
 }
 impl From<JsShorthandPropertyObjectMember> for AnyJsObjectMember {
-    fn from(node: JsShorthandPropertyObjectMember) -> AnyJsObjectMember {
-        AnyJsObjectMember::JsShorthandPropertyObjectMember(node)
+    fn from(node: JsShorthandPropertyObjectMember) -> Self {
+        Self::JsShorthandPropertyObjectMember(node)
     }
 }
 impl From<JsSpread> for AnyJsObjectMember {
-    fn from(node: JsSpread) -> AnyJsObjectMember {
-        AnyJsObjectMember::JsSpread(node)
+    fn from(node: JsSpread) -> Self {
+        Self::JsSpread(node)
     }
 }
 impl AstNode for AnyJsObjectMember {
@@ -36577,67 +36351,59 @@ impl AstNode for AnyJsObjectMember {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BOGUS_MEMBER => AnyJsObjectMember::JsBogusMember(JsBogusMember { syntax }),
-            JS_GETTER_OBJECT_MEMBER => {
-                AnyJsObjectMember::JsGetterObjectMember(JsGetterObjectMember { syntax })
-            }
-            JS_METHOD_OBJECT_MEMBER => {
-                AnyJsObjectMember::JsMethodObjectMember(JsMethodObjectMember { syntax })
-            }
+            JS_BOGUS_MEMBER => Self::JsBogusMember(JsBogusMember { syntax }),
+            JS_GETTER_OBJECT_MEMBER => Self::JsGetterObjectMember(JsGetterObjectMember { syntax }),
+            JS_METHOD_OBJECT_MEMBER => Self::JsMethodObjectMember(JsMethodObjectMember { syntax }),
             JS_PROPERTY_OBJECT_MEMBER => {
-                AnyJsObjectMember::JsPropertyObjectMember(JsPropertyObjectMember { syntax })
+                Self::JsPropertyObjectMember(JsPropertyObjectMember { syntax })
             }
-            JS_SETTER_OBJECT_MEMBER => {
-                AnyJsObjectMember::JsSetterObjectMember(JsSetterObjectMember { syntax })
-            }
+            JS_SETTER_OBJECT_MEMBER => Self::JsSetterObjectMember(JsSetterObjectMember { syntax }),
             JS_SHORTHAND_PROPERTY_OBJECT_MEMBER => {
-                AnyJsObjectMember::JsShorthandPropertyObjectMember(
-                    JsShorthandPropertyObjectMember { syntax },
-                )
+                Self::JsShorthandPropertyObjectMember(JsShorthandPropertyObjectMember { syntax })
             }
-            JS_SPREAD => AnyJsObjectMember::JsSpread(JsSpread { syntax }),
+            JS_SPREAD => Self::JsSpread(JsSpread { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsObjectMember::JsBogusMember(it) => &it.syntax,
-            AnyJsObjectMember::JsGetterObjectMember(it) => &it.syntax,
-            AnyJsObjectMember::JsMethodObjectMember(it) => &it.syntax,
-            AnyJsObjectMember::JsPropertyObjectMember(it) => &it.syntax,
-            AnyJsObjectMember::JsSetterObjectMember(it) => &it.syntax,
-            AnyJsObjectMember::JsShorthandPropertyObjectMember(it) => &it.syntax,
-            AnyJsObjectMember::JsSpread(it) => &it.syntax,
+            Self::JsBogusMember(it) => &it.syntax,
+            Self::JsGetterObjectMember(it) => &it.syntax,
+            Self::JsMethodObjectMember(it) => &it.syntax,
+            Self::JsPropertyObjectMember(it) => &it.syntax,
+            Self::JsSetterObjectMember(it) => &it.syntax,
+            Self::JsShorthandPropertyObjectMember(it) => &it.syntax,
+            Self::JsSpread(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsObjectMember::JsBogusMember(it) => it.syntax,
-            AnyJsObjectMember::JsGetterObjectMember(it) => it.syntax,
-            AnyJsObjectMember::JsMethodObjectMember(it) => it.syntax,
-            AnyJsObjectMember::JsPropertyObjectMember(it) => it.syntax,
-            AnyJsObjectMember::JsSetterObjectMember(it) => it.syntax,
-            AnyJsObjectMember::JsShorthandPropertyObjectMember(it) => it.syntax,
-            AnyJsObjectMember::JsSpread(it) => it.syntax,
+            Self::JsBogusMember(it) => it.syntax,
+            Self::JsGetterObjectMember(it) => it.syntax,
+            Self::JsMethodObjectMember(it) => it.syntax,
+            Self::JsPropertyObjectMember(it) => it.syntax,
+            Self::JsSetterObjectMember(it) => it.syntax,
+            Self::JsShorthandPropertyObjectMember(it) => it.syntax,
+            Self::JsSpread(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsObjectMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsObjectMember::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectMember::JsGetterObjectMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectMember::JsMethodObjectMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectMember::JsPropertyObjectMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectMember::JsSetterObjectMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectMember::JsShorthandPropertyObjectMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectMember::JsSpread(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsGetterObjectMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMethodObjectMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsPropertyObjectMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSetterObjectMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsShorthandPropertyObjectMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSpread(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsObjectMember> for SyntaxNode {
-    fn from(n: AnyJsObjectMember) -> SyntaxNode {
+    fn from(n: AnyJsObjectMember) -> Self {
         match n {
             AnyJsObjectMember::JsBogusMember(it) => it.into(),
             AnyJsObjectMember::JsGetterObjectMember(it) => it.into(),
@@ -36650,24 +36416,24 @@ impl From<AnyJsObjectMember> for SyntaxNode {
     }
 }
 impl From<AnyJsObjectMember> for SyntaxElement {
-    fn from(n: AnyJsObjectMember) -> SyntaxElement {
+    fn from(n: AnyJsObjectMember) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsComputedMemberName> for AnyJsObjectMemberName {
-    fn from(node: JsComputedMemberName) -> AnyJsObjectMemberName {
-        AnyJsObjectMemberName::JsComputedMemberName(node)
+    fn from(node: JsComputedMemberName) -> Self {
+        Self::JsComputedMemberName(node)
     }
 }
 impl From<JsLiteralMemberName> for AnyJsObjectMemberName {
-    fn from(node: JsLiteralMemberName) -> AnyJsObjectMemberName {
-        AnyJsObjectMemberName::JsLiteralMemberName(node)
+    fn from(node: JsLiteralMemberName) -> Self {
+        Self::JsLiteralMemberName(node)
     }
 }
 impl From<JsMetavariable> for AnyJsObjectMemberName {
-    fn from(node: JsMetavariable) -> AnyJsObjectMemberName {
-        AnyJsObjectMemberName::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl AstNode for AnyJsObjectMemberName {
@@ -36683,43 +36449,39 @@ impl AstNode for AnyJsObjectMemberName {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_COMPUTED_MEMBER_NAME => {
-                AnyJsObjectMemberName::JsComputedMemberName(JsComputedMemberName { syntax })
-            }
-            JS_LITERAL_MEMBER_NAME => {
-                AnyJsObjectMemberName::JsLiteralMemberName(JsLiteralMemberName { syntax })
-            }
-            JS_METAVARIABLE => AnyJsObjectMemberName::JsMetavariable(JsMetavariable { syntax }),
+            JS_COMPUTED_MEMBER_NAME => Self::JsComputedMemberName(JsComputedMemberName { syntax }),
+            JS_LITERAL_MEMBER_NAME => Self::JsLiteralMemberName(JsLiteralMemberName { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsObjectMemberName::JsComputedMemberName(it) => &it.syntax,
-            AnyJsObjectMemberName::JsLiteralMemberName(it) => &it.syntax,
-            AnyJsObjectMemberName::JsMetavariable(it) => &it.syntax,
+            Self::JsComputedMemberName(it) => &it.syntax,
+            Self::JsLiteralMemberName(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsObjectMemberName::JsComputedMemberName(it) => it.syntax,
-            AnyJsObjectMemberName::JsLiteralMemberName(it) => it.syntax,
-            AnyJsObjectMemberName::JsMetavariable(it) => it.syntax,
+            Self::JsComputedMemberName(it) => it.syntax,
+            Self::JsLiteralMemberName(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsObjectMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsObjectMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectMemberName::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsObjectMemberName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsObjectMemberName> for SyntaxNode {
-    fn from(n: AnyJsObjectMemberName) -> SyntaxNode {
+    fn from(n: AnyJsObjectMemberName) -> Self {
         match n {
             AnyJsObjectMemberName::JsComputedMemberName(it) => it.into(),
             AnyJsObjectMemberName::JsLiteralMemberName(it) => it.into(),
@@ -36728,19 +36490,19 @@ impl From<AnyJsObjectMemberName> for SyntaxNode {
     }
 }
 impl From<AnyJsObjectMemberName> for SyntaxElement {
-    fn from(n: AnyJsObjectMemberName) -> SyntaxElement {
+    fn from(n: AnyJsObjectMemberName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsRestParameter> for AnyJsParameter {
-    fn from(node: JsRestParameter) -> AnyJsParameter {
-        AnyJsParameter::JsRestParameter(node)
+    fn from(node: JsRestParameter) -> Self {
+        Self::JsRestParameter(node)
     }
 }
 impl From<TsThisParameter> for AnyJsParameter {
-    fn from(node: TsThisParameter) -> AnyJsParameter {
-        AnyJsParameter::TsThisParameter(node)
+    fn from(node: TsThisParameter) -> Self {
+        Self::TsThisParameter(node)
     }
 }
 impl AstNode for AnyJsParameter {
@@ -36757,13 +36519,11 @@ impl AstNode for AnyJsParameter {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_REST_PARAMETER => AnyJsParameter::JsRestParameter(JsRestParameter { syntax }),
-            TS_THIS_PARAMETER => AnyJsParameter::TsThisParameter(TsThisParameter { syntax }),
+            JS_REST_PARAMETER => Self::JsRestParameter(JsRestParameter { syntax }),
+            TS_THIS_PARAMETER => Self::TsThisParameter(TsThisParameter { syntax }),
             _ => {
                 if let Some(any_js_formal_parameter) = AnyJsFormalParameter::cast(syntax) {
-                    return Some(AnyJsParameter::AnyJsFormalParameter(
-                        any_js_formal_parameter,
-                    ));
+                    return Some(Self::AnyJsFormalParameter(any_js_formal_parameter));
                 }
                 return None;
             }
@@ -36772,30 +36532,30 @@ impl AstNode for AnyJsParameter {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsParameter::JsRestParameter(it) => &it.syntax,
-            AnyJsParameter::TsThisParameter(it) => &it.syntax,
-            AnyJsParameter::AnyJsFormalParameter(it) => it.syntax(),
+            Self::JsRestParameter(it) => &it.syntax,
+            Self::TsThisParameter(it) => &it.syntax,
+            Self::AnyJsFormalParameter(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsParameter::JsRestParameter(it) => it.syntax,
-            AnyJsParameter::TsThisParameter(it) => it.syntax,
-            AnyJsParameter::AnyJsFormalParameter(it) => it.into_syntax(),
+            Self::JsRestParameter(it) => it.syntax,
+            Self::TsThisParameter(it) => it.syntax,
+            Self::AnyJsFormalParameter(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsParameter::AnyJsFormalParameter(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsParameter::JsRestParameter(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsParameter::TsThisParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsFormalParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsRestParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsThisParameter(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsParameter> for SyntaxNode {
-    fn from(n: AnyJsParameter) -> SyntaxNode {
+    fn from(n: AnyJsParameter) -> Self {
         match n {
             AnyJsParameter::AnyJsFormalParameter(it) => it.into(),
             AnyJsParameter::JsRestParameter(it) => it.into(),
@@ -36804,39 +36564,39 @@ impl From<AnyJsParameter> for SyntaxNode {
     }
 }
 impl From<AnyJsParameter> for SyntaxElement {
-    fn from(n: AnyJsParameter) -> SyntaxElement {
+    fn from(n: AnyJsParameter) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsAccessorModifier> for AnyJsPropertyModifier {
-    fn from(node: JsAccessorModifier) -> AnyJsPropertyModifier {
-        AnyJsPropertyModifier::JsAccessorModifier(node)
+    fn from(node: JsAccessorModifier) -> Self {
+        Self::JsAccessorModifier(node)
     }
 }
 impl From<JsDecorator> for AnyJsPropertyModifier {
-    fn from(node: JsDecorator) -> AnyJsPropertyModifier {
-        AnyJsPropertyModifier::JsDecorator(node)
+    fn from(node: JsDecorator) -> Self {
+        Self::JsDecorator(node)
     }
 }
 impl From<JsStaticModifier> for AnyJsPropertyModifier {
-    fn from(node: JsStaticModifier) -> AnyJsPropertyModifier {
-        AnyJsPropertyModifier::JsStaticModifier(node)
+    fn from(node: JsStaticModifier) -> Self {
+        Self::JsStaticModifier(node)
     }
 }
 impl From<TsAccessibilityModifier> for AnyJsPropertyModifier {
-    fn from(node: TsAccessibilityModifier) -> AnyJsPropertyModifier {
-        AnyJsPropertyModifier::TsAccessibilityModifier(node)
+    fn from(node: TsAccessibilityModifier) -> Self {
+        Self::TsAccessibilityModifier(node)
     }
 }
 impl From<TsOverrideModifier> for AnyJsPropertyModifier {
-    fn from(node: TsOverrideModifier) -> AnyJsPropertyModifier {
-        AnyJsPropertyModifier::TsOverrideModifier(node)
+    fn from(node: TsOverrideModifier) -> Self {
+        Self::TsOverrideModifier(node)
     }
 }
 impl From<TsReadonlyModifier> for AnyJsPropertyModifier {
-    fn from(node: TsReadonlyModifier) -> AnyJsPropertyModifier {
-        AnyJsPropertyModifier::TsReadonlyModifier(node)
+    fn from(node: TsReadonlyModifier) -> Self {
+        Self::TsReadonlyModifier(node)
     }
 }
 impl AstNode for AnyJsPropertyModifier {
@@ -36860,61 +36620,53 @@ impl AstNode for AnyJsPropertyModifier {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_ACCESSOR_MODIFIER => {
-                AnyJsPropertyModifier::JsAccessorModifier(JsAccessorModifier { syntax })
-            }
-            JS_DECORATOR => AnyJsPropertyModifier::JsDecorator(JsDecorator { syntax }),
-            JS_STATIC_MODIFIER => {
-                AnyJsPropertyModifier::JsStaticModifier(JsStaticModifier { syntax })
-            }
+            JS_ACCESSOR_MODIFIER => Self::JsAccessorModifier(JsAccessorModifier { syntax }),
+            JS_DECORATOR => Self::JsDecorator(JsDecorator { syntax }),
+            JS_STATIC_MODIFIER => Self::JsStaticModifier(JsStaticModifier { syntax }),
             TS_ACCESSIBILITY_MODIFIER => {
-                AnyJsPropertyModifier::TsAccessibilityModifier(TsAccessibilityModifier { syntax })
+                Self::TsAccessibilityModifier(TsAccessibilityModifier { syntax })
             }
-            TS_OVERRIDE_MODIFIER => {
-                AnyJsPropertyModifier::TsOverrideModifier(TsOverrideModifier { syntax })
-            }
-            TS_READONLY_MODIFIER => {
-                AnyJsPropertyModifier::TsReadonlyModifier(TsReadonlyModifier { syntax })
-            }
+            TS_OVERRIDE_MODIFIER => Self::TsOverrideModifier(TsOverrideModifier { syntax }),
+            TS_READONLY_MODIFIER => Self::TsReadonlyModifier(TsReadonlyModifier { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsPropertyModifier::JsAccessorModifier(it) => &it.syntax,
-            AnyJsPropertyModifier::JsDecorator(it) => &it.syntax,
-            AnyJsPropertyModifier::JsStaticModifier(it) => &it.syntax,
-            AnyJsPropertyModifier::TsAccessibilityModifier(it) => &it.syntax,
-            AnyJsPropertyModifier::TsOverrideModifier(it) => &it.syntax,
-            AnyJsPropertyModifier::TsReadonlyModifier(it) => &it.syntax,
+            Self::JsAccessorModifier(it) => &it.syntax,
+            Self::JsDecorator(it) => &it.syntax,
+            Self::JsStaticModifier(it) => &it.syntax,
+            Self::TsAccessibilityModifier(it) => &it.syntax,
+            Self::TsOverrideModifier(it) => &it.syntax,
+            Self::TsReadonlyModifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsPropertyModifier::JsAccessorModifier(it) => it.syntax,
-            AnyJsPropertyModifier::JsDecorator(it) => it.syntax,
-            AnyJsPropertyModifier::JsStaticModifier(it) => it.syntax,
-            AnyJsPropertyModifier::TsAccessibilityModifier(it) => it.syntax,
-            AnyJsPropertyModifier::TsOverrideModifier(it) => it.syntax,
-            AnyJsPropertyModifier::TsReadonlyModifier(it) => it.syntax,
+            Self::JsAccessorModifier(it) => it.syntax,
+            Self::JsDecorator(it) => it.syntax,
+            Self::JsStaticModifier(it) => it.syntax,
+            Self::TsAccessibilityModifier(it) => it.syntax,
+            Self::TsOverrideModifier(it) => it.syntax,
+            Self::TsReadonlyModifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsPropertyModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsPropertyModifier::JsAccessorModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsPropertyModifier::JsDecorator(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsPropertyModifier::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsPropertyModifier::TsAccessibilityModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsPropertyModifier::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsPropertyModifier::TsReadonlyModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsAccessorModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsDecorator(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAccessibilityModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsReadonlyModifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsPropertyModifier> for SyntaxNode {
-    fn from(n: AnyJsPropertyModifier) -> SyntaxNode {
+    fn from(n: AnyJsPropertyModifier) -> Self {
         match n {
             AnyJsPropertyModifier::JsAccessorModifier(it) => it.into(),
             AnyJsPropertyModifier::JsDecorator(it) => it.into(),
@@ -36926,29 +36678,29 @@ impl From<AnyJsPropertyModifier> for SyntaxNode {
     }
 }
 impl From<AnyJsPropertyModifier> for SyntaxElement {
-    fn from(n: AnyJsPropertyModifier) -> SyntaxElement {
+    fn from(n: AnyJsPropertyModifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsExpressionSnipped> for AnyJsRoot {
-    fn from(node: JsExpressionSnipped) -> AnyJsRoot {
-        AnyJsRoot::JsExpressionSnipped(node)
+    fn from(node: JsExpressionSnipped) -> Self {
+        Self::JsExpressionSnipped(node)
     }
 }
 impl From<JsModule> for AnyJsRoot {
-    fn from(node: JsModule) -> AnyJsRoot {
-        AnyJsRoot::JsModule(node)
+    fn from(node: JsModule) -> Self {
+        Self::JsModule(node)
     }
 }
 impl From<JsScript> for AnyJsRoot {
-    fn from(node: JsScript) -> AnyJsRoot {
-        AnyJsRoot::JsScript(node)
+    fn from(node: JsScript) -> Self {
+        Self::JsScript(node)
     }
 }
 impl From<TsDeclarationModule> for AnyJsRoot {
-    fn from(node: TsDeclarationModule) -> AnyJsRoot {
-        AnyJsRoot::TsDeclarationModule(node)
+    fn from(node: TsDeclarationModule) -> Self {
+        Self::TsDeclarationModule(node)
     }
 }
 impl AstNode for AnyJsRoot {
@@ -36965,43 +36717,43 @@ impl AstNode for AnyJsRoot {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_EXPRESSION_SNIPPED => AnyJsRoot::JsExpressionSnipped(JsExpressionSnipped { syntax }),
-            JS_MODULE => AnyJsRoot::JsModule(JsModule { syntax }),
-            JS_SCRIPT => AnyJsRoot::JsScript(JsScript { syntax }),
-            TS_DECLARATION_MODULE => AnyJsRoot::TsDeclarationModule(TsDeclarationModule { syntax }),
+            JS_EXPRESSION_SNIPPED => Self::JsExpressionSnipped(JsExpressionSnipped { syntax }),
+            JS_MODULE => Self::JsModule(JsModule { syntax }),
+            JS_SCRIPT => Self::JsScript(JsScript { syntax }),
+            TS_DECLARATION_MODULE => Self::TsDeclarationModule(TsDeclarationModule { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsRoot::JsExpressionSnipped(it) => &it.syntax,
-            AnyJsRoot::JsModule(it) => &it.syntax,
-            AnyJsRoot::JsScript(it) => &it.syntax,
-            AnyJsRoot::TsDeclarationModule(it) => &it.syntax,
+            Self::JsExpressionSnipped(it) => &it.syntax,
+            Self::JsModule(it) => &it.syntax,
+            Self::JsScript(it) => &it.syntax,
+            Self::TsDeclarationModule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsRoot::JsExpressionSnipped(it) => it.syntax,
-            AnyJsRoot::JsModule(it) => it.syntax,
-            AnyJsRoot::JsScript(it) => it.syntax,
-            AnyJsRoot::TsDeclarationModule(it) => it.syntax,
+            Self::JsExpressionSnipped(it) => it.syntax,
+            Self::JsModule(it) => it.syntax,
+            Self::JsScript(it) => it.syntax,
+            Self::TsDeclarationModule(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsRoot::JsExpressionSnipped(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsRoot::JsModule(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsRoot::JsScript(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsRoot::TsDeclarationModule(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExpressionSnipped(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsModule(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsScript(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsDeclarationModule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsRoot> for SyntaxNode {
-    fn from(n: AnyJsRoot) -> SyntaxNode {
+    fn from(n: AnyJsRoot) -> Self {
         match n {
             AnyJsRoot::JsExpressionSnipped(it) => it.into(),
             AnyJsRoot::JsModule(it) => it.into(),
@@ -37011,174 +36763,174 @@ impl From<AnyJsRoot> for SyntaxNode {
     }
 }
 impl From<AnyJsRoot> for SyntaxElement {
-    fn from(n: AnyJsRoot) -> SyntaxElement {
+    fn from(n: AnyJsRoot) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBlockStatement> for AnyJsStatement {
-    fn from(node: JsBlockStatement) -> AnyJsStatement {
-        AnyJsStatement::JsBlockStatement(node)
+    fn from(node: JsBlockStatement) -> Self {
+        Self::JsBlockStatement(node)
     }
 }
 impl From<JsBogusStatement> for AnyJsStatement {
-    fn from(node: JsBogusStatement) -> AnyJsStatement {
-        AnyJsStatement::JsBogusStatement(node)
+    fn from(node: JsBogusStatement) -> Self {
+        Self::JsBogusStatement(node)
     }
 }
 impl From<JsBreakStatement> for AnyJsStatement {
-    fn from(node: JsBreakStatement) -> AnyJsStatement {
-        AnyJsStatement::JsBreakStatement(node)
+    fn from(node: JsBreakStatement) -> Self {
+        Self::JsBreakStatement(node)
     }
 }
 impl From<JsClassDeclaration> for AnyJsStatement {
-    fn from(node: JsClassDeclaration) -> AnyJsStatement {
-        AnyJsStatement::JsClassDeclaration(node)
+    fn from(node: JsClassDeclaration) -> Self {
+        Self::JsClassDeclaration(node)
     }
 }
 impl From<JsContinueStatement> for AnyJsStatement {
-    fn from(node: JsContinueStatement) -> AnyJsStatement {
-        AnyJsStatement::JsContinueStatement(node)
+    fn from(node: JsContinueStatement) -> Self {
+        Self::JsContinueStatement(node)
     }
 }
 impl From<JsDebuggerStatement> for AnyJsStatement {
-    fn from(node: JsDebuggerStatement) -> AnyJsStatement {
-        AnyJsStatement::JsDebuggerStatement(node)
+    fn from(node: JsDebuggerStatement) -> Self {
+        Self::JsDebuggerStatement(node)
     }
 }
 impl From<JsDoWhileStatement> for AnyJsStatement {
-    fn from(node: JsDoWhileStatement) -> AnyJsStatement {
-        AnyJsStatement::JsDoWhileStatement(node)
+    fn from(node: JsDoWhileStatement) -> Self {
+        Self::JsDoWhileStatement(node)
     }
 }
 impl From<JsEmptyStatement> for AnyJsStatement {
-    fn from(node: JsEmptyStatement) -> AnyJsStatement {
-        AnyJsStatement::JsEmptyStatement(node)
+    fn from(node: JsEmptyStatement) -> Self {
+        Self::JsEmptyStatement(node)
     }
 }
 impl From<JsExpressionStatement> for AnyJsStatement {
-    fn from(node: JsExpressionStatement) -> AnyJsStatement {
-        AnyJsStatement::JsExpressionStatement(node)
+    fn from(node: JsExpressionStatement) -> Self {
+        Self::JsExpressionStatement(node)
     }
 }
 impl From<JsForInStatement> for AnyJsStatement {
-    fn from(node: JsForInStatement) -> AnyJsStatement {
-        AnyJsStatement::JsForInStatement(node)
+    fn from(node: JsForInStatement) -> Self {
+        Self::JsForInStatement(node)
     }
 }
 impl From<JsForOfStatement> for AnyJsStatement {
-    fn from(node: JsForOfStatement) -> AnyJsStatement {
-        AnyJsStatement::JsForOfStatement(node)
+    fn from(node: JsForOfStatement) -> Self {
+        Self::JsForOfStatement(node)
     }
 }
 impl From<JsForStatement> for AnyJsStatement {
-    fn from(node: JsForStatement) -> AnyJsStatement {
-        AnyJsStatement::JsForStatement(node)
+    fn from(node: JsForStatement) -> Self {
+        Self::JsForStatement(node)
     }
 }
 impl From<JsFunctionDeclaration> for AnyJsStatement {
-    fn from(node: JsFunctionDeclaration) -> AnyJsStatement {
-        AnyJsStatement::JsFunctionDeclaration(node)
+    fn from(node: JsFunctionDeclaration) -> Self {
+        Self::JsFunctionDeclaration(node)
     }
 }
 impl From<JsIfStatement> for AnyJsStatement {
-    fn from(node: JsIfStatement) -> AnyJsStatement {
-        AnyJsStatement::JsIfStatement(node)
+    fn from(node: JsIfStatement) -> Self {
+        Self::JsIfStatement(node)
     }
 }
 impl From<JsLabeledStatement> for AnyJsStatement {
-    fn from(node: JsLabeledStatement) -> AnyJsStatement {
-        AnyJsStatement::JsLabeledStatement(node)
+    fn from(node: JsLabeledStatement) -> Self {
+        Self::JsLabeledStatement(node)
     }
 }
 impl From<JsMetavariable> for AnyJsStatement {
-    fn from(node: JsMetavariable) -> AnyJsStatement {
-        AnyJsStatement::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsReturnStatement> for AnyJsStatement {
-    fn from(node: JsReturnStatement) -> AnyJsStatement {
-        AnyJsStatement::JsReturnStatement(node)
+    fn from(node: JsReturnStatement) -> Self {
+        Self::JsReturnStatement(node)
     }
 }
 impl From<JsSwitchStatement> for AnyJsStatement {
-    fn from(node: JsSwitchStatement) -> AnyJsStatement {
-        AnyJsStatement::JsSwitchStatement(node)
+    fn from(node: JsSwitchStatement) -> Self {
+        Self::JsSwitchStatement(node)
     }
 }
 impl From<JsThrowStatement> for AnyJsStatement {
-    fn from(node: JsThrowStatement) -> AnyJsStatement {
-        AnyJsStatement::JsThrowStatement(node)
+    fn from(node: JsThrowStatement) -> Self {
+        Self::JsThrowStatement(node)
     }
 }
 impl From<JsTryFinallyStatement> for AnyJsStatement {
-    fn from(node: JsTryFinallyStatement) -> AnyJsStatement {
-        AnyJsStatement::JsTryFinallyStatement(node)
+    fn from(node: JsTryFinallyStatement) -> Self {
+        Self::JsTryFinallyStatement(node)
     }
 }
 impl From<JsTryStatement> for AnyJsStatement {
-    fn from(node: JsTryStatement) -> AnyJsStatement {
-        AnyJsStatement::JsTryStatement(node)
+    fn from(node: JsTryStatement) -> Self {
+        Self::JsTryStatement(node)
     }
 }
 impl From<JsVariableStatement> for AnyJsStatement {
-    fn from(node: JsVariableStatement) -> AnyJsStatement {
-        AnyJsStatement::JsVariableStatement(node)
+    fn from(node: JsVariableStatement) -> Self {
+        Self::JsVariableStatement(node)
     }
 }
 impl From<JsWhileStatement> for AnyJsStatement {
-    fn from(node: JsWhileStatement) -> AnyJsStatement {
-        AnyJsStatement::JsWhileStatement(node)
+    fn from(node: JsWhileStatement) -> Self {
+        Self::JsWhileStatement(node)
     }
 }
 impl From<JsWithStatement> for AnyJsStatement {
-    fn from(node: JsWithStatement) -> AnyJsStatement {
-        AnyJsStatement::JsWithStatement(node)
+    fn from(node: JsWithStatement) -> Self {
+        Self::JsWithStatement(node)
     }
 }
 impl From<TsDeclareFunctionDeclaration> for AnyJsStatement {
-    fn from(node: TsDeclareFunctionDeclaration) -> AnyJsStatement {
-        AnyJsStatement::TsDeclareFunctionDeclaration(node)
+    fn from(node: TsDeclareFunctionDeclaration) -> Self {
+        Self::TsDeclareFunctionDeclaration(node)
     }
 }
 impl From<TsDeclareStatement> for AnyJsStatement {
-    fn from(node: TsDeclareStatement) -> AnyJsStatement {
-        AnyJsStatement::TsDeclareStatement(node)
+    fn from(node: TsDeclareStatement) -> Self {
+        Self::TsDeclareStatement(node)
     }
 }
 impl From<TsEnumDeclaration> for AnyJsStatement {
-    fn from(node: TsEnumDeclaration) -> AnyJsStatement {
-        AnyJsStatement::TsEnumDeclaration(node)
+    fn from(node: TsEnumDeclaration) -> Self {
+        Self::TsEnumDeclaration(node)
     }
 }
 impl From<TsExternalModuleDeclaration> for AnyJsStatement {
-    fn from(node: TsExternalModuleDeclaration) -> AnyJsStatement {
-        AnyJsStatement::TsExternalModuleDeclaration(node)
+    fn from(node: TsExternalModuleDeclaration) -> Self {
+        Self::TsExternalModuleDeclaration(node)
     }
 }
 impl From<TsGlobalDeclaration> for AnyJsStatement {
-    fn from(node: TsGlobalDeclaration) -> AnyJsStatement {
-        AnyJsStatement::TsGlobalDeclaration(node)
+    fn from(node: TsGlobalDeclaration) -> Self {
+        Self::TsGlobalDeclaration(node)
     }
 }
 impl From<TsImportEqualsDeclaration> for AnyJsStatement {
-    fn from(node: TsImportEqualsDeclaration) -> AnyJsStatement {
-        AnyJsStatement::TsImportEqualsDeclaration(node)
+    fn from(node: TsImportEqualsDeclaration) -> Self {
+        Self::TsImportEqualsDeclaration(node)
     }
 }
 impl From<TsInterfaceDeclaration> for AnyJsStatement {
-    fn from(node: TsInterfaceDeclaration) -> AnyJsStatement {
-        AnyJsStatement::TsInterfaceDeclaration(node)
+    fn from(node: TsInterfaceDeclaration) -> Self {
+        Self::TsInterfaceDeclaration(node)
     }
 }
 impl From<TsModuleDeclaration> for AnyJsStatement {
-    fn from(node: TsModuleDeclaration) -> AnyJsStatement {
-        AnyJsStatement::TsModuleDeclaration(node)
+    fn from(node: TsModuleDeclaration) -> Self {
+        Self::TsModuleDeclaration(node)
     }
 }
 impl From<TsTypeAliasDeclaration> for AnyJsStatement {
-    fn from(node: TsTypeAliasDeclaration) -> AnyJsStatement {
-        AnyJsStatement::TsTypeAliasDeclaration(node)
+    fn from(node: TsTypeAliasDeclaration) -> Self {
+        Self::TsTypeAliasDeclaration(node)
     }
 }
 impl AstNode for AnyJsStatement {
@@ -37256,74 +37008,54 @@ impl AstNode for AnyJsStatement {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BLOCK_STATEMENT => AnyJsStatement::JsBlockStatement(JsBlockStatement { syntax }),
-            JS_BOGUS_STATEMENT => AnyJsStatement::JsBogusStatement(JsBogusStatement { syntax }),
-            JS_BREAK_STATEMENT => AnyJsStatement::JsBreakStatement(JsBreakStatement { syntax }),
-            JS_CLASS_DECLARATION => {
-                AnyJsStatement::JsClassDeclaration(JsClassDeclaration { syntax })
-            }
-            JS_CONTINUE_STATEMENT => {
-                AnyJsStatement::JsContinueStatement(JsContinueStatement { syntax })
-            }
-            JS_DEBUGGER_STATEMENT => {
-                AnyJsStatement::JsDebuggerStatement(JsDebuggerStatement { syntax })
-            }
-            JS_DO_WHILE_STATEMENT => {
-                AnyJsStatement::JsDoWhileStatement(JsDoWhileStatement { syntax })
-            }
-            JS_EMPTY_STATEMENT => AnyJsStatement::JsEmptyStatement(JsEmptyStatement { syntax }),
+            JS_BLOCK_STATEMENT => Self::JsBlockStatement(JsBlockStatement { syntax }),
+            JS_BOGUS_STATEMENT => Self::JsBogusStatement(JsBogusStatement { syntax }),
+            JS_BREAK_STATEMENT => Self::JsBreakStatement(JsBreakStatement { syntax }),
+            JS_CLASS_DECLARATION => Self::JsClassDeclaration(JsClassDeclaration { syntax }),
+            JS_CONTINUE_STATEMENT => Self::JsContinueStatement(JsContinueStatement { syntax }),
+            JS_DEBUGGER_STATEMENT => Self::JsDebuggerStatement(JsDebuggerStatement { syntax }),
+            JS_DO_WHILE_STATEMENT => Self::JsDoWhileStatement(JsDoWhileStatement { syntax }),
+            JS_EMPTY_STATEMENT => Self::JsEmptyStatement(JsEmptyStatement { syntax }),
             JS_EXPRESSION_STATEMENT => {
-                AnyJsStatement::JsExpressionStatement(JsExpressionStatement { syntax })
+                Self::JsExpressionStatement(JsExpressionStatement { syntax })
             }
-            JS_FOR_IN_STATEMENT => AnyJsStatement::JsForInStatement(JsForInStatement { syntax }),
-            JS_FOR_OF_STATEMENT => AnyJsStatement::JsForOfStatement(JsForOfStatement { syntax }),
-            JS_FOR_STATEMENT => AnyJsStatement::JsForStatement(JsForStatement { syntax }),
+            JS_FOR_IN_STATEMENT => Self::JsForInStatement(JsForInStatement { syntax }),
+            JS_FOR_OF_STATEMENT => Self::JsForOfStatement(JsForOfStatement { syntax }),
+            JS_FOR_STATEMENT => Self::JsForStatement(JsForStatement { syntax }),
             JS_FUNCTION_DECLARATION => {
-                AnyJsStatement::JsFunctionDeclaration(JsFunctionDeclaration { syntax })
+                Self::JsFunctionDeclaration(JsFunctionDeclaration { syntax })
             }
-            JS_IF_STATEMENT => AnyJsStatement::JsIfStatement(JsIfStatement { syntax }),
-            JS_LABELED_STATEMENT => {
-                AnyJsStatement::JsLabeledStatement(JsLabeledStatement { syntax })
-            }
-            JS_METAVARIABLE => AnyJsStatement::JsMetavariable(JsMetavariable { syntax }),
-            JS_RETURN_STATEMENT => AnyJsStatement::JsReturnStatement(JsReturnStatement { syntax }),
-            JS_SWITCH_STATEMENT => AnyJsStatement::JsSwitchStatement(JsSwitchStatement { syntax }),
-            JS_THROW_STATEMENT => AnyJsStatement::JsThrowStatement(JsThrowStatement { syntax }),
+            JS_IF_STATEMENT => Self::JsIfStatement(JsIfStatement { syntax }),
+            JS_LABELED_STATEMENT => Self::JsLabeledStatement(JsLabeledStatement { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            JS_RETURN_STATEMENT => Self::JsReturnStatement(JsReturnStatement { syntax }),
+            JS_SWITCH_STATEMENT => Self::JsSwitchStatement(JsSwitchStatement { syntax }),
+            JS_THROW_STATEMENT => Self::JsThrowStatement(JsThrowStatement { syntax }),
             JS_TRY_FINALLY_STATEMENT => {
-                AnyJsStatement::JsTryFinallyStatement(JsTryFinallyStatement { syntax })
+                Self::JsTryFinallyStatement(JsTryFinallyStatement { syntax })
             }
-            JS_TRY_STATEMENT => AnyJsStatement::JsTryStatement(JsTryStatement { syntax }),
-            JS_VARIABLE_STATEMENT => {
-                AnyJsStatement::JsVariableStatement(JsVariableStatement { syntax })
-            }
-            JS_WHILE_STATEMENT => AnyJsStatement::JsWhileStatement(JsWhileStatement { syntax }),
-            JS_WITH_STATEMENT => AnyJsStatement::JsWithStatement(JsWithStatement { syntax }),
+            JS_TRY_STATEMENT => Self::JsTryStatement(JsTryStatement { syntax }),
+            JS_VARIABLE_STATEMENT => Self::JsVariableStatement(JsVariableStatement { syntax }),
+            JS_WHILE_STATEMENT => Self::JsWhileStatement(JsWhileStatement { syntax }),
+            JS_WITH_STATEMENT => Self::JsWithStatement(JsWithStatement { syntax }),
             TS_DECLARE_FUNCTION_DECLARATION => {
-                AnyJsStatement::TsDeclareFunctionDeclaration(TsDeclareFunctionDeclaration {
-                    syntax,
-                })
+                Self::TsDeclareFunctionDeclaration(TsDeclareFunctionDeclaration { syntax })
             }
-            TS_DECLARE_STATEMENT => {
-                AnyJsStatement::TsDeclareStatement(TsDeclareStatement { syntax })
-            }
-            TS_ENUM_DECLARATION => AnyJsStatement::TsEnumDeclaration(TsEnumDeclaration { syntax }),
+            TS_DECLARE_STATEMENT => Self::TsDeclareStatement(TsDeclareStatement { syntax }),
+            TS_ENUM_DECLARATION => Self::TsEnumDeclaration(TsEnumDeclaration { syntax }),
             TS_EXTERNAL_MODULE_DECLARATION => {
-                AnyJsStatement::TsExternalModuleDeclaration(TsExternalModuleDeclaration { syntax })
+                Self::TsExternalModuleDeclaration(TsExternalModuleDeclaration { syntax })
             }
-            TS_GLOBAL_DECLARATION => {
-                AnyJsStatement::TsGlobalDeclaration(TsGlobalDeclaration { syntax })
-            }
+            TS_GLOBAL_DECLARATION => Self::TsGlobalDeclaration(TsGlobalDeclaration { syntax }),
             TS_IMPORT_EQUALS_DECLARATION => {
-                AnyJsStatement::TsImportEqualsDeclaration(TsImportEqualsDeclaration { syntax })
+                Self::TsImportEqualsDeclaration(TsImportEqualsDeclaration { syntax })
             }
             TS_INTERFACE_DECLARATION => {
-                AnyJsStatement::TsInterfaceDeclaration(TsInterfaceDeclaration { syntax })
+                Self::TsInterfaceDeclaration(TsInterfaceDeclaration { syntax })
             }
-            TS_MODULE_DECLARATION => {
-                AnyJsStatement::TsModuleDeclaration(TsModuleDeclaration { syntax })
-            }
+            TS_MODULE_DECLARATION => Self::TsModuleDeclaration(TsModuleDeclaration { syntax }),
             TS_TYPE_ALIAS_DECLARATION => {
-                AnyJsStatement::TsTypeAliasDeclaration(TsTypeAliasDeclaration { syntax })
+                Self::TsTypeAliasDeclaration(TsTypeAliasDeclaration { syntax })
             }
             _ => return None,
         };
@@ -37331,120 +37063,120 @@ impl AstNode for AnyJsStatement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsStatement::JsBlockStatement(it) => &it.syntax,
-            AnyJsStatement::JsBogusStatement(it) => &it.syntax,
-            AnyJsStatement::JsBreakStatement(it) => &it.syntax,
-            AnyJsStatement::JsClassDeclaration(it) => &it.syntax,
-            AnyJsStatement::JsContinueStatement(it) => &it.syntax,
-            AnyJsStatement::JsDebuggerStatement(it) => &it.syntax,
-            AnyJsStatement::JsDoWhileStatement(it) => &it.syntax,
-            AnyJsStatement::JsEmptyStatement(it) => &it.syntax,
-            AnyJsStatement::JsExpressionStatement(it) => &it.syntax,
-            AnyJsStatement::JsForInStatement(it) => &it.syntax,
-            AnyJsStatement::JsForOfStatement(it) => &it.syntax,
-            AnyJsStatement::JsForStatement(it) => &it.syntax,
-            AnyJsStatement::JsFunctionDeclaration(it) => &it.syntax,
-            AnyJsStatement::JsIfStatement(it) => &it.syntax,
-            AnyJsStatement::JsLabeledStatement(it) => &it.syntax,
-            AnyJsStatement::JsMetavariable(it) => &it.syntax,
-            AnyJsStatement::JsReturnStatement(it) => &it.syntax,
-            AnyJsStatement::JsSwitchStatement(it) => &it.syntax,
-            AnyJsStatement::JsThrowStatement(it) => &it.syntax,
-            AnyJsStatement::JsTryFinallyStatement(it) => &it.syntax,
-            AnyJsStatement::JsTryStatement(it) => &it.syntax,
-            AnyJsStatement::JsVariableStatement(it) => &it.syntax,
-            AnyJsStatement::JsWhileStatement(it) => &it.syntax,
-            AnyJsStatement::JsWithStatement(it) => &it.syntax,
-            AnyJsStatement::TsDeclareFunctionDeclaration(it) => &it.syntax,
-            AnyJsStatement::TsDeclareStatement(it) => &it.syntax,
-            AnyJsStatement::TsEnumDeclaration(it) => &it.syntax,
-            AnyJsStatement::TsExternalModuleDeclaration(it) => &it.syntax,
-            AnyJsStatement::TsGlobalDeclaration(it) => &it.syntax,
-            AnyJsStatement::TsImportEqualsDeclaration(it) => &it.syntax,
-            AnyJsStatement::TsInterfaceDeclaration(it) => &it.syntax,
-            AnyJsStatement::TsModuleDeclaration(it) => &it.syntax,
-            AnyJsStatement::TsTypeAliasDeclaration(it) => &it.syntax,
+            Self::JsBlockStatement(it) => &it.syntax,
+            Self::JsBogusStatement(it) => &it.syntax,
+            Self::JsBreakStatement(it) => &it.syntax,
+            Self::JsClassDeclaration(it) => &it.syntax,
+            Self::JsContinueStatement(it) => &it.syntax,
+            Self::JsDebuggerStatement(it) => &it.syntax,
+            Self::JsDoWhileStatement(it) => &it.syntax,
+            Self::JsEmptyStatement(it) => &it.syntax,
+            Self::JsExpressionStatement(it) => &it.syntax,
+            Self::JsForInStatement(it) => &it.syntax,
+            Self::JsForOfStatement(it) => &it.syntax,
+            Self::JsForStatement(it) => &it.syntax,
+            Self::JsFunctionDeclaration(it) => &it.syntax,
+            Self::JsIfStatement(it) => &it.syntax,
+            Self::JsLabeledStatement(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsReturnStatement(it) => &it.syntax,
+            Self::JsSwitchStatement(it) => &it.syntax,
+            Self::JsThrowStatement(it) => &it.syntax,
+            Self::JsTryFinallyStatement(it) => &it.syntax,
+            Self::JsTryStatement(it) => &it.syntax,
+            Self::JsVariableStatement(it) => &it.syntax,
+            Self::JsWhileStatement(it) => &it.syntax,
+            Self::JsWithStatement(it) => &it.syntax,
+            Self::TsDeclareFunctionDeclaration(it) => &it.syntax,
+            Self::TsDeclareStatement(it) => &it.syntax,
+            Self::TsEnumDeclaration(it) => &it.syntax,
+            Self::TsExternalModuleDeclaration(it) => &it.syntax,
+            Self::TsGlobalDeclaration(it) => &it.syntax,
+            Self::TsImportEqualsDeclaration(it) => &it.syntax,
+            Self::TsInterfaceDeclaration(it) => &it.syntax,
+            Self::TsModuleDeclaration(it) => &it.syntax,
+            Self::TsTypeAliasDeclaration(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsStatement::JsBlockStatement(it) => it.syntax,
-            AnyJsStatement::JsBogusStatement(it) => it.syntax,
-            AnyJsStatement::JsBreakStatement(it) => it.syntax,
-            AnyJsStatement::JsClassDeclaration(it) => it.syntax,
-            AnyJsStatement::JsContinueStatement(it) => it.syntax,
-            AnyJsStatement::JsDebuggerStatement(it) => it.syntax,
-            AnyJsStatement::JsDoWhileStatement(it) => it.syntax,
-            AnyJsStatement::JsEmptyStatement(it) => it.syntax,
-            AnyJsStatement::JsExpressionStatement(it) => it.syntax,
-            AnyJsStatement::JsForInStatement(it) => it.syntax,
-            AnyJsStatement::JsForOfStatement(it) => it.syntax,
-            AnyJsStatement::JsForStatement(it) => it.syntax,
-            AnyJsStatement::JsFunctionDeclaration(it) => it.syntax,
-            AnyJsStatement::JsIfStatement(it) => it.syntax,
-            AnyJsStatement::JsLabeledStatement(it) => it.syntax,
-            AnyJsStatement::JsMetavariable(it) => it.syntax,
-            AnyJsStatement::JsReturnStatement(it) => it.syntax,
-            AnyJsStatement::JsSwitchStatement(it) => it.syntax,
-            AnyJsStatement::JsThrowStatement(it) => it.syntax,
-            AnyJsStatement::JsTryFinallyStatement(it) => it.syntax,
-            AnyJsStatement::JsTryStatement(it) => it.syntax,
-            AnyJsStatement::JsVariableStatement(it) => it.syntax,
-            AnyJsStatement::JsWhileStatement(it) => it.syntax,
-            AnyJsStatement::JsWithStatement(it) => it.syntax,
-            AnyJsStatement::TsDeclareFunctionDeclaration(it) => it.syntax,
-            AnyJsStatement::TsDeclareStatement(it) => it.syntax,
-            AnyJsStatement::TsEnumDeclaration(it) => it.syntax,
-            AnyJsStatement::TsExternalModuleDeclaration(it) => it.syntax,
-            AnyJsStatement::TsGlobalDeclaration(it) => it.syntax,
-            AnyJsStatement::TsImportEqualsDeclaration(it) => it.syntax,
-            AnyJsStatement::TsInterfaceDeclaration(it) => it.syntax,
-            AnyJsStatement::TsModuleDeclaration(it) => it.syntax,
-            AnyJsStatement::TsTypeAliasDeclaration(it) => it.syntax,
+            Self::JsBlockStatement(it) => it.syntax,
+            Self::JsBogusStatement(it) => it.syntax,
+            Self::JsBreakStatement(it) => it.syntax,
+            Self::JsClassDeclaration(it) => it.syntax,
+            Self::JsContinueStatement(it) => it.syntax,
+            Self::JsDebuggerStatement(it) => it.syntax,
+            Self::JsDoWhileStatement(it) => it.syntax,
+            Self::JsEmptyStatement(it) => it.syntax,
+            Self::JsExpressionStatement(it) => it.syntax,
+            Self::JsForInStatement(it) => it.syntax,
+            Self::JsForOfStatement(it) => it.syntax,
+            Self::JsForStatement(it) => it.syntax,
+            Self::JsFunctionDeclaration(it) => it.syntax,
+            Self::JsIfStatement(it) => it.syntax,
+            Self::JsLabeledStatement(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsReturnStatement(it) => it.syntax,
+            Self::JsSwitchStatement(it) => it.syntax,
+            Self::JsThrowStatement(it) => it.syntax,
+            Self::JsTryFinallyStatement(it) => it.syntax,
+            Self::JsTryStatement(it) => it.syntax,
+            Self::JsVariableStatement(it) => it.syntax,
+            Self::JsWhileStatement(it) => it.syntax,
+            Self::JsWithStatement(it) => it.syntax,
+            Self::TsDeclareFunctionDeclaration(it) => it.syntax,
+            Self::TsDeclareStatement(it) => it.syntax,
+            Self::TsEnumDeclaration(it) => it.syntax,
+            Self::TsExternalModuleDeclaration(it) => it.syntax,
+            Self::TsGlobalDeclaration(it) => it.syntax,
+            Self::TsImportEqualsDeclaration(it) => it.syntax,
+            Self::TsInterfaceDeclaration(it) => it.syntax,
+            Self::TsModuleDeclaration(it) => it.syntax,
+            Self::TsTypeAliasDeclaration(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsStatement::JsBlockStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsBogusStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsBreakStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsClassDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsContinueStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsDebuggerStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsDoWhileStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsEmptyStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsExpressionStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsForInStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsForOfStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsForStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsIfStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsLabeledStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsReturnStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsSwitchStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsThrowStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsTryFinallyStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsTryStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsVariableStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsWhileStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::JsWithStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::TsDeclareFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::TsDeclareStatement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::TsEnumDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::TsExternalModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::TsGlobalDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::TsImportEqualsDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::TsInterfaceDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::TsModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsStatement::TsTypeAliasDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBlockStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBreakStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsClassDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsContinueStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsDebuggerStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsDoWhileStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsEmptyStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsExpressionStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsForInStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsForOfStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsForStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsIfStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsLabeledStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsReturnStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSwitchStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsThrowStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsTryFinallyStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsTryStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsVariableStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsWhileStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsWithStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsDeclareFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsDeclareStatement(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsEnumDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsExternalModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsGlobalDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsImportEqualsDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsInterfaceDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsModuleDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeAliasDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsStatement> for SyntaxNode {
-    fn from(n: AnyJsStatement) -> SyntaxNode {
+    fn from(n: AnyJsStatement) -> Self {
         match n {
             AnyJsStatement::JsBlockStatement(it) => it.into(),
             AnyJsStatement::JsBogusStatement(it) => it.into(),
@@ -37483,19 +37215,19 @@ impl From<AnyJsStatement> for SyntaxNode {
     }
 }
 impl From<AnyJsStatement> for SyntaxElement {
-    fn from(n: AnyJsStatement) -> SyntaxElement {
+    fn from(n: AnyJsStatement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsCaseClause> for AnyJsSwitchClause {
-    fn from(node: JsCaseClause) -> AnyJsSwitchClause {
-        AnyJsSwitchClause::JsCaseClause(node)
+    fn from(node: JsCaseClause) -> Self {
+        Self::JsCaseClause(node)
     }
 }
 impl From<JsDefaultClause> for AnyJsSwitchClause {
-    fn from(node: JsDefaultClause) -> AnyJsSwitchClause {
-        AnyJsSwitchClause::JsDefaultClause(node)
+    fn from(node: JsDefaultClause) -> Self {
+        Self::JsDefaultClause(node)
     }
 }
 impl AstNode for AnyJsSwitchClause {
@@ -37507,35 +37239,35 @@ impl AstNode for AnyJsSwitchClause {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_CASE_CLAUSE => AnyJsSwitchClause::JsCaseClause(JsCaseClause { syntax }),
-            JS_DEFAULT_CLAUSE => AnyJsSwitchClause::JsDefaultClause(JsDefaultClause { syntax }),
+            JS_CASE_CLAUSE => Self::JsCaseClause(JsCaseClause { syntax }),
+            JS_DEFAULT_CLAUSE => Self::JsDefaultClause(JsDefaultClause { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsSwitchClause::JsCaseClause(it) => &it.syntax,
-            AnyJsSwitchClause::JsDefaultClause(it) => &it.syntax,
+            Self::JsCaseClause(it) => &it.syntax,
+            Self::JsDefaultClause(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsSwitchClause::JsCaseClause(it) => it.syntax,
-            AnyJsSwitchClause::JsDefaultClause(it) => it.syntax,
+            Self::JsCaseClause(it) => it.syntax,
+            Self::JsDefaultClause(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsSwitchClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsSwitchClause::JsCaseClause(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsSwitchClause::JsDefaultClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsCaseClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsDefaultClause(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsSwitchClause> for SyntaxNode {
-    fn from(n: AnyJsSwitchClause) -> SyntaxNode {
+    fn from(n: AnyJsSwitchClause) -> Self {
         match n {
             AnyJsSwitchClause::JsCaseClause(it) => it.into(),
             AnyJsSwitchClause::JsDefaultClause(it) => it.into(),
@@ -37543,19 +37275,19 @@ impl From<AnyJsSwitchClause> for SyntaxNode {
     }
 }
 impl From<AnyJsSwitchClause> for SyntaxElement {
-    fn from(n: AnyJsSwitchClause) -> SyntaxElement {
+    fn from(n: AnyJsSwitchClause) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsTemplateChunkElement> for AnyJsTemplateElement {
-    fn from(node: JsTemplateChunkElement) -> AnyJsTemplateElement {
-        AnyJsTemplateElement::JsTemplateChunkElement(node)
+    fn from(node: JsTemplateChunkElement) -> Self {
+        Self::JsTemplateChunkElement(node)
     }
 }
 impl From<JsTemplateElement> for AnyJsTemplateElement {
-    fn from(node: JsTemplateElement) -> AnyJsTemplateElement {
-        AnyJsTemplateElement::JsTemplateElement(node)
+    fn from(node: JsTemplateElement) -> Self {
+        Self::JsTemplateElement(node)
     }
 }
 impl AstNode for AnyJsTemplateElement {
@@ -37568,38 +37300,36 @@ impl AstNode for AnyJsTemplateElement {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_TEMPLATE_CHUNK_ELEMENT => {
-                AnyJsTemplateElement::JsTemplateChunkElement(JsTemplateChunkElement { syntax })
+                Self::JsTemplateChunkElement(JsTemplateChunkElement { syntax })
             }
-            JS_TEMPLATE_ELEMENT => {
-                AnyJsTemplateElement::JsTemplateElement(JsTemplateElement { syntax })
-            }
+            JS_TEMPLATE_ELEMENT => Self::JsTemplateElement(JsTemplateElement { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsTemplateElement::JsTemplateChunkElement(it) => &it.syntax,
-            AnyJsTemplateElement::JsTemplateElement(it) => &it.syntax,
+            Self::JsTemplateChunkElement(it) => &it.syntax,
+            Self::JsTemplateElement(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsTemplateElement::JsTemplateChunkElement(it) => it.syntax,
-            AnyJsTemplateElement::JsTemplateElement(it) => it.syntax,
+            Self::JsTemplateChunkElement(it) => it.syntax,
+            Self::JsTemplateElement(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsTemplateElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsTemplateElement::JsTemplateChunkElement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsTemplateElement::JsTemplateElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsTemplateChunkElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsTemplateElement(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsTemplateElement> for SyntaxNode {
-    fn from(n: AnyJsTemplateElement) -> SyntaxNode {
+    fn from(n: AnyJsTemplateElement) -> Self {
         match n {
             AnyJsTemplateElement::JsTemplateChunkElement(it) => it.into(),
             AnyJsTemplateElement::JsTemplateElement(it) => it.into(),
@@ -37607,24 +37337,24 @@ impl From<AnyJsTemplateElement> for SyntaxNode {
     }
 }
 impl From<AnyJsTemplateElement> for SyntaxElement {
-    fn from(n: AnyJsTemplateElement) -> SyntaxElement {
+    fn from(n: AnyJsTemplateElement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsMetavariable> for AnyJsxAttribute {
-    fn from(node: JsMetavariable) -> AnyJsxAttribute {
-        AnyJsxAttribute::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsxAttribute> for AnyJsxAttribute {
-    fn from(node: JsxAttribute) -> AnyJsxAttribute {
-        AnyJsxAttribute::JsxAttribute(node)
+    fn from(node: JsxAttribute) -> Self {
+        Self::JsxAttribute(node)
     }
 }
 impl From<JsxSpreadAttribute> for AnyJsxAttribute {
-    fn from(node: JsxSpreadAttribute) -> AnyJsxAttribute {
-        AnyJsxAttribute::JsxSpreadAttribute(node)
+    fn from(node: JsxSpreadAttribute) -> Self {
+        Self::JsxSpreadAttribute(node)
     }
 }
 impl AstNode for AnyJsxAttribute {
@@ -37637,41 +37367,39 @@ impl AstNode for AnyJsxAttribute {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_METAVARIABLE => AnyJsxAttribute::JsMetavariable(JsMetavariable { syntax }),
-            JSX_ATTRIBUTE => AnyJsxAttribute::JsxAttribute(JsxAttribute { syntax }),
-            JSX_SPREAD_ATTRIBUTE => {
-                AnyJsxAttribute::JsxSpreadAttribute(JsxSpreadAttribute { syntax })
-            }
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            JSX_ATTRIBUTE => Self::JsxAttribute(JsxAttribute { syntax }),
+            JSX_SPREAD_ATTRIBUTE => Self::JsxSpreadAttribute(JsxSpreadAttribute { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsxAttribute::JsMetavariable(it) => &it.syntax,
-            AnyJsxAttribute::JsxAttribute(it) => &it.syntax,
-            AnyJsxAttribute::JsxSpreadAttribute(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsxAttribute(it) => &it.syntax,
+            Self::JsxSpreadAttribute(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsxAttribute::JsMetavariable(it) => it.syntax,
-            AnyJsxAttribute::JsxAttribute(it) => it.syntax,
-            AnyJsxAttribute::JsxSpreadAttribute(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsxAttribute(it) => it.syntax,
+            Self::JsxSpreadAttribute(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsxAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsxAttribute::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxAttribute::JsxAttribute(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxAttribute::JsxSpreadAttribute(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxAttribute(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxSpreadAttribute(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsxAttribute> for SyntaxNode {
-    fn from(n: AnyJsxAttribute) -> SyntaxNode {
+    fn from(n: AnyJsxAttribute) -> Self {
         match n {
             AnyJsxAttribute::JsMetavariable(it) => it.into(),
             AnyJsxAttribute::JsxAttribute(it) => it.into(),
@@ -37680,19 +37408,19 @@ impl From<AnyJsxAttribute> for SyntaxNode {
     }
 }
 impl From<AnyJsxAttribute> for SyntaxElement {
-    fn from(n: AnyJsxAttribute) -> SyntaxElement {
+    fn from(n: AnyJsxAttribute) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsxName> for AnyJsxAttributeName {
-    fn from(node: JsxName) -> AnyJsxAttributeName {
-        AnyJsxAttributeName::JsxName(node)
+    fn from(node: JsxName) -> Self {
+        Self::JsxName(node)
     }
 }
 impl From<JsxNamespaceName> for AnyJsxAttributeName {
-    fn from(node: JsxNamespaceName) -> AnyJsxAttributeName {
-        AnyJsxAttributeName::JsxNamespaceName(node)
+    fn from(node: JsxNamespaceName) -> Self {
+        Self::JsxNamespaceName(node)
     }
 }
 impl AstNode for AnyJsxAttributeName {
@@ -37703,37 +37431,35 @@ impl AstNode for AnyJsxAttributeName {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JSX_NAME => AnyJsxAttributeName::JsxName(JsxName { syntax }),
-            JSX_NAMESPACE_NAME => {
-                AnyJsxAttributeName::JsxNamespaceName(JsxNamespaceName { syntax })
-            }
+            JSX_NAME => Self::JsxName(JsxName { syntax }),
+            JSX_NAMESPACE_NAME => Self::JsxNamespaceName(JsxNamespaceName { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsxAttributeName::JsxName(it) => &it.syntax,
-            AnyJsxAttributeName::JsxNamespaceName(it) => &it.syntax,
+            Self::JsxName(it) => &it.syntax,
+            Self::JsxNamespaceName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsxAttributeName::JsxName(it) => it.syntax,
-            AnyJsxAttributeName::JsxNamespaceName(it) => it.syntax,
+            Self::JsxName(it) => it.syntax,
+            Self::JsxNamespaceName(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsxAttributeName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsxAttributeName::JsxName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxAttributeName::JsxNamespaceName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxNamespaceName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsxAttributeName> for SyntaxNode {
-    fn from(n: AnyJsxAttributeName) -> SyntaxNode {
+    fn from(n: AnyJsxAttributeName) -> Self {
         match n {
             AnyJsxAttributeName::JsxName(it) => it.into(),
             AnyJsxAttributeName::JsxNamespaceName(it) => it.into(),
@@ -37741,19 +37467,19 @@ impl From<AnyJsxAttributeName> for SyntaxNode {
     }
 }
 impl From<AnyJsxAttributeName> for SyntaxElement {
-    fn from(n: AnyJsxAttributeName) -> SyntaxElement {
+    fn from(n: AnyJsxAttributeName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsxExpressionAttributeValue> for AnyJsxAttributeValue {
-    fn from(node: JsxExpressionAttributeValue) -> AnyJsxAttributeValue {
-        AnyJsxAttributeValue::JsxExpressionAttributeValue(node)
+    fn from(node: JsxExpressionAttributeValue) -> Self {
+        Self::JsxExpressionAttributeValue(node)
     }
 }
 impl From<JsxString> for AnyJsxAttributeValue {
-    fn from(node: JsxString) -> AnyJsxAttributeValue {
-        AnyJsxAttributeValue::JsxString(node)
+    fn from(node: JsxString) -> Self {
+        Self::JsxString(node)
     }
 }
 impl AstNode for AnyJsxAttributeValue {
@@ -37771,14 +37497,12 @@ impl AstNode for AnyJsxAttributeValue {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JSX_EXPRESSION_ATTRIBUTE_VALUE => {
-                AnyJsxAttributeValue::JsxExpressionAttributeValue(JsxExpressionAttributeValue {
-                    syntax,
-                })
+                Self::JsxExpressionAttributeValue(JsxExpressionAttributeValue { syntax })
             }
-            JSX_STRING => AnyJsxAttributeValue::JsxString(JsxString { syntax }),
+            JSX_STRING => Self::JsxString(JsxString { syntax }),
             _ => {
                 if let Some(any_jsx_tag) = AnyJsxTag::cast(syntax) {
-                    return Some(AnyJsxAttributeValue::AnyJsxTag(any_jsx_tag));
+                    return Some(Self::AnyJsxTag(any_jsx_tag));
                 }
                 return None;
             }
@@ -37787,30 +37511,30 @@ impl AstNode for AnyJsxAttributeValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsxAttributeValue::JsxExpressionAttributeValue(it) => &it.syntax,
-            AnyJsxAttributeValue::JsxString(it) => &it.syntax,
-            AnyJsxAttributeValue::AnyJsxTag(it) => it.syntax(),
+            Self::JsxExpressionAttributeValue(it) => &it.syntax,
+            Self::JsxString(it) => &it.syntax,
+            Self::AnyJsxTag(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsxAttributeValue::JsxExpressionAttributeValue(it) => it.syntax,
-            AnyJsxAttributeValue::JsxString(it) => it.syntax,
-            AnyJsxAttributeValue::AnyJsxTag(it) => it.into_syntax(),
+            Self::JsxExpressionAttributeValue(it) => it.syntax,
+            Self::JsxString(it) => it.syntax,
+            Self::AnyJsxTag(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyJsxAttributeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsxAttributeValue::AnyJsxTag(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxAttributeValue::JsxExpressionAttributeValue(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxAttributeValue::JsxString(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyJsxTag(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxExpressionAttributeValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxString(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsxAttributeValue> for SyntaxNode {
-    fn from(n: AnyJsxAttributeValue) -> SyntaxNode {
+    fn from(n: AnyJsxAttributeValue) -> Self {
         match n {
             AnyJsxAttributeValue::AnyJsxTag(it) => it.into(),
             AnyJsxAttributeValue::JsxExpressionAttributeValue(it) => it.into(),
@@ -37819,44 +37543,44 @@ impl From<AnyJsxAttributeValue> for SyntaxNode {
     }
 }
 impl From<AnyJsxAttributeValue> for SyntaxElement {
-    fn from(n: AnyJsxAttributeValue) -> SyntaxElement {
+    fn from(n: AnyJsxAttributeValue) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsMetavariable> for AnyJsxChild {
-    fn from(node: JsMetavariable) -> AnyJsxChild {
-        AnyJsxChild::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsxElement> for AnyJsxChild {
-    fn from(node: JsxElement) -> AnyJsxChild {
-        AnyJsxChild::JsxElement(node)
+    fn from(node: JsxElement) -> Self {
+        Self::JsxElement(node)
     }
 }
 impl From<JsxExpressionChild> for AnyJsxChild {
-    fn from(node: JsxExpressionChild) -> AnyJsxChild {
-        AnyJsxChild::JsxExpressionChild(node)
+    fn from(node: JsxExpressionChild) -> Self {
+        Self::JsxExpressionChild(node)
     }
 }
 impl From<JsxFragment> for AnyJsxChild {
-    fn from(node: JsxFragment) -> AnyJsxChild {
-        AnyJsxChild::JsxFragment(node)
+    fn from(node: JsxFragment) -> Self {
+        Self::JsxFragment(node)
     }
 }
 impl From<JsxSelfClosingElement> for AnyJsxChild {
-    fn from(node: JsxSelfClosingElement) -> AnyJsxChild {
-        AnyJsxChild::JsxSelfClosingElement(node)
+    fn from(node: JsxSelfClosingElement) -> Self {
+        Self::JsxSelfClosingElement(node)
     }
 }
 impl From<JsxSpreadChild> for AnyJsxChild {
-    fn from(node: JsxSpreadChild) -> AnyJsxChild {
-        AnyJsxChild::JsxSpreadChild(node)
+    fn from(node: JsxSpreadChild) -> Self {
+        Self::JsxSpreadChild(node)
     }
 }
 impl From<JsxText> for AnyJsxChild {
-    fn from(node: JsxText) -> AnyJsxChild {
-        AnyJsxChild::JsxText(node)
+    fn from(node: JsxText) -> Self {
+        Self::JsxText(node)
     }
 }
 impl AstNode for AnyJsxChild {
@@ -37882,57 +37606,57 @@ impl AstNode for AnyJsxChild {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_METAVARIABLE => AnyJsxChild::JsMetavariable(JsMetavariable { syntax }),
-            JSX_ELEMENT => AnyJsxChild::JsxElement(JsxElement { syntax }),
-            JSX_EXPRESSION_CHILD => AnyJsxChild::JsxExpressionChild(JsxExpressionChild { syntax }),
-            JSX_FRAGMENT => AnyJsxChild::JsxFragment(JsxFragment { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            JSX_ELEMENT => Self::JsxElement(JsxElement { syntax }),
+            JSX_EXPRESSION_CHILD => Self::JsxExpressionChild(JsxExpressionChild { syntax }),
+            JSX_FRAGMENT => Self::JsxFragment(JsxFragment { syntax }),
             JSX_SELF_CLOSING_ELEMENT => {
-                AnyJsxChild::JsxSelfClosingElement(JsxSelfClosingElement { syntax })
+                Self::JsxSelfClosingElement(JsxSelfClosingElement { syntax })
             }
-            JSX_SPREAD_CHILD => AnyJsxChild::JsxSpreadChild(JsxSpreadChild { syntax }),
-            JSX_TEXT => AnyJsxChild::JsxText(JsxText { syntax }),
+            JSX_SPREAD_CHILD => Self::JsxSpreadChild(JsxSpreadChild { syntax }),
+            JSX_TEXT => Self::JsxText(JsxText { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsxChild::JsMetavariable(it) => &it.syntax,
-            AnyJsxChild::JsxElement(it) => &it.syntax,
-            AnyJsxChild::JsxExpressionChild(it) => &it.syntax,
-            AnyJsxChild::JsxFragment(it) => &it.syntax,
-            AnyJsxChild::JsxSelfClosingElement(it) => &it.syntax,
-            AnyJsxChild::JsxSpreadChild(it) => &it.syntax,
-            AnyJsxChild::JsxText(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsxElement(it) => &it.syntax,
+            Self::JsxExpressionChild(it) => &it.syntax,
+            Self::JsxFragment(it) => &it.syntax,
+            Self::JsxSelfClosingElement(it) => &it.syntax,
+            Self::JsxSpreadChild(it) => &it.syntax,
+            Self::JsxText(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsxChild::JsMetavariable(it) => it.syntax,
-            AnyJsxChild::JsxElement(it) => it.syntax,
-            AnyJsxChild::JsxExpressionChild(it) => it.syntax,
-            AnyJsxChild::JsxFragment(it) => it.syntax,
-            AnyJsxChild::JsxSelfClosingElement(it) => it.syntax,
-            AnyJsxChild::JsxSpreadChild(it) => it.syntax,
-            AnyJsxChild::JsxText(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsxElement(it) => it.syntax,
+            Self::JsxExpressionChild(it) => it.syntax,
+            Self::JsxFragment(it) => it.syntax,
+            Self::JsxSelfClosingElement(it) => it.syntax,
+            Self::JsxSpreadChild(it) => it.syntax,
+            Self::JsxText(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsxChild {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsxChild::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxChild::JsxElement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxChild::JsxExpressionChild(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxChild::JsxFragment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxChild::JsxSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxChild::JsxSpreadChild(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxChild::JsxText(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxExpressionChild(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxFragment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxSpreadChild(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxText(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsxChild> for SyntaxNode {
-    fn from(n: AnyJsxChild) -> SyntaxNode {
+    fn from(n: AnyJsxChild) -> Self {
         match n {
             AnyJsxChild::JsMetavariable(it) => it.into(),
             AnyJsxChild::JsxElement(it) => it.into(),
@@ -37945,34 +37669,34 @@ impl From<AnyJsxChild> for SyntaxNode {
     }
 }
 impl From<AnyJsxChild> for SyntaxElement {
-    fn from(n: AnyJsxChild) -> SyntaxElement {
+    fn from(n: AnyJsxChild) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsMetavariable> for AnyJsxElementName {
-    fn from(node: JsMetavariable) -> AnyJsxElementName {
-        AnyJsxElementName::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<JsxMemberName> for AnyJsxElementName {
-    fn from(node: JsxMemberName) -> AnyJsxElementName {
-        AnyJsxElementName::JsxMemberName(node)
+    fn from(node: JsxMemberName) -> Self {
+        Self::JsxMemberName(node)
     }
 }
 impl From<JsxName> for AnyJsxElementName {
-    fn from(node: JsxName) -> AnyJsxElementName {
-        AnyJsxElementName::JsxName(node)
+    fn from(node: JsxName) -> Self {
+        Self::JsxName(node)
     }
 }
 impl From<JsxNamespaceName> for AnyJsxElementName {
-    fn from(node: JsxNamespaceName) -> AnyJsxElementName {
-        AnyJsxElementName::JsxNamespaceName(node)
+    fn from(node: JsxNamespaceName) -> Self {
+        Self::JsxNamespaceName(node)
     }
 }
 impl From<JsxReferenceIdentifier> for AnyJsxElementName {
-    fn from(node: JsxReferenceIdentifier) -> AnyJsxElementName {
-        AnyJsxElementName::JsxReferenceIdentifier(node)
+    fn from(node: JsxReferenceIdentifier) -> Self {
+        Self::JsxReferenceIdentifier(node)
     }
 }
 impl AstNode for AnyJsxElementName {
@@ -37994,12 +37718,12 @@ impl AstNode for AnyJsxElementName {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_METAVARIABLE => AnyJsxElementName::JsMetavariable(JsMetavariable { syntax }),
-            JSX_MEMBER_NAME => AnyJsxElementName::JsxMemberName(JsxMemberName { syntax }),
-            JSX_NAME => AnyJsxElementName::JsxName(JsxName { syntax }),
-            JSX_NAMESPACE_NAME => AnyJsxElementName::JsxNamespaceName(JsxNamespaceName { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            JSX_MEMBER_NAME => Self::JsxMemberName(JsxMemberName { syntax }),
+            JSX_NAME => Self::JsxName(JsxName { syntax }),
+            JSX_NAMESPACE_NAME => Self::JsxNamespaceName(JsxNamespaceName { syntax }),
             JSX_REFERENCE_IDENTIFIER => {
-                AnyJsxElementName::JsxReferenceIdentifier(JsxReferenceIdentifier { syntax })
+                Self::JsxReferenceIdentifier(JsxReferenceIdentifier { syntax })
             }
             _ => return None,
         };
@@ -38007,36 +37731,36 @@ impl AstNode for AnyJsxElementName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsxElementName::JsMetavariable(it) => &it.syntax,
-            AnyJsxElementName::JsxMemberName(it) => &it.syntax,
-            AnyJsxElementName::JsxName(it) => &it.syntax,
-            AnyJsxElementName::JsxNamespaceName(it) => &it.syntax,
-            AnyJsxElementName::JsxReferenceIdentifier(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::JsxMemberName(it) => &it.syntax,
+            Self::JsxName(it) => &it.syntax,
+            Self::JsxNamespaceName(it) => &it.syntax,
+            Self::JsxReferenceIdentifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsxElementName::JsMetavariable(it) => it.syntax,
-            AnyJsxElementName::JsxMemberName(it) => it.syntax,
-            AnyJsxElementName::JsxName(it) => it.syntax,
-            AnyJsxElementName::JsxNamespaceName(it) => it.syntax,
-            AnyJsxElementName::JsxReferenceIdentifier(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::JsxMemberName(it) => it.syntax,
+            Self::JsxName(it) => it.syntax,
+            Self::JsxNamespaceName(it) => it.syntax,
+            Self::JsxReferenceIdentifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsxElementName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsxElementName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxElementName::JsxMemberName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxElementName::JsxName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxElementName::JsxNamespaceName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxElementName::JsxReferenceIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxNamespaceName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxReferenceIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsxElementName> for SyntaxNode {
-    fn from(n: AnyJsxElementName) -> SyntaxNode {
+    fn from(n: AnyJsxElementName) -> Self {
         match n {
             AnyJsxElementName::JsMetavariable(it) => it.into(),
             AnyJsxElementName::JsxMemberName(it) => it.into(),
@@ -38047,19 +37771,19 @@ impl From<AnyJsxElementName> for SyntaxNode {
     }
 }
 impl From<AnyJsxElementName> for SyntaxElement {
-    fn from(n: AnyJsxElementName) -> SyntaxElement {
+    fn from(n: AnyJsxElementName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsxName> for AnyJsxName {
-    fn from(node: JsxName) -> AnyJsxName {
-        AnyJsxName::JsxName(node)
+    fn from(node: JsxName) -> Self {
+        Self::JsxName(node)
     }
 }
 impl From<JsxNamespaceName> for AnyJsxName {
-    fn from(node: JsxNamespaceName) -> AnyJsxName {
-        AnyJsxName::JsxNamespaceName(node)
+    fn from(node: JsxNamespaceName) -> Self {
+        Self::JsxNamespaceName(node)
     }
 }
 impl AstNode for AnyJsxName {
@@ -38070,35 +37794,35 @@ impl AstNode for AnyJsxName {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JSX_NAME => AnyJsxName::JsxName(JsxName { syntax }),
-            JSX_NAMESPACE_NAME => AnyJsxName::JsxNamespaceName(JsxNamespaceName { syntax }),
+            JSX_NAME => Self::JsxName(JsxName { syntax }),
+            JSX_NAMESPACE_NAME => Self::JsxNamespaceName(JsxNamespaceName { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsxName::JsxName(it) => &it.syntax,
-            AnyJsxName::JsxNamespaceName(it) => &it.syntax,
+            Self::JsxName(it) => &it.syntax,
+            Self::JsxNamespaceName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsxName::JsxName(it) => it.syntax,
-            AnyJsxName::JsxNamespaceName(it) => it.syntax,
+            Self::JsxName(it) => it.syntax,
+            Self::JsxNamespaceName(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsxName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsxName::JsxName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxName::JsxNamespaceName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxNamespaceName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsxName> for SyntaxNode {
-    fn from(n: AnyJsxName) -> SyntaxNode {
+    fn from(n: AnyJsxName) -> Self {
         match n {
             AnyJsxName::JsxName(it) => it.into(),
             AnyJsxName::JsxNamespaceName(it) => it.into(),
@@ -38106,24 +37830,24 @@ impl From<AnyJsxName> for SyntaxNode {
     }
 }
 impl From<AnyJsxName> for SyntaxElement {
-    fn from(n: AnyJsxName) -> SyntaxElement {
+    fn from(n: AnyJsxName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsxMemberName> for AnyJsxObjectName {
-    fn from(node: JsxMemberName) -> AnyJsxObjectName {
-        AnyJsxObjectName::JsxMemberName(node)
+    fn from(node: JsxMemberName) -> Self {
+        Self::JsxMemberName(node)
     }
 }
 impl From<JsxNamespaceName> for AnyJsxObjectName {
-    fn from(node: JsxNamespaceName) -> AnyJsxObjectName {
-        AnyJsxObjectName::JsxNamespaceName(node)
+    fn from(node: JsxNamespaceName) -> Self {
+        Self::JsxNamespaceName(node)
     }
 }
 impl From<JsxReferenceIdentifier> for AnyJsxObjectName {
-    fn from(node: JsxReferenceIdentifier) -> AnyJsxObjectName {
-        AnyJsxObjectName::JsxReferenceIdentifier(node)
+    fn from(node: JsxReferenceIdentifier) -> Self {
+        Self::JsxReferenceIdentifier(node)
     }
 }
 impl AstNode for AnyJsxObjectName {
@@ -38139,10 +37863,10 @@ impl AstNode for AnyJsxObjectName {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JSX_MEMBER_NAME => AnyJsxObjectName::JsxMemberName(JsxMemberName { syntax }),
-            JSX_NAMESPACE_NAME => AnyJsxObjectName::JsxNamespaceName(JsxNamespaceName { syntax }),
+            JSX_MEMBER_NAME => Self::JsxMemberName(JsxMemberName { syntax }),
+            JSX_NAMESPACE_NAME => Self::JsxNamespaceName(JsxNamespaceName { syntax }),
             JSX_REFERENCE_IDENTIFIER => {
-                AnyJsxObjectName::JsxReferenceIdentifier(JsxReferenceIdentifier { syntax })
+                Self::JsxReferenceIdentifier(JsxReferenceIdentifier { syntax })
             }
             _ => return None,
         };
@@ -38150,30 +37874,30 @@ impl AstNode for AnyJsxObjectName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsxObjectName::JsxMemberName(it) => &it.syntax,
-            AnyJsxObjectName::JsxNamespaceName(it) => &it.syntax,
-            AnyJsxObjectName::JsxReferenceIdentifier(it) => &it.syntax,
+            Self::JsxMemberName(it) => &it.syntax,
+            Self::JsxNamespaceName(it) => &it.syntax,
+            Self::JsxReferenceIdentifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsxObjectName::JsxMemberName(it) => it.syntax,
-            AnyJsxObjectName::JsxNamespaceName(it) => it.syntax,
-            AnyJsxObjectName::JsxReferenceIdentifier(it) => it.syntax,
+            Self::JsxMemberName(it) => it.syntax,
+            Self::JsxNamespaceName(it) => it.syntax,
+            Self::JsxReferenceIdentifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsxObjectName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsxObjectName::JsxMemberName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxObjectName::JsxNamespaceName(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxObjectName::JsxReferenceIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxNamespaceName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxReferenceIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsxObjectName> for SyntaxNode {
-    fn from(n: AnyJsxObjectName) -> SyntaxNode {
+    fn from(n: AnyJsxObjectName) -> Self {
         match n {
             AnyJsxObjectName::JsxMemberName(it) => it.into(),
             AnyJsxObjectName::JsxNamespaceName(it) => it.into(),
@@ -38182,24 +37906,24 @@ impl From<AnyJsxObjectName> for SyntaxNode {
     }
 }
 impl From<AnyJsxObjectName> for SyntaxElement {
-    fn from(n: AnyJsxObjectName) -> SyntaxElement {
+    fn from(n: AnyJsxObjectName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsxElement> for AnyJsxTag {
-    fn from(node: JsxElement) -> AnyJsxTag {
-        AnyJsxTag::JsxElement(node)
+    fn from(node: JsxElement) -> Self {
+        Self::JsxElement(node)
     }
 }
 impl From<JsxFragment> for AnyJsxTag {
-    fn from(node: JsxFragment) -> AnyJsxTag {
-        AnyJsxTag::JsxFragment(node)
+    fn from(node: JsxFragment) -> Self {
+        Self::JsxFragment(node)
     }
 }
 impl From<JsxSelfClosingElement> for AnyJsxTag {
-    fn from(node: JsxSelfClosingElement) -> AnyJsxTag {
-        AnyJsxTag::JsxSelfClosingElement(node)
+    fn from(node: JsxSelfClosingElement) -> Self {
+        Self::JsxSelfClosingElement(node)
     }
 }
 impl AstNode for AnyJsxTag {
@@ -38212,10 +37936,10 @@ impl AstNode for AnyJsxTag {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JSX_ELEMENT => AnyJsxTag::JsxElement(JsxElement { syntax }),
-            JSX_FRAGMENT => AnyJsxTag::JsxFragment(JsxFragment { syntax }),
+            JSX_ELEMENT => Self::JsxElement(JsxElement { syntax }),
+            JSX_FRAGMENT => Self::JsxFragment(JsxFragment { syntax }),
             JSX_SELF_CLOSING_ELEMENT => {
-                AnyJsxTag::JsxSelfClosingElement(JsxSelfClosingElement { syntax })
+                Self::JsxSelfClosingElement(JsxSelfClosingElement { syntax })
             }
             _ => return None,
         };
@@ -38223,30 +37947,30 @@ impl AstNode for AnyJsxTag {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyJsxTag::JsxElement(it) => &it.syntax,
-            AnyJsxTag::JsxFragment(it) => &it.syntax,
-            AnyJsxTag::JsxSelfClosingElement(it) => &it.syntax,
+            Self::JsxElement(it) => &it.syntax,
+            Self::JsxFragment(it) => &it.syntax,
+            Self::JsxSelfClosingElement(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyJsxTag::JsxElement(it) => it.syntax,
-            AnyJsxTag::JsxFragment(it) => it.syntax,
-            AnyJsxTag::JsxSelfClosingElement(it) => it.syntax,
+            Self::JsxElement(it) => it.syntax,
+            Self::JsxFragment(it) => it.syntax,
+            Self::JsxSelfClosingElement(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyJsxTag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyJsxTag::JsxElement(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxTag::JsxFragment(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsxTag::JsxSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxFragment(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsxSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyJsxTag> for SyntaxNode {
-    fn from(n: AnyJsxTag) -> SyntaxNode {
+    fn from(n: AnyJsxTag) -> Self {
         match n {
             AnyJsxTag::JsxElement(it) => it.into(),
             AnyJsxTag::JsxFragment(it) => it.into(),
@@ -38255,19 +37979,19 @@ impl From<AnyJsxTag> for SyntaxNode {
     }
 }
 impl From<AnyJsxTag> for SyntaxElement {
-    fn from(n: AnyJsxTag) -> SyntaxElement {
+    fn from(n: AnyJsxTag) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsComputedMemberName> for AnyTsEnumMemberName {
-    fn from(node: JsComputedMemberName) -> AnyTsEnumMemberName {
-        AnyTsEnumMemberName::JsComputedMemberName(node)
+    fn from(node: JsComputedMemberName) -> Self {
+        Self::JsComputedMemberName(node)
     }
 }
 impl From<TsLiteralEnumMemberName> for AnyTsEnumMemberName {
-    fn from(node: TsLiteralEnumMemberName) -> AnyTsEnumMemberName {
-        AnyTsEnumMemberName::TsLiteralEnumMemberName(node)
+    fn from(node: TsLiteralEnumMemberName) -> Self {
+        Self::TsLiteralEnumMemberName(node)
     }
 }
 impl AstNode for AnyTsEnumMemberName {
@@ -38279,11 +38003,9 @@ impl AstNode for AnyTsEnumMemberName {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_COMPUTED_MEMBER_NAME => {
-                AnyTsEnumMemberName::JsComputedMemberName(JsComputedMemberName { syntax })
-            }
+            JS_COMPUTED_MEMBER_NAME => Self::JsComputedMemberName(JsComputedMemberName { syntax }),
             TS_LITERAL_ENUM_MEMBER_NAME => {
-                AnyTsEnumMemberName::TsLiteralEnumMemberName(TsLiteralEnumMemberName { syntax })
+                Self::TsLiteralEnumMemberName(TsLiteralEnumMemberName { syntax })
             }
             _ => return None,
         };
@@ -38291,27 +38013,27 @@ impl AstNode for AnyTsEnumMemberName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsEnumMemberName::JsComputedMemberName(it) => &it.syntax,
-            AnyTsEnumMemberName::TsLiteralEnumMemberName(it) => &it.syntax,
+            Self::JsComputedMemberName(it) => &it.syntax,
+            Self::TsLiteralEnumMemberName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsEnumMemberName::JsComputedMemberName(it) => it.syntax,
-            AnyTsEnumMemberName::TsLiteralEnumMemberName(it) => it.syntax,
+            Self::JsComputedMemberName(it) => it.syntax,
+            Self::TsLiteralEnumMemberName(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsEnumMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsEnumMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsEnumMemberName::TsLiteralEnumMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsLiteralEnumMemberName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsEnumMemberName> for SyntaxNode {
-    fn from(n: AnyTsEnumMemberName) -> SyntaxNode {
+    fn from(n: AnyTsEnumMemberName) -> Self {
         match n {
             AnyTsEnumMemberName::JsComputedMemberName(it) => it.into(),
             AnyTsEnumMemberName::TsLiteralEnumMemberName(it) => it.into(),
@@ -38319,19 +38041,19 @@ impl From<AnyTsEnumMemberName> for SyntaxNode {
     }
 }
 impl From<AnyTsEnumMemberName> for SyntaxElement {
-    fn from(n: AnyTsEnumMemberName) -> SyntaxElement {
+    fn from(n: AnyTsEnumMemberName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsEmptyExternalModuleDeclarationBody> for AnyTsExternalModuleDeclarationBody {
-    fn from(node: TsEmptyExternalModuleDeclarationBody) -> AnyTsExternalModuleDeclarationBody {
-        AnyTsExternalModuleDeclarationBody::TsEmptyExternalModuleDeclarationBody(node)
+    fn from(node: TsEmptyExternalModuleDeclarationBody) -> Self {
+        Self::TsEmptyExternalModuleDeclarationBody(node)
     }
 }
 impl From<TsModuleBlock> for AnyTsExternalModuleDeclarationBody {
-    fn from(node: TsModuleBlock) -> AnyTsExternalModuleDeclarationBody {
-        AnyTsExternalModuleDeclarationBody::TsModuleBlock(node)
+    fn from(node: TsModuleBlock) -> Self {
+        Self::TsModuleBlock(node)
     }
 }
 impl AstNode for AnyTsExternalModuleDeclarationBody {
@@ -38347,46 +38069,38 @@ impl AstNode for AnyTsExternalModuleDeclarationBody {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY => {
-                AnyTsExternalModuleDeclarationBody::TsEmptyExternalModuleDeclarationBody(
-                    TsEmptyExternalModuleDeclarationBody { syntax },
-                )
+                Self::TsEmptyExternalModuleDeclarationBody(TsEmptyExternalModuleDeclarationBody {
+                    syntax,
+                })
             }
-            TS_MODULE_BLOCK => {
-                AnyTsExternalModuleDeclarationBody::TsModuleBlock(TsModuleBlock { syntax })
-            }
+            TS_MODULE_BLOCK => Self::TsModuleBlock(TsModuleBlock { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsExternalModuleDeclarationBody::TsEmptyExternalModuleDeclarationBody(it) => {
-                &it.syntax
-            }
-            AnyTsExternalModuleDeclarationBody::TsModuleBlock(it) => &it.syntax,
+            Self::TsEmptyExternalModuleDeclarationBody(it) => &it.syntax,
+            Self::TsModuleBlock(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsExternalModuleDeclarationBody::TsEmptyExternalModuleDeclarationBody(it) => {
-                it.syntax
-            }
-            AnyTsExternalModuleDeclarationBody::TsModuleBlock(it) => it.syntax,
+            Self::TsEmptyExternalModuleDeclarationBody(it) => it.syntax,
+            Self::TsModuleBlock(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsExternalModuleDeclarationBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsExternalModuleDeclarationBody::TsEmptyExternalModuleDeclarationBody(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyTsExternalModuleDeclarationBody::TsModuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsEmptyExternalModuleDeclarationBody(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsModuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsExternalModuleDeclarationBody> for SyntaxNode {
-    fn from(n: AnyTsExternalModuleDeclarationBody) -> SyntaxNode {
+    fn from(n: AnyTsExternalModuleDeclarationBody) -> Self {
         match n {
             AnyTsExternalModuleDeclarationBody::TsEmptyExternalModuleDeclarationBody(it) => {
                 it.into()
@@ -38396,19 +38110,19 @@ impl From<AnyTsExternalModuleDeclarationBody> for SyntaxNode {
     }
 }
 impl From<AnyTsExternalModuleDeclarationBody> for SyntaxElement {
-    fn from(n: AnyTsExternalModuleDeclarationBody) -> SyntaxElement {
+    fn from(n: AnyTsExternalModuleDeclarationBody) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsMetavariable> for AnyTsIdentifierBinding {
-    fn from(node: JsMetavariable) -> AnyTsIdentifierBinding {
-        AnyTsIdentifierBinding::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<TsIdentifierBinding> for AnyTsIdentifierBinding {
-    fn from(node: TsIdentifierBinding) -> AnyTsIdentifierBinding {
-        AnyTsIdentifierBinding::TsIdentifierBinding(node)
+    fn from(node: TsIdentifierBinding) -> Self {
+        Self::TsIdentifierBinding(node)
     }
 }
 impl AstNode for AnyTsIdentifierBinding {
@@ -38420,37 +38134,35 @@ impl AstNode for AnyTsIdentifierBinding {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_METAVARIABLE => AnyTsIdentifierBinding::JsMetavariable(JsMetavariable { syntax }),
-            TS_IDENTIFIER_BINDING => {
-                AnyTsIdentifierBinding::TsIdentifierBinding(TsIdentifierBinding { syntax })
-            }
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            TS_IDENTIFIER_BINDING => Self::TsIdentifierBinding(TsIdentifierBinding { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsIdentifierBinding::JsMetavariable(it) => &it.syntax,
-            AnyTsIdentifierBinding::TsIdentifierBinding(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::TsIdentifierBinding(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsIdentifierBinding::JsMetavariable(it) => it.syntax,
-            AnyTsIdentifierBinding::TsIdentifierBinding(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::TsIdentifierBinding(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsIdentifierBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsIdentifierBinding::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsIdentifierBinding::TsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsIdentifierBinding> for SyntaxNode {
-    fn from(n: AnyTsIdentifierBinding) -> SyntaxNode {
+    fn from(n: AnyTsIdentifierBinding) -> Self {
         match n {
             AnyTsIdentifierBinding::JsMetavariable(it) => it.into(),
             AnyTsIdentifierBinding::TsIdentifierBinding(it) => it.into(),
@@ -38458,19 +38170,19 @@ impl From<AnyTsIdentifierBinding> for SyntaxNode {
     }
 }
 impl From<AnyTsIdentifierBinding> for SyntaxElement {
-    fn from(n: AnyTsIdentifierBinding) -> SyntaxElement {
+    fn from(n: AnyTsIdentifierBinding) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsStaticModifier> for AnyTsIndexSignatureModifier {
-    fn from(node: JsStaticModifier) -> AnyTsIndexSignatureModifier {
-        AnyTsIndexSignatureModifier::JsStaticModifier(node)
+    fn from(node: JsStaticModifier) -> Self {
+        Self::JsStaticModifier(node)
     }
 }
 impl From<TsReadonlyModifier> for AnyTsIndexSignatureModifier {
-    fn from(node: TsReadonlyModifier) -> AnyTsIndexSignatureModifier {
-        AnyTsIndexSignatureModifier::TsReadonlyModifier(node)
+    fn from(node: TsReadonlyModifier) -> Self {
+        Self::TsReadonlyModifier(node)
     }
 }
 impl AstNode for AnyTsIndexSignatureModifier {
@@ -38482,39 +38194,35 @@ impl AstNode for AnyTsIndexSignatureModifier {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_STATIC_MODIFIER => {
-                AnyTsIndexSignatureModifier::JsStaticModifier(JsStaticModifier { syntax })
-            }
-            TS_READONLY_MODIFIER => {
-                AnyTsIndexSignatureModifier::TsReadonlyModifier(TsReadonlyModifier { syntax })
-            }
+            JS_STATIC_MODIFIER => Self::JsStaticModifier(JsStaticModifier { syntax }),
+            TS_READONLY_MODIFIER => Self::TsReadonlyModifier(TsReadonlyModifier { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsIndexSignatureModifier::JsStaticModifier(it) => &it.syntax,
-            AnyTsIndexSignatureModifier::TsReadonlyModifier(it) => &it.syntax,
+            Self::JsStaticModifier(it) => &it.syntax,
+            Self::TsReadonlyModifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsIndexSignatureModifier::JsStaticModifier(it) => it.syntax,
-            AnyTsIndexSignatureModifier::TsReadonlyModifier(it) => it.syntax,
+            Self::JsStaticModifier(it) => it.syntax,
+            Self::TsReadonlyModifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsIndexSignatureModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsIndexSignatureModifier::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsIndexSignatureModifier::TsReadonlyModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsReadonlyModifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsIndexSignatureModifier> for SyntaxNode {
-    fn from(n: AnyTsIndexSignatureModifier) -> SyntaxNode {
+    fn from(n: AnyTsIndexSignatureModifier) -> Self {
         match n {
             AnyTsIndexSignatureModifier::JsStaticModifier(it) => it.into(),
             AnyTsIndexSignatureModifier::TsReadonlyModifier(it) => it.into(),
@@ -38522,34 +38230,34 @@ impl From<AnyTsIndexSignatureModifier> for SyntaxNode {
     }
 }
 impl From<AnyTsIndexSignatureModifier> for SyntaxElement {
-    fn from(n: AnyTsIndexSignatureModifier) -> SyntaxElement {
+    fn from(n: AnyTsIndexSignatureModifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsDecorator> for AnyTsMethodSignatureModifier {
-    fn from(node: JsDecorator) -> AnyTsMethodSignatureModifier {
-        AnyTsMethodSignatureModifier::JsDecorator(node)
+    fn from(node: JsDecorator) -> Self {
+        Self::JsDecorator(node)
     }
 }
 impl From<JsStaticModifier> for AnyTsMethodSignatureModifier {
-    fn from(node: JsStaticModifier) -> AnyTsMethodSignatureModifier {
-        AnyTsMethodSignatureModifier::JsStaticModifier(node)
+    fn from(node: JsStaticModifier) -> Self {
+        Self::JsStaticModifier(node)
     }
 }
 impl From<TsAbstractModifier> for AnyTsMethodSignatureModifier {
-    fn from(node: TsAbstractModifier) -> AnyTsMethodSignatureModifier {
-        AnyTsMethodSignatureModifier::TsAbstractModifier(node)
+    fn from(node: TsAbstractModifier) -> Self {
+        Self::TsAbstractModifier(node)
     }
 }
 impl From<TsAccessibilityModifier> for AnyTsMethodSignatureModifier {
-    fn from(node: TsAccessibilityModifier) -> AnyTsMethodSignatureModifier {
-        AnyTsMethodSignatureModifier::TsAccessibilityModifier(node)
+    fn from(node: TsAccessibilityModifier) -> Self {
+        Self::TsAccessibilityModifier(node)
     }
 }
 impl From<TsOverrideModifier> for AnyTsMethodSignatureModifier {
-    fn from(node: TsOverrideModifier) -> AnyTsMethodSignatureModifier {
-        AnyTsMethodSignatureModifier::TsOverrideModifier(node)
+    fn from(node: TsOverrideModifier) -> Self {
+        Self::TsOverrideModifier(node)
     }
 }
 impl AstNode for AnyTsMethodSignatureModifier {
@@ -38571,59 +38279,49 @@ impl AstNode for AnyTsMethodSignatureModifier {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_DECORATOR => AnyTsMethodSignatureModifier::JsDecorator(JsDecorator { syntax }),
-            JS_STATIC_MODIFIER => {
-                AnyTsMethodSignatureModifier::JsStaticModifier(JsStaticModifier { syntax })
-            }
-            TS_ABSTRACT_MODIFIER => {
-                AnyTsMethodSignatureModifier::TsAbstractModifier(TsAbstractModifier { syntax })
-            }
+            JS_DECORATOR => Self::JsDecorator(JsDecorator { syntax }),
+            JS_STATIC_MODIFIER => Self::JsStaticModifier(JsStaticModifier { syntax }),
+            TS_ABSTRACT_MODIFIER => Self::TsAbstractModifier(TsAbstractModifier { syntax }),
             TS_ACCESSIBILITY_MODIFIER => {
-                AnyTsMethodSignatureModifier::TsAccessibilityModifier(TsAccessibilityModifier {
-                    syntax,
-                })
+                Self::TsAccessibilityModifier(TsAccessibilityModifier { syntax })
             }
-            TS_OVERRIDE_MODIFIER => {
-                AnyTsMethodSignatureModifier::TsOverrideModifier(TsOverrideModifier { syntax })
-            }
+            TS_OVERRIDE_MODIFIER => Self::TsOverrideModifier(TsOverrideModifier { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsMethodSignatureModifier::JsDecorator(it) => &it.syntax,
-            AnyTsMethodSignatureModifier::JsStaticModifier(it) => &it.syntax,
-            AnyTsMethodSignatureModifier::TsAbstractModifier(it) => &it.syntax,
-            AnyTsMethodSignatureModifier::TsAccessibilityModifier(it) => &it.syntax,
-            AnyTsMethodSignatureModifier::TsOverrideModifier(it) => &it.syntax,
+            Self::JsDecorator(it) => &it.syntax,
+            Self::JsStaticModifier(it) => &it.syntax,
+            Self::TsAbstractModifier(it) => &it.syntax,
+            Self::TsAccessibilityModifier(it) => &it.syntax,
+            Self::TsOverrideModifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsMethodSignatureModifier::JsDecorator(it) => it.syntax,
-            AnyTsMethodSignatureModifier::JsStaticModifier(it) => it.syntax,
-            AnyTsMethodSignatureModifier::TsAbstractModifier(it) => it.syntax,
-            AnyTsMethodSignatureModifier::TsAccessibilityModifier(it) => it.syntax,
-            AnyTsMethodSignatureModifier::TsOverrideModifier(it) => it.syntax,
+            Self::JsDecorator(it) => it.syntax,
+            Self::JsStaticModifier(it) => it.syntax,
+            Self::TsAbstractModifier(it) => it.syntax,
+            Self::TsAccessibilityModifier(it) => it.syntax,
+            Self::TsOverrideModifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsMethodSignatureModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsMethodSignatureModifier::JsDecorator(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsMethodSignatureModifier::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsMethodSignatureModifier::TsAbstractModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsMethodSignatureModifier::TsAccessibilityModifier(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyTsMethodSignatureModifier::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsDecorator(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAbstractModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAccessibilityModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsMethodSignatureModifier> for SyntaxNode {
-    fn from(n: AnyTsMethodSignatureModifier) -> SyntaxNode {
+    fn from(n: AnyTsMethodSignatureModifier) -> Self {
         match n {
             AnyTsMethodSignatureModifier::JsDecorator(it) => it.into(),
             AnyTsMethodSignatureModifier::JsStaticModifier(it) => it.into(),
@@ -38634,14 +38332,14 @@ impl From<AnyTsMethodSignatureModifier> for SyntaxNode {
     }
 }
 impl From<AnyTsMethodSignatureModifier> for SyntaxElement {
-    fn from(n: AnyTsMethodSignatureModifier) -> SyntaxElement {
+    fn from(n: AnyTsMethodSignatureModifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsQualifiedModuleName> for AnyTsModuleName {
-    fn from(node: TsQualifiedModuleName) -> AnyTsModuleName {
-        AnyTsModuleName::TsQualifiedModuleName(node)
+    fn from(node: TsQualifiedModuleName) -> Self {
+        Self::TsQualifiedModuleName(node)
     }
 }
 impl AstNode for AnyTsModuleName {
@@ -38658,13 +38356,11 @@ impl AstNode for AnyTsModuleName {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TS_QUALIFIED_MODULE_NAME => {
-                AnyTsModuleName::TsQualifiedModuleName(TsQualifiedModuleName { syntax })
+                Self::TsQualifiedModuleName(TsQualifiedModuleName { syntax })
             }
             _ => {
                 if let Some(any_ts_identifier_binding) = AnyTsIdentifierBinding::cast(syntax) {
-                    return Some(AnyTsModuleName::AnyTsIdentifierBinding(
-                        any_ts_identifier_binding,
-                    ));
+                    return Some(Self::AnyTsIdentifierBinding(any_ts_identifier_binding));
                 }
                 return None;
             }
@@ -38673,27 +38369,27 @@ impl AstNode for AnyTsModuleName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsModuleName::TsQualifiedModuleName(it) => &it.syntax,
-            AnyTsModuleName::AnyTsIdentifierBinding(it) => it.syntax(),
+            Self::TsQualifiedModuleName(it) => &it.syntax,
+            Self::AnyTsIdentifierBinding(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsModuleName::TsQualifiedModuleName(it) => it.syntax,
-            AnyTsModuleName::AnyTsIdentifierBinding(it) => it.into_syntax(),
+            Self::TsQualifiedModuleName(it) => it.syntax,
+            Self::AnyTsIdentifierBinding(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyTsModuleName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsModuleName::AnyTsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsModuleName::TsQualifiedModuleName(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyTsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsQualifiedModuleName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsModuleName> for SyntaxNode {
-    fn from(n: AnyTsModuleName) -> SyntaxNode {
+    fn from(n: AnyTsModuleName) -> Self {
         match n {
             AnyTsModuleName::AnyTsIdentifierBinding(it) => it.into(),
             AnyTsModuleName::TsQualifiedModuleName(it) => it.into(),
@@ -38701,14 +38397,14 @@ impl From<AnyTsModuleName> for SyntaxNode {
     }
 }
 impl From<AnyTsModuleName> for SyntaxElement {
-    fn from(n: AnyTsModuleName) -> SyntaxElement {
+    fn from(n: AnyTsModuleName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsExternalModuleReference> for AnyTsModuleReference {
-    fn from(node: TsExternalModuleReference) -> AnyTsModuleReference {
-        AnyTsModuleReference::TsExternalModuleReference(node)
+    fn from(node: TsExternalModuleReference) -> Self {
+        Self::TsExternalModuleReference(node)
     }
 }
 impl AstNode for AnyTsModuleReference {
@@ -38725,13 +38421,11 @@ impl AstNode for AnyTsModuleReference {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TS_EXTERNAL_MODULE_REFERENCE => {
-                AnyTsModuleReference::TsExternalModuleReference(TsExternalModuleReference {
-                    syntax,
-                })
+                Self::TsExternalModuleReference(TsExternalModuleReference { syntax })
             }
             _ => {
                 if let Some(any_ts_name) = AnyTsName::cast(syntax) {
-                    return Some(AnyTsModuleReference::AnyTsName(any_ts_name));
+                    return Some(Self::AnyTsName(any_ts_name));
                 }
                 return None;
             }
@@ -38740,27 +38434,27 @@ impl AstNode for AnyTsModuleReference {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsModuleReference::TsExternalModuleReference(it) => &it.syntax,
-            AnyTsModuleReference::AnyTsName(it) => it.syntax(),
+            Self::TsExternalModuleReference(it) => &it.syntax,
+            Self::AnyTsName(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsModuleReference::TsExternalModuleReference(it) => it.syntax,
-            AnyTsModuleReference::AnyTsName(it) => it.into_syntax(),
+            Self::TsExternalModuleReference(it) => it.syntax,
+            Self::AnyTsName(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyTsModuleReference {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsModuleReference::AnyTsName(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsModuleReference::TsExternalModuleReference(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyTsName(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsExternalModuleReference(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsModuleReference> for SyntaxNode {
-    fn from(n: AnyTsModuleReference) -> SyntaxNode {
+    fn from(n: AnyTsModuleReference) -> Self {
         match n {
             AnyTsModuleReference::AnyTsName(it) => it.into(),
             AnyTsModuleReference::TsExternalModuleReference(it) => it.into(),
@@ -38768,19 +38462,19 @@ impl From<AnyTsModuleReference> for SyntaxNode {
     }
 }
 impl From<AnyTsModuleReference> for SyntaxElement {
-    fn from(n: AnyTsModuleReference) -> SyntaxElement {
+    fn from(n: AnyTsModuleReference) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsReferenceIdentifier> for AnyTsName {
-    fn from(node: JsReferenceIdentifier) -> AnyTsName {
-        AnyTsName::JsReferenceIdentifier(node)
+    fn from(node: JsReferenceIdentifier) -> Self {
+        Self::JsReferenceIdentifier(node)
     }
 }
 impl From<TsQualifiedName> for AnyTsName {
-    fn from(node: TsQualifiedName) -> AnyTsName {
-        AnyTsName::TsQualifiedName(node)
+    fn from(node: TsQualifiedName) -> Self {
+        Self::TsQualifiedName(node)
     }
 }
 impl AstNode for AnyTsName {
@@ -38793,36 +38487,36 @@ impl AstNode for AnyTsName {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_REFERENCE_IDENTIFIER => {
-                AnyTsName::JsReferenceIdentifier(JsReferenceIdentifier { syntax })
+                Self::JsReferenceIdentifier(JsReferenceIdentifier { syntax })
             }
-            TS_QUALIFIED_NAME => AnyTsName::TsQualifiedName(TsQualifiedName { syntax }),
+            TS_QUALIFIED_NAME => Self::TsQualifiedName(TsQualifiedName { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsName::JsReferenceIdentifier(it) => &it.syntax,
-            AnyTsName::TsQualifiedName(it) => &it.syntax,
+            Self::JsReferenceIdentifier(it) => &it.syntax,
+            Self::TsQualifiedName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsName::JsReferenceIdentifier(it) => it.syntax,
-            AnyTsName::TsQualifiedName(it) => it.syntax,
+            Self::JsReferenceIdentifier(it) => it.syntax,
+            Self::TsQualifiedName(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsName::JsReferenceIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsName::TsQualifiedName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsReferenceIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsQualifiedName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsName> for SyntaxNode {
-    fn from(n: AnyTsName) -> SyntaxNode {
+    fn from(n: AnyTsName) -> Self {
         match n {
             AnyTsName::JsReferenceIdentifier(it) => it.into(),
             AnyTsName::TsQualifiedName(it) => it.into(),
@@ -38830,24 +38524,24 @@ impl From<AnyTsName> for SyntaxNode {
     }
 }
 impl From<AnyTsName> for SyntaxElement {
-    fn from(n: AnyTsName) -> SyntaxElement {
+    fn from(n: AnyTsName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsDefinitePropertyAnnotation> for AnyTsPropertyAnnotation {
-    fn from(node: TsDefinitePropertyAnnotation) -> AnyTsPropertyAnnotation {
-        AnyTsPropertyAnnotation::TsDefinitePropertyAnnotation(node)
+    fn from(node: TsDefinitePropertyAnnotation) -> Self {
+        Self::TsDefinitePropertyAnnotation(node)
     }
 }
 impl From<TsOptionalPropertyAnnotation> for AnyTsPropertyAnnotation {
-    fn from(node: TsOptionalPropertyAnnotation) -> AnyTsPropertyAnnotation {
-        AnyTsPropertyAnnotation::TsOptionalPropertyAnnotation(node)
+    fn from(node: TsOptionalPropertyAnnotation) -> Self {
+        Self::TsOptionalPropertyAnnotation(node)
     }
 }
 impl From<TsTypeAnnotation> for AnyTsPropertyAnnotation {
-    fn from(node: TsTypeAnnotation) -> AnyTsPropertyAnnotation {
-        AnyTsPropertyAnnotation::TsTypeAnnotation(node)
+    fn from(node: TsTypeAnnotation) -> Self {
+        Self::TsTypeAnnotation(node)
     }
 }
 impl AstNode for AnyTsPropertyAnnotation {
@@ -38864,52 +38558,42 @@ impl AstNode for AnyTsPropertyAnnotation {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TS_DEFINITE_PROPERTY_ANNOTATION => {
-                AnyTsPropertyAnnotation::TsDefinitePropertyAnnotation(
-                    TsDefinitePropertyAnnotation { syntax },
-                )
+                Self::TsDefinitePropertyAnnotation(TsDefinitePropertyAnnotation { syntax })
             }
             TS_OPTIONAL_PROPERTY_ANNOTATION => {
-                AnyTsPropertyAnnotation::TsOptionalPropertyAnnotation(
-                    TsOptionalPropertyAnnotation { syntax },
-                )
+                Self::TsOptionalPropertyAnnotation(TsOptionalPropertyAnnotation { syntax })
             }
-            TS_TYPE_ANNOTATION => {
-                AnyTsPropertyAnnotation::TsTypeAnnotation(TsTypeAnnotation { syntax })
-            }
+            TS_TYPE_ANNOTATION => Self::TsTypeAnnotation(TsTypeAnnotation { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsPropertyAnnotation::TsDefinitePropertyAnnotation(it) => &it.syntax,
-            AnyTsPropertyAnnotation::TsOptionalPropertyAnnotation(it) => &it.syntax,
-            AnyTsPropertyAnnotation::TsTypeAnnotation(it) => &it.syntax,
+            Self::TsDefinitePropertyAnnotation(it) => &it.syntax,
+            Self::TsOptionalPropertyAnnotation(it) => &it.syntax,
+            Self::TsTypeAnnotation(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsPropertyAnnotation::TsDefinitePropertyAnnotation(it) => it.syntax,
-            AnyTsPropertyAnnotation::TsOptionalPropertyAnnotation(it) => it.syntax,
-            AnyTsPropertyAnnotation::TsTypeAnnotation(it) => it.syntax,
+            Self::TsDefinitePropertyAnnotation(it) => it.syntax,
+            Self::TsOptionalPropertyAnnotation(it) => it.syntax,
+            Self::TsTypeAnnotation(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsPropertyAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsPropertyAnnotation::TsDefinitePropertyAnnotation(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyTsPropertyAnnotation::TsOptionalPropertyAnnotation(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyTsPropertyAnnotation::TsTypeAnnotation(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsDefinitePropertyAnnotation(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsOptionalPropertyAnnotation(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeAnnotation(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsPropertyAnnotation> for SyntaxNode {
-    fn from(n: AnyTsPropertyAnnotation) -> SyntaxNode {
+    fn from(n: AnyTsPropertyAnnotation) -> Self {
         match n {
             AnyTsPropertyAnnotation::TsDefinitePropertyAnnotation(it) => it.into(),
             AnyTsPropertyAnnotation::TsOptionalPropertyAnnotation(it) => it.into(),
@@ -38918,24 +38602,24 @@ impl From<AnyTsPropertyAnnotation> for SyntaxNode {
     }
 }
 impl From<AnyTsPropertyAnnotation> for SyntaxElement {
-    fn from(n: AnyTsPropertyAnnotation) -> SyntaxElement {
+    fn from(n: AnyTsPropertyAnnotation) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsAccessibilityModifier> for AnyTsPropertyParameterModifier {
-    fn from(node: TsAccessibilityModifier) -> AnyTsPropertyParameterModifier {
-        AnyTsPropertyParameterModifier::TsAccessibilityModifier(node)
+    fn from(node: TsAccessibilityModifier) -> Self {
+        Self::TsAccessibilityModifier(node)
     }
 }
 impl From<TsOverrideModifier> for AnyTsPropertyParameterModifier {
-    fn from(node: TsOverrideModifier) -> AnyTsPropertyParameterModifier {
-        AnyTsPropertyParameterModifier::TsOverrideModifier(node)
+    fn from(node: TsOverrideModifier) -> Self {
+        Self::TsOverrideModifier(node)
     }
 }
 impl From<TsReadonlyModifier> for AnyTsPropertyParameterModifier {
-    fn from(node: TsReadonlyModifier) -> AnyTsPropertyParameterModifier {
-        AnyTsPropertyParameterModifier::TsReadonlyModifier(node)
+    fn from(node: TsReadonlyModifier) -> Self {
+        Self::TsReadonlyModifier(node)
     }
 }
 impl AstNode for AnyTsPropertyParameterModifier {
@@ -38952,48 +38636,40 @@ impl AstNode for AnyTsPropertyParameterModifier {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TS_ACCESSIBILITY_MODIFIER => {
-                AnyTsPropertyParameterModifier::TsAccessibilityModifier(TsAccessibilityModifier {
-                    syntax,
-                })
+                Self::TsAccessibilityModifier(TsAccessibilityModifier { syntax })
             }
-            TS_OVERRIDE_MODIFIER => {
-                AnyTsPropertyParameterModifier::TsOverrideModifier(TsOverrideModifier { syntax })
-            }
-            TS_READONLY_MODIFIER => {
-                AnyTsPropertyParameterModifier::TsReadonlyModifier(TsReadonlyModifier { syntax })
-            }
+            TS_OVERRIDE_MODIFIER => Self::TsOverrideModifier(TsOverrideModifier { syntax }),
+            TS_READONLY_MODIFIER => Self::TsReadonlyModifier(TsReadonlyModifier { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsPropertyParameterModifier::TsAccessibilityModifier(it) => &it.syntax,
-            AnyTsPropertyParameterModifier::TsOverrideModifier(it) => &it.syntax,
-            AnyTsPropertyParameterModifier::TsReadonlyModifier(it) => &it.syntax,
+            Self::TsAccessibilityModifier(it) => &it.syntax,
+            Self::TsOverrideModifier(it) => &it.syntax,
+            Self::TsReadonlyModifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsPropertyParameterModifier::TsAccessibilityModifier(it) => it.syntax,
-            AnyTsPropertyParameterModifier::TsOverrideModifier(it) => it.syntax,
-            AnyTsPropertyParameterModifier::TsReadonlyModifier(it) => it.syntax,
+            Self::TsAccessibilityModifier(it) => it.syntax,
+            Self::TsOverrideModifier(it) => it.syntax,
+            Self::TsReadonlyModifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsPropertyParameterModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsPropertyParameterModifier::TsAccessibilityModifier(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyTsPropertyParameterModifier::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsPropertyParameterModifier::TsReadonlyModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAccessibilityModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsReadonlyModifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsPropertyParameterModifier> for SyntaxNode {
-    fn from(n: AnyTsPropertyParameterModifier) -> SyntaxNode {
+    fn from(n: AnyTsPropertyParameterModifier) -> Self {
         match n {
             AnyTsPropertyParameterModifier::TsAccessibilityModifier(it) => it.into(),
             AnyTsPropertyParameterModifier::TsOverrideModifier(it) => it.into(),
@@ -39002,19 +38678,19 @@ impl From<AnyTsPropertyParameterModifier> for SyntaxNode {
     }
 }
 impl From<AnyTsPropertyParameterModifier> for SyntaxElement {
-    fn from(n: AnyTsPropertyParameterModifier) -> SyntaxElement {
+    fn from(n: AnyTsPropertyParameterModifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsOptionalPropertyAnnotation> for AnyTsPropertySignatureAnnotation {
-    fn from(node: TsOptionalPropertyAnnotation) -> AnyTsPropertySignatureAnnotation {
-        AnyTsPropertySignatureAnnotation::TsOptionalPropertyAnnotation(node)
+    fn from(node: TsOptionalPropertyAnnotation) -> Self {
+        Self::TsOptionalPropertyAnnotation(node)
     }
 }
 impl From<TsTypeAnnotation> for AnyTsPropertySignatureAnnotation {
-    fn from(node: TsTypeAnnotation) -> AnyTsPropertySignatureAnnotation {
-        AnyTsPropertySignatureAnnotation::TsTypeAnnotation(node)
+    fn from(node: TsTypeAnnotation) -> Self {
+        Self::TsTypeAnnotation(node)
     }
 }
 impl AstNode for AnyTsPropertySignatureAnnotation {
@@ -39027,42 +38703,36 @@ impl AstNode for AnyTsPropertySignatureAnnotation {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TS_OPTIONAL_PROPERTY_ANNOTATION => {
-                AnyTsPropertySignatureAnnotation::TsOptionalPropertyAnnotation(
-                    TsOptionalPropertyAnnotation { syntax },
-                )
+                Self::TsOptionalPropertyAnnotation(TsOptionalPropertyAnnotation { syntax })
             }
-            TS_TYPE_ANNOTATION => {
-                AnyTsPropertySignatureAnnotation::TsTypeAnnotation(TsTypeAnnotation { syntax })
-            }
+            TS_TYPE_ANNOTATION => Self::TsTypeAnnotation(TsTypeAnnotation { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsPropertySignatureAnnotation::TsOptionalPropertyAnnotation(it) => &it.syntax,
-            AnyTsPropertySignatureAnnotation::TsTypeAnnotation(it) => &it.syntax,
+            Self::TsOptionalPropertyAnnotation(it) => &it.syntax,
+            Self::TsTypeAnnotation(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsPropertySignatureAnnotation::TsOptionalPropertyAnnotation(it) => it.syntax,
-            AnyTsPropertySignatureAnnotation::TsTypeAnnotation(it) => it.syntax,
+            Self::TsOptionalPropertyAnnotation(it) => it.syntax,
+            Self::TsTypeAnnotation(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsPropertySignatureAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsPropertySignatureAnnotation::TsOptionalPropertyAnnotation(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyTsPropertySignatureAnnotation::TsTypeAnnotation(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsOptionalPropertyAnnotation(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeAnnotation(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsPropertySignatureAnnotation> for SyntaxNode {
-    fn from(n: AnyTsPropertySignatureAnnotation) -> SyntaxNode {
+    fn from(n: AnyTsPropertySignatureAnnotation) -> Self {
         match n {
             AnyTsPropertySignatureAnnotation::TsOptionalPropertyAnnotation(it) => it.into(),
             AnyTsPropertySignatureAnnotation::TsTypeAnnotation(it) => it.into(),
@@ -39070,49 +38740,49 @@ impl From<AnyTsPropertySignatureAnnotation> for SyntaxNode {
     }
 }
 impl From<AnyTsPropertySignatureAnnotation> for SyntaxElement {
-    fn from(n: AnyTsPropertySignatureAnnotation) -> SyntaxElement {
+    fn from(n: AnyTsPropertySignatureAnnotation) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsAccessorModifier> for AnyTsPropertySignatureModifier {
-    fn from(node: JsAccessorModifier) -> AnyTsPropertySignatureModifier {
-        AnyTsPropertySignatureModifier::JsAccessorModifier(node)
+    fn from(node: JsAccessorModifier) -> Self {
+        Self::JsAccessorModifier(node)
     }
 }
 impl From<JsDecorator> for AnyTsPropertySignatureModifier {
-    fn from(node: JsDecorator) -> AnyTsPropertySignatureModifier {
-        AnyTsPropertySignatureModifier::JsDecorator(node)
+    fn from(node: JsDecorator) -> Self {
+        Self::JsDecorator(node)
     }
 }
 impl From<JsStaticModifier> for AnyTsPropertySignatureModifier {
-    fn from(node: JsStaticModifier) -> AnyTsPropertySignatureModifier {
-        AnyTsPropertySignatureModifier::JsStaticModifier(node)
+    fn from(node: JsStaticModifier) -> Self {
+        Self::JsStaticModifier(node)
     }
 }
 impl From<TsAbstractModifier> for AnyTsPropertySignatureModifier {
-    fn from(node: TsAbstractModifier) -> AnyTsPropertySignatureModifier {
-        AnyTsPropertySignatureModifier::TsAbstractModifier(node)
+    fn from(node: TsAbstractModifier) -> Self {
+        Self::TsAbstractModifier(node)
     }
 }
 impl From<TsAccessibilityModifier> for AnyTsPropertySignatureModifier {
-    fn from(node: TsAccessibilityModifier) -> AnyTsPropertySignatureModifier {
-        AnyTsPropertySignatureModifier::TsAccessibilityModifier(node)
+    fn from(node: TsAccessibilityModifier) -> Self {
+        Self::TsAccessibilityModifier(node)
     }
 }
 impl From<TsDeclareModifier> for AnyTsPropertySignatureModifier {
-    fn from(node: TsDeclareModifier) -> AnyTsPropertySignatureModifier {
-        AnyTsPropertySignatureModifier::TsDeclareModifier(node)
+    fn from(node: TsDeclareModifier) -> Self {
+        Self::TsDeclareModifier(node)
     }
 }
 impl From<TsOverrideModifier> for AnyTsPropertySignatureModifier {
-    fn from(node: TsOverrideModifier) -> AnyTsPropertySignatureModifier {
-        AnyTsPropertySignatureModifier::TsOverrideModifier(node)
+    fn from(node: TsOverrideModifier) -> Self {
+        Self::TsOverrideModifier(node)
     }
 }
 impl From<TsReadonlyModifier> for AnyTsPropertySignatureModifier {
-    fn from(node: TsReadonlyModifier) -> AnyTsPropertySignatureModifier {
-        AnyTsPropertySignatureModifier::TsReadonlyModifier(node)
+    fn from(node: TsReadonlyModifier) -> Self {
+        Self::TsReadonlyModifier(node)
     }
 }
 impl AstNode for AnyTsPropertySignatureModifier {
@@ -39140,77 +38810,61 @@ impl AstNode for AnyTsPropertySignatureModifier {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_ACCESSOR_MODIFIER => {
-                AnyTsPropertySignatureModifier::JsAccessorModifier(JsAccessorModifier { syntax })
-            }
-            JS_DECORATOR => AnyTsPropertySignatureModifier::JsDecorator(JsDecorator { syntax }),
-            JS_STATIC_MODIFIER => {
-                AnyTsPropertySignatureModifier::JsStaticModifier(JsStaticModifier { syntax })
-            }
-            TS_ABSTRACT_MODIFIER => {
-                AnyTsPropertySignatureModifier::TsAbstractModifier(TsAbstractModifier { syntax })
-            }
+            JS_ACCESSOR_MODIFIER => Self::JsAccessorModifier(JsAccessorModifier { syntax }),
+            JS_DECORATOR => Self::JsDecorator(JsDecorator { syntax }),
+            JS_STATIC_MODIFIER => Self::JsStaticModifier(JsStaticModifier { syntax }),
+            TS_ABSTRACT_MODIFIER => Self::TsAbstractModifier(TsAbstractModifier { syntax }),
             TS_ACCESSIBILITY_MODIFIER => {
-                AnyTsPropertySignatureModifier::TsAccessibilityModifier(TsAccessibilityModifier {
-                    syntax,
-                })
+                Self::TsAccessibilityModifier(TsAccessibilityModifier { syntax })
             }
-            TS_DECLARE_MODIFIER => {
-                AnyTsPropertySignatureModifier::TsDeclareModifier(TsDeclareModifier { syntax })
-            }
-            TS_OVERRIDE_MODIFIER => {
-                AnyTsPropertySignatureModifier::TsOverrideModifier(TsOverrideModifier { syntax })
-            }
-            TS_READONLY_MODIFIER => {
-                AnyTsPropertySignatureModifier::TsReadonlyModifier(TsReadonlyModifier { syntax })
-            }
+            TS_DECLARE_MODIFIER => Self::TsDeclareModifier(TsDeclareModifier { syntax }),
+            TS_OVERRIDE_MODIFIER => Self::TsOverrideModifier(TsOverrideModifier { syntax }),
+            TS_READONLY_MODIFIER => Self::TsReadonlyModifier(TsReadonlyModifier { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsPropertySignatureModifier::JsAccessorModifier(it) => &it.syntax,
-            AnyTsPropertySignatureModifier::JsDecorator(it) => &it.syntax,
-            AnyTsPropertySignatureModifier::JsStaticModifier(it) => &it.syntax,
-            AnyTsPropertySignatureModifier::TsAbstractModifier(it) => &it.syntax,
-            AnyTsPropertySignatureModifier::TsAccessibilityModifier(it) => &it.syntax,
-            AnyTsPropertySignatureModifier::TsDeclareModifier(it) => &it.syntax,
-            AnyTsPropertySignatureModifier::TsOverrideModifier(it) => &it.syntax,
-            AnyTsPropertySignatureModifier::TsReadonlyModifier(it) => &it.syntax,
+            Self::JsAccessorModifier(it) => &it.syntax,
+            Self::JsDecorator(it) => &it.syntax,
+            Self::JsStaticModifier(it) => &it.syntax,
+            Self::TsAbstractModifier(it) => &it.syntax,
+            Self::TsAccessibilityModifier(it) => &it.syntax,
+            Self::TsDeclareModifier(it) => &it.syntax,
+            Self::TsOverrideModifier(it) => &it.syntax,
+            Self::TsReadonlyModifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsPropertySignatureModifier::JsAccessorModifier(it) => it.syntax,
-            AnyTsPropertySignatureModifier::JsDecorator(it) => it.syntax,
-            AnyTsPropertySignatureModifier::JsStaticModifier(it) => it.syntax,
-            AnyTsPropertySignatureModifier::TsAbstractModifier(it) => it.syntax,
-            AnyTsPropertySignatureModifier::TsAccessibilityModifier(it) => it.syntax,
-            AnyTsPropertySignatureModifier::TsDeclareModifier(it) => it.syntax,
-            AnyTsPropertySignatureModifier::TsOverrideModifier(it) => it.syntax,
-            AnyTsPropertySignatureModifier::TsReadonlyModifier(it) => it.syntax,
+            Self::JsAccessorModifier(it) => it.syntax,
+            Self::JsDecorator(it) => it.syntax,
+            Self::JsStaticModifier(it) => it.syntax,
+            Self::TsAbstractModifier(it) => it.syntax,
+            Self::TsAccessibilityModifier(it) => it.syntax,
+            Self::TsDeclareModifier(it) => it.syntax,
+            Self::TsOverrideModifier(it) => it.syntax,
+            Self::TsReadonlyModifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsPropertySignatureModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsPropertySignatureModifier::JsAccessorModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsPropertySignatureModifier::JsDecorator(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsPropertySignatureModifier::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsPropertySignatureModifier::TsAbstractModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsPropertySignatureModifier::TsAccessibilityModifier(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyTsPropertySignatureModifier::TsDeclareModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsPropertySignatureModifier::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsPropertySignatureModifier::TsReadonlyModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsAccessorModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsDecorator(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsStaticModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAbstractModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAccessibilityModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsDeclareModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsOverrideModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsReadonlyModifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsPropertySignatureModifier> for SyntaxNode {
-    fn from(n: AnyTsPropertySignatureModifier) -> SyntaxNode {
+    fn from(n: AnyTsPropertySignatureModifier) -> Self {
         match n {
             AnyTsPropertySignatureModifier::JsAccessorModifier(it) => it.into(),
             AnyTsPropertySignatureModifier::JsDecorator(it) => it.into(),
@@ -39224,19 +38878,19 @@ impl From<AnyTsPropertySignatureModifier> for SyntaxNode {
     }
 }
 impl From<AnyTsPropertySignatureModifier> for SyntaxElement {
-    fn from(n: AnyTsPropertySignatureModifier) -> SyntaxElement {
+    fn from(n: AnyTsPropertySignatureModifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsAssertsReturnType> for AnyTsReturnType {
-    fn from(node: TsAssertsReturnType) -> AnyTsReturnType {
-        AnyTsReturnType::TsAssertsReturnType(node)
+    fn from(node: TsAssertsReturnType) -> Self {
+        Self::TsAssertsReturnType(node)
     }
 }
 impl From<TsPredicateReturnType> for AnyTsReturnType {
-    fn from(node: TsPredicateReturnType) -> AnyTsReturnType {
-        AnyTsReturnType::TsPredicateReturnType(node)
+    fn from(node: TsPredicateReturnType) -> Self {
+        Self::TsPredicateReturnType(node)
     }
 }
 impl AstNode for AnyTsReturnType {
@@ -39253,15 +38907,13 @@ impl AstNode for AnyTsReturnType {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            TS_ASSERTS_RETURN_TYPE => {
-                AnyTsReturnType::TsAssertsReturnType(TsAssertsReturnType { syntax })
-            }
+            TS_ASSERTS_RETURN_TYPE => Self::TsAssertsReturnType(TsAssertsReturnType { syntax }),
             TS_PREDICATE_RETURN_TYPE => {
-                AnyTsReturnType::TsPredicateReturnType(TsPredicateReturnType { syntax })
+                Self::TsPredicateReturnType(TsPredicateReturnType { syntax })
             }
             _ => {
                 if let Some(any_ts_type) = AnyTsType::cast(syntax) {
-                    return Some(AnyTsReturnType::AnyTsType(any_ts_type));
+                    return Some(Self::AnyTsType(any_ts_type));
                 }
                 return None;
             }
@@ -39270,30 +38922,30 @@ impl AstNode for AnyTsReturnType {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsReturnType::TsAssertsReturnType(it) => &it.syntax,
-            AnyTsReturnType::TsPredicateReturnType(it) => &it.syntax,
-            AnyTsReturnType::AnyTsType(it) => it.syntax(),
+            Self::TsAssertsReturnType(it) => &it.syntax,
+            Self::TsPredicateReturnType(it) => &it.syntax,
+            Self::AnyTsType(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsReturnType::TsAssertsReturnType(it) => it.syntax,
-            AnyTsReturnType::TsPredicateReturnType(it) => it.syntax,
-            AnyTsReturnType::AnyTsType(it) => it.into_syntax(),
+            Self::TsAssertsReturnType(it) => it.syntax,
+            Self::TsPredicateReturnType(it) => it.syntax,
+            Self::AnyTsType(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyTsReturnType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsReturnType::AnyTsType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsReturnType::TsAssertsReturnType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsReturnType::TsPredicateReturnType(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyTsType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAssertsReturnType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsPredicateReturnType(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsReturnType> for SyntaxNode {
-    fn from(n: AnyTsReturnType) -> SyntaxNode {
+    fn from(n: AnyTsReturnType) -> Self {
         match n {
             AnyTsReturnType::AnyTsType(it) => it.into(),
             AnyTsReturnType::TsAssertsReturnType(it) => it.into(),
@@ -39302,19 +38954,19 @@ impl From<AnyTsReturnType> for SyntaxNode {
     }
 }
 impl From<AnyTsReturnType> for SyntaxElement {
-    fn from(n: AnyTsReturnType) -> SyntaxElement {
+    fn from(n: AnyTsReturnType) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsTemplateChunkElement> for AnyTsTemplateElement {
-    fn from(node: TsTemplateChunkElement) -> AnyTsTemplateElement {
-        AnyTsTemplateElement::TsTemplateChunkElement(node)
+    fn from(node: TsTemplateChunkElement) -> Self {
+        Self::TsTemplateChunkElement(node)
     }
 }
 impl From<TsTemplateElement> for AnyTsTemplateElement {
-    fn from(node: TsTemplateElement) -> AnyTsTemplateElement {
-        AnyTsTemplateElement::TsTemplateElement(node)
+    fn from(node: TsTemplateElement) -> Self {
+        Self::TsTemplateElement(node)
     }
 }
 impl AstNode for AnyTsTemplateElement {
@@ -39327,38 +38979,36 @@ impl AstNode for AnyTsTemplateElement {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TS_TEMPLATE_CHUNK_ELEMENT => {
-                AnyTsTemplateElement::TsTemplateChunkElement(TsTemplateChunkElement { syntax })
+                Self::TsTemplateChunkElement(TsTemplateChunkElement { syntax })
             }
-            TS_TEMPLATE_ELEMENT => {
-                AnyTsTemplateElement::TsTemplateElement(TsTemplateElement { syntax })
-            }
+            TS_TEMPLATE_ELEMENT => Self::TsTemplateElement(TsTemplateElement { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsTemplateElement::TsTemplateChunkElement(it) => &it.syntax,
-            AnyTsTemplateElement::TsTemplateElement(it) => &it.syntax,
+            Self::TsTemplateChunkElement(it) => &it.syntax,
+            Self::TsTemplateElement(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsTemplateElement::TsTemplateChunkElement(it) => it.syntax,
-            AnyTsTemplateElement::TsTemplateElement(it) => it.syntax,
+            Self::TsTemplateChunkElement(it) => it.syntax,
+            Self::TsTemplateElement(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsTemplateElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsTemplateElement::TsTemplateChunkElement(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTemplateElement::TsTemplateElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTemplateChunkElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTemplateElement(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsTemplateElement> for SyntaxNode {
-    fn from(n: AnyTsTemplateElement) -> SyntaxNode {
+    fn from(n: AnyTsTemplateElement) -> Self {
         match n {
             AnyTsTemplateElement::TsTemplateChunkElement(it) => it.into(),
             AnyTsTemplateElement::TsTemplateElement(it) => it.into(),
@@ -39366,24 +39016,24 @@ impl From<AnyTsTemplateElement> for SyntaxNode {
     }
 }
 impl From<AnyTsTemplateElement> for SyntaxElement {
-    fn from(n: AnyTsTemplateElement) -> SyntaxElement {
+    fn from(n: AnyTsTemplateElement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsNamedTupleTypeElement> for AnyTsTupleTypeElement {
-    fn from(node: TsNamedTupleTypeElement) -> AnyTsTupleTypeElement {
-        AnyTsTupleTypeElement::TsNamedTupleTypeElement(node)
+    fn from(node: TsNamedTupleTypeElement) -> Self {
+        Self::TsNamedTupleTypeElement(node)
     }
 }
 impl From<TsOptionalTupleTypeElement> for AnyTsTupleTypeElement {
-    fn from(node: TsOptionalTupleTypeElement) -> AnyTsTupleTypeElement {
-        AnyTsTupleTypeElement::TsOptionalTupleTypeElement(node)
+    fn from(node: TsOptionalTupleTypeElement) -> Self {
+        Self::TsOptionalTupleTypeElement(node)
     }
 }
 impl From<TsRestTupleTypeElement> for AnyTsTupleTypeElement {
-    fn from(node: TsRestTupleTypeElement) -> AnyTsTupleTypeElement {
-        AnyTsTupleTypeElement::TsRestTupleTypeElement(node)
+    fn from(node: TsRestTupleTypeElement) -> Self {
+        Self::TsRestTupleTypeElement(node)
     }
 }
 impl AstNode for AnyTsTupleTypeElement {
@@ -39404,19 +39054,17 @@ impl AstNode for AnyTsTupleTypeElement {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TS_NAMED_TUPLE_TYPE_ELEMENT => {
-                AnyTsTupleTypeElement::TsNamedTupleTypeElement(TsNamedTupleTypeElement { syntax })
+                Self::TsNamedTupleTypeElement(TsNamedTupleTypeElement { syntax })
             }
             TS_OPTIONAL_TUPLE_TYPE_ELEMENT => {
-                AnyTsTupleTypeElement::TsOptionalTupleTypeElement(TsOptionalTupleTypeElement {
-                    syntax,
-                })
+                Self::TsOptionalTupleTypeElement(TsOptionalTupleTypeElement { syntax })
             }
             TS_REST_TUPLE_TYPE_ELEMENT => {
-                AnyTsTupleTypeElement::TsRestTupleTypeElement(TsRestTupleTypeElement { syntax })
+                Self::TsRestTupleTypeElement(TsRestTupleTypeElement { syntax })
             }
             _ => {
                 if let Some(any_ts_type) = AnyTsType::cast(syntax) {
-                    return Some(AnyTsTupleTypeElement::AnyTsType(any_ts_type));
+                    return Some(Self::AnyTsType(any_ts_type));
                 }
                 return None;
             }
@@ -39425,33 +39073,33 @@ impl AstNode for AnyTsTupleTypeElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsTupleTypeElement::TsNamedTupleTypeElement(it) => &it.syntax,
-            AnyTsTupleTypeElement::TsOptionalTupleTypeElement(it) => &it.syntax,
-            AnyTsTupleTypeElement::TsRestTupleTypeElement(it) => &it.syntax,
-            AnyTsTupleTypeElement::AnyTsType(it) => it.syntax(),
+            Self::TsNamedTupleTypeElement(it) => &it.syntax,
+            Self::TsOptionalTupleTypeElement(it) => &it.syntax,
+            Self::TsRestTupleTypeElement(it) => &it.syntax,
+            Self::AnyTsType(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsTupleTypeElement::TsNamedTupleTypeElement(it) => it.syntax,
-            AnyTsTupleTypeElement::TsOptionalTupleTypeElement(it) => it.syntax,
-            AnyTsTupleTypeElement::TsRestTupleTypeElement(it) => it.syntax,
-            AnyTsTupleTypeElement::AnyTsType(it) => it.into_syntax(),
+            Self::TsNamedTupleTypeElement(it) => it.syntax,
+            Self::TsOptionalTupleTypeElement(it) => it.syntax,
+            Self::TsRestTupleTypeElement(it) => it.syntax,
+            Self::AnyTsType(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyTsTupleTypeElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsTupleTypeElement::AnyTsType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTupleTypeElement::TsNamedTupleTypeElement(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTupleTypeElement::TsOptionalTupleTypeElement(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTupleTypeElement::TsRestTupleTypeElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyTsType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsNamedTupleTypeElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsOptionalTupleTypeElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsRestTupleTypeElement(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsTupleTypeElement> for SyntaxNode {
-    fn from(n: AnyTsTupleTypeElement) -> SyntaxNode {
+    fn from(n: AnyTsTupleTypeElement) -> Self {
         match n {
             AnyTsTupleTypeElement::AnyTsType(it) => it.into(),
             AnyTsTupleTypeElement::TsNamedTupleTypeElement(it) => it.into(),
@@ -39461,189 +39109,189 @@ impl From<AnyTsTupleTypeElement> for SyntaxNode {
     }
 }
 impl From<AnyTsTupleTypeElement> for SyntaxElement {
-    fn from(n: AnyTsTupleTypeElement) -> SyntaxElement {
+    fn from(n: AnyTsTupleTypeElement) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsMetavariable> for AnyTsType {
-    fn from(node: JsMetavariable) -> AnyTsType {
-        AnyTsType::JsMetavariable(node)
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
     }
 }
 impl From<TsAnyType> for AnyTsType {
-    fn from(node: TsAnyType) -> AnyTsType {
-        AnyTsType::TsAnyType(node)
+    fn from(node: TsAnyType) -> Self {
+        Self::TsAnyType(node)
     }
 }
 impl From<TsArrayType> for AnyTsType {
-    fn from(node: TsArrayType) -> AnyTsType {
-        AnyTsType::TsArrayType(node)
+    fn from(node: TsArrayType) -> Self {
+        Self::TsArrayType(node)
     }
 }
 impl From<TsBigintLiteralType> for AnyTsType {
-    fn from(node: TsBigintLiteralType) -> AnyTsType {
-        AnyTsType::TsBigintLiteralType(node)
+    fn from(node: TsBigintLiteralType) -> Self {
+        Self::TsBigintLiteralType(node)
     }
 }
 impl From<TsBigintType> for AnyTsType {
-    fn from(node: TsBigintType) -> AnyTsType {
-        AnyTsType::TsBigintType(node)
+    fn from(node: TsBigintType) -> Self {
+        Self::TsBigintType(node)
     }
 }
 impl From<TsBogusType> for AnyTsType {
-    fn from(node: TsBogusType) -> AnyTsType {
-        AnyTsType::TsBogusType(node)
+    fn from(node: TsBogusType) -> Self {
+        Self::TsBogusType(node)
     }
 }
 impl From<TsBooleanLiteralType> for AnyTsType {
-    fn from(node: TsBooleanLiteralType) -> AnyTsType {
-        AnyTsType::TsBooleanLiteralType(node)
+    fn from(node: TsBooleanLiteralType) -> Self {
+        Self::TsBooleanLiteralType(node)
     }
 }
 impl From<TsBooleanType> for AnyTsType {
-    fn from(node: TsBooleanType) -> AnyTsType {
-        AnyTsType::TsBooleanType(node)
+    fn from(node: TsBooleanType) -> Self {
+        Self::TsBooleanType(node)
     }
 }
 impl From<TsConditionalType> for AnyTsType {
-    fn from(node: TsConditionalType) -> AnyTsType {
-        AnyTsType::TsConditionalType(node)
+    fn from(node: TsConditionalType) -> Self {
+        Self::TsConditionalType(node)
     }
 }
 impl From<TsConstructorType> for AnyTsType {
-    fn from(node: TsConstructorType) -> AnyTsType {
-        AnyTsType::TsConstructorType(node)
+    fn from(node: TsConstructorType) -> Self {
+        Self::TsConstructorType(node)
     }
 }
 impl From<TsFunctionType> for AnyTsType {
-    fn from(node: TsFunctionType) -> AnyTsType {
-        AnyTsType::TsFunctionType(node)
+    fn from(node: TsFunctionType) -> Self {
+        Self::TsFunctionType(node)
     }
 }
 impl From<TsImportType> for AnyTsType {
-    fn from(node: TsImportType) -> AnyTsType {
-        AnyTsType::TsImportType(node)
+    fn from(node: TsImportType) -> Self {
+        Self::TsImportType(node)
     }
 }
 impl From<TsIndexedAccessType> for AnyTsType {
-    fn from(node: TsIndexedAccessType) -> AnyTsType {
-        AnyTsType::TsIndexedAccessType(node)
+    fn from(node: TsIndexedAccessType) -> Self {
+        Self::TsIndexedAccessType(node)
     }
 }
 impl From<TsInferType> for AnyTsType {
-    fn from(node: TsInferType) -> AnyTsType {
-        AnyTsType::TsInferType(node)
+    fn from(node: TsInferType) -> Self {
+        Self::TsInferType(node)
     }
 }
 impl From<TsIntersectionType> for AnyTsType {
-    fn from(node: TsIntersectionType) -> AnyTsType {
-        AnyTsType::TsIntersectionType(node)
+    fn from(node: TsIntersectionType) -> Self {
+        Self::TsIntersectionType(node)
     }
 }
 impl From<TsMappedType> for AnyTsType {
-    fn from(node: TsMappedType) -> AnyTsType {
-        AnyTsType::TsMappedType(node)
+    fn from(node: TsMappedType) -> Self {
+        Self::TsMappedType(node)
     }
 }
 impl From<TsNeverType> for AnyTsType {
-    fn from(node: TsNeverType) -> AnyTsType {
-        AnyTsType::TsNeverType(node)
+    fn from(node: TsNeverType) -> Self {
+        Self::TsNeverType(node)
     }
 }
 impl From<TsNonPrimitiveType> for AnyTsType {
-    fn from(node: TsNonPrimitiveType) -> AnyTsType {
-        AnyTsType::TsNonPrimitiveType(node)
+    fn from(node: TsNonPrimitiveType) -> Self {
+        Self::TsNonPrimitiveType(node)
     }
 }
 impl From<TsNullLiteralType> for AnyTsType {
-    fn from(node: TsNullLiteralType) -> AnyTsType {
-        AnyTsType::TsNullLiteralType(node)
+    fn from(node: TsNullLiteralType) -> Self {
+        Self::TsNullLiteralType(node)
     }
 }
 impl From<TsNumberLiteralType> for AnyTsType {
-    fn from(node: TsNumberLiteralType) -> AnyTsType {
-        AnyTsType::TsNumberLiteralType(node)
+    fn from(node: TsNumberLiteralType) -> Self {
+        Self::TsNumberLiteralType(node)
     }
 }
 impl From<TsNumberType> for AnyTsType {
-    fn from(node: TsNumberType) -> AnyTsType {
-        AnyTsType::TsNumberType(node)
+    fn from(node: TsNumberType) -> Self {
+        Self::TsNumberType(node)
     }
 }
 impl From<TsObjectType> for AnyTsType {
-    fn from(node: TsObjectType) -> AnyTsType {
-        AnyTsType::TsObjectType(node)
+    fn from(node: TsObjectType) -> Self {
+        Self::TsObjectType(node)
     }
 }
 impl From<TsParenthesizedType> for AnyTsType {
-    fn from(node: TsParenthesizedType) -> AnyTsType {
-        AnyTsType::TsParenthesizedType(node)
+    fn from(node: TsParenthesizedType) -> Self {
+        Self::TsParenthesizedType(node)
     }
 }
 impl From<TsReferenceType> for AnyTsType {
-    fn from(node: TsReferenceType) -> AnyTsType {
-        AnyTsType::TsReferenceType(node)
+    fn from(node: TsReferenceType) -> Self {
+        Self::TsReferenceType(node)
     }
 }
 impl From<TsStringLiteralType> for AnyTsType {
-    fn from(node: TsStringLiteralType) -> AnyTsType {
-        AnyTsType::TsStringLiteralType(node)
+    fn from(node: TsStringLiteralType) -> Self {
+        Self::TsStringLiteralType(node)
     }
 }
 impl From<TsStringType> for AnyTsType {
-    fn from(node: TsStringType) -> AnyTsType {
-        AnyTsType::TsStringType(node)
+    fn from(node: TsStringType) -> Self {
+        Self::TsStringType(node)
     }
 }
 impl From<TsSymbolType> for AnyTsType {
-    fn from(node: TsSymbolType) -> AnyTsType {
-        AnyTsType::TsSymbolType(node)
+    fn from(node: TsSymbolType) -> Self {
+        Self::TsSymbolType(node)
     }
 }
 impl From<TsTemplateLiteralType> for AnyTsType {
-    fn from(node: TsTemplateLiteralType) -> AnyTsType {
-        AnyTsType::TsTemplateLiteralType(node)
+    fn from(node: TsTemplateLiteralType) -> Self {
+        Self::TsTemplateLiteralType(node)
     }
 }
 impl From<TsThisType> for AnyTsType {
-    fn from(node: TsThisType) -> AnyTsType {
-        AnyTsType::TsThisType(node)
+    fn from(node: TsThisType) -> Self {
+        Self::TsThisType(node)
     }
 }
 impl From<TsTupleType> for AnyTsType {
-    fn from(node: TsTupleType) -> AnyTsType {
-        AnyTsType::TsTupleType(node)
+    fn from(node: TsTupleType) -> Self {
+        Self::TsTupleType(node)
     }
 }
 impl From<TsTypeOperatorType> for AnyTsType {
-    fn from(node: TsTypeOperatorType) -> AnyTsType {
-        AnyTsType::TsTypeOperatorType(node)
+    fn from(node: TsTypeOperatorType) -> Self {
+        Self::TsTypeOperatorType(node)
     }
 }
 impl From<TsTypeofType> for AnyTsType {
-    fn from(node: TsTypeofType) -> AnyTsType {
-        AnyTsType::TsTypeofType(node)
+    fn from(node: TsTypeofType) -> Self {
+        Self::TsTypeofType(node)
     }
 }
 impl From<TsUndefinedType> for AnyTsType {
-    fn from(node: TsUndefinedType) -> AnyTsType {
-        AnyTsType::TsUndefinedType(node)
+    fn from(node: TsUndefinedType) -> Self {
+        Self::TsUndefinedType(node)
     }
 }
 impl From<TsUnionType> for AnyTsType {
-    fn from(node: TsUnionType) -> AnyTsType {
-        AnyTsType::TsUnionType(node)
+    fn from(node: TsUnionType) -> Self {
+        Self::TsUnionType(node)
     }
 }
 impl From<TsUnknownType> for AnyTsType {
-    fn from(node: TsUnknownType) -> AnyTsType {
-        AnyTsType::TsUnknownType(node)
+    fn from(node: TsUnknownType) -> Self {
+        Self::TsUnknownType(node)
     }
 }
 impl From<TsVoidType> for AnyTsType {
-    fn from(node: TsVoidType) -> AnyTsType {
-        AnyTsType::TsVoidType(node)
+    fn from(node: TsVoidType) -> Self {
+        Self::TsVoidType(node)
     }
 }
 impl AstNode for AnyTsType {
@@ -39727,183 +39375,173 @@ impl AstNode for AnyTsType {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_METAVARIABLE => AnyTsType::JsMetavariable(JsMetavariable { syntax }),
-            TS_ANY_TYPE => AnyTsType::TsAnyType(TsAnyType { syntax }),
-            TS_ARRAY_TYPE => AnyTsType::TsArrayType(TsArrayType { syntax }),
-            TS_BIGINT_LITERAL_TYPE => {
-                AnyTsType::TsBigintLiteralType(TsBigintLiteralType { syntax })
-            }
-            TS_BIGINT_TYPE => AnyTsType::TsBigintType(TsBigintType { syntax }),
-            TS_BOGUS_TYPE => AnyTsType::TsBogusType(TsBogusType { syntax }),
-            TS_BOOLEAN_LITERAL_TYPE => {
-                AnyTsType::TsBooleanLiteralType(TsBooleanLiteralType { syntax })
-            }
-            TS_BOOLEAN_TYPE => AnyTsType::TsBooleanType(TsBooleanType { syntax }),
-            TS_CONDITIONAL_TYPE => AnyTsType::TsConditionalType(TsConditionalType { syntax }),
-            TS_CONSTRUCTOR_TYPE => AnyTsType::TsConstructorType(TsConstructorType { syntax }),
-            TS_FUNCTION_TYPE => AnyTsType::TsFunctionType(TsFunctionType { syntax }),
-            TS_IMPORT_TYPE => AnyTsType::TsImportType(TsImportType { syntax }),
-            TS_INDEXED_ACCESS_TYPE => {
-                AnyTsType::TsIndexedAccessType(TsIndexedAccessType { syntax })
-            }
-            TS_INFER_TYPE => AnyTsType::TsInferType(TsInferType { syntax }),
-            TS_INTERSECTION_TYPE => AnyTsType::TsIntersectionType(TsIntersectionType { syntax }),
-            TS_MAPPED_TYPE => AnyTsType::TsMappedType(TsMappedType { syntax }),
-            TS_NEVER_TYPE => AnyTsType::TsNeverType(TsNeverType { syntax }),
-            TS_NON_PRIMITIVE_TYPE => AnyTsType::TsNonPrimitiveType(TsNonPrimitiveType { syntax }),
-            TS_NULL_LITERAL_TYPE => AnyTsType::TsNullLiteralType(TsNullLiteralType { syntax }),
-            TS_NUMBER_LITERAL_TYPE => {
-                AnyTsType::TsNumberLiteralType(TsNumberLiteralType { syntax })
-            }
-            TS_NUMBER_TYPE => AnyTsType::TsNumberType(TsNumberType { syntax }),
-            TS_OBJECT_TYPE => AnyTsType::TsObjectType(TsObjectType { syntax }),
-            TS_PARENTHESIZED_TYPE => AnyTsType::TsParenthesizedType(TsParenthesizedType { syntax }),
-            TS_REFERENCE_TYPE => AnyTsType::TsReferenceType(TsReferenceType { syntax }),
-            TS_STRING_LITERAL_TYPE => {
-                AnyTsType::TsStringLiteralType(TsStringLiteralType { syntax })
-            }
-            TS_STRING_TYPE => AnyTsType::TsStringType(TsStringType { syntax }),
-            TS_SYMBOL_TYPE => AnyTsType::TsSymbolType(TsSymbolType { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            TS_ANY_TYPE => Self::TsAnyType(TsAnyType { syntax }),
+            TS_ARRAY_TYPE => Self::TsArrayType(TsArrayType { syntax }),
+            TS_BIGINT_LITERAL_TYPE => Self::TsBigintLiteralType(TsBigintLiteralType { syntax }),
+            TS_BIGINT_TYPE => Self::TsBigintType(TsBigintType { syntax }),
+            TS_BOGUS_TYPE => Self::TsBogusType(TsBogusType { syntax }),
+            TS_BOOLEAN_LITERAL_TYPE => Self::TsBooleanLiteralType(TsBooleanLiteralType { syntax }),
+            TS_BOOLEAN_TYPE => Self::TsBooleanType(TsBooleanType { syntax }),
+            TS_CONDITIONAL_TYPE => Self::TsConditionalType(TsConditionalType { syntax }),
+            TS_CONSTRUCTOR_TYPE => Self::TsConstructorType(TsConstructorType { syntax }),
+            TS_FUNCTION_TYPE => Self::TsFunctionType(TsFunctionType { syntax }),
+            TS_IMPORT_TYPE => Self::TsImportType(TsImportType { syntax }),
+            TS_INDEXED_ACCESS_TYPE => Self::TsIndexedAccessType(TsIndexedAccessType { syntax }),
+            TS_INFER_TYPE => Self::TsInferType(TsInferType { syntax }),
+            TS_INTERSECTION_TYPE => Self::TsIntersectionType(TsIntersectionType { syntax }),
+            TS_MAPPED_TYPE => Self::TsMappedType(TsMappedType { syntax }),
+            TS_NEVER_TYPE => Self::TsNeverType(TsNeverType { syntax }),
+            TS_NON_PRIMITIVE_TYPE => Self::TsNonPrimitiveType(TsNonPrimitiveType { syntax }),
+            TS_NULL_LITERAL_TYPE => Self::TsNullLiteralType(TsNullLiteralType { syntax }),
+            TS_NUMBER_LITERAL_TYPE => Self::TsNumberLiteralType(TsNumberLiteralType { syntax }),
+            TS_NUMBER_TYPE => Self::TsNumberType(TsNumberType { syntax }),
+            TS_OBJECT_TYPE => Self::TsObjectType(TsObjectType { syntax }),
+            TS_PARENTHESIZED_TYPE => Self::TsParenthesizedType(TsParenthesizedType { syntax }),
+            TS_REFERENCE_TYPE => Self::TsReferenceType(TsReferenceType { syntax }),
+            TS_STRING_LITERAL_TYPE => Self::TsStringLiteralType(TsStringLiteralType { syntax }),
+            TS_STRING_TYPE => Self::TsStringType(TsStringType { syntax }),
+            TS_SYMBOL_TYPE => Self::TsSymbolType(TsSymbolType { syntax }),
             TS_TEMPLATE_LITERAL_TYPE => {
-                AnyTsType::TsTemplateLiteralType(TsTemplateLiteralType { syntax })
+                Self::TsTemplateLiteralType(TsTemplateLiteralType { syntax })
             }
-            TS_THIS_TYPE => AnyTsType::TsThisType(TsThisType { syntax }),
-            TS_TUPLE_TYPE => AnyTsType::TsTupleType(TsTupleType { syntax }),
-            TS_TYPE_OPERATOR_TYPE => AnyTsType::TsTypeOperatorType(TsTypeOperatorType { syntax }),
-            TS_TYPEOF_TYPE => AnyTsType::TsTypeofType(TsTypeofType { syntax }),
-            TS_UNDEFINED_TYPE => AnyTsType::TsUndefinedType(TsUndefinedType { syntax }),
-            TS_UNION_TYPE => AnyTsType::TsUnionType(TsUnionType { syntax }),
-            TS_UNKNOWN_TYPE => AnyTsType::TsUnknownType(TsUnknownType { syntax }),
-            TS_VOID_TYPE => AnyTsType::TsVoidType(TsVoidType { syntax }),
+            TS_THIS_TYPE => Self::TsThisType(TsThisType { syntax }),
+            TS_TUPLE_TYPE => Self::TsTupleType(TsTupleType { syntax }),
+            TS_TYPE_OPERATOR_TYPE => Self::TsTypeOperatorType(TsTypeOperatorType { syntax }),
+            TS_TYPEOF_TYPE => Self::TsTypeofType(TsTypeofType { syntax }),
+            TS_UNDEFINED_TYPE => Self::TsUndefinedType(TsUndefinedType { syntax }),
+            TS_UNION_TYPE => Self::TsUnionType(TsUnionType { syntax }),
+            TS_UNKNOWN_TYPE => Self::TsUnknownType(TsUnknownType { syntax }),
+            TS_VOID_TYPE => Self::TsVoidType(TsVoidType { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsType::JsMetavariable(it) => &it.syntax,
-            AnyTsType::TsAnyType(it) => &it.syntax,
-            AnyTsType::TsArrayType(it) => &it.syntax,
-            AnyTsType::TsBigintLiteralType(it) => &it.syntax,
-            AnyTsType::TsBigintType(it) => &it.syntax,
-            AnyTsType::TsBogusType(it) => &it.syntax,
-            AnyTsType::TsBooleanLiteralType(it) => &it.syntax,
-            AnyTsType::TsBooleanType(it) => &it.syntax,
-            AnyTsType::TsConditionalType(it) => &it.syntax,
-            AnyTsType::TsConstructorType(it) => &it.syntax,
-            AnyTsType::TsFunctionType(it) => &it.syntax,
-            AnyTsType::TsImportType(it) => &it.syntax,
-            AnyTsType::TsIndexedAccessType(it) => &it.syntax,
-            AnyTsType::TsInferType(it) => &it.syntax,
-            AnyTsType::TsIntersectionType(it) => &it.syntax,
-            AnyTsType::TsMappedType(it) => &it.syntax,
-            AnyTsType::TsNeverType(it) => &it.syntax,
-            AnyTsType::TsNonPrimitiveType(it) => &it.syntax,
-            AnyTsType::TsNullLiteralType(it) => &it.syntax,
-            AnyTsType::TsNumberLiteralType(it) => &it.syntax,
-            AnyTsType::TsNumberType(it) => &it.syntax,
-            AnyTsType::TsObjectType(it) => &it.syntax,
-            AnyTsType::TsParenthesizedType(it) => &it.syntax,
-            AnyTsType::TsReferenceType(it) => &it.syntax,
-            AnyTsType::TsStringLiteralType(it) => &it.syntax,
-            AnyTsType::TsStringType(it) => &it.syntax,
-            AnyTsType::TsSymbolType(it) => &it.syntax,
-            AnyTsType::TsTemplateLiteralType(it) => &it.syntax,
-            AnyTsType::TsThisType(it) => &it.syntax,
-            AnyTsType::TsTupleType(it) => &it.syntax,
-            AnyTsType::TsTypeOperatorType(it) => &it.syntax,
-            AnyTsType::TsTypeofType(it) => &it.syntax,
-            AnyTsType::TsUndefinedType(it) => &it.syntax,
-            AnyTsType::TsUnionType(it) => &it.syntax,
-            AnyTsType::TsUnknownType(it) => &it.syntax,
-            AnyTsType::TsVoidType(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
+            Self::TsAnyType(it) => &it.syntax,
+            Self::TsArrayType(it) => &it.syntax,
+            Self::TsBigintLiteralType(it) => &it.syntax,
+            Self::TsBigintType(it) => &it.syntax,
+            Self::TsBogusType(it) => &it.syntax,
+            Self::TsBooleanLiteralType(it) => &it.syntax,
+            Self::TsBooleanType(it) => &it.syntax,
+            Self::TsConditionalType(it) => &it.syntax,
+            Self::TsConstructorType(it) => &it.syntax,
+            Self::TsFunctionType(it) => &it.syntax,
+            Self::TsImportType(it) => &it.syntax,
+            Self::TsIndexedAccessType(it) => &it.syntax,
+            Self::TsInferType(it) => &it.syntax,
+            Self::TsIntersectionType(it) => &it.syntax,
+            Self::TsMappedType(it) => &it.syntax,
+            Self::TsNeverType(it) => &it.syntax,
+            Self::TsNonPrimitiveType(it) => &it.syntax,
+            Self::TsNullLiteralType(it) => &it.syntax,
+            Self::TsNumberLiteralType(it) => &it.syntax,
+            Self::TsNumberType(it) => &it.syntax,
+            Self::TsObjectType(it) => &it.syntax,
+            Self::TsParenthesizedType(it) => &it.syntax,
+            Self::TsReferenceType(it) => &it.syntax,
+            Self::TsStringLiteralType(it) => &it.syntax,
+            Self::TsStringType(it) => &it.syntax,
+            Self::TsSymbolType(it) => &it.syntax,
+            Self::TsTemplateLiteralType(it) => &it.syntax,
+            Self::TsThisType(it) => &it.syntax,
+            Self::TsTupleType(it) => &it.syntax,
+            Self::TsTypeOperatorType(it) => &it.syntax,
+            Self::TsTypeofType(it) => &it.syntax,
+            Self::TsUndefinedType(it) => &it.syntax,
+            Self::TsUnionType(it) => &it.syntax,
+            Self::TsUnknownType(it) => &it.syntax,
+            Self::TsVoidType(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsType::JsMetavariable(it) => it.syntax,
-            AnyTsType::TsAnyType(it) => it.syntax,
-            AnyTsType::TsArrayType(it) => it.syntax,
-            AnyTsType::TsBigintLiteralType(it) => it.syntax,
-            AnyTsType::TsBigintType(it) => it.syntax,
-            AnyTsType::TsBogusType(it) => it.syntax,
-            AnyTsType::TsBooleanLiteralType(it) => it.syntax,
-            AnyTsType::TsBooleanType(it) => it.syntax,
-            AnyTsType::TsConditionalType(it) => it.syntax,
-            AnyTsType::TsConstructorType(it) => it.syntax,
-            AnyTsType::TsFunctionType(it) => it.syntax,
-            AnyTsType::TsImportType(it) => it.syntax,
-            AnyTsType::TsIndexedAccessType(it) => it.syntax,
-            AnyTsType::TsInferType(it) => it.syntax,
-            AnyTsType::TsIntersectionType(it) => it.syntax,
-            AnyTsType::TsMappedType(it) => it.syntax,
-            AnyTsType::TsNeverType(it) => it.syntax,
-            AnyTsType::TsNonPrimitiveType(it) => it.syntax,
-            AnyTsType::TsNullLiteralType(it) => it.syntax,
-            AnyTsType::TsNumberLiteralType(it) => it.syntax,
-            AnyTsType::TsNumberType(it) => it.syntax,
-            AnyTsType::TsObjectType(it) => it.syntax,
-            AnyTsType::TsParenthesizedType(it) => it.syntax,
-            AnyTsType::TsReferenceType(it) => it.syntax,
-            AnyTsType::TsStringLiteralType(it) => it.syntax,
-            AnyTsType::TsStringType(it) => it.syntax,
-            AnyTsType::TsSymbolType(it) => it.syntax,
-            AnyTsType::TsTemplateLiteralType(it) => it.syntax,
-            AnyTsType::TsThisType(it) => it.syntax,
-            AnyTsType::TsTupleType(it) => it.syntax,
-            AnyTsType::TsTypeOperatorType(it) => it.syntax,
-            AnyTsType::TsTypeofType(it) => it.syntax,
-            AnyTsType::TsUndefinedType(it) => it.syntax,
-            AnyTsType::TsUnionType(it) => it.syntax,
-            AnyTsType::TsUnknownType(it) => it.syntax,
-            AnyTsType::TsVoidType(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
+            Self::TsAnyType(it) => it.syntax,
+            Self::TsArrayType(it) => it.syntax,
+            Self::TsBigintLiteralType(it) => it.syntax,
+            Self::TsBigintType(it) => it.syntax,
+            Self::TsBogusType(it) => it.syntax,
+            Self::TsBooleanLiteralType(it) => it.syntax,
+            Self::TsBooleanType(it) => it.syntax,
+            Self::TsConditionalType(it) => it.syntax,
+            Self::TsConstructorType(it) => it.syntax,
+            Self::TsFunctionType(it) => it.syntax,
+            Self::TsImportType(it) => it.syntax,
+            Self::TsIndexedAccessType(it) => it.syntax,
+            Self::TsInferType(it) => it.syntax,
+            Self::TsIntersectionType(it) => it.syntax,
+            Self::TsMappedType(it) => it.syntax,
+            Self::TsNeverType(it) => it.syntax,
+            Self::TsNonPrimitiveType(it) => it.syntax,
+            Self::TsNullLiteralType(it) => it.syntax,
+            Self::TsNumberLiteralType(it) => it.syntax,
+            Self::TsNumberType(it) => it.syntax,
+            Self::TsObjectType(it) => it.syntax,
+            Self::TsParenthesizedType(it) => it.syntax,
+            Self::TsReferenceType(it) => it.syntax,
+            Self::TsStringLiteralType(it) => it.syntax,
+            Self::TsStringType(it) => it.syntax,
+            Self::TsSymbolType(it) => it.syntax,
+            Self::TsTemplateLiteralType(it) => it.syntax,
+            Self::TsThisType(it) => it.syntax,
+            Self::TsTupleType(it) => it.syntax,
+            Self::TsTypeOperatorType(it) => it.syntax,
+            Self::TsTypeofType(it) => it.syntax,
+            Self::TsUndefinedType(it) => it.syntax,
+            Self::TsUnionType(it) => it.syntax,
+            Self::TsUnknownType(it) => it.syntax,
+            Self::TsVoidType(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsType::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsAnyType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsArrayType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsBigintLiteralType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsBigintType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsBogusType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsBooleanLiteralType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsBooleanType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsConditionalType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsConstructorType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsFunctionType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsImportType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsIndexedAccessType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsInferType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsIntersectionType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsMappedType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsNeverType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsNonPrimitiveType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsNullLiteralType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsNumberLiteralType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsNumberType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsObjectType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsParenthesizedType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsReferenceType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsStringLiteralType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsStringType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsSymbolType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsTemplateLiteralType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsThisType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsTupleType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsTypeOperatorType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsTypeofType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsUndefinedType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsUnionType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsUnknownType(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsType::TsVoidType(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsAnyType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsArrayType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsBigintLiteralType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsBigintType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsBogusType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsBooleanLiteralType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsBooleanType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsConditionalType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsConstructorType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsFunctionType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsImportType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsIndexedAccessType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsInferType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsIntersectionType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsMappedType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsNeverType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsNonPrimitiveType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsNullLiteralType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsNumberLiteralType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsNumberType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsObjectType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsParenthesizedType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsReferenceType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsStringLiteralType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsStringType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsSymbolType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTemplateLiteralType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsThisType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTupleType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeOperatorType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeofType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsUndefinedType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsUnionType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsUnknownType(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsVoidType(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsType> for SyntaxNode {
-    fn from(n: AnyTsType) -> SyntaxNode {
+    fn from(n: AnyTsType) -> Self {
         match n {
             AnyTsType::JsMetavariable(it) => it.into(),
             AnyTsType::TsAnyType(it) => it.into(),
@@ -39945,49 +39583,49 @@ impl From<AnyTsType> for SyntaxNode {
     }
 }
 impl From<AnyTsType> for SyntaxElement {
-    fn from(n: AnyTsType) -> SyntaxElement {
+    fn from(n: AnyTsType) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsBogusMember> for AnyTsTypeMember {
-    fn from(node: JsBogusMember) -> AnyTsTypeMember {
-        AnyTsTypeMember::JsBogusMember(node)
+    fn from(node: JsBogusMember) -> Self {
+        Self::JsBogusMember(node)
     }
 }
 impl From<TsCallSignatureTypeMember> for AnyTsTypeMember {
-    fn from(node: TsCallSignatureTypeMember) -> AnyTsTypeMember {
-        AnyTsTypeMember::TsCallSignatureTypeMember(node)
+    fn from(node: TsCallSignatureTypeMember) -> Self {
+        Self::TsCallSignatureTypeMember(node)
     }
 }
 impl From<TsConstructSignatureTypeMember> for AnyTsTypeMember {
-    fn from(node: TsConstructSignatureTypeMember) -> AnyTsTypeMember {
-        AnyTsTypeMember::TsConstructSignatureTypeMember(node)
+    fn from(node: TsConstructSignatureTypeMember) -> Self {
+        Self::TsConstructSignatureTypeMember(node)
     }
 }
 impl From<TsGetterSignatureTypeMember> for AnyTsTypeMember {
-    fn from(node: TsGetterSignatureTypeMember) -> AnyTsTypeMember {
-        AnyTsTypeMember::TsGetterSignatureTypeMember(node)
+    fn from(node: TsGetterSignatureTypeMember) -> Self {
+        Self::TsGetterSignatureTypeMember(node)
     }
 }
 impl From<TsIndexSignatureTypeMember> for AnyTsTypeMember {
-    fn from(node: TsIndexSignatureTypeMember) -> AnyTsTypeMember {
-        AnyTsTypeMember::TsIndexSignatureTypeMember(node)
+    fn from(node: TsIndexSignatureTypeMember) -> Self {
+        Self::TsIndexSignatureTypeMember(node)
     }
 }
 impl From<TsMethodSignatureTypeMember> for AnyTsTypeMember {
-    fn from(node: TsMethodSignatureTypeMember) -> AnyTsTypeMember {
-        AnyTsTypeMember::TsMethodSignatureTypeMember(node)
+    fn from(node: TsMethodSignatureTypeMember) -> Self {
+        Self::TsMethodSignatureTypeMember(node)
     }
 }
 impl From<TsPropertySignatureTypeMember> for AnyTsTypeMember {
-    fn from(node: TsPropertySignatureTypeMember) -> AnyTsTypeMember {
-        AnyTsTypeMember::TsPropertySignatureTypeMember(node)
+    fn from(node: TsPropertySignatureTypeMember) -> Self {
+        Self::TsPropertySignatureTypeMember(node)
     }
 }
 impl From<TsSetterSignatureTypeMember> for AnyTsTypeMember {
-    fn from(node: TsSetterSignatureTypeMember) -> AnyTsTypeMember {
-        AnyTsTypeMember::TsSetterSignatureTypeMember(node)
+    fn from(node: TsSetterSignatureTypeMember) -> Self {
+        Self::TsSetterSignatureTypeMember(node)
     }
 }
 impl AstNode for AnyTsTypeMember {
@@ -40015,31 +39653,27 @@ impl AstNode for AnyTsTypeMember {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            JS_BOGUS_MEMBER => AnyTsTypeMember::JsBogusMember(JsBogusMember { syntax }),
+            JS_BOGUS_MEMBER => Self::JsBogusMember(JsBogusMember { syntax }),
             TS_CALL_SIGNATURE_TYPE_MEMBER => {
-                AnyTsTypeMember::TsCallSignatureTypeMember(TsCallSignatureTypeMember { syntax })
+                Self::TsCallSignatureTypeMember(TsCallSignatureTypeMember { syntax })
             }
             TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER => {
-                AnyTsTypeMember::TsConstructSignatureTypeMember(TsConstructSignatureTypeMember {
-                    syntax,
-                })
+                Self::TsConstructSignatureTypeMember(TsConstructSignatureTypeMember { syntax })
             }
             TS_GETTER_SIGNATURE_TYPE_MEMBER => {
-                AnyTsTypeMember::TsGetterSignatureTypeMember(TsGetterSignatureTypeMember { syntax })
+                Self::TsGetterSignatureTypeMember(TsGetterSignatureTypeMember { syntax })
             }
             TS_INDEX_SIGNATURE_TYPE_MEMBER => {
-                AnyTsTypeMember::TsIndexSignatureTypeMember(TsIndexSignatureTypeMember { syntax })
+                Self::TsIndexSignatureTypeMember(TsIndexSignatureTypeMember { syntax })
             }
             TS_METHOD_SIGNATURE_TYPE_MEMBER => {
-                AnyTsTypeMember::TsMethodSignatureTypeMember(TsMethodSignatureTypeMember { syntax })
+                Self::TsMethodSignatureTypeMember(TsMethodSignatureTypeMember { syntax })
             }
             TS_PROPERTY_SIGNATURE_TYPE_MEMBER => {
-                AnyTsTypeMember::TsPropertySignatureTypeMember(TsPropertySignatureTypeMember {
-                    syntax,
-                })
+                Self::TsPropertySignatureTypeMember(TsPropertySignatureTypeMember { syntax })
             }
             TS_SETTER_SIGNATURE_TYPE_MEMBER => {
-                AnyTsTypeMember::TsSetterSignatureTypeMember(TsSetterSignatureTypeMember { syntax })
+                Self::TsSetterSignatureTypeMember(TsSetterSignatureTypeMember { syntax })
             }
             _ => return None,
         };
@@ -40047,45 +39681,45 @@ impl AstNode for AnyTsTypeMember {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsTypeMember::JsBogusMember(it) => &it.syntax,
-            AnyTsTypeMember::TsCallSignatureTypeMember(it) => &it.syntax,
-            AnyTsTypeMember::TsConstructSignatureTypeMember(it) => &it.syntax,
-            AnyTsTypeMember::TsGetterSignatureTypeMember(it) => &it.syntax,
-            AnyTsTypeMember::TsIndexSignatureTypeMember(it) => &it.syntax,
-            AnyTsTypeMember::TsMethodSignatureTypeMember(it) => &it.syntax,
-            AnyTsTypeMember::TsPropertySignatureTypeMember(it) => &it.syntax,
-            AnyTsTypeMember::TsSetterSignatureTypeMember(it) => &it.syntax,
+            Self::JsBogusMember(it) => &it.syntax,
+            Self::TsCallSignatureTypeMember(it) => &it.syntax,
+            Self::TsConstructSignatureTypeMember(it) => &it.syntax,
+            Self::TsGetterSignatureTypeMember(it) => &it.syntax,
+            Self::TsIndexSignatureTypeMember(it) => &it.syntax,
+            Self::TsMethodSignatureTypeMember(it) => &it.syntax,
+            Self::TsPropertySignatureTypeMember(it) => &it.syntax,
+            Self::TsSetterSignatureTypeMember(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsTypeMember::JsBogusMember(it) => it.syntax,
-            AnyTsTypeMember::TsCallSignatureTypeMember(it) => it.syntax,
-            AnyTsTypeMember::TsConstructSignatureTypeMember(it) => it.syntax,
-            AnyTsTypeMember::TsGetterSignatureTypeMember(it) => it.syntax,
-            AnyTsTypeMember::TsIndexSignatureTypeMember(it) => it.syntax,
-            AnyTsTypeMember::TsMethodSignatureTypeMember(it) => it.syntax,
-            AnyTsTypeMember::TsPropertySignatureTypeMember(it) => it.syntax,
-            AnyTsTypeMember::TsSetterSignatureTypeMember(it) => it.syntax,
+            Self::JsBogusMember(it) => it.syntax,
+            Self::TsCallSignatureTypeMember(it) => it.syntax,
+            Self::TsConstructSignatureTypeMember(it) => it.syntax,
+            Self::TsGetterSignatureTypeMember(it) => it.syntax,
+            Self::TsIndexSignatureTypeMember(it) => it.syntax,
+            Self::TsMethodSignatureTypeMember(it) => it.syntax,
+            Self::TsPropertySignatureTypeMember(it) => it.syntax,
+            Self::TsSetterSignatureTypeMember(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsTypeMember::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTypeMember::TsCallSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTypeMember::TsConstructSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTypeMember::TsGetterSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTypeMember::TsIndexSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTypeMember::TsMethodSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTypeMember::TsPropertySignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTypeMember::TsSetterSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsCallSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsConstructSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsGetterSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsIndexSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsMethodSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsPropertySignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsSetterSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsTypeMember> for SyntaxNode {
-    fn from(n: AnyTsTypeMember) -> SyntaxNode {
+    fn from(n: AnyTsTypeMember) -> Self {
         match n {
             AnyTsTypeMember::JsBogusMember(it) => it.into(),
             AnyTsTypeMember::TsCallSignatureTypeMember(it) => it.into(),
@@ -40099,24 +39733,24 @@ impl From<AnyTsTypeMember> for SyntaxNode {
     }
 }
 impl From<AnyTsTypeMember> for SyntaxElement {
-    fn from(n: AnyTsTypeMember) -> SyntaxElement {
+    fn from(n: AnyTsTypeMember) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsConstModifier> for AnyTsTypeParameterModifier {
-    fn from(node: TsConstModifier) -> AnyTsTypeParameterModifier {
-        AnyTsTypeParameterModifier::TsConstModifier(node)
+    fn from(node: TsConstModifier) -> Self {
+        Self::TsConstModifier(node)
     }
 }
 impl From<TsInModifier> for AnyTsTypeParameterModifier {
-    fn from(node: TsInModifier) -> AnyTsTypeParameterModifier {
-        AnyTsTypeParameterModifier::TsInModifier(node)
+    fn from(node: TsInModifier) -> Self {
+        Self::TsInModifier(node)
     }
 }
 impl From<TsOutModifier> for AnyTsTypeParameterModifier {
-    fn from(node: TsOutModifier) -> AnyTsTypeParameterModifier {
-        AnyTsTypeParameterModifier::TsOutModifier(node)
+    fn from(node: TsOutModifier) -> Self {
+        Self::TsOutModifier(node)
     }
 }
 impl AstNode for AnyTsTypeParameterModifier {
@@ -40129,41 +39763,39 @@ impl AstNode for AnyTsTypeParameterModifier {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            TS_CONST_MODIFIER => {
-                AnyTsTypeParameterModifier::TsConstModifier(TsConstModifier { syntax })
-            }
-            TS_IN_MODIFIER => AnyTsTypeParameterModifier::TsInModifier(TsInModifier { syntax }),
-            TS_OUT_MODIFIER => AnyTsTypeParameterModifier::TsOutModifier(TsOutModifier { syntax }),
+            TS_CONST_MODIFIER => Self::TsConstModifier(TsConstModifier { syntax }),
+            TS_IN_MODIFIER => Self::TsInModifier(TsInModifier { syntax }),
+            TS_OUT_MODIFIER => Self::TsOutModifier(TsOutModifier { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsTypeParameterModifier::TsConstModifier(it) => &it.syntax,
-            AnyTsTypeParameterModifier::TsInModifier(it) => &it.syntax,
-            AnyTsTypeParameterModifier::TsOutModifier(it) => &it.syntax,
+            Self::TsConstModifier(it) => &it.syntax,
+            Self::TsInModifier(it) => &it.syntax,
+            Self::TsOutModifier(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsTypeParameterModifier::TsConstModifier(it) => it.syntax,
-            AnyTsTypeParameterModifier::TsInModifier(it) => it.syntax,
-            AnyTsTypeParameterModifier::TsOutModifier(it) => it.syntax,
+            Self::TsConstModifier(it) => it.syntax,
+            Self::TsInModifier(it) => it.syntax,
+            Self::TsOutModifier(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsTypeParameterModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsTypeParameterModifier::TsConstModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTypeParameterModifier::TsInModifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyTsTypeParameterModifier::TsOutModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsConstModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsInModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsOutModifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsTypeParameterModifier> for SyntaxNode {
-    fn from(n: AnyTsTypeParameterModifier) -> SyntaxNode {
+    fn from(n: AnyTsTypeParameterModifier) -> Self {
         match n {
             AnyTsTypeParameterModifier::TsConstModifier(it) => it.into(),
             AnyTsTypeParameterModifier::TsInModifier(it) => it.into(),
@@ -40172,19 +39804,19 @@ impl From<AnyTsTypeParameterModifier> for SyntaxNode {
     }
 }
 impl From<AnyTsTypeParameterModifier> for SyntaxElement {
-    fn from(n: AnyTsTypeParameterModifier) -> SyntaxElement {
+    fn from(n: AnyTsTypeParameterModifier) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<JsReferenceIdentifier> for AnyTsTypePredicateParameterName {
-    fn from(node: JsReferenceIdentifier) -> AnyTsTypePredicateParameterName {
-        AnyTsTypePredicateParameterName::JsReferenceIdentifier(node)
+    fn from(node: JsReferenceIdentifier) -> Self {
+        Self::JsReferenceIdentifier(node)
     }
 }
 impl From<TsThisType> for AnyTsTypePredicateParameterName {
-    fn from(node: TsThisType) -> AnyTsTypePredicateParameterName {
-        AnyTsTypePredicateParameterName::TsThisType(node)
+    fn from(node: TsThisType) -> Self {
+        Self::TsThisType(node)
     }
 }
 impl AstNode for AnyTsTypePredicateParameterName {
@@ -40197,40 +39829,36 @@ impl AstNode for AnyTsTypePredicateParameterName {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_REFERENCE_IDENTIFIER => {
-                AnyTsTypePredicateParameterName::JsReferenceIdentifier(JsReferenceIdentifier {
-                    syntax,
-                })
+                Self::JsReferenceIdentifier(JsReferenceIdentifier { syntax })
             }
-            TS_THIS_TYPE => AnyTsTypePredicateParameterName::TsThisType(TsThisType { syntax }),
+            TS_THIS_TYPE => Self::TsThisType(TsThisType { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsTypePredicateParameterName::JsReferenceIdentifier(it) => &it.syntax,
-            AnyTsTypePredicateParameterName::TsThisType(it) => &it.syntax,
+            Self::JsReferenceIdentifier(it) => &it.syntax,
+            Self::TsThisType(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsTypePredicateParameterName::JsReferenceIdentifier(it) => it.syntax,
-            AnyTsTypePredicateParameterName::TsThisType(it) => it.syntax,
+            Self::JsReferenceIdentifier(it) => it.syntax,
+            Self::TsThisType(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsTypePredicateParameterName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsTypePredicateParameterName::JsReferenceIdentifier(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyTsTypePredicateParameterName::TsThisType(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsReferenceIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsThisType(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsTypePredicateParameterName> for SyntaxNode {
-    fn from(n: AnyTsTypePredicateParameterName) -> SyntaxNode {
+    fn from(n: AnyTsTypePredicateParameterName) -> Self {
         match n {
             AnyTsTypePredicateParameterName::JsReferenceIdentifier(it) => it.into(),
             AnyTsTypePredicateParameterName::TsThisType(it) => it.into(),
@@ -40238,19 +39866,19 @@ impl From<AnyTsTypePredicateParameterName> for SyntaxNode {
     }
 }
 impl From<AnyTsTypePredicateParameterName> for SyntaxElement {
-    fn from(n: AnyTsTypePredicateParameterName) -> SyntaxElement {
+    fn from(n: AnyTsTypePredicateParameterName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
 impl From<TsDefiniteVariableAnnotation> for AnyTsVariableAnnotation {
-    fn from(node: TsDefiniteVariableAnnotation) -> AnyTsVariableAnnotation {
-        AnyTsVariableAnnotation::TsDefiniteVariableAnnotation(node)
+    fn from(node: TsDefiniteVariableAnnotation) -> Self {
+        Self::TsDefiniteVariableAnnotation(node)
     }
 }
 impl From<TsTypeAnnotation> for AnyTsVariableAnnotation {
-    fn from(node: TsTypeAnnotation) -> AnyTsVariableAnnotation {
-        AnyTsVariableAnnotation::TsTypeAnnotation(node)
+    fn from(node: TsTypeAnnotation) -> Self {
+        Self::TsTypeAnnotation(node)
     }
 }
 impl AstNode for AnyTsVariableAnnotation {
@@ -40263,42 +39891,36 @@ impl AstNode for AnyTsVariableAnnotation {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             TS_DEFINITE_VARIABLE_ANNOTATION => {
-                AnyTsVariableAnnotation::TsDefiniteVariableAnnotation(
-                    TsDefiniteVariableAnnotation { syntax },
-                )
+                Self::TsDefiniteVariableAnnotation(TsDefiniteVariableAnnotation { syntax })
             }
-            TS_TYPE_ANNOTATION => {
-                AnyTsVariableAnnotation::TsTypeAnnotation(TsTypeAnnotation { syntax })
-            }
+            TS_TYPE_ANNOTATION => Self::TsTypeAnnotation(TsTypeAnnotation { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsVariableAnnotation::TsDefiniteVariableAnnotation(it) => &it.syntax,
-            AnyTsVariableAnnotation::TsTypeAnnotation(it) => &it.syntax,
+            Self::TsDefiniteVariableAnnotation(it) => &it.syntax,
+            Self::TsTypeAnnotation(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsVariableAnnotation::TsDefiniteVariableAnnotation(it) => it.syntax,
-            AnyTsVariableAnnotation::TsTypeAnnotation(it) => it.syntax,
+            Self::TsDefiniteVariableAnnotation(it) => it.syntax,
+            Self::TsTypeAnnotation(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyTsVariableAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsVariableAnnotation::TsDefiniteVariableAnnotation(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyTsVariableAnnotation::TsTypeAnnotation(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsDefiniteVariableAnnotation(it) => std::fmt::Debug::fmt(it, f),
+            Self::TsTypeAnnotation(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyTsVariableAnnotation> for SyntaxNode {
-    fn from(n: AnyTsVariableAnnotation) -> SyntaxNode {
+    fn from(n: AnyTsVariableAnnotation) -> Self {
         match n {
             AnyTsVariableAnnotation::TsDefiniteVariableAnnotation(it) => it.into(),
             AnyTsVariableAnnotation::TsTypeAnnotation(it) => it.into(),
@@ -40306,7 +39928,7 @@ impl From<AnyTsVariableAnnotation> for SyntaxNode {
     }
 }
 impl From<AnyTsVariableAnnotation> for SyntaxElement {
-    fn from(n: AnyTsVariableAnnotation) -> SyntaxElement {
+    fn from(n: AnyTsVariableAnnotation) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -42178,12 +41800,12 @@ impl std::fmt::Debug for JsBogus {
     }
 }
 impl From<JsBogus> for SyntaxNode {
-    fn from(n: JsBogus) -> SyntaxNode {
+    fn from(n: JsBogus) -> Self {
         n.syntax
     }
 }
 impl From<JsBogus> for SyntaxElement {
-    fn from(n: JsBogus) -> SyntaxElement {
+    fn from(n: JsBogus) -> Self {
         n.syntax.into()
     }
 }
@@ -42234,12 +41856,12 @@ impl std::fmt::Debug for JsBogusAssignment {
     }
 }
 impl From<JsBogusAssignment> for SyntaxNode {
-    fn from(n: JsBogusAssignment) -> SyntaxNode {
+    fn from(n: JsBogusAssignment) -> Self {
         n.syntax
     }
 }
 impl From<JsBogusAssignment> for SyntaxElement {
-    fn from(n: JsBogusAssignment) -> SyntaxElement {
+    fn from(n: JsBogusAssignment) -> Self {
         n.syntax.into()
     }
 }
@@ -42290,12 +41912,12 @@ impl std::fmt::Debug for JsBogusBinding {
     }
 }
 impl From<JsBogusBinding> for SyntaxNode {
-    fn from(n: JsBogusBinding) -> SyntaxNode {
+    fn from(n: JsBogusBinding) -> Self {
         n.syntax
     }
 }
 impl From<JsBogusBinding> for SyntaxElement {
-    fn from(n: JsBogusBinding) -> SyntaxElement {
+    fn from(n: JsBogusBinding) -> Self {
         n.syntax.into()
     }
 }
@@ -42346,12 +41968,12 @@ impl std::fmt::Debug for JsBogusExpression {
     }
 }
 impl From<JsBogusExpression> for SyntaxNode {
-    fn from(n: JsBogusExpression) -> SyntaxNode {
+    fn from(n: JsBogusExpression) -> Self {
         n.syntax
     }
 }
 impl From<JsBogusExpression> for SyntaxElement {
-    fn from(n: JsBogusExpression) -> SyntaxElement {
+    fn from(n: JsBogusExpression) -> Self {
         n.syntax.into()
     }
 }
@@ -42402,12 +42024,12 @@ impl std::fmt::Debug for JsBogusImportAssertionEntry {
     }
 }
 impl From<JsBogusImportAssertionEntry> for SyntaxNode {
-    fn from(n: JsBogusImportAssertionEntry) -> SyntaxNode {
+    fn from(n: JsBogusImportAssertionEntry) -> Self {
         n.syntax
     }
 }
 impl From<JsBogusImportAssertionEntry> for SyntaxElement {
-    fn from(n: JsBogusImportAssertionEntry) -> SyntaxElement {
+    fn from(n: JsBogusImportAssertionEntry) -> Self {
         n.syntax.into()
     }
 }
@@ -42458,12 +42080,12 @@ impl std::fmt::Debug for JsBogusMember {
     }
 }
 impl From<JsBogusMember> for SyntaxNode {
-    fn from(n: JsBogusMember) -> SyntaxNode {
+    fn from(n: JsBogusMember) -> Self {
         n.syntax
     }
 }
 impl From<JsBogusMember> for SyntaxElement {
-    fn from(n: JsBogusMember) -> SyntaxElement {
+    fn from(n: JsBogusMember) -> Self {
         n.syntax.into()
     }
 }
@@ -42514,12 +42136,12 @@ impl std::fmt::Debug for JsBogusNamedImportSpecifier {
     }
 }
 impl From<JsBogusNamedImportSpecifier> for SyntaxNode {
-    fn from(n: JsBogusNamedImportSpecifier) -> SyntaxNode {
+    fn from(n: JsBogusNamedImportSpecifier) -> Self {
         n.syntax
     }
 }
 impl From<JsBogusNamedImportSpecifier> for SyntaxElement {
-    fn from(n: JsBogusNamedImportSpecifier) -> SyntaxElement {
+    fn from(n: JsBogusNamedImportSpecifier) -> Self {
         n.syntax.into()
     }
 }
@@ -42570,12 +42192,12 @@ impl std::fmt::Debug for JsBogusParameter {
     }
 }
 impl From<JsBogusParameter> for SyntaxNode {
-    fn from(n: JsBogusParameter) -> SyntaxNode {
+    fn from(n: JsBogusParameter) -> Self {
         n.syntax
     }
 }
 impl From<JsBogusParameter> for SyntaxElement {
-    fn from(n: JsBogusParameter) -> SyntaxElement {
+    fn from(n: JsBogusParameter) -> Self {
         n.syntax.into()
     }
 }
@@ -42626,12 +42248,12 @@ impl std::fmt::Debug for JsBogusStatement {
     }
 }
 impl From<JsBogusStatement> for SyntaxNode {
-    fn from(n: JsBogusStatement) -> SyntaxNode {
+    fn from(n: JsBogusStatement) -> Self {
         n.syntax
     }
 }
 impl From<JsBogusStatement> for SyntaxElement {
-    fn from(n: JsBogusStatement) -> SyntaxElement {
+    fn from(n: JsBogusStatement) -> Self {
         n.syntax.into()
     }
 }
@@ -42682,12 +42304,12 @@ impl std::fmt::Debug for TsBogusType {
     }
 }
 impl From<TsBogusType> for SyntaxNode {
-    fn from(n: TsBogusType) -> SyntaxNode {
+    fn from(n: TsBogusType) -> Self {
         n.syntax
     }
 }
 impl From<TsBogusType> for SyntaxElement {
-    fn from(n: TsBogusType) -> SyntaxElement {
+    fn from(n: TsBogusType) -> Self {
         n.syntax.into()
     }
 }
@@ -42717,9 +42339,9 @@ impl AstNode for JsArrayAssignmentPatternElementList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsArrayAssignmentPatternElementList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsArrayAssignmentPatternElementList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -42799,9 +42421,9 @@ impl AstNode for JsArrayBindingPatternElementList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsArrayBindingPatternElementList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsArrayBindingPatternElementList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -42881,9 +42503,9 @@ impl AstNode for JsArrayElementList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_ARRAY_ELEMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsArrayElementList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsArrayElementList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -42963,9 +42585,9 @@ impl AstNode for JsCallArgumentList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_CALL_ARGUMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsCallArgumentList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsCallArgumentList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43045,9 +42667,9 @@ impl AstNode for JsClassMemberList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_CLASS_MEMBER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsClassMemberList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsClassMemberList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43127,9 +42749,9 @@ impl AstNode for JsConstructorModifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_CONSTRUCTOR_MODIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsConstructorModifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsConstructorModifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43209,9 +42831,9 @@ impl AstNode for JsConstructorParameterList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_CONSTRUCTOR_PARAMETER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsConstructorParameterList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsConstructorParameterList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43291,9 +42913,9 @@ impl AstNode for JsDecoratorList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_DECORATOR_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsDecoratorList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsDecoratorList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43373,9 +42995,9 @@ impl AstNode for JsDirectiveList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_DIRECTIVE_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsDirectiveList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsDirectiveList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43455,9 +43077,9 @@ impl AstNode for JsExportNamedFromSpecifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_EXPORT_NAMED_FROM_SPECIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsExportNamedFromSpecifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsExportNamedFromSpecifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43537,9 +43159,9 @@ impl AstNode for JsExportNamedSpecifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_EXPORT_NAMED_SPECIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsExportNamedSpecifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsExportNamedSpecifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43619,9 +43241,9 @@ impl AstNode for JsImportAssertionEntryList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_IMPORT_ASSERTION_ENTRY_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsImportAssertionEntryList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsImportAssertionEntryList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43701,9 +43323,9 @@ impl AstNode for JsMethodModifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_METHOD_MODIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsMethodModifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsMethodModifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43783,9 +43405,9 @@ impl AstNode for JsModuleItemList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_MODULE_ITEM_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsModuleItemList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsModuleItemList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43865,9 +43487,9 @@ impl AstNode for JsNamedImportSpecifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_NAMED_IMPORT_SPECIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsNamedImportSpecifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsNamedImportSpecifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -43948,9 +43570,9 @@ impl AstNode for JsObjectAssignmentPatternPropertyList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsObjectAssignmentPatternPropertyList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsObjectAssignmentPatternPropertyList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44031,9 +43653,9 @@ impl AstNode for JsObjectBindingPatternPropertyList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsObjectBindingPatternPropertyList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsObjectBindingPatternPropertyList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44113,9 +43735,9 @@ impl AstNode for JsObjectMemberList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_OBJECT_MEMBER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsObjectMemberList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsObjectMemberList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44195,9 +43817,9 @@ impl AstNode for JsParameterList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_PARAMETER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsParameterList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsParameterList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44277,9 +43899,9 @@ impl AstNode for JsPropertyModifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_PROPERTY_MODIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsPropertyModifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsPropertyModifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44359,9 +43981,9 @@ impl AstNode for JsStatementList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_STATEMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsStatementList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsStatementList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44441,9 +44063,9 @@ impl AstNode for JsSwitchCaseList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_SWITCH_CASE_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsSwitchCaseList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsSwitchCaseList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44523,9 +44145,9 @@ impl AstNode for JsTemplateElementList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_TEMPLATE_ELEMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsTemplateElementList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsTemplateElementList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44605,9 +44227,9 @@ impl AstNode for JsVariableDeclaratorList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JS_VARIABLE_DECLARATOR_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsVariableDeclaratorList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsVariableDeclaratorList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44687,9 +44309,9 @@ impl AstNode for JsxAttributeList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JSX_ATTRIBUTE_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsxAttributeList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsxAttributeList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44769,9 +44391,9 @@ impl AstNode for JsxChildList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == JSX_CHILD_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<JsxChildList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(JsxChildList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44851,9 +44473,9 @@ impl AstNode for TsEnumMemberList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_ENUM_MEMBER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsEnumMemberList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsEnumMemberList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -44933,9 +44555,9 @@ impl AstNode for TsIndexSignatureModifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_INDEX_SIGNATURE_MODIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsIndexSignatureModifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsIndexSignatureModifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45015,9 +44637,9 @@ impl AstNode for TsIntersectionTypeElementList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_INTERSECTION_TYPE_ELEMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsIntersectionTypeElementList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsIntersectionTypeElementList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45097,9 +44719,9 @@ impl AstNode for TsMethodSignatureModifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_METHOD_SIGNATURE_MODIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsMethodSignatureModifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsMethodSignatureModifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45179,9 +44801,9 @@ impl AstNode for TsPropertyParameterModifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_PROPERTY_PARAMETER_MODIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsPropertyParameterModifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsPropertyParameterModifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45261,9 +44883,9 @@ impl AstNode for TsPropertySignatureModifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_PROPERTY_SIGNATURE_MODIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsPropertySignatureModifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsPropertySignatureModifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45343,9 +44965,9 @@ impl AstNode for TsTemplateElementList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_TEMPLATE_ELEMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsTemplateElementList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsTemplateElementList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45425,9 +45047,9 @@ impl AstNode for TsTupleTypeElementList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_TUPLE_TYPE_ELEMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsTupleTypeElementList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsTupleTypeElementList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45507,9 +45129,9 @@ impl AstNode for TsTypeArgumentList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_TYPE_ARGUMENT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsTypeArgumentList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsTypeArgumentList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45589,9 +45211,9 @@ impl AstNode for TsTypeList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_TYPE_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsTypeList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsTypeList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45671,9 +45293,9 @@ impl AstNode for TsTypeMemberList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_TYPE_MEMBER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsTypeMemberList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsTypeMemberList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45753,9 +45375,9 @@ impl AstNode for TsTypeParameterList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_TYPE_PARAMETER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsTypeParameterList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsTypeParameterList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45835,9 +45457,9 @@ impl AstNode for TsTypeParameterModifierList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_TYPE_PARAMETER_MODIFIER_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsTypeParameterModifierList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsTypeParameterModifierList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {
@@ -45917,9 +45539,9 @@ impl AstNode for TsUnionTypeVariantList {
     fn can_cast(kind: SyntaxKind) -> bool {
         kind == TS_UNION_TYPE_VARIANT_LIST
     }
-    fn cast(syntax: SyntaxNode) -> Option<TsUnionTypeVariantList> {
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
-            Some(TsUnionTypeVariantList {
+            Some(Self {
                 syntax_list: syntax.into_list(),
             })
         } else {

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `format.js`
 
@@ -22,10 +23,6 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-Scanned project folder in <TIME>.
-```
-
-```block
 format.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:
@@ -38,6 +35,7 @@ format.js format ━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
+Scanned project folder in <TIME>.
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
 ```

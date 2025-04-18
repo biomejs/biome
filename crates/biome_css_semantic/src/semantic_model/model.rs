@@ -207,7 +207,7 @@ pub struct Specificity(pub u32, pub u32, pub u32);
 ///
 /// More details https://drafts.csswg.org/selectors/#example-d97bd125
 impl std::ops::Add for Specificity {
-    type Output = Specificity;
+    type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
         Self(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2)
     }
@@ -269,8 +269,8 @@ declare_node_union! {
 impl CssProperty {
     pub fn value(&self) -> SyntaxResult<TokenText> {
         let token = match self {
-            CssProperty::CssDashedIdentifier(node) => node.value_token()?,
-            CssProperty::CssIdentifier(node) => node.value_token()?,
+            Self::CssDashedIdentifier(node) => node.value_token()?,
+            Self::CssIdentifier(node) => node.value_token()?,
         };
 
         Ok(token.token_text_trimmed())

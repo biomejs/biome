@@ -6,6 +6,7 @@ unconditional_recursion,
 future_incompatible,
 // missing_docs,
 )]
+#![deny(clippy::use_self)]
 #![deny(unsafe_code)]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![expect(clippy::map_unwrap_or, clippy::mem_forget)]

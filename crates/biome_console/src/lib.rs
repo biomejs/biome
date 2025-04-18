@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use std::io;
 use std::io::{IsTerminal, Read, Write};
 use std::panic::RefUnwindSafe;

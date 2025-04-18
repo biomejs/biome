@@ -13,7 +13,7 @@ pub(crate) struct AriaRoleOptions {
 }
 impl From<AriaRoleOptions> for use_valid_aria_role::ValidAriaRoleOptions {
     fn from(val: AriaRoleOptions) -> Self {
-        use_valid_aria_role::ValidAriaRoleOptions {
+        Self {
             allow_invalid_roles: val.allowed_invalid_roles,
             ignore_non_dom: val.ignore_non_dom,
         }

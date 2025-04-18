@@ -21,11 +21,11 @@ pub enum TriviaPieceKind {
 
 impl TriviaPieceKind {
     pub const fn is_newline(&self) -> bool {
-        matches!(self, TriviaPieceKind::Newline)
+        matches!(self, Self::Newline)
     }
 
     pub const fn is_whitespace(&self) -> bool {
-        matches!(self, TriviaPieceKind::Whitespace)
+        matches!(self, Self::Whitespace)
     }
 
     pub const fn is_comment(&self) -> bool {
@@ -33,15 +33,15 @@ impl TriviaPieceKind {
     }
 
     pub const fn is_single_line_comment(&self) -> bool {
-        matches!(self, TriviaPieceKind::SingleLineComment)
+        matches!(self, Self::SingleLineComment)
     }
 
     pub const fn is_multiline_comment(&self) -> bool {
-        matches!(self, TriviaPieceKind::MultiLineComment)
+        matches!(self, Self::MultiLineComment)
     }
 
     pub const fn is_skipped(&self) -> bool {
-        matches!(self, TriviaPieceKind::Skipped)
+        matches!(self, Self::Skipped)
     }
 }
 

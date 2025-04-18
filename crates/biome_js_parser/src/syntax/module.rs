@@ -58,7 +58,7 @@ pub(crate) enum ModuleItemListParent {
 
 impl ModuleItemListParent {
     fn is_module(&self) -> bool {
-        matches!(self, ModuleItemListParent::Module)
+        matches!(self, Self::Module)
     }
 
     #[inline]
@@ -68,7 +68,7 @@ impl ModuleItemListParent {
         }
 
         match self {
-            ModuleItemListParent::Block => p.at(T!['}']),
+            Self::Block => p.at(T!['}']),
             _ => false,
         }
     }

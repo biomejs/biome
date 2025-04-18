@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_rowan::TreeBuilder;
 use biome_yaml_syntax::YamlLanguage;
 

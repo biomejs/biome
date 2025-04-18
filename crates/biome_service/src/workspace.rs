@@ -57,10 +57,12 @@ mod scanner;
 mod server;
 mod watcher;
 
+use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
-pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-pub use server::WorkspaceServer;
-
+use crate::projects::ProjectKey;
+use crate::settings::WorkspaceSettingsHandle;
+pub use crate::workspace::scanner::ScanKind;
+use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::Configuration;
 use biome_configuration::analyzer::RuleSelector;
@@ -73,22 +75,19 @@ use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
+pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use core::str;
 use crossbeam::channel::bounded;
 use enumflags2::{BitFlags, bitflags};
 #[cfg(feature = "schema")]
 use schemars::{r#gen::SchemaGenerator, schema::Schema};
+pub use server::WorkspaceServer;
 use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe};
 use tokio::sync::watch;
 use tracing::{debug, instrument};
-
-use crate::file_handlers::Capabilities;
-use crate::projects::ProjectKey;
-use crate::settings::WorkspaceSettingsHandle;
-use crate::{Deserialize, Serialize, WorkspaceError};
 
 /// Notification regarding a workspace's service data.
 #[derive(Clone, Copy, Debug)]
@@ -400,30 +399,30 @@ pub enum SupportKind {
 impl std::fmt::Display for SupportKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            SupportKind::Supported => write!(f, "Supported"),
-            SupportKind::Ignored => write!(f, "Ignored"),
-            SupportKind::Protected => write!(f, "Protected"),
-            SupportKind::FeatureNotEnabled => write!(f, "FeatureNotEnabled"),
-            SupportKind::FileNotSupported => write!(f, "FileNotSupported"),
+            Self::Supported => write!(f, "Supported"),
+            Self::Ignored => write!(f, "Ignored"),
+            Self::Protected => write!(f, "Protected"),
+            Self::FeatureNotEnabled => write!(f, "FeatureNotEnabled"),
+            Self::FileNotSupported => write!(f, "FileNotSupported"),
         }
     }
 }
 
 impl SupportKind {
     pub const fn is_supported(&self) -> bool {
-        matches!(self, SupportKind::Supported)
+        matches!(self, Self::Supported)
     }
     pub const fn is_not_enabled(&self) -> bool {
-        matches!(self, SupportKind::FeatureNotEnabled)
+        matches!(self, Self::FeatureNotEnabled)
     }
     pub const fn is_not_supported(&self) -> bool {
-        matches!(self, SupportKind::FileNotSupported)
+        matches!(self, Self::FileNotSupported)
     }
     pub const fn is_ignored(&self) -> bool {
-        matches!(self, SupportKind::Ignored)
+        matches!(self, Self::Ignored)
     }
     pub const fn is_protected(&self) -> bool {
-        matches!(self, SupportKind::Protected)
+        matches!(self, Self::Protected)
     }
 }
 
@@ -443,11 +442,11 @@ pub enum FeatureKind {
 impl std::fmt::Display for FeatureKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FeatureKind::Format => write!(f, "Format"),
-            FeatureKind::Lint => write!(f, "Lint"),
-            FeatureKind::Search => write!(f, "Search"),
-            FeatureKind::Assist => write!(f, "Assist"),
-            FeatureKind::Debug => write!(f, "Debug"),
+            Self::Format => write!(f, "Format"),
+            Self::Lint => write!(f, "Lint"),
+            Self::Search => write!(f, "Search"),
+            Self::Assist => write!(f, "Assist"),
+            Self::Debug => write!(f, "Debug"),
         }
     }
 }
@@ -488,12 +487,10 @@ impl FeatureName {
 
 impl From<SmallVec<[FeatureKind; 6]>> for FeatureName {
     fn from(value: SmallVec<[FeatureKind; 6]>) -> Self {
-        value
-            .into_iter()
-            .fold(FeatureName::empty(), |mut acc, kind| {
-                acc.insert(kind);
-                acc
-            })
+        value.into_iter().fold(Self::empty(), |mut acc, kind| {
+            acc.insert(kind);
+            acc
+        })
     }
 }
 
@@ -1032,6 +1029,8 @@ pub struct ScanProjectFolderParams {
 
     /// Forces scanning of the folder, even if it is already being watched.
     pub force: bool,
+
+    pub scan_kind: ScanKind,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

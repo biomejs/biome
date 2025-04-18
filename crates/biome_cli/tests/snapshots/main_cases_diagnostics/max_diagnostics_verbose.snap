@@ -23,10 +23,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-Scanned project folder in <TIME>.
-```
-
-```block
 src/folder_5/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_5/package-lock.json is protected because is handled by another tool. Biome won't process it.
@@ -135,6 +131,7 @@ src/file.js format ━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+Scanned project folder in <TIME>.
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
 ```

@@ -138,7 +138,7 @@ impl AriaRole {
     /// use biome_aria_metadata::AriaRole;
     /// assert_eq!(AriaRole::from_roles("INVALID main FALLBACK"), Some(AriaRole::Main));
     /// ```
-    pub fn from_roles(roles: &str) -> Option<AriaRole> {
+    pub fn from_roles(roles: &str) -> Option<Self> {
         roles
             .split_ascii_whitespace()
             .find_map(|value| value.parse().ok())

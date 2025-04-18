@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod flattening;
 mod format_type_info;
 mod globals;

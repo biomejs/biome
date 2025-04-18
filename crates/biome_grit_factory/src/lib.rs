@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_grit_syntax::GritLanguage;
 use biome_rowan::TreeBuilder;
 

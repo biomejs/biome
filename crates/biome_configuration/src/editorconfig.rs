@@ -281,7 +281,7 @@ impl<T: FromStr> FromStr for EditorconfigValue<T> {
     type Err = T::Err;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "unset" | "off" => Ok(EditorconfigValue::Default),
+            "unset" | "off" => Ok(Self::Default),
             _ => T::from_str(s).map(EditorconfigValue::Explicit),
         }
     }
@@ -292,9 +292,9 @@ impl<T: FromStr> FromStr for EditorconfigValue<T> {
 impl<T: Default> Into<Option<T>> for EditorconfigValue<T> {
     fn into(self) -> Option<T> {
         match self {
-            EditorconfigValue::Explicit(v) => Some(v),
-            EditorconfigValue::Default => Some(T::default()),
-            EditorconfigValue::None => None,
+            Self::Explicit(v) => Some(v),
+            Self::Default => Some(T::default()),
+            Self::None => None,
         }
     }
 }

@@ -466,7 +466,7 @@ pub enum CustomRestrictedImport {
 impl From<CustomRestrictedImport> for CustomRestrictedImportOptions {
     fn from(options: CustomRestrictedImport) -> Self {
         match options {
-            CustomRestrictedImport::Plain(message) => CustomRestrictedImportOptions {
+            CustomRestrictedImport::Plain(message) => Self {
                 message,
                 import_names: [].into(),
                 allow_import_names: [].into(),

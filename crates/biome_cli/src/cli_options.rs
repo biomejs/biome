@@ -162,13 +162,13 @@ impl FromStr for CliReporter {
 impl Display for CliReporter {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            CliReporter::Default => f.write_str("default"),
-            CliReporter::Json => f.write_str("json"),
-            CliReporter::JsonPretty => f.write_str("json-pretty"),
-            CliReporter::Summary => f.write_str("summary"),
-            CliReporter::GitHub => f.write_str("github"),
-            CliReporter::Junit => f.write_str("junit"),
-            CliReporter::GitLab => f.write_str("gitlab"),
+            Self::Default => f.write_str("default"),
+            Self::Json => f.write_str("json"),
+            Self::JsonPretty => f.write_str("json-pretty"),
+            Self::Summary => f.write_str("summary"),
+            Self::GitHub => f.write_str("github"),
+            Self::Junit => f.write_str("junit"),
+            Self::GitLab => f.write_str("gitlab"),
         }
     }
 }
@@ -182,8 +182,8 @@ pub enum MaxDiagnostics {
 impl MaxDiagnostics {
     pub fn ok(&self) -> Option<u32> {
         match self {
-            MaxDiagnostics::None => None,
-            MaxDiagnostics::Limit(value) => Some(*value),
+            Self::None => None,
+            Self::Limit(value) => Some(*value),
         }
     }
 }
@@ -197,10 +197,10 @@ impl Default for MaxDiagnostics {
 impl Display for MaxDiagnostics {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            MaxDiagnostics::None => {
+            Self::None => {
                 write!(f, "none")
             }
-            MaxDiagnostics::Limit(value) => {
+            Self::Limit(value) => {
                 write!(f, "{value}")
             }
         }
@@ -211,10 +211,10 @@ impl FromStr for MaxDiagnostics {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "none" => Ok(MaxDiagnostics::None),
+            "none" => Ok(Self::None),
             _ => {
                 if let Ok(value) = s.parse::<u32>() {
-                    Ok(MaxDiagnostics::Limit(value))
+                    Ok(Self::Limit(value))
                 } else {
                     Err(format!(
                         "Invalid value provided. Provide 'none' to lift the limit, or a number between 0 and {}.",
@@ -229,8 +229,8 @@ impl FromStr for MaxDiagnostics {
 impl From<MaxDiagnostics> for u64 {
     fn from(value: MaxDiagnostics) -> Self {
         match value {
-            MaxDiagnostics::None => u64::MAX,
-            MaxDiagnostics::Limit(value) => value as u64,
+            MaxDiagnostics::None => Self::MAX,
+            MaxDiagnostics::Limit(value) => value as Self,
         }
     }
 }
@@ -238,7 +238,7 @@ impl From<MaxDiagnostics> for u64 {
 impl From<MaxDiagnostics> for u32 {
     fn from(value: MaxDiagnostics) -> Self {
         match value {
-            MaxDiagnostics::None => u32::MAX,
+            MaxDiagnostics::None => Self::MAX,
             MaxDiagnostics::Limit(value) => value,
         }
     }

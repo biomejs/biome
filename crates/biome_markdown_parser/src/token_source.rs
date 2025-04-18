@@ -18,9 +18,7 @@ pub(crate) type MarkdownTokenSourceCheckpoint = TokenSourceCheckpoint<MarkdownSy
 
 impl<'source> MarkdownTokenSource<'source> {
     /// Creates a new token source.
-    pub(crate) fn new(
-        lexer: BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>>,
-    ) -> MarkdownTokenSource<'source> {
+    pub(crate) fn new(lexer: BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>>) -> Self {
         MarkdownTokenSource {
             lexer,
             trivia_list: vec![],

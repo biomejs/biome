@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::Configuration;

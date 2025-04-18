@@ -115,7 +115,7 @@ impl Type {
                                 .all_members()
                                 .find(|member| member.is_static() && member.has_name(&expr.member));
                             match member {
-                                Some(member) => Type::instance_of(
+                                Some(member) => Self::instance_of(
                                     member.to_type(&object).resolved(resolver, stack),
                                 ),
                                 None => Self::unknown(),
@@ -126,7 +126,7 @@ impl Type {
                                 !member.is_static() && member.has_name(&expr.member)
                             });
                             match member {
-                                Some(member) => Type::instance_of(
+                                Some(member) => Self::instance_of(
                                     member.to_type(&object).resolved(resolver, stack),
                                 ),
                                 None => Self::unknown(),

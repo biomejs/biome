@@ -433,9 +433,9 @@ enum SnippetValue {
 impl From<SnippetValue> for Pattern<GritQueryContext> {
     fn from(value: SnippetValue) -> Self {
         match value {
-            SnippetValue::Dots => Pattern::Dots,
-            SnippetValue::Underscore => Pattern::Underscore,
-            SnippetValue::Variable(v) => Pattern::Variable(v),
+            SnippetValue::Dots => Self::Dots,
+            SnippetValue::Underscore => Self::Underscore,
+            SnippetValue::Variable(v) => Self::Variable(v),
         }
     }
 }
