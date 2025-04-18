@@ -1,6 +1,6 @@
 use biome_analyze::{
-    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
-    Queryable, RuleKey, ServiceBag, SyntaxVisitor,
+    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_module_graph::{JsModuleInfo, ModuleGraph};
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange};
@@ -23,11 +23,24 @@ impl ModuleGraphService {
 impl FromServices for ModuleGraphService {
     fn from_services(
         rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic> {
-        let module_graph: &Arc<ModuleGraph> = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["ModuleGraph"])
-        })?;
+    ) -> Result<Self, ServicesDiagnostic> {
+        if cfg!(debug_assertions) {
+            let has_project_domain = rule_metadata
+                .domains
+                .iter()
+                .any(|d| d == &RuleDomain::Project);
+            if !has_project_domain {
+                panic!(
+                    "The rule {rule_key} uses ModuleGraphService, but it is not in the project domain."
+                );
+            }
+        }
+        let module_graph: &Arc<ModuleGraph> = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleGraph"]))?;
+
         Ok(Self(module_graph.clone()))
     }
 }

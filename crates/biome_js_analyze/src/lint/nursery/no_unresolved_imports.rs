@@ -1,5 +1,6 @@
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -55,6 +56,7 @@ declare_lint_rule! {
             RuleSource::EslintImport("named")
         ],
         source_kind: RuleSourceKind::Inspired,
+        domains: &[RuleDomain::Project],
     }
 }
 

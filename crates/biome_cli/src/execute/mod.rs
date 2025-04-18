@@ -376,6 +376,21 @@ impl Execution {
         matches!(self.traversal_mode, TraversalMode::Lint { .. })
     }
 
+    pub(crate) const fn is_migrate(&self) -> bool {
+        matches!(self.traversal_mode, TraversalMode::Migrate { .. })
+    }
+
+    pub(crate) fn is_stdin(&self) -> bool {
+        match &self.traversal_mode {
+            TraversalMode::Check { stdin, .. } => stdin.is_some(),
+            TraversalMode::Lint { stdin, .. } => stdin.is_some(),
+            TraversalMode::CI { .. } => false,
+            TraversalMode::Format { stdin, .. } => stdin.is_some(),
+            TraversalMode::Migrate { .. } => false,
+            TraversalMode::Search { stdin, .. } => stdin.is_some(),
+        }
+    }
+
     #[instrument(level = "debug", skip(self), fields(result))]
     pub(crate) fn is_safe_fixes_enabled(&self) -> bool {
         let result = match self.traversal_mode {
