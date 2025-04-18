@@ -584,46 +584,41 @@ pub fn execute_mode(
     let skipped = summary.skipped;
     let processed = summary.changed + summary.unchanged;
     let should_exit_on_warnings = summary.warnings > 0 && cli_options.error_on_warnings;
+    let diagnostics_payload = DiagnosticsPayload {
+        diagnostic_level: cli_options.diagnostic_level,
+        diagnostics,
+    };
 
     match execution.report_mode {
         ReportMode::Terminal { with_summary } => {
             if with_summary {
                 let reporter = SummaryReporter {
                     summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
+                    diagnostics_payload,
                     execution: execution.clone(),
+                    verbose: cli_options.verbose,
                 };
                 reporter.write(&mut SummaryReporterVisitor(console))?;
             } else {
                 let reporter = ConsoleReporter {
                     summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
+                    diagnostics_payload,
                     execution: execution.clone(),
                     evaluated_paths,
+                    verbose: cli_options.verbose,
                 };
                 reporter.write(&mut ConsoleReporterVisitor(console))?;
             }
         }
         ReportMode::Json { pretty } => {
-            console.error(markup!{
+            console.error(markup! {
                     <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
                 });
             let reporter = JsonReporter {
                 summary,
-                diagnostics: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics: diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             let mut buffer = JsonReporterVisitor::new(summary);
             reporter.write(&mut buffer)?;
@@ -660,23 +655,17 @@ pub fn execute_mode(
         }
         ReportMode::GitHub => {
             let reporter = GithubReporter {
-                diagnostics_payload: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             reporter.write(&mut GithubReporterVisitor(console))?;
         }
         ReportMode::GitLab => {
             let reporter = GitLabReporter {
-                diagnostics: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics: diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             reporter.write(&mut GitLabReporterVisitor::new(
                 console,
@@ -686,12 +675,9 @@ pub fn execute_mode(
         ReportMode::Junit => {
             let reporter = JunitReporter {
                 summary,
-                diagnostics_payload: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
         }

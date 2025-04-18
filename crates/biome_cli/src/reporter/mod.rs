@@ -15,7 +15,6 @@ use std::time::Duration;
 
 pub struct DiagnosticsPayload {
     pub diagnostics: Vec<Error>,
-    pub verbose: bool,
     pub diagnostic_level: Severity,
 }
 
@@ -66,5 +65,6 @@ pub trait ReporterVisitor {
         &mut self,
         execution: &Execution,
         payload: DiagnosticsPayload,
+        verbose: bool,
     ) -> io::Result<()>;
 }

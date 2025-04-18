@@ -42,6 +42,7 @@ impl ReporterVisitor for BufferVisitor {
         &mut self,
         _execution: &Execution,
         _payload: DiagnosticsPayload,
+        _verbose: bool,
     ) -> std::io::Result<()> {
         todo!()
     }

@@ -45,7 +45,7 @@ impl WorkspaceServer {
         &self,
         project_key: ProjectKey,
         folder: &Utf8Path,
-        target: ScanKind,
+        scan_kind: ScanKind,
     ) -> Result<ScanResult, WorkspaceError> {
         let (interner, _path_receiver) = PathInterner::new();
         let (diagnostics_sender, diagnostics_receiver) = unbounded();
@@ -68,7 +68,7 @@ impl WorkspaceServer {
                     interner,
                     diagnostics_sender,
                     evaluated_paths: Default::default(),
-                    target,
+                    scan_kind,
                 },
             );
 
@@ -215,7 +215,7 @@ pub(crate) struct ScanContext<'app> {
     pub(crate) evaluated_paths: RwLock<BTreeSet<BiomePath>>,
 
     /// What the scanner should target.
-    target: ScanKind,
+    scan_kind: ScanKind,
 }
 
 #[derive(Debug, Copy, Clone, serde::Serialize, serde::Deserialize)]
@@ -266,7 +266,7 @@ impl TraversalContext for ScanContext<'_> {
 
     fn can_handle(&self, path: &BiomePath) -> bool {
         path.is_dir()
-            || if self.target.is_known_files() {
+            || if self.scan_kind.is_known_files() {
                 path.is_ignore() || path.is_manifest() || path.is_config()
             } else {
                 DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
