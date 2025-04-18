@@ -327,7 +327,7 @@ impl JsResolvedPath {
 
     /// For testing purpose, it returns an instance of [JsResolvedPath]. It panics otherwise
     pub fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
-        if cfg!(debug_assertions) {
+        if cfg!(test) {
             Self::new(Ok(path.into()))
         } else {
             panic!("This method shouldn't be used in production.")

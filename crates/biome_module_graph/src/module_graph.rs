@@ -63,7 +63,7 @@ impl ModuleGraph {
 
     /// Returns the data of the module graph in test. It panics otherwise
     pub fn data(&self) -> HashMapRef<Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard> {
-        if !cfg!(debug_assertions) {
+        if !cfg!(test) {
             self.data.pin()
         } else {
             panic!("This method shouldn't be used in production.")
