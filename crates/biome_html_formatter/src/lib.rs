@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_formatter::comments::Comments;
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
 use biome_formatter::{FormatLanguage, FormatResult, FormatToken, Formatted, write};
@@ -226,7 +228,7 @@ where
 }
 
 impl AsFormat<HtmlFormatContext> for HtmlSyntaxToken {
-    type Format<'a> = FormatRefWithRule<'a, HtmlSyntaxToken, FormatHtmlSyntaxToken>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatHtmlSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatHtmlSyntaxToken::default())
@@ -234,7 +236,7 @@ impl AsFormat<HtmlFormatContext> for HtmlSyntaxToken {
 }
 
 impl IntoFormat<HtmlFormatContext> for HtmlSyntaxToken {
-    type Format = FormatOwnedWithRule<HtmlSyntaxToken, FormatHtmlSyntaxToken>;
+    type Format = FormatOwnedWithRule<Self, FormatHtmlSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatHtmlSyntaxToken::default())

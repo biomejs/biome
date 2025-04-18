@@ -641,7 +641,7 @@ impl JsSyntaxKind {
                 | JSX_CHILD_LIST
         )
     }
-    pub fn from_keyword(ident: &str) -> Option<JsSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "break" => BREAK_KW,
             "case" => CASE_KW,

@@ -220,15 +220,15 @@ pub enum JsExport {
 impl JsExport {
     pub fn as_own_export(&self) -> Option<&JsOwnExport> {
         match self {
-            JsExport::Own(own_export) | JsExport::OwnType(own_export) => Some(own_export),
-            JsExport::Reexport(_) | JsExport::ReexportType(_) => None,
+            Self::Own(own_export) | Self::OwnType(own_export) => Some(own_export),
+            Self::Reexport(_) | Self::ReexportType(_) => None,
         }
     }
 
     pub fn as_own_export_mut(&mut self) -> Option<&mut JsOwnExport> {
         match self {
-            JsExport::Own(own_export) | JsExport::OwnType(own_export) => Some(own_export),
-            JsExport::Reexport(_) | JsExport::ReexportType(_) => None,
+            Self::Own(own_export) | Self::OwnType(own_export) => Some(own_export),
+            Self::Reexport(_) | Self::ReexportType(_) => None,
         }
     }
 }

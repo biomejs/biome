@@ -69,7 +69,7 @@ impl From<TypeInner> for Type {
 }
 
 impl Type {
-    pub fn array_of(ty: Type) -> Self {
+    pub fn array_of(ty: Self) -> Self {
         Self(Arc::new(TypeInner::Class(Box::new(ARRAY.clone())))).with_type_parameters(&[ty])
     }
 
@@ -96,7 +96,7 @@ impl Type {
     }
 
     /// Returns a new instance of the given type.
-    pub fn instance_of(ty: Type) -> Self {
+    pub fn instance_of(ty: Self) -> Self {
         if matches!(ty.deref(), TypeInner::Class(_)) {
             TypeInner::Object(Box::new(Object {
                 prototype: Some(ty),
@@ -132,7 +132,7 @@ impl Type {
         }
     }
 
-    pub fn promise_of(ty: Type) -> Self {
+    pub fn promise_of(ty: Self) -> Self {
         Self(Arc::new(TypeInner::Class(Box::new(PROMISE.clone())))).with_type_parameters(&[ty])
     }
 

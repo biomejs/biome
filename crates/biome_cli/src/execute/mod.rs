@@ -27,7 +27,7 @@ use biome_grit_patterns::GritTargetLanguage;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     CloseFileParams, FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams,
-    OpenFileParams, PatternId,
+    OpenFileParams, PatternId, ScanKind,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
@@ -203,12 +203,12 @@ pub enum TraversalMode {
 impl Display for TraversalMode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            TraversalMode::Check { .. } => write!(f, "check"),
-            TraversalMode::CI { .. } => write!(f, "ci"),
-            TraversalMode::Format { .. } => write!(f, "format"),
-            TraversalMode::Migrate { .. } => write!(f, "migrate"),
-            TraversalMode::Lint { .. } => write!(f, "lint"),
-            TraversalMode::Search { .. } => write!(f, "search"),
+            Self::Check { .. } => write!(f, "check"),
+            Self::CI { .. } => write!(f, "ci"),
+            Self::Format { .. } => write!(f, "format"),
+            Self::Migrate { .. } => write!(f, "migrate"),
+            Self::Lint { .. } => write!(f, "lint"),
+            Self::Search { .. } => write!(f, "search"),
         }
     }
 }
@@ -225,14 +225,25 @@ impl TraversalMode {
         }
     }
 
-    pub fn should_scan_project(&self) -> bool {
+    /// It returns the best [ScanKind] variant based on the [TraversalMode]
+    pub fn to_scan_kind(&self) -> ScanKind {
         match self {
-            Self::CI { .. } => true,
-            Self::Check { stdin, .. }
-            | Self::Format { stdin, .. }
-            | Self::Lint { stdin, .. }
-            | Self::Search { stdin, .. } => stdin.is_none(),
-            Self::Migrate { .. } => false,
+            Self::CI { .. } => ScanKind::Project,
+            Self::Format { stdin, .. } => {
+                if stdin.is_none() {
+                    ScanKind::KnownFiles
+                } else {
+                    ScanKind::None
+                }
+            }
+            Self::Check { stdin, .. } | Self::Lint { stdin, .. } | Self::Search { stdin, .. } => {
+                if stdin.is_none() {
+                    ScanKind::Project
+                } else {
+                    ScanKind::None
+                }
+            }
+            Self::Migrate { .. } => ScanKind::None,
         }
     }
 }
@@ -514,7 +525,7 @@ pub fn execute_mode(
     mut session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
-    duration: Option<Duration>,
+    scanner_duration: Option<Duration>,
 ) -> Result<(), CliDiagnostic> {
     // If a custom reporter was provided, let's lift the limit so users can see all of them
     execution.max_diagnostics = if cli_options.reporter.is_default() {
@@ -567,54 +578,47 @@ pub fn execute_mode(
         diagnostics,
     } = traverse(&execution, &mut session, project_key, cli_options, paths)?;
     // We join the duration of the scanning with the duration of the traverse.
-    if let Some(duration) = duration {
-        summary.duration += duration;
-    }
+    summary.scanner_duration = scanner_duration;
     let console = session.app.console;
     let errors = summary.errors;
     let skipped = summary.skipped;
     let processed = summary.changed + summary.unchanged;
     let should_exit_on_warnings = summary.warnings > 0 && cli_options.error_on_warnings;
+    let diagnostics_payload = DiagnosticsPayload {
+        diagnostic_level: cli_options.diagnostic_level,
+        diagnostics,
+    };
 
     match execution.report_mode {
         ReportMode::Terminal { with_summary } => {
             if with_summary {
                 let reporter = SummaryReporter {
                     summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
+                    diagnostics_payload,
                     execution: execution.clone(),
+                    verbose: cli_options.verbose,
                 };
                 reporter.write(&mut SummaryReporterVisitor(console))?;
             } else {
                 let reporter = ConsoleReporter {
                     summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
+                    diagnostics_payload,
                     execution: execution.clone(),
                     evaluated_paths,
+                    verbose: cli_options.verbose,
                 };
                 reporter.write(&mut ConsoleReporterVisitor(console))?;
             }
         }
         ReportMode::Json { pretty } => {
-            console.error(markup!{
+            console.error(markup! {
                     <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
                 });
             let reporter = JsonReporter {
                 summary,
-                diagnostics: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics: diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             let mut buffer = JsonReporterVisitor::new(summary);
             reporter.write(&mut buffer)?;
@@ -651,23 +655,17 @@ pub fn execute_mode(
         }
         ReportMode::GitHub => {
             let reporter = GithubReporter {
-                diagnostics_payload: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             reporter.write(&mut GithubReporterVisitor(console))?;
         }
         ReportMode::GitLab => {
             let reporter = GitLabReporter {
-                diagnostics: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics: diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             reporter.write(&mut GitLabReporterVisitor::new(
                 console,
@@ -677,12 +675,9 @@ pub fn execute_mode(
         ReportMode::Junit => {
             let reporter = JunitReporter {
                 summary,
-                diagnostics_payload: DiagnosticsPayload {
-                    verbose: cli_options.verbose,
-                    diagnostic_level: cli_options.diagnostic_level,
-                    diagnostics,
-                },
+                diagnostics_payload,
                 execution: execution.clone(),
+                verbose: cli_options.verbose,
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
         }

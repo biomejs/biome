@@ -8,37 +8,29 @@ use crate::{
 impl AnyJsDeclarationClause {
     pub fn into_declaration(self) -> Option<AnyJsDeclaration> {
         match self {
-            AnyJsDeclarationClause::JsClassDeclaration(decl) => {
-                Some(AnyJsDeclaration::JsClassDeclaration(decl))
-            }
-            AnyJsDeclarationClause::JsFunctionDeclaration(decl) => {
+            Self::JsClassDeclaration(decl) => Some(AnyJsDeclaration::JsClassDeclaration(decl)),
+            Self::JsFunctionDeclaration(decl) => {
                 Some(AnyJsDeclaration::JsFunctionDeclaration(decl))
             }
-            AnyJsDeclarationClause::JsVariableDeclarationClause(decl) => Some(
+            Self::JsVariableDeclarationClause(decl) => Some(
                 AnyJsDeclaration::JsVariableDeclaration(decl.declaration().ok()?),
             ),
-            AnyJsDeclarationClause::TsDeclareFunctionDeclaration(decl) => {
+            Self::TsDeclareFunctionDeclaration(decl) => {
                 Some(AnyJsDeclaration::TsDeclareFunctionDeclaration(decl))
             }
-            AnyJsDeclarationClause::TsEnumDeclaration(decl) => {
-                Some(AnyJsDeclaration::TsEnumDeclaration(decl))
-            }
-            AnyJsDeclarationClause::TsExternalModuleDeclaration(decl) => {
+            Self::TsEnumDeclaration(decl) => Some(AnyJsDeclaration::TsEnumDeclaration(decl)),
+            Self::TsExternalModuleDeclaration(decl) => {
                 Some(AnyJsDeclaration::TsExternalModuleDeclaration(decl))
             }
-            AnyJsDeclarationClause::TsGlobalDeclaration(decl) => {
-                Some(AnyJsDeclaration::TsGlobalDeclaration(decl))
-            }
-            AnyJsDeclarationClause::TsImportEqualsDeclaration(decl) => {
+            Self::TsGlobalDeclaration(decl) => Some(AnyJsDeclaration::TsGlobalDeclaration(decl)),
+            Self::TsImportEqualsDeclaration(decl) => {
                 Some(AnyJsDeclaration::TsImportEqualsDeclaration(decl))
             }
-            AnyJsDeclarationClause::TsInterfaceDeclaration(decl) => {
+            Self::TsInterfaceDeclaration(decl) => {
                 Some(AnyJsDeclaration::TsInterfaceDeclaration(decl))
             }
-            AnyJsDeclarationClause::TsModuleDeclaration(decl) => {
-                Some(AnyJsDeclaration::TsModuleDeclaration(decl))
-            }
-            AnyJsDeclarationClause::TsTypeAliasDeclaration(decl) => {
+            Self::TsModuleDeclaration(decl) => Some(AnyJsDeclaration::TsModuleDeclaration(decl)),
+            Self::TsTypeAliasDeclaration(decl) => {
                 Some(AnyJsDeclaration::TsTypeAliasDeclaration(decl))
             }
         }

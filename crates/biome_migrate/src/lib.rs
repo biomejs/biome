@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod analyzers;
 mod macros;
 mod registry;

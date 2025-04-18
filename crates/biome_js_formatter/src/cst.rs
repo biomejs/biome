@@ -16,7 +16,7 @@ impl biome_formatter::FormatRule<JsSyntaxNode> for FormatJsSyntaxNode {
 }
 
 impl AsFormat<JsFormatContext> for JsSyntaxNode {
-    type Format<'a> = FormatRefWithRule<'a, JsSyntaxNode, FormatJsSyntaxNode>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatJsSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(self, FormatJsSyntaxNode)
@@ -24,7 +24,7 @@ impl AsFormat<JsFormatContext> for JsSyntaxNode {
 }
 
 impl IntoFormat<JsFormatContext> for JsSyntaxNode {
-    type Format = FormatOwnedWithRule<JsSyntaxNode, FormatJsSyntaxNode>;
+    type Format = FormatOwnedWithRule<Self, FormatJsSyntaxNode>;
 
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(self, FormatJsSyntaxNode)

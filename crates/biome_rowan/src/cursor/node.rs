@@ -21,8 +21,8 @@ pub(crate) struct SyntaxNode {
 }
 
 impl SyntaxNode {
-    pub(crate) fn new_root(green: GreenNode) -> SyntaxNode {
-        SyntaxNode {
+    pub(crate) fn new_root(green: GreenNode) -> Self {
+        Self {
             ptr: NodeData::new(
                 NodeKind::Root {
                     green: GreenElement::Node(green),
@@ -35,11 +35,11 @@ impl SyntaxNode {
 
     pub(super) fn new_child(
         green: &GreenNodeData,
-        parent: SyntaxNode,
+        parent: Self,
         slot: u32,
         offset: TextSize,
-    ) -> SyntaxNode {
-        SyntaxNode {
+    ) -> Self {
+        Self {
             ptr: NodeData::new(
                 NodeKind::Child {
                     green: WeakGreenElement::new(GreenElementRef::Node(green)),
@@ -51,8 +51,8 @@ impl SyntaxNode {
         }
     }
 
-    pub fn clone_subtree(&self) -> SyntaxNode {
-        SyntaxNode::new_root(self.green().into())
+    pub fn clone_subtree(&self) -> Self {
+        Self::new_root(self.green().into())
     }
 
     #[inline]
@@ -157,13 +157,13 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn parent(&self) -> Option<SyntaxNode> {
+    pub fn parent(&self) -> Option<Self> {
         self.data().parent_node()
     }
 
     #[inline]
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> + use<> {
-        iter::successors(Some(self.clone()), SyntaxNode::parent)
+    pub fn ancestors(&self) -> impl Iterator<Item = Self> + use<> {
+        iter::successors(Some(self.clone()), Self::parent)
     }
 
     #[inline]
@@ -190,10 +190,10 @@ impl SyntaxNode {
         })
     }
 
-    pub fn first_child(&self) -> Option<SyntaxNode> {
+    pub fn first_child(&self) -> Option<Self> {
         self.green().children().find_map(|child| {
             child.element().into_node().map(|green| {
-                SyntaxNode::new_child(
+                Self::new_child(
                     green,
                     self.clone(),
                     child.slot(),
@@ -203,10 +203,10 @@ impl SyntaxNode {
         })
     }
 
-    pub fn last_child(&self) -> Option<SyntaxNode> {
+    pub fn last_child(&self) -> Option<Self> {
         self.green().children().rev().find_map(|child| {
             child.element().into_node().map(|green| {
-                SyntaxNode::new_child(
+                Self::new_child(
                     green,
                     self.clone(),
                     child.slot(),
@@ -237,10 +237,10 @@ impl SyntaxNode {
         })
     }
 
-    pub fn next_sibling(&self) -> Option<SyntaxNode> {
+    pub fn next_sibling(&self) -> Option<Self> {
         self.data().next_sibling()
     }
-    pub fn prev_sibling(&self) -> Option<SyntaxNode> {
+    pub fn prev_sibling(&self) -> Option<Self> {
         self.data().prev_sibling()
     }
 
@@ -266,7 +266,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = SyntaxNode> + use<> {
+    pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = Self> + use<> {
         iter::successors(Some(self.clone()), move |node| match direction {
             Direction::Next => node.next_sibling(),
             Direction::Prev => node.prev_sibling(),
@@ -286,7 +286,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode> + use<> {
+    pub fn descendants(&self) -> impl Iterator<Item = Self> + use<> {
         self.preorder().filter_map(|event| match event {
             WalkEvent::Enter(node) => Some(node),
             WalkEvent::Leave(_) => None,
@@ -342,7 +342,7 @@ impl SyntaxNode {
 
             if let Some(right) = right {
                 let token_at_offset =
-                    |node: NodeOrToken<SyntaxNode, SyntaxToken>| -> TokenAtOffset<SyntaxToken> {
+                    |node: NodeOrToken<Self, SyntaxToken>| -> TokenAtOffset<SyntaxToken> {
                         match node {
                             NodeOrToken::Token(token) => TokenAtOffset::Single(token),
                             NodeOrToken::Node(node) => node.token_at_offset(offset),
@@ -436,7 +436,7 @@ impl SyntaxNode {
 // Identity semantics for hash & eq
 impl PartialEq for SyntaxNode {
     #[inline]
-    fn eq(&self, other: &SyntaxNode) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         self.data().key() == other.data().key()
     }
 }
@@ -478,8 +478,8 @@ pub(crate) struct SyntaxNodeChildren {
 }
 
 impl SyntaxNodeChildren {
-    fn new(parent: SyntaxNode) -> SyntaxNodeChildren {
-        SyntaxNodeChildren {
+    fn new(parent: SyntaxNode) -> Self {
+        Self {
             next: parent.first_child(),
         }
     }
@@ -502,8 +502,8 @@ pub(crate) struct SyntaxElementChildren {
 }
 
 impl SyntaxElementChildren {
-    fn new(parent: SyntaxNode) -> SyntaxElementChildren {
-        SyntaxElementChildren {
+    fn new(parent: SyntaxNode) -> Self {
+        Self {
             next: parent.first_child_or_token(),
         }
     }
@@ -527,9 +527,9 @@ pub(crate) struct Preorder {
 }
 
 impl Preorder {
-    fn new(start: SyntaxNode) -> Preorder {
+    fn new(start: SyntaxNode) -> Self {
         let next = Some(WalkEvent::Enter(start.clone()));
-        Preorder {
+        Self {
             start,
             next,
             skip_subtree: false,
@@ -589,9 +589,9 @@ pub(crate) struct PreorderWithTokens {
 }
 
 impl PreorderWithTokens {
-    fn new(start: SyntaxNode, direction: Direction) -> PreorderWithTokens {
+    fn new(start: SyntaxNode, direction: Direction) -> Self {
         let next = Some(WalkEvent::Enter(start.clone().into()));
-        PreorderWithTokens {
+        Self {
             start: start.into(),
             next,
             direction,
@@ -662,12 +662,12 @@ pub(crate) struct PreorderTokens {
 }
 
 impl PreorderTokens {
-    fn new(start: SyntaxNode, direction: Direction) -> PreorderTokens {
+    fn new(start: SyntaxNode, direction: Direction) -> Self {
         let next = match direction {
             Direction::Next => start.first_token(),
             Direction::Prev => start.last_token(),
         };
-        PreorderTokens { next, direction }
+        Self { next, direction }
     }
 }
 
@@ -698,8 +698,8 @@ pub(crate) enum SyntaxSlot {
 impl From<SyntaxElement> for SyntaxSlot {
     fn from(element: SyntaxElement) -> Self {
         match element {
-            SyntaxElement::Node(node) => SyntaxSlot::Node(node),
-            SyntaxElement::Token(token) => SyntaxSlot::Token(token),
+            SyntaxElement::Node(node) => Self::Node(node),
+            SyntaxElement::Token(token) => Self::Token(token),
         }
     }
 }
@@ -711,9 +711,9 @@ impl SyntaxSlot {
         F: FnOnce(SyntaxElement) -> R,
     {
         match self {
-            SyntaxSlot::Node(node) => Some(mapper(SyntaxElement::Node(node))),
-            SyntaxSlot::Token(token) => Some(mapper(SyntaxElement::Token(token))),
-            SyntaxSlot::Empty { .. } => None,
+            Self::Node(node) => Some(mapper(SyntaxElement::Node(node))),
+            Self::Token(token) => Some(mapper(SyntaxElement::Token(token))),
+            Self::Empty { .. } => None,
         }
     }
 }
@@ -849,7 +849,7 @@ pub(crate) struct SlotsPreorder {
 impl SlotsPreorder {
     fn new(start: SyntaxNode) -> Self {
         let next = Some(WalkEvent::Enter(SyntaxSlot::Node(start.clone())));
-        SlotsPreorder { start, next }
+        Self { start, next }
     }
 }
 

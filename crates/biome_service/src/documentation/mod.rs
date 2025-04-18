@@ -17,13 +17,13 @@ impl FromStr for Doc {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "daemon-logs" => Ok(Doc::DaemonLogs),
+            "daemon-logs" => Ok(Self::DaemonLogs),
             _ => {
                 if let Some(metadata) = LintRulesVisitor::new().get_metadata(s) {
-                    return Ok(Doc::Rule(metadata));
+                    return Ok(Self::Rule(metadata));
                 };
 
-                Ok(Doc::Unknown(s.to_string()))
+                Ok(Self::Unknown(s.to_string()))
             }
         }
     }

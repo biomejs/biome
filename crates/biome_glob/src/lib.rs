@@ -127,6 +127,8 @@
 //! ```
 //!
 
+#![deny(clippy::use_self)]
+
 pub mod editorconfig;
 
 /// A Biome glob pattern.
@@ -231,7 +233,7 @@ impl std::str::FromStr for Glob {
         // Only `**` can match `/`
         glob_builder.literal_separator(true);
         match glob_builder.build() {
-            Ok(glob) => Ok(Glob {
+            Ok(glob) => Ok(Self {
                 is_negated,
                 glob: glob.compile_matcher(),
             }),

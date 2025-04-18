@@ -36,7 +36,7 @@ impl<'a> SpecTestFile<'a> {
         input_file: &'a str,
         root_path: &'a Utf8Path,
         settings_fn: impl FnOnce(ProjectKey) -> Option<UpdateSettingsParams>,
-    ) -> Option<SpecTestFile<'a>> {
+    ) -> Option<Self> {
         if input_file.ends_with("options.json") {
             return None;
         }

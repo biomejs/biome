@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod assist;
 mod lint;
 

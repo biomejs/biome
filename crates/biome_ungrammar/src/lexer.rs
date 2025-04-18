@@ -29,10 +29,10 @@ pub(crate) enum CombinatorKind {
 impl CombinatorKind {
     pub fn new(value: &TokenKind) -> Self {
         match value {
-            TokenKind::Pipe => CombinatorKind::Pipe,
-            TokenKind::DoublePipe => CombinatorKind::DoublePipe,
-            TokenKind::DoubleAmpersand => CombinatorKind::DoubleAmpersand,
-            _ => CombinatorKind::NonCombinator,
+            TokenKind::Pipe => Self::Pipe,
+            TokenKind::DoublePipe => Self::DoublePipe,
+            TokenKind::DoubleAmpersand => Self::DoubleAmpersand,
+            _ => Self::NonCombinator,
         }
     }
 }

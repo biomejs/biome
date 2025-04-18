@@ -443,19 +443,19 @@ impl CliDiagnostic {
 
 impl From<WorkspaceError> for CliDiagnostic {
     fn from(error: WorkspaceError) -> Self {
-        CliDiagnostic::workspace_error(error)
+        Self::workspace_error(error)
     }
 }
 
 impl From<std::io::Error> for CliDiagnostic {
     fn from(error: std::io::Error) -> Self {
-        CliDiagnostic::io_error(error)
+        Self::io_error(error)
     }
 }
 
 impl From<StdinDiagnostic> for CliDiagnostic {
     fn from(error: StdinDiagnostic) -> Self {
-        CliDiagnostic::Stdin(error)
+        Self::Stdin(error)
     }
 }
 
@@ -497,10 +497,10 @@ impl Diagnostic for StdinDiagnostic {
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         match self {
-            StdinDiagnostic::NotFormatted => {
+            Self::NotFormatted => {
                 fmt.write_str("The contents aren't fixed. Use the `--fix` flag to fix them.")
             },
-            StdinDiagnostic::NoExtension => {
+            Self::NoExtension => {
                 fmt.write_markup(markup!{
                     "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how handle the file."
                 })

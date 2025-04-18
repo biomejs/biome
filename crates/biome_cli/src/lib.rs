@@ -6,6 +6,8 @@
 //! to parse commands and arguments, redirect the execution of the commands and
 //! execute the traversal of directory and files, based on the command that were passed.
 
+#![deny(clippy::use_self)]
+
 use biome_console::{ColorMode, Console};
 use biome_service::{App, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;

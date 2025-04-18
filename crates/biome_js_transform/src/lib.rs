@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod declare_transformation;
 mod registry;
 mod transformers;

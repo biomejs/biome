@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_html_syntax::HtmlLanguage;
 use biome_rowan::TreeBuilder;
 

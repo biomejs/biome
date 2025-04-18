@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod format_module_graph;
 mod js_module_info;
 mod jsdoc_comment;

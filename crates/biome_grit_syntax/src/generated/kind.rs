@@ -280,7 +280,7 @@ impl GritSyntaxKind {
                 | GRIT_VARIABLE_LIST
         )
     }
-    pub fn from_keyword(ident: &str) -> Option<GritSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "sequential" => SEQUENTIAL_KW,
             "multifile" => MULTIFILE_KW,

@@ -168,7 +168,7 @@ impl Format<ModuleFormatContext> for JsExport {
     ) -> FormatResult<()> {
         write!(f, [text("Export")])?;
         match self {
-            JsExport::Own(export) => {
+            Self::Own(export) => {
                 write!(
                     f,
                     [&format_args![
@@ -180,7 +180,7 @@ impl Format<ModuleFormatContext> for JsExport {
                     ]]
                 )
             }
-            JsExport::OwnType(own_type) => {
+            Self::OwnType(own_type) => {
                 write!(
                     f,
                     [&format_args![
@@ -192,7 +192,7 @@ impl Format<ModuleFormatContext> for JsExport {
                     ]]
                 )
             }
-            JsExport::Reexport(reexport) => {
+            Self::Reexport(reexport) => {
                 write!(
                     f,
                     [&format_args![
@@ -204,7 +204,7 @@ impl Format<ModuleFormatContext> for JsExport {
                     ]]
                 )
             }
-            JsExport::ReexportType(reexport_type) => {
+            Self::ReexportType(reexport_type) => {
                 write!(
                     f,
                     [&format_args![
@@ -427,7 +427,7 @@ impl Format<ModuleFormatContext> for Literal {
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
         match self {
-            Literal::BigInt(value) => write!(
+            Self::BigInt(value) => write!(
                 f,
                 [&format_args![
                     text("BigInt"),
@@ -436,7 +436,7 @@ impl Format<ModuleFormatContext> for Literal {
                     dynamic_text(value.text(), TextSize::default()),
                 ]]
             ),
-            Literal::Boolean(value) => write!(
+            Self::Boolean(value) => write!(
                 f,
                 [&format_args![
                     text("Boolean"),
@@ -445,8 +445,8 @@ impl Format<ModuleFormatContext> for Literal {
                     dynamic_text(value.text(), TextSize::default()),
                 ]]
             ),
-            Literal::Null => write!(f, [&format_args![text("Null")]]),
-            Literal::Number(value) => write!(
+            Self::Null => write!(f, [&format_args![text("Null")]]),
+            Self::Number(value) => write!(
                 f,
                 [&format_args![
                     text("Number"),
@@ -455,7 +455,7 @@ impl Format<ModuleFormatContext> for Literal {
                     dynamic_text(value.text(), TextSize::default()),
                 ]]
             ),
-            Literal::Object(value) => write!(
+            Self::Object(value) => write!(
                 f,
                 [&format_args![
                     text("Object"),
@@ -464,7 +464,7 @@ impl Format<ModuleFormatContext> for Literal {
                     text(")")
                 ]]
             ),
-            Literal::RegExp(value) => write!(
+            Self::RegExp(value) => write!(
                 f,
                 [&format_args![
                     text("RegExp"),
@@ -473,7 +473,7 @@ impl Format<ModuleFormatContext> for Literal {
                     dynamic_text(value.text(), TextSize::default()),
                 ]]
             ),
-            Literal::String(value) => write!(
+            Self::String(value) => write!(
                 f,
                 [&format_args![
                     text("String"),
@@ -482,7 +482,7 @@ impl Format<ModuleFormatContext> for Literal {
                     dynamic_text(value.text(), TextSize::default()),
                 ]]
             ),
-            Literal::Template(value) => write!(
+            Self::Template(value) => write!(
                 f,
                 [&format_args![
                     text("Template"),
@@ -535,11 +535,11 @@ impl Format<ModuleFormatContext> for JsImportSymbol {
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
         let import = format_with(|f| match self {
-            JsImportSymbol::Default => write!(f, [&format_args![text("Default")]]),
-            JsImportSymbol::Named(name) => {
+            Self::Default => write!(f, [&format_args![text("Default")]]),
+            Self::Named(name) => {
                 write!(f, [&format_args![dynamic_text(name, TextSize::default())]])
             }
-            JsImportSymbol::All => write!(f, [&format_args![text("All")]]),
+            Self::All => write!(f, [&format_args![text("All")]]),
         });
         write!(f, [&format_args![text("Import Symbol:"), space(), &import]])
     }
@@ -607,7 +607,7 @@ impl Format<ModuleFormatContext> for TypeMember {
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
         match self {
-            TypeMember::CallSignature(ty) => {
+            Self::CallSignature(ty) => {
                 write!(
                     f,
                     [&format_args![
@@ -618,11 +618,11 @@ impl Format<ModuleFormatContext> for TypeMember {
                     ]]
                 )
             }
-            TypeMember::Constructor(_) => todo!(),
-            TypeMember::Method(method) => {
+            Self::Constructor(_) => todo!(),
+            Self::Method(method) => {
                 write!(f, [&format_args![&method]])
             }
-            TypeMember::Property(property) => {
+            Self::Property(property) => {
                 write!(
                     f,
                     [&format_args![
@@ -718,11 +718,11 @@ impl Format<ModuleFormatContext> for ReturnType {
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
         match self {
-            ReturnType::Type(ty) => {
+            Self::Type(ty) => {
                 write!(f, [&ty])
             }
-            ReturnType::Predicate(_) => todo!(),
-            ReturnType::Asserts(_asset) => {
+            Self::Predicate(_) => todo!(),
+            Self::Asserts(_asset) => {
                 todo!()
             }
         }
@@ -940,8 +940,8 @@ impl Format<ModuleFormatContext> for TypeofExpression {
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
         match self {
-            TypeofExpression::Addition(_) => todo!(),
-            TypeofExpression::Await(await_expression) => {
+            Self::Addition(_) => todo!(),
+            Self::Await(await_expression) => {
                 write!(
                     f,
                     [&format_args![
@@ -952,11 +952,11 @@ impl Format<ModuleFormatContext> for TypeofExpression {
                     ]]
                 )
             }
-            TypeofExpression::Call(_) => todo!(),
-            TypeofExpression::New(_) => todo!(),
-            TypeofExpression::StaticMember(_) => todo!(),
-            TypeofExpression::Super(_) => todo!(),
-            TypeofExpression::This(_) => todo!(),
+            Self::Call(_) => todo!(),
+            Self::New(_) => todo!(),
+            Self::StaticMember(_) => todo!(),
+            Self::Super(_) => todo!(),
+            Self::This(_) => todo!(),
         }
     }
 }

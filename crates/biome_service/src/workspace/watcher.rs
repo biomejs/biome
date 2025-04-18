@@ -18,8 +18,8 @@ use papaya::{Compute, Operation};
 use crate::{IGNORE_ENTRIES, WorkspaceError, workspace_watcher::WatcherSignalKind};
 
 use super::{
-    FileContent, OpenFileParams, ScanProjectFolderParams, ServiceDataNotification, Workspace,
-    WorkspaceServer, document::Document,
+    FileContent, OpenFileParams, ScanKind, ScanProjectFolderParams, ServiceDataNotification,
+    Workspace, WorkspaceServer, document::Document,
 };
 
 impl WorkspaceServer {
@@ -94,6 +94,7 @@ impl WorkspaceServer {
             path: Some(path.into()),
             watch: false, // It's already being watched.
             force: true,
+            scan_kind: ScanKind::Project,
         })
         .map(|_| ())
     }

@@ -1,8 +1,8 @@
+use super::*;
+use crate::workspace::ScanKind;
 use biome_fs::MemoryFileSystem;
 use crossbeam::channel::bounded;
 use tokio::sync::watch;
-
-use super::*;
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -29,6 +29,7 @@ fn commonjs_file_rejects_import_statement() {
             path: Some(BiomePath::new("/")),
             watch: false,
             force: false,
+            scan_kind: ScanKind::Project,
         })
         .unwrap();
 

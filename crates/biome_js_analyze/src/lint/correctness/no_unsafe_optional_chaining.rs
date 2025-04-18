@@ -336,16 +336,16 @@ declare_node_union! {
 }
 
 impl From<AnyJsOptionalChainExpression> for RuleNode {
-    fn from(node: AnyJsOptionalChainExpression) -> RuleNode {
+    fn from(node: AnyJsOptionalChainExpression) -> Self {
         match node {
             AnyJsOptionalChainExpression::JsCallExpression(expression) => {
-                RuleNode::JsCallExpression(expression)
+                Self::JsCallExpression(expression)
             }
             AnyJsOptionalChainExpression::JsStaticMemberExpression(expression) => {
-                RuleNode::JsStaticMemberExpression(expression)
+                Self::JsStaticMemberExpression(expression)
             }
             AnyJsOptionalChainExpression::JsComputedMemberExpression(expression) => {
-                RuleNode::JsComputedMemberExpression(expression)
+                Self::JsComputedMemberExpression(expression)
             }
         }
     }

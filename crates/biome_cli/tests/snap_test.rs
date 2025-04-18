@@ -327,7 +327,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             test_name: _,
             module_path: _,
         } = payload;
-        let mut cli_snapshot = CliSnapshot::from_result(result);
+        let mut cli_snapshot = Self::from_result(result);
 
         for file_name in ConfigName::file_names() {
             let config_path = Utf8PathBuf::from(file_name);

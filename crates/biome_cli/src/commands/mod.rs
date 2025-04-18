@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
-use crate::execute::{ReportMode, Stdin};
+use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
     CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION, execute_mode, setup_cli_subscriber,
@@ -548,29 +548,29 @@ pub enum MigrateSubCommand {
 
 impl MigrateSubCommand {
     pub const fn is_prettier(&self) -> bool {
-        matches!(self, MigrateSubCommand::Prettier)
+        matches!(self, Self::Prettier)
     }
 }
 
 impl BiomeCommand {
     const fn cli_options(&self) -> Option<&CliOptions> {
         match self {
-            BiomeCommand::Version(cli_options)
-            | BiomeCommand::Rage(cli_options, ..)
-            | BiomeCommand::Check { cli_options, .. }
-            | BiomeCommand::Lint { cli_options, .. }
-            | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Migrate { cli_options, .. }
-            | BiomeCommand::Search { cli_options, .. } => Some(cli_options),
-            BiomeCommand::LspProxy { .. }
-            | BiomeCommand::Start { .. }
-            | BiomeCommand::Stop
-            | BiomeCommand::Init(_)
-            | BiomeCommand::Explain { .. }
-            | BiomeCommand::RunServer { .. }
-            | BiomeCommand::Clean { .. }
-            | BiomeCommand::PrintSocket => None,
+            Self::Version(cli_options)
+            | Self::Rage(cli_options, ..)
+            | Self::Check { cli_options, .. }
+            | Self::Lint { cli_options, .. }
+            | Self::Ci { cli_options, .. }
+            | Self::Format { cli_options, .. }
+            | Self::Migrate { cli_options, .. }
+            | Self::Search { cli_options, .. } => Some(cli_options),
+            Self::LspProxy { .. }
+            | Self::Start { .. }
+            | Self::Stop
+            | Self::Init(_)
+            | Self::Explain { .. }
+            | Self::RunServer { .. }
+            | Self::Clean { .. }
+            | Self::PrintSocket => None,
         }
     }
 
@@ -583,7 +583,7 @@ impl BiomeCommand {
                 }
                 // We want force colors in CI, to give e better UX experience
                 // Unless users explicitly set the colors flag
-                if matches!(self, BiomeCommand::Ci { .. }) && cli_options.colors.is_none() {
+                if matches!(self, Self::Ci { .. }) && cli_options.colors.is_none() {
                     return Some(&ColorsArg::Force);
                 }
                 // Normal behaviors
@@ -595,7 +595,7 @@ impl BiomeCommand {
 
     pub const fn get_threads(&self) -> Option<usize> {
         match self {
-            BiomeCommand::Ci { threads, .. } => *threads,
+            Self::Ci { threads, .. } => *threads,
             _ => None,
         }
     }
@@ -815,44 +815,43 @@ pub(crate) trait CommandRunner: Sized {
             open_uninitialized: true,
         })?;
 
+        let execution = self.get_execution(cli_options, console, workspace, project_key)?;
+        let scan_kind = execution.traversal_mode().to_scan_kind();
+
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key,
             workspace_directory: configuration_path.map(BiomePath::from),
             configuration,
         })?;
         for diagnostic in &result.diagnostics {
-            console.log(markup! {{PrintDiagnostic::simple(diagnostic)}});
+            if diagnostic.tags().is_verbose() && cli_options.verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
+            }
         }
 
-        let execution = self.get_execution(cli_options, console, workspace, project_key)?;
-
-        let duration = if execution.traversal_mode().should_scan_project() {
-            let result = workspace.scan_project_folder(ScanProjectFolderParams {
-                project_key,
-                path: Some(project_path),
-                watch: cli_options.use_server,
-                force: false, // TODO: Maybe we'll want a CLI flag for this.
-            })?;
-            for diagnostic in result.diagnostics {
-                if diagnostic.severity() >= Severity::Error {
-                    console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+        let result = workspace.scan_project_folder(ScanProjectFolderParams {
+            project_key,
+            path: Some(project_path),
+            watch: cli_options.use_server,
+            force: false, // TODO: Maybe we'll want a CLI flag for this.
+            scan_kind,
+        })?;
+        for diagnostic in result.diagnostics {
+            if diagnostic.severity() >= Severity::Error {
+                if diagnostic.tags().is_verbose() && cli_options.verbose {
+                    console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
+                } else {
+                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
                 }
             }
-            if cli_options.verbose && matches!(execution.report_mode(), ReportMode::Terminal { .. })
-            {
-                console.log(markup! {
-                    <Info>"Scanned project folder in "<Emphasis>{result.duration}</Emphasis>"."</Info>
-                });
-            }
-            Some(result.duration)
-        } else {
-            None
-        };
+        }
 
         Ok(ConfiguredWorkspace {
             execution,
             paths,
-            duration,
+            duration: Some(result.duration),
         })
     }
 

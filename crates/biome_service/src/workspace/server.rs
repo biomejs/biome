@@ -826,6 +826,13 @@ impl Workspace for WorkspaceServer {
         &self,
         params: ScanProjectFolderParams,
     ) -> Result<ScanProjectFolderResult, WorkspaceError> {
+        if params.scan_kind.is_none() {
+            return Ok(ScanProjectFolderResult {
+                diagnostics: Vec::new(),
+                duration: Duration::from_millis(0),
+            });
+        }
+
         let path = params
             .path
             .map(Utf8PathBuf::from)
@@ -854,7 +861,7 @@ impl Workspace for WorkspaceServer {
                 .try_send(WatcherInstruction::WatchFolder(path.clone()));
         }
 
-        let result = self.scan(params.project_key, &path)?;
+        let result = self.scan(params.project_key, &path, params.scan_kind)?;
 
         Ok(ScanProjectFolderResult {
             diagnostics: result.diagnostics,

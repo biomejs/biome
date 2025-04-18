@@ -15,12 +15,13 @@ pub(crate) struct SummaryReporter {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
+    pub(crate) verbose: bool,
 }
 
 impl Reporter for SummaryReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload)?;
-        visitor.report_summary(&self.execution, self.summary)?;
+        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
         Ok(())
     }
 }
@@ -32,6 +33,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
+        verbose: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
@@ -48,7 +50,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         }
 
         self.0.log(markup! {
-            {ConsoleTraversalSummary(execution.traversal_mode(), &summary)}
+            {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbose)}
         });
 
         Ok(())
@@ -58,6 +60,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         &mut self,
         execution: &Execution,
         diagnostics_payload: DiagnosticsPayload,
+        verbose: bool,
     ) -> io::Result<()> {
         let mut files_to_diagnostics = FileToDiagnostics::default();
 
@@ -75,7 +78,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
 
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() {
-                    if diagnostics_payload.verbose {
+                    if verbose {
                         if execution.is_check() || execution.is_lint() {
                             if let Some(category) = category {
                                 if category.name().starts_with("lint/") {

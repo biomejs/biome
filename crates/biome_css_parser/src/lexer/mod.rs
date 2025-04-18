@@ -48,7 +48,7 @@ pub enum CssLexContext {
 impl LexContext for CssLexContext {
     /// Returns true if this is [CssLexContext::Regular]
     fn is_regular(&self) -> bool {
-        matches!(self, CssLexContext::Regular)
+        matches!(self, Self::Regular)
     }
 }
 

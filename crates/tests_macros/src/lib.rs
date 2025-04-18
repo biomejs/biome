@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use case::CaseExt;
 use globwalk::{GlobWalker, GlobWalkerBuilder};
 use proc_macro::TokenStream;
@@ -189,7 +191,7 @@ impl Arguments {
                 test_full_path,
                 test_expected_fullpath,
                 test_directory,
-            } = Arguments::get_variables(file).ok_or("Cannot generate variables for this file")?;
+            } = Self::get_variables(file).ok_or("Cannot generate variables for this file")?;
 
             let test_name = transform_file_name(&test_name);
 
@@ -234,7 +236,7 @@ impl syn::parse::Parse for Arguments {
         let call: syn::Path = input.parse()?;
         let _: syn::Token!(,) = input.parse()?;
         let file_type: syn::ExprLit = input.parse()?;
-        Ok(Arguments {
+        Ok(Self {
             pattern: path,
             called_function: call,
             file_type,

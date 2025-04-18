@@ -35,10 +35,6 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-Scanned project folder in <TIME>.
-```
-
-```block
 other.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:
@@ -51,6 +47,7 @@ other.json format ━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+Scanned project folder in <TIME>.
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
 ```

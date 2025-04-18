@@ -153,20 +153,20 @@ impl Type {
                     .into_iter()
                     .map(|el| match el {
                         Ok(AnyJsArrayElement::AnyJsExpression(expr)) => TupleElementType {
-                            ty: Type::from_any_js_expression(&expr),
+                            ty: Self::from_any_js_expression(&expr),
                             name: None,
                             is_optional: false,
                             is_rest: false,
                         },
                         Ok(AnyJsArrayElement::JsSpread(_spread)) => TupleElementType {
                             // TODO: We can definitely be smarter about this one.
-                            ty: Type::unknown(),
+                            ty: Self::unknown(),
                             name: None,
                             is_optional: false,
                             is_rest: false,
                         },
                         Ok(AnyJsArrayElement::JsArrayHole(_)) | Err(_) => TupleElementType {
-                            ty: Type::unknown(),
+                            ty: Self::unknown(),
                             name: None,
                             is_optional: false,
                             is_rest: false,
@@ -325,7 +325,7 @@ impl Type {
             AnyTsType::TsConstructorType(ty) => TypeInner::Constructor(Box::new(Constructor {
                 type_parameters: generic_params_from_ts_type_params(ty.type_parameters()),
                 parameters: function_params_from_js_params(ty.parameters()),
-                return_type: ty.return_type().ok().map(|ty| Type::from_any_ts_type(&ty)),
+                return_type: ty.return_type().ok().map(|ty| Self::from_any_ts_type(&ty)),
             })),
             AnyTsType::TsFunctionType(ty) => TypeInner::Function(Box::new(Function {
                 is_async: false,
@@ -459,7 +459,7 @@ impl Type {
                         name: binding
                             .as_js_identifier_binding()
                             .and_then(|binding| text_from_token(binding.name_token())),
-                        ty: Type::unknown(),
+                        ty: Self::unknown(),
                         is_optional: false,
                         is_rest: false,
                     }])
@@ -617,7 +617,7 @@ impl Type {
             .map(|qualifier| {
                 TypeInner::Reference(Box::new(TypeReference {
                     qualifier,
-                    ty: Type::unknown(),
+                    ty: Self::unknown(),
                     type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
                 }))
             })
@@ -644,7 +644,7 @@ impl Type {
                 TypeInner::TypeofType(Box::new(
                     TypeInner::Reference(Box::new(TypeReference {
                         qualifier,
-                        ty: Type::unknown(),
+                        ty: Self::unknown(),
                         type_parameters: Self::types_from_ts_type_arguments(ty.type_arguments()),
                     }))
                     .into(),
@@ -667,17 +667,12 @@ impl Type {
 }
 
 impl CallArgumentType {
-    pub fn types_from_js_call_arguments(
-        arguments: Option<JsCallArguments>,
-    ) -> Arc<[CallArgumentType]> {
+    pub fn types_from_js_call_arguments(arguments: Option<JsCallArguments>) -> Arc<[Self]> {
         arguments
             .map(|args| {
                 args.args()
                     .into_iter()
-                    .filter_map(|arg| {
-                        arg.ok()
-                            .map(|arg| CallArgumentType::from_any_js_call_argument(&arg))
-                    })
+                    .filter_map(|arg| arg.ok().map(|arg| Self::from_any_js_call_argument(&arg)))
                     .collect()
             })
             .unwrap_or_default()
@@ -976,7 +971,7 @@ impl TypeMember {
             }
             AnyJsObjectMember::JsMethodObjectMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
-                    TypeMember::Method(MethodTypeMember {
+                    Self::Method(MethodTypeMember {
                         is_async: member.async_token().is_some(),
                         type_parameters: generic_params_from_ts_type_params(
                             member.type_parameters(),
@@ -992,7 +987,7 @@ impl TypeMember {
             }
             AnyJsObjectMember::JsPropertyObjectMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
-                    TypeMember::Property(PropertyTypeMember {
+                    Self::Property(PropertyTypeMember {
                         name: name.into(),
                         ty: member
                             .value()
@@ -1012,7 +1007,7 @@ impl TypeMember {
                 .ok()
                 .and_then(|name| text_from_token(name.value_token()))
                 .map(|name| {
-                    TypeMember::Property(PropertyTypeMember {
+                    Self::Property(PropertyTypeMember {
                         name: name.clone(),
                         ty: TypeInner::TypeofValue(Box::new(TypeofValue {
                             identifier: name,

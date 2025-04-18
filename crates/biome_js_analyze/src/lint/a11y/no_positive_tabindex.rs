@@ -82,10 +82,10 @@ declare_node_union! {
 impl NoPositiveTabindexQuery {
     fn find_tabindex_attribute(&self, model: &SemanticModel) -> Option<TabindexProp> {
         match self {
-            NoPositiveTabindexQuery::AnyJsxElement(jsx) => jsx
+            Self::AnyJsxElement(jsx) => jsx
                 .find_attribute_by_name("tabIndex")
                 .map(TabindexProp::from),
-            NoPositiveTabindexQuery::JsCallExpression(expression) => {
+            Self::JsCallExpression(expression) => {
                 let react_create_element =
                     ReactCreateElementCall::from_call_expression(expression, model)?;
                 react_create_element
@@ -102,13 +102,13 @@ impl AnyNumberLikeExpression {
     /// returns the value for signed numeric expressions.
     pub(crate) fn value(&self) -> Option<String> {
         match self {
-            AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
+            Self::JsStringLiteralExpression(string_literal) => {
                 return Some(string_literal.inner_string_text().ok()?.to_string());
             }
-            AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
+            Self::JsNumberLiteralExpression(number_literal) => {
                 return Some(number_literal.value_token().ok()?.to_string());
             }
-            AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
+            Self::JsUnaryExpression(unary_expression) => {
                 if unary_expression.is_signed_numeric_literal().ok()? {
                     return Some(unary_expression.to_trimmed_string());
                 }

@@ -1,3 +1,4 @@
+#![deny(clippy::use_self)]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![doc = include_str!("../CONTRIBUTING.md")]
 
@@ -674,8 +675,8 @@ impl From<SendNode> for AnyParse {
 }
 
 impl AnyParse {
-    pub fn new(root: SendNode, diagnostics: Vec<ParseDiagnostic>) -> AnyParse {
-        AnyParse { root, diagnostics }
+    pub fn new(root: SendNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
     }
 
     pub fn syntax<L>(&self) -> SyntaxNode<L>

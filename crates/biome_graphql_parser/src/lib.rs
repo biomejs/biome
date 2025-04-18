@@ -1,5 +1,7 @@
 //! Extremely fast, lossless, and error tolerant GraphQL Parser.
 
+#![deny(clippy::use_self)]
+
 use biome_graphql_factory::GraphqlSyntaxFactory;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
 pub use biome_parser::prelude::*;
@@ -44,8 +46,8 @@ pub struct GraphqlParse {
 }
 
 impl GraphqlParse {
-    pub fn new(root: GraphqlSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> GraphqlParse {
-        GraphqlParse { root, diagnostics }
+    pub fn new(root: GraphqlSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
     }
 
     /// The syntax node represented by this Parse result
