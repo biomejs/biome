@@ -27,7 +27,6 @@ impl ServicesDiagnostic {
 }
 
 pub trait FromServices: Sized {
-    #[expect(clippy::result_large_err)]
     fn from_services(
         rule_key: &RuleKey,
         rule_metadata: &RuleMetadata,

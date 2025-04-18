@@ -1,6 +1,7 @@
 use crate::Execution;
 use biome_analyze::{Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup};
 use biome_configuration::Configuration;
+use biome_configuration::analyzer::{RuleDomainValue, RuleDomains};
 use biome_css_syntax::CssLanguage;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_syntax::JsLanguage;
@@ -25,7 +26,8 @@ pub(crate) fn compute_scan_kind(execution: &Execution, configuration: &Configura
     };
 
     let lint_rules = configuration.get_linter_rules().as_enabled_rules();
-    let requires_project_scan = RequiresProjectScan::new(&lint_rules);
+    let domains = configuration.get_linter_domains();
+    let requires_project_scan = RequiresProjectScan::new(&lint_rules, domains);
 
     requires_project_scan.compute()
 }
@@ -33,17 +35,28 @@ pub(crate) fn compute_scan_kind(execution: &Execution, configuration: &Configura
 struct RequiresProjectScan<'a> {
     requires_project_scan: bool,
     enabled_rules: &'a FxHashSet<RuleFilter<'a>>,
+    domains: Option<&'a RuleDomains>,
 }
 
 impl<'a> RequiresProjectScan<'a> {
-    fn new(enabled_rules: &'a FxHashSet<RuleFilter<'a>>) -> Self {
+    fn new(enabled_rules: &'a FxHashSet<RuleFilter<'a>>, domains: Option<&'a RuleDomains>) -> Self {
         Self {
             enabled_rules,
             requires_project_scan: false,
+            domains,
         }
     }
 
     fn compute(mut self) -> ScanKind {
+        if let Some(domains) = &self.domains {
+            for (domain, value) in domains.iter() {
+                if domain == &RuleDomain::Project && value != &RuleDomainValue::None {
+                    self.requires_project_scan = true;
+                    break;
+                }
+            }
+        }
+
         biome_graphql_analyze::visit_registry(&mut self);
         biome_css_analyze::visit_registry(&mut self);
         biome_json_analyze::visit_registry(&mut self);
@@ -62,7 +75,7 @@ impl<'a> RequiresProjectScan<'a> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
-        if let Some(_) = self.enabled_rules.get(&filter) {
+        if self.enabled_rules.get(&filter).is_some() {
             let domains = R::METADATA.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
         }
@@ -136,9 +149,6 @@ mod tests {
 
     #[test]
     fn should_scan_known_files_when_no_rules_are_enabled() {
-        let mut domains = FxHashMap::default();
-        domains.insert(RuleDomain::Project, RuleDomainValue::Recommended);
-
         let configuration = Configuration {
             linter: Some(LinterConfiguration {
                 enabled: Some(false.into()),
@@ -151,7 +161,7 @@ mod tests {
 
         assert_eq!(
             compute_scan_kind(&execution, &configuration),
-            ScanKind::Project
+            ScanKind::KnownFiles
         );
     }
 
