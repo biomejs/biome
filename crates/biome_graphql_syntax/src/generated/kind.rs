@@ -202,7 +202,7 @@ impl GraphqlSyntaxKind {
                 | GRAPHQL_DIRECTIVE_LOCATION_LIST
         )
     }
-    pub fn from_keyword(ident: &str) -> Option<GraphqlSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "true" => TRUE_KW,
             "false" => FALSE_KW,

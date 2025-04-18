@@ -187,8 +187,8 @@ enum BuiltinCreationRule {
 impl BuiltinCreationRule {
     fn forbidden_builtins_list(&self) -> &[&str] {
         match self {
-            BuiltinCreationRule::MustUseNew => BUILTINS_REQUIRING_NEW,
-            BuiltinCreationRule::MustNotUseNew => BUILTINS_NOT_REQUIRING_NEW,
+            Self::MustUseNew => BUILTINS_REQUIRING_NEW,
+            Self::MustNotUseNew => BUILTINS_NOT_REQUIRING_NEW,
         }
     }
 }

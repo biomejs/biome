@@ -202,15 +202,15 @@ impl StringCase {
 
     fn convert<'a>(&self, s: &'a str) -> Cow<'a, str> {
         match self {
-            StringCase::Upper => Cow::Owned(s.to_uppercase()),
-            StringCase::Lower => s.to_lowercase_cow(),
+            Self::Upper => Cow::Owned(s.to_uppercase()),
+            Self::Lower => s.to_lowercase_cow(),
         }
     }
 
     fn description(&self) -> &str {
         match self {
-            StringCase::Upper => "upper case",
-            StringCase::Lower => "lower case",
+            Self::Upper => "upper case",
+            Self::Lower => "lower case",
         }
     }
 }

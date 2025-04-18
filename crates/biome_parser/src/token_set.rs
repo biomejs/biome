@@ -5,14 +5,14 @@ use std::marker::PhantomData;
 pub struct TokenSet<K: SyntaxKind>([u128; 2], PhantomData<K>);
 
 impl<K: SyntaxKind> TokenSet<K> {
-    pub const EMPTY: TokenSet<K> = TokenSet([0; 2], PhantomData);
+    pub const EMPTY: Self = Self([0; 2], PhantomData);
 
     pub fn singleton(kind: K) -> Self {
-        unsafe { TokenSet::from_raw(kind.to_raw().0) }
+        unsafe { Self::from_raw(kind.to_raw().0) }
     }
 
-    pub const fn union(self, other: TokenSet<K>) -> Self {
-        TokenSet(
+    pub const fn union(self, other: Self) -> Self {
+        Self(
             [self.0[0] | other.0[0], self.0[1] | other.0[1]],
             PhantomData,
         )
@@ -35,7 +35,7 @@ impl<K: SyntaxKind> TokenSet<K> {
     /// It exists to support the `token_set` macro in a `const` context.
     #[doc(hidden)]
     pub const unsafe fn from_raw(kind: u16) -> Self {
-        TokenSet(mask(kind), PhantomData)
+        Self(mask(kind), PhantomData)
     }
 }
 

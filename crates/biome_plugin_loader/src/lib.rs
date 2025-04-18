@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod analyzer_grit_plugin;
 mod diagnostics;
 mod plugin_cache;

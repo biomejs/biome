@@ -171,9 +171,9 @@ pub enum Visibility {
 impl Display for Visibility {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            Visibility::Public => fmt.write_str("public"),
-            Visibility::Package => fmt.write_str("package"),
-            Visibility::Private => fmt.write_str("private"),
+            Self::Public => fmt.write_str("public"),
+            Self::Package => fmt.write_str("package"),
+            Self::Private => fmt.write_str("private"),
         }
     }
 }
@@ -183,9 +183,9 @@ impl FromStr for Visibility {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "public" => Ok(Visibility::Public),
-            "package" => Ok(Visibility::Package),
-            "private" => Ok(Visibility::Private),
+            "public" => Ok(Self::Public),
+            "package" => Ok(Self::Package),
+            "private" => Ok(Self::Private),
             _ => Err(()),
         }
     }

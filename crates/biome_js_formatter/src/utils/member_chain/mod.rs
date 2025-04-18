@@ -132,7 +132,7 @@ impl MemberChain {
         call_expression: JsCallExpression,
         comments: &JsComments,
         tab_width: TabWidth,
-    ) -> SyntaxResult<MemberChain> {
+    ) -> SyntaxResult<Self> {
         let parent = call_expression.syntax().parent();
         let mut chain_members =
             ChainMembersIterator::new(call_expression.clone().into(), comments).collect::<Vec<_>>();
@@ -146,7 +146,7 @@ impl MemberChain {
         // `[ StaticMemberExpression -> AnyNode + JsCallExpression ]`
         let tail_groups = compute_remaining_groups(remaining_members, comments);
 
-        let mut member_chain = MemberChain {
+        let mut member_chain = Self {
             head: head_group,
             tail: tail_groups,
             root: call_expression,

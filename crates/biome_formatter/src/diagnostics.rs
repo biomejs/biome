@@ -31,18 +31,18 @@ pub enum FormatError {
 impl std::fmt::Display for FormatError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FormatError::SyntaxError => {
+            Self::SyntaxError => {
                 fmt.write_str("Can't format code because it contains syntax errors")
             }
-            FormatError::RangeError { input, tree } => std::write!(
+            Self::RangeError { input, tree } => std::write!(
                 fmt,
                 "Formatting range {input:?} is larger than syntax tree {tree:?}"
             ),
-            FormatError::InvalidDocument(error) => std::write!(
+            Self::InvalidDocument(error) => std::write!(
                 fmt,
                 "Invalid document: {error}\n\n This is an internal Biome error. Please report if necessary."
             ),
-            FormatError::PoorLayout => {
+            Self::PoorLayout => {
                 std::write!(
                     fmt,
                     "Poor layout: The formatter wasn't able to pick a good layout for your document. This is an internal Biome error. Please report if necessary."
@@ -56,7 +56,7 @@ impl Error for FormatError {}
 
 impl From<SyntaxError> for FormatError {
     fn from(error: SyntaxError) -> Self {
-        FormatError::from(&error)
+        Self::from(&error)
     }
 }
 
@@ -65,21 +65,21 @@ impl From<&SyntaxError> for FormatError {
         match syntax_error {
             SyntaxError::MissingRequiredChild
             | SyntaxError::UnexpectedBogusNode
-            | SyntaxError::UnexpectedMetavariable => FormatError::SyntaxError,
+            | SyntaxError::UnexpectedMetavariable => Self::SyntaxError,
         }
     }
 }
 
 impl From<PrintError> for FormatError {
     fn from(error: PrintError) -> Self {
-        FormatError::from(&error)
+        Self::from(&error)
     }
 }
 
 impl From<&PrintError> for FormatError {
     fn from(error: &PrintError) -> Self {
         match error {
-            PrintError::InvalidDocument(reason) => FormatError::InvalidDocument(*reason),
+            PrintError::InvalidDocument(reason) => Self::InvalidDocument(*reason),
         }
     }
 }
@@ -95,10 +95,10 @@ impl Diagnostic for FormatError {
 
     fn tags(&self) -> DiagnosticTags {
         match self {
-            FormatError::SyntaxError => DiagnosticTags::empty(),
-            FormatError::RangeError { .. } => DiagnosticTags::empty(),
-            FormatError::InvalidDocument(_) => DiagnosticTags::INTERNAL,
-            FormatError::PoorLayout => DiagnosticTags::INTERNAL,
+            Self::SyntaxError => DiagnosticTags::empty(),
+            Self::RangeError { .. } => DiagnosticTags::empty(),
+            Self::InvalidDocument(_) => DiagnosticTags::INTERNAL,
+            Self::PoorLayout => DiagnosticTags::INTERNAL,
         }
     }
 
@@ -115,13 +115,13 @@ impl Diagnostic for FormatError {
         fmt: &mut biome_diagnostics::console::fmt::Formatter<'_>,
     ) -> std::io::Result<()> {
         match self {
-            FormatError::SyntaxError => fmt.write_str("Syntax error."),
-            FormatError::RangeError { input, tree } => std::write!(
+            Self::SyntaxError => fmt.write_str("Syntax error."),
+            Self::RangeError { input, tree } => std::write!(
                 fmt,
                 "Formatting range {input:?} is larger than syntax tree {tree:?}"
             ),
-            FormatError::InvalidDocument(error) => std::write!(fmt, "Invalid document: {error}"),
-            FormatError::PoorLayout => {
+            Self::InvalidDocument(error) => std::write!(fmt, "Invalid document: {error}"),
+            Self::PoorLayout => {
                 std::write!(
                     fmt,
                     "Poor layout: The formatter wasn't able to pick a good layout for your document."
@@ -183,7 +183,7 @@ pub enum ActualStart {
 impl std::fmt::Display for InvalidDocumentError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            InvalidDocumentError::StartEndTagMismatch {
+            Self::StartEndTagMismatch {
                 start_kind,
                 end_kind,
             } => {
@@ -192,10 +192,10 @@ impl std::fmt::Display for InvalidDocumentError {
                     "Expected end tag of kind {start_kind:?} but found {end_kind:?}."
                 )
             }
-            InvalidDocumentError::StartTagMissing { kind } => {
+            Self::StartTagMissing { kind } => {
                 std::write!(f, "End tag of kind {kind:?} without matching start tag.")
             }
-            InvalidDocumentError::ExpectedStart {
+            Self::ExpectedStart {
                 expected_start,
                 actual,
             } => match actual {
@@ -239,7 +239,7 @@ impl Error for PrintError {}
 impl std::fmt::Display for PrintError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PrintError::InvalidDocument(inner) => {
+            Self::InvalidDocument(inner) => {
                 std::write!(f, "Invalid document: {inner}")
             }
         }
@@ -257,7 +257,7 @@ impl Diagnostic for PrintError {
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         match self {
-            PrintError::InvalidDocument(inner) => {
+            Self::InvalidDocument(inner) => {
                 let inner = format!("{inner}");
                 fmt.write_markup(markup! {
                     "Invalid document: "{{inner}}

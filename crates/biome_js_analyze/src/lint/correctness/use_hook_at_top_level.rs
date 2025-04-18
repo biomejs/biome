@@ -93,16 +93,16 @@ impl AnyJsFunctionOrMethod {
 
     fn name(&self) -> Option<String> {
         match self {
-            AnyJsFunctionOrMethod::AnyJsFunction(function) => function
+            Self::AnyJsFunction(function) => function
                 .binding()
                 .as_ref()
                 .map(AnyJsBinding::to_trimmed_string),
-            AnyJsFunctionOrMethod::JsMethodClassMember(method) => method
+            Self::JsMethodClassMember(method) => method
                 .name()
                 .ok()
                 .as_ref()
                 .map(AnyJsClassMemberName::to_trimmed_string),
-            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => method
+            Self::JsMethodObjectMember(method) => method
                 .name()
                 .ok()
                 .as_ref()

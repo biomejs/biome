@@ -2,6 +2,8 @@
 //! Both rome_grit_lexer and biome_grit_parser rely on these definitions, therefore
 //! they are wrapped in this crate to prevent cyclic dependencies
 
+#![deny(clippy::use_self)]
+
 #[macro_use]
 mod generated;
 pub mod file_source;
@@ -17,15 +19,15 @@ use GritSyntaxKind::*;
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
 
 impl From<u16> for GritSyntaxKind {
-    fn from(d: u16) -> GritSyntaxKind {
-        assert!(d <= (GritSyntaxKind::__LAST as u16));
-        unsafe { std::mem::transmute::<u16, GritSyntaxKind>(d) }
+    fn from(d: u16) -> Self {
+        assert!(d <= (Self::__LAST as u16));
+        unsafe { std::mem::transmute::<u16, Self>(d) }
     }
 }
 
 impl From<GritSyntaxKind> for u16 {
-    fn from(k: GritSyntaxKind) -> u16 {
-        k as u16
+    fn from(k: GritSyntaxKind) -> Self {
+        k as Self
     }
 }
 
@@ -33,8 +35,7 @@ impl GritSyntaxKind {
     /// Returns `true` for any contextual (await) or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
-        (self as u16) <= (GritSyntaxKind::RETURN_KW as u16)
-            && (self as u16) >= (GritSyntaxKind::SEQUENTIAL_KW as u16)
+        (self as u16) <= (Self::RETURN_KW as u16) && (self as u16) >= (Self::SEQUENTIAL_KW as u16)
     }
 }
 
@@ -59,7 +60,7 @@ impl biome_rowan::SyntaxKind for GritSyntaxKind {
         )
     }
 
-    fn to_bogus(&self) -> GritSyntaxKind {
+    fn to_bogus(&self) -> Self {
         match self {
             kind if AnyGritLiteral::can_cast(*kind) => GRIT_BOGUS_LITERAL,
             kind if AnyGritPattern::can_cast(*kind) => GRIT_BOGUS_PATTERN,
@@ -91,18 +92,15 @@ impl biome_rowan::SyntaxKind for GritSyntaxKind {
     }
 
     fn is_list(&self) -> bool {
-        GritSyntaxKind::is_list(*self)
+        Self::is_list(*self)
     }
 
     fn is_trivia(self) -> bool {
-        matches!(
-            self,
-            GritSyntaxKind::NEWLINE | GritSyntaxKind::WHITESPACE | GritSyntaxKind::COMMENT
-        )
+        matches!(self, Self::NEWLINE | Self::WHITESPACE | Self::COMMENT)
     }
 
     fn to_string(&self) -> Option<&'static str> {
-        GritSyntaxKind::to_string(self)
+        Self::to_string(self)
     }
 }
 
@@ -112,9 +110,9 @@ impl TryFrom<GritSyntaxKind> for TriviaPieceKind {
     fn try_from(value: GritSyntaxKind) -> Result<Self, Self::Error> {
         if value.is_trivia() {
             match value {
-                GritSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
-                GritSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
-                GritSyntaxKind::COMMENT => Ok(TriviaPieceKind::SingleLineComment),
+                GritSyntaxKind::NEWLINE => Ok(Self::Newline),
+                GritSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
+                GritSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
                 _ => unreachable!("Not Trivia"),
             }
         } else {

@@ -136,7 +136,7 @@ declare_node_union! {
 impl AnyJsStatement {
     pub fn value_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsStatement::JsExpressionStatement(node) => {
+            Self::JsExpressionStatement(node) => {
                 let callee = node
                     .expression()
                     .ok()?
@@ -150,7 +150,7 @@ impl AnyJsStatement {
                     .value_token()
                     .ok()
             }
-            AnyJsStatement::JsVariableStatement(node) => {
+            Self::JsVariableStatement(node) => {
                 let declaration = node.declaration().ok()?;
                 let declarators = declaration.declarators();
                 declarators.into_iter().find_map(|declarator| {
@@ -168,7 +168,7 @@ impl AnyJsStatement {
     }
     pub fn member(&self) -> Option<AnyJsName> {
         match self {
-            AnyJsStatement::JsExpressionStatement(node) => {
+            Self::JsExpressionStatement(node) => {
                 let callee = node
                     .expression()
                     .ok()?
@@ -177,7 +177,7 @@ impl AnyJsStatement {
                     .ok()?;
                 callee.as_js_static_member_expression()?.member().ok()
             }
-            AnyJsStatement::JsVariableStatement(node) => {
+            Self::JsVariableStatement(node) => {
                 let declaration = node.declaration().ok()?;
                 let declarators = declaration.declarators();
                 declarators.into_iter().find_map(|declarator| {
@@ -193,7 +193,7 @@ impl AnyJsStatement {
     }
     pub fn arguments(&self) -> Option<JsCallArguments> {
         match self {
-            AnyJsStatement::JsExpressionStatement(node) => node
+            Self::JsExpressionStatement(node) => node
                 .expression()
                 .ok()?
                 .as_js_call_expression()?

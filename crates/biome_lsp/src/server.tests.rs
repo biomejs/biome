@@ -362,11 +362,11 @@ enum ServerNotification {
 }
 impl ServerNotification {
     pub fn is_publish_diagnostics(&self) -> bool {
-        matches!(self, ServerNotification::PublishDiagnostics(_))
+        matches!(self, Self::PublishDiagnostics(_))
     }
 
     pub fn is_show_message(&self) -> bool {
-        matches!(self, ServerNotification::ShowMessage(_))
+        matches!(self, Self::ShowMessage(_))
     }
 }
 

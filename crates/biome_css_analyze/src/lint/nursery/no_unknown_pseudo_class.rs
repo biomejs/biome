@@ -86,44 +86,44 @@ declare_node_union! {
 impl AnyPseudoLike {
     fn name_range(&self) -> Option<TextRange> {
         Some(match self {
-            AnyPseudoLike::CssBogusPseudoClass(_) => return None,
-            AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
+            Self::CssBogusPseudoClass(_) => return None,
+            Self::CssPseudoClassFunctionCompoundSelector(selector) => {
                 let name = selector.name().ok()?;
                 name.text_trimmed_range()
             }
-            AnyPseudoLike::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
+            Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
                 let name = selector_list.name().ok()?;
                 name.text_trimmed_range()
             }
-            AnyPseudoLike::CssPseudoClassFunctionIdentifier(ident) => {
+            Self::CssPseudoClassFunctionIdentifier(ident) => {
                 let name = ident.name_token().ok()?;
                 name.text_trimmed_range()
             }
-            AnyPseudoLike::CssPseudoClassFunctionNth(func_nth) => {
+            Self::CssPseudoClassFunctionNth(func_nth) => {
                 let name = func_nth.name().ok()?;
                 name.text_trimmed_range()
             }
-            AnyPseudoLike::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
+            Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
                 let name = selector_list.name_token().ok()?;
                 name.text_trimmed_range()
             }
-            AnyPseudoLike::CssPseudoClassFunctionSelector(selector) => {
+            Self::CssPseudoClassFunctionSelector(selector) => {
                 let name = selector.name().ok()?;
                 name.text_trimmed_range()
             }
-            AnyPseudoLike::CssPseudoClassFunctionSelectorList(selector_list) => {
+            Self::CssPseudoClassFunctionSelectorList(selector_list) => {
                 let name = selector_list.name().ok()?;
                 name.text_trimmed_range()
             }
-            AnyPseudoLike::CssPseudoClassFunctionValueList(func_value_list) => {
+            Self::CssPseudoClassFunctionValueList(func_value_list) => {
                 let name = func_value_list.name_token().ok()?;
                 name.text_trimmed_range()
             }
-            AnyPseudoLike::CssPseudoClassIdentifier(ident) => {
+            Self::CssPseudoClassIdentifier(ident) => {
                 let name = ident.name().ok()?;
                 name.range()
             }
-            AnyPseudoLike::CssPageSelectorPseudo(page_pseudo) => {
+            Self::CssPageSelectorPseudo(page_pseudo) => {
                 let name = page_pseudo.selector().ok()?;
                 name.text_trimmed_range()
             }
@@ -132,30 +132,26 @@ impl AnyPseudoLike {
 
     fn name(&self) -> Option<CssSyntaxToken> {
         Some(match self {
-            AnyPseudoLike::CssBogusPseudoClass(_) => return None,
-            AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
-                selector.name().ok()?
-            }
-            AnyPseudoLike::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
+            Self::CssBogusPseudoClass(_) => return None,
+            Self::CssPseudoClassFunctionCompoundSelector(selector) => selector.name().ok()?,
+            Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
                 selector_list.name().ok()?
             }
-            AnyPseudoLike::CssPseudoClassFunctionIdentifier(ident) => ident.name_token().ok()?,
-            AnyPseudoLike::CssPseudoClassFunctionNth(func_nth) => func_nth.name().ok()?,
-            AnyPseudoLike::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
+            Self::CssPseudoClassFunctionIdentifier(ident) => ident.name_token().ok()?,
+            Self::CssPseudoClassFunctionNth(func_nth) => func_nth.name().ok()?,
+            Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
                 selector_list.name_token().ok()?
             }
-            AnyPseudoLike::CssPseudoClassFunctionSelector(selector) => selector.name().ok()?,
-            AnyPseudoLike::CssPseudoClassFunctionSelectorList(selector_list) => {
-                selector_list.name().ok()?
-            }
-            AnyPseudoLike::CssPseudoClassFunctionValueList(func_value_list) => {
+            Self::CssPseudoClassFunctionSelector(selector) => selector.name().ok()?,
+            Self::CssPseudoClassFunctionSelectorList(selector_list) => selector_list.name().ok()?,
+            Self::CssPseudoClassFunctionValueList(func_value_list) => {
                 func_value_list.name_token().ok()?
             }
-            AnyPseudoLike::CssPseudoClassIdentifier(ident) => {
+            Self::CssPseudoClassIdentifier(ident) => {
                 let name = ident.name().ok()?;
                 name.value_token().ok()?
             }
-            AnyPseudoLike::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector().ok()?,
+            Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector().ok()?,
         })
     }
 }

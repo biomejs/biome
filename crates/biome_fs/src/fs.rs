@@ -53,8 +53,8 @@ impl PathKind {
 
     pub fn is_symlink(self) -> bool {
         match self {
-            PathKind::File { is_symlink } => is_symlink,
-            PathKind::Directory { is_symlink } => is_symlink,
+            Self::File { is_symlink } => is_symlink,
+            Self::Directory { is_symlink } => is_symlink,
         }
     }
 }
@@ -62,12 +62,8 @@ impl PathKind {
 impl From<PathKind> for oxc_resolver::FileMetadata {
     fn from(kind: PathKind) -> Self {
         match kind {
-            PathKind::File { is_symlink } => {
-                oxc_resolver::FileMetadata::new(true, false, is_symlink)
-            }
-            PathKind::Directory { is_symlink } => {
-                oxc_resolver::FileMetadata::new(false, true, is_symlink)
-            }
+            PathKind::File { is_symlink } => Self::new(true, false, is_symlink),
+            PathKind::Directory { is_symlink } => Self::new(false, true, is_symlink),
         }
     }
 }

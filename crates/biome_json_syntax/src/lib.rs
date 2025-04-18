@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 #[macro_use]
 mod generated;
 mod file_source;
@@ -13,24 +15,21 @@ pub use syntax_node::*;
 use biome_rowan::{RawSyntaxKind, SyntaxKind, TokenText};
 
 impl From<u16> for JsonSyntaxKind {
-    fn from(d: u16) -> JsonSyntaxKind {
-        assert!(d <= (JsonSyntaxKind::__LAST as u16));
-        unsafe { std::mem::transmute::<u16, JsonSyntaxKind>(d) }
+    fn from(d: u16) -> Self {
+        assert!(d <= (Self::__LAST as u16));
+        unsafe { std::mem::transmute::<u16, Self>(d) }
     }
 }
 
 impl From<JsonSyntaxKind> for u16 {
-    fn from(k: JsonSyntaxKind) -> u16 {
-        k as u16
+    fn from(k: JsonSyntaxKind) -> Self {
+        k as Self
     }
 }
 
 impl JsonSyntaxKind {
     pub fn is_comments(self) -> bool {
-        matches!(
-            self,
-            JsonSyntaxKind::COMMENT | JsonSyntaxKind::MULTILINE_COMMENT
-        )
+        matches!(self, Self::COMMENT | Self::MULTILINE_COMMENT)
     }
 
     #[inline]
@@ -40,26 +39,23 @@ impl JsonSyntaxKind {
 }
 
 impl biome_rowan::SyntaxKind for JsonSyntaxKind {
-    const TOMBSTONE: Self = JsonSyntaxKind::TOMBSTONE;
-    const EOF: Self = JsonSyntaxKind::EOF;
+    const TOMBSTONE: Self = Self::TOMBSTONE;
+    const EOF: Self = Self::EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(
-            self,
-            JsonSyntaxKind::JSON_BOGUS | JsonSyntaxKind::JSON_BOGUS_VALUE
-        )
+        matches!(self, Self::JSON_BOGUS | Self::JSON_BOGUS_VALUE)
     }
 
     fn to_bogus(&self) -> Self {
         match self {
-            JsonSyntaxKind::JSON_NUMBER_VALUE
-            | JsonSyntaxKind::JSON_STRING_VALUE
-            | JsonSyntaxKind::JSON_BOOLEAN_VALUE
-            | JsonSyntaxKind::JSON_NULL_VALUE
-            | JsonSyntaxKind::JSON_ARRAY_VALUE
-            | JsonSyntaxKind::JSON_OBJECT_VALUE
-            | JsonSyntaxKind::JSON_BOGUS_VALUE => JsonSyntaxKind::JSON_BOGUS_VALUE,
-            _ => JsonSyntaxKind::JSON_BOGUS,
+            Self::JSON_NUMBER_VALUE
+            | Self::JSON_STRING_VALUE
+            | Self::JSON_BOOLEAN_VALUE
+            | Self::JSON_NULL_VALUE
+            | Self::JSON_ARRAY_VALUE
+            | Self::JSON_OBJECT_VALUE
+            | Self::JSON_BOGUS_VALUE => Self::JSON_BOGUS_VALUE,
+            _ => Self::JSON_BOGUS,
         }
     }
 
@@ -74,19 +70,19 @@ impl biome_rowan::SyntaxKind for JsonSyntaxKind {
     }
 
     fn is_root(&self) -> bool {
-        matches!(self, JsonSyntaxKind::JSON_ROOT)
+        matches!(self, Self::JSON_ROOT)
     }
 
     fn is_list(&self) -> bool {
-        JsonSyntaxKind::is_list(*self)
+        Self::is_list(*self)
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, JsonSyntaxKind::NEWLINE | JsonSyntaxKind::WHITESPACE)
+        matches!(self, Self::NEWLINE | Self::WHITESPACE)
     }
 
     fn to_string(&self) -> Option<&'static str> {
-        JsonSyntaxKind::to_string(self)
+        Self::to_string(self)
     }
 }
 
@@ -96,14 +92,14 @@ impl TryFrom<JsonSyntaxKind> for TriviaPieceKind {
     fn try_from(value: JsonSyntaxKind) -> Result<Self, Self::Error> {
         if value.is_trivia() {
             match value {
-                JsonSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
-                JsonSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
+                JsonSyntaxKind::NEWLINE => Ok(Self::Newline),
+                JsonSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
                 _ => unreachable!("Not Trivia"),
             }
         } else if value.is_comments() {
             match value {
-                JsonSyntaxKind::COMMENT => Ok(TriviaPieceKind::SingleLineComment),
-                JsonSyntaxKind::MULTILINE_COMMENT => Ok(TriviaPieceKind::MultiLineComment),
+                JsonSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
+                JsonSyntaxKind::MULTILINE_COMMENT => Ok(Self::MultiLineComment),
                 _ => unreachable!("Not Comment"),
             }
         } else {

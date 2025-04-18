@@ -106,8 +106,7 @@ impl TryFrom<JsSyntaxToken> for JsdocComment {
             .find_map(|trivia| match trivia.kind() {
                 TriviaPieceKind::MultiLineComment | TriviaPieceKind::SingleLineComment => {
                     let text = trivia.text();
-                    JsdocComment::text_is_jsdoc_comment(text)
-                        .then(|| JsdocComment::from_comment_text(text))
+                    Self::text_is_jsdoc_comment(text).then(|| Self::from_comment_text(text))
                 }
                 _ => None,
             })

@@ -1,3 +1,4 @@
+#![deny(clippy::use_self)]
 #![warn(clippy::needless_pass_by_value)]
 
 use crate::suppression_action::JsSuppressionAction;

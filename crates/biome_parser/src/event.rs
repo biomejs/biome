@@ -36,7 +36,7 @@ pub enum Event<K: SyntaxKind> {
 
 impl<K: SyntaxKind> Event<K> {
     pub fn tombstone() -> Self {
-        Event::Start {
+        Self::Start {
             kind: K::TOMBSTONE,
             forward_parent: None,
         }

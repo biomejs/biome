@@ -17,7 +17,7 @@ pub struct LineIndex {
 }
 
 impl LineIndex {
-    pub fn new(text: &str) -> LineIndex {
+    pub fn new(text: &str) -> Self {
         let mut line_wide_chars = FxHashMap::default();
         let mut wide_chars = Vec::new();
 
@@ -61,7 +61,7 @@ impl LineIndex {
             line_wide_chars.insert(line, wide_chars);
         }
 
-        LineIndex {
+        Self {
             newlines,
             line_wide_chars,
         }

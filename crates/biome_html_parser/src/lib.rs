@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod lexer;
 mod parser;
 mod syntax;

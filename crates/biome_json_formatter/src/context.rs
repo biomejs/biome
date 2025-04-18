@@ -102,8 +102,8 @@ impl FromStr for TrailingCommas {
 impl fmt::Display for TrailingCommas {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TrailingCommas::None => std::write!(f, "None"),
-            TrailingCommas::All => std::write!(f, "All"),
+            Self::None => std::write!(f, "None"),
+            Self::All => std::write!(f, "All"),
         }
     }
 }

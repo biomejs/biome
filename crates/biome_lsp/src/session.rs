@@ -122,19 +122,19 @@ pub(crate) enum ConfigurationStatus {
 
 impl ConfigurationStatus {
     pub(crate) const fn is_error(&self) -> bool {
-        matches!(self, ConfigurationStatus::Error)
+        matches!(self, Self::Error)
     }
 
     pub(crate) const fn is_editorconfig_error(&self) -> bool {
-        matches!(self, ConfigurationStatus::EditorConfigError)
+        matches!(self, Self::EditorConfigError)
     }
 
     pub(crate) const fn is_plugin_error(&self) -> bool {
-        matches!(self, ConfigurationStatus::PluginError)
+        matches!(self, Self::PluginError)
     }
 
     pub(crate) const fn is_loaded(&self) -> bool {
-        matches!(self, ConfigurationStatus::Loaded)
+        matches!(self, Self::Loaded)
     }
 }
 

@@ -125,7 +125,7 @@ impl YamlSyntaxKind {
                 | YAML_PROPERTY_LIST
         )
     }
-    pub fn from_keyword(_ident: &str) -> Option<YamlSyntaxKind> {
+    pub fn from_keyword(_ident: &str) -> Option<Self> {
         None
     }
     pub const fn to_string(&self) -> Option<&'static str> {

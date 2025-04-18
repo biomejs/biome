@@ -539,6 +539,7 @@ impl BoilerplateImpls {
         let formatter_context_ident = self.language.format_context_ident();
 
         let tokens = quote! {
+            #![allow(clippy::use_self)]
             #![expect(clippy::default_constructed_unit_structs)]
             use crate::{AsFormat, IntoFormat, FormatNodeRule, FormatBogusNodeRule, #formatter_ident, #formatter_context_ident};
             use biome_formatter::{FormatRefWithRule, FormatOwnedWithRule, FormatRule, FormatResult};
@@ -566,49 +567,49 @@ enum NodeDialect {
 }
 
 impl NodeDialect {
-    fn all() -> &'static [NodeDialect] {
+    fn all() -> &'static [Self] {
         &[
-            NodeDialect::Js,
-            NodeDialect::Ts,
-            NodeDialect::Jsx,
-            NodeDialect::Json,
-            NodeDialect::Css,
-            NodeDialect::Grit,
-            NodeDialect::Graphql,
-            NodeDialect::Html,
+            Self::Js,
+            Self::Ts,
+            Self::Jsx,
+            Self::Json,
+            Self::Css,
+            Self::Grit,
+            Self::Graphql,
+            Self::Html,
         ]
     }
 
     fn is_jsx(&self) -> bool {
-        matches!(self, NodeDialect::Jsx)
+        matches!(self, Self::Jsx)
     }
 
     fn as_str(&self) -> &'static str {
         match self {
-            NodeDialect::Js => "js",
-            NodeDialect::Ts => "ts",
-            NodeDialect::Jsx => "jsx",
-            NodeDialect::Json => "json",
-            NodeDialect::Css => "css",
-            NodeDialect::Grit => "grit",
-            NodeDialect::Graphql => "graphql",
-            NodeDialect::Html => "html",
+            Self::Js => "js",
+            Self::Ts => "ts",
+            Self::Jsx => "jsx",
+            Self::Json => "json",
+            Self::Css => "css",
+            Self::Grit => "grit",
+            Self::Graphql => "graphql",
+            Self::Html => "html",
         }
     }
 
-    fn from_str(name: &str) -> NodeDialect {
+    fn from_str(name: &str) -> Self {
         match name {
-            "Jsx" => NodeDialect::Jsx,
-            "Js" => NodeDialect::Js,
-            "Ts" => NodeDialect::Ts,
-            "Json" => NodeDialect::Json,
-            "Css" => NodeDialect::Css,
-            "Grit" => NodeDialect::Grit,
-            "Graphql" => NodeDialect::Graphql,
-            "Html" => NodeDialect::Html,
+            "Jsx" => Self::Jsx,
+            "Js" => Self::Js,
+            "Ts" => Self::Ts,
+            "Json" => Self::Json,
+            "Css" => Self::Css,
+            "Grit" => Self::Grit,
+            "Graphql" => Self::Graphql,
+            "Html" => Self::Html,
             _ => {
                 eprintln!("missing prefix {name}");
-                NodeDialect::Js
+                Self::Js
             }
         }
     }
@@ -654,29 +655,29 @@ enum NodeConcept {
 impl NodeConcept {
     fn as_str(&self) -> &'static str {
         match self {
-            NodeConcept::Expression => "expressions",
-            NodeConcept::Statement => "statements",
-            NodeConcept::Declaration => "declarations",
-            NodeConcept::Object => "objects",
-            NodeConcept::Class => "classes",
-            NodeConcept::Assignment => "assignments",
-            NodeConcept::Binding => "bindings",
-            NodeConcept::Type => "types",
-            NodeConcept::Module => "module",
-            NodeConcept::Bogus => "bogus",
-            NodeConcept::List => "lists",
-            NodeConcept::Union => "any",
-            NodeConcept::Tag => "tag",
-            NodeConcept::Attribute => "attribute",
-            NodeConcept::Auxiliary => "auxiliary",
-            NodeConcept::Value => "value",
-            NodeConcept::Pseudo => "pseudo",
-            NodeConcept::Selector => "selectors",
-            NodeConcept::Property => "properties",
-            NodeConcept::Pattern => "patterns",
-            NodeConcept::Predicate => "predicates",
-            NodeConcept::Definition => "definitions",
-            NodeConcept::Extension => "extensions",
+            Self::Expression => "expressions",
+            Self::Statement => "statements",
+            Self::Declaration => "declarations",
+            Self::Object => "objects",
+            Self::Class => "classes",
+            Self::Assignment => "assignments",
+            Self::Binding => "bindings",
+            Self::Type => "types",
+            Self::Module => "module",
+            Self::Bogus => "bogus",
+            Self::List => "lists",
+            Self::Union => "any",
+            Self::Tag => "tag",
+            Self::Attribute => "attribute",
+            Self::Auxiliary => "auxiliary",
+            Self::Value => "value",
+            Self::Pseudo => "pseudo",
+            Self::Selector => "selectors",
+            Self::Property => "properties",
+            Self::Pattern => "patterns",
+            Self::Predicate => "predicates",
+            Self::Definition => "definitions",
+            Self::Extension => "extensions",
         }
     }
 }
@@ -888,14 +889,14 @@ fn name_to_module(kind: &NodeKind, in_name: &str, language: LanguageKind) -> Nod
 impl LanguageKind {
     fn formatter_ident(&self) -> Ident {
         let name = match self {
-            LanguageKind::Js => "JsFormatter",
-            LanguageKind::Css => "CssFormatter",
-            LanguageKind::Json => "JsonFormatter",
-            LanguageKind::Graphql => "GraphqlFormatter",
-            LanguageKind::Grit => "GritFormatter",
-            LanguageKind::Html => "HtmlFormatter",
-            LanguageKind::Yaml => "YamlFormatter",
-            LanguageKind::Markdown => "DemoFormatter",
+            Self::Js => "JsFormatter",
+            Self::Css => "CssFormatter",
+            Self::Json => "JsonFormatter",
+            Self::Graphql => "GraphqlFormatter",
+            Self::Grit => "GritFormatter",
+            Self::Html => "HtmlFormatter",
+            Self::Yaml => "YamlFormatter",
+            Self::Markdown => "DemoFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -903,14 +904,14 @@ impl LanguageKind {
 
     fn format_context_ident(&self) -> Ident {
         let name = match self {
-            LanguageKind::Js => "JsFormatContext",
-            LanguageKind::Css => "CssFormatContext",
-            LanguageKind::Json => "JsonFormatContext",
-            LanguageKind::Graphql => "GraphqlFormatContext",
-            LanguageKind::Grit => "GritFormatContext",
-            LanguageKind::Html => "HtmlFormatContext",
-            LanguageKind::Yaml => "YamlFormatContext",
-            LanguageKind::Markdown => "DemoFormatterContext",
+            Self::Js => "JsFormatContext",
+            Self::Css => "CssFormatContext",
+            Self::Json => "JsonFormatContext",
+            Self::Graphql => "GraphqlFormatContext",
+            Self::Grit => "GritFormatContext",
+            Self::Html => "HtmlFormatContext",
+            Self::Yaml => "YamlFormatContext",
+            Self::Markdown => "DemoFormatterContext",
         };
 
         Ident::new(name, Span::call_site())

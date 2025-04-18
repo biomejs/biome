@@ -27,7 +27,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
     let punctuation = grammar
         .punct
         .iter()
-        .map(|(_token, name)| format_ident!("{}", name))
+        .map(|(_token, name)| format_ident!("{name}"))
         .collect::<Vec<_>>();
 
     // color-profile
@@ -208,13 +208,13 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
 
     let keyword_impl = if all_keywords.is_empty() {
         quote! {
-            pub fn from_keyword(_ident: &str) -> Option<#syntax_kind> {
+            pub fn from_keyword(_ident: &str) -> Option<Self> {
                 None
             }
         }
     } else {
         quote! {
-            pub fn from_keyword(ident: &str) -> Option<#syntax_kind> {
+            pub fn from_keyword(ident: &str) -> Option<Self> {
                 let kw = match ident {
                     #(#all_keyword_strings => #full_keywords,)*
                     _ => return None,

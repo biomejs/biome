@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 pub mod documentation;
 pub mod file_handlers;
 
