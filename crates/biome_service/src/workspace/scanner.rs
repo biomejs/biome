@@ -13,6 +13,7 @@ use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
 use camino::Utf8Path;
 use crossbeam::channel::{Receiver, Sender, unbounded};
+use std::cmp::Reverse;
 use std::collections::BTreeSet;
 use std::panic::catch_unwind;
 use std::sync::RwLock;
@@ -193,6 +194,9 @@ impl DiagnosticsCollector {
             }
         }
 
+        // Sort diagnostics by severity to put the most severe diagnostics first.
+        diagnostics.sort_by_key(|d| Reverse(d.severity()));
+
         diagnostics
     }
 }
@@ -317,3 +321,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "scanner.tests.rs"]
+mod tests;
