@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue-5710.js
+---
+# Input
+```js
+// The last `inject` specifier is a bogus node, so this won't emit any code actions.
+import { inject, Injectable, inject } from '@angular/core';
+
+```

@@ -22,7 +22,9 @@ impl JsNamedSpecifiers {
                 are_export_specifiers_sorted(specifeirs)
             }
         }
-        .unwrap_or_default()
+        // Assume the import is already sorted if there are any bogus nodes, otherwise the `--write`
+        // flag will cause infinite loop.
+        .unwrap_or(true)
     }
 }
 
