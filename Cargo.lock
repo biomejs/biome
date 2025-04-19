@@ -1466,6 +1466,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_unicode_table",
+ "biome_yaml_factory",
  "biome_yaml_syntax",
  "quickcheck",
  "quickcheck_macros",

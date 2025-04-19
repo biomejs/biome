@@ -9,23 +9,6 @@ use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
 
-impl<'src> YamlLexer<'src> {
-    /// Make a new lexer from a str, this is safe because strs are valid utf8
-    pub fn from_str(source: &'src str) -> Self {
-        use biome_parser::lexer::TokenFlags;
-
-        Self {
-            source,
-            position: 0,
-            unicode_bom_length: 0,
-            current_kind: TOMBSTONE,
-            current_start: TextSize::from(0),
-            current_flags: TokenFlags::empty(),
-            diagnostics: vec![],
-        }
-    }
-}
-
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
