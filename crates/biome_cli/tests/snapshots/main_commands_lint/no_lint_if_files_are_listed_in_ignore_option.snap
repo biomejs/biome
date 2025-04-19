@@ -32,7 +32,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
   
   i Check your biome.json to ensure the paths are not ignored by the configuration.
   
-  i There paths were provided but ignored:
+  i These paths were provided but ignored:
   
   - test1.js
   - test2.js
