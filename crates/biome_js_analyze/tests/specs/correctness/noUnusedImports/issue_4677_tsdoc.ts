@@ -1,0 +1,111 @@
+// See https://github.com/biomejs/biome/issues/4677
+
+// some types for the different locations
+import type LinkOnFunction from "mod";
+
+import type LinkOnVariable from "mod";
+import type LinkOnClass from "mod";
+
+import type LinkOnClassField from "mod";
+import type LinkOnClassMethod from "mod";
+import type LinkOnClassConstructor from "mod";
+import type LinkOnClassAccessor from "mod";
+import type LinkOnClassIndexer from "mod";
+
+import type LinkOnInterface from "mod";
+import type LinkOnInterfaceField from "mod";
+import type LinkOnInterfaceMethod from "mod";
+import type LinkOnInterfaceIndexer from "mod";
+
+import type LinkOnEnum from "mod";
+import type LinkOnEnumMember from "mod";
+
+
+/**
+ * {@link LinkOnFunction}
+ */
+function testLinkOnFunction() { }
+
+/**
+ * {@link LinkOnVariable}
+ */
+const testLinkOnVariable = 3;
+
+/**
+ * {@link LinkOnClass}
+ */
+class TestLinkOnClass { }
+
+class TestLinkOnClassField {
+    /**
+     * {@link LinkOnClassField}
+     */
+    field: number;
+}
+
+class TestLinkOnClassMethod {
+    /**
+     * {@link LinkOnClassMethod}
+     */
+    method(): void { }
+}
+
+class TestLinkOnClassConstructor {
+    /**
+     * {@link LinkOnClassConstructor}
+     */
+    constructor() { }
+}
+
+class TestLinkOnClassAccessor {
+    /**
+     * {@link LinkOnClassAccessor}
+     */
+    get accessor(): number { return 0 }
+}
+
+class TestLinkOnClassIndexer {
+    /**
+     * {@link LinkOnClassIndexer}
+     */
+    [index: number]: string;
+}
+
+/**
+ * {@link LinkOnInterface}
+ */
+interface TestLinkOnInterface { }
+
+interface TestLinkOnInterfaceField {
+    /**
+     * {@link LinkOnInterfaceField}
+     */
+    field: string;
+}
+
+interface TestLinkOnInterfaceMethod {
+    /**
+     * {@link LinkOnInterfaceMethod}
+     */
+    method(): string;
+}
+
+interface TestLinkOnInterfaceIndexer {
+    /**
+     * {@link LinkOnInterfaceIndexer}
+     */
+    [index: number]: string;
+}
+
+/**
+ * {@link LinkOnEnum}
+ */
+enum TestLinkOnEnum {
+}
+
+enum TestLinkOnEnumMember {
+    /**
+     * {@link LinkOnEnumMember}
+     */
+    member
+}

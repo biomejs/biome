@@ -2,7 +2,7 @@
 
 mod format_module_graph;
 mod js_module_info;
-mod jsdoc_comment;
+pub mod jsdoc_comment;
 mod module_graph;
 mod resolver_cache;
 
