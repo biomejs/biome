@@ -42,7 +42,7 @@ where
             query_result,
             root,
             bag: services,
-            services: FromServices::from_services(&rule_key, services)?,
+            services: FromServices::from_services(&rule_key, &R::METADATA, services)?,
             globals,
             file_path,
             options,

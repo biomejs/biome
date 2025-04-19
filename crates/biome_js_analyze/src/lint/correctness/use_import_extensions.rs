@@ -2,7 +2,9 @@ use biome_module_graph::JsResolvedPath;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
 
-use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
@@ -117,6 +119,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         fix_kind: FixKind::Safe,
+        domains: &[RuleDomain::Project],
     }
 }
 

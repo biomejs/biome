@@ -1,6 +1,7 @@
 use biome_analyze::{
-    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
-    Queryable, RuleKey, ServiceBag, SyntaxVisitor, Visitor, VisitorContext, VisitorFinishContext,
+    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
+    VisitorFinishContext,
 };
 use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
@@ -19,11 +20,13 @@ impl SemanticServices {
 impl FromServices for SemanticServices {
     fn from_services(
         rule_key: &RuleKey,
+        _rule_metadata: &RuleMetadata,
+
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic> {
-        let model: &SemanticModel = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"])
-        })?;
+    ) -> Result<Self, ServicesDiagnostic> {
+        let model: &SemanticModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"]))?;
         Ok(Self {
             model: model.clone(),
         })

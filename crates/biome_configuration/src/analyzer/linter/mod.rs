@@ -53,7 +53,7 @@ pub enum RuleDomainValue {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
-pub struct RuleDomains(FxHashMap<RuleDomain, RuleDomainValue>);
+pub struct RuleDomains(pub FxHashMap<RuleDomain, RuleDomainValue>);
 
 impl Deref for RuleDomains {
     type Target = FxHashMap<RuleDomain, RuleDomainValue>;
@@ -92,4 +92,8 @@ impl LinterConfiguration {
     pub fn get_rules(&self) -> Rules {
         self.rules.clone().unwrap_or_default()
     }
+}
+
+impl Rules {
+    pub fn get_rule(&self) {}
 }

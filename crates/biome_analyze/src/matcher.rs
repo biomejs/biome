@@ -3,6 +3,7 @@ use crate::{
     ServiceBag, SuppressionAction,
 };
 use biome_rowan::{Language, TextRange};
+use std::fmt::Display;
 use std::{
     any::{Any, TypeId},
     cmp::Ordering,
@@ -96,6 +97,12 @@ impl From<GroupKey> for RuleFilter<'static> {
 pub struct RuleKey {
     group: &'static str,
     rule: &'static str,
+}
+
+impl Display for RuleKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}/{}", self.group, self.rule)
+    }
 }
 
 impl RuleKey {

@@ -1,5 +1,5 @@
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -24,9 +24,9 @@ declare_lint_rule! {
     /// - `return`ing it
     /// - `void`ing it
     ///
-    /// :::caution
     /// ## Important notes
     ///
+    /// :::caution
     /// This rule is a work in progress, and is only partially implemented.
     /// Progress is being tracked in the following GitHub issue: https://github.com/biomejs/biome/issues/3187
     /// :::
@@ -160,9 +160,10 @@ declare_lint_rule! {
         version: "next",
         name: "noFloatingPromises",
         language: "ts",
-        recommended: false,
+        recommended: true,
         sources: &[RuleSource::EslintTypeScript("no-floating-promises")],
         fix_kind: FixKind::Unsafe,
+        domains: &[RuleDomain::Project],
     }
 }
 
