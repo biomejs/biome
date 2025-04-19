@@ -1578,6 +1578,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow usage of dependency arrays in createEffect and createMemo.
+	 */
+	noReactDeps?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of configured elements.
 	 */
 	noRestrictedElements?: RuleConfiguration_for_NoRestrictedElementsOptions;
@@ -3385,6 +3389,7 @@ export type Category =
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noReactDeps"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
