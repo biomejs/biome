@@ -88,28 +88,3 @@ issue_4677_jsdoc.js:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━�
   
 
 ```
-
-```
-issue_4677_jsdoc.js:10:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This import is unused.
-  
-     8 │ import TypeOnGlobalVariable from "mod";
-     9 │ import TypeOnFunctionVariable from "mod";
-  > 10 │ import TypeOnTypeDef from "mod";
-       │        ^^^^^^^^^^^^^
-    11 │ 
-    12 │ /**
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused imports.
-  
-     8  8 │   import TypeOnGlobalVariable from "mod";
-     9  9 │   import TypeOnFunctionVariable from "mod";
-    10    │ - import·TypeOnTypeDef·from·"mod";
-    11 10 │   
-    12 11 │   /**
-  
-
-```

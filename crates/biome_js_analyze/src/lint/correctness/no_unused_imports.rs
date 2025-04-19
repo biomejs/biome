@@ -148,20 +148,20 @@ impl Visitor for JsDocTypeCollectorVisitior {
 }
 
 fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLanguage>) {
-    if let Ok(comment) = JsdocComment::try_from(node) {
-        load_jsdoc_types_from_jsdoc_comment(model, &comment)
-    }
+    JsdocComment::for_each(node, |comment| {
+        load_jsdoc_types_from_jsdoc_comment(model, comment)
+    });
 }
 
 static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\{@(link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap());
 
 static JSDOC_TYPE_TAG_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)}").unwrap());
+    LazyLock::new(|| Regex::new(r"@(param|returns|type|typedef)\s*\{([^}]+)\}").unwrap());
 
 static JSDOC_TYPE_PART_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\w+)").unwrap());
 
-fn load_jsdoc_types_from_jsdoc_comment(model: &mut JsDocTypeModel, comment: &JsdocComment) {
+fn load_jsdoc_types_from_jsdoc_comment(model: &mut JsDocTypeModel, comment: &str) {
     // regex matching for typical JSDoc patterns containing types `{@link ClassName}` and `@sometag {TypeSyntax}`
     // This should likely become a proper parser.
     // This will definitely fail in object types like { a: { b: number } }
