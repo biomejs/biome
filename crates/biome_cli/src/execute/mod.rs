@@ -692,6 +692,7 @@ pub fn execute_mode(
     // Processing emitted error diagnostics, exit with a non-zero code
     if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
         Err(CliDiagnostic::no_files_processed(
+            execution.as_diagnostic_category(),
             paths
                 .into_iter()
                 .flat_map(|p| p.into_string())

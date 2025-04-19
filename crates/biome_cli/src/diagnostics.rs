@@ -230,13 +230,15 @@ pub struct IncompatibleEndConfiguration {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "internalError/io",
     severity = Error,
     message = "No files were processed in the specified paths.",
     advice = "Check your biome.json to ensure the paths are not ignored by the configuration.",
     advice = "There paths were provided but ignored:",
 )]
 pub struct NoFilesWereProcessed {
+    #[category]
+    category: &'static Category,
+
     #[advice]
     paths: ListAdvice<String>,
 }
@@ -341,8 +343,9 @@ impl CliDiagnostic {
     }
 
     /// When no files were processed while traversing the file system
-    pub fn no_files_processed(paths: impl Into<Vec<String>>) -> Self {
+    pub fn no_files_processed(category: &'static Category, paths: impl Into<Vec<String>>) -> Self {
         Self::NoFilesWereProcessed(NoFilesWereProcessed {
+            category,
             paths: ListAdvice { list: paths.into() },
         })
     }
