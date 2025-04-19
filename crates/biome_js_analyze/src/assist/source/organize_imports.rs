@@ -606,7 +606,8 @@ impl Rule for OrganizeImports {
                 let are_specifiers_unsorted =
                     specifiers.is_some_and(|specifiers| !specifiers.are_sorted());
                 let are_attributes_unsorted = attributes.is_some_and(|attributes| {
-                    !(are_import_attributes_sorted(&attributes).unwrap_or_default())
+                    // Assume the attributes are sorted if there are any bogus nodes.
+                    !(are_import_attributes_sorted(&attributes).unwrap_or(true))
                 });
                 let newline_issue = if leading_newline_count == 1
                     // A chunk must start with a blank line (two newlines)
