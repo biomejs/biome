@@ -1,10 +1,13 @@
 #![allow(dead_code)]
 
+use std::cmp::Ordering;
+
 use biome_parser::{
     diagnostic::ParseDiagnostic,
     lexer::{LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags},
 };
 use biome_rowan::{TextLen, TextRange, TextSize};
+use biome_unicode_table::{Dispatch::WHS, lookup_byte};
 use biome_yaml_syntax::{T, YamlSyntaxKind, YamlSyntaxKind::*};
 
 #[rustfmt::skip]
@@ -34,6 +37,11 @@ pub(crate) struct YamlLexer<'src> {
 
     /// diagnostics emitted during the parsing phase
     diagnostics: Vec<ParseDiagnostic>,
+
+    /// Keeps track of the current indentation level to emit INDENT and DEDENT tokens
+    indent_levels: Vec<usize>,
+
+    left_over_stack: Vec<YamlSyntaxKind>,
 }
 
 impl<'src> YamlLexer<'src> {
@@ -47,7 +55,9 @@ impl<'src> YamlLexer<'src> {
             current_kind: TOMBSTONE,
             current_start: TextSize::from(0),
             current_flags: TokenFlags::empty(),
-            diagnostics: vec![],
+            diagnostics: Vec::new(),
+            indent_levels: Vec::new(),
+            left_over_stack: Vec::new(),
         }
     }
 
@@ -65,7 +75,7 @@ impl<'src> YamlLexer<'src> {
             b'#' => self.consume_comment(),
             b'\'' => self.consume_single_quoted_literal(),
             b'"' => self.consume_double_quoted_literal(),
-            b' ' | b'\n' => self.consume_newline_or_whitespaces(),
+            _ if is_space(current) || is_break(current) => self.consume_blank(context),
             _ if self.is_first_plain_char(current, context) => self.consume_plain_literal(context),
             _ => self.consume_unexpected_token(),
         };
@@ -193,6 +203,73 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
+    /// Consume all newlines and whitespace until a non-whitespace is found. Unlike similar
+    /// functions in other languages, this one consumes all newlines instead of just one because
+    /// newlines are significant in YAML. By collapsing all new lines into a single one, the parser
+    /// doesn't have to handle multiple consecutive newlines separately.
+    fn consume_blank(&mut self, context: YamlLexContext) -> YamlSyntaxKind {
+        let mut indent_level: Option<usize> = None;
+        while let Some(current) = self.current_byte() {
+            if is_space(current) {
+                let start = self.position();
+                self.consume_whitespaces();
+                let end = self.position();
+                indent_level = indent_level.map(|_| end - start)
+            } else if is_break(current) {
+                self.consume_newline();
+                indent_level = Some(0);
+            } else {
+                break;
+            }
+        }
+        let Some(indent_level) = indent_level else {
+            return WHITESPACE;
+        };
+        let last_indent_level = self.indent_levels.last().copied().unwrap_or(0);
+        match indent_level.cmp(&last_indent_level) {
+            Ordering::Greater => {
+                // Elements inside flow nodes only need to be indented more than the nearest block
+                // node ancestor, so we don't have to push the indent level for nested flow node.
+                if !matches!(context, YamlLexContext::FlowIn) {
+                    self.indent_levels.push(indent_level);
+                }
+                INDENT
+            }
+            Ordering::Less => {
+                if matches!(context, YamlLexContext::FlowIn) {
+                    // This commonly happens, even though it's not supported by the spec. Other
+                    // parsers therefore also allows this. Just return a DEDENT token and let the
+                    // parser deal with it
+                    DEDENT
+                } else {
+                    while self
+                        .indent_levels
+                        .last()
+                        .copied()
+                        .is_some_and(|last_indent| last_indent > indent_level)
+                    {
+                        self.left_over_stack.push(DEDENT);
+                        self.indent_levels.pop();
+                    }
+                    if !self.left_over_stack.is_empty() {
+                        self.left_over_stack.pop();
+                    }
+                    let last_indent_level = self.indent_levels.last().copied().unwrap_or(0);
+                    if last_indent_level < indent_level {
+                        self.push_diagnostic(ParseDiagnostic::new(
+                            "unexpected indent level",
+                            self.position..self.position + 1,
+                        ));
+                        ERROR_TOKEN
+                    } else {
+                        DEDENT
+                    }
+                }
+            }
+            Ordering::Equal => NEWLINE,
+        }
+    }
+
     fn consume_unexpected_token(&mut self) -> YamlSyntaxKind {
         self.assert_current_char_boundary();
 
@@ -242,9 +319,13 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
         self.current_start = TextSize::from(self.position as u32);
         self.current_flags = TokenFlags::empty();
-        let kind = match self.current_byte() {
-            Some(current) => self.consume_token(current, context),
-            None => EOF,
+        let kind = if let Some(kind) = self.left_over_stack.pop() {
+            kind
+        } else {
+            match self.current_byte() {
+                Some(current) => self.consume_token(current, context),
+                None => EOF,
+            }
         };
         self.current_kind = kind;
         kind
@@ -300,16 +381,35 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
         self.position += n;
     }
 
-    /// Consume one newline or all whitespace until a non-whitespace or a newline is found.
+    /// Consumes all whitespace until a non-whitespace or a newline is found.
     ///
     /// ## Safety
     /// Must be called at a valid UT8 char boundary
-    fn consume_newline_or_whitespaces(&mut self) -> YamlSyntaxKind {
-        if self.consume_newline() {
-            YamlSyntaxKind::NEWLINE
-        } else {
-            self.consume_whitespaces();
-            YamlSyntaxKind::WHITESPACE
+    fn consume_whitespaces(&mut self) {
+        self.assert_current_char_boundary();
+
+        while let Some(c) = self.current_byte() {
+            let dispatch = lookup_byte(c);
+            if !matches!(dispatch, WHS) {
+                break;
+            }
+
+            if is_space(c) {
+                self.advance(1);
+            } else if is_break(c) {
+                break;
+            } else {
+                let start = self.text_position();
+                self.advance(1);
+
+                self.push_diagnostic(
+                    ParseDiagnostic::new(
+                        "The YAML standard allows only two types of whitespace characters: tabs and spaces",
+                        start..self.text_position(),
+                    )
+                        .with_hint("Use a regular whitespace character instead. For more detail, please check https://yaml.org/spec/1.2.2/#55-white-space-characters"),
+                )
+            }
         }
     }
 }
@@ -356,6 +456,9 @@ pub enum YamlLexContext {
     /// abc: xyz
     /// ^^^
     BlockKey,
+    /// Inside a block sequence context
+    BlockIn,
+    BlockOut,
     /// Inside block value, but outside flow context, for example:
     /// abc: [1, 2, 3]
     ///      ^^^^^^^^^
@@ -387,6 +490,7 @@ fn is_plain_safe(c: u8, context: YamlLexContext) -> bool {
         // body. This token is not used inside the CST and instead is just used to signal the
         // start of document body
         Regular => is_non_space_char(c) && !is_indicator(c),
+        _ => unreachable!(),
     }
 }
 

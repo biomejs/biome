@@ -16,12 +16,13 @@ YamlRoot {
     documents: YamlDocumentList [
         YamlDocument {
             bom_token: missing (optional),
+            newline_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
             node: YamlBlockCollection {
+                indent_token: missing (optional),
                 properties: missing (optional),
                 content: YamlBlockMapping {
-                    indent_token: missing (optional),
                     entries: YamlBlockMapEntryList [
                         YamlBlockMapExplicitEntry {
                             key: YamlBlockMapExplicitKey {
@@ -54,8 +55,8 @@ YamlRoot {
                             value: missing (optional),
                         },
                     ],
-                    dedent_token: missing (optional),
                 },
+                dedent_token: missing (optional),
             },
             dotdotdot_token: missing (optional),
         },
@@ -71,13 +72,14 @@ YamlRoot {
   0: YAML_DOCUMENT_LIST@0..8
     0: YAML_DOCUMENT@0..8
       0: (empty)
-      1: YAML_DIRECTIVE_LIST@0..0
-      2: (empty)
-      3: YAML_BLOCK_COLLECTION@0..8
+      1: (empty)
+      2: YAML_DIRECTIVE_LIST@0..0
+      3: (empty)
+      4: YAML_BLOCK_COLLECTION@0..8
         0: (empty)
-        1: YAML_BLOCK_MAPPING@0..8
-          0: (empty)
-          1: YAML_BLOCK_MAP_ENTRY_LIST@0..8
+        1: (empty)
+        2: YAML_BLOCK_MAPPING@0..8
+          0: YAML_BLOCK_MAP_ENTRY_LIST@0..8
             0: YAML_BLOCK_MAP_EXPLICIT_ENTRY@0..4
               0: YAML_BLOCK_MAP_EXPLICIT_KEY@0..4
                 0: QUESTION@0..2 "?" [] [Whitespace(" ")]
@@ -98,8 +100,8 @@ YamlRoot {
                       0: PLAIN_LITERAL@6..7 "b" [] []
                   1: NEWLINE@7..8 "\n" [] []
               1: (empty)
-          2: (empty)
-      4: (empty)
+        3: (empty)
+      5: (empty)
   1: EOF@8..8 "" [] []
 
 ```

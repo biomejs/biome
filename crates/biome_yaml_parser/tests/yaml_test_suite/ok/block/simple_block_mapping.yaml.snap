@@ -17,12 +17,13 @@ YamlRoot {
     documents: YamlDocumentList [
         YamlDocument {
             bom_token: missing (optional),
+            newline_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
             node: YamlBlockCollection {
+                indent_token: missing (optional),
                 properties: missing (optional),
                 content: YamlBlockMapping {
-                    indent_token: missing (optional),
                     entries: YamlBlockMapEntryList [
                         YamlBlockMapImplicitEntry {
                             key: YamlFlowYamlNode {
@@ -88,8 +89,8 @@ YamlRoot {
                             },
                         },
                     ],
-                    dedent_token: missing (optional),
                 },
+                dedent_token: missing (optional),
             },
             dotdotdot_token: missing (optional),
         },
@@ -105,13 +106,14 @@ YamlRoot {
   0: YAML_DOCUMENT_LIST@0..18
     0: YAML_DOCUMENT@0..18
       0: (empty)
-      1: YAML_DIRECTIVE_LIST@0..0
-      2: (empty)
-      3: YAML_BLOCK_COLLECTION@0..18
+      1: (empty)
+      2: YAML_DIRECTIVE_LIST@0..0
+      3: (empty)
+      4: YAML_BLOCK_COLLECTION@0..18
         0: (empty)
-        1: YAML_BLOCK_MAPPING@0..18
-          0: (empty)
-          1: YAML_BLOCK_MAP_ENTRY_LIST@0..18
+        1: (empty)
+        2: YAML_BLOCK_MAPPING@0..18
+          0: YAML_BLOCK_MAP_ENTRY_LIST@0..18
             0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..6
               0: YAML_FLOW_YAML_NODE@0..1
                 0: (empty)
@@ -154,8 +156,8 @@ YamlRoot {
                       0: PLAIN_LITERAL@15..17 "30" [] []
                   1: NEWLINE@17..18 "\n" [] []
                 2: (empty)
-          2: (empty)
-      4: (empty)
+        3: (empty)
+      5: (empty)
   1: EOF@18..18 "" [] []
 
 ```

@@ -35,7 +35,11 @@ YamlRoot =
 	documents: YamlDocumentList
 	eof: 'EOF'
 
-YamlDocumentList = YamlDocument*
+YamlDocumentList = AnyYamlDocument*
+
+AnyYamlDocument =
+	YamlDocument
+	| YamlBogus
 
 // https://yaml.org/spec/1.2.2/#91-documents
 YamlDocument =
@@ -43,6 +47,7 @@ YamlDocument =
 	// but documents are allowed to re-specify the encoding
 	// https://yaml.org/spec/1.2.2/#rule-l-document-prefix
 	bom: 'UNICODE_BOM'?
+	newline: 'NEWLINE'?
 	// https://yaml.org/spec/1.2.2/#rule-l-directive-document
 	directives: YamlDirectiveList
 	// https://yaml.org/spec/1.2.2/#rule-c-directives-end
@@ -155,8 +160,12 @@ AnyYamlBlockInBlockNode =
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-collection
 YamlBlockCollection =
+	// Indent block
+	'indent'?
 	properties: AnyYamlPropertiesCombination?
 	content: AnyYamlBlockCollectionContent
+	// Dedent block, that is, go back to parent block's scope
+	'dedent'?
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
 YamlBlockScalar =
@@ -177,11 +186,7 @@ AnyYamlBlockScalarContent =
 //  - d
 // https://yaml.org/spec/1.2.2/#rule-l+block-sequence
 YamlBlockSequence =
-	// Indent block
-	'indent'?
 	entries: YamlBlockSequenceEntryList
-	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
 
 YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
 
@@ -195,11 +200,7 @@ YamlBlockSequenceEntry =
 //  d: e
 // https://yaml.org/spec/1.2.2/#rule-l+block-mapping
 YamlBlockMapping =
-	// Indent block
-	'indent'?
 	entries: YamlBlockMapEntryList
-	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
 
 YamlBlockMapEntryList = AnyYamlBlockMapEntry*
 

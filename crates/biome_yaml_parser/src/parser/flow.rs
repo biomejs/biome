@@ -1,5 +1,11 @@
-use biome_parser::{CompletedMarker, Parser};
-use biome_yaml_syntax::YamlSyntaxKind::*;
+use biome_parser::{
+    CompletedMarker, Parser,
+    prelude::{
+        ParsedSyntax::{self, *},
+        TokenSource,
+    },
+};
+use biome_yaml_syntax::YamlSyntaxKind::{self, *};
 
 use crate::lexer::YamlLexContext;
 
@@ -13,12 +19,14 @@ pub(crate) fn parse_flow_yaml_node(p: &mut YamlParser, context: YamlLexContext) 
 }
 
 fn parse_plain_scalar(p: &mut YamlParser, context: YamlLexContext) -> CompletedMarker {
-    // The current plain token was lexed during the last `bump` or `bump_with_context` call, which
-    // might have used a different context than the current one
     p.re_lex(context);
     let m = p.start();
     p.bump(PLAIN_LITERAL);
     m.complete(p, YAML_PLAIN_SCALAR)
+}
+
+pub(crate) fn is_at_any_flow_node(p: &YamlParser) -> bool {
+    is_at_flow_yaml_node(p)
 }
 
 pub(crate) fn is_at_flow_yaml_node(p: &YamlParser) -> bool {

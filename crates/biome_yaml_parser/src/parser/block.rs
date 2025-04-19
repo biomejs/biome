@@ -2,7 +2,10 @@ use biome_parser::{
     CompletedMarker, Marker, Parser,
     parse_lists::ParseNodeList,
     parse_recovery::ParseRecovery,
-    prelude::ParsedSyntax::{self, *},
+    prelude::{
+        ParsedSyntax::{self, *},
+        TokenSource,
+    },
 };
 use biome_yaml_syntax::{
     T,
@@ -13,7 +16,7 @@ use crate::lexer::YamlLexContext;
 
 use super::{
     YamlParser,
-    flow::{is_at_flow_yaml_node, parse_flow_yaml_node},
+    flow::{is_at_any_flow_node, is_at_flow_yaml_node, parse_flow_yaml_node},
     parse_error::expected_block_mapping,
 };
 
@@ -200,7 +203,18 @@ fn parse_block_map_explicit_value(p: &mut YamlParser) -> ParsedSyntax {
 }
 
 fn parse_block_indented(p: &mut YamlParser) -> ParsedSyntax {
-    parse_any_block_node(p)
+    if is_at_block_node(p) {
+        parse_any_block_node(p)
+    } else {
+        Present(parse_compact_mapping(p))
+    }
+}
+
+fn parse_compact_mapping(p: &mut YamlParser) -> CompletedMarker {
+    //TODO: Same strategy for implicit key
+    let m = p.start();
+    BlockMapEntryList::default().parse_list(p);
+    m.complete(p, YAML_COMPACT_MAPPING)
 }
 
 fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
@@ -228,7 +242,36 @@ fn parse_block_map_implicit_value(p: &mut YamlParser) -> CompletedMarker {
     m.complete(p, YAML_BLOCK_MAP_IMPLICIT_VALUE)
 }
 
+fn is_at_block_node(p: &mut YamlParser) -> bool {
+    is_at_block_in_block_node(p) || is_at_any_flow_node(p)
+}
+
+fn is_at_block_in_block_node(p: &mut YamlParser) -> bool {
+    is_at_block_collection(p)
+}
+
+fn is_at_block_collection(p: &mut YamlParser) -> bool {
+    if p.indent_level > 0 && p.at(INDENT) {
+        let checkpoint = p.checkpoint();
+        p.bump(INDENT);
+        let block_mapping_predicate = is_at_block_mapping(p);
+        p.rewind(checkpoint);
+        block_mapping_predicate
+    } else if p.indent_level == 0 {
+        is_at_block_mapping(p)
+    } else {
+        false
+    }
+}
+
+fn is_at_block_mapping(p: &mut YamlParser) -> bool {
+    is_at_explicit_mapping_key(p)
+}
+
 fn is_at_explicit_mapping_key(p: &mut YamlParser) -> bool {
+    while p.at(NEWLINE) {
+        p.source_mut().bump();
+    }
     p.at(T![?])
 }
 

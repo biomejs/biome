@@ -31,7 +31,15 @@ impl<'source> YamlTokenSource<'source> {
     }
 
     fn next_non_trivia_token(&mut self, context: YamlLexContext, first_token: bool) {
+        enum NewlineCommentNewlineState {
+            StartingNewline,
+            FollowingComment,
+        }
         let mut trailing = !first_token;
+
+        // Truncating newline-comment-newline combination, as it's being lexed as two consecutive
+        // newline tokens. If we don't filter out one, we will have to introduce multiple newlines
+        // token into the cst.
 
         loop {
             let kind = self.lexer.next_token(context);
