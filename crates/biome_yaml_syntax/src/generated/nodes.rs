@@ -105,15 +105,23 @@ impl YamlBlockCollection {
     }
     pub fn as_fields(&self) -> YamlBlockCollectionFields {
         YamlBlockCollectionFields {
+            indent_token: self.indent_token(),
             properties: self.properties(),
             content: self.content(),
+            dedent_token: self.dedent_token(),
         }
     }
+    pub fn indent_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
     pub fn properties(&self) -> Option<AnyYamlPropertiesCombination> {
-        support::node(&self.syntax, 0usize)
+        support::node(&self.syntax, 1usize)
     }
     pub fn content(&self) -> SyntaxResult<AnyYamlBlockCollectionContent> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn dedent_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
     }
 }
 impl Serialize for YamlBlockCollection {
@@ -126,8 +134,10 @@ impl Serialize for YamlBlockCollection {
 }
 #[derive(Serialize)]
 pub struct YamlBlockCollectionFields {
+    pub indent_token: Option<SyntaxToken>,
     pub properties: Option<AnyYamlPropertiesCombination>,
     pub content: SyntaxResult<AnyYamlBlockCollectionContent>,
+    pub dedent_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct YamlBlockMapExplicitEntry {
@@ -350,19 +360,11 @@ impl YamlBlockMapping {
     }
     pub fn as_fields(&self) -> YamlBlockMappingFields {
         YamlBlockMappingFields {
-            indent_token: self.indent_token(),
             entries: self.entries(),
-            dedent_token: self.dedent_token(),
         }
     }
-    pub fn indent_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 0usize)
-    }
     pub fn entries(&self) -> YamlBlockMapEntryList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn dedent_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 2usize)
+        support::list(&self.syntax, 0usize)
     }
 }
 impl Serialize for YamlBlockMapping {
@@ -375,9 +377,7 @@ impl Serialize for YamlBlockMapping {
 }
 #[derive(Serialize)]
 pub struct YamlBlockMappingFields {
-    pub indent_token: Option<SyntaxToken>,
     pub entries: YamlBlockMapEntryList,
-    pub dedent_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct YamlBlockScalar {
@@ -435,19 +435,11 @@ impl YamlBlockSequence {
     }
     pub fn as_fields(&self) -> YamlBlockSequenceFields {
         YamlBlockSequenceFields {
-            indent_token: self.indent_token(),
             entries: self.entries(),
-            dedent_token: self.dedent_token(),
         }
     }
-    pub fn indent_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 0usize)
-    }
     pub fn entries(&self) -> YamlBlockSequenceEntryList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn dedent_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 2usize)
+        support::list(&self.syntax, 0usize)
     }
 }
 impl Serialize for YamlBlockSequence {
@@ -460,9 +452,7 @@ impl Serialize for YamlBlockSequence {
 }
 #[derive(Serialize)]
 pub struct YamlBlockSequenceFields {
-    pub indent_token: Option<SyntaxToken>,
     pub entries: YamlBlockSequenceEntryList,
-    pub dedent_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct YamlBlockSequenceEntry {
@@ -520,11 +510,15 @@ impl YamlCompactMapping {
     }
     pub fn as_fields(&self) -> YamlCompactMappingFields {
         YamlCompactMappingFields {
-            entries: self.entries(),
+            inline_entry: self.inline_entry(),
+            indented_entries: self.indented_entries(),
         }
     }
-    pub fn entries(&self) -> YamlBlockSequenceEntryList {
-        support::list(&self.syntax, 0usize)
+    pub fn inline_entry(&self) -> SyntaxResult<AnyYamlBlockMapEntry> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn indented_entries(&self) -> Option<YamlCompactMappingIndented> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for YamlCompactMapping {
@@ -537,7 +531,53 @@ impl Serialize for YamlCompactMapping {
 }
 #[derive(Serialize)]
 pub struct YamlCompactMappingFields {
-    pub entries: YamlBlockSequenceEntryList,
+    pub inline_entry: SyntaxResult<AnyYamlBlockMapEntry>,
+    pub indented_entries: Option<YamlCompactMappingIndented>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct YamlCompactMappingIndented {
+    pub(crate) syntax: SyntaxNode,
+}
+impl YamlCompactMappingIndented {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> YamlCompactMappingIndentedFields {
+        YamlCompactMappingIndentedFields {
+            indent_token: self.indent_token(),
+            entries: self.entries(),
+            dedent_token: self.dedent_token(),
+        }
+    }
+    pub fn indent_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn entries(&self) -> YamlBlockMapEntryList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn dedent_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for YamlCompactMappingIndented {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct YamlCompactMappingIndentedFields {
+    pub indent_token: SyntaxResult<SyntaxToken>,
+    pub entries: YamlBlockMapEntryList,
+    pub dedent_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct YamlCompactSequence {
@@ -555,11 +595,15 @@ impl YamlCompactSequence {
     }
     pub fn as_fields(&self) -> YamlCompactSequenceFields {
         YamlCompactSequenceFields {
-            entries: self.entries(),
+            inline_entry: self.inline_entry(),
+            indented_entries: self.indented_entries(),
         }
     }
-    pub fn entries(&self) -> YamlBlockSequenceEntryList {
-        support::list(&self.syntax, 0usize)
+    pub fn inline_entry(&self) -> SyntaxResult<YamlBlockSequenceEntry> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn indented_entries(&self) -> Option<YamlCompactSequenceIndented> {
+        support::node(&self.syntax, 1usize)
     }
 }
 impl Serialize for YamlCompactSequence {
@@ -572,7 +616,53 @@ impl Serialize for YamlCompactSequence {
 }
 #[derive(Serialize)]
 pub struct YamlCompactSequenceFields {
+    pub inline_entry: SyntaxResult<YamlBlockSequenceEntry>,
+    pub indented_entries: Option<YamlCompactSequenceIndented>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct YamlCompactSequenceIndented {
+    pub(crate) syntax: SyntaxNode,
+}
+impl YamlCompactSequenceIndented {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> YamlCompactSequenceIndentedFields {
+        YamlCompactSequenceIndentedFields {
+            indent_token: self.indent_token(),
+            entries: self.entries(),
+            dedent_token: self.dedent_token(),
+        }
+    }
+    pub fn indent_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn entries(&self) -> YamlBlockSequenceEntryList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn dedent_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for YamlCompactSequenceIndented {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct YamlCompactSequenceIndentedFields {
+    pub indent_token: SyntaxResult<SyntaxToken>,
     pub entries: YamlBlockSequenceEntryList,
+    pub dedent_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct YamlDirective {
@@ -626,6 +716,7 @@ impl YamlDocument {
     pub fn as_fields(&self) -> YamlDocumentFields {
         YamlDocumentFields {
             bom_token: self.bom_token(),
+            newline_token: self.newline_token(),
             directives: self.directives(),
             dashdashdash_token: self.dashdashdash_token(),
             node: self.node(),
@@ -635,17 +726,20 @@ impl YamlDocument {
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
+    pub fn newline_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn directives(&self) -> YamlDirectiveList {
-        support::list(&self.syntax, 1usize)
+        support::list(&self.syntax, 2usize)
     }
     pub fn dashdashdash_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 2usize)
+        support::token(&self.syntax, 3usize)
     }
     pub fn node(&self) -> Option<AnyYamlBlockNode> {
-        support::node(&self.syntax, 3usize)
+        support::node(&self.syntax, 4usize)
     }
     pub fn dotdotdot_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 4usize)
+        support::token(&self.syntax, 5usize)
     }
 }
 impl Serialize for YamlDocument {
@@ -659,6 +753,7 @@ impl Serialize for YamlDocument {
 #[derive(Serialize)]
 pub struct YamlDocumentFields {
     pub bom_token: Option<SyntaxToken>,
+    pub newline_token: Option<SyntaxToken>,
     pub directives: YamlDirectiveList,
     pub dashdashdash_token: Option<SyntaxToken>,
     pub node: Option<AnyYamlBlockNode>,
@@ -715,15 +810,19 @@ impl YamlFlowInBlockNode {
     }
     pub fn as_fields(&self) -> YamlFlowInBlockNodeFields {
         YamlFlowInBlockNodeFields {
+            indent_token: self.indent_token(),
             flow: self.flow(),
             newline_token: self.newline_token(),
         }
     }
+    pub fn indent_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
     pub fn flow(&self) -> SyntaxResult<AnyYamlFlowNode> {
-        support::required_node(&self.syntax, 0usize)
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn newline_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 1usize)
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for YamlFlowInBlockNode {
@@ -736,6 +835,7 @@ impl Serialize for YamlFlowInBlockNode {
 }
 #[derive(Serialize)]
 pub struct YamlFlowInBlockNodeFields {
+    pub indent_token: Option<SyntaxToken>,
     pub flow: SyntaxResult<AnyYamlFlowNode>,
     pub newline_token: Option<SyntaxToken>,
 }
@@ -1444,6 +1544,25 @@ impl AnyYamlBlockScalarContent {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyYamlDocument {
+    YamlBogus(YamlBogus),
+    YamlDocument(YamlDocument),
+}
+impl AnyYamlDocument {
+    pub fn as_yaml_bogus(&self) -> Option<&YamlBogus> {
+        match &self {
+            Self::YamlBogus(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_yaml_document(&self) -> Option<&YamlDocument> {
+        match &self {
+            Self::YamlDocument(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyYamlFlowMapEntry {
     YamlFlowMapExplicitEntry(YamlFlowMapExplicitEntry),
     YamlFlowMapImplicitEntry(YamlFlowMapImplicitEntry),
@@ -1707,10 +1826,18 @@ impl std::fmt::Debug for YamlBlockCollection {
             DEPTH.set(current_depth + 1);
             f.debug_struct("YamlBlockCollection")
                 .field(
+                    "indent_token",
+                    &support::DebugOptionalElement(self.indent_token()),
+                )
+                .field(
                     "properties",
                     &support::DebugOptionalElement(self.properties()),
                 )
                 .field("content", &support::DebugSyntaxResult(self.content()))
+                .field(
+                    "dedent_token",
+                    &support::DebugOptionalElement(self.dedent_token()),
+                )
                 .finish()
         } else {
             f.debug_struct("YamlBlockCollection").finish()
@@ -2010,15 +2137,7 @@ impl std::fmt::Debug for YamlBlockMapping {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("YamlBlockMapping")
-                .field(
-                    "indent_token",
-                    &support::DebugOptionalElement(self.indent_token()),
-                )
                 .field("entries", &self.entries())
-                .field(
-                    "dedent_token",
-                    &support::DebugOptionalElement(self.dedent_token()),
-                )
                 .finish()
         } else {
             f.debug_struct("YamlBlockMapping").finish()
@@ -2116,15 +2235,7 @@ impl std::fmt::Debug for YamlBlockSequence {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("YamlBlockSequence")
-                .field(
-                    "indent_token",
-                    &support::DebugOptionalElement(self.indent_token()),
-                )
                 .field("entries", &self.entries())
-                .field(
-                    "dedent_token",
-                    &support::DebugOptionalElement(self.dedent_token()),
-                )
                 .finish()
         } else {
             f.debug_struct("YamlBlockSequence").finish()
@@ -2222,7 +2333,14 @@ impl std::fmt::Debug for YamlCompactMapping {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("YamlCompactMapping")
-                .field("entries", &self.entries())
+                .field(
+                    "inline_entry",
+                    &support::DebugSyntaxResult(self.inline_entry()),
+                )
+                .field(
+                    "indented_entries",
+                    &support::DebugOptionalElement(self.indented_entries()),
+                )
                 .finish()
         } else {
             f.debug_struct("YamlCompactMapping").finish()
@@ -2238,6 +2356,61 @@ impl From<YamlCompactMapping> for SyntaxNode {
 }
 impl From<YamlCompactMapping> for SyntaxElement {
     fn from(n: YamlCompactMapping) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for YamlCompactMappingIndented {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(YAML_COMPACT_MAPPING_INDENTED as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == YAML_COMPACT_MAPPING_INDENTED
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for YamlCompactMappingIndented {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlCompactMappingIndented")
+                .field(
+                    "indent_token",
+                    &support::DebugSyntaxResult(self.indent_token()),
+                )
+                .field("entries", &self.entries())
+                .field(
+                    "dedent_token",
+                    &support::DebugSyntaxResult(self.dedent_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlCompactMappingIndented").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<YamlCompactMappingIndented> for SyntaxNode {
+    fn from(n: YamlCompactMappingIndented) -> Self {
+        n.syntax
+    }
+}
+impl From<YamlCompactMappingIndented> for SyntaxElement {
+    fn from(n: YamlCompactMappingIndented) -> Self {
         n.syntax.into()
     }
 }
@@ -2269,7 +2442,14 @@ impl std::fmt::Debug for YamlCompactSequence {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("YamlCompactSequence")
-                .field("entries", &self.entries())
+                .field(
+                    "inline_entry",
+                    &support::DebugSyntaxResult(self.inline_entry()),
+                )
+                .field(
+                    "indented_entries",
+                    &support::DebugOptionalElement(self.indented_entries()),
+                )
                 .finish()
         } else {
             f.debug_struct("YamlCompactSequence").finish()
@@ -2285,6 +2465,61 @@ impl From<YamlCompactSequence> for SyntaxNode {
 }
 impl From<YamlCompactSequence> for SyntaxElement {
     fn from(n: YamlCompactSequence) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for YamlCompactSequenceIndented {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(YAML_COMPACT_SEQUENCE_INDENTED as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == YAML_COMPACT_SEQUENCE_INDENTED
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for YamlCompactSequenceIndented {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("YamlCompactSequenceIndented")
+                .field(
+                    "indent_token",
+                    &support::DebugSyntaxResult(self.indent_token()),
+                )
+                .field("entries", &self.entries())
+                .field(
+                    "dedent_token",
+                    &support::DebugSyntaxResult(self.dedent_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("YamlCompactSequenceIndented").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<YamlCompactSequenceIndented> for SyntaxNode {
+    fn from(n: YamlCompactSequenceIndented) -> Self {
+        n.syntax
+    }
+}
+impl From<YamlCompactSequenceIndented> for SyntaxElement {
+    fn from(n: YamlCompactSequenceIndented) -> Self {
         n.syntax.into()
     }
 }
@@ -2369,6 +2604,10 @@ impl std::fmt::Debug for YamlDocument {
                 .field(
                     "bom_token",
                     &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field(
+                    "newline_token",
+                    &support::DebugOptionalElement(self.newline_token()),
                 )
                 .field("directives", &self.directives())
                 .field(
@@ -2476,6 +2715,10 @@ impl std::fmt::Debug for YamlFlowInBlockNode {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("YamlFlowInBlockNode")
+                .field(
+                    "indent_token",
+                    &support::DebugOptionalElement(self.indent_token()),
+                )
                 .field("flow", &support::DebugSyntaxResult(self.flow()))
                 .field(
                     "newline_token",
@@ -3678,6 +3921,65 @@ impl From<AnyYamlBlockScalarContent> for SyntaxElement {
         node.into()
     }
 }
+impl From<YamlBogus> for AnyYamlDocument {
+    fn from(node: YamlBogus) -> Self {
+        Self::YamlBogus(node)
+    }
+}
+impl From<YamlDocument> for AnyYamlDocument {
+    fn from(node: YamlDocument) -> Self {
+        Self::YamlDocument(node)
+    }
+}
+impl AstNode for AnyYamlDocument {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = YamlBogus::KIND_SET.union(YamlDocument::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, YAML_BOGUS | YAML_DOCUMENT)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            YAML_BOGUS => Self::YamlBogus(YamlBogus { syntax }),
+            YAML_DOCUMENT => Self::YamlDocument(YamlDocument { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::YamlBogus(it) => &it.syntax,
+            Self::YamlDocument(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::YamlBogus(it) => it.syntax,
+            Self::YamlDocument(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyYamlDocument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::YamlBogus(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlDocument(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyYamlDocument> for SyntaxNode {
+    fn from(n: AnyYamlDocument) -> Self {
+        match n {
+            AnyYamlDocument::YamlBogus(it) => it.into(),
+            AnyYamlDocument::YamlDocument(it) => it.into(),
+        }
+    }
+}
+impl From<AnyYamlDocument> for SyntaxElement {
+    fn from(n: AnyYamlDocument) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<YamlFlowMapExplicitEntry> for AnyYamlFlowMapEntry {
     fn from(node: YamlFlowMapExplicitEntry) -> Self {
         Self::YamlFlowMapExplicitEntry(node)
@@ -4131,6 +4433,11 @@ impl std::fmt::Display for AnyYamlBlockScalarContent {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyYamlDocument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyYamlFlowMapEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -4226,7 +4533,17 @@ impl std::fmt::Display for YamlCompactMapping {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for YamlCompactMappingIndented {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for YamlCompactSequence {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for YamlCompactSequenceIndented {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4790,7 +5107,7 @@ impl Serialize for YamlDocumentList {
 }
 impl AstNodeList for YamlDocumentList {
     type Language = Language;
-    type Node = YamlDocument;
+    type Node = AnyYamlDocument;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -4805,15 +5122,15 @@ impl Debug for YamlDocumentList {
     }
 }
 impl IntoIterator for &YamlDocumentList {
-    type Item = YamlDocument;
-    type IntoIter = AstNodeListIterator<Language, YamlDocument>;
+    type Item = AnyYamlDocument;
+    type IntoIter = AstNodeListIterator<Language, AnyYamlDocument>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for YamlDocumentList {
-    type Item = YamlDocument;
-    type IntoIter = AstNodeListIterator<Language, YamlDocument>;
+    type Item = AnyYamlDocument;
+    type IntoIter = AstNodeListIterator<Language, AnyYamlDocument>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

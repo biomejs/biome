@@ -2,8 +2,12 @@ use biome_parser::{
     CompletedMarker, Marker, Parser,
     parse_lists::ParseNodeList,
     parse_recovery::ParseRecovery,
-    prelude::ParsedSyntax::{self, *},
+    prelude::{
+        ParsedSyntax::{self, *},
+        TokenSource,
+    },
 };
+use biome_rowan::TextRange;
 use biome_yaml_syntax::{
     T,
     YamlSyntaxKind::{self, *},
@@ -13,13 +17,13 @@ use crate::lexer::YamlLexContext;
 
 use super::{
     YamlParser,
-    flow::{is_at_flow_yaml_node, parse_flow_yaml_node},
+    flow::{is_nth_at_flow_yaml_node, parse_flow_yaml_node},
     parse_error::expected_block_mapping,
 };
 
-pub(crate) fn parse_any_block_node(p: &mut YamlParser) -> ParsedSyntax {
+pub(crate) fn parse_any_block_node(p: &mut YamlParser, has_to_indent: bool) -> ParsedSyntax {
     if maybe_at_implicit_mapping_key(p) {
-        Present(parse_implicit_entry_or_flow_node(p))
+        Present(parse_block_mapping_or_flow_node(p, has_to_indent))
     } else if is_at_explicit_mapping_key(p) {
         Present(parse_block_collection(p))
     } else if is_at_block_scalar(p) {
@@ -55,58 +59,64 @@ fn parse_folded_scalar(p: &mut YamlParser) -> CompletedMarker {
     m.complete(p, YAML_FOLDED_SCALAR)
 }
 
+/// Since the block key context's only difference with flow context is that it disallows multiline
+/// flow node, we can just parse a flow node and emit a diagnostic when we encounter a key that
+/// violate the restriction.lexer
+fn parse_block_mapping_or_flow_node(p: &mut YamlParser, has_to_indent: bool) -> CompletedMarker {
+    let start = p.cur_range().start();
+    let mut end = p.cur_range().end();
+    let m = p.start();
+    let has_indent = p.eat(INDENT);
+    let implicit_key_marker = parse_block_map_implicit_key(p);
+    // It's a nested block mapping in a compact block mapping
+    if has_to_indent && !has_indent && p.at(T![:]) {
+        while !(p.at(DEDENT) || p.at(NEWLINE) || p.at(INDENT) || p.at(EOF)) {
+            end = p.cur_range().end();
+            p.bump_any();
+        }
+        if p.at(INDENT) {
+            while !p.at(DEDENT) && !p.at(EOF) {
+                end = p.cur_range().end();
+                p.bump_any();
+            }
+        }
+        p.eat(DEDENT);
+        p.error(p.err_builder(
+            "Nested nodes are not allowed in compact mapping",
+            TextRange::new(start, end),
+        ));
+        m.complete(p, YAML_BOGUS_BLOCK_NODE)
+    }
+    // It's an implicit key of a block mapping entry
+    else if p.at(T![:]) {
+        let implicit_entry_marker = implicit_key_marker.precede(p);
+        parse_block_map_implicit_value(p);
+        let implicit_entry_completed_marker =
+            implicit_entry_marker.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY);
+        let entry_list_marker = implicit_entry_completed_marker.precede(p);
+        let entry_list_completed_marker = BlockMapEntryList::with(entry_list_marker).parse_list(p);
+        let block_map_marker = entry_list_completed_marker.precede(p);
+        block_map_marker.complete(p, YAML_BLOCK_MAPPING);
+        p.eat(DEDENT);
+        m.complete(p, YAML_BLOCK_COLLECTION)
+    }
+    // It's just a flow node
+    else {
+        p.eat(NEWLINE);
+        m.complete(p, YAML_FLOW_IN_BLOCK_NODE)
+    }
+}
+
 fn parse_block_collection(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
     parse_block_mapping(p);
     m.complete(p, YAML_BLOCK_COLLECTION)
 }
 
-/// Since the block key context's only difference with flow context is that it disallows multiline
-/// flow node, we can just parse a flow node and emit a diagnostic when we encounter a key that
-/// violate the restriction.lexer
-fn parse_implicit_entry_or_flow_node(p: &mut YamlParser) -> CompletedMarker {
-    let implicit_key_marker = parse_block_map_implicit_key(p);
-    // It's indeed an implicit key
-    if p.at(T![:]) {
-        let implicit_entry_marker = implicit_key_marker.precede(p);
-        parse_block_map_implicit_value(p);
-        let implicit_entry_marker =
-            implicit_entry_marker.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY);
-        parse_block_collection_starting_with_implicit_entry(p, implicit_entry_marker)
-    }
-    // It's just a flow node
-    else {
-        let block_node_marker = implicit_key_marker.precede(p);
-        p.eat(NEWLINE);
-        block_node_marker.complete(p, YAML_FLOW_IN_BLOCK_NODE)
-    }
-}
-
-fn parse_block_collection_starting_with_implicit_entry(
-    p: &mut YamlParser,
-    implicit_entry_marker: CompletedMarker,
-) -> CompletedMarker {
-    let block_mapping_marker =
-        parse_block_mapping_starting_with_implicit_entry(p, implicit_entry_marker);
-    let block_collection_marker = block_mapping_marker.precede(p);
-    block_collection_marker.complete(p, YAML_BLOCK_COLLECTION)
-}
-
 fn parse_block_mapping(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
     BlockMapEntryList::default().parse_list(p);
     m.complete(p, YAML_BLOCK_MAPPING)
-}
-
-fn parse_block_mapping_starting_with_implicit_entry(
-    p: &mut YamlParser,
-    implicit_entry_marker: CompletedMarker,
-) -> CompletedMarker {
-    let block_map_entry_list_marker = implicit_entry_marker.precede(p);
-    let block_map_entry_list_marker =
-        BlockMapEntryList::with(block_map_entry_list_marker).parse_list(p);
-    let block_map_marker = block_map_entry_list_marker.precede(p);
-    block_map_marker.complete(p, YAML_BLOCK_MAPPING)
 }
 
 #[derive(Default)]
@@ -200,11 +210,41 @@ fn parse_block_map_explicit_value(p: &mut YamlParser) -> ParsedSyntax {
 }
 
 fn parse_block_indented(p: &mut YamlParser) -> ParsedSyntax {
-    parse_any_block_node(p)
+    if maybe_at_implicit_mapping_key(p) {
+        Present(parse_compact_mapping_or_flow_node(p))
+    } else {
+        parse_any_block_node(p, false)
+    }
+}
+
+fn parse_compact_mapping_or_flow_node(p: &mut YamlParser) -> CompletedMarker {
+    let implicit_key_marker = parse_block_map_implicit_key(p);
+    // It's indeed an implicit key
+    if p.at(T![:]) {
+        let implicit_entry_marker = implicit_key_marker.precede(p);
+        parse_block_map_implicit_value(p);
+        let implicit_entry_marker =
+            implicit_entry_marker.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY);
+        let compact_mapping = implicit_entry_marker.precede(p);
+        if p.at(INDENT) {
+            let m = p.start();
+            p.bump(INDENT);
+            BlockMapEntryList::default().parse_list(p);
+            p.bump(DEDENT);
+            m.complete(p, YAML_COMPACT_MAPPING_INDENTED);
+        }
+        compact_mapping.complete(p, YAML_COMPACT_MAPPING)
+    }
+    // It's just a flow node
+    else {
+        let block_node_marker = implicit_key_marker.precede(p);
+        p.eat(NEWLINE);
+        block_node_marker.complete(p, YAML_FLOW_IN_BLOCK_NODE)
+    }
 }
 
 fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
-    if !is_at_flow_yaml_node(p) {
+    if !is_nth_at_flow_yaml_node(p, 0) {
         return Absent;
     }
     let m = p.start();
@@ -214,14 +254,14 @@ fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
 }
 
 fn parse_block_map_implicit_key(p: &mut YamlParser) -> CompletedMarker {
-    parse_flow_yaml_node(p, YamlLexContext::BlockKey)
+    parse_flow_yaml_node(p, YamlLexContext::Regular)
 }
 
 fn parse_block_map_implicit_value(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
     p.bump(COLON);
     // Value can be completely empty according to the spec
-    let value = parse_any_block_node(p);
+    let value = parse_any_block_node(p, true);
     if value.is_absent() {
         p.eat(NEWLINE);
     }
@@ -229,11 +269,14 @@ fn parse_block_map_implicit_value(p: &mut YamlParser) -> CompletedMarker {
 }
 
 fn is_at_explicit_mapping_key(p: &mut YamlParser) -> bool {
+    while p.at(NEWLINE) {
+        p.source_mut().skip_as_trivia();
+    }
     p.at(T![?])
 }
 
-fn maybe_at_implicit_mapping_key(p: &YamlParser) -> bool {
-    is_at_flow_yaml_node(p)
+fn maybe_at_implicit_mapping_key(p: &mut YamlParser) -> bool {
+    is_nth_at_flow_yaml_node(p, 0) || (p.at(INDENT) && is_nth_at_flow_yaml_node(p, 1))
 }
 
 fn is_at_block_scalar(p: &YamlParser) -> bool {
