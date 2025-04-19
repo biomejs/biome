@@ -14,7 +14,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            YAML_BOGUS | YAML_BOGUS_NODE => {
+            YAML_BOGUS | YAML_BOGUS_BLOCK_MAP_ENTRY | YAML_BOGUS_BLOCK_NODE => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
             }
             YAML_ALIAS_NODE => {
@@ -57,8 +57,15 @@ impl SyntaxFactory for YamlSyntaxFactory {
             }
             YAML_BLOCK_COLLECTION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == INDENT {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyYamlPropertiesCombination::can_cast(element.kind()) {
                         slots.mark_present();
@@ -68,6 +75,13 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyYamlBlockCollectionContent::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == DEDENT {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -119,7 +133,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlIndentedBlock::can_cast(element.kind()) {
+                    if AnyYamlBlockIndented::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -145,7 +159,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlIndentedBlock::can_cast(element.kind()) {
+                    if AnyYamlBlockIndented::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -187,7 +201,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
             }
             YAML_BLOCK_MAP_IMPLICIT_VALUE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T ! [:] {
@@ -197,7 +211,14 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlNode::can_cast(element.kind()) {
+                    if AnyYamlBlockNode::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == NEWLINE {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -213,24 +234,10 @@ impl SyntaxFactory for YamlSyntaxFactory {
             }
             YAML_BLOCK_MAPPING => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == INDENT {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
                     if YamlBlockMapEntryList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == DEDENT {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -272,24 +279,10 @@ impl SyntaxFactory for YamlSyntaxFactory {
             }
             YAML_BLOCK_SEQUENCE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == INDENT {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
                     if YamlBlockSequenceEntryList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == DEDENT {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -315,7 +308,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlIndentedBlock::can_cast(element.kind()) {
+                    if AnyYamlBlockIndented::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -388,10 +381,17 @@ impl SyntaxFactory for YamlSyntaxFactory {
             }
             YAML_DOCUMENT => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T![UNICODE_BOM] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == NEWLINE {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -412,7 +412,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlNode::can_cast(element.kind()) {
+                    if AnyYamlBlockNode::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -451,6 +451,32 @@ impl SyntaxFactory for YamlSyntaxFactory {
                     );
                 }
                 slots.into_node(YAML_DOUBLE_QUOTED_SCALAR, children)
+            }
+            YAML_FLOW_IN_BLOCK_NODE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if AnyYamlFlowNode::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == NEWLINE {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        YAML_FLOW_IN_BLOCK_NODE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(YAML_FLOW_IN_BLOCK_NODE, children)
             }
             YAML_FLOW_JSON_NODE => {
                 let mut elements = (&children).into_iter();
@@ -812,7 +838,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 Self::make_node_list_syntax(kind, children, YamlDirective::can_cast)
             }
             YAML_DOCUMENT_LIST => {
-                Self::make_node_list_syntax(kind, children, YamlDocument::can_cast)
+                Self::make_node_list_syntax(kind, children, AnyYamlDocument::can_cast)
             }
             YAML_FLOW_MAP_ENTRY_LIST => Self::make_separated_list_syntax(
                 kind,

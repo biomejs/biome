@@ -53,6 +53,7 @@ pub enum YamlSyntaxKind {
     YAML_FLOW_MAP_EXPLICIT_ENTRY,
     YAML_FLOW_MAP_IMPLICIT_ENTRY,
     YAML_ALIAS_NODE,
+    YAML_FLOW_IN_BLOCK_NODE,
     YAML_BLOCK_COLLECTION,
     YAML_BLOCK_SCALAR,
     YAML_BLOCK_SEQUENCE,
@@ -78,7 +79,8 @@ pub enum YamlSyntaxKind {
     YAML_ANCHOR_PROPERTY,
     YAML_TAG_PROPERTY,
     YAML_BOGUS,
-    YAML_BOGUS_NODE,
+    YAML_BOGUS_BLOCK_NODE,
+    YAML_BOGUS_BLOCK_MAP_ENTRY,
     #[doc(hidden)]
     __LAST,
 }
@@ -144,6 +146,9 @@ impl YamlSyntaxKind {
             BACKTICK => "`",
             AT => "@",
             EOF => "EOF",
+            NEWLINE => "NEWLINE",
+            INDENT => "indent",
+            DEDENT => "dedent",
             _ => return None,
         };
         Some(tok)

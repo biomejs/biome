@@ -27,14 +27,19 @@
 SyntaxElement = SyntaxElement
 
 YamlBogus = SyntaxElement*
-YamlBogusNode = SyntaxElement*
+YamlBogusBlockNode = SyntaxElement*
+YamlBogusBlockMapEntry = SyntaxElement*
 
 // https://yaml.org/spec/1.2.2/#92-streams
 YamlRoot =
 	documents: YamlDocumentList
 	eof: 'EOF'
 
-YamlDocumentList = YamlDocument*
+YamlDocumentList = AnyYamlDocument*
+
+AnyYamlDocument =
+	YamlDocument
+	| YamlBogus
 
 // https://yaml.org/spec/1.2.2/#91-documents
 YamlDocument =
@@ -42,11 +47,12 @@ YamlDocument =
 	// but documents are allowed to re-specify the encoding
 	// https://yaml.org/spec/1.2.2/#rule-l-document-prefix
 	bom: 'UNICODE_BOM'?
+	newline: 'NEWLINE'?
 	// https://yaml.org/spec/1.2.2/#rule-l-directive-document
 	directives: YamlDirectiveList
 	// https://yaml.org/spec/1.2.2/#rule-c-directives-end
 	'---'?
-	node: AnyYamlNode
+	node: AnyYamlBlockNode?
 	// https://yaml.org/spec/1.2.2/#rule-c-document-end
 	'...'?
 
@@ -58,10 +64,15 @@ YamlDirectiveList = YamlDirective*
 YamlDirective = value: 'directive_literal'
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-node
-AnyYamlNode =
-	AnyYamlBlockNode
-	| AnyYamlFlowNode
-	| YamlBogusNode
+AnyYamlBlockNode =
+	AnyYamlBlockInBlockNode
+	| YamlFlowInBlockNode
+	| YamlBogusBlockNode
+
+// https://yaml.org/spec/1.2.2/#rule-s-l+flow-in-block
+YamlFlowInBlockNode =
+	flow: AnyYamlFlowNode
+	newline: 'NEWLINE'?
 
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-node
 AnyYamlFlowNode =
@@ -143,14 +154,18 @@ AnyYamlFlowMapImplicitKey =
 	| YamlFlowJsonNode
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
-AnyYamlBlockNode =
+AnyYamlBlockInBlockNode =
 	YamlBlockCollection
 	| YamlBlockScalar
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-collection
 YamlBlockCollection =
+	// Indent block
+	'indent'?
 	properties: AnyYamlPropertiesCombination?
 	content: AnyYamlBlockCollectionContent
+	// Dedent block, that is, go back to parent block's scope
+	'dedent'?
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
 YamlBlockScalar =
@@ -171,17 +186,13 @@ AnyYamlBlockScalarContent =
 //  - d
 // https://yaml.org/spec/1.2.2/#rule-l+block-sequence
 YamlBlockSequence =
-	// Indent block
-	'indent'?
 	entries: YamlBlockSequenceEntryList
-	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
 
 YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
 
 YamlBlockSequenceEntry =
 	'-'
-	value: AnyYamlIndentedBlock
+	value: AnyYamlBlockIndented?
 
 // a:
 //  b: c
@@ -189,11 +200,7 @@ YamlBlockSequenceEntry =
 //  d: e
 // https://yaml.org/spec/1.2.2/#rule-l+block-mapping
 YamlBlockMapping =
-	// Indent block
-	'indent'
 	entries: YamlBlockMapEntryList
-	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
 
 YamlBlockMapEntryList = AnyYamlBlockMapEntry*
 
@@ -201,6 +208,7 @@ YamlBlockMapEntryList = AnyYamlBlockMapEntry*
 AnyYamlBlockMapEntry =
 	YamlBlockMapExplicitEntry
 	| YamlBlockMapImplicitEntry
+	| YamlBogusBlockMapEntry
 
 // ? y
 // : 10
@@ -213,19 +221,22 @@ YamlBlockMapExplicitEntry =
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
 YamlBlockMapExplicitKey =
 	'?'
-	key: AnyYamlIndentedBlock
+	key: AnyYamlBlockIndented?
 
 // : 10
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
 YamlBlockMapExplicitValue =
 	':'
-	value: AnyYamlIndentedBlock
+	value: AnyYamlBlockIndented?
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-indented
-AnyYamlIndentedBlock =
+// In the specification, this node can be completely empty.
+// Instead of modeling an empty node, we can just make this node optional
+// wherever we refer it.
+AnyYamlBlockIndented =
 	YamlCompactSequence
 	| YamlCompactMapping
-	| AnyYamlNode
+	| AnyYamlBlockNode
 
 // https://yaml.org/spec/1.2.2/#rule-ns-l-compact-sequence
 YamlCompactSequence =
@@ -248,7 +259,9 @@ AnyYamlBlockMapImplicitKey =
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-implicit-value
 YamlBlockMapImplicitValue =
 	':'
-	value: AnyYamlNode
+	// Node value can be empty, but must be replaced by a newline
+	value: AnyYamlBlockNode?
+	newline: 'NEWLINE'?
 
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
 AnyYamlPropertiesCombination =
