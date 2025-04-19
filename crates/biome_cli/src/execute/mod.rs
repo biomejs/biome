@@ -576,7 +576,13 @@ pub fn execute_mode(
         mut summary,
         evaluated_paths,
         diagnostics,
-    } = traverse(&execution, &mut session, project_key, cli_options, paths)?;
+    } = traverse(
+        &execution,
+        &mut session,
+        project_key,
+        cli_options,
+        paths.clone(),
+    )?;
     // We join the duration of the scanning with the duration of the traverse.
     summary.scanner_duration = scanner_duration;
     let console = session.app.console;
@@ -685,7 +691,12 @@ pub fn execute_mode(
 
     // Processing emitted error diagnostics, exit with a non-zero code
     if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
-        Err(CliDiagnostic::no_files_processed())
+        Err(CliDiagnostic::no_files_processed(
+            paths
+                .into_iter()
+                .flat_map(|p| p.into_string())
+                .collect::<Vec<_>>(),
+        ))
     } else if errors > 0 || should_exit_on_warnings {
         let category = execution.as_diagnostic_category();
         if should_exit_on_warnings {
