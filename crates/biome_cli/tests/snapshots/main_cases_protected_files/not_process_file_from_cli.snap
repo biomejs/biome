@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `package-lock.json`
 
@@ -14,6 +14,12 @@ expression: content
 internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No files were processed in the specified paths.
+  
+  i Check your biome.json to ensure the paths are not ignored by the configuration.
+  
+  i There paths were provided but ignored:
+  
+  - package-lock.json
   
 
 

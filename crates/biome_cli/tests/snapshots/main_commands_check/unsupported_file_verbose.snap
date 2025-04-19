@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `check.txt`
 
@@ -16,6 +15,12 @@ for(;true;);
 internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No files were processed in the specified paths.
+  
+  i Check your biome.json to ensure the paths are not ignored by the configuration.
+  
+  i There paths were provided but ignored:
+  
+  - check.txt
   
 
 

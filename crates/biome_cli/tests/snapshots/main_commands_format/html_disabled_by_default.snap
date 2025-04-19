@@ -15,6 +15,12 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 
   × No files were processed in the specified paths.
   
+  i Check your biome.json to ensure the paths are not ignored by the configuration.
+  
+  i There paths were provided but ignored:
+  
+  - file.html
+  
 
 
 ```

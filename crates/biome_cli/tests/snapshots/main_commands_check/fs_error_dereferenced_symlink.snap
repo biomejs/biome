@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 # Termination Message
 
@@ -9,6 +8,12 @@ snapshot_kind: text
 internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No files were processed in the specified paths.
+  
+  i Check your biome.json to ensure the paths are not ignored by the configuration.
+  
+  i There paths were provided but ignored:
+  
+  - <TEMP_DIR>/check_rome_test_broken_symlink
   
 
 

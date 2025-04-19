@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Termination Message
 
@@ -8,6 +8,12 @@ expression: content
 internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No files were processed in the specified paths.
+  
+  i Check your biome.json to ensure the paths are not ignored by the configuration.
+  
+  i There paths were provided but ignored:
+  
+  - <TEMP_DIR>/lint_rome_test_infinite_symlink_expansion_to_dirs
   
 
 
