@@ -24,10 +24,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlAnchorProperty::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_BLOCK_COLLECTION => {
-                    let $pattern = unsafe { $crate::YamlBlockCollection::new_unchecked(node) };
-                    $body
-                }
                 $crate::YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_ENTRY => {
                     let $pattern =
                         unsafe { $crate::YamlBlockMapExplicitEntry::new_unchecked(node) };

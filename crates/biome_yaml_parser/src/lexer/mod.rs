@@ -1,13 +1,14 @@
 #![allow(dead_code)]
 
+use std::collections::VecDeque;
+
 use biome_parser::{
     diagnostic::ParseDiagnostic,
-    lexer::{LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags},
+    lexer::{Lexer, LexerCheckpoint},
 };
 use biome_rowan::{TextLen, TextRange, TextSize};
+use biome_unicode_table::{Dispatch::WHS, lookup_byte};
 use biome_yaml_syntax::{T, YamlSyntaxKind, YamlSyntaxKind::*};
-
-#[rustfmt::skip]
 mod tests;
 
 pub(crate) struct YamlLexer<'src> {
@@ -17,69 +18,146 @@ pub(crate) struct YamlLexer<'src> {
     /// The start byte position in the source text of the next token.
     position: usize,
 
-    /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
-    unicode_bom_length: usize,
+    current_start_position: usize,
 
-    /// Byte offset of the current token from the start of the source
-    /// The range of the current token can be computed by `self.position - self.current_start`
-    current_start: TextSize,
+    // TODO: change to usize
+    column: i32,
 
-    /// The kind of the current token
-    current_kind: YamlSyntaxKind,
-
-    /// Flags for the current token
-    current_flags: TokenFlags,
+    current_start_column: i32,
 
     /// diagnostics emitted during the parsing phase
     diagnostics: Vec<ParseDiagnostic>,
+
+    /// Keeps track of the current indentation level to emit INDENT and DEDENT tokens
+    indent_levels: Vec<usize>,
+
+    tokens: VecDeque<LexToken>,
+
+    scopes: Vec<LexScope>,
+
+    token_index: usize,
 }
 
 impl<'src> YamlLexer<'src> {
     pub fn from_str(source: &'src str) -> Self {
-        use biome_parser::lexer::TokenFlags;
-
+        let mut tokens = VecDeque::new();
+        tokens.push_back(LexToken {
+            kind: TOMBSTONE,
+            start: 0,
+            start_col: 0,
+            end: 0,
+            end_col: 0,
+        });
         Self {
             source,
             position: 0,
-            unicode_bom_length: 0,
-            current_kind: TOMBSTONE,
-            current_start: TextSize::from(0),
-            current_flags: TokenFlags::empty(),
-            diagnostics: vec![],
+            diagnostics: Vec::new(),
+            indent_levels: Vec::new(),
+            tokens,
+            column: 0,
+            current_start_position: 0,
+            current_start_column: 0,
+            scopes: vec![LexScope {
+                ty: LexScopeType::Document,
+                border: -1,
+            }],
+            token_index: 0,
         }
     }
 
-    /// Consume a token in the given context
-    fn consume_token(&mut self, current: u8, context: YamlLexContext) -> YamlSyntaxKind {
+    fn push_token(&mut self, kind: YamlSyntaxKind) {
+        let (end, end_col) = if matches!(
+            kind,
+            MAPPING_START | MAPPING_END | SEQUENCE_START | SEQUENCE_END | FLOW_START | FLOW_END
+        ) {
+            (self.current_start_position, self.current_start_column)
+        } else {
+            (self.position, self.column)
+        };
+        self.tokens.push_back(LexToken {
+            start: self.current_start_position,
+            end,
+            start_col: self.current_start_column,
+            end_col,
+            kind,
+        });
+        self.current_start_column = end_col;
+        self.current_start_position = end;
+    }
+
+    fn push_scope(&mut self, scope: LexScope) {
+        self.scopes.push(scope);
+    }
+
+    fn current_scope(&self) -> &LexScope {
+        self.scopes.last().unwrap_or(&LexScope {
+            ty: LexScopeType::Document,
+            border: -1,
+        })
+    }
+
+    /// Push a token
+    fn lex_token(&mut self, current: u8) {
         let start = self.text_position();
 
-        let kind = match current {
+        match current {
+            _ if self.is_first_plain_char(current) => self.consume_plain_literal(),
             b':' => self.consume_byte(T![:]),
             b',' => self.consume_byte(T![,]),
             b'[' => self.consume_byte(T!['[']),
             b']' => self.consume_byte(T![']']),
-            b'?' => self.consume_byte(T![?]),
-            b'-' => self.consume_byte(T![-]),
+            b'?' => self.consume_question(),
+            b'-' => self.consume_dash(),
             b'#' => self.consume_comment(),
             b'\'' => self.consume_single_quoted_literal(),
             b'"' => self.consume_double_quoted_literal(),
-            b' ' | b'\n' => self.consume_newline_or_whitespaces(),
-            _ if self.is_first_plain_char(current, context) => self.consume_plain_literal(context),
+            _ if is_space(current) || is_break(current) => self.consume_blank(),
             _ => self.consume_unexpected_token(),
         };
 
         debug_assert!(self.text_position() > start, "Lexer did not advance");
-        kind
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
-    fn consume_byte(&mut self, tok: YamlSyntaxKind) -> YamlSyntaxKind {
+    fn consume_byte(&mut self, tok: YamlSyntaxKind) {
         self.advance(1);
-        tok
+        self.push_token(tok);
     }
 
-    fn consume_comment(&mut self) -> YamlSyntaxKind {
+    fn consume_dash(&mut self) {
+        self.assert_byte(b'-');
+        let current_scope = self.current_scope();
+        if (!matches!(current_scope.ty, LexScopeType::BlockSequence)
+            && self.column >= current_scope.border)
+            || (matches!(current_scope.ty, LexScopeType::BlockSequence)
+                && self.column > current_scope.border)
+        {
+            self.push_token(SEQUENCE_START);
+            self.push_scope(LexScope {
+                ty: LexScopeType::BlockSequence,
+                border: self.column,
+            });
+        }
+        self.advance(1);
+        self.push_token(T![-]);
+    }
+
+    fn consume_question(&mut self) {
+        self.assert_byte(b'?');
+        let current_scope = self.current_scope();
+        if !matches!(current_scope.ty, LexScopeType::Flow) && self.column > current_scope.border {
+            self.push_token(MAPPING_START);
+            self.push_scope(LexScope {
+                ty: LexScopeType::BlockMap,
+                border: self.column,
+            });
+        }
+        self.advance(1);
+        self.push_token(T![?]);
+    }
+
+    fn consume_comment(&mut self) {
         self.assert_byte(b'#');
         while let Some(c) = self.current_byte() {
             if c == b'\n' {
@@ -87,26 +165,31 @@ impl<'src> YamlLexer<'src> {
             }
             self.advance(1);
         }
-        COMMENT
+        self.push_token(COMMENT);
     }
 
     // https://yaml.org/spec/1.2.2/#rule-ns-plain
     // TODO: parse multiline plain scalar at current indentation level
-    fn consume_plain_literal(&mut self, context: YamlLexContext) -> YamlSyntaxKind {
+    fn consume_plain_literal(&mut self) {
         self.assert_current_char_boundary();
         debug_assert!(
             self.current_byte()
-                .is_some_and(|c| self.is_first_plain_char(c, context))
+                .is_some_and(|c| self.is_first_plain_char(c))
         );
+        let border = self.column;
         self.advance_char_unchecked();
         while let Some(c) = self.current_byte() {
             // https://yaml.org/spec/1.2.2/#rule-ns-plain-char
-            if is_plain_safe(c, context) && c != b':' && c != b'#' {
+            if is_plain_safe(c, self.current_scope()) && c != b':' && c != b'#' {
                 self.advance_char_unchecked();
             } else if is_non_space_char(c) && self.peek_byte().is_some_and(|c| c == b'#') {
                 self.advance_char_unchecked();
                 self.advance(1); // '#'
-            } else if c == b':' && self.peek_byte().is_some_and(|c| is_plain_safe(c, context)) {
+            } else if c == b':'
+                && self
+                    .peek_byte()
+                    .is_some_and(|c| is_plain_safe(c, self.current_scope()))
+            {
                 self.advance(1); // ':'
                 self.advance_char_unchecked();
             }
@@ -120,22 +203,45 @@ impl<'src> YamlLexer<'src> {
                 break;
             }
         }
-        PLAIN_LITERAL
+
+        debug_assert!(
+            self.current_scope().border <= border,
+            "Current token's starting position must not be smaller than its scope's border"
+        );
+        if border <= self.current_scope().border {
+            self.push_token(PLAIN_LITERAL);
+        } else if self.current_byte().is_some_and(|c| c == b':')
+            && self.peek_byte().is_none_or(|c| is_break(c) || is_space(c))
+        {
+            self.push_scope(LexScope {
+                ty: LexScopeType::BlockMap,
+                border: self.column,
+            });
+
+            self.push_token(MAPPING_START);
+            self.push_token(PLAIN_LITERAL)
+        } else {
+            self.push_token(FLOW_START);
+            self.push_token(PLAIN_LITERAL);
+            self.push_token(FLOW_END);
+        }
     }
 
     // https://yaml.org/spec/1.2.2/#rule-ns-plain-first
-    fn is_first_plain_char(&self, c: u8, context: YamlLexContext) -> bool {
+    fn is_first_plain_char(&self, c: u8) -> bool {
         (is_non_space_char(c) && !is_indicator(c))
             || ((c == b'?' || c == b':' || c == b'-')
-                && self.peek_byte().is_some_and(|c| is_plain_safe(c, context)))
+                && self
+                    .peek_byte()
+                    .is_some_and(|c| is_plain_safe(c, self.current_scope())))
     }
 
     // https://yaml.org/spec/1.2.2/#731-double-quoted-style
-    fn consume_double_quoted_literal(&mut self) -> YamlSyntaxKind {
+    fn consume_double_quoted_literal(&mut self) {
         self.assert_byte(b'"');
         self.advance(1);
 
-        loop {
+        let kind = loop {
             match self.current_byte() {
                 Some(b'\\') => {
                     if matches!(self.peek_byte(), Some(b'"')) {
@@ -151,15 +257,16 @@ impl<'src> YamlLexer<'src> {
                 Some(_) => self.advance(1),
                 None => break ERROR_TOKEN,
             }
-        }
+        };
+        self.push_token(kind);
     }
 
     // https://yaml.org/spec/1.2.2/#732-single-quoted-style
-    fn consume_single_quoted_literal(&mut self) -> YamlSyntaxKind {
+    fn consume_single_quoted_literal(&mut self) {
         self.assert_byte(b'\'');
         self.advance(1);
 
-        loop {
+        let kind = loop {
             match self.current_byte() {
                 Some(b'\'') => {
                     if matches!(self.peek_byte(), Some(b'\'')) {
@@ -172,10 +279,40 @@ impl<'src> YamlLexer<'src> {
                 Some(_) => self.advance(1),
                 None => break ERROR_TOKEN,
             }
+        };
+        self.push_token(kind);
+    }
+
+    fn consume_blank(&mut self) {
+        let mut is_newline = false;
+        while let Some(current) = self.current_byte() {
+            if is_space(current) {
+                self.consume_whitespaces();
+            } else if is_break(current) {
+                self.consume_newline();
+                self.column = 0;
+                is_newline = true;
+            } else {
+                break;
+            }
+        }
+        if is_newline {
+            self.push_token(NEWLINE);
+            while self.column < self.current_scope().border {
+                match self.current_scope().ty {
+                    LexScopeType::Document => break,
+                    LexScopeType::BlockSequence => self.push_token(SEQUENCE_END),
+                    LexScopeType::BlockMap => self.push_token(MAPPING_END),
+                    LexScopeType::Flow => self.push_token(FLOW_END),
+                }
+                self.scopes.pop();
+            }
+        } else {
+            self.push_token(WHITESPACE);
         }
     }
 
-    fn consume_unexpected_token(&mut self) -> YamlSyntaxKind {
+    fn consume_unexpected_token(&mut self) {
         self.assert_current_char_boundary();
 
         let char = self.current_char_unchecked();
@@ -185,8 +322,12 @@ impl<'src> YamlLexer<'src> {
         );
         self.diagnostics.push(err);
         self.advance(char.len_utf8());
+        self.push_token(ERROR_TOKEN);
+    }
 
-        ERROR_TOKEN
+    fn current_token(&self) -> &LexToken {
+        // Gracefully handle out of index
+        &self.tokens[self.token_index]
     }
 }
 
@@ -195,19 +336,28 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
     const WHITESPACE: Self::Kind = YamlSyntaxKind::WHITESPACE;
 
     type Kind = YamlSyntaxKind;
-    type LexContext = YamlLexContext;
-    type ReLexContext = YamlLexContext;
+    type LexContext = ();
+    type ReLexContext = ();
 
     fn source(&self) -> &'src str {
         self.source
     }
 
     fn current(&self) -> Self::Kind {
-        self.current_kind
+        self.current_token().kind
     }
 
     fn current_range(&self) -> TextRange {
-        TextRange::new(self.current_start, TextSize::from(self.position as u32))
+        TextRange::new(
+            TextSize::from(self.current_token().start as u32),
+            TextSize::from(self.current_token().end as u32),
+        )
+    }
+
+    #[inline]
+    fn advance(&mut self, n: usize) {
+        self.position += n;
+        self.column += n as i32;
     }
 
     #[inline]
@@ -218,55 +368,44 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
 
     #[inline]
     fn current_start(&self) -> TextSize {
-        self.current_start
+        TextSize::from(self.current_token().start as u32)
     }
 
-    fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
-        self.current_start = TextSize::from(self.position as u32);
-        self.current_flags = TokenFlags::empty();
-        let kind = match self.current_byte() {
-            Some(current) => self.consume_token(current, context),
-            None => EOF,
-        };
-        self.current_kind = kind;
-        kind
+    fn next_token(&mut self, _context: Self::LexContext) -> Self::Kind {
+        if self.tokens.len() <= self.token_index + 1 {
+            match self.current_byte() {
+                Some(current) => self.lex_token(current),
+                None => {
+                    while let Some(scope) = self.scopes.pop() {
+                        match scope.ty {
+                            LexScopeType::Document => break,
+                            LexScopeType::BlockSequence => self.push_token(SEQUENCE_END),
+                            LexScopeType::BlockMap => self.push_token(MAPPING_END),
+                            LexScopeType::Flow => self.push_token(FLOW_END),
+                        }
+                    }
+                    self.push_token(EOF)
+                }
+            }
+        }
+        self.token_index += 1;
+        self.current_token().kind
     }
 
     fn has_preceding_line_break(&self) -> bool {
-        self.current_flags.has_preceding_line_break()
+        false
     }
 
     fn has_unicode_escape(&self) -> bool {
-        self.current_flags.has_unicode_escape()
+        false
     }
 
-    fn rewind(&mut self, checkpoint: LexerCheckpoint<Self::Kind>) {
-        let LexerCheckpoint {
-            position,
-            current_start,
-            current_flags,
-            current_kind,
-            unicode_bom_length,
-            diagnostics_pos,
-            ..
-        } = checkpoint;
-
-        let new_pos = u32::from(position) as usize;
-
-        self.position = new_pos;
-        self.current_kind = current_kind;
-        self.current_start = current_start;
-        self.current_flags = current_flags;
-        self.unicode_bom_length = unicode_bom_length;
-        self.diagnostics.truncate(diagnostics_pos as usize);
+    fn rewind(&mut self, _: LexerCheckpoint<Self::Kind>) {
+        unimplemented!()
     }
 
     fn finish(self) -> Vec<ParseDiagnostic> {
         self.diagnostics
-    }
-
-    fn current_flags(&self) -> TokenFlags {
-        self.current_flags
     }
 
     fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
@@ -277,98 +416,66 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
         self.position
     }
 
-    #[inline]
-    fn advance(&mut self, n: usize) {
-        self.position += n;
-    }
-
-    /// Consume one newline or all whitespace until a non-whitespace or a newline is found.
+    /// Consumes all whitespace until a non-whitespace or a newline is found.
     ///
     /// ## Safety
     /// Must be called at a valid UT8 char boundary
-    fn consume_newline_or_whitespaces(&mut self) -> YamlSyntaxKind {
-        if self.consume_newline() {
-            YamlSyntaxKind::NEWLINE
-        } else {
-            self.consume_whitespaces();
-            YamlSyntaxKind::WHITESPACE
+    fn consume_whitespaces(&mut self) {
+        self.assert_current_char_boundary();
+
+        while let Some(c) = self.current_byte() {
+            let dispatch = lookup_byte(c);
+            if !matches!(dispatch, WHS) {
+                break;
+            }
+
+            if is_space(c) {
+                self.advance(1);
+            } else if is_break(c) {
+                break;
+            } else {
+                let start = self.text_position();
+                self.advance(1);
+
+                self.push_diagnostic(
+                    ParseDiagnostic::new(
+                        "The YAML standard allows only two types of whitespace characters: tabs and spaces",
+                        start..self.text_position(),
+                    )
+                        .with_hint("Use a regular whitespace character instead. For more detail, please check https://yaml.org/spec/1.2.2/#55-white-space-characters"),
+                )
+            }
         }
     }
 }
 
-impl<'src> ReLexer<'src> for YamlLexer<'src> {
-    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
-        self.position = u32::from(self.current_start) as usize;
-
-        let kind = match self.current_byte() {
-            Some(current) => self.consume_token(current, context),
-            None => EOF,
-        };
-        self.current_kind = kind;
-        kind
-    }
+#[derive(Debug)]
+pub(crate) struct LexToken {
+    start: usize,
+    end: usize,
+    start_col: i32,
+    end_col: i32,
+    kind: YamlSyntaxKind,
 }
 
-impl<'src> LexerWithCheckpoint<'src> for YamlLexer<'src> {
-    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
-        LexerCheckpoint {
-            position: TextSize::from(self.position as u32),
-            current_start: self.current_start,
-            current_flags: self.current_flags,
-            current_kind: self.current_kind,
-            after_line_break: self.has_preceding_line_break(),
-            unicode_bom_length: self.unicode_bom_length,
-            diagnostics_pos: self.diagnostics.len() as u32,
-        }
-    }
+struct LexScope {
+    ty: LexScopeType,
+    /// Scope starting column
+    border: i32,
 }
 
-/// Lex context as specified in
-/// https://yaml.org/spec/1.2.2/#42-production-parameters
-#[derive(Default, Clone, Copy)]
-pub enum YamlLexContext {
-    /// Before getting into the document body, for example:
-    /// %YAML 1.2
-    /// ---
-    /// <document body>
-    /// ...
-    #[default]
-    Regular,
-    /// Inside block key context, for example:
-    /// abc: xyz
-    /// ^^^
-    BlockKey,
-    /// Inside block value, but outside flow context, for example:
-    /// abc: [1, 2, 3]
-    ///      ^^^^^^^^^
-    FlowOut,
-    /// Inside flow context, for example:
-    /// abc: [1, 2, [4, 5]]
-    ///       ^  ^  ^^^^^^
-    FlowIn,
-    /// Inside flow key context
-    /// abc: {{10: [100]}: 50}
-    ///       ^^^^^^^^^^
-    FlowKey,
-}
-
-impl LexContext for YamlLexContext {
-    fn is_regular(&self) -> bool {
-        matches!(self, Self::Regular)
-    }
+enum LexScopeType {
+    Document,
+    BlockSequence,
+    BlockMap,
+    Flow,
 }
 
 // https://yaml.org/spec/1.2.2/#rule-ns-plain-safe
-fn is_plain_safe(c: u8, context: YamlLexContext) -> bool {
-    use YamlLexContext::*;
-    match context {
-        FlowOut | BlockKey => is_non_space_char(c),
-        FlowIn | FlowKey => is_non_space_char(c) && !is_flow_indicator(c),
-        // Can happen when a YAML document starts with a plain token. This token will then be
-        // used by the parser to determine whether the parser is already inside the document
-        // body. This token is not used inside the CST and instead is just used to signal the
-        // start of document body
-        Regular => is_non_space_char(c) && !is_indicator(c),
+fn is_plain_safe(c: u8, scope: &LexScope) -> bool {
+    match scope.ty {
+        LexScopeType::Flow => is_non_space_char(c) && !is_flow_indicator(c),
+        _ => is_non_space_char(c),
     }
 }
 

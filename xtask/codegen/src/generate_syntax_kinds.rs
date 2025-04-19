@@ -198,6 +198,12 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
                         EOF => "EOF",
+                        FLOW_START => "start of a flow node",
+                        FLOW_END => "end of a flow node",
+                        MAPPING_START => "start of a block mapping",
+                        MAPPING_END => "end of a block mapping",
+                        SEQUENCE_START => "start of a block sequence",
+                        SEQUENCE_END => "end of a block sequence",
                         _ => return None,
                     };
                     Some(tok)

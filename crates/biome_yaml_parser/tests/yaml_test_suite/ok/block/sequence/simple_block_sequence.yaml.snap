@@ -1,0 +1,119 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+- 10
+- 20
+- 30
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockSequence {
+                sequence_start_token: SEQUENCE_START@0..0 "" [] [],
+                properties: missing (optional),
+                entries: YamlBlockSequenceEntryList [
+                    YamlBlockSequenceEntry {
+                        minus_token: DASH@0..2 "-" [] [Whitespace(" ")],
+                        value: YamlFlowInBlockNode {
+                            flow_start_token: FLOW_START@2..2 "" [] [],
+                            flow: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@2..4 "10" [] [],
+                                },
+                            },
+                            flow_end_token: FLOW_END@4..4 "" [] [],
+                        },
+                    },
+                    YamlBlockSequenceEntry {
+                        minus_token: DASH@4..7 "-" [Newline("\n")] [Whitespace(" ")],
+                        value: YamlFlowInBlockNode {
+                            flow_start_token: FLOW_START@7..7 "" [] [],
+                            flow: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@7..9 "20" [] [],
+                                },
+                            },
+                            flow_end_token: FLOW_END@9..9 "" [] [],
+                        },
+                    },
+                    YamlBlockSequenceEntry {
+                        minus_token: DASH@9..12 "-" [Newline("\n")] [Whitespace(" ")],
+                        value: YamlFlowInBlockNode {
+                            flow_start_token: FLOW_START@12..12 "" [] [],
+                            flow: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@12..14 "30" [] [],
+                                },
+                            },
+                            flow_end_token: FLOW_END@14..14 "" [] [],
+                        },
+                    },
+                ],
+                sequence_end_token: SEQUENCE_END@14..15 "" [Newline("\n")] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@15..15 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..15
+  0: YAML_DOCUMENT_LIST@0..15
+    0: YAML_DOCUMENT@0..15
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_SEQUENCE@0..15
+        0: SEQUENCE_START@0..0 "" [] []
+        1: (empty)
+        2: YAML_BLOCK_SEQUENCE_ENTRY_LIST@0..14
+          0: YAML_BLOCK_SEQUENCE_ENTRY@0..4
+            0: DASH@0..2 "-" [] [Whitespace(" ")]
+            1: YAML_FLOW_IN_BLOCK_NODE@2..4
+              0: FLOW_START@2..2 "" [] []
+              1: YAML_FLOW_YAML_NODE@2..4
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@2..4
+                  0: PLAIN_LITERAL@2..4 "10" [] []
+              2: FLOW_END@4..4 "" [] []
+          1: YAML_BLOCK_SEQUENCE_ENTRY@4..9
+            0: DASH@4..7 "-" [Newline("\n")] [Whitespace(" ")]
+            1: YAML_FLOW_IN_BLOCK_NODE@7..9
+              0: FLOW_START@7..7 "" [] []
+              1: YAML_FLOW_YAML_NODE@7..9
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@7..9
+                  0: PLAIN_LITERAL@7..9 "20" [] []
+              2: FLOW_END@9..9 "" [] []
+          2: YAML_BLOCK_SEQUENCE_ENTRY@9..14
+            0: DASH@9..12 "-" [Newline("\n")] [Whitespace(" ")]
+            1: YAML_FLOW_IN_BLOCK_NODE@12..14
+              0: FLOW_START@12..12 "" [] []
+              1: YAML_FLOW_YAML_NODE@12..14
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@12..14
+                  0: PLAIN_LITERAL@12..14 "30" [] []
+              2: FLOW_END@14..14 "" [] []
+        3: SEQUENCE_END@14..15 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@15..15 "" [] []
+
+```

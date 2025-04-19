@@ -36,7 +36,6 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let parsed = parse_yaml(&content);
     validate_eof_token(parsed.syntax());
-    println!("Raw tree {:#?}", parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 
