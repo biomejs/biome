@@ -33,7 +33,21 @@ pub(crate) struct YamlLexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
 }
 
-impl YamlLexer<'_> {
+impl<'src> YamlLexer<'src> {
+    pub fn from_str(source: &'src str) -> Self {
+        use biome_parser::lexer::TokenFlags;
+
+        Self {
+            source,
+            position: 0,
+            unicode_bom_length: 0,
+            current_kind: TOMBSTONE,
+            current_start: TextSize::from(0),
+            current_flags: TokenFlags::empty(),
+            diagnostics: vec![],
+        }
+    }
+
     /// Consume a byte in the given context
     fn consume_token(&mut self, current: u8) -> YamlSyntaxKind {
         let start = self.text_position();
