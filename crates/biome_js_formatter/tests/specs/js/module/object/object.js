@@ -30,3 +30,6 @@ const y = {
 
 ({
 	a, b, c} = {a: 'apple', b: 'banana', c: 'coconut'});
+
+// https://github.com/biomejs/biome/issues/5682
+const { foo, bar = [], baz: { disabled } = { disabled: false } } = props;
