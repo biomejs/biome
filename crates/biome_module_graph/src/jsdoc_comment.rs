@@ -76,7 +76,7 @@ impl JsdocComment {
                 .filter_map(|trivia| match trivia.kind() {
                     TriviaPieceKind::MultiLineComment | TriviaPieceKind::SingleLineComment => {
                         let text = trivia.text();
-                        JsdocComment::text_is_jsdoc_comment(text).then(|| text.to_string())
+                        Self::text_is_jsdoc_comment(text).then(|| text.to_string())
                     }
                     _ => None,
                 })
