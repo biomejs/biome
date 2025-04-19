@@ -203,22 +203,21 @@ declare_source_rule! {
     ///
     /// If two imports or exports share the same source and are in the same chunk, then they are ordered according to their kind as follows:
     ///
-    /// 1. Default type import
-    /// 2. Default import
-    /// 3. Combined default and namespace import
-    /// 4. Combined default and named import
-    /// 5. Namespace type import / Namespace type export
-    /// 6. Namespace import / Namespace export
-    /// 7. Named type import / Named type export
+    /// 1. Namespace type import / Namespace type export
+    /// 2. Default type import
+    /// 3. Named type import / Named type export
+    /// 4. Namespace import / Namespace export
+    /// 5. Combined default and namespace import
+    /// 6. Default import
+    /// 7. Combined default and named import
     /// 8. Named import / Named export
     ///
-    /// Also, import and exports with attributes are always placed first.
+    /// Import and exports with attributes are always placed first.
     /// For example, the following code...
     ///
     /// ```ts,expect_diagnostic
     /// import * as namespaceImport from "same-source";
     /// import type * as namespaceTypeImport from "same-source";
-    /// import { namedImport } from "same-source";
     /// import type { namedTypeImport } from "same-source";
     /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
     /// import defaultNamedCombined, { namedCombined } from "same-source";
@@ -231,18 +230,17 @@ declare_source_rule! {
     ///
     /// ```ts,ignore
     /// import { importWithAttribute } from "same-source" with { "attribute": "value" } ;
-    /// import type defaultTypeImport from "same-source";
-    /// import defaultImport from "same-source";
-    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
-    /// import defaultNamedCombined, { namedCombined } from "same-source";
     /// import type * as namespaceTypeImport from "same-source";
-    /// import * as namespaceImport from "same-source";
+    /// import type defaultTypeImport from "same-source";
     /// import type { namedTypeImport } from "same-source";
-    /// import { namedImport } from "same-source";
+    /// import * as namespaceImport from "same-source";
+    /// import defaultNamespaceCombined, * as namespaceCombined from "same-source";
+    /// import defaultImport from "same-source";
+    /// import defaultNamedCombined, { namedCombined } from "same-source";
     /// ```
     ///
     /// This default order cannot be changed.
-    /// However, users can still customize how imports and exports are sorted using the concept of groups.
+    /// However, users can still customize how imports and exports are sorted using the concept of groups as explained in the following section.
     ///
     ///
     /// ## Import and export groups
@@ -256,7 +254,7 @@ declare_source_rule! {
     ///
     /// - A predefined group matcher, or
     /// - A glob pattern, or
-    /// - A list of glob patterns.
+    /// - A list of glob patterns and predefined group matchers.
     ///
     /// Predefined group matchers are strings in `CONSTANT_CASE` prefixed and suffixed by `:`.
     /// The sorter provides several predefined group matchers:
@@ -373,9 +371,6 @@ declare_source_rule! {
     /// For example `["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**", "@my/lib/special/*/accepted/**"]` allows you to accepts all sources matching `@my/lib/special/*/accepted/**`.
     /// For more details on the supported glob patterns, see the dedicated section.
     ///
-    /// For now, it is not possible to mix predefined group matchers and glob patterns inside a list of globs.
-    /// This is a limitation that we are working to remove.
-    ///
     /// The sorter allows the separation of two groups with a blank line using the predefined string `:BLANK_LINE:`.
     /// Given the following configuration...
     ///
@@ -383,7 +378,7 @@ declare_source_rule! {
     /// {
     ///     "options": {
     ///         "groups": [
-    ///             ":NODE:",
+    ///             [":BUN:", ":NODE:"],
     ///             ":BLANK_LINE:",
     ///             ["@my/lib", "@my/lib/**", "!@my/lib/special", "!@my/lib/special/**"],
     ///             "@/**"
@@ -395,10 +390,11 @@ declare_source_rule! {
     /// ...the following code...
     ///
     /// ```js
+    /// import test from "bun:test";
     /// import path from "node:path";
     /// import lib from "@my/lib";
-    /// import test from "@my/lib/path";
-    /// import path from "@my/lib/special";
+    /// import libPath from "@my/lib/path";
+    /// import libSpecial from "@my/lib/special";
     /// import aliased from "@/alias";
     /// ```
     ///
@@ -411,6 +407,47 @@ declare_source_rule! {
     /// import test from "@my/lib/path";
     /// import aliased from "@/alias";
     /// import path from "@my/lib/special";
+    /// ```
+    ///
+    ///
+    /// ## Separating type-only imports and exports
+    ///
+    /// The organizer also provides the `typePlacement` option that allows you to separate `import type` and `export type` from regular `import` and `export`.
+    /// By default they are mixed together.
+    ///
+    /// Set the option to `typesFirst` to place type-only imports and exports before regular imports and exports.
+    /// A blank line is always added between them.
+    ///
+    /// Given the following configuration...
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "typePlacement": "typesFirst",
+    ///         "groups": [
+    ///             ["@my/lib", "@my/lib/**"]
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ...the following code...
+    ///
+    /// ```ts
+    /// import D from "@my/lib";
+    /// import type T from "@my/lib";
+    /// import type * as pathTypes from "node:path";
+    /// import path from "node:path";
+    /// ```
+    ///
+    /// ...is sorted as:
+    ///
+    /// ```ts
+    /// import type T from "@my/lib";
+    /// import type * as pathTypes from "node:path";
+    ///
+    /// import D from "@my/lib";
+    /// import path from "node:path";
     /// ```
     ///
     ///
@@ -458,6 +495,31 @@ declare_source_rule! {
     /// import A from "a";
     /// // Attached comment for `b`
     /// import B from "b";
+    /// ```
+    ///
+    ///
+    /// ## Import and export merging
+    ///
+    /// The organizer also merges imports and exports that can be merged.
+    ///
+    /// For example, the following code:
+    ///
+    /// ```ts
+    /// import type { T1 } from "package";
+    /// import type { T2 } from "package";
+    /// import * as ns from "package";
+    /// import D1 from "package";
+    /// import D2 from "package";
+    /// import { A } from "package";
+    /// import { B } from "package";
+    /// ```
+    ///
+    /// is merged as follows:
+    ///
+    /// ```ts
+    /// import type { T1, T2 } from "package";
+    /// import D1, * as ns from "package";
+    /// import D2, { A, B } from "package";
     /// ```
     ///
     ///
