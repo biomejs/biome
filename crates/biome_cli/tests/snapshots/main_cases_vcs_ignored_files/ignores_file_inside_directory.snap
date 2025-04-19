@@ -33,7 +33,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
   
   i There paths were provided but ignored:
   
-  - /private<TEMP_DIR>/ignores_file_inside_directory
+  - <TEMP_DIR>/ignores_file_inside_directory
   
 
 
