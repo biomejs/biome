@@ -63,6 +63,26 @@ impl JsdocComment {
             && text.as_bytes().get(3).is_some_and(|c| *c != b'*')
             && text.ends_with("*/")
     }
+
+    /// Iterates all JSDoc comments preceeding the node.
+    pub fn for_each<F>(node: &JsSyntaxNode, mut func: F)
+    where
+        F: FnMut(&String),
+    {
+        if let Some(token) = node.first_token() {
+            token
+                .leading_trivia()
+                .pieces()
+                .filter_map(|trivia| match trivia.kind() {
+                    TriviaPieceKind::MultiLineComment | TriviaPieceKind::SingleLineComment => {
+                        let text = trivia.text();
+                        JsdocComment::text_is_jsdoc_comment(text).then(|| text.to_string())
+                    }
+                    _ => None,
+                })
+                .for_each(|f| func(&f));
+        }
+    }
 }
 
 impl AsRef<str> for JsdocComment {
@@ -97,7 +117,6 @@ impl TryFrom<&JsSyntaxNode> for JsdocComment {
 
 impl TryFrom<JsSyntaxToken> for JsdocComment {
     type Error = ();
-
     fn try_from(token: JsSyntaxToken) -> Result<Self, Self::Error> {
         token
             .leading_trivia()
