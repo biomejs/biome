@@ -230,6 +230,10 @@ fn replace_temp_dir(input: Cow<str>) -> Cow<str> {
     while let Some(index) = rest.find(temp_dir) {
         let (before, after) = rest.split_at(index);
 
+        // Normalize /var and /private/var on macOS
+        #[cfg(target_os = "macos")]
+        let before = before.trim_end_matches("/private");
+
         result.push_str(before);
         result.push_str("<TEMP_DIR>");
 
