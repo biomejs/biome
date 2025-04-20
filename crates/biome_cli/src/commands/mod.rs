@@ -1,5 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
+use crate::commands::scan_kind::compute_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -51,6 +52,7 @@ pub(crate) mod init;
 pub(crate) mod lint;
 pub(crate) mod migrate;
 pub(crate) mod rage;
+mod scan_kind;
 pub(crate) mod search;
 pub(crate) mod version;
 
@@ -816,7 +818,7 @@ pub(crate) trait CommandRunner: Sized {
         })?;
 
         let execution = self.get_execution(cli_options, console, workspace, project_key)?;
-        let scan_kind = execution.traversal_mode().to_scan_kind();
+        let scan_kind = compute_scan_kind(&execution, &configuration);
 
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key,

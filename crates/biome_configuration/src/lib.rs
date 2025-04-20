@@ -22,8 +22,8 @@ mod overrides;
 pub mod plugins;
 pub mod vcs;
 
-use crate::analyzer::RuleAssistConfiguration;
 use crate::analyzer::assist::{Actions, AssistConfiguration, Source, assist_configuration};
+use crate::analyzer::{RuleAssistConfiguration, RuleDomains};
 use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
 pub use crate::diagnostics::BiomeDiagnostic;
@@ -267,6 +267,10 @@ impl Configuration {
             .as_ref()
             .map(|f| f.get_rules())
             .unwrap_or_default()
+    }
+
+    pub fn get_linter_domains(&self) -> Option<&RuleDomains> {
+        self.linter.as_ref().and_then(|l| l.domains.as_ref())
     }
 
     pub fn get_assist_actions(&self) -> Actions {

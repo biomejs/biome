@@ -1,8 +1,11 @@
-use biome_analyze::{GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleMetadata};
+use biome_analyze::{
+    GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
+};
 use biome_css_syntax::CssLanguage;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
+use biome_rowan::Language;
 use std::{collections::BTreeMap, str::FromStr};
 
 #[derive(Debug, Clone)]
@@ -19,7 +22,7 @@ impl FromStr for Doc {
         match s {
             "daemon-logs" => Ok(Self::DaemonLogs),
             _ => {
-                if let Some(metadata) = LintRulesVisitor::new().get_metadata(s) {
+                if let Some(metadata) = RulesVisitor::new().get_metadata(s) {
                     return Ok(Self::Rule(metadata));
                 };
 
@@ -29,11 +32,11 @@ impl FromStr for Doc {
     }
 }
 
-struct LintRulesVisitor {
+struct RulesVisitor {
     rules_metadata: BTreeMap<&'static str, RuleMetadata>,
 }
 
-impl LintRulesVisitor {
+impl RulesVisitor {
     fn new() -> Self {
         let mut visitor = Self {
             rules_metadata: BTreeMap::new(),
@@ -50,67 +53,54 @@ impl LintRulesVisitor {
     fn get_metadata(&mut self, name: &str) -> Option<RuleMetadata> {
         self.rules_metadata.remove(name)
     }
-}
 
-impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
-    fn record_rule<R>(&mut self)
+    fn store_rule<R, L>(&mut self)
     where
-        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+        L: Language,
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
-        self.rules_metadata.insert(R::METADATA.name, R::METADATA);
-    }
-
-    fn record_category<C: biome_analyze::GroupCategory<Language = JsLanguage>>(&mut self) {
-        if matches!(C::CATEGORY, RuleCategory::Lint) {
-            C::record_groups(self);
+        let category = <R::Group as RuleGroup>::Category::CATEGORY;
+        if matches!(category, RuleCategory::Lint) {
+            self.rules_metadata.insert(R::METADATA.name, R::METADATA);
         }
     }
 }
 
-impl RegistryVisitor<JsonLanguage> for LintRulesVisitor {
+impl RegistryVisitor<JsLanguage> for RulesVisitor {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        self.store_rule::<R, JsLanguage>();
+    }
+}
+
+impl RegistryVisitor<JsonLanguage> for RulesVisitor {
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
             + 'static,
     {
-        self.rules_metadata.insert(R::METADATA.name, R::METADATA);
-    }
-
-    fn record_category<C: biome_analyze::GroupCategory<Language = JsonLanguage>>(&mut self) {
-        if matches!(C::CATEGORY, RuleCategory::Lint) {
-            C::record_groups(self);
-        }
+        self.store_rule::<R, JsonLanguage>();
     }
 }
 
-impl RegistryVisitor<CssLanguage> for LintRulesVisitor {
+impl RegistryVisitor<CssLanguage> for RulesVisitor {
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
             + 'static,
     {
-        self.rules_metadata.insert(R::METADATA.name, R::METADATA);
-    }
-
-    fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
-        if matches!(C::CATEGORY, RuleCategory::Lint) {
-            C::record_groups(self);
-        }
+        self.store_rule::<R, CssLanguage>();
     }
 }
 
-impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
+impl RegistryVisitor<GraphqlLanguage> for RulesVisitor {
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
             + 'static,
     {
-        self.rules_metadata.insert(R::METADATA.name, R::METADATA);
-    }
-
-    fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
-        if matches!(C::CATEGORY, RuleCategory::Lint) {
-            C::record_groups(self);
-        }
+        self.store_rule::<R, GraphqlLanguage>();
     }
 }

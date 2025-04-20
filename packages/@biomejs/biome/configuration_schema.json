@@ -3468,6 +3468,11 @@
 					"description": "Next.js framework rules",
 					"type": "string",
 					"enum": ["next"]
+				},
+				{
+					"description": "For rules that require querying multiple files inside a project",
+					"type": "string",
+					"enum": ["project"]
 				}
 			]
 		},
