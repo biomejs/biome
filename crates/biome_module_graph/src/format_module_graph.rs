@@ -482,15 +482,7 @@ impl Format<ModuleFormatContext> for Literal {
                     dynamic_text(value.text(), TextSize::default()),
                 ]]
             ),
-            Self::Template(value) => write!(
-                f,
-                [&format_args![
-                    text("Template"),
-                    text(":"),
-                    space(),
-                    dynamic_text(value.text(), TextSize::default()),
-                ]]
-            ),
+            Self::Template(value) => write!(f, [FmtVerbatim(&value)]),
         }
     }
 }
@@ -509,6 +501,7 @@ impl Format<ModuleFormatContext> for ObjectLiteral {
         )
     }
 }
+
 impl Format<ModuleFormatContext> for JsResolvedPath {
     fn fmt(
         &self,

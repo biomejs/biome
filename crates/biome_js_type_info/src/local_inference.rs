@@ -4,23 +4,24 @@ use biome_js_syntax::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMember,
     AnyJsDeclaration, AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression,
     AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMember, AnyJsParameter,
-    AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, ClassMemberName, JsArrowFunctionExpression, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsFunctionDeclaration,
-    JsFunctionExpression, JsNewExpression, JsObjectExpression, JsParameters, JsReferenceIdentifier,
-    JsSyntaxToken, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
-    TsTypeofType, inner_string_text, unescape_js_string,
+    AnyJsTemplateElement, AnyTsName, AnyTsReturnType, AnyTsTemplateElement, AnyTsTupleTypeElement,
+    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, ClassMemberName,
+    JsArrowFunctionExpression, JsBinaryExpression, JsCallArguments, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsClassExpression, JsFunctionDeclaration,
+    JsFunctionExpression, JsLogicalExpression, JsNewExpression, JsObjectExpression, JsParameters,
+    JsReferenceIdentifier, JsSyntaxToken, JsVariableDeclarator, T, TsReferenceType,
+    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
-use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
+use biome_rowan::{AstNode, AstNodeList, SyntaxResult, Text, TokenText};
 
 use crate::{
     AssertsReturnType, CallArgumentType, CallSignatureTypeMember, Class, Constructor,
     ConstructorTypeMember, Function, FunctionParameter, GenericTypeParameter, Intersection,
-    Literal, MethodTypeMember, Object, PredicateReturnType, PropertyTypeMember, ReturnType, Tuple,
-    TupleElementType, Type, TypeAlias, TypeId, TypeInner, TypeMember, TypeOperator,
-    TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeofCallExpression,
-    TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
+    Literal, MethodTypeMember, Object, PredicateReturnType, PropertyTypeMember, ReturnType,
+    TemplateLiteral, Truthiness, Tuple, TupleElementType, Type, TypeAlias, TypeId, TypeInner,
+    TypeMember, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
+    TypeofCallExpression, TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
     TypeofThisOrSuperExpression, TypeofValue, Union,
     globals::{ARRAY_TYPE, PROMISE_TYPE},
 };
@@ -178,6 +179,11 @@ impl Type {
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(expr)
             }
+            AnyJsExpression::JsAssignmentExpression(expr) => expr
+                .right()
+                .map(|expr| Self::from_any_js_expression(&expr))
+                .unwrap_or_default(),
+            AnyJsExpression::JsBinaryExpression(expr) => Self::from_js_binary_expression(&expr),
             AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
                 Ok(callee) => TypeInner::TypeofExpression(Box::new(TypeofExpression::Call(
                     TypeofCallExpression {
@@ -218,6 +224,7 @@ impl Type {
                 .map(|name| Self::from_js_reference_identifier(&name))
                 .unwrap_or_default(),
             AnyJsExpression::JsInstanceofExpression(_expr) => Self::boolean(),
+            AnyJsExpression::JsLogicalExpression(expr) => Self::from_js_logical_expression(&expr),
             AnyJsExpression::JsNewExpression(expr) => {
                 Self::from_js_new_expression(expr).unwrap_or_default()
             }
@@ -233,6 +240,10 @@ impl Type {
             .into(),
             AnyJsExpression::JsParenthesizedExpression(expr) => expr
                 .expression()
+                .map(|expr| Self::from_any_js_expression(&expr))
+                .unwrap_or_default(),
+            AnyJsExpression::JsSequenceExpression(expr) => expr
+                .right()
                 .map(|expr| Self::from_any_js_expression(&expr))
                 .unwrap_or_default(),
             AnyJsExpression::JsStaticMemberExpression(expr) => match (expr.object(), expr.member())
@@ -254,10 +265,88 @@ impl Type {
                 TypeofExpression::Super(TypeofThisOrSuperExpression::from_any_js_expression(expr)),
             ))
             .into(),
+            AnyJsExpression::JsTemplateExpression(expr) => {
+                // TODO: support tagged templates
+                if expr.tag().is_some() {
+                    return Self::unknown();
+                }
+
+                let elements = expr.elements();
+                match elements.first() {
+                    Some(AnyJsTemplateElement::JsTemplateChunkElement(element))
+                        if elements.len() <= 1 =>
+                    {
+                        TypeInner::Literal(Box::new(Literal::String(element.to_trimmed_text())))
+                            .into()
+                    }
+                    None => TypeInner::Literal(Box::new(Literal::String(Text::Static("")))).into(),
+                    _ => {
+                        let items = elements
+                            .into_iter()
+                            .map(|element| match element {
+                                AnyJsTemplateElement::JsTemplateElement(element) => {
+                                    element.expression().map_or_else(
+                                        |_| Self::unknown(),
+                                        |expr| Self::from_any_js_expression(&expr),
+                                    )
+                                }
+                                AnyJsTemplateElement::JsTemplateChunkElement(element) => {
+                                    TypeInner::Literal(Box::new(Literal::String(
+                                        element.to_trimmed_text(),
+                                    )))
+                                    .into()
+                                }
+                            })
+                            .collect();
+
+                        TypeInner::Literal(Box::new(Literal::Template(TemplateLiteral(items))))
+                            .into()
+                    }
+                }
+            }
             AnyJsExpression::JsThisExpression(_) => TypeInner::TypeofExpression(Box::new(
                 TypeofExpression::This(TypeofThisOrSuperExpression::from_any_js_expression(expr)),
             ))
             .into(),
+            AnyJsExpression::JsUnaryExpression(expr) => {
+                let Ok(operator) = expr.operator_token() else {
+                    return Self::unknown();
+                };
+
+                let Ok(argument) = expr.argument() else {
+                    return Self::unknown();
+                };
+
+                match operator.kind() {
+                    T![void] => Self::undefined(),
+                    T![!] => {
+                        let ty = Self::from_any_js_expression(&argument);
+                        TypeInner::Literal(Box::new(Literal::Boolean(match ty.truthiness() {
+                            Some(Truthiness::Truthy) => Text::Static("false"),
+                            Some(Truthiness::Falsy) => Text::Static("true"),
+                            _ => return Self::boolean(),
+                        })))
+                        .into()
+                    }
+                    T![-] => {
+                        let ty = Self::from_any_js_expression(&argument);
+                        match ty.as_literal() {
+                            Some(Literal::BigInt(_)) => TypeInner::Literal(Box::new(
+                                Literal::BigInt(expr.to_trimmed_text()),
+                            ))
+                            .into(),
+                            Some(Literal::Number(_)) => TypeInner::Literal(Box::new(
+                                Literal::Number(expr.to_trimmed_text()),
+                            ))
+                            .into(),
+                            _ => Self::number(),
+                        }
+                    }
+                    // TODO
+                    _ => Self::unknown(),
+                    // _ => unreachable!("unexpected operator kind"),
+                }
+            }
             _ => {
                 // TODO: Much
                 Self::unknown()
@@ -400,7 +489,21 @@ impl Type {
             AnyTsType::TsStringType(_) => TypeInner::String,
             AnyTsType::TsSymbolType(_) => TypeInner::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
-                TypeInner::Literal(Box::new(Literal::Template(Text::Owned(ty.to_string()))))
+                let items = ty
+                    .elements()
+                    .into_iter()
+                    .map(|element| match element {
+                        AnyTsTemplateElement::TsTemplateElement(element) => element
+                            .ty()
+                            .map_or_else(|_| Self::unknown(), |ty| Self::from_any_ts_type(&ty)),
+                        AnyTsTemplateElement::TsTemplateChunkElement(element) => {
+                            TypeInner::Literal(Box::new(Literal::String(element.to_trimmed_text())))
+                                .into()
+                        }
+                    })
+                    .collect();
+
+                TypeInner::Literal(Box::new(Literal::Template(TemplateLiteral(items))))
             }
             AnyTsType::TsThisType(_) => TypeInner::ThisKeyword,
             AnyTsType::TsTupleType(ty) => {
@@ -475,6 +578,58 @@ impl Type {
         .into()
     }
 
+    pub fn from_js_binary_expression(expr: &JsBinaryExpression) -> Self {
+        let operator = match expr.operator_token() {
+            Ok(token) => token.kind(),
+            _ => return Self::unknown(),
+        };
+
+        let (left, right) = match (expr.left(), expr.right()) {
+            (Ok(left), Ok(right)) => (
+                Self::from_any_js_expression(&left),
+                Self::from_any_js_expression(&right),
+            ),
+            _ => return Self::unknown(),
+        };
+
+        match operator {
+            T![==] | T![===] | T![!=] | T![!==] => {
+                let strict = operator == T![===];
+                let inverted = operator == T![!=] || operator == T![!==];
+
+                let (left, right) = match (left.as_literal(), right.as_literal()) {
+                    (Some(left), Some(right)) => (left, right),
+                    _ => return Self::boolean(),
+                };
+
+                let mut is_equal = match (left, right) {
+                    // TODO: normalize values explicitly
+                    (Literal::BigInt(left), Literal::BigInt(right))
+                    | (Literal::Boolean(left), Literal::Boolean(right))
+                    | (Literal::Number(left), Literal::Number(right))
+                    | (Literal::String(left), Literal::String(right)) => left == right,
+                    (Literal::Number(left), Literal::String(right))
+                    | (Literal::String(right), Literal::Number(left)) => !strict && left == right,
+                    _ => false,
+                };
+
+                if inverted {
+                    is_equal = !is_equal;
+                }
+
+                TypeInner::Literal(Box::new(Literal::Boolean(match is_equal {
+                    true => Text::Static("true"),
+                    false => Text::Static("false"),
+                })))
+                .into()
+            }
+            T![<<] | T![>>] | T![>>>] => Self::number(),
+            T![<] | T![>] | T![<=] | T![>=] | T![instanceof] | T![in] => Self::boolean(), // TODO
+            T![+] | T![-] | T![*] | T![/] | T![%] | T![**] => Self::unknown(),            // TODO
+            _ => unreachable!("unexpected operator kind"),
+        }
+    }
+
     pub fn from_js_class_declaration(decl: &JsClassDeclaration) -> Self {
         TypeInner::Class(Box::new(Class {
             id: TypeId::new(),
@@ -527,7 +682,6 @@ impl Type {
         }))
         .into()
     }
-
     pub fn from_js_function_declaration(decl: &JsFunctionDeclaration) -> Self {
         TypeInner::Function(Box::new(Function {
             is_async: decl.async_token().is_some(),
@@ -559,6 +713,36 @@ impl Type {
                 .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
         }))
         .into()
+    }
+
+    pub fn from_js_logical_expression(expr: &JsLogicalExpression) -> Self {
+        let operator = match expr.operator_token() {
+            Ok(token) => token.kind(),
+            _ => return Self::unknown(),
+        };
+
+        let (left, right) = match (expr.left(), expr.right()) {
+            (Ok(left), Ok(right)) => (
+                Self::from_any_js_expression(&left),
+                Self::from_any_js_expression(&right),
+            ),
+            _ => return Self::unknown(),
+        };
+
+        match operator {
+            T![&&] => match left.truthiness() {
+                Some(Truthiness::Truthy) => right,
+                Some(Truthiness::Falsy) => left,
+                _ => TypeInner::Union(Box::new(Union(vec![left, right].into_boxed_slice()))).into(),
+            },
+            T![||] => match left.truthiness() {
+                Some(Truthiness::Truthy) => left,
+                Some(Truthiness::Falsy) => right,
+                _ => TypeInner::Union(Box::new(Union(vec![left, right].into_boxed_slice()))).into(),
+            },
+            T![??] => Self::unknown(), // TODO!
+            _ => unreachable!("unexpected operator kind"),
+        }
     }
 
     pub fn from_js_new_expression(expr: &JsNewExpression) -> Option<Self> {

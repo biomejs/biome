@@ -1,0 +1,1618 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 105
+expression: invalid.js
+---
+# Input
+```js
+for (; true;);
+for (; ``;);
+for (; `foo`;);
+for (; `foo${bar}`;);
+do { } while (1)
+do { } while ('1')
+do { } while (0)
+do { } while (t = -2)
+do { } while (``)
+do { } while (`foo`)
+do { } while (`foo${bar}`)
+true ? 1 : 2;
+1 ? 1 : 2;
+q = 0 ? 1 : 2;
+(q = 0) ? 1 : 2;
+`` ? 1 : 2;
+`foo` ? 1 : 2;
+`foo${bar}` ? 1 : 2;
+if (-2);
+if (true);
+if (1);
+if ({});
+if (0 < 1);
+if (0 || 1);
+if (a, 1);
+if (`foo`);
+if (``);
+if (`///n`);
+if (`${'bar'}`);
+if (`${'bar' + `foo`}`);
+if (`foo${false || true}`);
+if (`foo${0 || 1}`);
+if (`foo${bar}`);
+if (`${bar}foo`);
+if (!(true || a));
+if (!(a && void b && c));
+if (0 || !(a && null));
+if (1 + !(a || true));
+if (!(null && a) > 1);
+if (+(!(a && 0)));
+if (!typeof a === 'string');
+if (-('foo' || a));
+if (+(void a && b) === ~(1 || c));
+if (a ||= true);
+if (a ||= 5);
+if (a ||= 'foo' || b);
+if (a ||= b || /regex/);
+if (a ||= b ||= true);
+if (a ||= b ||= c || 1);
+if (!(a ||= true));
+if (!(a ||= 'foo') === true);
+if (!(a ||= 'foo') === false);
+if (a || (b ||= true));
+if ((a ||= 1) || b);
+if ((a ||= true) && true);
+if (true && (a ||= true));
+if (a &&= false);
+if (a &&= null);
+if (a &&= void b);
+if (a &&= 0 && b);
+if (a &&= b && '');
+if (a &&= b &&= false);
+if (a &&= b &&= c && false);
+if (!(a &&= false));
+if (!(a &&= 0) + 1);
+if (a && (b &&= false));
+if ((a &&= null) && b);
+if (false || (a &&= false));
+if ((a &&= false) || false);
+while ([]);
+while (~!0);
+while (x = 1);
+while (function () { });
+while (1);
+while (() => { });
+while (`foo`);
+while (``);
+while (`${'foo'}`);
+while (`${'foo' + 'bar'}`);
+if (typeof x) { }
+if (typeof 'abc' === 'string') { }
+if (a = typeof b) { }
+if (a, typeof b) { }
+if (typeof 'a' == 'string' || typeof 'b' == 'string') { }
+while (typeof x) { }
+if (1 || void x);
+if (void x);
+if (y = void x);
+if (x, void x);
+if (void x === void y);
+if (void x && a);
+if (a && void x);
+if (false && abc === 'str') { }
+if (true || abc === 'str') { }
+if (1 || abc === 'str') { }
+if (abc === 'str' || true) { }
+if (abc === 'str' || true || def === 'str') { }
+if (false || true) { }
+if (typeof abc === 'str' || true) { }
+if ('str' || a) { }
+if ('str' || abc === 'str') { }
+if ('str1' || 'str2') { }
+if ('str1' && 'str2') { }
+if (abc === 'str' || 'str') { }
+if (a || 'str') { }
+function* foo() { while (1) { } yield 'foo'; }
+function* foo() { while (1) { if (true) { yield 'foo'; } } }
+function* foo() { while (1) { yield 'foo'; } while (1) { } }
+var a = function* foo() { while (1) { } yield 'foo'; }
+while (1) { function* foo() { yield; } }
+function* foo() { if (true) { yield 'foo'; } }
+function* foo() { for (let foo = yield; true;) { } }
+function* foo() { for (foo = yield; true;) { } }
+function foo() { while (1) { function* bar() { while (1) { yield; } } } }
+function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
+function* foo() { for (let foo = 1 + 2 + 3 + (yield); true; baz) { } }
+if ([a]) { }
+if ([]) { }
+if ('' + ['a']) { }
+if ('' + []) { }
+if (+1) { }
+if ([,] + '') { }
+if (/foo/ui);
+if (0n);
+if (0b0n);
+if (0o0n);
+if (0x0n);
+if (0b1n);
+if (0o1n);
+if (0x1n);
+if (0x1n || foo);
+if (class { }) { }
+if (new Foo()) { }
+if (new Boolean(foo)) { }
+if (new String(foo)) { }
+if (new Number(foo)) { }
+if (`${[...['a']]}`) { }
+if (undefined) { }
+if (Boolean(1)) { }
+if (Boolean()) { }
+if (Boolean([a])) {}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+  > 1 │ for (; true;);
+      │        ^^^^
+    2 │ for (; ``;);
+    3 │ for (; `foo`;);
+  
+
+```
+
+```
+invalid.js:2:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    1 │ for (; true;);
+  > 2 │ for (; ``;);
+      │        ^^
+    3 │ for (; `foo`;);
+    4 │ for (; `foo${bar}`;);
+  
+
+```
+
+```
+invalid.js:3:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    1 │ for (; true;);
+    2 │ for (; ``;);
+  > 3 │ for (; `foo`;);
+      │        ^^^^^
+    4 │ for (; `foo${bar}`;);
+    5 │ do { } while (1)
+  
+
+```
+
+```
+invalid.js:4:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    2 │ for (; ``;);
+    3 │ for (; `foo`;);
+  > 4 │ for (; `foo${bar}`;);
+      │        ^^^^^^^^^^^
+    5 │ do { } while (1)
+    6 │ do { } while ('1')
+  
+
+```
+
+```
+invalid.js:5:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    3 │ for (; `foo`;);
+    4 │ for (; `foo${bar}`;);
+  > 5 │ do { } while (1)
+      │               ^
+    6 │ do { } while ('1')
+    7 │ do { } while (0)
+  
+
+```
+
+```
+invalid.js:6:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    4 │ for (; `foo${bar}`;);
+    5 │ do { } while (1)
+  > 6 │ do { } while ('1')
+      │               ^^^
+    7 │ do { } while (0)
+    8 │ do { } while (t = -2)
+  
+
+```
+
+```
+invalid.js:7:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    5 │ do { } while (1)
+    6 │ do { } while ('1')
+  > 7 │ do { } while (0)
+      │               ^
+    8 │ do { } while (t = -2)
+    9 │ do { } while (``)
+  
+
+```
+
+```
+invalid.js:8:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+     6 │ do { } while ('1')
+     7 │ do { } while (0)
+   > 8 │ do { } while (t = -2)
+       │               ^^^^^^
+     9 │ do { } while (``)
+    10 │ do { } while (`foo`)
+  
+
+```
+
+```
+invalid.js:9:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+     7 │ do { } while (0)
+     8 │ do { } while (t = -2)
+   > 9 │ do { } while (``)
+       │               ^^
+    10 │ do { } while (`foo`)
+    11 │ do { } while (`foo${bar}`)
+  
+
+```
+
+```
+invalid.js:10:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+     8 │ do { } while (t = -2)
+     9 │ do { } while (``)
+  > 10 │ do { } while (`foo`)
+       │               ^^^^^
+    11 │ do { } while (`foo${bar}`)
+    12 │ true ? 1 : 2;
+  
+
+```
+
+```
+invalid.js:11:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+     9 │ do { } while (``)
+    10 │ do { } while (`foo`)
+  > 11 │ do { } while (`foo${bar}`)
+       │               ^^^^^^^^^^^
+    12 │ true ? 1 : 2;
+    13 │ 1 ? 1 : 2;
+  
+
+```
+
+```
+invalid.js:12:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    10 │ do { } while (`foo`)
+    11 │ do { } while (`foo${bar}`)
+  > 12 │ true ? 1 : 2;
+       │ ^^^^
+    13 │ 1 ? 1 : 2;
+    14 │ q = 0 ? 1 : 2;
+  
+
+```
+
+```
+invalid.js:13:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    11 │ do { } while (`foo${bar}`)
+    12 │ true ? 1 : 2;
+  > 13 │ 1 ? 1 : 2;
+       │ ^
+    14 │ q = 0 ? 1 : 2;
+    15 │ (q = 0) ? 1 : 2;
+  
+
+```
+
+```
+invalid.js:14:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    12 │ true ? 1 : 2;
+    13 │ 1 ? 1 : 2;
+  > 14 │ q = 0 ? 1 : 2;
+       │     ^
+    15 │ (q = 0) ? 1 : 2;
+    16 │ `` ? 1 : 2;
+  
+
+```
+
+```
+invalid.js:15:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    13 │ 1 ? 1 : 2;
+    14 │ q = 0 ? 1 : 2;
+  > 15 │ (q = 0) ? 1 : 2;
+       │ ^^^^^^^
+    16 │ `` ? 1 : 2;
+    17 │ `foo` ? 1 : 2;
+  
+
+```
+
+```
+invalid.js:16:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    14 │ q = 0 ? 1 : 2;
+    15 │ (q = 0) ? 1 : 2;
+  > 16 │ `` ? 1 : 2;
+       │ ^^
+    17 │ `foo` ? 1 : 2;
+    18 │ `foo${bar}` ? 1 : 2;
+  
+
+```
+
+```
+invalid.js:17:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    15 │ (q = 0) ? 1 : 2;
+    16 │ `` ? 1 : 2;
+  > 17 │ `foo` ? 1 : 2;
+       │ ^^^^^
+    18 │ `foo${bar}` ? 1 : 2;
+    19 │ if (-2);
+  
+
+```
+
+```
+invalid.js:18:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    16 │ `` ? 1 : 2;
+    17 │ `foo` ? 1 : 2;
+  > 18 │ `foo${bar}` ? 1 : 2;
+       │ ^^^^^^^^^^^
+    19 │ if (-2);
+    20 │ if (true);
+  
+
+```
+
+```
+invalid.js:19:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    17 │ `foo` ? 1 : 2;
+    18 │ `foo${bar}` ? 1 : 2;
+  > 19 │ if (-2);
+       │     ^^
+    20 │ if (true);
+    21 │ if (1);
+  
+
+```
+
+```
+invalid.js:20:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    18 │ `foo${bar}` ? 1 : 2;
+    19 │ if (-2);
+  > 20 │ if (true);
+       │     ^^^^
+    21 │ if (1);
+    22 │ if ({});
+  
+
+```
+
+```
+invalid.js:21:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    19 │ if (-2);
+    20 │ if (true);
+  > 21 │ if (1);
+       │     ^
+    22 │ if ({});
+    23 │ if (0 < 1);
+  
+
+```
+
+```
+invalid.js:22:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    20 │ if (true);
+    21 │ if (1);
+  > 22 │ if ({});
+       │     ^^
+    23 │ if (0 < 1);
+    24 │ if (0 || 1);
+  
+
+```
+
+```
+invalid.js:24:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    22 │ if ({});
+    23 │ if (0 < 1);
+  > 24 │ if (0 || 1);
+       │     ^^^^^^
+    25 │ if (a, 1);
+    26 │ if (`foo`);
+  
+
+```
+
+```
+invalid.js:25:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    23 │ if (0 < 1);
+    24 │ if (0 || 1);
+  > 25 │ if (a, 1);
+       │     ^^^^
+    26 │ if (`foo`);
+    27 │ if (``);
+  
+
+```
+
+```
+invalid.js:26:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    24 │ if (0 || 1);
+    25 │ if (a, 1);
+  > 26 │ if (`foo`);
+       │     ^^^^^
+    27 │ if (``);
+    28 │ if (`///n`);
+  
+
+```
+
+```
+invalid.js:27:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    25 │ if (a, 1);
+    26 │ if (`foo`);
+  > 27 │ if (``);
+       │     ^^
+    28 │ if (`///n`);
+    29 │ if (`${'bar'}`);
+  
+
+```
+
+```
+invalid.js:28:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    26 │ if (`foo`);
+    27 │ if (``);
+  > 28 │ if (`///n`);
+       │     ^^^^^^
+    29 │ if (`${'bar'}`);
+    30 │ if (`${'bar' + `foo`}`);
+  
+
+```
+
+```
+invalid.js:29:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    27 │ if (``);
+    28 │ if (`///n`);
+  > 29 │ if (`${'bar'}`);
+       │     ^^^^^^^^^^
+    30 │ if (`${'bar' + `foo`}`);
+    31 │ if (`foo${false || true}`);
+  
+
+```
+
+```
+invalid.js:30:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    28 │ if (`///n`);
+    29 │ if (`${'bar'}`);
+  > 30 │ if (`${'bar' + `foo`}`);
+       │     ^^^^^^^^^^^^^^^^^^
+    31 │ if (`foo${false || true}`);
+    32 │ if (`foo${0 || 1}`);
+  
+
+```
+
+```
+invalid.js:31:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    29 │ if (`${'bar'}`);
+    30 │ if (`${'bar' + `foo`}`);
+  > 31 │ if (`foo${false || true}`);
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    32 │ if (`foo${0 || 1}`);
+    33 │ if (`foo${bar}`);
+  
+
+```
+
+```
+invalid.js:32:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    30 │ if (`${'bar' + `foo`}`);
+    31 │ if (`foo${false || true}`);
+  > 32 │ if (`foo${0 || 1}`);
+       │     ^^^^^^^^^^^^^^
+    33 │ if (`foo${bar}`);
+    34 │ if (`${bar}foo`);
+  
+
+```
+
+```
+invalid.js:33:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    31 │ if (`foo${false || true}`);
+    32 │ if (`foo${0 || 1}`);
+  > 33 │ if (`foo${bar}`);
+       │     ^^^^^^^^^^^
+    34 │ if (`${bar}foo`);
+    35 │ if (!(true || a));
+  
+
+```
+
+```
+invalid.js:34:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    32 │ if (`foo${0 || 1}`);
+    33 │ if (`foo${bar}`);
+  > 34 │ if (`${bar}foo`);
+       │     ^^^^^^^^^^^
+    35 │ if (!(true || a));
+    36 │ if (!(a && void b && c));
+  
+
+```
+
+```
+invalid.js:35:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    33 │ if (`foo${bar}`);
+    34 │ if (`${bar}foo`);
+  > 35 │ if (!(true || a));
+       │     ^^^^^^^^^^^^
+    36 │ if (!(a && void b && c));
+    37 │ if (0 || !(a && null));
+  
+
+```
+
+```
+invalid.js:42:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    40 │ if (+(!(a && 0)));
+    41 │ if (!typeof a === 'string');
+  > 42 │ if (-('foo' || a));
+       │     ^^^^^^^^^^^^^
+    43 │ if (+(void a && b) === ~(1 || c));
+    44 │ if (a ||= true);
+  
+
+```
+
+```
+invalid.js:44:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    42 │ if (-('foo' || a));
+    43 │ if (+(void a && b) === ~(1 || c));
+  > 44 │ if (a ||= true);
+       │     ^^^^^^^^^^
+    45 │ if (a ||= 5);
+    46 │ if (a ||= 'foo' || b);
+  
+
+```
+
+```
+invalid.js:45:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    43 │ if (+(void a && b) === ~(1 || c));
+    44 │ if (a ||= true);
+  > 45 │ if (a ||= 5);
+       │     ^^^^^^^
+    46 │ if (a ||= 'foo' || b);
+    47 │ if (a ||= b || /regex/);
+  
+
+```
+
+```
+invalid.js:46:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    44 │ if (a ||= true);
+    45 │ if (a ||= 5);
+  > 46 │ if (a ||= 'foo' || b);
+       │     ^^^^^^^^^^^^^^^^
+    47 │ if (a ||= b || /regex/);
+    48 │ if (a ||= b ||= true);
+  
+
+```
+
+```
+invalid.js:48:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    46 │ if (a ||= 'foo' || b);
+    47 │ if (a ||= b || /regex/);
+  > 48 │ if (a ||= b ||= true);
+       │     ^^^^^^^^^^^^^^^^
+    49 │ if (a ||= b ||= c || 1);
+    50 │ if (!(a ||= true));
+  
+
+```
+
+```
+invalid.js:50:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    48 │ if (a ||= b ||= true);
+    49 │ if (a ||= b ||= c || 1);
+  > 50 │ if (!(a ||= true));
+       │     ^^^^^^^^^^^^^
+    51 │ if (!(a ||= 'foo') === true);
+    52 │ if (!(a ||= 'foo') === false);
+  
+
+```
+
+```
+invalid.js:51:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    49 │ if (a ||= b ||= c || 1);
+    50 │ if (!(a ||= true));
+  > 51 │ if (!(a ||= 'foo') === true);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ if (!(a ||= 'foo') === false);
+    53 │ if (a || (b ||= true));
+  
+
+```
+
+```
+invalid.js:52:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    50 │ if (!(a ||= true));
+    51 │ if (!(a ||= 'foo') === true);
+  > 52 │ if (!(a ||= 'foo') === false);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ if (a || (b ||= true));
+    54 │ if ((a ||= 1) || b);
+  
+
+```
+
+```
+invalid.js:54:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    52 │ if (!(a ||= 'foo') === false);
+    53 │ if (a || (b ||= true));
+  > 54 │ if ((a ||= 1) || b);
+       │     ^^^^^^^^^^^^^^
+    55 │ if ((a ||= true) && true);
+    56 │ if (true && (a ||= true));
+  
+
+```
+
+```
+invalid.js:55:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    53 │ if (a || (b ||= true));
+    54 │ if ((a ||= 1) || b);
+  > 55 │ if ((a ||= true) && true);
+       │     ^^^^^^^^^^^^^^^^^^^^
+    56 │ if (true && (a ||= true));
+    57 │ if (a &&= false);
+  
+
+```
+
+```
+invalid.js:56:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    54 │ if ((a ||= 1) || b);
+    55 │ if ((a ||= true) && true);
+  > 56 │ if (true && (a ||= true));
+       │     ^^^^^^^^^^^^^^^^^^^^
+    57 │ if (a &&= false);
+    58 │ if (a &&= null);
+  
+
+```
+
+```
+invalid.js:57:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    55 │ if ((a ||= true) && true);
+    56 │ if (true && (a ||= true));
+  > 57 │ if (a &&= false);
+       │     ^^^^^^^^^^^
+    58 │ if (a &&= null);
+    59 │ if (a &&= void b);
+  
+
+```
+
+```
+invalid.js:58:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    56 │ if (true && (a ||= true));
+    57 │ if (a &&= false);
+  > 58 │ if (a &&= null);
+       │     ^^^^^^^^^^
+    59 │ if (a &&= void b);
+    60 │ if (a &&= 0 && b);
+  
+
+```
+
+```
+invalid.js:60:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    58 │ if (a &&= null);
+    59 │ if (a &&= void b);
+  > 60 │ if (a &&= 0 && b);
+       │     ^^^^^^^^^^^^
+    61 │ if (a &&= b && '');
+    62 │ if (a &&= b &&= false);
+  
+
+```
+
+```
+invalid.js:62:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    60 │ if (a &&= 0 && b);
+    61 │ if (a &&= b && '');
+  > 62 │ if (a &&= b &&= false);
+       │     ^^^^^^^^^^^^^^^^^
+    63 │ if (a &&= b &&= c && false);
+    64 │ if (!(a &&= false));
+  
+
+```
+
+```
+invalid.js:64:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    62 │ if (a &&= b &&= false);
+    63 │ if (a &&= b &&= c && false);
+  > 64 │ if (!(a &&= false));
+       │     ^^^^^^^^^^^^^^
+    65 │ if (!(a &&= 0) + 1);
+    66 │ if (a && (b &&= false));
+  
+
+```
+
+```
+invalid.js:67:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    65 │ if (!(a &&= 0) + 1);
+    66 │ if (a && (b &&= false));
+  > 67 │ if ((a &&= null) && b);
+       │     ^^^^^^^^^^^^^^^^^
+    68 │ if (false || (a &&= false));
+    69 │ if ((a &&= false) || false);
+  
+
+```
+
+```
+invalid.js:68:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    66 │ if (a && (b &&= false));
+    67 │ if ((a &&= null) && b);
+  > 68 │ if (false || (a &&= false));
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    69 │ if ((a &&= false) || false);
+    70 │ while ([]);
+  
+
+```
+
+```
+invalid.js:69:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    67 │ if ((a &&= null) && b);
+    68 │ if (false || (a &&= false));
+  > 69 │ if ((a &&= false) || false);
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    70 │ while ([]);
+    71 │ while (~!0);
+  
+
+```
+
+```
+invalid.js:71:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    69 │ if ((a &&= false) || false);
+    70 │ while ([]);
+  > 71 │ while (~!0);
+       │        ^^^
+    72 │ while (x = 1);
+    73 │ while (function () { });
+  
+
+```
+
+```
+invalid.js:72:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    70 │ while ([]);
+    71 │ while (~!0);
+  > 72 │ while (x = 1);
+       │        ^^^^^
+    73 │ while (function () { });
+    74 │ while (1);
+  
+
+```
+
+```
+invalid.js:73:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    71 │ while (~!0);
+    72 │ while (x = 1);
+  > 73 │ while (function () { });
+       │        ^^^^^^^^^^^^^^^
+    74 │ while (1);
+    75 │ while (() => { });
+  
+
+```
+
+```
+invalid.js:74:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    72 │ while (x = 1);
+    73 │ while (function () { });
+  > 74 │ while (1);
+       │        ^
+    75 │ while (() => { });
+    76 │ while (`foo`);
+  
+
+```
+
+```
+invalid.js:75:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    73 │ while (function () { });
+    74 │ while (1);
+  > 75 │ while (() => { });
+       │        ^^^^^^^^^
+    76 │ while (`foo`);
+    77 │ while (``);
+  
+
+```
+
+```
+invalid.js:76:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    74 │ while (1);
+    75 │ while (() => { });
+  > 76 │ while (`foo`);
+       │        ^^^^^
+    77 │ while (``);
+    78 │ while (`${'foo'}`);
+  
+
+```
+
+```
+invalid.js:77:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    75 │ while (() => { });
+    76 │ while (`foo`);
+  > 77 │ while (``);
+       │        ^^
+    78 │ while (`${'foo'}`);
+    79 │ while (`${'foo' + 'bar'}`);
+  
+
+```
+
+```
+invalid.js:78:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    76 │ while (`foo`);
+    77 │ while (``);
+  > 78 │ while (`${'foo'}`);
+       │        ^^^^^^^^^^
+    79 │ while (`${'foo' + 'bar'}`);
+    80 │ if (typeof x) { }
+  
+
+```
+
+```
+invalid.js:79:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    77 │ while (``);
+    78 │ while (`${'foo'}`);
+  > 79 │ while (`${'foo' + 'bar'}`);
+       │        ^^^^^^^^^^^^^^^^^^
+    80 │ if (typeof x) { }
+    81 │ if (typeof 'abc' === 'string') { }
+  
+
+```
+
+```
+invalid.js:81:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    79 │ while (`${'foo' + 'bar'}`);
+    80 │ if (typeof x) { }
+  > 81 │ if (typeof 'abc' === 'string') { }
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    82 │ if (a = typeof b) { }
+    83 │ if (a, typeof b) { }
+  
+
+```
+
+```
+invalid.js:84:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    82 │ if (a = typeof b) { }
+    83 │ if (a, typeof b) { }
+  > 84 │ if (typeof 'a' == 'string' || typeof 'b' == 'string') { }
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ while (typeof x) { }
+    86 │ if (1 || void x);
+  
+
+```
+
+```
+invalid.js:86:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    84 │ if (typeof 'a' == 'string' || typeof 'b' == 'string') { }
+    85 │ while (typeof x) { }
+  > 86 │ if (1 || void x);
+       │     ^^^^^^^^^^^
+    87 │ if (void x);
+    88 │ if (y = void x);
+  
+
+```
+
+```
+invalid.js:93:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    91 │ if (void x && a);
+    92 │ if (a && void x);
+  > 93 │ if (false && abc === 'str') { }
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    94 │ if (true || abc === 'str') { }
+    95 │ if (1 || abc === 'str') { }
+  
+
+```
+
+```
+invalid.js:94:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    92 │ if (a && void x);
+    93 │ if (false && abc === 'str') { }
+  > 94 │ if (true || abc === 'str') { }
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    95 │ if (1 || abc === 'str') { }
+    96 │ if (abc === 'str' || true) { }
+  
+
+```
+
+```
+invalid.js:95:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    93 │ if (false && abc === 'str') { }
+    94 │ if (true || abc === 'str') { }
+  > 95 │ if (1 || abc === 'str') { }
+       │     ^^^^^^^^^^^^^^^^^^
+    96 │ if (abc === 'str' || true) { }
+    97 │ if (abc === 'str' || true || def === 'str') { }
+  
+
+```
+
+```
+invalid.js:98:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+     96 │ if (abc === 'str' || true) { }
+     97 │ if (abc === 'str' || true || def === 'str') { }
+   > 98 │ if (false || true) { }
+        │     ^^^^^^^^^^^^^
+     99 │ if (typeof abc === 'str' || true) { }
+    100 │ if ('str' || a) { }
+  
+
+```
+
+```
+invalid.js:100:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+     98 │ if (false || true) { }
+     99 │ if (typeof abc === 'str' || true) { }
+  > 100 │ if ('str' || a) { }
+        │     ^^^^^^^^^^
+    101 │ if ('str' || abc === 'str') { }
+    102 │ if ('str1' || 'str2') { }
+  
+
+```
+
+```
+invalid.js:101:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+     99 │ if (typeof abc === 'str' || true) { }
+    100 │ if ('str' || a) { }
+  > 101 │ if ('str' || abc === 'str') { }
+        │     ^^^^^^^^^^^^^^^^^^^^^^
+    102 │ if ('str1' || 'str2') { }
+    103 │ if ('str1' && 'str2') { }
+  
+
+```
+
+```
+invalid.js:102:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    100 │ if ('str' || a) { }
+    101 │ if ('str' || abc === 'str') { }
+  > 102 │ if ('str1' || 'str2') { }
+        │     ^^^^^^^^^^^^^^^^
+    103 │ if ('str1' && 'str2') { }
+    104 │ if (abc === 'str' || 'str') { }
+  
+
+```
+
+```
+invalid.js:103:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    101 │ if ('str' || abc === 'str') { }
+    102 │ if ('str1' || 'str2') { }
+  > 103 │ if ('str1' && 'str2') { }
+        │     ^^^^^^^^^^^^^^^^
+    104 │ if (abc === 'str' || 'str') { }
+    105 │ if (a || 'str') { }
+  
+
+```
+
+```
+invalid.js:106:26 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    104 │ if (abc === 'str' || 'str') { }
+    105 │ if (a || 'str') { }
+  > 106 │ function* foo() { while (1) { } yield 'foo'; }
+        │                          ^
+    107 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
+    108 │ function* foo() { while (1) { yield 'foo'; } while (1) { } }
+  
+
+```
+
+```
+invalid.js:107:26 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    105 │ if (a || 'str') { }
+    106 │ function* foo() { while (1) { } yield 'foo'; }
+  > 107 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
+        │                          ^
+    108 │ function* foo() { while (1) { yield 'foo'; } while (1) { } }
+    109 │ var a = function* foo() { while (1) { } yield 'foo'; }
+  
+
+```
+
+```
+invalid.js:107:35 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    105 │ if (a || 'str') { }
+    106 │ function* foo() { while (1) { } yield 'foo'; }
+  > 107 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
+        │                                   ^^^^
+    108 │ function* foo() { while (1) { yield 'foo'; } while (1) { } }
+    109 │ var a = function* foo() { while (1) { } yield 'foo'; }
+  
+
+```
+
+```
+invalid.js:108:53 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    106 │ function* foo() { while (1) { } yield 'foo'; }
+    107 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
+  > 108 │ function* foo() { while (1) { yield 'foo'; } while (1) { } }
+        │                                                     ^
+    109 │ var a = function* foo() { while (1) { } yield 'foo'; }
+    110 │ while (1) { function* foo() { yield; } }
+  
+
+```
+
+```
+invalid.js:109:34 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    107 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
+    108 │ function* foo() { while (1) { yield 'foo'; } while (1) { } }
+  > 109 │ var a = function* foo() { while (1) { } yield 'foo'; }
+        │                                  ^
+    110 │ while (1) { function* foo() { yield; } }
+    111 │ function* foo() { if (true) { yield 'foo'; } }
+  
+
+```
+
+```
+invalid.js:110:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    108 │ function* foo() { while (1) { yield 'foo'; } while (1) { } }
+    109 │ var a = function* foo() { while (1) { } yield 'foo'; }
+  > 110 │ while (1) { function* foo() { yield; } }
+        │        ^
+    111 │ function* foo() { if (true) { yield 'foo'; } }
+    112 │ function* foo() { for (let foo = yield; true;) { } }
+  
+
+```
+
+```
+invalid.js:111:23 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    109 │ var a = function* foo() { while (1) { } yield 'foo'; }
+    110 │ while (1) { function* foo() { yield; } }
+  > 111 │ function* foo() { if (true) { yield 'foo'; } }
+        │                       ^^^^
+    112 │ function* foo() { for (let foo = yield; true;) { } }
+    113 │ function* foo() { for (foo = yield; true;) { } }
+  
+
+```
+
+```
+invalid.js:112:41 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    110 │ while (1) { function* foo() { yield; } }
+    111 │ function* foo() { if (true) { yield 'foo'; } }
+  > 112 │ function* foo() { for (let foo = yield; true;) { } }
+        │                                         ^^^^
+    113 │ function* foo() { for (foo = yield; true;) { } }
+    114 │ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
+  
+
+```
+
+```
+invalid.js:113:37 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    111 │ function* foo() { if (true) { yield 'foo'; } }
+    112 │ function* foo() { for (let foo = yield; true;) { } }
+  > 113 │ function* foo() { for (foo = yield; true;) { } }
+        │                                     ^^^^
+    114 │ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
+    115 │ function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
+  
+
+```
+
+```
+invalid.js:114:25 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    112 │ function* foo() { for (let foo = yield; true;) { } }
+    113 │ function* foo() { for (foo = yield; true;) { } }
+  > 114 │ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
+        │                         ^
+    115 │ function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
+    116 │ function* foo() { for (let foo = 1 + 2 + 3 + (yield); true; baz) { } }
+  
+
+```
+
+```
+invalid.js:115:25 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    113 │ function* foo() { for (foo = yield; true;) { } }
+    114 │ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
+  > 115 │ function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
+        │                         ^
+    116 │ function* foo() { for (let foo = 1 + 2 + 3 + (yield); true; baz) { } }
+    117 │ if ([a]) { }
+  
+
+```
+
+```
+invalid.js:116:55 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    114 │ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
+    115 │ function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
+  > 116 │ function* foo() { for (let foo = 1 + 2 + 3 + (yield); true; baz) { } }
+        │                                                       ^^^^
+    117 │ if ([a]) { }
+    118 │ if ([]) { }
+  
+
+```
+
+```
+invalid.js:121:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    119 │ if ('' + ['a']) { }
+    120 │ if ('' + []) { }
+  > 121 │ if (+1) { }
+        │     ^^
+    122 │ if ([,] + '') { }
+    123 │ if (/foo/ui);
+  
+
+```
+
+```
+invalid.js:123:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    121 │ if (+1) { }
+    122 │ if ([,] + '') { }
+  > 123 │ if (/foo/ui);
+        │     ^^^^^^^
+    124 │ if (0n);
+    125 │ if (0b0n);
+  
+
+```
+
+```
+invalid.js:124:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    122 │ if ([,] + '') { }
+    123 │ if (/foo/ui);
+  > 124 │ if (0n);
+        │     ^^
+    125 │ if (0b0n);
+    126 │ if (0o0n);
+  
+
+```
+
+```
+invalid.js:125:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    123 │ if (/foo/ui);
+    124 │ if (0n);
+  > 125 │ if (0b0n);
+        │     ^^^^
+    126 │ if (0o0n);
+    127 │ if (0x0n);
+  
+
+```
+
+```
+invalid.js:126:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    124 │ if (0n);
+    125 │ if (0b0n);
+  > 126 │ if (0o0n);
+        │     ^^^^
+    127 │ if (0x0n);
+    128 │ if (0b1n);
+  
+
+```
+
+```
+invalid.js:127:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    125 │ if (0b0n);
+    126 │ if (0o0n);
+  > 127 │ if (0x0n);
+        │     ^^^^
+    128 │ if (0b1n);
+    129 │ if (0o1n);
+  
+
+```
+
+```
+invalid.js:128:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    126 │ if (0o0n);
+    127 │ if (0x0n);
+  > 128 │ if (0b1n);
+        │     ^^^^
+    129 │ if (0o1n);
+    130 │ if (0x1n);
+  
+
+```
+
+```
+invalid.js:129:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    127 │ if (0x0n);
+    128 │ if (0b1n);
+  > 129 │ if (0o1n);
+        │     ^^^^
+    130 │ if (0x1n);
+    131 │ if (0x1n || foo);
+  
+
+```
+
+```
+invalid.js:130:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    128 │ if (0b1n);
+    129 │ if (0o1n);
+  > 130 │ if (0x1n);
+        │     ^^^^
+    131 │ if (0x1n || foo);
+    132 │ if (class { }) { }
+  
+
+```
+
+```
+invalid.js:131:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    129 │ if (0o1n);
+    130 │ if (0x1n);
+  > 131 │ if (0x1n || foo);
+        │     ^^^^^^^^^^^
+    132 │ if (class { }) { }
+    133 │ if (new Foo()) { }
+  
+
+```
+
+```
+invalid.js:132:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    130 │ if (0x1n);
+    131 │ if (0x1n || foo);
+  > 132 │ if (class { }) { }
+        │     ^^^^^^^^^
+    133 │ if (new Foo()) { }
+    134 │ if (new Boolean(foo)) { }
+  
+
+```
+
+```
+invalid.js:137:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    135 │ if (new String(foo)) { }
+    136 │ if (new Number(foo)) { }
+  > 137 │ if (`${[...['a']]}`) { }
+        │     ^^^^^^^^^^^^^^^
+    138 │ if (undefined) { }
+    139 │ if (Boolean(1)) { }
+  
+
+```
+
+```
+invalid.js:138:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected constant condition.
+  
+    136 │ if (new Number(foo)) { }
+    137 │ if (`${[...['a']]}`) { }
+  > 138 │ if (undefined) { }
+        │     ^^^^^^^^^
+    139 │ if (Boolean(1)) { }
+    140 │ if (Boolean()) { }
+  
+
+```

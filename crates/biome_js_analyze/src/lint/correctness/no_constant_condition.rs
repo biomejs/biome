@@ -1,5 +1,3 @@
-use crate::ast_utils::is_constant_condition;
-use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -9,6 +7,8 @@ use biome_js_syntax::{
     JsWhileStatement, JsYieldExpression, TextRange,
 };
 use biome_rowan::{AstNode, declare_node_union};
+
+use crate::services::typed::Typed;
 
 declare_lint_rule! {
     /// Disallow constant expressions in conditions
@@ -94,14 +94,14 @@ declare_node_union! {
 }
 
 impl Rule for NoConstantCondition {
-    type Query = Semantic<ConditionalStatement>;
+    type Query = Typed<ConditionalStatement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let conditional_stmt = ctx.query();
-        let model = ctx.model();
+        // let model = ctx.model();
 
         // We must verify that the conditional statement is within a generator function.
         // If the statement contains a valid yield expression returned from a `while`, `for`, or `do...while` statement,
@@ -126,7 +126,10 @@ impl Rule for NoConstantCondition {
             return None;
         }
         let test_range = test.range();
-        is_constant_condition(test, true, model).map(|_| test_range)
+
+        ctx.type_for_expression(&test)
+            .truthiness()
+            .map(|_| test_range)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

@@ -21,6 +21,7 @@ use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
 const TESTS_WITH_MODULE_GRAPH: &[&str] = &[
+    "noConstantCondition",
     "noFloatingPromises",
     "noImportCycles",
     "noPrivateImports",
