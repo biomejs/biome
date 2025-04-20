@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
-snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -582,7 +581,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(String.raw`\\d`,·`g`);
-  + /\d/g;
+  + /\\d/g;
   
 
 ```
@@ -606,7 +605,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(String['raw']`\\d`,·`g`);
-  + /\d/g;
+  + /\\d/g;
   
 
 ```
@@ -630,7 +629,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(String["raw"]`\\d`,·`g`);
-  + /\d/g;
+  + /\\d/g;
   
 
 ```
@@ -3732,7 +3731,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp("\.")
-  + /\./
+  + /./
   
 
 ```
