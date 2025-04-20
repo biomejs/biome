@@ -9,6 +9,8 @@
 //! | end_of_line          | line_ending  |
 //! | max_line_length      | line_width   |
 
+use std::fmt::{Debug, Display};
+use std::num::ParseIntError;
 use std::str::FromStr;
 
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, ParseFormatNumberError};
@@ -18,6 +20,153 @@ use crate::{
     Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
     OverridePattern, Overrides, diagnostics::EditorConfigDiagnostic,
 };
+
+/// Error type returned when parsing a [IndentSize] value
+pub enum ParseIndentSizeError {
+    /// The value could not be parsed to a number or `tab`
+    ParseError(ParseIntError),
+    /// The `u8` value of the string is not a valid [IndentSize]
+    TryFromU8Error(IndentSizeFromIntError),
+}
+
+impl From<ParseIntError> for ParseIndentSizeError {
+    fn from(value: ParseIntError) -> Self {
+        Self::ParseError(value)
+    }
+}
+
+impl From<IndentSizeFromIntError> for ParseIndentSizeError {
+    fn from(value: IndentSizeFromIntError) -> Self {
+        Self::TryFromU8Error(value)
+    }
+}
+
+impl Debug for ParseIndentSizeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self, f)
+    }
+}
+
+impl std::error::Error for ParseIndentSizeError {}
+
+impl std::fmt::Display for ParseIndentSizeError {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ParseError(err) => std::fmt::Display::fmt(err, fmt),
+            Self::TryFromU8Error(err) => std::fmt::Display::fmt(err, fmt),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum IndentSize {
+    Tab,
+    Value(u8),
+}
+
+impl IndentSize {
+    pub const MIN: u8 = 0;
+    pub const MAX: u8 = 24;
+}
+
+impl Default for IndentSize {
+    fn default() -> Self {
+        Self::Value(2)
+    }
+}
+
+/// Error type returned when converting a u8 to a [IndentSize] fails
+#[derive(Clone, Copy, Debug)]
+pub struct IndentSizeFromIntError(pub u8);
+
+impl std::fmt::Display for IndentSizeFromIntError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "The indent_size should be between {} and {}, got {}",
+            IndentSize::MIN,
+            IndentSize::MAX,
+            self.0,
+        )
+    }
+}
+
+impl std::error::Error for IndentSizeFromIntError {}
+
+/// Error type returned when converting an invalid string to a [IndentSize]
+#[derive(Clone, Debug)]
+pub struct InvalidIndentSize(pub &'static str);
+
+impl std::fmt::Display for InvalidIndentSize {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "Invalid `indent_size` value: a positive integer between `0` and `24` or `tab` is expected."
+        )
+    }
+}
+
+impl FromStr for IndentSize {
+    type Err = ParseIndentSizeError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "tab" => Ok(Self::Tab),
+            s => {
+                let val = u8::from_str(s).map_err(ParseIndentSizeError::ParseError)?;
+
+                if (Self::MIN..=Self::MAX).contains(&val) {
+                    Ok(Self::Value(val))
+                } else {
+                    Err(ParseIndentSizeError::TryFromU8Error(
+                        IndentSizeFromIntError(val),
+                    ))
+                }
+            }
+        }
+    }
+}
+
+impl From<u8> for IndentSize {
+    fn from(value: u8) -> Self {
+        Self::Value(value)
+    }
+}
+
+impl Display for IndentSize {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Tab => std::write!(f, "Tab"),
+            Self::Value(val) => f.write_str(&std::format!("{val}")),
+        }
+    }
+}
+
+impl TryFrom<IndentSize> for IndentWidth {
+    type Error = ParseFormatNumberError;
+
+    fn try_from(value: IndentSize) -> Result<Self, Self::Error> {
+        match value {
+            IndentSize::Tab => Self::try_from(4).map_err(ParseFormatNumberError::TryFromU8Error),
+            IndentSize::Value(val) => {
+                Self::try_from(val).map_err(ParseFormatNumberError::TryFromU8Error)
+            }
+        }
+    }
+}
+
+// impl From<IndentSize> for IndentWidth {
+//     fn from(size: IndentSize) -> Self {
+//         match size {
+//             // TODO: support tab_with to get value of indentWidth with here.
+//             IndentSize::Tab => {
+//                 let x = Self::try_from(4);
+//             },
+//             IndentSize::Value(val) => Self::try_from(val).map_err()?,
+//         }
+//     }
+// }
 
 #[derive(Debug, biome_diagnostics::Diagnostic)]
 #[diagnostic(category = "configuration", severity = Error)]
@@ -38,6 +187,7 @@ pub enum EditorConfigErrorKind {
     InvalidBooleanValue,
     InvalidEndOfLineValue,
     InvalidIndentStyleValue,
+    InvalidIndentSizeValue(ParseIndentSizeError),
 }
 impl biome_console::fmt::Display for EditorConfigErrorKind {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
@@ -59,6 +209,9 @@ impl std::fmt::Display for EditorConfigErrorKind {
             }
             Self::InvalidIndentStyleValue => {
                 f.write_str("Invalid `ident_style` value: `space` or `tab` is expected.")
+            }
+            Self::InvalidIndentSizeValue(error) => {
+                write!(f, "{}", error)
             }
         }
     }
@@ -128,8 +281,8 @@ impl FromStr for EditorConfig {
                                     })?;
                             } else if key.eq_ignore_ascii_case("indent_size") {
                                 last_options.indent_size = EditorconfigValue::from_str(val)
-                                    .map_err(|err| EditorConfigError {
-                                        kind: EditorConfigErrorKind::ParseFormatNumberError(err),
+                                    .map_err(|error| EditorConfigError {
+                                        kind: EditorConfigErrorKind::InvalidIndentSizeValue(error),
                                         span: TextRange::new(val_start.into(), val_end.into()),
                                     })?;
                             } else if key.eq_ignore_ascii_case("end_of_line") {
@@ -216,7 +369,7 @@ impl EditorConfig {
 #[derive(Debug, Clone, Default)]
 pub struct EditorConfigOptions {
     pub indent_style: EditorconfigValue<IndentStyle>,
-    pub indent_size: EditorconfigValue<IndentWidth>,
+    pub indent_size: EditorconfigValue<IndentSize>,
     pub end_of_line: EditorconfigValue<LineEnding>,
     // Not a biome option, but we need it to emit a diagnostic when this is set to false.
     pub insert_final_newline: EditorconfigValue<bool>,
@@ -231,18 +384,24 @@ impl EditorConfigOptions {
     }
 
     pub fn to_biome(self) -> FormatterConfiguration {
+        let indent_size: Option<IndentSize> = self.indent_size.into();
+        let indent_width = indent_size.map(IndentWidth::try_from).and_then(Result::ok);
+
         FormatterConfiguration {
             indent_style: self.indent_style.into(),
-            indent_width: self.indent_size.into(),
+            indent_width,
             line_ending: self.end_of_line.into(),
             ..Default::default()
         }
     }
 
     pub fn to_biome_override(self) -> OverrideFormatterConfiguration {
+        let indent_size: Option<IndentSize> = self.indent_size.into();
+        let indent_width = indent_size.map(IndentWidth::try_from).and_then(Result::ok);
+
         OverrideFormatterConfiguration {
             indent_style: self.indent_style.into(),
-            indent_width: self.indent_size.into(),
+            indent_width,
             line_ending: self.end_of_line.into(),
             ..Default::default()
         }
