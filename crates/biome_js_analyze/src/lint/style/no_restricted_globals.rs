@@ -39,7 +39,10 @@ declare_lint_rule! {
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "deniedGlobals": ["$", "MooTools"]
+    ///         "deniedGlobals": {
+    ///             "$": "jQuery is not allowed. Use native DOM manipulation instead.",
+    ///             "MooTools": "Do not use MooTools, use MeowTools instead."
+    ///         }
     ///     }
     /// }
     /// ```
