@@ -2,6 +2,7 @@ use crate::analyzers::all::RulesAll;
 use crate::analyzers::deleted_rules::DeletedRules;
 use crate::analyzers::includes::Includes;
 use crate::analyzers::no_multiple_spaces_in_regex::UseMultipleSpacesInRegex;
+use crate::analyzers::no_restriected_globals::NoRestrictedGlobals;
 use crate::analyzers::no_unnecessary_continue::NoUnncesseraryContinue;
 use crate::analyzers::no_var::NoVar;
 use crate::analyzers::nursery_rules::NurseryRules;
@@ -18,6 +19,7 @@ mod all;
 mod deleted_rules;
 mod includes;
 mod no_multiple_spaces_in_regex;
+mod no_restriected_globals;
 mod no_unnecessary_continue;
 mod no_var;
 mod nursery_rules;
@@ -55,6 +57,7 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<UseNamingConventionEnumMemberCase>();
         registry.record_rule::<UseMultipleSpacesInRegex>();
         registry.record_rule::<NoUnncesseraryContinue>();
+        registry.record_rule::<NoRestrictedGlobals>();
     }
 }
 

@@ -1,0 +1,60 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "noRestrictedGlobals": {
+        "options": {
+          // comment 1
+          "deniedGlobals": [ // comment 2
+            "$", // comment 3
+            "someGlobal" // comment 4
+          ] // comment 5
+        }
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsonc:7:11 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The deniedGlobals option of the noRestrictedGlobals rule has been changed from an array to a record.
+  
+     5 │         "options": {
+     6 │           // comment 1
+   > 7 │           "deniedGlobals": [ // comment 2
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │             "$", // comment 3
+   > 9 │             "someGlobal" // comment 4
+  > 10 │           ] // comment 5
+       │           ^
+    11 │         }
+    12 │       }
+  
+  i You can now customize the message for each restricted global name.
+  
+  i Safe fix: Turn into a record.
+  
+     5  5 │           "options": {
+     6  6 │             // comment 1
+     7    │ - ··········"deniedGlobals":·[·//·comment·2
+     8    │ - ············"$",·//·comment·3
+     9    │ - ············"someGlobal"·//·comment·4
+    10    │ - ··········]·//·comment·5
+        7 │ + ··········"deniedGlobals":·{·//·comment·2
+        8 │ + ············"$":·"TODO:·Add·a·custom·message·here.",·//·comment·3
+        9 │ + ············"someGlobal":·"TODO:·Add·a·custom·message·here."·//·comment·4
+       10 │ + ··········}·//·comment·5
+    11 11 │           }
+    12 12 │         }
+  
+
+```
