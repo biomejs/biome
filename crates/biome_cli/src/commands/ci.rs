@@ -120,6 +120,7 @@ impl CommandRunner for CiCommandPayload {
             project_key,
             (false, self.changed).into(),
             self.enforce_assist,
+            cli_options.skip_errors,
         )
         .set_report(cli_options))
     }

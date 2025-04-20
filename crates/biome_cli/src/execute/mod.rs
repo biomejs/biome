@@ -110,6 +110,9 @@ pub enum TraversalMode {
 
         /// Whether assist diagnostics should be promoted to error, and fail the CLI
         enforce_assist: bool,
+
+        /// It ignores parse errors
+        ignore_errors: bool,
     },
     /// This mode is enabled when running the command `biome lint`
     Lint {
@@ -137,6 +140,9 @@ pub enum TraversalMode {
         suppress: bool,
         /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
         suppression_reason: Option<String>,
+
+        /// It ignores parse errors
+        ignore_errors: bool,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
@@ -148,6 +154,9 @@ pub enum TraversalMode {
         vcs_targeted: VcsTargeted,
         /// Whether assist diagnostics should be promoted to error, and fail the CLI
         enforce_assist: bool,
+
+        /// It ignores parse errors
+        ignore_errors: bool,
     },
     /// This mode is enabled when running the command `biome format`
     Format {
@@ -301,6 +310,7 @@ impl Execution {
         project_key: ProjectKey,
         vcs_targeted: VcsTargeted,
         enforce_assist: bool,
+        ignore_errors: bool,
     ) -> Self {
         // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
         let is_github = std::env::var("GITHUB_ACTIONS")
@@ -318,6 +328,7 @@ impl Execution {
                 },
                 vcs_targeted,
                 enforce_assist,
+                ignore_errors,
             },
             max_diagnostics: 20,
         }
@@ -515,7 +526,10 @@ impl Execution {
     #[instrument(level = "debug", skip(self), fields(result))]
     pub(crate) fn should_ignore_errors(&self) -> bool {
         let result = match self.traversal_mode {
-            TraversalMode::Format { ignore_errors, .. } => ignore_errors,
+            TraversalMode::Format { ignore_errors, .. }
+            | TraversalMode::Check { ignore_errors, .. }
+            | TraversalMode::Lint { ignore_errors, .. }
+            | TraversalMode::CI { ignore_errors, .. } => ignore_errors,
 
             _ => false,
         };
