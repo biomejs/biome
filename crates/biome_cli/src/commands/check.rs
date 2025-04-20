@@ -139,6 +139,7 @@ impl CommandRunner for CheckCommandPayload {
             stdin: self.get_stdin(console)?,
             vcs_targeted: (self.staged, self.changed).into(),
             enforce_assist: self.enforce_assist,
+            ignore_errors: cli_options.skip_errors,
         })
         .set_report(cli_options))
     }
