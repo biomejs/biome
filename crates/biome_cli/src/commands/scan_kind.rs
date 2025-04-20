@@ -100,13 +100,9 @@ impl<'a> RequiresProjectScan<'a> {
                 let domains = R::METADATA.domains;
                 self.requires_project_scan |= domains.contains(&RuleDomain::Project);
             }
-        } else {
-            if !self.skip.contains(&selector) {
-                if self.enabled_rules.contains(&filter) {
-                    let domains = R::METADATA.domains;
-                    self.requires_project_scan |= domains.contains(&RuleDomain::Project);
-                }
-            }
+        } else if !self.skip.contains(&selector) && self.enabled_rules.contains(&filter) {
+            let domains = R::METADATA.domains;
+            self.requires_project_scan |= domains.contains(&RuleDomain::Project);
         }
     }
 }
