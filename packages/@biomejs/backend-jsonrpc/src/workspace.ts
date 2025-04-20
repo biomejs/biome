@@ -1688,7 +1688,7 @@ export interface Nursery {
 	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
-	useConsistentObjectDefinition?: RuleConfiguration_for_UseConsistentObjectDefinitionOptions;
+	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
 	/**
 	 * Require specifying the reason argument when using @deprecated directive
 	 */
@@ -2363,9 +2363,9 @@ export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
-export type RuleConfiguration_for_UseConsistentObjectDefinitionOptions =
+export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseConsistentObjectDefinitionOptions;
+	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -2627,7 +2627,11 @@ export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	 */
 	options: ConsistentMemberAccessibilityOptions;
 }
-export interface RuleWithOptions_for_UseConsistentObjectDefinitionOptions {
+export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
