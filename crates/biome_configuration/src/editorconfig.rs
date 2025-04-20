@@ -156,18 +156,6 @@ impl TryFrom<IndentSize> for IndentWidth {
     }
 }
 
-// impl From<IndentSize> for IndentWidth {
-//     fn from(size: IndentSize) -> Self {
-//         match size {
-//             // TODO: support tab_with to get value of indentWidth with here.
-//             IndentSize::Tab => {
-//                 let x = Self::try_from(4);
-//             },
-//             IndentSize::Value(val) => Self::try_from(val).map_err()?,
-//         }
-//     }
-// }
-
 #[derive(Debug, biome_diagnostics::Diagnostic)]
 #[diagnostic(category = "configuration", severity = Error)]
 pub struct EditorConfigError {
