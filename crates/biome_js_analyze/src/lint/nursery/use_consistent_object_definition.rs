@@ -1,14 +1,19 @@
+use serde::{Deserialize, Serialize};
+
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
+use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsObjectMember, AnyJsObjectMemberName, inner_string_text,
+    AnyJsExpression, AnyJsObjectMember, AnyJsObjectMemberName, JsLanguage, T, inner_string_text,
 };
-use biome_rowan::AstNode;
-use serde::{Deserialize, Serialize};
+use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+
+use crate::JsRuleAction;
 
 declare_lint_rule! {
     /// Require the consistent declaration of object literals. Defaults to explicit definitions.
@@ -110,6 +115,7 @@ declare_lint_rule! {
         name: "useConsistentObjectDefinition",
         language: "js",
         recommended: false,
+        fix_kind: FixKind::Safe,
         severity: Severity::Error,
         sources: &[RuleSource::Eslint("object-shorthand")],
         source_kind: RuleSourceKind::Inspired,
@@ -233,5 +239,129 @@ impl Rule for UseConsistentObjectDefinition {
             RuleDiagnostic::new(rule_category!(), node.range(), markup! {{title}})
                 .note(markup! {{note}}),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleAction<JsLanguage>> {
+        let node = ctx.query();
+        let options = ctx.options();
+        let mut mutation = ctx.root().begin();
+
+        let new_node = match node {
+            AnyJsObjectMember::JsShorthandPropertyObjectMember(node) => {
+                let leading_trivia = node.syntax().first_leading_trivia()?;
+                let node = node.clone().with_leading_trivia_pieces([])?;
+
+                make::js_property_object_member(
+                    make::js_literal_member_name(node.name().ok()?.value_token().ok()?).into(),
+                    make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::js_identifier_expression(node.name().ok()?).into(),
+                )
+                .with_leading_trivia_pieces(leading_trivia.pieces())?
+                .into()
+            }
+            AnyJsObjectMember::JsMethodObjectMember(node) => {
+                let leading_trivia = node.syntax().first_leading_trivia()?;
+                let node = node.clone().with_leading_trivia_pieces([])?;
+
+                let mut func_token = make::token(T![function]);
+                if node.star_token().is_none() {
+                    func_token =
+                        func_token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                }
+
+                let mut func = make::js_function_expression(
+                    func_token,
+                    node.parameters().ok()?,
+                    node.body().ok()?,
+                );
+
+                if let Some(token) = node.async_token() {
+                    func = func.with_async_token(token);
+                }
+
+                if let Some(token) = node.star_token() {
+                    // `*foo() {}` -> `foo: function* () {}`
+                    func = func.with_star_token(
+                        token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    );
+                }
+
+                if let Some(type_params) = node.type_parameters() {
+                    func = func.with_type_parameters(type_params);
+                }
+
+                if let Some(return_type) = node.return_type_annotation() {
+                    func = func.with_return_type_annotation(return_type);
+                }
+
+                make::js_property_object_member(
+                    node.name().ok()?,
+                    make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    func.build().into(),
+                )
+                .with_leading_trivia_pieces(leading_trivia.pieces())?
+                .into()
+            }
+            AnyJsObjectMember::JsPropertyObjectMember(node) => {
+                let leading_trivia = node.syntax().first_leading_trivia()?;
+                let node = node.clone().with_leading_trivia_pieces([])?;
+
+                match node.value().ok()? {
+                    AnyJsExpression::JsIdentifierExpression(expr) => {
+                        make::js_shorthand_property_object_member(expr.name().ok()?)
+                            .with_leading_trivia_pieces(leading_trivia.pieces())?
+                            .into()
+                    }
+                    AnyJsExpression::JsFunctionExpression(expr) => {
+                        let mut func = make::js_method_object_member(
+                            node.name().ok()?,
+                            expr.parameters().ok()?,
+                            expr.body().ok()?,
+                        );
+
+                        if let Some(token) = expr.async_token() {
+                            func = func.with_async_token(token);
+                        }
+
+                        if let Some(token) = expr.star_token() {
+                            // `foo: function* () {}` -> `*foo() {}`
+                            func = func.with_star_token(token.trim_trailing_trivia());
+                        }
+
+                        if let Some(type_params) = expr.type_parameters() {
+                            func = func.with_type_parameters(type_params);
+                        }
+
+                        if let Some(return_type) = expr.return_type_annotation() {
+                            func = func.with_return_type_annotation(return_type);
+                        }
+
+                        func.build()
+                            .with_leading_trivia_pieces(leading_trivia.pieces())?
+                            .into()
+                    }
+                    _ => return None,
+                }
+            }
+            _ => return None,
+        };
+
+        mutation.replace_node(node.clone(), new_node);
+
+        let message = match options.syntax {
+            ObjectPropertySyntax::Explicit => {
+                markup! { "Use explicit object property syntax." }.to_owned()
+            }
+            ObjectPropertySyntax::Shorthand => {
+                markup! { "Use shorthand object property syntax." }.to_owned()
+            }
+        };
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            message,
+            mutation,
+        ))
     }
 }

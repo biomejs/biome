@@ -3359,7 +3359,7 @@ pub struct Nursery {
     #[doc = "Require the consistent declaration of object literals. Defaults to explicit definitions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_object_definition:
-        Option<RuleConfiguration<biome_js_analyze::options::UseConsistentObjectDefinition>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseConsistentObjectDefinition>>,
     #[doc = "Require specifying the reason argument when using @deprecated directive"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_deprecated_reason:
