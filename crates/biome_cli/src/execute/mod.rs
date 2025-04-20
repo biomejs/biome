@@ -78,7 +78,7 @@ impl From<(Utf8PathBuf, String)> for Stdin {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct VcsTargeted {
     pub staged: bool,
     pub changed: bool,
