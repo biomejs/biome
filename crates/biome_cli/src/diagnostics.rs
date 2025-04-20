@@ -232,7 +232,7 @@ pub struct IncompatibleEndConfiguration {
 #[diagnostic(
     severity = Error,
     message = "No files were processed in the specified paths.",
-    advice = "Check your biome.json to ensure the paths are not ignored by the configuration.",
+    advice = "Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.",
     advice = "These paths were provided but ignored:",
 )]
 pub struct NoFilesWereProcessed {

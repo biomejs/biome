@@ -26,7 +26,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 
   × No files were processed in the specified paths.
   
-  i Check your biome.json to ensure the paths are not ignored by the configuration.
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
   
   i These paths were provided but ignored:
   
