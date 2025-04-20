@@ -58,6 +58,8 @@ impl std::fmt::Display for ParseIndentSizeError {
     }
 }
 
+/// Config for `.editorconfig`, it can set to a number or string value `tab`.
+/// The difference between [IndentSize] with [IndentWidth] is that the latter does not support `tab`.
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum IndentSize {
