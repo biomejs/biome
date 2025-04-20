@@ -117,7 +117,6 @@ fn find_json_member_by_name(members: JsonMemberList, name: &str) -> Option<JsonM
             .name()
             .ok()
             .and_then(|name| name.inner_string_text().ok())
-            .map(|text| text.text() == name)
-            .unwrap_or_default()
+            .is_some_and(|text| text.text() == name)
     })
 }
