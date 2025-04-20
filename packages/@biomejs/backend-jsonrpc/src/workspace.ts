@@ -2965,7 +2965,7 @@ export interface RestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
 	 */
-	deniedGlobals: string[];
+	deniedGlobals: Record<string, string>;
 }
 export interface ConsistentArrayTypeOptions {
 	syntax?: ConsistentArrayType;
