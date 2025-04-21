@@ -428,6 +428,9 @@ impl AnyJsonValue {
         }
     }
 }
+impl JsonArrayValue {
+    pub const KIND: SyntaxKind = JSON_ARRAY_VALUE;
+}
 impl AstNode for JsonArrayValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -483,6 +486,9 @@ impl From<JsonArrayValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsonBooleanValue {
+    pub const KIND: SyntaxKind = JSON_BOOLEAN_VALUE;
+}
 impl AstNode for JsonBooleanValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -532,6 +538,9 @@ impl From<JsonBooleanValue> for SyntaxElement {
     fn from(n: JsonBooleanValue) -> Self {
         n.syntax.into()
     }
+}
+impl JsonMember {
+    pub const KIND: SyntaxKind = JSON_MEMBER;
 }
 impl AstNode for JsonMember {
     type Language = Language;
@@ -585,6 +594,9 @@ impl From<JsonMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsonMemberName {
+    pub const KIND: SyntaxKind = JSON_MEMBER_NAME;
+}
 impl AstNode for JsonMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -634,6 +646,9 @@ impl From<JsonMemberName> for SyntaxElement {
     fn from(n: JsonMemberName) -> Self {
         n.syntax.into()
     }
+}
+impl JsonNullValue {
+    pub const KIND: SyntaxKind = JSON_NULL_VALUE;
 }
 impl AstNode for JsonNullValue {
     type Language = Language;
@@ -685,6 +700,9 @@ impl From<JsonNullValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsonNumberValue {
+    pub const KIND: SyntaxKind = JSON_NUMBER_VALUE;
+}
 impl AstNode for JsonNumberValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -734,6 +752,9 @@ impl From<JsonNumberValue> for SyntaxElement {
     fn from(n: JsonNumberValue) -> Self {
         n.syntax.into()
     }
+}
+impl JsonObjectValue {
+    pub const KIND: SyntaxKind = JSON_OBJECT_VALUE;
 }
 impl AstNode for JsonObjectValue {
     type Language = Language;
@@ -790,6 +811,9 @@ impl From<JsonObjectValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsonRoot {
+    pub const KIND: SyntaxKind = JSON_ROOT;
+}
 impl AstNode for JsonRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -841,6 +865,9 @@ impl From<JsonRoot> for SyntaxElement {
     fn from(n: JsonRoot) -> Self {
         n.syntax.into()
     }
+}
+impl JsonStringValue {
+    pub const KIND: SyntaxKind = JSON_STRING_VALUE;
 }
 impl AstNode for JsonStringValue {
     type Language = Language;
@@ -1071,6 +1098,7 @@ pub struct JsonBogus {
     syntax: SyntaxNode,
 }
 impl JsonBogus {
+    pub const KIND: SyntaxKind = JSON_BOGUS;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1127,6 +1155,7 @@ pub struct JsonBogusValue {
     syntax: SyntaxNode,
 }
 impl JsonBogusValue {
+    pub const KIND: SyntaxKind = JSON_BOGUS_VALUE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1184,6 +1213,7 @@ pub struct JsonArrayElementList {
     syntax_list: SyntaxList,
 }
 impl JsonArrayElementList {
+    pub const KIND: SyntaxKind = JSON_ARRAY_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1266,6 +1296,7 @@ pub struct JsonMemberList {
     syntax_list: SyntaxList,
 }
 impl JsonMemberList {
+    pub const KIND: SyntaxKind = JSON_MEMBER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]

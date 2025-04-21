@@ -296,6 +296,10 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     }
                 },
                 quote! {
+                    impl #name {
+                        pub const KIND: SyntaxKind = #node_kind;
+                    }
+
                     impl AstNode for #name {
                         type Language = Language;
 
@@ -653,6 +657,8 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             }
 
             impl #ident {
+                pub const KIND: SyntaxKind = #kind;
+
                 /// Create an AstNode from a SyntaxNode without checking its kind
                 ///
                 /// # Safety
@@ -745,6 +751,8 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
         let node_impl = quote! {
             impl #list_name {
+                pub const KIND: SyntaxKind = #list_kind;
+
                 /// Create an AstNode from a SyntaxNode without checking its kind
                 ///
                 /// # Safety

@@ -1336,6 +1336,9 @@ impl AnyMdInline {
         }
     }
 }
+impl MdBullet {
+    pub const KIND: SyntaxKind = MD_BULLET;
+}
 impl AstNode for MdBullet {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1388,6 +1391,9 @@ impl From<MdBullet> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdBulletListItem {
+    pub const KIND: SyntaxKind = MD_BULLET_LIST_ITEM;
+}
 impl AstNode for MdBulletListItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1434,6 +1440,9 @@ impl From<MdBulletListItem> for SyntaxElement {
     fn from(n: MdBulletListItem) -> Self {
         n.syntax.into()
     }
+}
+impl MdDocument {
+    pub const KIND: SyntaxKind = MD_DOCUMENT;
 }
 impl AstNode for MdDocument {
     type Language = Language;
@@ -1486,6 +1495,9 @@ impl From<MdDocument> for SyntaxElement {
     fn from(n: MdDocument) -> Self {
         n.syntax.into()
     }
+}
+impl MdFencedCodeBlock {
+    pub const KIND: SyntaxKind = MD_FENCED_CODE_BLOCK;
 }
 impl AstNode for MdFencedCodeBlock {
     type Language = Language;
@@ -1551,6 +1563,9 @@ impl From<MdFencedCodeBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdHardLine {
+    pub const KIND: SyntaxKind = MD_HARD_LINE;
+}
 impl AstNode for MdHardLine {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1601,6 +1616,9 @@ impl From<MdHardLine> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdHash {
+    pub const KIND: SyntaxKind = MD_HASH;
+}
 impl AstNode for MdHash {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1647,6 +1665,9 @@ impl From<MdHash> for SyntaxElement {
     fn from(n: MdHash) -> Self {
         n.syntax.into()
     }
+}
+impl MdHeader {
+    pub const KIND: SyntaxKind = MD_HEADER;
 }
 impl AstNode for MdHeader {
     type Language = Language;
@@ -1697,6 +1718,9 @@ impl From<MdHeader> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdHtmlBlock {
+    pub const KIND: SyntaxKind = MD_HTML_BLOCK;
+}
 impl AstNode for MdHtmlBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1743,6 +1767,9 @@ impl From<MdHtmlBlock> for SyntaxElement {
     fn from(n: MdHtmlBlock) -> Self {
         n.syntax.into()
     }
+}
+impl MdIndent {
+    pub const KIND: SyntaxKind = MD_INDENT;
 }
 impl AstNode for MdIndent {
     type Language = Language;
@@ -1794,6 +1821,9 @@ impl From<MdIndent> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdIndentCodeBlock {
+    pub const KIND: SyntaxKind = MD_INDENT_CODE_BLOCK;
+}
 impl AstNode for MdIndentCodeBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1840,6 +1870,9 @@ impl From<MdIndentCodeBlock> for SyntaxElement {
     fn from(n: MdIndentCodeBlock) -> Self {
         n.syntax.into()
     }
+}
+impl MdIndentedCodeLine {
+    pub const KIND: SyntaxKind = MD_INDENTED_CODE_LINE;
 }
 impl AstNode for MdIndentedCodeLine {
     type Language = Language;
@@ -1891,6 +1924,9 @@ impl From<MdIndentedCodeLine> for SyntaxElement {
     fn from(n: MdIndentedCodeLine) -> Self {
         n.syntax.into()
     }
+}
+impl MdInlineCode {
+    pub const KIND: SyntaxKind = MD_INLINE_CODE;
 }
 impl AstNode for MdInlineCode {
     type Language = Language;
@@ -1947,6 +1983,9 @@ impl From<MdInlineCode> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdInlineEmphasis {
+    pub const KIND: SyntaxKind = MD_INLINE_EMPHASIS;
+}
 impl AstNode for MdInlineEmphasis {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1995,6 +2034,9 @@ impl From<MdInlineEmphasis> for SyntaxElement {
     fn from(n: MdInlineEmphasis) -> Self {
         n.syntax.into()
     }
+}
+impl MdInlineImage {
+    pub const KIND: SyntaxKind = MD_INLINE_IMAGE;
 }
 impl AstNode for MdInlineImage {
     type Language = Language;
@@ -2054,6 +2096,9 @@ impl From<MdInlineImage> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdInlineImageAlt {
+    pub const KIND: SyntaxKind = MD_INLINE_IMAGE_ALT;
+}
 impl AstNode for MdInlineImageAlt {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2108,6 +2153,9 @@ impl From<MdInlineImageAlt> for SyntaxElement {
     fn from(n: MdInlineImageAlt) -> Self {
         n.syntax.into()
     }
+}
+impl MdInlineImageLink {
+    pub const KIND: SyntaxKind = MD_INLINE_IMAGE_LINK;
 }
 impl AstNode for MdInlineImageLink {
     type Language = Language;
@@ -2164,6 +2212,9 @@ impl From<MdInlineImageLink> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdInlineImageSource {
+    pub const KIND: SyntaxKind = MD_INLINE_IMAGE_SOURCE;
+}
 impl AstNode for MdInlineImageSource {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2219,6 +2270,9 @@ impl From<MdInlineImageSource> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdInlineItalic {
+    pub const KIND: SyntaxKind = MD_INLINE_ITALIC;
+}
 impl AstNode for MdInlineItalic {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2267,6 +2321,9 @@ impl From<MdInlineItalic> for SyntaxElement {
     fn from(n: MdInlineItalic) -> Self {
         n.syntax.into()
     }
+}
+impl MdInlineLink {
+    pub const KIND: SyntaxKind = MD_INLINE_LINK;
 }
 impl AstNode for MdInlineLink {
     type Language = Language;
@@ -2332,6 +2389,9 @@ impl From<MdInlineLink> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdLinkBlock {
+    pub const KIND: SyntaxKind = MD_LINK_BLOCK;
+}
 impl AstNode for MdLinkBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2381,6 +2441,9 @@ impl From<MdLinkBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdOrderListItem {
+    pub const KIND: SyntaxKind = MD_ORDER_LIST_ITEM;
+}
 impl AstNode for MdOrderListItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2427,6 +2490,9 @@ impl From<MdOrderListItem> for SyntaxElement {
     fn from(n: MdOrderListItem) -> Self {
         n.syntax.into()
     }
+}
+impl MdParagraph {
+    pub const KIND: SyntaxKind = MD_PARAGRAPH;
 }
 impl AstNode for MdParagraph {
     type Language = Language;
@@ -2475,6 +2541,9 @@ impl From<MdParagraph> for SyntaxElement {
     fn from(n: MdParagraph) -> Self {
         n.syntax.into()
     }
+}
+impl MdQuote {
+    pub const KIND: SyntaxKind = MD_QUOTE;
 }
 impl AstNode for MdQuote {
     type Language = Language;
@@ -2526,6 +2595,9 @@ impl From<MdQuote> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdSetextHeader {
+    pub const KIND: SyntaxKind = MD_SETEXT_HEADER;
+}
 impl AstNode for MdSetextHeader {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2575,6 +2647,9 @@ impl From<MdSetextHeader> for SyntaxElement {
     fn from(n: MdSetextHeader) -> Self {
         n.syntax.into()
     }
+}
+impl MdSoftBreak {
+    pub const KIND: SyntaxKind = MD_SOFT_BREAK;
 }
 impl AstNode for MdSoftBreak {
     type Language = Language;
@@ -2626,6 +2701,9 @@ impl From<MdSoftBreak> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl MdTextual {
+    pub const KIND: SyntaxKind = MD_TEXTUAL;
+}
 impl AstNode for MdTextual {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2675,6 +2753,9 @@ impl From<MdTextual> for SyntaxElement {
     fn from(n: MdTextual) -> Self {
         n.syntax.into()
     }
+}
+impl MdThematicBreakBlock {
+    pub const KIND: SyntaxKind = MD_THEMATIC_BREAK_BLOCK;
 }
 impl AstNode for MdThematicBreakBlock {
     type Language = Language;
@@ -3351,6 +3432,7 @@ pub struct MdBogus {
     syntax: SyntaxNode,
 }
 impl MdBogus {
+    pub const KIND: SyntaxKind = MD_BOGUS;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -3408,6 +3490,7 @@ pub struct MdBlockList {
     syntax_list: SyntaxList,
 }
 impl MdBlockList {
+    pub const KIND: SyntaxKind = MD_BLOCK_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -3490,6 +3573,7 @@ pub struct MdBulletList {
     syntax_list: SyntaxList,
 }
 impl MdBulletList {
+    pub const KIND: SyntaxKind = MD_BULLET_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -3572,6 +3656,7 @@ pub struct MdCodeNameList {
     syntax_list: SyntaxList,
 }
 impl MdCodeNameList {
+    pub const KIND: SyntaxKind = MD_CODE_NAME_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -3654,6 +3739,7 @@ pub struct MdHashList {
     syntax_list: SyntaxList,
 }
 impl MdHashList {
+    pub const KIND: SyntaxKind = MD_HASH_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -3736,6 +3822,7 @@ pub struct MdIndentedCodeLineList {
     syntax_list: SyntaxList,
 }
 impl MdIndentedCodeLineList {
+    pub const KIND: SyntaxKind = MD_INDENTED_CODE_LINE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -3818,6 +3905,7 @@ pub struct MdInlineItemList {
     syntax_list: SyntaxList,
 }
 impl MdInlineItemList {
+    pub const KIND: SyntaxKind = MD_INLINE_ITEM_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -3900,6 +3988,7 @@ pub struct MdOrderList {
     syntax_list: SyntaxList,
 }
 impl MdOrderList {
+    pub const KIND: SyntaxKind = MD_ORDER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]

@@ -1429,6 +1429,9 @@ impl AnyYamlProperty {
         }
     }
 }
+impl YamlAliasNode {
+    pub const KIND: SyntaxKind = YAML_ALIAS_NODE;
+}
 impl AstNode for YamlAliasNode {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1478,6 +1481,9 @@ impl From<YamlAliasNode> for SyntaxElement {
     fn from(n: YamlAliasNode) -> Self {
         n.syntax.into()
     }
+}
+impl YamlAnchorProperty {
+    pub const KIND: SyntaxKind = YAML_ANCHOR_PROPERTY;
 }
 impl AstNode for YamlAnchorProperty {
     type Language = Language;
@@ -1529,6 +1535,9 @@ impl From<YamlAnchorProperty> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlBlockCollection {
+    pub const KIND: SyntaxKind = YAML_BLOCK_COLLECTION;
+}
 impl AstNode for YamlBlockCollection {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1577,6 +1586,9 @@ impl From<YamlBlockCollection> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlBlockMapExplicitEntry {
+    pub const KIND: SyntaxKind = YAML_BLOCK_MAP_EXPLICIT_ENTRY;
+}
 impl AstNode for YamlBlockMapExplicitEntry {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1624,6 +1636,9 @@ impl From<YamlBlockMapExplicitEntry> for SyntaxElement {
     fn from(n: YamlBlockMapExplicitEntry) -> Self {
         n.syntax.into()
     }
+}
+impl YamlBlockMapExplicitKey {
+    pub const KIND: SyntaxKind = YAML_BLOCK_MAP_EXPLICIT_KEY;
 }
 impl AstNode for YamlBlockMapExplicitKey {
     type Language = Language;
@@ -1676,6 +1691,9 @@ impl From<YamlBlockMapExplicitKey> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlBlockMapExplicitValue {
+    pub const KIND: SyntaxKind = YAML_BLOCK_MAP_EXPLICIT_VALUE;
+}
 impl AstNode for YamlBlockMapExplicitValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1727,6 +1745,9 @@ impl From<YamlBlockMapExplicitValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlBlockMapImplicitEntry {
+    pub const KIND: SyntaxKind = YAML_BLOCK_MAP_IMPLICIT_ENTRY;
+}
 impl AstNode for YamlBlockMapImplicitEntry {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1774,6 +1795,9 @@ impl From<YamlBlockMapImplicitEntry> for SyntaxElement {
     fn from(n: YamlBlockMapImplicitEntry) -> Self {
         n.syntax.into()
     }
+}
+impl YamlBlockMapImplicitValue {
+    pub const KIND: SyntaxKind = YAML_BLOCK_MAP_IMPLICIT_VALUE;
 }
 impl AstNode for YamlBlockMapImplicitValue {
     type Language = Language;
@@ -1825,6 +1849,9 @@ impl From<YamlBlockMapImplicitValue> for SyntaxElement {
     fn from(n: YamlBlockMapImplicitValue) -> Self {
         n.syntax.into()
     }
+}
+impl YamlBlockMapping {
+    pub const KIND: SyntaxKind = YAML_BLOCK_MAPPING;
 }
 impl AstNode for YamlBlockMapping {
     type Language = Language;
@@ -1881,6 +1908,9 @@ impl From<YamlBlockMapping> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlBlockSequence {
+    pub const KIND: SyntaxKind = YAML_BLOCK_SEQUENCE;
+}
 impl AstNode for YamlBlockSequence {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1936,6 +1966,9 @@ impl From<YamlBlockSequence> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlBlockSequenceEntry {
+    pub const KIND: SyntaxKind = YAML_BLOCK_SEQUENCE_ENTRY;
+}
 impl AstNode for YamlBlockSequenceEntry {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1987,6 +2020,9 @@ impl From<YamlBlockSequenceEntry> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlCompactMapping {
+    pub const KIND: SyntaxKind = YAML_COMPACT_MAPPING;
+}
 impl AstNode for YamlCompactMapping {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2034,6 +2070,9 @@ impl From<YamlCompactMapping> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlCompactSequence {
+    pub const KIND: SyntaxKind = YAML_COMPACT_SEQUENCE;
+}
 impl AstNode for YamlCompactSequence {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2080,6 +2119,9 @@ impl From<YamlCompactSequence> for SyntaxElement {
     fn from(n: YamlCompactSequence) -> Self {
         n.syntax.into()
     }
+}
+impl YamlDirective {
+    pub const KIND: SyntaxKind = YAML_DIRECTIVE;
 }
 impl AstNode for YamlDirective {
     type Language = Language;
@@ -2130,6 +2172,9 @@ impl From<YamlDirective> for SyntaxElement {
     fn from(n: YamlDirective) -> Self {
         n.syntax.into()
     }
+}
+impl YamlDocument {
+    pub const KIND: SyntaxKind = YAML_DOCUMENT;
 }
 impl AstNode for YamlDocument {
     type Language = Language;
@@ -2191,6 +2236,9 @@ impl From<YamlDocument> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlDoubleQuotedScalar {
+    pub const KIND: SyntaxKind = YAML_DOUBLE_QUOTED_SCALAR;
+}
 impl AstNode for YamlDoubleQuotedScalar {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2241,6 +2289,9 @@ impl From<YamlDoubleQuotedScalar> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlFlowJsonNode {
+    pub const KIND: SyntaxKind = YAML_FLOW_JSON_NODE;
+}
 impl AstNode for YamlFlowJsonNode {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2288,6 +2339,9 @@ impl From<YamlFlowJsonNode> for SyntaxElement {
     fn from(n: YamlFlowJsonNode) -> Self {
         n.syntax.into()
     }
+}
+impl YamlFlowMapExplicitEntry {
+    pub const KIND: SyntaxKind = YAML_FLOW_MAP_EXPLICIT_ENTRY;
 }
 impl AstNode for YamlFlowMapExplicitEntry {
     type Language = Language;
@@ -2340,6 +2394,9 @@ impl From<YamlFlowMapExplicitEntry> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlFlowMapImplicitEntry {
+    pub const KIND: SyntaxKind = YAML_FLOW_MAP_IMPLICIT_ENTRY;
+}
 impl AstNode for YamlFlowMapImplicitEntry {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2391,6 +2448,9 @@ impl From<YamlFlowMapImplicitEntry> for SyntaxElement {
     fn from(n: YamlFlowMapImplicitEntry) -> Self {
         n.syntax.into()
     }
+}
+impl YamlFlowMapping {
+    pub const KIND: SyntaxKind = YAML_FLOW_MAPPING;
 }
 impl AstNode for YamlFlowMapping {
     type Language = Language;
@@ -2447,6 +2507,9 @@ impl From<YamlFlowMapping> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlFlowSequence {
+    pub const KIND: SyntaxKind = YAML_FLOW_SEQUENCE;
+}
 impl AstNode for YamlFlowSequence {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2502,6 +2565,9 @@ impl From<YamlFlowSequence> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlFlowYamlNode {
+    pub const KIND: SyntaxKind = YAML_FLOW_YAML_NODE;
+}
 impl AstNode for YamlFlowYamlNode {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2549,6 +2615,9 @@ impl From<YamlFlowYamlNode> for SyntaxElement {
     fn from(n: YamlFlowYamlNode) -> Self {
         n.syntax.into()
     }
+}
+impl YamlFoldedScalar {
+    pub const KIND: SyntaxKind = YAML_FOLDED_SCALAR;
 }
 impl AstNode for YamlFoldedScalar {
     type Language = Language;
@@ -2600,6 +2669,9 @@ impl From<YamlFoldedScalar> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlLiteralScalar {
+    pub const KIND: SyntaxKind = YAML_LITERAL_SCALAR;
+}
 impl AstNode for YamlLiteralScalar {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2649,6 +2721,9 @@ impl From<YamlLiteralScalar> for SyntaxElement {
     fn from(n: YamlLiteralScalar) -> Self {
         n.syntax.into()
     }
+}
+impl YamlPlainScalar {
+    pub const KIND: SyntaxKind = YAML_PLAIN_SCALAR;
 }
 impl AstNode for YamlPlainScalar {
     type Language = Language;
@@ -2700,6 +2775,9 @@ impl From<YamlPlainScalar> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlPropertyList {
+    pub const KIND: SyntaxKind = YAML_PROPERTY_LIST;
+}
 impl AstNode for YamlPropertyList {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2750,6 +2828,9 @@ impl From<YamlPropertyList> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl YamlRoot {
+    pub const KIND: SyntaxKind = YAML_ROOT;
+}
 impl AstNode for YamlRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2797,6 +2878,9 @@ impl From<YamlRoot> for SyntaxElement {
     fn from(n: YamlRoot) -> Self {
         n.syntax.into()
     }
+}
+impl YamlSingleQuotedScalar {
+    pub const KIND: SyntaxKind = YAML_SINGLE_QUOTED_SCALAR;
 }
 impl AstNode for YamlSingleQuotedScalar {
     type Language = Language;
@@ -2847,6 +2931,9 @@ impl From<YamlSingleQuotedScalar> for SyntaxElement {
     fn from(n: YamlSingleQuotedScalar) -> Self {
         n.syntax.into()
     }
+}
+impl YamlTagProperty {
+    pub const KIND: SyntaxKind = YAML_TAG_PROPERTY;
 }
 impl AstNode for YamlTagProperty {
     type Language = Language;
@@ -3929,6 +4016,7 @@ pub struct YamlBogus {
     syntax: SyntaxNode,
 }
 impl YamlBogus {
+    pub const KIND: SyntaxKind = YAML_BOGUS;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -3985,6 +4073,7 @@ pub struct YamlBogusNode {
     syntax: SyntaxNode,
 }
 impl YamlBogusNode {
+    pub const KIND: SyntaxKind = YAML_BOGUS_NODE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -4042,6 +4131,7 @@ pub struct YamlBlockMapEntryList {
     syntax_list: SyntaxList,
 }
 impl YamlBlockMapEntryList {
+    pub const KIND: SyntaxKind = YAML_BLOCK_MAP_ENTRY_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -4124,6 +4214,7 @@ pub struct YamlBlockSequenceEntryList {
     syntax_list: SyntaxList,
 }
 impl YamlBlockSequenceEntryList {
+    pub const KIND: SyntaxKind = YAML_BLOCK_SEQUENCE_ENTRY_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -4206,6 +4297,7 @@ pub struct YamlDirectiveList {
     syntax_list: SyntaxList,
 }
 impl YamlDirectiveList {
+    pub const KIND: SyntaxKind = YAML_DIRECTIVE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -4288,6 +4380,7 @@ pub struct YamlDocumentList {
     syntax_list: SyntaxList,
 }
 impl YamlDocumentList {
+    pub const KIND: SyntaxKind = YAML_DOCUMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -4370,6 +4463,7 @@ pub struct YamlFlowMapEntryList {
     syntax_list: SyntaxList,
 }
 impl YamlFlowMapEntryList {
+    pub const KIND: SyntaxKind = YAML_FLOW_MAP_ENTRY_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -4452,6 +4546,7 @@ pub struct YamlFlowSequenceEntryList {
     syntax_list: SyntaxList,
 }
 impl YamlFlowSequenceEntryList {
+    pub const KIND: SyntaxKind = YAML_FLOW_SEQUENCE_ENTRY_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]

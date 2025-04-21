@@ -19,7 +19,7 @@ use crate::{
     TsSetterSignatureClassMember, TsSetterSignatureTypeMember, TsTypeAliasDeclaration,
     TsTypeParameter, TsTypeParameterName,
 };
-use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union, match_ast};
 
 declare_node_union! {
     pub AnyJsBindingDeclaration =
@@ -445,22 +445,20 @@ declare_node_union! {
 
 fn parent_function(node: &JsSyntaxNode) -> Option<AnyJsParameterParentFunction> {
     let parent = node.parent()?;
-
-    match parent.kind() {
-        JsSyntaxKind::JS_PARAMETER_LIST => {
-            // SAFETY: kind check above
-            let parameters = JsParameterList::unwrap_cast(parent).parent::<JsParameters>()?;
-            let parent = parameters.syntax.parent()?;
-            AnyJsParameterParentFunction::cast(parent)
+    match_ast! {
+        match parent {
+            JsParameterList(parameters) => {
+                let parameters = parameters.parent::<JsParameters>()?;
+                let parent = parameters.syntax.parent()?;
+                AnyJsParameterParentFunction::cast(parent)
+            },
+            JsConstructorParameterList(parameters) => {
+                let parameters = parameters.parent::<JsConstructorParameters>()?;
+                let parent = parameters.syntax().parent()?;
+                AnyJsParameterParentFunction::cast(parent)
+            },
+            _ => AnyJsParameterParentFunction::cast(parent),
         }
-        JsSyntaxKind::JS_CONSTRUCTOR_PARAMETER_LIST => {
-            // SAFETY: kind check above
-            let parameters = JsConstructorParameterList::unwrap_cast(parent)
-                .parent::<JsConstructorParameters>()?;
-            let parent = parameters.syntax().parent()?;
-            AnyJsParameterParentFunction::cast(parent)
-        }
-        _ => AnyJsParameterParentFunction::cast(parent),
     }
 }
 

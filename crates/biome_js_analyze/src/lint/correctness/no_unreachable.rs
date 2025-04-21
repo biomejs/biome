@@ -8,12 +8,13 @@ use biome_control_flow::{
 };
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    JsBlockStatement, JsCaseClause, JsDefaultClause, JsDoWhileStatement, JsForInStatement,
-    JsForOfStatement, JsForStatement, JsFunctionBody, JsIfStatement, JsLabeledStatement,
-    JsLanguage, JsReturnStatement, JsSwitchStatement, JsSyntaxElement, JsSyntaxKind, JsSyntaxNode,
-    JsTryFinallyStatement, JsTryStatement, JsVariableStatement, JsWhileStatement, TextRange,
+    JsBlockStatement, JsBreakStatement, JsCaseClause, JsContinueStatement, JsDefaultClause,
+    JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement, JsFunctionBody,
+    JsIfStatement, JsLabeledStatement, JsLanguage, JsReturnStatement, JsSwitchStatement,
+    JsSyntaxElement, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, JsTryStatement,
+    JsVariableStatement, JsWhileStatement, TextRange,
 };
-use biome_rowan::{AstNode, NodeOrToken, declare_node_union};
+use biome_rowan::{AstNode, NodeOrToken, declare_node_union, match_ast};
 use roaring::bitmap::RoaringBitmap;
 use rustc_hash::FxHashMap;
 
@@ -540,13 +541,15 @@ fn has_side_effects(inst: &Instruction<JsLanguage>) -> bool {
         return false;
     };
 
-    match node.kind() {
-        JsSyntaxKind::JS_RETURN_STATEMENT => {
-            let node = JsReturnStatement::unwrap_cast(node.clone());
-            node.argument().is_some()
+    match_ast! {
+        match node {
+            JsReturnStatement(node) => {
+                node.argument().is_some()
+            },
+            JsBreakStatement(_) => false,
+            JsContinueStatement(_) => false,
+            _ => !node.kind().is_literal(),
         }
-        JsSyntaxKind::JS_BREAK_STATEMENT | JsSyntaxKind::JS_CONTINUE_STATEMENT => false,
-        kind => !kind.is_literal(),
     }
 }
 

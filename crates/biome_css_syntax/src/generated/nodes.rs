@@ -8903,6 +8903,9 @@ impl AnyCssValueAtRuleProperty {
         }
     }
 }
+impl CssAtRule {
+    pub const KIND: SyntaxKind = CSS_AT_RULE;
+}
 impl AstNode for CssAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8950,6 +8953,9 @@ impl From<CssAtRule> for SyntaxElement {
     fn from(n: CssAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssAttributeMatcher {
+    pub const KIND: SyntaxKind = CSS_ATTRIBUTE_MATCHER;
 }
 impl AstNode for CssAttributeMatcher {
     type Language = Language;
@@ -9000,6 +9006,9 @@ impl From<CssAttributeMatcher> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssAttributeMatcherValue {
+    pub const KIND: SyntaxKind = CSS_ATTRIBUTE_MATCHER_VALUE;
+}
 impl AstNode for CssAttributeMatcherValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9046,6 +9055,9 @@ impl From<CssAttributeMatcherValue> for SyntaxElement {
     fn from(n: CssAttributeMatcherValue) -> Self {
         n.syntax.into()
     }
+}
+impl CssAttributeName {
+    pub const KIND: SyntaxKind = CSS_ATTRIBUTE_NAME;
 }
 impl AstNode for CssAttributeName {
     type Language = Language;
@@ -9097,6 +9109,9 @@ impl From<CssAttributeName> for SyntaxElement {
     fn from(n: CssAttributeName) -> Self {
         n.syntax.into()
     }
+}
+impl CssAttributeSelector {
+    pub const KIND: SyntaxKind = CSS_ATTRIBUTE_SELECTOR;
 }
 impl AstNode for CssAttributeSelector {
     type Language = Language;
@@ -9154,6 +9169,9 @@ impl From<CssAttributeSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssBinaryExpression {
+    pub const KIND: SyntaxKind = CSS_BINARY_EXPRESSION;
+}
 impl AstNode for CssBinaryExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9205,6 +9223,9 @@ impl From<CssBinaryExpression> for SyntaxElement {
     fn from(n: CssBinaryExpression) -> Self {
         n.syntax.into()
     }
+}
+impl CssBracketedValue {
+    pub const KIND: SyntaxKind = CSS_BRACKETED_VALUE;
 }
 impl AstNode for CssBracketedValue {
     type Language = Language;
@@ -9261,6 +9282,9 @@ impl From<CssBracketedValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssCharsetAtRule {
+    pub const KIND: SyntaxKind = CSS_CHARSET_AT_RULE;
+}
 impl AstNode for CssCharsetAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9316,6 +9340,9 @@ impl From<CssCharsetAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssClassSelector {
+    pub const KIND: SyntaxKind = CSS_CLASS_SELECTOR;
+}
 impl AstNode for CssClassSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9363,6 +9390,9 @@ impl From<CssClassSelector> for SyntaxElement {
     fn from(n: CssClassSelector) -> Self {
         n.syntax.into()
     }
+}
+impl CssColor {
+    pub const KIND: SyntaxKind = CSS_COLOR;
 }
 impl AstNode for CssColor {
     type Language = Language;
@@ -9414,6 +9444,9 @@ impl From<CssColor> for SyntaxElement {
     fn from(n: CssColor) -> Self {
         n.syntax.into()
     }
+}
+impl CssColorProfileAtRule {
+    pub const KIND: SyntaxKind = CSS_COLOR_PROFILE_AT_RULE;
 }
 impl AstNode for CssColorProfileAtRule {
     type Language = Language;
@@ -9467,6 +9500,9 @@ impl From<CssColorProfileAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssComplexSelector {
+    pub const KIND: SyntaxKind = CSS_COMPLEX_SELECTOR;
+}
 impl AstNode for CssComplexSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9516,6 +9552,9 @@ impl From<CssComplexSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssComposesImportSpecifier {
+    pub const KIND: SyntaxKind = CSS_COMPOSES_IMPORT_SPECIFIER;
+}
 impl AstNode for CssComposesImportSpecifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9563,6 +9602,9 @@ impl From<CssComposesImportSpecifier> for SyntaxElement {
     fn from(n: CssComposesImportSpecifier) -> Self {
         n.syntax.into()
     }
+}
+impl CssComposesProperty {
+    pub const KIND: SyntaxKind = CSS_COMPOSES_PROPERTY;
 }
 impl AstNode for CssComposesProperty {
     type Language = Language;
@@ -9616,6 +9658,9 @@ impl From<CssComposesProperty> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssComposesPropertyValue {
+    pub const KIND: SyntaxKind = CSS_COMPOSES_PROPERTY_VALUE;
+}
 impl AstNode for CssComposesPropertyValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9666,6 +9711,9 @@ impl From<CssComposesPropertyValue> for SyntaxElement {
     fn from(n: CssComposesPropertyValue) -> Self {
         n.syntax.into()
     }
+}
+impl CssCompoundSelector {
+    pub const KIND: SyntaxKind = CSS_COMPOUND_SELECTOR;
 }
 impl AstNode for CssCompoundSelector {
     type Language = Language;
@@ -9719,6 +9767,9 @@ impl From<CssCompoundSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssContainerAndQuery {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_AND_QUERY;
+}
 impl AstNode for CssContainerAndQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9767,6 +9818,9 @@ impl From<CssContainerAndQuery> for SyntaxElement {
     fn from(n: CssContainerAndQuery) -> Self {
         n.syntax.into()
     }
+}
+impl CssContainerAtRule {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_AT_RULE;
 }
 impl AstNode for CssContainerAtRule {
     type Language = Language;
@@ -9821,6 +9875,9 @@ impl From<CssContainerAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssContainerNotQuery {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_NOT_QUERY;
+}
 impl AstNode for CssContainerNotQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9868,6 +9925,9 @@ impl From<CssContainerNotQuery> for SyntaxElement {
     fn from(n: CssContainerNotQuery) -> Self {
         n.syntax.into()
     }
+}
+impl CssContainerOrQuery {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_OR_QUERY;
 }
 impl AstNode for CssContainerOrQuery {
     type Language = Language;
@@ -9917,6 +9977,9 @@ impl From<CssContainerOrQuery> for SyntaxElement {
     fn from(n: CssContainerOrQuery) -> Self {
         n.syntax.into()
     }
+}
+impl CssContainerQueryInParens {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_QUERY_IN_PARENS;
 }
 impl AstNode for CssContainerQueryInParens {
     type Language = Language;
@@ -9973,6 +10036,9 @@ impl From<CssContainerQueryInParens> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssContainerSizeFeatureInParens {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_SIZE_FEATURE_IN_PARENS;
+}
 impl AstNode for CssContainerSizeFeatureInParens {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10028,6 +10094,9 @@ impl From<CssContainerSizeFeatureInParens> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssContainerStyleAndQuery {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_STYLE_AND_QUERY;
+}
 impl AstNode for CssContainerStyleAndQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10076,6 +10145,9 @@ impl From<CssContainerStyleAndQuery> for SyntaxElement {
     fn from(n: CssContainerStyleAndQuery) -> Self {
         n.syntax.into()
     }
+}
+impl CssContainerStyleInParens {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_STYLE_IN_PARENS;
 }
 impl AstNode for CssContainerStyleInParens {
     type Language = Language;
@@ -10132,6 +10204,9 @@ impl From<CssContainerStyleInParens> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssContainerStyleNotQuery {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_STYLE_NOT_QUERY;
+}
 impl AstNode for CssContainerStyleNotQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10179,6 +10254,9 @@ impl From<CssContainerStyleNotQuery> for SyntaxElement {
     fn from(n: CssContainerStyleNotQuery) -> Self {
         n.syntax.into()
     }
+}
+impl CssContainerStyleOrQuery {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_STYLE_OR_QUERY;
 }
 impl AstNode for CssContainerStyleOrQuery {
     type Language = Language;
@@ -10228,6 +10306,9 @@ impl From<CssContainerStyleOrQuery> for SyntaxElement {
     fn from(n: CssContainerStyleOrQuery) -> Self {
         n.syntax.into()
     }
+}
+impl CssContainerStyleQueryInParens {
+    pub const KIND: SyntaxKind = CSS_CONTAINER_STYLE_QUERY_IN_PARENS;
 }
 impl AstNode for CssContainerStyleQueryInParens {
     type Language = Language;
@@ -10288,6 +10369,9 @@ impl From<CssContainerStyleQueryInParens> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssCounterStyleAtRule {
+    pub const KIND: SyntaxKind = CSS_COUNTER_STYLE_AT_RULE;
+}
 impl AstNode for CssCounterStyleAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10340,6 +10424,9 @@ impl From<CssCounterStyleAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssCustomIdentifier {
+    pub const KIND: SyntaxKind = CSS_CUSTOM_IDENTIFIER;
+}
 impl AstNode for CssCustomIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10389,6 +10476,9 @@ impl From<CssCustomIdentifier> for SyntaxElement {
     fn from(n: CssCustomIdentifier) -> Self {
         n.syntax.into()
     }
+}
+impl CssDashedIdentifier {
+    pub const KIND: SyntaxKind = CSS_DASHED_IDENTIFIER;
 }
 impl AstNode for CssDashedIdentifier {
     type Language = Language;
@@ -10440,6 +10530,9 @@ impl From<CssDashedIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssDeclaration {
+    pub const KIND: SyntaxKind = CSS_DECLARATION;
+}
 impl AstNode for CssDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10490,6 +10583,9 @@ impl From<CssDeclaration> for SyntaxElement {
     fn from(n: CssDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl CssDeclarationBlock {
+    pub const KIND: SyntaxKind = CSS_DECLARATION_BLOCK;
 }
 impl AstNode for CssDeclarationBlock {
     type Language = Language;
@@ -10546,6 +10642,9 @@ impl From<CssDeclarationBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssDeclarationImportant {
+    pub const KIND: SyntaxKind = CSS_DECLARATION_IMPORTANT;
+}
 impl AstNode for CssDeclarationImportant {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10596,6 +10695,9 @@ impl From<CssDeclarationImportant> for SyntaxElement {
     fn from(n: CssDeclarationImportant) -> Self {
         n.syntax.into()
     }
+}
+impl CssDeclarationOrAtRuleBlock {
+    pub const KIND: SyntaxKind = CSS_DECLARATION_OR_AT_RULE_BLOCK;
 }
 impl AstNode for CssDeclarationOrAtRuleBlock {
     type Language = Language;
@@ -10652,6 +10754,9 @@ impl From<CssDeclarationOrAtRuleBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssDeclarationOrRuleBlock {
+    pub const KIND: SyntaxKind = CSS_DECLARATION_OR_RULE_BLOCK;
+}
 impl AstNode for CssDeclarationOrRuleBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10707,6 +10812,9 @@ impl From<CssDeclarationOrRuleBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssDeclarationWithSemicolon {
+    pub const KIND: SyntaxKind = CSS_DECLARATION_WITH_SEMICOLON;
+}
 impl AstNode for CssDeclarationWithSemicolon {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10761,6 +10869,9 @@ impl From<CssDeclarationWithSemicolon> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssDocumentAtRule {
+    pub const KIND: SyntaxKind = CSS_DOCUMENT_AT_RULE;
+}
 impl AstNode for CssDocumentAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10812,6 +10923,9 @@ impl From<CssDocumentAtRule> for SyntaxElement {
     fn from(n: CssDocumentAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssDocumentCustomMatcher {
+    pub const KIND: SyntaxKind = CSS_DOCUMENT_CUSTOM_MATCHER;
 }
 impl AstNode for CssDocumentCustomMatcher {
     type Language = Language;
@@ -10869,6 +10983,9 @@ impl From<CssDocumentCustomMatcher> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssEmptyDeclaration {
+    pub const KIND: SyntaxKind = CSS_EMPTY_DECLARATION;
+}
 impl AstNode for CssEmptyDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10918,6 +11035,9 @@ impl From<CssEmptyDeclaration> for SyntaxElement {
     fn from(n: CssEmptyDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl CssFontFaceAtRule {
+    pub const KIND: SyntaxKind = CSS_FONT_FACE_AT_RULE;
 }
 impl AstNode for CssFontFaceAtRule {
     type Language = Language;
@@ -10970,6 +11090,9 @@ impl From<CssFontFaceAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssFontFamilyName {
+    pub const KIND: SyntaxKind = CSS_FONT_FAMILY_NAME;
+}
 impl AstNode for CssFontFamilyName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11016,6 +11139,9 @@ impl From<CssFontFamilyName> for SyntaxElement {
     fn from(n: CssFontFamilyName) -> Self {
         n.syntax.into()
     }
+}
+impl CssFontFeatureValuesAtRule {
+    pub const KIND: SyntaxKind = CSS_FONT_FEATURE_VALUES_AT_RULE;
 }
 impl AstNode for CssFontFeatureValuesAtRule {
     type Language = Language;
@@ -11068,6 +11194,9 @@ impl From<CssFontFeatureValuesAtRule> for SyntaxElement {
     fn from(n: CssFontFeatureValuesAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssFontFeatureValuesBlock {
+    pub const KIND: SyntaxKind = CSS_FONT_FEATURE_VALUES_BLOCK;
 }
 impl AstNode for CssFontFeatureValuesBlock {
     type Language = Language;
@@ -11124,6 +11253,9 @@ impl From<CssFontFeatureValuesBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssFontFeatureValuesItem {
+    pub const KIND: SyntaxKind = CSS_FONT_FEATURE_VALUES_ITEM;
+}
 impl AstNode for CssFontFeatureValuesItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11172,6 +11304,9 @@ impl From<CssFontFeatureValuesItem> for SyntaxElement {
     fn from(n: CssFontFeatureValuesItem) -> Self {
         n.syntax.into()
     }
+}
+impl CssFontPaletteValuesAtRule {
+    pub const KIND: SyntaxKind = CSS_FONT_PALETTE_VALUES_AT_RULE;
 }
 impl AstNode for CssFontPaletteValuesAtRule {
     type Language = Language;
@@ -11224,6 +11359,9 @@ impl From<CssFontPaletteValuesAtRule> for SyntaxElement {
     fn from(n: CssFontPaletteValuesAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssFunction {
+    pub const KIND: SyntaxKind = CSS_FUNCTION;
 }
 impl AstNode for CssFunction {
     type Language = Language;
@@ -11281,6 +11419,9 @@ impl From<CssFunction> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssGenericDelimiter {
+    pub const KIND: SyntaxKind = CSS_GENERIC_DELIMITER;
+}
 impl AstNode for CssGenericDelimiter {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11327,6 +11468,9 @@ impl From<CssGenericDelimiter> for SyntaxElement {
     fn from(n: CssGenericDelimiter) -> Self {
         n.syntax.into()
     }
+}
+impl CssGenericProperty {
+    pub const KIND: SyntaxKind = CSS_GENERIC_PROPERTY;
 }
 impl AstNode for CssGenericProperty {
     type Language = Language;
@@ -11380,6 +11524,9 @@ impl From<CssGenericProperty> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssIdSelector {
+    pub const KIND: SyntaxKind = CSS_ID_SELECTOR;
+}
 impl AstNode for CssIdSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11427,6 +11574,9 @@ impl From<CssIdSelector> for SyntaxElement {
     fn from(n: CssIdSelector) -> Self {
         n.syntax.into()
     }
+}
+impl CssIdentifier {
+    pub const KIND: SyntaxKind = CSS_IDENTIFIER;
 }
 impl AstNode for CssIdentifier {
     type Language = Language;
@@ -11478,6 +11628,9 @@ impl From<CssIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssImportAnonymousLayer {
+    pub const KIND: SyntaxKind = CSS_IMPORT_ANONYMOUS_LAYER;
+}
 impl AstNode for CssImportAnonymousLayer {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11527,6 +11680,9 @@ impl From<CssImportAnonymousLayer> for SyntaxElement {
     fn from(n: CssImportAnonymousLayer) -> Self {
         n.syntax.into()
     }
+}
+impl CssImportAtRule {
+    pub const KIND: SyntaxKind = CSS_IMPORT_AT_RULE;
 }
 impl AstNode for CssImportAtRule {
     type Language = Language;
@@ -11585,6 +11741,9 @@ impl From<CssImportAtRule> for SyntaxElement {
     fn from(n: CssImportAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssImportNamedLayer {
+    pub const KIND: SyntaxKind = CSS_IMPORT_NAMED_LAYER;
 }
 impl AstNode for CssImportNamedLayer {
     type Language = Language;
@@ -11645,6 +11804,9 @@ impl From<CssImportNamedLayer> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssImportSupports {
+    pub const KIND: SyntaxKind = CSS_IMPORT_SUPPORTS;
+}
 impl AstNode for CssImportSupports {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11704,6 +11866,9 @@ impl From<CssImportSupports> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssKeyframesAtRule {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_AT_RULE;
+}
 impl AstNode for CssKeyframesAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11755,6 +11920,9 @@ impl From<CssKeyframesAtRule> for SyntaxElement {
     fn from(n: CssKeyframesAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssKeyframesBlock {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_BLOCK;
 }
 impl AstNode for CssKeyframesBlock {
     type Language = Language;
@@ -11811,6 +11979,9 @@ impl From<CssKeyframesBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssKeyframesIdentSelector {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_IDENT_SELECTOR;
+}
 impl AstNode for CssKeyframesIdentSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11857,6 +12028,9 @@ impl From<CssKeyframesIdentSelector> for SyntaxElement {
     fn from(n: CssKeyframesIdentSelector) -> Self {
         n.syntax.into()
     }
+}
+impl CssKeyframesItem {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_ITEM;
 }
 impl AstNode for CssKeyframesItem {
     type Language = Language;
@@ -11906,6 +12080,9 @@ impl From<CssKeyframesItem> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssKeyframesPercentageSelector {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_PERCENTAGE_SELECTOR;
+}
 impl AstNode for CssKeyframesPercentageSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11952,6 +12129,9 @@ impl From<CssKeyframesPercentageSelector> for SyntaxElement {
     fn from(n: CssKeyframesPercentageSelector) -> Self {
         n.syntax.into()
     }
+}
+impl CssKeyframesScopeFunction {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_SCOPE_FUNCTION;
 }
 impl AstNode for CssKeyframesScopeFunction {
     type Language = Language;
@@ -12009,6 +12189,9 @@ impl From<CssKeyframesScopeFunction> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssKeyframesScopePrefix {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_SCOPE_PREFIX;
+}
 impl AstNode for CssKeyframesScopePrefix {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12056,6 +12239,9 @@ impl From<CssKeyframesScopePrefix> for SyntaxElement {
     fn from(n: CssKeyframesScopePrefix) -> Self {
         n.syntax.into()
     }
+}
+impl CssKeyframesScopedName {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_SCOPED_NAME;
 }
 impl AstNode for CssKeyframesScopedName {
     type Language = Language;
@@ -12108,6 +12294,9 @@ impl From<CssKeyframesScopedName> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssLayerAtRule {
+    pub const KIND: SyntaxKind = CSS_LAYER_AT_RULE;
+}
 impl AstNode for CssLayerAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12159,6 +12348,9 @@ impl From<CssLayerAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssLayerDeclaration {
+    pub const KIND: SyntaxKind = CSS_LAYER_DECLARATION;
+}
 impl AstNode for CssLayerDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12206,6 +12398,9 @@ impl From<CssLayerDeclaration> for SyntaxElement {
     fn from(n: CssLayerDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl CssLayerReference {
+    pub const KIND: SyntaxKind = CSS_LAYER_REFERENCE;
 }
 impl AstNode for CssLayerReference {
     type Language = Language;
@@ -12258,6 +12453,9 @@ impl From<CssLayerReference> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssListOfComponentValuesExpression {
+    pub const KIND: SyntaxKind = CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION;
+}
 impl AstNode for CssListOfComponentValuesExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
@@ -12306,6 +12504,9 @@ impl From<CssListOfComponentValuesExpression> for SyntaxElement {
     fn from(n: CssListOfComponentValuesExpression) -> Self {
         n.syntax.into()
     }
+}
+impl CssMarginAtRule {
+    pub const KIND: SyntaxKind = CSS_MARGIN_AT_RULE;
 }
 impl AstNode for CssMarginAtRule {
     type Language = Language;
@@ -12356,6 +12557,9 @@ impl From<CssMarginAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssMediaAndCondition {
+    pub const KIND: SyntaxKind = CSS_MEDIA_AND_CONDITION;
+}
 impl AstNode for CssMediaAndCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12405,6 +12609,9 @@ impl From<CssMediaAndCondition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssMediaAndTypeQuery {
+    pub const KIND: SyntaxKind = CSS_MEDIA_AND_TYPE_QUERY;
+}
 impl AstNode for CssMediaAndTypeQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12453,6 +12660,9 @@ impl From<CssMediaAndTypeQuery> for SyntaxElement {
     fn from(n: CssMediaAndTypeQuery) -> Self {
         n.syntax.into()
     }
+}
+impl CssMediaAtRule {
+    pub const KIND: SyntaxKind = CSS_MEDIA_AT_RULE;
 }
 impl AstNode for CssMediaAtRule {
     type Language = Language;
@@ -12505,6 +12715,9 @@ impl From<CssMediaAtRule> for SyntaxElement {
     fn from(n: CssMediaAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssMediaConditionInParens {
+    pub const KIND: SyntaxKind = CSS_MEDIA_CONDITION_IN_PARENS;
 }
 impl AstNode for CssMediaConditionInParens {
     type Language = Language;
@@ -12561,6 +12774,9 @@ impl From<CssMediaConditionInParens> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssMediaConditionQuery {
+    pub const KIND: SyntaxKind = CSS_MEDIA_CONDITION_QUERY;
+}
 impl AstNode for CssMediaConditionQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12607,6 +12823,9 @@ impl From<CssMediaConditionQuery> for SyntaxElement {
     fn from(n: CssMediaConditionQuery) -> Self {
         n.syntax.into()
     }
+}
+impl CssMediaFeatureInParens {
+    pub const KIND: SyntaxKind = CSS_MEDIA_FEATURE_IN_PARENS;
 }
 impl AstNode for CssMediaFeatureInParens {
     type Language = Language;
@@ -12663,6 +12882,9 @@ impl From<CssMediaFeatureInParens> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssMediaNotCondition {
+    pub const KIND: SyntaxKind = CSS_MEDIA_NOT_CONDITION;
+}
 impl AstNode for CssMediaNotCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12710,6 +12932,9 @@ impl From<CssMediaNotCondition> for SyntaxElement {
     fn from(n: CssMediaNotCondition) -> Self {
         n.syntax.into()
     }
+}
+impl CssMediaOrCondition {
+    pub const KIND: SyntaxKind = CSS_MEDIA_OR_CONDITION;
 }
 impl AstNode for CssMediaOrCondition {
     type Language = Language;
@@ -12760,6 +12985,9 @@ impl From<CssMediaOrCondition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssMediaType {
+    pub const KIND: SyntaxKind = CSS_MEDIA_TYPE;
+}
 impl AstNode for CssMediaType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12806,6 +13034,9 @@ impl From<CssMediaType> for SyntaxElement {
     fn from(n: CssMediaType) -> Self {
         n.syntax.into()
     }
+}
+impl CssMediaTypeQuery {
+    pub const KIND: SyntaxKind = CSS_MEDIA_TYPE_QUERY;
 }
 impl AstNode for CssMediaTypeQuery {
     type Language = Language;
@@ -12854,6 +13085,9 @@ impl From<CssMediaTypeQuery> for SyntaxElement {
     fn from(n: CssMediaTypeQuery) -> Self {
         n.syntax.into()
     }
+}
+impl CssMetavariable {
+    pub const KIND: SyntaxKind = CSS_METAVARIABLE;
 }
 impl AstNode for CssMetavariable {
     type Language = Language;
@@ -12905,6 +13139,9 @@ impl From<CssMetavariable> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssNamedNamespacePrefix {
+    pub const KIND: SyntaxKind = CSS_NAMED_NAMESPACE_PREFIX;
+}
 impl AstNode for CssNamedNamespacePrefix {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12951,6 +13188,9 @@ impl From<CssNamedNamespacePrefix> for SyntaxElement {
     fn from(n: CssNamedNamespacePrefix) -> Self {
         n.syntax.into()
     }
+}
+impl CssNamespace {
+    pub const KIND: SyntaxKind = CSS_NAMESPACE;
 }
 impl AstNode for CssNamespace {
     type Language = Language;
@@ -13002,6 +13242,9 @@ impl From<CssNamespace> for SyntaxElement {
     fn from(n: CssNamespace) -> Self {
         n.syntax.into()
     }
+}
+impl CssNamespaceAtRule {
+    pub const KIND: SyntaxKind = CSS_NAMESPACE_AT_RULE;
 }
 impl AstNode for CssNamespaceAtRule {
     type Language = Language;
@@ -13059,6 +13302,9 @@ impl From<CssNamespaceAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssNestedQualifiedRule {
+    pub const KIND: SyntaxKind = CSS_NESTED_QUALIFIED_RULE;
+}
 impl AstNode for CssNestedQualifiedRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13107,6 +13353,9 @@ impl From<CssNestedQualifiedRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssNestedSelector {
+    pub const KIND: SyntaxKind = CSS_NESTED_SELECTOR;
+}
 impl AstNode for CssNestedSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13153,6 +13402,9 @@ impl From<CssNestedSelector> for SyntaxElement {
     fn from(n: CssNestedSelector) -> Self {
         n.syntax.into()
     }
+}
+impl CssNthOffset {
+    pub const KIND: SyntaxKind = CSS_NTH_OFFSET;
 }
 impl AstNode for CssNthOffset {
     type Language = Language;
@@ -13201,6 +13453,9 @@ impl From<CssNthOffset> for SyntaxElement {
     fn from(n: CssNthOffset) -> Self {
         n.syntax.into()
     }
+}
+impl CssNumber {
+    pub const KIND: SyntaxKind = CSS_NUMBER;
 }
 impl AstNode for CssNumber {
     type Language = Language;
@@ -13252,6 +13507,9 @@ impl From<CssNumber> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPageAtRule {
+    pub const KIND: SyntaxKind = CSS_PAGE_AT_RULE;
+}
 impl AstNode for CssPageAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13300,6 +13558,9 @@ impl From<CssPageAtRule> for SyntaxElement {
     fn from(n: CssPageAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssPageAtRuleBlock {
+    pub const KIND: SyntaxKind = CSS_PAGE_AT_RULE_BLOCK;
 }
 impl AstNode for CssPageAtRuleBlock {
     type Language = Language;
@@ -13356,6 +13617,9 @@ impl From<CssPageAtRuleBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPageSelector {
+    pub const KIND: SyntaxKind = CSS_PAGE_SELECTOR;
+}
 impl AstNode for CssPageSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13403,6 +13667,9 @@ impl From<CssPageSelector> for SyntaxElement {
     fn from(n: CssPageSelector) -> Self {
         n.syntax.into()
     }
+}
+impl CssPageSelectorPseudo {
+    pub const KIND: SyntaxKind = CSS_PAGE_SELECTOR_PSEUDO;
 }
 impl AstNode for CssPageSelectorPseudo {
     type Language = Language;
@@ -13455,6 +13722,9 @@ impl From<CssPageSelectorPseudo> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssParameter {
+    pub const KIND: SyntaxKind = CSS_PARAMETER;
+}
 impl AstNode for CssParameter {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13504,6 +13774,9 @@ impl From<CssParameter> for SyntaxElement {
     fn from(n: CssParameter) -> Self {
         n.syntax.into()
     }
+}
+impl CssParenthesizedExpression {
+    pub const KIND: SyntaxKind = CSS_PARENTHESIZED_EXPRESSION;
 }
 impl AstNode for CssParenthesizedExpression {
     type Language = Language;
@@ -13563,6 +13836,9 @@ impl From<CssParenthesizedExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPercentage {
+    pub const KIND: SyntaxKind = CSS_PERCENTAGE;
+}
 impl AstNode for CssPercentage {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13617,6 +13893,9 @@ impl From<CssPercentage> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPositionTryAtRule {
+    pub const KIND: SyntaxKind = CSS_POSITION_TRY_AT_RULE;
+}
 impl AstNode for CssPositionTryAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13669,6 +13948,9 @@ impl From<CssPositionTryAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPropertyAtRule {
+    pub const KIND: SyntaxKind = CSS_PROPERTY_AT_RULE;
+}
 impl AstNode for CssPropertyAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13720,6 +14002,9 @@ impl From<CssPropertyAtRule> for SyntaxElement {
     fn from(n: CssPropertyAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssPseudoClassFunctionCompoundSelector {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR;
 }
 impl AstNode for CssPseudoClassFunctionCompoundSelector {
     type Language = Language;
@@ -13779,6 +14064,9 @@ impl From<CssPseudoClassFunctionCompoundSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoClassFunctionCompoundSelectorList {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST;
+}
 impl AstNode for CssPseudoClassFunctionCompoundSelectorList {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
@@ -13837,6 +14125,9 @@ impl From<CssPseudoClassFunctionCompoundSelectorList> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoClassFunctionIdentifier {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER;
+}
 impl AstNode for CssPseudoClassFunctionIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13893,6 +14184,9 @@ impl From<CssPseudoClassFunctionIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoClassFunctionNth {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_FUNCTION_NTH;
+}
 impl AstNode for CssPseudoClassFunctionNth {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13948,6 +14242,9 @@ impl From<CssPseudoClassFunctionNth> for SyntaxElement {
     fn from(n: CssPseudoClassFunctionNth) -> Self {
         n.syntax.into()
     }
+}
+impl CssPseudoClassFunctionRelativeSelectorList {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST;
 }
 impl AstNode for CssPseudoClassFunctionRelativeSelectorList {
     type Language = Language;
@@ -14007,6 +14304,9 @@ impl From<CssPseudoClassFunctionRelativeSelectorList> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoClassFunctionSelector {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_FUNCTION_SELECTOR;
+}
 impl AstNode for CssPseudoClassFunctionSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14062,6 +14362,9 @@ impl From<CssPseudoClassFunctionSelector> for SyntaxElement {
     fn from(n: CssPseudoClassFunctionSelector) -> Self {
         n.syntax.into()
     }
+}
+impl CssPseudoClassFunctionSelectorList {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST;
 }
 impl AstNode for CssPseudoClassFunctionSelectorList {
     type Language = Language;
@@ -14121,6 +14424,9 @@ impl From<CssPseudoClassFunctionSelectorList> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoClassFunctionValueList {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST;
+}
 impl AstNode for CssPseudoClassFunctionValueList {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14177,6 +14483,9 @@ impl From<CssPseudoClassFunctionValueList> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoClassIdentifier {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_IDENTIFIER;
+}
 impl AstNode for CssPseudoClassIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14223,6 +14532,9 @@ impl From<CssPseudoClassIdentifier> for SyntaxElement {
     fn from(n: CssPseudoClassIdentifier) -> Self {
         n.syntax.into()
     }
+}
+impl CssPseudoClassNth {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_NTH;
 }
 impl AstNode for CssPseudoClassNth {
     type Language = Language;
@@ -14277,6 +14589,9 @@ impl From<CssPseudoClassNth> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoClassNthIdentifier {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_NTH_IDENTIFIER;
+}
 impl AstNode for CssPseudoClassNthIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14323,6 +14638,9 @@ impl From<CssPseudoClassNthIdentifier> for SyntaxElement {
     fn from(n: CssPseudoClassNthIdentifier) -> Self {
         n.syntax.into()
     }
+}
+impl CssPseudoClassNthNumber {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_NTH_NUMBER;
 }
 impl AstNode for CssPseudoClassNthNumber {
     type Language = Language;
@@ -14371,6 +14689,9 @@ impl From<CssPseudoClassNthNumber> for SyntaxElement {
     fn from(n: CssPseudoClassNthNumber) -> Self {
         n.syntax.into()
     }
+}
+impl CssPseudoClassNthSelector {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_NTH_SELECTOR;
 }
 impl AstNode for CssPseudoClassNthSelector {
     type Language = Language;
@@ -14423,6 +14744,9 @@ impl From<CssPseudoClassNthSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoClassOfNthSelector {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_OF_NTH_SELECTOR;
+}
 impl AstNode for CssPseudoClassOfNthSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14470,6 +14794,9 @@ impl From<CssPseudoClassOfNthSelector> for SyntaxElement {
     fn from(n: CssPseudoClassOfNthSelector) -> Self {
         n.syntax.into()
     }
+}
+impl CssPseudoClassSelector {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_CLASS_SELECTOR;
 }
 impl AstNode for CssPseudoClassSelector {
     type Language = Language;
@@ -14521,6 +14848,9 @@ impl From<CssPseudoClassSelector> for SyntaxElement {
     fn from(n: CssPseudoClassSelector) -> Self {
         n.syntax.into()
     }
+}
+impl CssPseudoElementFunctionIdentifier {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER;
 }
 impl AstNode for CssPseudoElementFunctionIdentifier {
     type Language = Language;
@@ -14579,6 +14909,9 @@ impl From<CssPseudoElementFunctionIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoElementFunctionSelector {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR;
+}
 impl AstNode for CssPseudoElementFunctionSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14635,6 +14968,9 @@ impl From<CssPseudoElementFunctionSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssPseudoElementIdentifier {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_ELEMENT_IDENTIFIER;
+}
 impl AstNode for CssPseudoElementIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14681,6 +15017,9 @@ impl From<CssPseudoElementIdentifier> for SyntaxElement {
     fn from(n: CssPseudoElementIdentifier) -> Self {
         n.syntax.into()
     }
+}
+impl CssPseudoElementSelector {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_ELEMENT_SELECTOR;
 }
 impl AstNode for CssPseudoElementSelector {
     type Language = Language;
@@ -14733,6 +15072,9 @@ impl From<CssPseudoElementSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssQualifiedRule {
+    pub const KIND: SyntaxKind = CSS_QUALIFIED_RULE;
+}
 impl AstNode for CssQualifiedRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14781,6 +15123,9 @@ impl From<CssQualifiedRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssQueryFeatureBoolean {
+    pub const KIND: SyntaxKind = CSS_QUERY_FEATURE_BOOLEAN;
+}
 impl AstNode for CssQueryFeatureBoolean {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14827,6 +15172,9 @@ impl From<CssQueryFeatureBoolean> for SyntaxElement {
     fn from(n: CssQueryFeatureBoolean) -> Self {
         n.syntax.into()
     }
+}
+impl CssQueryFeaturePlain {
+    pub const KIND: SyntaxKind = CSS_QUERY_FEATURE_PLAIN;
 }
 impl AstNode for CssQueryFeaturePlain {
     type Language = Language;
@@ -14880,6 +15228,9 @@ impl From<CssQueryFeaturePlain> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssQueryFeatureRange {
+    pub const KIND: SyntaxKind = CSS_QUERY_FEATURE_RANGE;
+}
 impl AstNode for CssQueryFeatureRange {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14929,6 +15280,9 @@ impl From<CssQueryFeatureRange> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssQueryFeatureRangeComparison {
+    pub const KIND: SyntaxKind = CSS_QUERY_FEATURE_RANGE_COMPARISON;
+}
 impl AstNode for CssQueryFeatureRangeComparison {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -14975,6 +15329,9 @@ impl From<CssQueryFeatureRangeComparison> for SyntaxElement {
     fn from(n: CssQueryFeatureRangeComparison) -> Self {
         n.syntax.into()
     }
+}
+impl CssQueryFeatureRangeInterval {
+    pub const KIND: SyntaxKind = CSS_QUERY_FEATURE_RANGE_INTERVAL;
 }
 impl AstNode for CssQueryFeatureRangeInterval {
     type Language = Language;
@@ -15033,6 +15390,9 @@ impl From<CssQueryFeatureRangeInterval> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssQueryFeatureReverseRange {
+    pub const KIND: SyntaxKind = CSS_QUERY_FEATURE_REVERSE_RANGE;
+}
 impl AstNode for CssQueryFeatureReverseRange {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15081,6 +15441,9 @@ impl From<CssQueryFeatureReverseRange> for SyntaxElement {
     fn from(n: CssQueryFeatureReverseRange) -> Self {
         n.syntax.into()
     }
+}
+impl CssRatio {
+    pub const KIND: SyntaxKind = CSS_RATIO;
 }
 impl AstNode for CssRatio {
     type Language = Language;
@@ -15137,6 +15500,9 @@ impl From<CssRatio> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssRegularDimension {
+    pub const KIND: SyntaxKind = CSS_REGULAR_DIMENSION;
+}
 impl AstNode for CssRegularDimension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15187,6 +15553,9 @@ impl From<CssRegularDimension> for SyntaxElement {
     fn from(n: CssRegularDimension) -> Self {
         n.syntax.into()
     }
+}
+impl CssRelativeSelector {
+    pub const KIND: SyntaxKind = CSS_RELATIVE_SELECTOR;
 }
 impl AstNode for CssRelativeSelector {
     type Language = Language;
@@ -15239,6 +15608,9 @@ impl From<CssRelativeSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssRoot {
+    pub const KIND: SyntaxKind = CSS_ROOT;
+}
 impl AstNode for CssRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15290,6 +15662,9 @@ impl From<CssRoot> for SyntaxElement {
     fn from(n: CssRoot) -> Self {
         n.syntax.into()
     }
+}
+impl CssRuleBlock {
+    pub const KIND: SyntaxKind = CSS_RULE_BLOCK;
 }
 impl AstNode for CssRuleBlock {
     type Language = Language;
@@ -15346,6 +15721,9 @@ impl From<CssRuleBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssScopeAtRule {
+    pub const KIND: SyntaxKind = CSS_SCOPE_AT_RULE;
+}
 impl AstNode for CssScopeAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15397,6 +15775,9 @@ impl From<CssScopeAtRule> for SyntaxElement {
     fn from(n: CssScopeAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssScopeEdge {
+    pub const KIND: SyntaxKind = CSS_SCOPE_EDGE;
 }
 impl AstNode for CssScopeEdge {
     type Language = Language;
@@ -15453,6 +15834,9 @@ impl From<CssScopeEdge> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssScopeRangeEnd {
+    pub const KIND: SyntaxKind = CSS_SCOPE_RANGE_END;
+}
 impl AstNode for CssScopeRangeEnd {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15500,6 +15884,9 @@ impl From<CssScopeRangeEnd> for SyntaxElement {
     fn from(n: CssScopeRangeEnd) -> Self {
         n.syntax.into()
     }
+}
+impl CssScopeRangeInterval {
+    pub const KIND: SyntaxKind = CSS_SCOPE_RANGE_INTERVAL;
 }
 impl AstNode for CssScopeRangeInterval {
     type Language = Language;
@@ -15550,6 +15937,9 @@ impl From<CssScopeRangeInterval> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssScopeRangeStart {
+    pub const KIND: SyntaxKind = CSS_SCOPE_RANGE_START;
+}
 impl AstNode for CssScopeRangeStart {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15596,6 +15986,9 @@ impl From<CssScopeRangeStart> for SyntaxElement {
     fn from(n: CssScopeRangeStart) -> Self {
         n.syntax.into()
     }
+}
+impl CssStartingStyleAtRule {
+    pub const KIND: SyntaxKind = CSS_STARTING_STYLE_AT_RULE;
 }
 impl AstNode for CssStartingStyleAtRule {
     type Language = Language;
@@ -15648,6 +16041,9 @@ impl From<CssStartingStyleAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssString {
+    pub const KIND: SyntaxKind = CSS_STRING;
+}
 impl AstNode for CssString {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15698,6 +16094,9 @@ impl From<CssString> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssSupportsAndCondition {
+    pub const KIND: SyntaxKind = CSS_SUPPORTS_AND_CONDITION;
+}
 impl AstNode for CssSupportsAndCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15746,6 +16145,9 @@ impl From<CssSupportsAndCondition> for SyntaxElement {
     fn from(n: CssSupportsAndCondition) -> Self {
         n.syntax.into()
     }
+}
+impl CssSupportsAtRule {
+    pub const KIND: SyntaxKind = CSS_SUPPORTS_AT_RULE;
 }
 impl AstNode for CssSupportsAtRule {
     type Language = Language;
@@ -15798,6 +16200,9 @@ impl From<CssSupportsAtRule> for SyntaxElement {
     fn from(n: CssSupportsAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssSupportsConditionInParens {
+    pub const KIND: SyntaxKind = CSS_SUPPORTS_CONDITION_IN_PARENS;
 }
 impl AstNode for CssSupportsConditionInParens {
     type Language = Language;
@@ -15853,6 +16258,9 @@ impl From<CssSupportsConditionInParens> for SyntaxElement {
     fn from(n: CssSupportsConditionInParens) -> Self {
         n.syntax.into()
     }
+}
+impl CssSupportsFeatureDeclaration {
+    pub const KIND: SyntaxKind = CSS_SUPPORTS_FEATURE_DECLARATION;
 }
 impl AstNode for CssSupportsFeatureDeclaration {
     type Language = Language;
@@ -15911,6 +16319,9 @@ impl From<CssSupportsFeatureDeclaration> for SyntaxElement {
     fn from(n: CssSupportsFeatureDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl CssSupportsFeatureSelector {
+    pub const KIND: SyntaxKind = CSS_SUPPORTS_FEATURE_SELECTOR;
 }
 impl AstNode for CssSupportsFeatureSelector {
     type Language = Language;
@@ -15971,6 +16382,9 @@ impl From<CssSupportsFeatureSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssSupportsNotCondition {
+    pub const KIND: SyntaxKind = CSS_SUPPORTS_NOT_CONDITION;
+}
 impl AstNode for CssSupportsNotCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16018,6 +16432,9 @@ impl From<CssSupportsNotCondition> for SyntaxElement {
     fn from(n: CssSupportsNotCondition) -> Self {
         n.syntax.into()
     }
+}
+impl CssSupportsOrCondition {
+    pub const KIND: SyntaxKind = CSS_SUPPORTS_OR_CONDITION;
 }
 impl AstNode for CssSupportsOrCondition {
     type Language = Language;
@@ -16067,6 +16484,9 @@ impl From<CssSupportsOrCondition> for SyntaxElement {
     fn from(n: CssSupportsOrCondition) -> Self {
         n.syntax.into()
     }
+}
+impl CssTypeSelector {
+    pub const KIND: SyntaxKind = CSS_TYPE_SELECTOR;
 }
 impl AstNode for CssTypeSelector {
     type Language = Language;
@@ -16119,6 +16539,9 @@ impl From<CssTypeSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssUnicodeCodepoint {
+    pub const KIND: SyntaxKind = CSS_UNICODE_CODEPOINT;
+}
 impl AstNode for CssUnicodeCodepoint {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16168,6 +16591,9 @@ impl From<CssUnicodeCodepoint> for SyntaxElement {
     fn from(n: CssUnicodeCodepoint) -> Self {
         n.syntax.into()
     }
+}
+impl CssUnicodeRange {
+    pub const KIND: SyntaxKind = CSS_UNICODE_RANGE;
 }
 impl AstNode for CssUnicodeRange {
     type Language = Language;
@@ -16219,6 +16645,9 @@ impl From<CssUnicodeRange> for SyntaxElement {
     fn from(n: CssUnicodeRange) -> Self {
         n.syntax.into()
     }
+}
+impl CssUnicodeRangeInterval {
+    pub const KIND: SyntaxKind = CSS_UNICODE_RANGE_INTERVAL;
 }
 impl AstNode for CssUnicodeRangeInterval {
     type Language = Language;
@@ -16272,6 +16701,9 @@ impl From<CssUnicodeRangeInterval> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssUnicodeRangeWildcard {
+    pub const KIND: SyntaxKind = CSS_UNICODE_RANGE_WILDCARD;
+}
 impl AstNode for CssUnicodeRangeWildcard {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16322,6 +16754,9 @@ impl From<CssUnicodeRangeWildcard> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssUniversalNamespacePrefix {
+    pub const KIND: SyntaxKind = CSS_UNIVERSAL_NAMESPACE_PREFIX;
+}
 impl AstNode for CssUniversalNamespacePrefix {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16368,6 +16803,9 @@ impl From<CssUniversalNamespacePrefix> for SyntaxElement {
     fn from(n: CssUniversalNamespacePrefix) -> Self {
         n.syntax.into()
     }
+}
+impl CssUniversalSelector {
+    pub const KIND: SyntaxKind = CSS_UNIVERSAL_SELECTOR;
 }
 impl AstNode for CssUniversalSelector {
     type Language = Language;
@@ -16420,6 +16858,9 @@ impl From<CssUniversalSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssUnknownBlockAtRule {
+    pub const KIND: SyntaxKind = CSS_UNKNOWN_BLOCK_AT_RULE;
+}
 impl AstNode for CssUnknownBlockAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16468,6 +16909,9 @@ impl From<CssUnknownBlockAtRule> for SyntaxElement {
     fn from(n: CssUnknownBlockAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssUnknownDimension {
+    pub const KIND: SyntaxKind = CSS_UNKNOWN_DIMENSION;
 }
 impl AstNode for CssUnknownDimension {
     type Language = Language;
@@ -16520,6 +16964,9 @@ impl From<CssUnknownDimension> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssUnknownValueAtRule {
+    pub const KIND: SyntaxKind = CSS_UNKNOWN_VALUE_AT_RULE;
+}
 impl AstNode for CssUnknownValueAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16571,6 +17018,9 @@ impl From<CssUnknownValueAtRule> for SyntaxElement {
     fn from(n: CssUnknownValueAtRule) -> Self {
         n.syntax.into()
     }
+}
+impl CssUrlFunction {
+    pub const KIND: SyntaxKind = CSS_URL_FUNCTION;
 }
 impl AstNode for CssUrlFunction {
     type Language = Language;
@@ -16629,6 +17079,9 @@ impl From<CssUrlFunction> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssUrlValueRaw {
+    pub const KIND: SyntaxKind = CSS_URL_VALUE_RAW;
+}
 impl AstNode for CssUrlValueRaw {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16678,6 +17131,9 @@ impl From<CssUrlValueRaw> for SyntaxElement {
     fn from(n: CssUrlValueRaw) -> Self {
         n.syntax.into()
     }
+}
+impl CssValueAtRule {
+    pub const KIND: SyntaxKind = CSS_VALUE_AT_RULE;
 }
 impl AstNode for CssValueAtRule {
     type Language = Language;
@@ -16734,6 +17190,9 @@ impl From<CssValueAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssValueAtRuleDeclarationClause {
+    pub const KIND: SyntaxKind = CSS_VALUE_AT_RULE_DECLARATION_CLAUSE;
+}
 impl AstNode for CssValueAtRuleDeclarationClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16780,6 +17239,9 @@ impl From<CssValueAtRuleDeclarationClause> for SyntaxElement {
     fn from(n: CssValueAtRuleDeclarationClause) -> Self {
         n.syntax.into()
     }
+}
+impl CssValueAtRuleGenericProperty {
+    pub const KIND: SyntaxKind = CSS_VALUE_AT_RULE_GENERIC_PROPERTY;
 }
 impl AstNode for CssValueAtRuleGenericProperty {
     type Language = Language;
@@ -16833,6 +17295,9 @@ impl From<CssValueAtRuleGenericProperty> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssValueAtRuleImportClause {
+    pub const KIND: SyntaxKind = CSS_VALUE_AT_RULE_IMPORT_CLAUSE;
+}
 impl AstNode for CssValueAtRuleImportClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16882,6 +17347,9 @@ impl From<CssValueAtRuleImportClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl CssValueAtRuleImportSpecifier {
+    pub const KIND: SyntaxKind = CSS_VALUE_AT_RULE_IMPORT_SPECIFIER;
+}
 impl AstNode for CssValueAtRuleImportSpecifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16928,6 +17396,9 @@ impl From<CssValueAtRuleImportSpecifier> for SyntaxElement {
     fn from(n: CssValueAtRuleImportSpecifier) -> Self {
         n.syntax.into()
     }
+}
+impl CssValueAtRuleNamedImportSpecifier {
+    pub const KIND: SyntaxKind = CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER;
 }
 impl AstNode for CssValueAtRuleNamedImportSpecifier {
     type Language = Language;
@@ -16979,6 +17450,9 @@ impl From<CssValueAtRuleNamedImportSpecifier> for SyntaxElement {
     fn from(n: CssValueAtRuleNamedImportSpecifier) -> Self {
         n.syntax.into()
     }
+}
+impl CssViewTransitionAtRule {
+    pub const KIND: SyntaxKind = CSS_VIEW_TRANSITION_AT_RULE;
 }
 impl AstNode for CssViewTransitionAtRule {
     type Language = Language;
@@ -24402,6 +24876,7 @@ pub struct CssBogus {
     syntax: SyntaxNode,
 }
 impl CssBogus {
+    pub const KIND: SyntaxKind = CSS_BOGUS;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24458,6 +24933,7 @@ pub struct CssBogusAtRule {
     syntax: SyntaxNode,
 }
 impl CssBogusAtRule {
+    pub const KIND: SyntaxKind = CSS_BOGUS_AT_RULE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24514,6 +24990,7 @@ pub struct CssBogusBlock {
     syntax: SyntaxNode,
 }
 impl CssBogusBlock {
+    pub const KIND: SyntaxKind = CSS_BOGUS_BLOCK;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24570,6 +25047,7 @@ pub struct CssBogusCustomIdentifier {
     syntax: SyntaxNode,
 }
 impl CssBogusCustomIdentifier {
+    pub const KIND: SyntaxKind = CSS_BOGUS_CUSTOM_IDENTIFIER;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24626,6 +25104,7 @@ pub struct CssBogusDeclarationItem {
     syntax: SyntaxNode,
 }
 impl CssBogusDeclarationItem {
+    pub const KIND: SyntaxKind = CSS_BOGUS_DECLARATION_ITEM;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24682,6 +25161,7 @@ pub struct CssBogusDocumentMatcher {
     syntax: SyntaxNode,
 }
 impl CssBogusDocumentMatcher {
+    pub const KIND: SyntaxKind = CSS_BOGUS_DOCUMENT_MATCHER;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24738,6 +25218,7 @@ pub struct CssBogusFontFamilyName {
     syntax: SyntaxNode,
 }
 impl CssBogusFontFamilyName {
+    pub const KIND: SyntaxKind = CSS_BOGUS_FONT_FAMILY_NAME;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24794,6 +25275,7 @@ pub struct CssBogusFontFeatureValuesItem {
     syntax: SyntaxNode,
 }
 impl CssBogusFontFeatureValuesItem {
+    pub const KIND: SyntaxKind = CSS_BOGUS_FONT_FEATURE_VALUES_ITEM;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24850,6 +25332,7 @@ pub struct CssBogusKeyframesItem {
     syntax: SyntaxNode,
 }
 impl CssBogusKeyframesItem {
+    pub const KIND: SyntaxKind = CSS_BOGUS_KEYFRAMES_ITEM;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24906,6 +25389,7 @@ pub struct CssBogusKeyframesName {
     syntax: SyntaxNode,
 }
 impl CssBogusKeyframesName {
+    pub const KIND: SyntaxKind = CSS_BOGUS_KEYFRAMES_NAME;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -24962,6 +25446,7 @@ pub struct CssBogusLayer {
     syntax: SyntaxNode,
 }
 impl CssBogusLayer {
+    pub const KIND: SyntaxKind = CSS_BOGUS_LAYER;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25018,6 +25503,7 @@ pub struct CssBogusMediaQuery {
     syntax: SyntaxNode,
 }
 impl CssBogusMediaQuery {
+    pub const KIND: SyntaxKind = CSS_BOGUS_MEDIA_QUERY;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25074,6 +25560,7 @@ pub struct CssBogusPageSelectorPseudo {
     syntax: SyntaxNode,
 }
 impl CssBogusPageSelectorPseudo {
+    pub const KIND: SyntaxKind = CSS_BOGUS_PAGE_SELECTOR_PSEUDO;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25130,6 +25617,7 @@ pub struct CssBogusParameter {
     syntax: SyntaxNode,
 }
 impl CssBogusParameter {
+    pub const KIND: SyntaxKind = CSS_BOGUS_PARAMETER;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25186,6 +25674,7 @@ pub struct CssBogusProperty {
     syntax: SyntaxNode,
 }
 impl CssBogusProperty {
+    pub const KIND: SyntaxKind = CSS_BOGUS_PROPERTY;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25242,6 +25731,7 @@ pub struct CssBogusPropertyValue {
     syntax: SyntaxNode,
 }
 impl CssBogusPropertyValue {
+    pub const KIND: SyntaxKind = CSS_BOGUS_PROPERTY_VALUE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25298,6 +25788,7 @@ pub struct CssBogusPseudoClass {
     syntax: SyntaxNode,
 }
 impl CssBogusPseudoClass {
+    pub const KIND: SyntaxKind = CSS_BOGUS_PSEUDO_CLASS;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25354,6 +25845,7 @@ pub struct CssBogusPseudoElement {
     syntax: SyntaxNode,
 }
 impl CssBogusPseudoElement {
+    pub const KIND: SyntaxKind = CSS_BOGUS_PSEUDO_ELEMENT;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25410,6 +25902,7 @@ pub struct CssBogusRule {
     syntax: SyntaxNode,
 }
 impl CssBogusRule {
+    pub const KIND: SyntaxKind = CSS_BOGUS_RULE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25466,6 +25959,7 @@ pub struct CssBogusScopeRange {
     syntax: SyntaxNode,
 }
 impl CssBogusScopeRange {
+    pub const KIND: SyntaxKind = CSS_BOGUS_SCOPE_RANGE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25522,6 +26016,7 @@ pub struct CssBogusSelector {
     syntax: SyntaxNode,
 }
 impl CssBogusSelector {
+    pub const KIND: SyntaxKind = CSS_BOGUS_SELECTOR;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25578,6 +26073,7 @@ pub struct CssBogusSubSelector {
     syntax: SyntaxNode,
 }
 impl CssBogusSubSelector {
+    pub const KIND: SyntaxKind = CSS_BOGUS_SUB_SELECTOR;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25634,6 +26130,7 @@ pub struct CssBogusUnicodeRangeValue {
     syntax: SyntaxNode,
 }
 impl CssBogusUnicodeRangeValue {
+    pub const KIND: SyntaxKind = CSS_BOGUS_UNICODE_RANGE_VALUE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25690,6 +26187,7 @@ pub struct CssBogusUrlModifier {
     syntax: SyntaxNode,
 }
 impl CssBogusUrlModifier {
+    pub const KIND: SyntaxKind = CSS_BOGUS_URL_MODIFIER;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25746,6 +26244,7 @@ pub struct CssUnknownAtRuleComponentList {
     syntax: SyntaxNode,
 }
 impl CssUnknownAtRuleComponentList {
+    pub const KIND: SyntaxKind = CSS_UNKNOWN_AT_RULE_COMPONENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25802,6 +26301,7 @@ pub struct CssValueAtRuleGenericValue {
     syntax: SyntaxNode,
 }
 impl CssValueAtRuleGenericValue {
+    pub const KIND: SyntaxKind = CSS_VALUE_AT_RULE_GENERIC_VALUE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25859,6 +26359,7 @@ pub struct CssBracketedValueList {
     syntax_list: SyntaxList,
 }
 impl CssBracketedValueList {
+    pub const KIND: SyntaxKind = CSS_BRACKETED_VALUE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -25941,6 +26442,7 @@ pub struct CssComponentValueList {
     syntax_list: SyntaxList,
 }
 impl CssComponentValueList {
+    pub const KIND: SyntaxKind = CSS_COMPONENT_VALUE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26023,6 +26525,7 @@ pub struct CssComposesClassList {
     syntax_list: SyntaxList,
 }
 impl CssComposesClassList {
+    pub const KIND: SyntaxKind = CSS_COMPOSES_CLASS_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26105,6 +26608,7 @@ pub struct CssCompoundSelectorList {
     syntax_list: SyntaxList,
 }
 impl CssCompoundSelectorList {
+    pub const KIND: SyntaxKind = CSS_COMPOUND_SELECTOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26187,6 +26691,7 @@ pub struct CssCustomIdentifierList {
     syntax_list: SyntaxList,
 }
 impl CssCustomIdentifierList {
+    pub const KIND: SyntaxKind = CSS_CUSTOM_IDENTIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26269,6 +26774,7 @@ pub struct CssDeclarationList {
     syntax_list: SyntaxList,
 }
 impl CssDeclarationList {
+    pub const KIND: SyntaxKind = CSS_DECLARATION_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26351,6 +26857,7 @@ pub struct CssDeclarationOrAtRuleList {
     syntax_list: SyntaxList,
 }
 impl CssDeclarationOrAtRuleList {
+    pub const KIND: SyntaxKind = CSS_DECLARATION_OR_AT_RULE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26433,6 +26940,7 @@ pub struct CssDeclarationOrRuleList {
     syntax_list: SyntaxList,
 }
 impl CssDeclarationOrRuleList {
+    pub const KIND: SyntaxKind = CSS_DECLARATION_OR_RULE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26515,6 +27023,7 @@ pub struct CssDocumentMatcherList {
     syntax_list: SyntaxList,
 }
 impl CssDocumentMatcherList {
+    pub const KIND: SyntaxKind = CSS_DOCUMENT_MATCHER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26597,6 +27106,7 @@ pub struct CssFontFamilyNameList {
     syntax_list: SyntaxList,
 }
 impl CssFontFamilyNameList {
+    pub const KIND: SyntaxKind = CSS_FONT_FAMILY_NAME_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26679,6 +27189,7 @@ pub struct CssFontFeatureValuesItemList {
     syntax_list: SyntaxList,
 }
 impl CssFontFeatureValuesItemList {
+    pub const KIND: SyntaxKind = CSS_FONT_FEATURE_VALUES_ITEM_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26761,6 +27272,7 @@ pub struct CssGenericComponentValueList {
     syntax_list: SyntaxList,
 }
 impl CssGenericComponentValueList {
+    pub const KIND: SyntaxKind = CSS_GENERIC_COMPONENT_VALUE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26843,6 +27355,7 @@ pub struct CssKeyframesItemList {
     syntax_list: SyntaxList,
 }
 impl CssKeyframesItemList {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_ITEM_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -26925,6 +27438,7 @@ pub struct CssKeyframesSelectorList {
     syntax_list: SyntaxList,
 }
 impl CssKeyframesSelectorList {
+    pub const KIND: SyntaxKind = CSS_KEYFRAMES_SELECTOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27007,6 +27521,7 @@ pub struct CssLayerNameList {
     syntax_list: SyntaxList,
 }
 impl CssLayerNameList {
+    pub const KIND: SyntaxKind = CSS_LAYER_NAME_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27089,6 +27604,7 @@ pub struct CssLayerReferenceList {
     syntax_list: SyntaxList,
 }
 impl CssLayerReferenceList {
+    pub const KIND: SyntaxKind = CSS_LAYER_REFERENCE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27171,6 +27687,7 @@ pub struct CssMediaQueryList {
     syntax_list: SyntaxList,
 }
 impl CssMediaQueryList {
+    pub const KIND: SyntaxKind = CSS_MEDIA_QUERY_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27253,6 +27770,7 @@ pub struct CssNestedSelectorList {
     syntax_list: SyntaxList,
 }
 impl CssNestedSelectorList {
+    pub const KIND: SyntaxKind = CSS_NESTED_SELECTOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27335,6 +27853,7 @@ pub struct CssPageAtRuleItemList {
     syntax_list: SyntaxList,
 }
 impl CssPageAtRuleItemList {
+    pub const KIND: SyntaxKind = CSS_PAGE_AT_RULE_ITEM_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27417,6 +27936,7 @@ pub struct CssPageSelectorList {
     syntax_list: SyntaxList,
 }
 impl CssPageSelectorList {
+    pub const KIND: SyntaxKind = CSS_PAGE_SELECTOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27499,6 +28019,7 @@ pub struct CssPageSelectorPseudoList {
     syntax_list: SyntaxList,
 }
 impl CssPageSelectorPseudoList {
+    pub const KIND: SyntaxKind = CSS_PAGE_SELECTOR_PSEUDO_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27581,6 +28102,7 @@ pub struct CssParameterList {
     syntax_list: SyntaxList,
 }
 impl CssParameterList {
+    pub const KIND: SyntaxKind = CSS_PARAMETER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27663,6 +28185,7 @@ pub struct CssPseudoValueList {
     syntax_list: SyntaxList,
 }
 impl CssPseudoValueList {
+    pub const KIND: SyntaxKind = CSS_PSEUDO_VALUE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27745,6 +28268,7 @@ pub struct CssRelativeSelectorList {
     syntax_list: SyntaxList,
 }
 impl CssRelativeSelectorList {
+    pub const KIND: SyntaxKind = CSS_RELATIVE_SELECTOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27827,6 +28351,7 @@ pub struct CssRuleList {
     syntax_list: SyntaxList,
 }
 impl CssRuleList {
+    pub const KIND: SyntaxKind = CSS_RULE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27909,6 +28434,7 @@ pub struct CssSelectorList {
     syntax_list: SyntaxList,
 }
 impl CssSelectorList {
+    pub const KIND: SyntaxKind = CSS_SELECTOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -27991,6 +28517,7 @@ pub struct CssSubSelectorList {
     syntax_list: SyntaxList,
 }
 impl CssSubSelectorList {
+    pub const KIND: SyntaxKind = CSS_SUB_SELECTOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -28073,6 +28600,7 @@ pub struct CssUrlModifierList {
     syntax_list: SyntaxList,
 }
 impl CssUrlModifierList {
+    pub const KIND: SyntaxKind = CSS_URL_MODIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -28155,6 +28683,7 @@ pub struct CssValueAtRuleImportSpecifierList {
     syntax_list: SyntaxList,
 }
 impl CssValueAtRuleImportSpecifierList {
+    pub const KIND: SyntaxKind = CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -28238,6 +28767,7 @@ pub struct CssValueAtRulePropertyList {
     syntax_list: SyntaxList,
 }
 impl CssValueAtRulePropertyList {
+    pub const KIND: SyntaxKind = CSS_VALUE_AT_RULE_PROPERTY_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]

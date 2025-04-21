@@ -3153,6 +3153,9 @@ impl AnyGraphqlValue {
         }
     }
 }
+impl GraphqlAlias {
+    pub const KIND: SyntaxKind = GRAPHQL_ALIAS;
+}
 impl AstNode for GraphqlAlias {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3203,6 +3206,9 @@ impl From<GraphqlAlias> for SyntaxElement {
     fn from(n: GraphqlAlias) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlArgument {
+    pub const KIND: SyntaxKind = GRAPHQL_ARGUMENT;
 }
 impl AstNode for GraphqlArgument {
     type Language = Language;
@@ -3255,6 +3261,9 @@ impl From<GraphqlArgument> for SyntaxElement {
     fn from(n: GraphqlArgument) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlArguments {
+    pub const KIND: SyntaxKind = GRAPHQL_ARGUMENTS;
 }
 impl AstNode for GraphqlArguments {
     type Language = Language;
@@ -3311,6 +3320,9 @@ impl From<GraphqlArguments> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlArgumentsDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_ARGUMENTS_DEFINITION;
+}
 impl AstNode for GraphqlArgumentsDefinition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3366,6 +3378,9 @@ impl From<GraphqlArgumentsDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlBooleanValue {
+    pub const KIND: SyntaxKind = GRAPHQL_BOOLEAN_VALUE;
+}
 impl AstNode for GraphqlBooleanValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3416,6 +3431,9 @@ impl From<GraphqlBooleanValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlDefaultValue {
+    pub const KIND: SyntaxKind = GRAPHQL_DEFAULT_VALUE;
+}
 impl AstNode for GraphqlDefaultValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3463,6 +3481,9 @@ impl From<GraphqlDefaultValue> for SyntaxElement {
     fn from(n: GraphqlDefaultValue) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlDescription {
+    pub const KIND: SyntaxKind = GRAPHQL_DESCRIPTION;
 }
 impl AstNode for GraphqlDescription {
     type Language = Language;
@@ -3513,6 +3534,9 @@ impl From<GraphqlDescription> for SyntaxElement {
     fn from(n: GraphqlDescription) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlDirective {
+    pub const KIND: SyntaxKind = GRAPHQL_DIRECTIVE;
 }
 impl AstNode for GraphqlDirective {
     type Language = Language;
@@ -3565,6 +3589,9 @@ impl From<GraphqlDirective> for SyntaxElement {
     fn from(n: GraphqlDirective) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlDirectiveDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_DIRECTIVE_DEFINITION;
 }
 impl AstNode for GraphqlDirectiveDefinition {
     type Language = Language;
@@ -3636,6 +3663,9 @@ impl From<GraphqlDirectiveDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlDirectiveLocation {
+    pub const KIND: SyntaxKind = GRAPHQL_DIRECTIVE_LOCATION;
+}
 impl AstNode for GraphqlDirectiveLocation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3685,6 +3715,9 @@ impl From<GraphqlDirectiveLocation> for SyntaxElement {
     fn from(n: GraphqlDirectiveLocation) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlEnumTypeDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_ENUM_TYPE_DEFINITION;
 }
 impl AstNode for GraphqlEnumTypeDefinition {
     type Language = Language;
@@ -3743,6 +3776,9 @@ impl From<GraphqlEnumTypeDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlEnumTypeExtension {
+    pub const KIND: SyntaxKind = GRAPHQL_ENUM_TYPE_EXTENSION;
+}
 impl AstNode for GraphqlEnumTypeExtension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3800,6 +3836,9 @@ impl From<GraphqlEnumTypeExtension> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlEnumValue {
+    pub const KIND: SyntaxKind = GRAPHQL_ENUM_VALUE;
+}
 impl AstNode for GraphqlEnumValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3846,6 +3885,9 @@ impl From<GraphqlEnumValue> for SyntaxElement {
     fn from(n: GraphqlEnumValue) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlEnumValueDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_ENUM_VALUE_DEFINITION;
 }
 impl AstNode for GraphqlEnumValueDefinition {
     type Language = Language;
@@ -3898,6 +3940,9 @@ impl From<GraphqlEnumValueDefinition> for SyntaxElement {
     fn from(n: GraphqlEnumValueDefinition) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlEnumValuesDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_ENUM_VALUES_DEFINITION;
 }
 impl AstNode for GraphqlEnumValuesDefinition {
     type Language = Language;
@@ -3953,6 +3998,9 @@ impl From<GraphqlEnumValuesDefinition> for SyntaxElement {
     fn from(n: GraphqlEnumValuesDefinition) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlField {
+    pub const KIND: SyntaxKind = GRAPHQL_FIELD;
 }
 impl AstNode for GraphqlField {
     type Language = Language;
@@ -4010,6 +4058,9 @@ impl From<GraphqlField> for SyntaxElement {
     fn from(n: GraphqlField) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlFieldDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_FIELD_DEFINITION;
 }
 impl AstNode for GraphqlFieldDefinition {
     type Language = Language;
@@ -4072,6 +4123,9 @@ impl From<GraphqlFieldDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlFieldsDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_FIELDS_DEFINITION;
+}
 impl AstNode for GraphqlFieldsDefinition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4127,6 +4181,9 @@ impl From<GraphqlFieldsDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlFloatValue {
+    pub const KIND: SyntaxKind = GRAPHQL_FLOAT_VALUE;
+}
 impl AstNode for GraphqlFloatValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4176,6 +4233,9 @@ impl From<GraphqlFloatValue> for SyntaxElement {
     fn from(n: GraphqlFloatValue) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlFragmentDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_FRAGMENT_DEFINITION;
 }
 impl AstNode for GraphqlFragmentDefinition {
     type Language = Language;
@@ -4237,6 +4297,9 @@ impl From<GraphqlFragmentDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlFragmentSpread {
+    pub const KIND: SyntaxKind = GRAPHQL_FRAGMENT_SPREAD;
+}
 impl AstNode for GraphqlFragmentSpread {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4288,6 +4351,9 @@ impl From<GraphqlFragmentSpread> for SyntaxElement {
     fn from(n: GraphqlFragmentSpread) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlImplementsInterfaces {
+    pub const KIND: SyntaxKind = GRAPHQL_IMPLEMENTS_INTERFACES;
 }
 impl AstNode for GraphqlImplementsInterfaces {
     type Language = Language;
@@ -4343,6 +4409,9 @@ impl From<GraphqlImplementsInterfaces> for SyntaxElement {
     fn from(n: GraphqlImplementsInterfaces) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlInlineFragment {
+    pub const KIND: SyntaxKind = GRAPHQL_INLINE_FRAGMENT;
 }
 impl AstNode for GraphqlInlineFragment {
     type Language = Language;
@@ -4403,6 +4472,9 @@ impl From<GraphqlInlineFragment> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlInputFieldsDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_INPUT_FIELDS_DEFINITION;
+}
 impl AstNode for GraphqlInputFieldsDefinition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4457,6 +4529,9 @@ impl From<GraphqlInputFieldsDefinition> for SyntaxElement {
     fn from(n: GraphqlInputFieldsDefinition) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlInputObjectTypeDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_INPUT_OBJECT_TYPE_DEFINITION;
 }
 impl AstNode for GraphqlInputObjectTypeDefinition {
     type Language = Language;
@@ -4518,6 +4593,9 @@ impl From<GraphqlInputObjectTypeDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlInputObjectTypeExtension {
+    pub const KIND: SyntaxKind = GRAPHQL_INPUT_OBJECT_TYPE_EXTENSION;
+}
 impl AstNode for GraphqlInputObjectTypeExtension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4578,6 +4656,9 @@ impl From<GraphqlInputObjectTypeExtension> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlInputValueDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_INPUT_VALUE_DEFINITION;
+}
 impl AstNode for GraphqlInputValueDefinition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4636,6 +4717,9 @@ impl From<GraphqlInputValueDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlIntValue {
+    pub const KIND: SyntaxKind = GRAPHQL_INT_VALUE;
+}
 impl AstNode for GraphqlIntValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4685,6 +4769,9 @@ impl From<GraphqlIntValue> for SyntaxElement {
     fn from(n: GraphqlIntValue) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlInterfaceTypeDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_INTERFACE_TYPE_DEFINITION;
 }
 impl AstNode for GraphqlInterfaceTypeDefinition {
     type Language = Language;
@@ -4747,6 +4834,9 @@ impl From<GraphqlInterfaceTypeDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlInterfaceTypeExtension {
+    pub const KIND: SyntaxKind = GRAPHQL_INTERFACE_TYPE_EXTENSION;
+}
 impl AstNode for GraphqlInterfaceTypeExtension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4808,6 +4898,9 @@ impl From<GraphqlInterfaceTypeExtension> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlListType {
+    pub const KIND: SyntaxKind = GRAPHQL_LIST_TYPE;
+}
 impl AstNode for GraphqlListType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4862,6 +4955,9 @@ impl From<GraphqlListType> for SyntaxElement {
     fn from(n: GraphqlListType) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlListValue {
+    pub const KIND: SyntaxKind = GRAPHQL_LIST_VALUE;
 }
 impl AstNode for GraphqlListValue {
     type Language = Language;
@@ -4918,6 +5014,9 @@ impl From<GraphqlListValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlLiteralName {
+    pub const KIND: SyntaxKind = GRAPHQL_LITERAL_NAME;
+}
 impl AstNode for GraphqlLiteralName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4967,6 +5066,9 @@ impl From<GraphqlLiteralName> for SyntaxElement {
     fn from(n: GraphqlLiteralName) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlNameBinding {
+    pub const KIND: SyntaxKind = GRAPHQL_NAME_BINDING;
 }
 impl AstNode for GraphqlNameBinding {
     type Language = Language;
@@ -5018,6 +5120,9 @@ impl From<GraphqlNameBinding> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlNameReference {
+    pub const KIND: SyntaxKind = GRAPHQL_NAME_REFERENCE;
+}
 impl AstNode for GraphqlNameReference {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5068,6 +5173,9 @@ impl From<GraphqlNameReference> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlNonNullType {
+    pub const KIND: SyntaxKind = GRAPHQL_NON_NULL_TYPE;
+}
 impl AstNode for GraphqlNonNullType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5116,6 +5224,9 @@ impl From<GraphqlNonNullType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlNullValue {
+    pub const KIND: SyntaxKind = GRAPHQL_NULL_VALUE;
+}
 impl AstNode for GraphqlNullValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5162,6 +5273,9 @@ impl From<GraphqlNullValue> for SyntaxElement {
     fn from(n: GraphqlNullValue) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlObjectField {
+    pub const KIND: SyntaxKind = GRAPHQL_OBJECT_FIELD;
 }
 impl AstNode for GraphqlObjectField {
     type Language = Language;
@@ -5214,6 +5328,9 @@ impl From<GraphqlObjectField> for SyntaxElement {
     fn from(n: GraphqlObjectField) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlObjectTypeDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_OBJECT_TYPE_DEFINITION;
 }
 impl AstNode for GraphqlObjectTypeDefinition {
     type Language = Language;
@@ -5273,6 +5390,9 @@ impl From<GraphqlObjectTypeDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlObjectTypeExtension {
+    pub const KIND: SyntaxKind = GRAPHQL_OBJECT_TYPE_EXTENSION;
+}
 impl AstNode for GraphqlObjectTypeExtension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5331,6 +5451,9 @@ impl From<GraphqlObjectTypeExtension> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlObjectValue {
+    pub const KIND: SyntaxKind = GRAPHQL_OBJECT_VALUE;
+}
 impl AstNode for GraphqlObjectValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5385,6 +5508,9 @@ impl From<GraphqlObjectValue> for SyntaxElement {
     fn from(n: GraphqlObjectValue) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlOperationDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_OPERATION_DEFINITION;
 }
 impl AstNode for GraphqlOperationDefinition {
     type Language = Language;
@@ -5443,6 +5569,9 @@ impl From<GraphqlOperationDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlOperationType {
+    pub const KIND: SyntaxKind = GRAPHQL_OPERATION_TYPE;
+}
 impl AstNode for GraphqlOperationType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5492,6 +5621,9 @@ impl From<GraphqlOperationType> for SyntaxElement {
     fn from(n: GraphqlOperationType) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlRoot {
+    pub const KIND: SyntaxKind = GRAPHQL_ROOT;
 }
 impl AstNode for GraphqlRoot {
     type Language = Language;
@@ -5544,6 +5676,9 @@ impl From<GraphqlRoot> for SyntaxElement {
     fn from(n: GraphqlRoot) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlRootOperationTypeDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION;
 }
 impl AstNode for GraphqlRootOperationTypeDefinition {
     type Language = Language;
@@ -5601,6 +5736,9 @@ impl From<GraphqlRootOperationTypeDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlRootOperationTypes {
+    pub const KIND: SyntaxKind = GRAPHQL_ROOT_OPERATION_TYPES;
+}
 impl AstNode for GraphqlRootOperationTypes {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5655,6 +5793,9 @@ impl From<GraphqlRootOperationTypes> for SyntaxElement {
     fn from(n: GraphqlRootOperationTypes) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlScalarTypeDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_SCALAR_TYPE_DEFINITION;
 }
 impl AstNode for GraphqlScalarTypeDefinition {
     type Language = Language;
@@ -5712,6 +5853,9 @@ impl From<GraphqlScalarTypeDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlScalarTypeExtension {
+    pub const KIND: SyntaxKind = GRAPHQL_SCALAR_TYPE_EXTENSION;
+}
 impl AstNode for GraphqlScalarTypeExtension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5767,6 +5911,9 @@ impl From<GraphqlScalarTypeExtension> for SyntaxElement {
     fn from(n: GraphqlScalarTypeExtension) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlSchemaDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_SCHEMA_DEFINITION;
 }
 impl AstNode for GraphqlSchemaDefinition {
     type Language = Language;
@@ -5827,6 +5974,9 @@ impl From<GraphqlSchemaDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlSchemaExtension {
+    pub const KIND: SyntaxKind = GRAPHQL_SCHEMA_EXTENSION;
+}
 impl AstNode for GraphqlSchemaExtension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5886,6 +6036,9 @@ impl From<GraphqlSchemaExtension> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlSelectionSet {
+    pub const KIND: SyntaxKind = GRAPHQL_SELECTION_SET;
+}
 impl AstNode for GraphqlSelectionSet {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5941,6 +6094,9 @@ impl From<GraphqlSelectionSet> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlStringValue {
+    pub const KIND: SyntaxKind = GRAPHQL_STRING_VALUE;
+}
 impl AstNode for GraphqlStringValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5991,6 +6147,9 @@ impl From<GraphqlStringValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlTypeCondition {
+    pub const KIND: SyntaxKind = GRAPHQL_TYPE_CONDITION;
+}
 impl AstNode for GraphqlTypeCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6038,6 +6197,9 @@ impl From<GraphqlTypeCondition> for SyntaxElement {
     fn from(n: GraphqlTypeCondition) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlUnionMemberTypes {
+    pub const KIND: SyntaxKind = GRAPHQL_UNION_MEMBER_TYPES;
 }
 impl AstNode for GraphqlUnionMemberTypes {
     type Language = Language;
@@ -6090,6 +6252,9 @@ impl From<GraphqlUnionMemberTypes> for SyntaxElement {
     fn from(n: GraphqlUnionMemberTypes) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlUnionTypeDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_UNION_TYPE_DEFINITION;
 }
 impl AstNode for GraphqlUnionTypeDefinition {
     type Language = Language;
@@ -6151,6 +6316,9 @@ impl From<GraphqlUnionTypeDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlUnionTypeExtension {
+    pub const KIND: SyntaxKind = GRAPHQL_UNION_TYPE_EXTENSION;
+}
 impl AstNode for GraphqlUnionTypeExtension {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6211,6 +6379,9 @@ impl From<GraphqlUnionTypeExtension> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlVariableBinding {
+    pub const KIND: SyntaxKind = GRAPHQL_VARIABLE_BINDING;
+}
 impl AstNode for GraphqlVariableBinding {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6261,6 +6432,9 @@ impl From<GraphqlVariableBinding> for SyntaxElement {
     fn from(n: GraphqlVariableBinding) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlVariableDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_VARIABLE_DEFINITION;
 }
 impl AstNode for GraphqlVariableDefinition {
     type Language = Language;
@@ -6316,6 +6490,9 @@ impl From<GraphqlVariableDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GraphqlVariableDefinitions {
+    pub const KIND: SyntaxKind = GRAPHQL_VARIABLE_DEFINITIONS;
+}
 impl AstNode for GraphqlVariableDefinitions {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6370,6 +6547,9 @@ impl From<GraphqlVariableDefinitions> for SyntaxElement {
     fn from(n: GraphqlVariableDefinitions) -> Self {
         n.syntax.into()
     }
+}
+impl GraphqlVariableReference {
+    pub const KIND: SyntaxKind = GRAPHQL_VARIABLE_REFERENCE;
 }
 impl AstNode for GraphqlVariableReference {
     type Language = Language;
@@ -7626,6 +7806,7 @@ pub struct GraphqlBogus {
     syntax: SyntaxNode,
 }
 impl GraphqlBogus {
+    pub const KIND: SyntaxKind = GRAPHQL_BOGUS;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -7682,6 +7863,7 @@ pub struct GraphqlBogusDefinition {
     syntax: SyntaxNode,
 }
 impl GraphqlBogusDefinition {
+    pub const KIND: SyntaxKind = GRAPHQL_BOGUS_DEFINITION;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -7738,6 +7920,7 @@ pub struct GraphqlBogusSelection {
     syntax: SyntaxNode,
 }
 impl GraphqlBogusSelection {
+    pub const KIND: SyntaxKind = GRAPHQL_BOGUS_SELECTION;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -7794,6 +7977,7 @@ pub struct GraphqlBogusType {
     syntax: SyntaxNode,
 }
 impl GraphqlBogusType {
+    pub const KIND: SyntaxKind = GRAPHQL_BOGUS_TYPE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -7850,6 +8034,7 @@ pub struct GraphqlBogusValue {
     syntax: SyntaxNode,
 }
 impl GraphqlBogusValue {
+    pub const KIND: SyntaxKind = GRAPHQL_BOGUS_VALUE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -7907,6 +8092,7 @@ pub struct GraphqlArgumentDefinitionList {
     syntax_list: SyntaxList,
 }
 impl GraphqlArgumentDefinitionList {
+    pub const KIND: SyntaxKind = GRAPHQL_ARGUMENT_DEFINITION_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -7989,6 +8175,7 @@ pub struct GraphqlArgumentList {
     syntax_list: SyntaxList,
 }
 impl GraphqlArgumentList {
+    pub const KIND: SyntaxKind = GRAPHQL_ARGUMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8071,6 +8258,7 @@ pub struct GraphqlDefinitionList {
     syntax_list: SyntaxList,
 }
 impl GraphqlDefinitionList {
+    pub const KIND: SyntaxKind = GRAPHQL_DEFINITION_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8153,6 +8341,7 @@ pub struct GraphqlDirectiveList {
     syntax_list: SyntaxList,
 }
 impl GraphqlDirectiveList {
+    pub const KIND: SyntaxKind = GRAPHQL_DIRECTIVE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8235,6 +8424,7 @@ pub struct GraphqlDirectiveLocationList {
     syntax_list: SyntaxList,
 }
 impl GraphqlDirectiveLocationList {
+    pub const KIND: SyntaxKind = GRAPHQL_DIRECTIVE_LOCATION_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8317,6 +8507,7 @@ pub struct GraphqlEnumValueList {
     syntax_list: SyntaxList,
 }
 impl GraphqlEnumValueList {
+    pub const KIND: SyntaxKind = GRAPHQL_ENUM_VALUE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8399,6 +8590,7 @@ pub struct GraphqlFieldDefinitionList {
     syntax_list: SyntaxList,
 }
 impl GraphqlFieldDefinitionList {
+    pub const KIND: SyntaxKind = GRAPHQL_FIELD_DEFINITION_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8481,6 +8673,7 @@ pub struct GraphqlImplementsInterfaceList {
     syntax_list: SyntaxList,
 }
 impl GraphqlImplementsInterfaceList {
+    pub const KIND: SyntaxKind = GRAPHQL_IMPLEMENTS_INTERFACE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8563,6 +8756,7 @@ pub struct GraphqlInputFieldList {
     syntax_list: SyntaxList,
 }
 impl GraphqlInputFieldList {
+    pub const KIND: SyntaxKind = GRAPHQL_INPUT_FIELD_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8645,6 +8839,7 @@ pub struct GraphqlListValueElementList {
     syntax_list: SyntaxList,
 }
 impl GraphqlListValueElementList {
+    pub const KIND: SyntaxKind = GRAPHQL_LIST_VALUE_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8727,6 +8922,7 @@ pub struct GraphqlObjectValueMemberList {
     syntax_list: SyntaxList,
 }
 impl GraphqlObjectValueMemberList {
+    pub const KIND: SyntaxKind = GRAPHQL_OBJECT_VALUE_MEMBER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8809,6 +9005,7 @@ pub struct GraphqlRootOperationTypeDefinitionList {
     syntax_list: SyntaxList,
 }
 impl GraphqlRootOperationTypeDefinitionList {
+    pub const KIND: SyntaxKind = GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8892,6 +9089,7 @@ pub struct GraphqlSelectionList {
     syntax_list: SyntaxList,
 }
 impl GraphqlSelectionList {
+    pub const KIND: SyntaxKind = GRAPHQL_SELECTION_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -8974,6 +9172,7 @@ pub struct GraphqlUnionMemberTypeList {
     syntax_list: SyntaxList,
 }
 impl GraphqlUnionMemberTypeList {
+    pub const KIND: SyntaxKind = GRAPHQL_UNION_MEMBER_TYPE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -9056,6 +9255,7 @@ pub struct GraphqlVariableDefinitionList {
     syntax_list: SyntaxList,
 }
 impl GraphqlVariableDefinitionList {
+    pub const KIND: SyntaxKind = GRAPHQL_VARIABLE_DEFINITION_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]

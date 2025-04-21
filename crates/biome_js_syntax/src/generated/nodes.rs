@@ -16424,6 +16424,9 @@ impl AnyTsVariableAnnotation {
         }
     }
 }
+impl JsAccessorModifier {
+    pub const KIND: SyntaxKind = JS_ACCESSOR_MODIFIER;
+}
 impl AstNode for JsAccessorModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16473,6 +16476,9 @@ impl From<JsAccessorModifier> for SyntaxElement {
     fn from(n: JsAccessorModifier) -> Self {
         n.syntax.into()
     }
+}
+impl JsArrayAssignmentPattern {
+    pub const KIND: SyntaxKind = JS_ARRAY_ASSIGNMENT_PATTERN;
 }
 impl AstNode for JsArrayAssignmentPattern {
     type Language = Language;
@@ -16529,6 +16535,9 @@ impl From<JsArrayAssignmentPattern> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsArrayAssignmentPatternElement {
+    pub const KIND: SyntaxKind = JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT;
+}
 impl AstNode for JsArrayAssignmentPatternElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16576,6 +16585,9 @@ impl From<JsArrayAssignmentPatternElement> for SyntaxElement {
     fn from(n: JsArrayAssignmentPatternElement) -> Self {
         n.syntax.into()
     }
+}
+impl JsArrayAssignmentPatternRestElement {
+    pub const KIND: SyntaxKind = JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT;
 }
 impl AstNode for JsArrayAssignmentPatternRestElement {
     type Language = Language;
@@ -16629,6 +16641,9 @@ impl From<JsArrayAssignmentPatternRestElement> for SyntaxElement {
     fn from(n: JsArrayAssignmentPatternRestElement) -> Self {
         n.syntax.into()
     }
+}
+impl JsArrayBindingPattern {
+    pub const KIND: SyntaxKind = JS_ARRAY_BINDING_PATTERN;
 }
 impl AstNode for JsArrayBindingPattern {
     type Language = Language;
@@ -16685,6 +16700,9 @@ impl From<JsArrayBindingPattern> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsArrayBindingPatternElement {
+    pub const KIND: SyntaxKind = JS_ARRAY_BINDING_PATTERN_ELEMENT;
+}
 impl AstNode for JsArrayBindingPatternElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16732,6 +16750,9 @@ impl From<JsArrayBindingPatternElement> for SyntaxElement {
     fn from(n: JsArrayBindingPatternElement) -> Self {
         n.syntax.into()
     }
+}
+impl JsArrayBindingPatternRestElement {
+    pub const KIND: SyntaxKind = JS_ARRAY_BINDING_PATTERN_REST_ELEMENT;
 }
 impl AstNode for JsArrayBindingPatternRestElement {
     type Language = Language;
@@ -16783,6 +16804,9 @@ impl From<JsArrayBindingPatternRestElement> for SyntaxElement {
     fn from(n: JsArrayBindingPatternRestElement) -> Self {
         n.syntax.into()
     }
+}
+impl JsArrayExpression {
+    pub const KIND: SyntaxKind = JS_ARRAY_EXPRESSION;
 }
 impl AstNode for JsArrayExpression {
     type Language = Language;
@@ -16839,6 +16863,9 @@ impl From<JsArrayExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsArrayHole {
+    pub const KIND: SyntaxKind = JS_ARRAY_HOLE;
+}
 impl AstNode for JsArrayHole {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16874,6 +16901,9 @@ impl From<JsArrayHole> for SyntaxElement {
     fn from(n: JsArrayHole) -> Self {
         n.syntax.into()
     }
+}
+impl JsArrowFunctionExpression {
+    pub const KIND: SyntaxKind = JS_ARROW_FUNCTION_EXPRESSION;
 }
 impl AstNode for JsArrowFunctionExpression {
     type Language = Language;
@@ -16939,6 +16969,9 @@ impl From<JsArrowFunctionExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsAssignmentExpression {
+    pub const KIND: SyntaxKind = JS_ASSIGNMENT_EXPRESSION;
+}
 impl AstNode for JsAssignmentExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -16991,6 +17024,9 @@ impl From<JsAssignmentExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsAwaitExpression {
+    pub const KIND: SyntaxKind = JS_AWAIT_EXPRESSION;
+}
 impl AstNode for JsAwaitExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17042,6 +17078,9 @@ impl From<JsAwaitExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsBigintLiteralExpression {
+    pub const KIND: SyntaxKind = JS_BIGINT_LITERAL_EXPRESSION;
+}
 impl AstNode for JsBigintLiteralExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17091,6 +17130,9 @@ impl From<JsBigintLiteralExpression> for SyntaxElement {
     fn from(n: JsBigintLiteralExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsBinaryExpression {
+    pub const KIND: SyntaxKind = JS_BINARY_EXPRESSION;
 }
 impl AstNode for JsBinaryExpression {
     type Language = Language;
@@ -17143,6 +17185,9 @@ impl From<JsBinaryExpression> for SyntaxElement {
     fn from(n: JsBinaryExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsBlockStatement {
+    pub const KIND: SyntaxKind = JS_BLOCK_STATEMENT;
 }
 impl AstNode for JsBlockStatement {
     type Language = Language;
@@ -17199,6 +17244,9 @@ impl From<JsBlockStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsBooleanLiteralExpression {
+    pub const KIND: SyntaxKind = JS_BOOLEAN_LITERAL_EXPRESSION;
+}
 impl AstNode for JsBooleanLiteralExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17248,6 +17296,9 @@ impl From<JsBooleanLiteralExpression> for SyntaxElement {
     fn from(n: JsBooleanLiteralExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsBreakStatement {
+    pub const KIND: SyntaxKind = JS_BREAK_STATEMENT;
 }
 impl AstNode for JsBreakStatement {
     type Language = Language;
@@ -17304,6 +17355,9 @@ impl From<JsBreakStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsCallArguments {
+    pub const KIND: SyntaxKind = JS_CALL_ARGUMENTS;
+}
 impl AstNode for JsCallArguments {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17358,6 +17412,9 @@ impl From<JsCallArguments> for SyntaxElement {
     fn from(n: JsCallArguments) -> Self {
         n.syntax.into()
     }
+}
+impl JsCallExpression {
+    pub const KIND: SyntaxKind = JS_CALL_EXPRESSION;
 }
 impl AstNode for JsCallExpression {
     type Language = Language;
@@ -17415,6 +17472,9 @@ impl From<JsCallExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsCaseClause {
+    pub const KIND: SyntaxKind = JS_CASE_CLAUSE;
+}
 impl AstNode for JsCaseClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17467,6 +17527,9 @@ impl From<JsCaseClause> for SyntaxElement {
     fn from(n: JsCaseClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsCatchClause {
+    pub const KIND: SyntaxKind = JS_CATCH_CLAUSE;
 }
 impl AstNode for JsCatchClause {
     type Language = Language;
@@ -17522,6 +17585,9 @@ impl From<JsCatchClause> for SyntaxElement {
     fn from(n: JsCatchClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsCatchDeclaration {
+    pub const KIND: SyntaxKind = JS_CATCH_DECLARATION;
 }
 impl AstNode for JsCatchDeclaration {
     type Language = Language;
@@ -17581,6 +17647,9 @@ impl From<JsCatchDeclaration> for SyntaxElement {
     fn from(n: JsCatchDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl JsClassDeclaration {
+    pub const KIND: SyntaxKind = JS_CLASS_DECLARATION;
 }
 impl AstNode for JsClassDeclaration {
     type Language = Language;
@@ -17659,6 +17728,9 @@ impl From<JsClassDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsClassExportDefaultDeclaration {
+    pub const KIND: SyntaxKind = JS_CLASS_EXPORT_DEFAULT_DECLARATION;
+}
 impl AstNode for JsClassExportDefaultDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17736,6 +17808,9 @@ impl From<JsClassExportDefaultDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsClassExpression {
+    pub const KIND: SyntaxKind = JS_CLASS_EXPRESSION;
+}
 impl AstNode for JsClassExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17809,6 +17884,9 @@ impl From<JsClassExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsComputedMemberAssignment {
+    pub const KIND: SyntaxKind = JS_COMPUTED_MEMBER_ASSIGNMENT;
+}
 impl AstNode for JsComputedMemberAssignment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17864,6 +17942,9 @@ impl From<JsComputedMemberAssignment> for SyntaxElement {
     fn from(n: JsComputedMemberAssignment) -> Self {
         n.syntax.into()
     }
+}
+impl JsComputedMemberExpression {
+    pub const KIND: SyntaxKind = JS_COMPUTED_MEMBER_EXPRESSION;
 }
 impl AstNode for JsComputedMemberExpression {
     type Language = Language;
@@ -17925,6 +18006,9 @@ impl From<JsComputedMemberExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsComputedMemberName {
+    pub const KIND: SyntaxKind = JS_COMPUTED_MEMBER_NAME;
+}
 impl AstNode for JsComputedMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17979,6 +18063,9 @@ impl From<JsComputedMemberName> for SyntaxElement {
     fn from(n: JsComputedMemberName) -> Self {
         n.syntax.into()
     }
+}
+impl JsConditionalExpression {
+    pub const KIND: SyntaxKind = JS_CONDITIONAL_EXPRESSION;
 }
 impl AstNode for JsConditionalExpression {
     type Language = Language;
@@ -18037,6 +18124,9 @@ impl From<JsConditionalExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsConstructorClassMember {
+    pub const KIND: SyntaxKind = JS_CONSTRUCTOR_CLASS_MEMBER;
+}
 impl AstNode for JsConstructorClassMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18086,6 +18176,9 @@ impl From<JsConstructorClassMember> for SyntaxElement {
     fn from(n: JsConstructorClassMember) -> Self {
         n.syntax.into()
     }
+}
+impl JsConstructorParameters {
+    pub const KIND: SyntaxKind = JS_CONSTRUCTOR_PARAMETERS;
 }
 impl AstNode for JsConstructorParameters {
     type Language = Language;
@@ -18142,6 +18235,9 @@ impl From<JsConstructorParameters> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsContinueStatement {
+    pub const KIND: SyntaxKind = JS_CONTINUE_STATEMENT;
+}
 impl AstNode for JsContinueStatement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18197,6 +18293,9 @@ impl From<JsContinueStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsDebuggerStatement {
+    pub const KIND: SyntaxKind = JS_DEBUGGER_STATEMENT;
+}
 impl AstNode for JsDebuggerStatement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18251,6 +18350,9 @@ impl From<JsDebuggerStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsDecorator {
+    pub const KIND: SyntaxKind = JS_DECORATOR;
+}
 impl AstNode for JsDecorator {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18298,6 +18400,9 @@ impl From<JsDecorator> for SyntaxElement {
     fn from(n: JsDecorator) -> Self {
         n.syntax.into()
     }
+}
+impl JsDefaultClause {
+    pub const KIND: SyntaxKind = JS_DEFAULT_CLAUSE;
 }
 impl AstNode for JsDefaultClause {
     type Language = Language;
@@ -18354,6 +18459,9 @@ impl From<JsDefaultClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsDefaultImportSpecifier {
+    pub const KIND: SyntaxKind = JS_DEFAULT_IMPORT_SPECIFIER;
+}
 impl AstNode for JsDefaultImportSpecifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18400,6 +18508,9 @@ impl From<JsDefaultImportSpecifier> for SyntaxElement {
     fn from(n: JsDefaultImportSpecifier) -> Self {
         n.syntax.into()
     }
+}
+impl JsDirective {
+    pub const KIND: SyntaxKind = JS_DIRECTIVE;
 }
 impl AstNode for JsDirective {
     type Language = Language;
@@ -18454,6 +18565,9 @@ impl From<JsDirective> for SyntaxElement {
     fn from(n: JsDirective) -> Self {
         n.syntax.into()
     }
+}
+impl JsDoWhileStatement {
+    pub const KIND: SyntaxKind = JS_DO_WHILE_STATEMENT;
 }
 impl AstNode for JsDoWhileStatement {
     type Language = Language;
@@ -18520,6 +18634,9 @@ impl From<JsDoWhileStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsElseClause {
+    pub const KIND: SyntaxKind = JS_ELSE_CLAUSE;
+}
 impl AstNode for JsElseClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18567,6 +18684,9 @@ impl From<JsElseClause> for SyntaxElement {
     fn from(n: JsElseClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsEmptyClassMember {
+    pub const KIND: SyntaxKind = JS_EMPTY_CLASS_MEMBER;
 }
 impl AstNode for JsEmptyClassMember {
     type Language = Language;
@@ -18618,6 +18738,9 @@ impl From<JsEmptyClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsEmptyStatement {
+    pub const KIND: SyntaxKind = JS_EMPTY_STATEMENT;
+}
 impl AstNode for JsEmptyStatement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18667,6 +18790,9 @@ impl From<JsEmptyStatement> for SyntaxElement {
     fn from(n: JsEmptyStatement) -> Self {
         n.syntax.into()
     }
+}
+impl JsExport {
+    pub const KIND: SyntaxKind = JS_EXPORT;
 }
 impl AstNode for JsExport {
     type Language = Language;
@@ -18723,6 +18849,9 @@ impl From<JsExport> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsExportAsClause {
+    pub const KIND: SyntaxKind = JS_EXPORT_AS_CLAUSE;
+}
 impl AstNode for JsExportAsClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18773,6 +18902,9 @@ impl From<JsExportAsClause> for SyntaxElement {
     fn from(n: JsExportAsClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsExportDefaultDeclarationClause {
+    pub const KIND: SyntaxKind = JS_EXPORT_DEFAULT_DECLARATION_CLAUSE;
 }
 impl AstNode for JsExportDefaultDeclarationClause {
     type Language = Language;
@@ -18832,6 +18964,9 @@ impl From<JsExportDefaultDeclarationClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsExportDefaultExpressionClause {
+    pub const KIND: SyntaxKind = JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE;
+}
 impl AstNode for JsExportDefaultExpressionClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18886,6 +19021,9 @@ impl From<JsExportDefaultExpressionClause> for SyntaxElement {
     fn from(n: JsExportDefaultExpressionClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsExportFromClause {
+    pub const KIND: SyntaxKind = JS_EXPORT_FROM_CLAUSE;
 }
 impl AstNode for JsExportFromClause {
     type Language = Language;
@@ -18952,6 +19090,9 @@ impl From<JsExportFromClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsExportNamedClause {
+    pub const KIND: SyntaxKind = JS_EXPORT_NAMED_CLAUSE;
+}
 impl AstNode for JsExportNamedClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19014,6 +19155,9 @@ impl From<JsExportNamedClause> for SyntaxElement {
     fn from(n: JsExportNamedClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsExportNamedFromClause {
+    pub const KIND: SyntaxKind = JS_EXPORT_NAMED_FROM_CLAUSE;
 }
 impl AstNode for JsExportNamedFromClause {
     type Language = Language;
@@ -19084,6 +19228,9 @@ impl From<JsExportNamedFromClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsExportNamedFromSpecifier {
+    pub const KIND: SyntaxKind = JS_EXPORT_NAMED_FROM_SPECIFIER;
+}
 impl AstNode for JsExportNamedFromSpecifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19142,6 +19289,9 @@ impl From<JsExportNamedFromSpecifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsExportNamedShorthandSpecifier {
+    pub const KIND: SyntaxKind = JS_EXPORT_NAMED_SHORTHAND_SPECIFIER;
+}
 impl AstNode for JsExportNamedShorthandSpecifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19192,6 +19342,9 @@ impl From<JsExportNamedShorthandSpecifier> for SyntaxElement {
     fn from(n: JsExportNamedShorthandSpecifier) -> Self {
         n.syntax.into()
     }
+}
+impl JsExportNamedSpecifier {
+    pub const KIND: SyntaxKind = JS_EXPORT_NAMED_SPECIFIER;
 }
 impl AstNode for JsExportNamedSpecifier {
     type Language = Language;
@@ -19249,6 +19402,9 @@ impl From<JsExportNamedSpecifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsExpressionSnipped {
+    pub const KIND: SyntaxKind = JS_EXPRESSION_SNIPPED;
+}
 impl AstNode for JsExpressionSnipped {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19296,6 +19452,9 @@ impl From<JsExpressionSnipped> for SyntaxElement {
     fn from(n: JsExpressionSnipped) -> Self {
         n.syntax.into()
     }
+}
+impl JsExpressionStatement {
+    pub const KIND: SyntaxKind = JS_EXPRESSION_STATEMENT;
 }
 impl AstNode for JsExpressionStatement {
     type Language = Language;
@@ -19347,6 +19506,9 @@ impl From<JsExpressionStatement> for SyntaxElement {
     fn from(n: JsExpressionStatement) -> Self {
         n.syntax.into()
     }
+}
+impl JsExtendsClause {
+    pub const KIND: SyntaxKind = JS_EXTENDS_CLAUSE;
 }
 impl AstNode for JsExtendsClause {
     type Language = Language;
@@ -19406,6 +19568,9 @@ impl From<JsExtendsClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsFinallyClause {
+    pub const KIND: SyntaxKind = JS_FINALLY_CLAUSE;
+}
 impl AstNode for JsFinallyClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19456,6 +19621,9 @@ impl From<JsFinallyClause> for SyntaxElement {
     fn from(n: JsFinallyClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsForInStatement {
+    pub const KIND: SyntaxKind = JS_FOR_IN_STATEMENT;
 }
 impl AstNode for JsForInStatement {
     type Language = Language;
@@ -19518,6 +19686,9 @@ impl From<JsForInStatement> for SyntaxElement {
     fn from(n: JsForInStatement) -> Self {
         n.syntax.into()
     }
+}
+impl JsForOfStatement {
+    pub const KIND: SyntaxKind = JS_FOR_OF_STATEMENT;
 }
 impl AstNode for JsForOfStatement {
     type Language = Language;
@@ -19584,6 +19755,9 @@ impl From<JsForOfStatement> for SyntaxElement {
     fn from(n: JsForOfStatement) -> Self {
         n.syntax.into()
     }
+}
+impl JsForStatement {
+    pub const KIND: SyntaxKind = JS_FOR_STATEMENT;
 }
 impl AstNode for JsForStatement {
     type Language = Language;
@@ -19655,6 +19829,9 @@ impl From<JsForStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsForVariableDeclaration {
+    pub const KIND: SyntaxKind = JS_FOR_VARIABLE_DECLARATION;
+}
 impl AstNode for JsForVariableDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19706,6 +19883,9 @@ impl From<JsForVariableDeclaration> for SyntaxElement {
     fn from(n: JsForVariableDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl JsFormalParameter {
+    pub const KIND: SyntaxKind = JS_FORMAL_PARAMETER;
 }
 impl AstNode for JsFormalParameter {
     type Language = Language;
@@ -19767,6 +19947,9 @@ impl From<JsFormalParameter> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsFunctionBody {
+    pub const KIND: SyntaxKind = JS_FUNCTION_BODY;
+}
 impl AstNode for JsFunctionBody {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -19822,6 +20005,9 @@ impl From<JsFunctionBody> for SyntaxElement {
     fn from(n: JsFunctionBody) -> Self {
         n.syntax.into()
     }
+}
+impl JsFunctionDeclaration {
+    pub const KIND: SyntaxKind = JS_FUNCTION_DECLARATION;
 }
 impl AstNode for JsFunctionDeclaration {
     type Language = Language;
@@ -19891,6 +20077,9 @@ impl From<JsFunctionDeclaration> for SyntaxElement {
     fn from(n: JsFunctionDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl JsFunctionExportDefaultDeclaration {
+    pub const KIND: SyntaxKind = JS_FUNCTION_EXPORT_DEFAULT_DECLARATION;
 }
 impl AstNode for JsFunctionExportDefaultDeclaration {
     type Language = Language;
@@ -19962,6 +20151,9 @@ impl From<JsFunctionExportDefaultDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsFunctionExpression {
+    pub const KIND: SyntaxKind = JS_FUNCTION_EXPRESSION;
+}
 impl AstNode for JsFunctionExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20031,6 +20223,9 @@ impl From<JsFunctionExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsGetterClassMember {
+    pub const KIND: SyntaxKind = JS_GETTER_CLASS_MEMBER;
+}
 impl AstNode for JsGetterClassMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20093,6 +20288,9 @@ impl From<JsGetterClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsGetterObjectMember {
+    pub const KIND: SyntaxKind = JS_GETTER_OBJECT_MEMBER;
+}
 impl AstNode for JsGetterObjectMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20154,6 +20352,9 @@ impl From<JsGetterObjectMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsIdentifierAssignment {
+    pub const KIND: SyntaxKind = JS_IDENTIFIER_ASSIGNMENT;
+}
 impl AstNode for JsIdentifierAssignment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20200,6 +20401,9 @@ impl From<JsIdentifierAssignment> for SyntaxElement {
     fn from(n: JsIdentifierAssignment) -> Self {
         n.syntax.into()
     }
+}
+impl JsIdentifierBinding {
+    pub const KIND: SyntaxKind = JS_IDENTIFIER_BINDING;
 }
 impl AstNode for JsIdentifierBinding {
     type Language = Language;
@@ -20248,6 +20452,9 @@ impl From<JsIdentifierBinding> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsIdentifierExpression {
+    pub const KIND: SyntaxKind = JS_IDENTIFIER_EXPRESSION;
+}
 impl AstNode for JsIdentifierExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20294,6 +20501,9 @@ impl From<JsIdentifierExpression> for SyntaxElement {
     fn from(n: JsIdentifierExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsIfStatement {
+    pub const KIND: SyntaxKind = JS_IF_STATEMENT;
 }
 impl AstNode for JsIfStatement {
     type Language = Language;
@@ -20356,6 +20566,9 @@ impl From<JsIfStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsImport {
+    pub const KIND: SyntaxKind = JS_IMPORT;
+}
 impl AstNode for JsImport {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20414,6 +20627,9 @@ impl From<JsImport> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsImportAssertion {
+    pub const KIND: SyntaxKind = JS_IMPORT_ASSERTION;
+}
 impl AstNode for JsImportAssertion {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20470,6 +20686,9 @@ impl From<JsImportAssertion> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsImportAssertionEntry {
+    pub const KIND: SyntaxKind = JS_IMPORT_ASSERTION_ENTRY;
+}
 impl AstNode for JsImportAssertionEntry {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20525,6 +20744,9 @@ impl From<JsImportAssertionEntry> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsImportBareClause {
+    pub const KIND: SyntaxKind = JS_IMPORT_BARE_CLAUSE;
+}
 impl AstNode for JsImportBareClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20576,6 +20798,9 @@ impl From<JsImportBareClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsImportCallExpression {
+    pub const KIND: SyntaxKind = JS_IMPORT_CALL_EXPRESSION;
+}
 impl AstNode for JsImportCallExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20626,6 +20851,9 @@ impl From<JsImportCallExpression> for SyntaxElement {
     fn from(n: JsImportCallExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsImportCombinedClause {
+    pub const KIND: SyntaxKind = JS_IMPORT_COMBINED_CLAUSE;
 }
 impl AstNode for JsImportCombinedClause {
     type Language = Language;
@@ -20688,6 +20916,9 @@ impl From<JsImportCombinedClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsImportDefaultClause {
+    pub const KIND: SyntaxKind = JS_IMPORT_DEFAULT_CLAUSE;
+}
 impl AstNode for JsImportDefaultClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20748,6 +20979,9 @@ impl From<JsImportDefaultClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsImportMetaExpression {
+    pub const KIND: SyntaxKind = JS_IMPORT_META_EXPRESSION;
+}
 impl AstNode for JsImportMetaExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20799,6 +21033,9 @@ impl From<JsImportMetaExpression> for SyntaxElement {
     fn from(n: JsImportMetaExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsImportNamedClause {
+    pub const KIND: SyntaxKind = JS_IMPORT_NAMED_CLAUSE;
 }
 impl AstNode for JsImportNamedClause {
     type Language = Language;
@@ -20860,6 +21097,9 @@ impl From<JsImportNamedClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsImportNamespaceClause {
+    pub const KIND: SyntaxKind = JS_IMPORT_NAMESPACE_CLAUSE;
+}
 impl AstNode for JsImportNamespaceClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20920,6 +21160,9 @@ impl From<JsImportNamespaceClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsInExpression {
+    pub const KIND: SyntaxKind = JS_IN_EXPRESSION;
+}
 impl AstNode for JsInExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20969,6 +21212,9 @@ impl From<JsInExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsInitializerClause {
+    pub const KIND: SyntaxKind = JS_INITIALIZER_CLAUSE;
+}
 impl AstNode for JsInitializerClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21016,6 +21262,9 @@ impl From<JsInitializerClause> for SyntaxElement {
     fn from(n: JsInitializerClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsInstanceofExpression {
+    pub const KIND: SyntaxKind = JS_INSTANCEOF_EXPRESSION;
 }
 impl AstNode for JsInstanceofExpression {
     type Language = Language;
@@ -21069,6 +21318,9 @@ impl From<JsInstanceofExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsLabel {
+    pub const KIND: SyntaxKind = JS_LABEL;
+}
 impl AstNode for JsLabel {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21118,6 +21370,9 @@ impl From<JsLabel> for SyntaxElement {
     fn from(n: JsLabel) -> Self {
         n.syntax.into()
     }
+}
+impl JsLabeledStatement {
+    pub const KIND: SyntaxKind = JS_LABELED_STATEMENT;
 }
 impl AstNode for JsLabeledStatement {
     type Language = Language;
@@ -21171,6 +21426,9 @@ impl From<JsLabeledStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsLiteralExportName {
+    pub const KIND: SyntaxKind = JS_LITERAL_EXPORT_NAME;
+}
 impl AstNode for JsLiteralExportName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21218,6 +21476,9 @@ impl From<JsLiteralExportName> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsLiteralMemberName {
+    pub const KIND: SyntaxKind = JS_LITERAL_MEMBER_NAME;
+}
 impl AstNode for JsLiteralMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21264,6 +21525,9 @@ impl From<JsLiteralMemberName> for SyntaxElement {
     fn from(n: JsLiteralMemberName) -> Self {
         n.syntax.into()
     }
+}
+impl JsLogicalExpression {
+    pub const KIND: SyntaxKind = JS_LOGICAL_EXPRESSION;
 }
 impl AstNode for JsLogicalExpression {
     type Language = Language;
@@ -21317,6 +21581,9 @@ impl From<JsLogicalExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsMetavariable {
+    pub const KIND: SyntaxKind = JS_METAVARIABLE;
+}
 impl AstNode for JsMetavariable {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21366,6 +21633,9 @@ impl From<JsMetavariable> for SyntaxElement {
     fn from(n: JsMetavariable) -> Self {
         n.syntax.into()
     }
+}
+impl JsMethodClassMember {
+    pub const KIND: SyntaxKind = JS_METHOD_CLASS_MEMBER;
 }
 impl AstNode for JsMethodClassMember {
     type Language = Language;
@@ -21437,6 +21707,9 @@ impl From<JsMethodClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsMethodObjectMember {
+    pub const KIND: SyntaxKind = JS_METHOD_OBJECT_MEMBER;
+}
 impl AstNode for JsMethodObjectMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21502,6 +21775,9 @@ impl From<JsMethodObjectMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsModule {
+    pub const KIND: SyntaxKind = JS_MODULE;
+}
 impl AstNode for JsModule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21559,6 +21835,9 @@ impl From<JsModule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsModuleSource {
+    pub const KIND: SyntaxKind = JS_MODULE_SOURCE;
+}
 impl AstNode for JsModuleSource {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21609,6 +21888,9 @@ impl From<JsModuleSource> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsName {
+    pub const KIND: SyntaxKind = JS_NAME;
+}
 impl AstNode for JsName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21658,6 +21940,9 @@ impl From<JsName> for SyntaxElement {
     fn from(n: JsName) -> Self {
         n.syntax.into()
     }
+}
+impl JsNamedImportSpecifier {
+    pub const KIND: SyntaxKind = JS_NAMED_IMPORT_SPECIFIER;
 }
 impl AstNode for JsNamedImportSpecifier {
     type Language = Language;
@@ -21711,6 +21996,9 @@ impl From<JsNamedImportSpecifier> for SyntaxElement {
     fn from(n: JsNamedImportSpecifier) -> Self {
         n.syntax.into()
     }
+}
+impl JsNamedImportSpecifiers {
+    pub const KIND: SyntaxKind = JS_NAMED_IMPORT_SPECIFIERS;
 }
 impl AstNode for JsNamedImportSpecifiers {
     type Language = Language;
@@ -21767,6 +22055,9 @@ impl From<JsNamedImportSpecifiers> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsNamespaceImportSpecifier {
+    pub const KIND: SyntaxKind = JS_NAMESPACE_IMPORT_SPECIFIER;
+}
 impl AstNode for JsNamespaceImportSpecifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21815,6 +22106,9 @@ impl From<JsNamespaceImportSpecifier> for SyntaxElement {
     fn from(n: JsNamespaceImportSpecifier) -> Self {
         n.syntax.into()
     }
+}
+impl JsNewExpression {
+    pub const KIND: SyntaxKind = JS_NEW_EXPRESSION;
 }
 impl AstNode for JsNewExpression {
     type Language = Language;
@@ -21872,6 +22166,9 @@ impl From<JsNewExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsNewTargetExpression {
+    pub const KIND: SyntaxKind = JS_NEW_TARGET_EXPRESSION;
+}
 impl AstNode for JsNewTargetExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21924,6 +22221,9 @@ impl From<JsNewTargetExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsNullLiteralExpression {
+    pub const KIND: SyntaxKind = JS_NULL_LITERAL_EXPRESSION;
+}
 impl AstNode for JsNullLiteralExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21974,6 +22274,9 @@ impl From<JsNullLiteralExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsNumberLiteralExpression {
+    pub const KIND: SyntaxKind = JS_NUMBER_LITERAL_EXPRESSION;
+}
 impl AstNode for JsNumberLiteralExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22023,6 +22326,9 @@ impl From<JsNumberLiteralExpression> for SyntaxElement {
     fn from(n: JsNumberLiteralExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsObjectAssignmentPattern {
+    pub const KIND: SyntaxKind = JS_OBJECT_ASSIGNMENT_PATTERN;
 }
 impl AstNode for JsObjectAssignmentPattern {
     type Language = Language;
@@ -22079,6 +22385,9 @@ impl From<JsObjectAssignmentPattern> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsObjectAssignmentPatternProperty {
+    pub const KIND: SyntaxKind = JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY;
+}
 impl AstNode for JsObjectAssignmentPatternProperty {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22132,6 +22441,9 @@ impl From<JsObjectAssignmentPatternProperty> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsObjectAssignmentPatternRest {
+    pub const KIND: SyntaxKind = JS_OBJECT_ASSIGNMENT_PATTERN_REST;
+}
 impl AstNode for JsObjectAssignmentPatternRest {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22183,6 +22495,9 @@ impl From<JsObjectAssignmentPatternRest> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsObjectAssignmentPatternShorthandProperty {
+    pub const KIND: SyntaxKind = JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY;
+}
 impl AstNode for JsObjectAssignmentPatternShorthandProperty {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
@@ -22232,6 +22547,9 @@ impl From<JsObjectAssignmentPatternShorthandProperty> for SyntaxElement {
     fn from(n: JsObjectAssignmentPatternShorthandProperty) -> Self {
         n.syntax.into()
     }
+}
+impl JsObjectBindingPattern {
+    pub const KIND: SyntaxKind = JS_OBJECT_BINDING_PATTERN;
 }
 impl AstNode for JsObjectBindingPattern {
     type Language = Language;
@@ -22288,6 +22606,9 @@ impl From<JsObjectBindingPattern> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsObjectBindingPatternProperty {
+    pub const KIND: SyntaxKind = JS_OBJECT_BINDING_PATTERN_PROPERTY;
+}
 impl AstNode for JsObjectBindingPatternProperty {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22341,6 +22662,9 @@ impl From<JsObjectBindingPatternProperty> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsObjectBindingPatternRest {
+    pub const KIND: SyntaxKind = JS_OBJECT_BINDING_PATTERN_REST;
+}
 impl AstNode for JsObjectBindingPatternRest {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22392,6 +22716,9 @@ impl From<JsObjectBindingPatternRest> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsObjectBindingPatternShorthandProperty {
+    pub const KIND: SyntaxKind = JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY;
+}
 impl AstNode for JsObjectBindingPatternShorthandProperty {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
@@ -22441,6 +22768,9 @@ impl From<JsObjectBindingPatternShorthandProperty> for SyntaxElement {
     fn from(n: JsObjectBindingPatternShorthandProperty) -> Self {
         n.syntax.into()
     }
+}
+impl JsObjectExpression {
+    pub const KIND: SyntaxKind = JS_OBJECT_EXPRESSION;
 }
 impl AstNode for JsObjectExpression {
     type Language = Language;
@@ -22497,6 +22827,9 @@ impl From<JsObjectExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsParameters {
+    pub const KIND: SyntaxKind = JS_PARAMETERS;
+}
 impl AstNode for JsParameters {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22551,6 +22884,9 @@ impl From<JsParameters> for SyntaxElement {
     fn from(n: JsParameters) -> Self {
         n.syntax.into()
     }
+}
+impl JsParenthesizedAssignment {
+    pub const KIND: SyntaxKind = JS_PARENTHESIZED_ASSIGNMENT;
 }
 impl AstNode for JsParenthesizedAssignment {
     type Language = Language;
@@ -22607,6 +22943,9 @@ impl From<JsParenthesizedAssignment> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsParenthesizedExpression {
+    pub const KIND: SyntaxKind = JS_PARENTHESIZED_EXPRESSION;
+}
 impl AstNode for JsParenthesizedExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22662,6 +23001,9 @@ impl From<JsParenthesizedExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsPostUpdateExpression {
+    pub const KIND: SyntaxKind = JS_POST_UPDATE_EXPRESSION;
+}
 impl AstNode for JsPostUpdateExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22712,6 +23054,9 @@ impl From<JsPostUpdateExpression> for SyntaxElement {
     fn from(n: JsPostUpdateExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsPreUpdateExpression {
+    pub const KIND: SyntaxKind = JS_PRE_UPDATE_EXPRESSION;
 }
 impl AstNode for JsPreUpdateExpression {
     type Language = Language;
@@ -22764,6 +23109,9 @@ impl From<JsPreUpdateExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsPrivateClassMemberName {
+    pub const KIND: SyntaxKind = JS_PRIVATE_CLASS_MEMBER_NAME;
+}
 impl AstNode for JsPrivateClassMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22811,6 +23159,9 @@ impl From<JsPrivateClassMemberName> for SyntaxElement {
     fn from(n: JsPrivateClassMemberName) -> Self {
         n.syntax.into()
     }
+}
+impl JsPrivateName {
+    pub const KIND: SyntaxKind = JS_PRIVATE_NAME;
 }
 impl AstNode for JsPrivateName {
     type Language = Language;
@@ -22862,6 +23213,9 @@ impl From<JsPrivateName> for SyntaxElement {
     fn from(n: JsPrivateName) -> Self {
         n.syntax.into()
     }
+}
+impl JsPropertyClassMember {
+    pub const KIND: SyntaxKind = JS_PROPERTY_CLASS_MEMBER;
 }
 impl AstNode for JsPropertyClassMember {
     type Language = Language;
@@ -22920,6 +23274,9 @@ impl From<JsPropertyClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsPropertyObjectMember {
+    pub const KIND: SyntaxKind = JS_PROPERTY_OBJECT_MEMBER;
+}
 impl AstNode for JsPropertyObjectMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -22972,6 +23329,9 @@ impl From<JsPropertyObjectMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsReferenceIdentifier {
+    pub const KIND: SyntaxKind = JS_REFERENCE_IDENTIFIER;
+}
 impl AstNode for JsReferenceIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23022,6 +23382,9 @@ impl From<JsReferenceIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsRegexLiteralExpression {
+    pub const KIND: SyntaxKind = JS_REGEX_LITERAL_EXPRESSION;
+}
 impl AstNode for JsRegexLiteralExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23071,6 +23434,9 @@ impl From<JsRegexLiteralExpression> for SyntaxElement {
     fn from(n: JsRegexLiteralExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsRestParameter {
+    pub const KIND: SyntaxKind = JS_REST_PARAMETER;
 }
 impl AstNode for JsRestParameter {
     type Language = Language;
@@ -23128,6 +23494,9 @@ impl From<JsRestParameter> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsReturnStatement {
+    pub const KIND: SyntaxKind = JS_RETURN_STATEMENT;
+}
 impl AstNode for JsReturnStatement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23182,6 +23551,9 @@ impl From<JsReturnStatement> for SyntaxElement {
     fn from(n: JsReturnStatement) -> Self {
         n.syntax.into()
     }
+}
+impl JsScript {
+    pub const KIND: SyntaxKind = JS_SCRIPT;
 }
 impl AstNode for JsScript {
     type Language = Language;
@@ -23240,6 +23612,9 @@ impl From<JsScript> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsSequenceExpression {
+    pub const KIND: SyntaxKind = JS_SEQUENCE_EXPRESSION;
+}
 impl AstNode for JsSequenceExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23291,6 +23666,9 @@ impl From<JsSequenceExpression> for SyntaxElement {
     fn from(n: JsSequenceExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsSetterClassMember {
+    pub const KIND: SyntaxKind = JS_SETTER_CLASS_MEMBER;
 }
 impl AstNode for JsSetterClassMember {
     type Language = Language;
@@ -23355,6 +23733,9 @@ impl From<JsSetterClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsSetterObjectMember {
+    pub const KIND: SyntaxKind = JS_SETTER_OBJECT_MEMBER;
+}
 impl AstNode for JsSetterObjectMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23417,6 +23798,9 @@ impl From<JsSetterObjectMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsShorthandNamedImportSpecifier {
+    pub const KIND: SyntaxKind = JS_SHORTHAND_NAMED_IMPORT_SPECIFIER;
+}
 impl AstNode for JsShorthandNamedImportSpecifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23468,6 +23852,9 @@ impl From<JsShorthandNamedImportSpecifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsShorthandPropertyObjectMember {
+    pub const KIND: SyntaxKind = JS_SHORTHAND_PROPERTY_OBJECT_MEMBER;
+}
 impl AstNode for JsShorthandPropertyObjectMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23514,6 +23901,9 @@ impl From<JsShorthandPropertyObjectMember> for SyntaxElement {
     fn from(n: JsShorthandPropertyObjectMember) -> Self {
         n.syntax.into()
     }
+}
+impl JsSpread {
+    pub const KIND: SyntaxKind = JS_SPREAD;
 }
 impl AstNode for JsSpread {
     type Language = Language;
@@ -23565,6 +23955,9 @@ impl From<JsSpread> for SyntaxElement {
     fn from(n: JsSpread) -> Self {
         n.syntax.into()
     }
+}
+impl JsStaticInitializationBlockClassMember {
+    pub const KIND: SyntaxKind = JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER;
 }
 impl AstNode for JsStaticInitializationBlockClassMember {
     type Language = Language;
@@ -23627,6 +24020,9 @@ impl From<JsStaticInitializationBlockClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsStaticMemberAssignment {
+    pub const KIND: SyntaxKind = JS_STATIC_MEMBER_ASSIGNMENT;
+}
 impl AstNode for JsStaticMemberAssignment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23675,6 +24071,9 @@ impl From<JsStaticMemberAssignment> for SyntaxElement {
     fn from(n: JsStaticMemberAssignment) -> Self {
         n.syntax.into()
     }
+}
+impl JsStaticMemberExpression {
+    pub const KIND: SyntaxKind = JS_STATIC_MEMBER_EXPRESSION;
 }
 impl AstNode for JsStaticMemberExpression {
     type Language = Language;
@@ -23728,6 +24127,9 @@ impl From<JsStaticMemberExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsStaticModifier {
+    pub const KIND: SyntaxKind = JS_STATIC_MODIFIER;
+}
 impl AstNode for JsStaticModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23777,6 +24179,9 @@ impl From<JsStaticModifier> for SyntaxElement {
     fn from(n: JsStaticModifier) -> Self {
         n.syntax.into()
     }
+}
+impl JsStringLiteralExpression {
+    pub const KIND: SyntaxKind = JS_STRING_LITERAL_EXPRESSION;
 }
 impl AstNode for JsStringLiteralExpression {
     type Language = Language;
@@ -23828,6 +24233,9 @@ impl From<JsStringLiteralExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsSuperExpression {
+    pub const KIND: SyntaxKind = JS_SUPER_EXPRESSION;
+}
 impl AstNode for JsSuperExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23877,6 +24285,9 @@ impl From<JsSuperExpression> for SyntaxElement {
     fn from(n: JsSuperExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsSwitchStatement {
+    pub const KIND: SyntaxKind = JS_SWITCH_STATEMENT;
 }
 impl AstNode for JsSwitchStatement {
     type Language = Language;
@@ -23949,6 +24360,9 @@ impl From<JsSwitchStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsTemplateChunkElement {
+    pub const KIND: SyntaxKind = JS_TEMPLATE_CHUNK_ELEMENT;
+}
 impl AstNode for JsTemplateChunkElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -23998,6 +24412,9 @@ impl From<JsTemplateChunkElement> for SyntaxElement {
     fn from(n: JsTemplateChunkElement) -> Self {
         n.syntax.into()
     }
+}
+impl JsTemplateElement {
+    pub const KIND: SyntaxKind = JS_TEMPLATE_ELEMENT;
 }
 impl AstNode for JsTemplateElement {
     type Language = Language;
@@ -24053,6 +24470,9 @@ impl From<JsTemplateElement> for SyntaxElement {
     fn from(n: JsTemplateElement) -> Self {
         n.syntax.into()
     }
+}
+impl JsTemplateExpression {
+    pub const KIND: SyntaxKind = JS_TEMPLATE_EXPRESSION;
 }
 impl AstNode for JsTemplateExpression {
     type Language = Language;
@@ -24114,6 +24534,9 @@ impl From<JsTemplateExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsThisExpression {
+    pub const KIND: SyntaxKind = JS_THIS_EXPRESSION;
+}
 impl AstNode for JsThisExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -24160,6 +24583,9 @@ impl From<JsThisExpression> for SyntaxElement {
     fn from(n: JsThisExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsThrowStatement {
+    pub const KIND: SyntaxKind = JS_THROW_STATEMENT;
 }
 impl AstNode for JsThrowStatement {
     type Language = Language;
@@ -24215,6 +24641,9 @@ impl From<JsThrowStatement> for SyntaxElement {
     fn from(n: JsThrowStatement) -> Self {
         n.syntax.into()
     }
+}
+impl JsTryFinallyStatement {
+    pub const KIND: SyntaxKind = JS_TRY_FINALLY_STATEMENT;
 }
 impl AstNode for JsTryFinallyStatement {
     type Language = Language;
@@ -24272,6 +24701,9 @@ impl From<JsTryFinallyStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsTryStatement {
+    pub const KIND: SyntaxKind = JS_TRY_STATEMENT;
+}
 impl AstNode for JsTryStatement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -24324,6 +24756,9 @@ impl From<JsTryStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsUnaryExpression {
+    pub const KIND: SyntaxKind = JS_UNARY_EXPRESSION;
+}
 impl AstNode for JsUnaryExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -24374,6 +24809,9 @@ impl From<JsUnaryExpression> for SyntaxElement {
     fn from(n: JsUnaryExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsVariableDeclaration {
+    pub const KIND: SyntaxKind = JS_VARIABLE_DECLARATION;
 }
 impl AstNode for JsVariableDeclaration {
     type Language = Language;
@@ -24426,6 +24864,9 @@ impl From<JsVariableDeclaration> for SyntaxElement {
     fn from(n: JsVariableDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl JsVariableDeclarationClause {
+    pub const KIND: SyntaxKind = JS_VARIABLE_DECLARATION_CLAUSE;
 }
 impl AstNode for JsVariableDeclarationClause {
     type Language = Language;
@@ -24480,6 +24921,9 @@ impl From<JsVariableDeclarationClause> for SyntaxElement {
     fn from(n: JsVariableDeclarationClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsVariableDeclarator {
+    pub const KIND: SyntaxKind = JS_VARIABLE_DECLARATOR;
 }
 impl AstNode for JsVariableDeclarator {
     type Language = Language;
@@ -24536,6 +24980,9 @@ impl From<JsVariableDeclarator> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsVariableStatement {
+    pub const KIND: SyntaxKind = JS_VARIABLE_STATEMENT;
+}
 impl AstNode for JsVariableStatement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -24589,6 +25036,9 @@ impl From<JsVariableStatement> for SyntaxElement {
     fn from(n: JsVariableStatement) -> Self {
         n.syntax.into()
     }
+}
+impl JsWhileStatement {
+    pub const KIND: SyntaxKind = JS_WHILE_STATEMENT;
 }
 impl AstNode for JsWhileStatement {
     type Language = Language;
@@ -24650,6 +25100,9 @@ impl From<JsWhileStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsWithStatement {
+    pub const KIND: SyntaxKind = JS_WITH_STATEMENT;
+}
 impl AstNode for JsWithStatement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -24707,6 +25160,9 @@ impl From<JsWithStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsYieldArgument {
+    pub const KIND: SyntaxKind = JS_YIELD_ARGUMENT;
+}
 impl AstNode for JsYieldArgument {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -24757,6 +25213,9 @@ impl From<JsYieldArgument> for SyntaxElement {
     fn from(n: JsYieldArgument) -> Self {
         n.syntax.into()
     }
+}
+impl JsYieldExpression {
+    pub const KIND: SyntaxKind = JS_YIELD_EXPRESSION;
 }
 impl AstNode for JsYieldExpression {
     type Language = Language;
@@ -24809,6 +25268,9 @@ impl From<JsYieldExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxAttribute {
+    pub const KIND: SyntaxKind = JSX_ATTRIBUTE;
+}
 impl AstNode for JsxAttribute {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -24860,6 +25322,9 @@ impl From<JsxAttribute> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxAttributeInitializerClause {
+    pub const KIND: SyntaxKind = JSX_ATTRIBUTE_INITIALIZER_CLAUSE;
+}
 impl AstNode for JsxAttributeInitializerClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -24907,6 +25372,9 @@ impl From<JsxAttributeInitializerClause> for SyntaxElement {
     fn from(n: JsxAttributeInitializerClause) -> Self {
         n.syntax.into()
     }
+}
+impl JsxClosingElement {
+    pub const KIND: SyntaxKind = JSX_CLOSING_ELEMENT;
 }
 impl AstNode for JsxClosingElement {
     type Language = Language;
@@ -24967,6 +25435,9 @@ impl From<JsxClosingElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxClosingFragment {
+    pub const KIND: SyntaxKind = JSX_CLOSING_FRAGMENT;
+}
 impl AstNode for JsxClosingFragment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25025,6 +25496,9 @@ impl From<JsxClosingFragment> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxElement {
+    pub const KIND: SyntaxKind = JSX_ELEMENT;
+}
 impl AstNode for JsxElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25080,6 +25554,9 @@ impl From<JsxElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxExpressionAttributeValue {
+    pub const KIND: SyntaxKind = JSX_EXPRESSION_ATTRIBUTE_VALUE;
+}
 impl AstNode for JsxExpressionAttributeValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25134,6 +25611,9 @@ impl From<JsxExpressionAttributeValue> for SyntaxElement {
     fn from(n: JsxExpressionAttributeValue) -> Self {
         n.syntax.into()
     }
+}
+impl JsxExpressionChild {
+    pub const KIND: SyntaxKind = JSX_EXPRESSION_CHILD;
 }
 impl AstNode for JsxExpressionChild {
     type Language = Language;
@@ -25193,6 +25673,9 @@ impl From<JsxExpressionChild> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxFragment {
+    pub const KIND: SyntaxKind = JSX_FRAGMENT;
+}
 impl AstNode for JsxFragment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25248,6 +25731,9 @@ impl From<JsxFragment> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxMemberName {
+    pub const KIND: SyntaxKind = JSX_MEMBER_NAME;
+}
 impl AstNode for JsxMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25296,6 +25782,9 @@ impl From<JsxMemberName> for SyntaxElement {
     fn from(n: JsxMemberName) -> Self {
         n.syntax.into()
     }
+}
+impl JsxName {
+    pub const KIND: SyntaxKind = JSX_NAME;
 }
 impl AstNode for JsxName {
     type Language = Language;
@@ -25346,6 +25835,9 @@ impl From<JsxName> for SyntaxElement {
     fn from(n: JsxName) -> Self {
         n.syntax.into()
     }
+}
+impl JsxNamespaceName {
+    pub const KIND: SyntaxKind = JSX_NAMESPACE_NAME;
 }
 impl AstNode for JsxNamespaceName {
     type Language = Language;
@@ -25398,6 +25890,9 @@ impl From<JsxNamespaceName> for SyntaxElement {
     fn from(n: JsxNamespaceName) -> Self {
         n.syntax.into()
     }
+}
+impl JsxOpeningElement {
+    pub const KIND: SyntaxKind = JSX_OPENING_ELEMENT;
 }
 impl AstNode for JsxOpeningElement {
     type Language = Language;
@@ -25459,6 +25954,9 @@ impl From<JsxOpeningElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxOpeningFragment {
+    pub const KIND: SyntaxKind = JSX_OPENING_FRAGMENT;
+}
 impl AstNode for JsxOpeningFragment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25513,6 +26011,9 @@ impl From<JsxOpeningFragment> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxReferenceIdentifier {
+    pub const KIND: SyntaxKind = JSX_REFERENCE_IDENTIFIER;
+}
 impl AstNode for JsxReferenceIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25562,6 +26063,9 @@ impl From<JsxReferenceIdentifier> for SyntaxElement {
     fn from(n: JsxReferenceIdentifier) -> Self {
         n.syntax.into()
     }
+}
+impl JsxSelfClosingElement {
+    pub const KIND: SyntaxKind = JSX_SELF_CLOSING_ELEMENT;
 }
 impl AstNode for JsxSelfClosingElement {
     type Language = Language;
@@ -25627,6 +26131,9 @@ impl From<JsxSelfClosingElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxSpreadAttribute {
+    pub const KIND: SyntaxKind = JSX_SPREAD_ATTRIBUTE;
+}
 impl AstNode for JsxSpreadAttribute {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25685,6 +26192,9 @@ impl From<JsxSpreadAttribute> for SyntaxElement {
     fn from(n: JsxSpreadAttribute) -> Self {
         n.syntax.into()
     }
+}
+impl JsxSpreadChild {
+    pub const KIND: SyntaxKind = JSX_SPREAD_CHILD;
 }
 impl AstNode for JsxSpreadChild {
     type Language = Language;
@@ -25745,6 +26255,9 @@ impl From<JsxSpreadChild> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxString {
+    pub const KIND: SyntaxKind = JSX_STRING;
+}
 impl AstNode for JsxString {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25795,6 +26308,9 @@ impl From<JsxString> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl JsxTagExpression {
+    pub const KIND: SyntaxKind = JSX_TAG_EXPRESSION;
+}
 impl AstNode for JsxTagExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25841,6 +26357,9 @@ impl From<JsxTagExpression> for SyntaxElement {
     fn from(n: JsxTagExpression) -> Self {
         n.syntax.into()
     }
+}
+impl JsxText {
+    pub const KIND: SyntaxKind = JSX_TEXT;
 }
 impl AstNode for JsxText {
     type Language = Language;
@@ -25892,6 +26411,9 @@ impl From<JsxText> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsAbstractModifier {
+    pub const KIND: SyntaxKind = TS_ABSTRACT_MODIFIER;
+}
 impl AstNode for TsAbstractModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25941,6 +26463,9 @@ impl From<TsAbstractModifier> for SyntaxElement {
     fn from(n: TsAbstractModifier) -> Self {
         n.syntax.into()
     }
+}
+impl TsAccessibilityModifier {
+    pub const KIND: SyntaxKind = TS_ACCESSIBILITY_MODIFIER;
 }
 impl AstNode for TsAccessibilityModifier {
     type Language = Language;
@@ -25992,6 +26517,9 @@ impl From<TsAccessibilityModifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsAnyType {
+    pub const KIND: SyntaxKind = TS_ANY_TYPE;
+}
 impl AstNode for TsAnyType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26038,6 +26566,9 @@ impl From<TsAnyType> for SyntaxElement {
     fn from(n: TsAnyType) -> Self {
         n.syntax.into()
     }
+}
+impl TsArrayType {
+    pub const KIND: SyntaxKind = TS_ARRAY_TYPE;
 }
 impl AstNode for TsArrayType {
     type Language = Language;
@@ -26097,6 +26628,9 @@ impl From<TsArrayType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsAsAssignment {
+    pub const KIND: SyntaxKind = TS_AS_ASSIGNMENT;
+}
 impl AstNode for TsAsAssignment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26145,6 +26679,9 @@ impl From<TsAsAssignment> for SyntaxElement {
     fn from(n: TsAsAssignment) -> Self {
         n.syntax.into()
     }
+}
+impl TsAsExpression {
+    pub const KIND: SyntaxKind = TS_AS_EXPRESSION;
 }
 impl AstNode for TsAsExpression {
     type Language = Language;
@@ -26195,6 +26732,9 @@ impl From<TsAsExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsAssertsCondition {
+    pub const KIND: SyntaxKind = TS_ASSERTS_CONDITION;
+}
 impl AstNode for TsAssertsCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26242,6 +26782,9 @@ impl From<TsAssertsCondition> for SyntaxElement {
     fn from(n: TsAssertsCondition) -> Self {
         n.syntax.into()
     }
+}
+impl TsAssertsReturnType {
+    pub const KIND: SyntaxKind = TS_ASSERTS_RETURN_TYPE;
 }
 impl AstNode for TsAssertsReturnType {
     type Language = Language;
@@ -26301,6 +26844,9 @@ impl From<TsAssertsReturnType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsBigintLiteralType {
+    pub const KIND: SyntaxKind = TS_BIGINT_LITERAL_TYPE;
+}
 impl AstNode for TsBigintLiteralType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26355,6 +26901,9 @@ impl From<TsBigintLiteralType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsBigintType {
+    pub const KIND: SyntaxKind = TS_BIGINT_TYPE;
+}
 impl AstNode for TsBigintType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26405,6 +26954,9 @@ impl From<TsBigintType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsBooleanLiteralType {
+    pub const KIND: SyntaxKind = TS_BOOLEAN_LITERAL_TYPE;
+}
 impl AstNode for TsBooleanLiteralType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26451,6 +27003,9 @@ impl From<TsBooleanLiteralType> for SyntaxElement {
     fn from(n: TsBooleanLiteralType) -> Self {
         n.syntax.into()
     }
+}
+impl TsBooleanType {
+    pub const KIND: SyntaxKind = TS_BOOLEAN_TYPE;
 }
 impl AstNode for TsBooleanType {
     type Language = Language;
@@ -26501,6 +27056,9 @@ impl From<TsBooleanType> for SyntaxElement {
     fn from(n: TsBooleanType) -> Self {
         n.syntax.into()
     }
+}
+impl TsCallSignatureTypeMember {
+    pub const KIND: SyntaxKind = TS_CALL_SIGNATURE_TYPE_MEMBER;
 }
 impl AstNode for TsCallSignatureTypeMember {
     type Language = Language;
@@ -26560,6 +27118,9 @@ impl From<TsCallSignatureTypeMember> for SyntaxElement {
     fn from(n: TsCallSignatureTypeMember) -> Self {
         n.syntax.into()
     }
+}
+impl TsConditionalType {
+    pub const KIND: SyntaxKind = TS_CONDITIONAL_TYPE;
 }
 impl AstNode for TsConditionalType {
     type Language = Language;
@@ -26626,6 +27187,9 @@ impl From<TsConditionalType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsConstModifier {
+    pub const KIND: SyntaxKind = TS_CONST_MODIFIER;
+}
 impl AstNode for TsConstModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26675,6 +27239,9 @@ impl From<TsConstModifier> for SyntaxElement {
     fn from(n: TsConstModifier) -> Self {
         n.syntax.into()
     }
+}
+impl TsConstructSignatureTypeMember {
+    pub const KIND: SyntaxKind = TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER;
 }
 impl AstNode for TsConstructSignatureTypeMember {
     type Language = Language;
@@ -26736,6 +27303,9 @@ impl From<TsConstructSignatureTypeMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsConstructorSignatureClassMember {
+    pub const KIND: SyntaxKind = TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER;
+}
 impl AstNode for TsConstructorSignatureClassMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26788,6 +27358,9 @@ impl From<TsConstructorSignatureClassMember> for SyntaxElement {
     fn from(n: TsConstructorSignatureClassMember) -> Self {
         n.syntax.into()
     }
+}
+impl TsConstructorType {
+    pub const KIND: SyntaxKind = TS_CONSTRUCTOR_TYPE;
 }
 impl AstNode for TsConstructorType {
     type Language = Language;
@@ -26853,6 +27426,9 @@ impl From<TsConstructorType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsDeclarationModule {
+    pub const KIND: SyntaxKind = TS_DECLARATION_MODULE;
+}
 impl AstNode for TsDeclarationModule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26909,6 +27485,9 @@ impl From<TsDeclarationModule> for SyntaxElement {
     fn from(n: TsDeclarationModule) -> Self {
         n.syntax.into()
     }
+}
+impl TsDeclareFunctionDeclaration {
+    pub const KIND: SyntaxKind = TS_DECLARE_FUNCTION_DECLARATION;
 }
 impl AstNode for TsDeclareFunctionDeclaration {
     type Language = Language;
@@ -26977,6 +27556,9 @@ impl From<TsDeclareFunctionDeclaration> for SyntaxElement {
     fn from(n: TsDeclareFunctionDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl TsDeclareFunctionExportDefaultDeclaration {
+    pub const KIND: SyntaxKind = TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION;
 }
 impl AstNode for TsDeclareFunctionExportDefaultDeclaration {
     type Language = Language;
@@ -27048,6 +27630,9 @@ impl From<TsDeclareFunctionExportDefaultDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsDeclareModifier {
+    pub const KIND: SyntaxKind = TS_DECLARE_MODIFIER;
+}
 impl AstNode for TsDeclareModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27097,6 +27682,9 @@ impl From<TsDeclareModifier> for SyntaxElement {
     fn from(n: TsDeclareModifier) -> Self {
         n.syntax.into()
     }
+}
+impl TsDeclareStatement {
+    pub const KIND: SyntaxKind = TS_DECLARE_STATEMENT;
 }
 impl AstNode for TsDeclareStatement {
     type Language = Language;
@@ -27152,6 +27740,9 @@ impl From<TsDeclareStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsDefaultTypeClause {
+    pub const KIND: SyntaxKind = TS_DEFAULT_TYPE_CLAUSE;
+}
 impl AstNode for TsDefaultTypeClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27199,6 +27790,9 @@ impl From<TsDefaultTypeClause> for SyntaxElement {
     fn from(n: TsDefaultTypeClause) -> Self {
         n.syntax.into()
     }
+}
+impl TsDefinitePropertyAnnotation {
+    pub const KIND: SyntaxKind = TS_DEFINITE_PROPERTY_ANNOTATION;
 }
 impl AstNode for TsDefinitePropertyAnnotation {
     type Language = Language;
@@ -27251,6 +27845,9 @@ impl From<TsDefinitePropertyAnnotation> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsDefiniteVariableAnnotation {
+    pub const KIND: SyntaxKind = TS_DEFINITE_VARIABLE_ANNOTATION;
+}
 impl AstNode for TsDefiniteVariableAnnotation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27301,6 +27898,9 @@ impl From<TsDefiniteVariableAnnotation> for SyntaxElement {
     fn from(n: TsDefiniteVariableAnnotation) -> Self {
         n.syntax.into()
     }
+}
+impl TsEmptyExternalModuleDeclarationBody {
+    pub const KIND: SyntaxKind = TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY;
 }
 impl AstNode for TsEmptyExternalModuleDeclarationBody {
     type Language = Language;
@@ -27353,6 +27953,9 @@ impl From<TsEmptyExternalModuleDeclarationBody> for SyntaxElement {
     fn from(n: TsEmptyExternalModuleDeclarationBody) -> Self {
         n.syntax.into()
     }
+}
+impl TsEnumDeclaration {
+    pub const KIND: SyntaxKind = TS_ENUM_DECLARATION;
 }
 impl AstNode for TsEnumDeclaration {
     type Language = Language;
@@ -27415,6 +28018,9 @@ impl From<TsEnumDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsEnumMember {
+    pub const KIND: SyntaxKind = TS_ENUM_MEMBER;
+}
 impl AstNode for TsEnumMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27465,6 +28071,9 @@ impl From<TsEnumMember> for SyntaxElement {
     fn from(n: TsEnumMember) -> Self {
         n.syntax.into()
     }
+}
+impl TsExportAsNamespaceClause {
+    pub const KIND: SyntaxKind = TS_EXPORT_AS_NAMESPACE_CLAUSE;
 }
 impl AstNode for TsExportAsNamespaceClause {
     type Language = Language;
@@ -27522,6 +28131,9 @@ impl From<TsExportAsNamespaceClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsExportAssignmentClause {
+    pub const KIND: SyntaxKind = TS_EXPORT_ASSIGNMENT_CLAUSE;
+}
 impl AstNode for TsExportAssignmentClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27573,6 +28185,9 @@ impl From<TsExportAssignmentClause> for SyntaxElement {
     fn from(n: TsExportAssignmentClause) -> Self {
         n.syntax.into()
     }
+}
+impl TsExportDeclareClause {
+    pub const KIND: SyntaxKind = TS_EXPORT_DECLARE_CLAUSE;
 }
 impl AstNode for TsExportDeclareClause {
     type Language = Language;
@@ -27628,6 +28243,9 @@ impl From<TsExportDeclareClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsExtendsClause {
+    pub const KIND: SyntaxKind = TS_EXTENDS_CLAUSE;
+}
 impl AstNode for TsExtendsClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27678,6 +28296,9 @@ impl From<TsExtendsClause> for SyntaxElement {
     fn from(n: TsExtendsClause) -> Self {
         n.syntax.into()
     }
+}
+impl TsExternalModuleDeclaration {
+    pub const KIND: SyntaxKind = TS_EXTERNAL_MODULE_DECLARATION;
 }
 impl AstNode for TsExternalModuleDeclaration {
     type Language = Language;
@@ -27730,6 +28351,9 @@ impl From<TsExternalModuleDeclaration> for SyntaxElement {
     fn from(n: TsExternalModuleDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl TsExternalModuleReference {
+    pub const KIND: SyntaxKind = TS_EXTERNAL_MODULE_REFERENCE;
 }
 impl AstNode for TsExternalModuleReference {
     type Language = Language;
@@ -27790,6 +28414,9 @@ impl From<TsExternalModuleReference> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsFunctionType {
+    pub const KIND: SyntaxKind = TS_FUNCTION_TYPE;
+}
 impl AstNode for TsFunctionType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27848,6 +28475,9 @@ impl From<TsFunctionType> for SyntaxElement {
     fn from(n: TsFunctionType) -> Self {
         n.syntax.into()
     }
+}
+impl TsGetterSignatureClassMember {
+    pub const KIND: SyntaxKind = TS_GETTER_SIGNATURE_CLASS_MEMBER;
 }
 impl AstNode for TsGetterSignatureClassMember {
     type Language = Language;
@@ -27914,6 +28544,9 @@ impl From<TsGetterSignatureClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsGetterSignatureTypeMember {
+    pub const KIND: SyntaxKind = TS_GETTER_SIGNATURE_TYPE_MEMBER;
+}
 impl AstNode for TsGetterSignatureTypeMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27978,6 +28611,9 @@ impl From<TsGetterSignatureTypeMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsGlobalDeclaration {
+    pub const KIND: SyntaxKind = TS_GLOBAL_DECLARATION;
+}
 impl AstNode for TsGlobalDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28029,6 +28665,9 @@ impl From<TsGlobalDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsIdentifierBinding {
+    pub const KIND: SyntaxKind = TS_IDENTIFIER_BINDING;
+}
 impl AstNode for TsIdentifierBinding {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28075,6 +28714,9 @@ impl From<TsIdentifierBinding> for SyntaxElement {
     fn from(n: TsIdentifierBinding) -> Self {
         n.syntax.into()
     }
+}
+impl TsImplementsClause {
+    pub const KIND: SyntaxKind = TS_IMPLEMENTS_CLAUSE;
 }
 impl AstNode for TsImplementsClause {
     type Language = Language;
@@ -28126,6 +28768,9 @@ impl From<TsImplementsClause> for SyntaxElement {
     fn from(n: TsImplementsClause) -> Self {
         n.syntax.into()
     }
+}
+impl TsImportEqualsDeclaration {
+    pub const KIND: SyntaxKind = TS_IMPORT_EQUALS_DECLARATION;
 }
 impl AstNode for TsImportEqualsDeclaration {
     type Language = Language;
@@ -28191,6 +28836,9 @@ impl From<TsImportEqualsDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsImportType {
+    pub const KIND: SyntaxKind = TS_IMPORT_TYPE;
+}
 impl AstNode for TsImportType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28253,6 +28901,9 @@ impl From<TsImportType> for SyntaxElement {
     fn from(n: TsImportType) -> Self {
         n.syntax.into()
     }
+}
+impl TsImportTypeArguments {
+    pub const KIND: SyntaxKind = TS_IMPORT_TYPE_ARGUMENTS;
 }
 impl AstNode for TsImportTypeArguments {
     type Language = Language;
@@ -28317,6 +28968,9 @@ impl From<TsImportTypeArguments> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsImportTypeAssertion {
+    pub const KIND: SyntaxKind = TS_IMPORT_TYPE_ASSERTION;
+}
 impl AstNode for TsImportTypeAssertion {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28377,6 +29031,9 @@ impl From<TsImportTypeAssertion> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsImportTypeAssertionBlock {
+    pub const KIND: SyntaxKind = TS_IMPORT_TYPE_ASSERTION_BLOCK;
+}
 impl AstNode for TsImportTypeAssertionBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28435,6 +29092,9 @@ impl From<TsImportTypeAssertionBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsImportTypeQualifier {
+    pub const KIND: SyntaxKind = TS_IMPORT_TYPE_QUALIFIER;
+}
 impl AstNode for TsImportTypeQualifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28482,6 +29142,9 @@ impl From<TsImportTypeQualifier> for SyntaxElement {
     fn from(n: TsImportTypeQualifier) -> Self {
         n.syntax.into()
     }
+}
+impl TsInModifier {
+    pub const KIND: SyntaxKind = TS_IN_MODIFIER;
 }
 impl AstNode for TsInModifier {
     type Language = Language;
@@ -28532,6 +29195,9 @@ impl From<TsInModifier> for SyntaxElement {
     fn from(n: TsInModifier) -> Self {
         n.syntax.into()
     }
+}
+impl TsIndexSignatureClassMember {
+    pub const KIND: SyntaxKind = TS_INDEX_SIGNATURE_CLASS_MEMBER;
 }
 impl AstNode for TsIndexSignatureClassMember {
     type Language = Language;
@@ -28597,6 +29263,9 @@ impl From<TsIndexSignatureClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsIndexSignatureParameter {
+    pub const KIND: SyntaxKind = TS_INDEX_SIGNATURE_PARAMETER;
+}
 impl AstNode for TsIndexSignatureParameter {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28647,6 +29316,9 @@ impl From<TsIndexSignatureParameter> for SyntaxElement {
     fn from(n: TsIndexSignatureParameter) -> Self {
         n.syntax.into()
     }
+}
+impl TsIndexSignatureTypeMember {
+    pub const KIND: SyntaxKind = TS_INDEX_SIGNATURE_TYPE_MEMBER;
 }
 impl AstNode for TsIndexSignatureTypeMember {
     type Language = Language;
@@ -28715,6 +29387,9 @@ impl From<TsIndexSignatureTypeMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsIndexedAccessType {
+    pub const KIND: SyntaxKind = TS_INDEXED_ACCESS_TYPE;
+}
 impl AstNode for TsIndexedAccessType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28774,6 +29449,9 @@ impl From<TsIndexedAccessType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsInferType {
+    pub const KIND: SyntaxKind = TS_INFER_TYPE;
+}
 impl AstNode for TsInferType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28828,6 +29506,9 @@ impl From<TsInferType> for SyntaxElement {
     fn from(n: TsInferType) -> Self {
         n.syntax.into()
     }
+}
+impl TsInitializedPropertySignatureClassMember {
+    pub const KIND: SyntaxKind = TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER;
 }
 impl AstNode for TsInitializedPropertySignatureClassMember {
     type Language = Language;
@@ -28888,6 +29569,9 @@ impl From<TsInitializedPropertySignatureClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsInstantiationExpression {
+    pub const KIND: SyntaxKind = TS_INSTANTIATION_EXPRESSION;
+}
 impl AstNode for TsInstantiationExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28935,6 +29619,9 @@ impl From<TsInstantiationExpression> for SyntaxElement {
     fn from(n: TsInstantiationExpression) -> Self {
         n.syntax.into()
     }
+}
+impl TsInterfaceDeclaration {
+    pub const KIND: SyntaxKind = TS_INTERFACE_DECLARATION;
 }
 impl AstNode for TsInterfaceDeclaration {
     type Language = Language;
@@ -29004,6 +29691,9 @@ impl From<TsInterfaceDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsIntersectionType {
+    pub const KIND: SyntaxKind = TS_INTERSECTION_TYPE;
+}
 impl AstNode for TsIntersectionType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29055,6 +29745,9 @@ impl From<TsIntersectionType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsLiteralEnumMemberName {
+    pub const KIND: SyntaxKind = TS_LITERAL_ENUM_MEMBER_NAME;
+}
 impl AstNode for TsLiteralEnumMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29101,6 +29794,9 @@ impl From<TsLiteralEnumMemberName> for SyntaxElement {
     fn from(n: TsLiteralEnumMemberName) -> Self {
         n.syntax.into()
     }
+}
+impl TsMappedType {
+    pub const KIND: SyntaxKind = TS_MAPPED_TYPE;
 }
 impl AstNode for TsMappedType {
     type Language = Language;
@@ -29190,6 +29886,9 @@ impl From<TsMappedType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsMappedTypeAsClause {
+    pub const KIND: SyntaxKind = TS_MAPPED_TYPE_AS_CLAUSE;
+}
 impl AstNode for TsMappedTypeAsClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29237,6 +29936,9 @@ impl From<TsMappedTypeAsClause> for SyntaxElement {
     fn from(n: TsMappedTypeAsClause) -> Self {
         n.syntax.into()
     }
+}
+impl TsMappedTypeOptionalModifierClause {
+    pub const KIND: SyntaxKind = TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE;
 }
 impl AstNode for TsMappedTypeOptionalModifierClause {
     type Language = Language;
@@ -29294,6 +29996,9 @@ impl From<TsMappedTypeOptionalModifierClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsMappedTypeReadonlyModifierClause {
+    pub const KIND: SyntaxKind = TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE;
+}
 impl AstNode for TsMappedTypeReadonlyModifierClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
@@ -29349,6 +30054,9 @@ impl From<TsMappedTypeReadonlyModifierClause> for SyntaxElement {
     fn from(n: TsMappedTypeReadonlyModifierClause) -> Self {
         n.syntax.into()
     }
+}
+impl TsMethodSignatureClassMember {
+    pub const KIND: SyntaxKind = TS_METHOD_SIGNATURE_CLASS_MEMBER;
 }
 impl AstNode for TsMethodSignatureClassMember {
     type Language = Language;
@@ -29419,6 +30127,9 @@ impl From<TsMethodSignatureClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsMethodSignatureTypeMember {
+    pub const KIND: SyntaxKind = TS_METHOD_SIGNATURE_TYPE_MEMBER;
+}
 impl AstNode for TsMethodSignatureTypeMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29483,6 +30194,9 @@ impl From<TsMethodSignatureTypeMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsModuleBlock {
+    pub const KIND: SyntaxKind = TS_MODULE_BLOCK;
+}
 impl AstNode for TsModuleBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29538,6 +30252,9 @@ impl From<TsModuleBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsModuleDeclaration {
+    pub const KIND: SyntaxKind = TS_MODULE_DECLARATION;
+}
 impl AstNode for TsModuleDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29589,6 +30306,9 @@ impl From<TsModuleDeclaration> for SyntaxElement {
     fn from(n: TsModuleDeclaration) -> Self {
         n.syntax.into()
     }
+}
+impl TsNamedTupleTypeElement {
+    pub const KIND: SyntaxKind = TS_NAMED_TUPLE_TYPE_ELEMENT;
 }
 impl AstNode for TsNamedTupleTypeElement {
     type Language = Language;
@@ -29650,6 +30370,9 @@ impl From<TsNamedTupleTypeElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsNeverType {
+    pub const KIND: SyntaxKind = TS_NEVER_TYPE;
+}
 impl AstNode for TsNeverType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29700,6 +30423,9 @@ impl From<TsNeverType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsNonNullAssertionAssignment {
+    pub const KIND: SyntaxKind = TS_NON_NULL_ASSERTION_ASSIGNMENT;
+}
 impl AstNode for TsNonNullAssertionAssignment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29748,6 +30474,9 @@ impl From<TsNonNullAssertionAssignment> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsNonNullAssertionExpression {
+    pub const KIND: SyntaxKind = TS_NON_NULL_ASSERTION_EXPRESSION;
+}
 impl AstNode for TsNonNullAssertionExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29795,6 +30524,9 @@ impl From<TsNonNullAssertionExpression> for SyntaxElement {
     fn from(n: TsNonNullAssertionExpression) -> Self {
         n.syntax.into()
     }
+}
+impl TsNonPrimitiveType {
+    pub const KIND: SyntaxKind = TS_NON_PRIMITIVE_TYPE;
 }
 impl AstNode for TsNonPrimitiveType {
     type Language = Language;
@@ -29846,6 +30578,9 @@ impl From<TsNonPrimitiveType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsNullLiteralType {
+    pub const KIND: SyntaxKind = TS_NULL_LITERAL_TYPE;
+}
 impl AstNode for TsNullLiteralType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29895,6 +30630,9 @@ impl From<TsNullLiteralType> for SyntaxElement {
     fn from(n: TsNullLiteralType) -> Self {
         n.syntax.into()
     }
+}
+impl TsNumberLiteralType {
+    pub const KIND: SyntaxKind = TS_NUMBER_LITERAL_TYPE;
 }
 impl AstNode for TsNumberLiteralType {
     type Language = Language;
@@ -29950,6 +30688,9 @@ impl From<TsNumberLiteralType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsNumberType {
+    pub const KIND: SyntaxKind = TS_NUMBER_TYPE;
+}
 impl AstNode for TsNumberType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -29999,6 +30740,9 @@ impl From<TsNumberType> for SyntaxElement {
     fn from(n: TsNumberType) -> Self {
         n.syntax.into()
     }
+}
+impl TsObjectType {
+    pub const KIND: SyntaxKind = TS_OBJECT_TYPE;
 }
 impl AstNode for TsObjectType {
     type Language = Language;
@@ -30055,6 +30799,9 @@ impl From<TsObjectType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsOptionalPropertyAnnotation {
+    pub const KIND: SyntaxKind = TS_OPTIONAL_PROPERTY_ANNOTATION;
+}
 impl AstNode for TsOptionalPropertyAnnotation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30109,6 +30856,9 @@ impl From<TsOptionalPropertyAnnotation> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsOptionalTupleTypeElement {
+    pub const KIND: SyntaxKind = TS_OPTIONAL_TUPLE_TYPE_ELEMENT;
+}
 impl AstNode for TsOptionalTupleTypeElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30160,6 +30910,9 @@ impl From<TsOptionalTupleTypeElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsOutModifier {
+    pub const KIND: SyntaxKind = TS_OUT_MODIFIER;
+}
 impl AstNode for TsOutModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30210,6 +30963,9 @@ impl From<TsOutModifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsOverrideModifier {
+    pub const KIND: SyntaxKind = TS_OVERRIDE_MODIFIER;
+}
 impl AstNode for TsOverrideModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30259,6 +31015,9 @@ impl From<TsOverrideModifier> for SyntaxElement {
     fn from(n: TsOverrideModifier) -> Self {
         n.syntax.into()
     }
+}
+impl TsParenthesizedType {
+    pub const KIND: SyntaxKind = TS_PARENTHESIZED_TYPE;
 }
 impl AstNode for TsParenthesizedType {
     type Language = Language;
@@ -30315,6 +31074,9 @@ impl From<TsParenthesizedType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsPredicateReturnType {
+    pub const KIND: SyntaxKind = TS_PREDICATE_RETURN_TYPE;
+}
 impl AstNode for TsPredicateReturnType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30367,6 +31129,9 @@ impl From<TsPredicateReturnType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsPropertyParameter {
+    pub const KIND: SyntaxKind = TS_PROPERTY_PARAMETER;
+}
 impl AstNode for TsPropertyParameter {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30418,6 +31183,9 @@ impl From<TsPropertyParameter> for SyntaxElement {
     fn from(n: TsPropertyParameter) -> Self {
         n.syntax.into()
     }
+}
+impl TsPropertySignatureClassMember {
+    pub const KIND: SyntaxKind = TS_PROPERTY_SIGNATURE_CLASS_MEMBER;
 }
 impl AstNode for TsPropertySignatureClassMember {
     type Language = Language;
@@ -30474,6 +31242,9 @@ impl From<TsPropertySignatureClassMember> for SyntaxElement {
     fn from(n: TsPropertySignatureClassMember) -> Self {
         n.syntax.into()
     }
+}
+impl TsPropertySignatureTypeMember {
+    pub const KIND: SyntaxKind = TS_PROPERTY_SIGNATURE_TYPE_MEMBER;
 }
 impl AstNode for TsPropertySignatureTypeMember {
     type Language = Language;
@@ -30538,6 +31309,9 @@ impl From<TsPropertySignatureTypeMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsQualifiedModuleName {
+    pub const KIND: SyntaxKind = TS_QUALIFIED_MODULE_NAME;
+}
 impl AstNode for TsQualifiedModuleName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30586,6 +31360,9 @@ impl From<TsQualifiedModuleName> for SyntaxElement {
     fn from(n: TsQualifiedModuleName) -> Self {
         n.syntax.into()
     }
+}
+impl TsQualifiedName {
+    pub const KIND: SyntaxKind = TS_QUALIFIED_NAME;
 }
 impl AstNode for TsQualifiedName {
     type Language = Language;
@@ -30636,6 +31413,9 @@ impl From<TsQualifiedName> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsReadonlyModifier {
+    pub const KIND: SyntaxKind = TS_READONLY_MODIFIER;
+}
 impl AstNode for TsReadonlyModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30685,6 +31465,9 @@ impl From<TsReadonlyModifier> for SyntaxElement {
     fn from(n: TsReadonlyModifier) -> Self {
         n.syntax.into()
     }
+}
+impl TsReferenceType {
+    pub const KIND: SyntaxKind = TS_REFERENCE_TYPE;
 }
 impl AstNode for TsReferenceType {
     type Language = Language;
@@ -30737,6 +31520,9 @@ impl From<TsReferenceType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsRestTupleTypeElement {
+    pub const KIND: SyntaxKind = TS_REST_TUPLE_TYPE_ELEMENT;
+}
 impl AstNode for TsRestTupleTypeElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30788,6 +31574,9 @@ impl From<TsRestTupleTypeElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsReturnTypeAnnotation {
+    pub const KIND: SyntaxKind = TS_RETURN_TYPE_ANNOTATION;
+}
 impl AstNode for TsReturnTypeAnnotation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30838,6 +31627,9 @@ impl From<TsReturnTypeAnnotation> for SyntaxElement {
     fn from(n: TsReturnTypeAnnotation) -> Self {
         n.syntax.into()
     }
+}
+impl TsSatisfiesAssignment {
+    pub const KIND: SyntaxKind = TS_SATISFIES_ASSIGNMENT;
 }
 impl AstNode for TsSatisfiesAssignment {
     type Language = Language;
@@ -30891,6 +31683,9 @@ impl From<TsSatisfiesAssignment> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsSatisfiesExpression {
+    pub const KIND: SyntaxKind = TS_SATISFIES_EXPRESSION;
+}
 impl AstNode for TsSatisfiesExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -30942,6 +31737,9 @@ impl From<TsSatisfiesExpression> for SyntaxElement {
     fn from(n: TsSatisfiesExpression) -> Self {
         n.syntax.into()
     }
+}
+impl TsSetterSignatureClassMember {
+    pub const KIND: SyntaxKind = TS_SETTER_SIGNATURE_CLASS_MEMBER;
 }
 impl AstNode for TsSetterSignatureClassMember {
     type Language = Language;
@@ -31009,6 +31807,9 @@ impl From<TsSetterSignatureClassMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsSetterSignatureTypeMember {
+    pub const KIND: SyntaxKind = TS_SETTER_SIGNATURE_TYPE_MEMBER;
+}
 impl AstNode for TsSetterSignatureTypeMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31074,6 +31875,9 @@ impl From<TsSetterSignatureTypeMember> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsStringLiteralType {
+    pub const KIND: SyntaxKind = TS_STRING_LITERAL_TYPE;
+}
 impl AstNode for TsStringLiteralType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31123,6 +31927,9 @@ impl From<TsStringLiteralType> for SyntaxElement {
     fn from(n: TsStringLiteralType) -> Self {
         n.syntax.into()
     }
+}
+impl TsStringType {
+    pub const KIND: SyntaxKind = TS_STRING_TYPE;
 }
 impl AstNode for TsStringType {
     type Language = Language;
@@ -31174,6 +31981,9 @@ impl From<TsStringType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsSymbolType {
+    pub const KIND: SyntaxKind = TS_SYMBOL_TYPE;
+}
 impl AstNode for TsSymbolType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31224,6 +32034,9 @@ impl From<TsSymbolType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsTemplateChunkElement {
+    pub const KIND: SyntaxKind = TS_TEMPLATE_CHUNK_ELEMENT;
+}
 impl AstNode for TsTemplateChunkElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31273,6 +32086,9 @@ impl From<TsTemplateChunkElement> for SyntaxElement {
     fn from(n: TsTemplateChunkElement) -> Self {
         n.syntax.into()
     }
+}
+impl TsTemplateElement {
+    pub const KIND: SyntaxKind = TS_TEMPLATE_ELEMENT;
 }
 impl AstNode for TsTemplateElement {
     type Language = Language;
@@ -31329,6 +32145,9 @@ impl From<TsTemplateElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsTemplateLiteralType {
+    pub const KIND: SyntaxKind = TS_TEMPLATE_LITERAL_TYPE;
+}
 impl AstNode for TsTemplateLiteralType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31384,6 +32203,9 @@ impl From<TsTemplateLiteralType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsThisParameter {
+    pub const KIND: SyntaxKind = TS_THIS_PARAMETER;
+}
 impl AstNode for TsThisParameter {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31435,6 +32257,9 @@ impl From<TsThisParameter> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsThisType {
+    pub const KIND: SyntaxKind = TS_THIS_TYPE;
+}
 impl AstNode for TsThisType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31481,6 +32306,9 @@ impl From<TsThisType> for SyntaxElement {
     fn from(n: TsThisType) -> Self {
         n.syntax.into()
     }
+}
+impl TsTupleType {
+    pub const KIND: SyntaxKind = TS_TUPLE_TYPE;
 }
 impl AstNode for TsTupleType {
     type Language = Language;
@@ -31536,6 +32364,9 @@ impl From<TsTupleType> for SyntaxElement {
     fn from(n: TsTupleType) -> Self {
         n.syntax.into()
     }
+}
+impl TsTypeAliasDeclaration {
+    pub const KIND: SyntaxKind = TS_TYPE_ALIAS_DECLARATION;
 }
 impl AstNode for TsTypeAliasDeclaration {
     type Language = Language;
@@ -31598,6 +32429,9 @@ impl From<TsTypeAliasDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsTypeAnnotation {
+    pub const KIND: SyntaxKind = TS_TYPE_ANNOTATION;
+}
 impl AstNode for TsTypeAnnotation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31648,6 +32482,9 @@ impl From<TsTypeAnnotation> for SyntaxElement {
     fn from(n: TsTypeAnnotation) -> Self {
         n.syntax.into()
     }
+}
+impl TsTypeArguments {
+    pub const KIND: SyntaxKind = TS_TYPE_ARGUMENTS;
 }
 impl AstNode for TsTypeArguments {
     type Language = Language;
@@ -31703,6 +32540,9 @@ impl From<TsTypeArguments> for SyntaxElement {
     fn from(n: TsTypeArguments) -> Self {
         n.syntax.into()
     }
+}
+impl TsTypeAssertionAssignment {
+    pub const KIND: SyntaxKind = TS_TYPE_ASSERTION_ASSIGNMENT;
 }
 impl AstNode for TsTypeAssertionAssignment {
     type Language = Language;
@@ -31760,6 +32600,9 @@ impl From<TsTypeAssertionAssignment> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsTypeAssertionExpression {
+    pub const KIND: SyntaxKind = TS_TYPE_ASSERTION_EXPRESSION;
+}
 impl AstNode for TsTypeAssertionExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31816,6 +32659,9 @@ impl From<TsTypeAssertionExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsTypeConstraintClause {
+    pub const KIND: SyntaxKind = TS_TYPE_CONSTRAINT_CLAUSE;
+}
 impl AstNode for TsTypeConstraintClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31867,6 +32713,9 @@ impl From<TsTypeConstraintClause> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsTypeOperatorType {
+    pub const KIND: SyntaxKind = TS_TYPE_OPERATOR_TYPE;
+}
 impl AstNode for TsTypeOperatorType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -31917,6 +32766,9 @@ impl From<TsTypeOperatorType> for SyntaxElement {
     fn from(n: TsTypeOperatorType) -> Self {
         n.syntax.into()
     }
+}
+impl TsTypeParameter {
+    pub const KIND: SyntaxKind = TS_TYPE_PARAMETER;
 }
 impl AstNode for TsTypeParameter {
     type Language = Language;
@@ -31971,6 +32823,9 @@ impl From<TsTypeParameter> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsTypeParameterName {
+    pub const KIND: SyntaxKind = TS_TYPE_PARAMETER_NAME;
+}
 impl AstNode for TsTypeParameterName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -32020,6 +32875,9 @@ impl From<TsTypeParameterName> for SyntaxElement {
     fn from(n: TsTypeParameterName) -> Self {
         n.syntax.into()
     }
+}
+impl TsTypeParameters {
+    pub const KIND: SyntaxKind = TS_TYPE_PARAMETERS;
 }
 impl AstNode for TsTypeParameters {
     type Language = Language;
@@ -32075,6 +32933,9 @@ impl From<TsTypeParameters> for SyntaxElement {
     fn from(n: TsTypeParameters) -> Self {
         n.syntax.into()
     }
+}
+impl TsTypeofType {
+    pub const KIND: SyntaxKind = TS_TYPEOF_TYPE;
 }
 impl AstNode for TsTypeofType {
     type Language = Language;
@@ -32134,6 +32995,9 @@ impl From<TsTypeofType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsUndefinedType {
+    pub const KIND: SyntaxKind = TS_UNDEFINED_TYPE;
+}
 impl AstNode for TsUndefinedType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -32183,6 +33047,9 @@ impl From<TsUndefinedType> for SyntaxElement {
     fn from(n: TsUndefinedType) -> Self {
         n.syntax.into()
     }
+}
+impl TsUnionType {
+    pub const KIND: SyntaxKind = TS_UNION_TYPE;
 }
 impl AstNode for TsUnionType {
     type Language = Language;
@@ -32235,6 +33102,9 @@ impl From<TsUnionType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl TsUnknownType {
+    pub const KIND: SyntaxKind = TS_UNKNOWN_TYPE;
+}
 impl AstNode for TsUnknownType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -32284,6 +33154,9 @@ impl From<TsUnknownType> for SyntaxElement {
     fn from(n: TsUnknownType) -> Self {
         n.syntax.into()
     }
+}
+impl TsVoidType {
+    pub const KIND: SyntaxKind = TS_VOID_TYPE;
 }
 impl AstNode for TsVoidType {
     type Language = Language;
@@ -41758,6 +42631,7 @@ pub struct JsBogus {
     syntax: SyntaxNode,
 }
 impl JsBogus {
+    pub const KIND: SyntaxKind = JS_BOGUS;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -41814,6 +42688,7 @@ pub struct JsBogusAssignment {
     syntax: SyntaxNode,
 }
 impl JsBogusAssignment {
+    pub const KIND: SyntaxKind = JS_BOGUS_ASSIGNMENT;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -41870,6 +42745,7 @@ pub struct JsBogusBinding {
     syntax: SyntaxNode,
 }
 impl JsBogusBinding {
+    pub const KIND: SyntaxKind = JS_BOGUS_BINDING;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -41926,6 +42802,7 @@ pub struct JsBogusExpression {
     syntax: SyntaxNode,
 }
 impl JsBogusExpression {
+    pub const KIND: SyntaxKind = JS_BOGUS_EXPRESSION;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -41982,6 +42859,7 @@ pub struct JsBogusImportAssertionEntry {
     syntax: SyntaxNode,
 }
 impl JsBogusImportAssertionEntry {
+    pub const KIND: SyntaxKind = JS_BOGUS_IMPORT_ASSERTION_ENTRY;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42038,6 +42916,7 @@ pub struct JsBogusMember {
     syntax: SyntaxNode,
 }
 impl JsBogusMember {
+    pub const KIND: SyntaxKind = JS_BOGUS_MEMBER;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42094,6 +42973,7 @@ pub struct JsBogusNamedImportSpecifier {
     syntax: SyntaxNode,
 }
 impl JsBogusNamedImportSpecifier {
+    pub const KIND: SyntaxKind = JS_BOGUS_NAMED_IMPORT_SPECIFIER;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42150,6 +43030,7 @@ pub struct JsBogusParameter {
     syntax: SyntaxNode,
 }
 impl JsBogusParameter {
+    pub const KIND: SyntaxKind = JS_BOGUS_PARAMETER;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42206,6 +43087,7 @@ pub struct JsBogusStatement {
     syntax: SyntaxNode,
 }
 impl JsBogusStatement {
+    pub const KIND: SyntaxKind = JS_BOGUS_STATEMENT;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42262,6 +43144,7 @@ pub struct TsBogusType {
     syntax: SyntaxNode,
 }
 impl TsBogusType {
+    pub const KIND: SyntaxKind = TS_BOGUS_TYPE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42319,6 +43202,7 @@ pub struct JsArrayAssignmentPatternElementList {
     syntax_list: SyntaxList,
 }
 impl JsArrayAssignmentPatternElementList {
+    pub const KIND: SyntaxKind = JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42402,6 +43286,7 @@ pub struct JsArrayBindingPatternElementList {
     syntax_list: SyntaxList,
 }
 impl JsArrayBindingPatternElementList {
+    pub const KIND: SyntaxKind = JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42484,6 +43369,7 @@ pub struct JsArrayElementList {
     syntax_list: SyntaxList,
 }
 impl JsArrayElementList {
+    pub const KIND: SyntaxKind = JS_ARRAY_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42566,6 +43452,7 @@ pub struct JsCallArgumentList {
     syntax_list: SyntaxList,
 }
 impl JsCallArgumentList {
+    pub const KIND: SyntaxKind = JS_CALL_ARGUMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42648,6 +43535,7 @@ pub struct JsClassMemberList {
     syntax_list: SyntaxList,
 }
 impl JsClassMemberList {
+    pub const KIND: SyntaxKind = JS_CLASS_MEMBER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42730,6 +43618,7 @@ pub struct JsConstructorModifierList {
     syntax_list: SyntaxList,
 }
 impl JsConstructorModifierList {
+    pub const KIND: SyntaxKind = JS_CONSTRUCTOR_MODIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42812,6 +43701,7 @@ pub struct JsConstructorParameterList {
     syntax_list: SyntaxList,
 }
 impl JsConstructorParameterList {
+    pub const KIND: SyntaxKind = JS_CONSTRUCTOR_PARAMETER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42894,6 +43784,7 @@ pub struct JsDecoratorList {
     syntax_list: SyntaxList,
 }
 impl JsDecoratorList {
+    pub const KIND: SyntaxKind = JS_DECORATOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -42976,6 +43867,7 @@ pub struct JsDirectiveList {
     syntax_list: SyntaxList,
 }
 impl JsDirectiveList {
+    pub const KIND: SyntaxKind = JS_DIRECTIVE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43058,6 +43950,7 @@ pub struct JsExportNamedFromSpecifierList {
     syntax_list: SyntaxList,
 }
 impl JsExportNamedFromSpecifierList {
+    pub const KIND: SyntaxKind = JS_EXPORT_NAMED_FROM_SPECIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43140,6 +44033,7 @@ pub struct JsExportNamedSpecifierList {
     syntax_list: SyntaxList,
 }
 impl JsExportNamedSpecifierList {
+    pub const KIND: SyntaxKind = JS_EXPORT_NAMED_SPECIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43222,6 +44116,7 @@ pub struct JsImportAssertionEntryList {
     syntax_list: SyntaxList,
 }
 impl JsImportAssertionEntryList {
+    pub const KIND: SyntaxKind = JS_IMPORT_ASSERTION_ENTRY_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43304,6 +44199,7 @@ pub struct JsMethodModifierList {
     syntax_list: SyntaxList,
 }
 impl JsMethodModifierList {
+    pub const KIND: SyntaxKind = JS_METHOD_MODIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43386,6 +44282,7 @@ pub struct JsModuleItemList {
     syntax_list: SyntaxList,
 }
 impl JsModuleItemList {
+    pub const KIND: SyntaxKind = JS_MODULE_ITEM_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43468,6 +44365,7 @@ pub struct JsNamedImportSpecifierList {
     syntax_list: SyntaxList,
 }
 impl JsNamedImportSpecifierList {
+    pub const KIND: SyntaxKind = JS_NAMED_IMPORT_SPECIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43550,6 +44448,7 @@ pub struct JsObjectAssignmentPatternPropertyList {
     syntax_list: SyntaxList,
 }
 impl JsObjectAssignmentPatternPropertyList {
+    pub const KIND: SyntaxKind = JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43633,6 +44532,7 @@ pub struct JsObjectBindingPatternPropertyList {
     syntax_list: SyntaxList,
 }
 impl JsObjectBindingPatternPropertyList {
+    pub const KIND: SyntaxKind = JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43716,6 +44616,7 @@ pub struct JsObjectMemberList {
     syntax_list: SyntaxList,
 }
 impl JsObjectMemberList {
+    pub const KIND: SyntaxKind = JS_OBJECT_MEMBER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43798,6 +44699,7 @@ pub struct JsParameterList {
     syntax_list: SyntaxList,
 }
 impl JsParameterList {
+    pub const KIND: SyntaxKind = JS_PARAMETER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43880,6 +44782,7 @@ pub struct JsPropertyModifierList {
     syntax_list: SyntaxList,
 }
 impl JsPropertyModifierList {
+    pub const KIND: SyntaxKind = JS_PROPERTY_MODIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -43962,6 +44865,7 @@ pub struct JsStatementList {
     syntax_list: SyntaxList,
 }
 impl JsStatementList {
+    pub const KIND: SyntaxKind = JS_STATEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44044,6 +44948,7 @@ pub struct JsSwitchCaseList {
     syntax_list: SyntaxList,
 }
 impl JsSwitchCaseList {
+    pub const KIND: SyntaxKind = JS_SWITCH_CASE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44126,6 +45031,7 @@ pub struct JsTemplateElementList {
     syntax_list: SyntaxList,
 }
 impl JsTemplateElementList {
+    pub const KIND: SyntaxKind = JS_TEMPLATE_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44208,6 +45114,7 @@ pub struct JsVariableDeclaratorList {
     syntax_list: SyntaxList,
 }
 impl JsVariableDeclaratorList {
+    pub const KIND: SyntaxKind = JS_VARIABLE_DECLARATOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44290,6 +45197,7 @@ pub struct JsxAttributeList {
     syntax_list: SyntaxList,
 }
 impl JsxAttributeList {
+    pub const KIND: SyntaxKind = JSX_ATTRIBUTE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44372,6 +45280,7 @@ pub struct JsxChildList {
     syntax_list: SyntaxList,
 }
 impl JsxChildList {
+    pub const KIND: SyntaxKind = JSX_CHILD_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44454,6 +45363,7 @@ pub struct TsEnumMemberList {
     syntax_list: SyntaxList,
 }
 impl TsEnumMemberList {
+    pub const KIND: SyntaxKind = TS_ENUM_MEMBER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44536,6 +45446,7 @@ pub struct TsIndexSignatureModifierList {
     syntax_list: SyntaxList,
 }
 impl TsIndexSignatureModifierList {
+    pub const KIND: SyntaxKind = TS_INDEX_SIGNATURE_MODIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44618,6 +45529,7 @@ pub struct TsIntersectionTypeElementList {
     syntax_list: SyntaxList,
 }
 impl TsIntersectionTypeElementList {
+    pub const KIND: SyntaxKind = TS_INTERSECTION_TYPE_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44700,6 +45612,7 @@ pub struct TsMethodSignatureModifierList {
     syntax_list: SyntaxList,
 }
 impl TsMethodSignatureModifierList {
+    pub const KIND: SyntaxKind = TS_METHOD_SIGNATURE_MODIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44782,6 +45695,7 @@ pub struct TsPropertyParameterModifierList {
     syntax_list: SyntaxList,
 }
 impl TsPropertyParameterModifierList {
+    pub const KIND: SyntaxKind = TS_PROPERTY_PARAMETER_MODIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44864,6 +45778,7 @@ pub struct TsPropertySignatureModifierList {
     syntax_list: SyntaxList,
 }
 impl TsPropertySignatureModifierList {
+    pub const KIND: SyntaxKind = TS_PROPERTY_SIGNATURE_MODIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -44946,6 +45861,7 @@ pub struct TsTemplateElementList {
     syntax_list: SyntaxList,
 }
 impl TsTemplateElementList {
+    pub const KIND: SyntaxKind = TS_TEMPLATE_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -45028,6 +45944,7 @@ pub struct TsTupleTypeElementList {
     syntax_list: SyntaxList,
 }
 impl TsTupleTypeElementList {
+    pub const KIND: SyntaxKind = TS_TUPLE_TYPE_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -45110,6 +46027,7 @@ pub struct TsTypeArgumentList {
     syntax_list: SyntaxList,
 }
 impl TsTypeArgumentList {
+    pub const KIND: SyntaxKind = TS_TYPE_ARGUMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -45192,6 +46110,7 @@ pub struct TsTypeList {
     syntax_list: SyntaxList,
 }
 impl TsTypeList {
+    pub const KIND: SyntaxKind = TS_TYPE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -45274,6 +46193,7 @@ pub struct TsTypeMemberList {
     syntax_list: SyntaxList,
 }
 impl TsTypeMemberList {
+    pub const KIND: SyntaxKind = TS_TYPE_MEMBER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -45356,6 +46276,7 @@ pub struct TsTypeParameterList {
     syntax_list: SyntaxList,
 }
 impl TsTypeParameterList {
+    pub const KIND: SyntaxKind = TS_TYPE_PARAMETER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -45438,6 +46359,7 @@ pub struct TsTypeParameterModifierList {
     syntax_list: SyntaxList,
 }
 impl TsTypeParameterModifierList {
+    pub const KIND: SyntaxKind = TS_TYPE_PARAMETER_MODIFIER_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -45520,6 +46442,7 @@ pub struct TsUnionTypeVariantList {
     syntax_list: SyntaxList,
 }
 impl TsUnionTypeVariantList {
+    pub const KIND: SyntaxKind = TS_UNION_TYPE_VARIANT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]

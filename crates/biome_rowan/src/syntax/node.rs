@@ -815,6 +815,12 @@ impl<L: Language> From<cursor::SyntaxNode> for SyntaxNode<L> {
     }
 }
 
+impl<L: Language> From<&Self> for SyntaxNode<L> {
+    fn from(value: &Self) -> Self {
+        value.clone()
+    }
+}
+
 /// Language-agnostic representation of the root node of a syntax tree, can be
 /// sent or shared between threads
 #[derive(Clone, Debug)]

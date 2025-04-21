@@ -5,7 +5,7 @@ use crate::{AstNode, Language};
 /// # Example:
 ///
 /// ```
-/// use biome_rowan::{match_ast, AstNode};
+/// use biome_rowan::{match_syntax, AstNode};
 /// use biome_rowan::raw_language::{LiteralExpression, RawLanguageRoot, RawLanguageKind, RawSyntaxTreeBuilder};
 ///
 /// let mut builder = RawSyntaxTreeBuilder::new();
@@ -17,8 +17,8 @@ use crate::{AstNode, Language};
 ///
 /// let root = builder.finish();
 ///
-/// let text = match_ast! {
-///     match &root {
+/// let text = match_syntax! {
+///     match root {
 ///         RawLanguageRoot(root) => { format!("root: {}", root.to_trimmed_string()) },
 ///         LiteralExpression(literal) => { format!("literal: {}", literal.to_trimmed_string()) },
 ///         _ => {
@@ -32,17 +32,126 @@ use crate::{AstNode, Language};
 #[macro_export]
 macro_rules! match_ast {
     // Necessary because expressions aren't allowed in front of `{`
-    (match &$node:ident { $($tt:tt)* }) => { match_ast!(match (&$node) { $($tt)* }) };
-    (match $node:ident { $($tt:tt)* }) => { match_ast!(match ($node) { $($tt)* }) };
+    (match &$node:ident { $($tt:tt)+ }) => { match_syntax!(match (&$node) { $($tt)* }) };
+    (match $node:ident { $($tt:tt)+ }) => { match_syntax!(match ($node) { $($tt)* }) };
 
     (match ($node:expr) {
-        $( $( $path:ident )::+ ($it:pat) => $res:expr, )*
-        _ => $catch_all:expr $(,)?
+        $( $inner:tt )*
     }) => {{
-        $( if let Some($it) = $($path::)+cast_ref($node) { $res } else )*
-        { $catch_all }
+        match_syntax!(@accum ( $node, $( $inner )* ) -> ())
     }};
+
+    // We use a Push-down Accumulator to allow expressive matching.
+    // See https://danielkeep.github.io/tlborm/book/pat-push-down-accumulation.html
+
+    (@as_expr ( $node:expr, $($e:tt)* )) => {{
+        match $node.kind() {
+            $( $e )*
+        }
+    }};
+
+    (@accum (
+            $node:expr,
+            _ => $catch_all:expr $(,)?
+        ) -> ($($body:tt)*)
+    ) => {
+        match_syntax!(@as_expr (
+            $node,
+            $($body)*
+            _ => $catch_all,
+        ))
+    };
+
+    (@accum (
+            $node:expr,
+            _ $( if $catch_all_cond:tt )? => $catch_all:expr,
+            $($next:tt)+
+        ) -> ($($body:tt)*)
+    ) => {
+        match_syntax!(@accum ($node, $($next)+) -> (
+            $($body)*
+            _ $( if $catch_all_cond )? => $catch_all,
+        ))
+    };
+
+    (@accum (
+            $node:expr,
+            $( $( $path:ident )::+ (_) )|+ $( if $cond:tt )? => $res:expr,
+            $($next:tt)+
+        ) -> ($($body:tt)*)
+    ) => {
+        match_syntax!(@accum ($node, $($next)+) -> (
+            $($body)*
+            $( $($path::)+KIND )|* $( if $cond )? => $res,
+        ))
+    };
+
+    (@accum (
+            $node:expr,
+            $( $path:ident )::+ ($it:pat) $( if $cond:tt )?  => $res:expr,
+            $($next:tt)+
+        ) -> ($($body:tt)*)
+    ) => {
+        match_syntax!(@accum ($node, $($next)+) -> (
+            $($body)*
+            $($path::)+KIND $( if $cond )? => {
+                let $it = $($path::)+unwrap_cast($node.into());
+                $res
+            }
+        ))
+    };
 }
+
+//#[macro_export]
+//macro_rules! match_ast {
+//    // Necessary because expressions aren't allowed in front of `{`
+//    (match &$node:ident { $($tt:tt)* }) => { match_ast!(match (&$node) { $($tt)* }) };
+//    (match $node:ident { $($tt:tt)* }) => { match_ast!(match ($node) { $($tt)* }) };
+//
+//    (match ($node:expr) {
+//        $catch_it:pat => $catch_all:expr $(,)?
+//    }) => {
+//        $catch_all
+//    };
+//
+//    (match ($node:expr) {
+//        $( $path:ident )::+ ($it:pat) => $res:expr,
+//        $($tt:tt)+
+//    }) => {
+//        match $($path::)+try_cast($node) {
+//            Ok($it) => $res,
+//            Err(node) => {
+//                match_ast! {
+//                    match node {
+//                        $($tt)*
+//                    }
+//                }
+//            }
+//        }
+//    };
+//}
+
+//#[macro_export]
+//macro_rules! match_syntax {
+//    // Necessary because expressions aren't allowed in front of `{`
+//    (match &$node:ident { $($tt:tt)+ }) => { match_syntax!(match (&$node) { $($tt)* }) };
+//    (match $node:ident { $($tt:tt)+ }) => { match_syntax!(match ($node) { $($tt)* }) };
+//
+//    (match ($node:expr) {
+//        $(
+//            $( $path:ident )::+ ($it:pat) $( if $cond:tt )? => $res:expr $(,)?
+//        )*,
+//        $( _ $( if $catch_all_cond:tt )? => $catch_all:expr $(,)? )+
+//    }) => {{
+//        match $node.kind() {
+//            $( $($path::)+KIND $( if $cond )? => {
+//                let $it = $($path::)+unwrap_cast($node.into());
+//                $res
+//            } )*
+//            $( _ $( if $catch_all_cond )? => $catch_all, )*
+//        }
+//    }};
+//}
 
 /// Declares a custom union AstNode type with an ungram-like syntax
 ///
