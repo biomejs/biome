@@ -857,7 +857,7 @@ export type TrailingCommas2 = "none" | "all";
 /**
  * Rule domains
  */
-export type RuleDomain = "react" | "test" | "solid" | "next";
+export type RuleDomain = "react" | "test" | "solid" | "next" | "project";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
@@ -1688,7 +1688,7 @@ export interface Nursery {
 	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
-	useConsistentObjectDefinition?: RuleConfiguration_for_UseConsistentObjectDefinitionOptions;
+	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
 	/**
 	 * Require specifying the reason argument when using @deprecated directive
 	 */
@@ -1725,6 +1725,10 @@ export interface Nursery {
 	 * Validates that all enum values are capitalized.
 	 */
 	useNamingConvention?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce the use of numeric separators in numeric literals.
+	 */
+	useNumericSeparators?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
@@ -2363,9 +2367,9 @@ export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
-export type RuleConfiguration_for_UseConsistentObjectDefinitionOptions =
+export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseConsistentObjectDefinitionOptions;
+	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -2627,7 +2631,11 @@ export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	 */
 	options: ConsistentMemberAccessibilityOptions;
 }
-export interface RuleWithOptions_for_UseConsistentObjectDefinitionOptions {
+export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -3363,7 +3371,6 @@ export type Category =
 	| "lint/nursery/noDuplicateFields"
 	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
-	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noFloatingPromises"
@@ -3386,6 +3393,7 @@ export type Category =
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
+	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noSecrets"
@@ -3435,6 +3443,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
+	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"

@@ -78,7 +78,7 @@ impl From<(Utf8PathBuf, String)> for Stdin {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct VcsTargeted {
     pub staged: bool,
     pub changed: bool,
@@ -374,6 +374,21 @@ impl Execution {
 
     pub(crate) const fn is_lint(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::Lint { .. })
+    }
+
+    pub(crate) const fn is_migrate(&self) -> bool {
+        matches!(self.traversal_mode, TraversalMode::Migrate { .. })
+    }
+
+    pub(crate) fn is_stdin(&self) -> bool {
+        match &self.traversal_mode {
+            TraversalMode::Check { stdin, .. } => stdin.is_some(),
+            TraversalMode::Lint { stdin, .. } => stdin.is_some(),
+            TraversalMode::CI { .. } => false,
+            TraversalMode::Format { stdin, .. } => stdin.is_some(),
+            TraversalMode::Migrate { .. } => false,
+            TraversalMode::Search { stdin, .. } => stdin.is_some(),
+        }
     }
 
     #[instrument(level = "debug", skip(self), fields(result))]

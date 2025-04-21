@@ -1,8 +1,8 @@
 use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
-    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryMatch, Queryable,
-    Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor, VisitorContext, VisitorFinishContext,
+    AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
     context::RuleContext, declare_lint_rule,
 };
 use biome_analyze::{RuleDomain, RuleSource};
@@ -358,14 +358,15 @@ impl FunctionCallServices {
 impl FromServices for FunctionCallServices {
     fn from_services(
         rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic> {
-        let early_returns: &EarlyReturnsModel = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"])
-        })?;
+    ) -> Result<Self, ServicesDiagnostic> {
+        let early_returns: &EarlyReturnsModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"]))?;
         Ok(Self {
             early_returns: early_returns.clone(),
-            semantic_services: SemanticServices::from_services(rule_key, services)?,
+            semantic_services: SemanticServices::from_services(rule_key, rule_metadata, services)?,
         })
     }
 }

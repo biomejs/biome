@@ -1,4 +1,6 @@
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::{fmt::Display, markup};
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
@@ -144,6 +146,7 @@ declare_lint_rule! {
             RuleSource::EslintImportAccess("eslint-plugin-import-access")
         ],
         recommended: true,
+        domains: &[RuleDomain::Project],
     }
 }
 

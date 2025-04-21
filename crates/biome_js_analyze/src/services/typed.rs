@@ -1,6 +1,6 @@
 use biome_analyze::{
-    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
-    Queryable, RuleKey, ServiceBag, SyntaxVisitor,
+    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_js_syntax::{AnyJsExpression, AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_js_type_info::Type;
@@ -32,14 +32,27 @@ impl TypedService {
 impl FromServices for TypedService {
     fn from_services(
         rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic> {
+    ) -> Result<Self, ServicesDiagnostic> {
+        if cfg!(debug_assertions) {
+            let has_project_domain = rule_metadata
+                .domains
+                .iter()
+                .any(|d| d == &RuleDomain::Project);
+            if !has_project_domain {
+                panic!(
+                    "The rule {rule_key} uses TypedService, but it is not in the project domain."
+                );
+            }
+        }
+
         let file_path: &Arc<Utf8PathBuf> = services
             .get_service()
-            .ok_or_else(|| MissingServicesDiagnostic::new(rule_key.rule_name(), &["FilePath"]))?;
-        let module_graph: &Arc<ModuleGraph> = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["ModuleGraph"])
-        })?;
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["FilePath"]))?;
+        let module_graph: &Arc<ModuleGraph> = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleGraph"]))?;
         let module_info = module_graph.module_info_for_path(file_path.as_ref());
         Ok(Self {
             module_info,

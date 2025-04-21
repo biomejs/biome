@@ -1,0 +1,913 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Tests adapted from https://github.com/sindresorhus/eslint-plugin-unicorn/blob/756dbbf0a359a139745b092a676f6e535cb85128/test/numeric-separators-style.js.
+
+let foo;
+
+// Hexadecimal
+foo = 0xA_B_CDE_F0; // 0xA_BC_DE_F0
+foo = 0xABCDEF; // 0xAB_CD_EF
+foo = 0xA_B; // 0xAB
+foo = 0XAB_C_D; // 0XAB_CD
+
+// Octal
+foo = 0o12_34_5670; // 0o1234_5670
+foo = 0o7_7_77; // 0o7777
+foo = 0o010101010101; // 0o0101_0101_0101
+foo = 0O010101010101; // 0O0101_0101_0101
+
+// Binary
+foo = 0b10_10_0001; // 0b1010_0001
+foo = 0b0_00_0; // 0b0000
+foo = 0b10101010101010; // 0b10_1010_1010_1010
+foo = 0B10101010101010; // 0B10_1010_1010_1010
+
+// BigInt
+foo = 1_9_223n; // 19_223n
+foo = 80_7n; // 807n
+foo = 123456789_100n; // 123_456_789_100n
+
+// Numbers
+foo = 1_2_345_678; // 12_345_678
+foo = 12_3; // 123
+foo = 1234567890; // 1_234_567_890
+
+// Decimal numbers
+foo = 9807.1234567; // 9807.123_456_7
+foo = 3819.123_4325; // 3819.123_432_5
+foo = 138789.12343_2_42; // 138_789.123_432_42
+foo = .000000_1; // .000_000_1
+foo = 12345678..toString(); // 12_345_678..toString()
+foo = 12345678 .toString(); // 12_345_678 .toString()
+foo = .00000; // .000_00
+foo = 0.00000; // 0.000_00
+
+// Negative numbers
+foo = -100000_1; // -1_000_001
+
+// Exponential notation
+foo = 1e10000; // 1e10_000
+foo = 39804e10000; // 39_804e10_000
+foo = -123456e100; // -123_456e100
+foo = -100000e-10000; // -100_000e-10_000
+foo = -1000e+10000; // -1000e+10_000
+foo = -1000e+00010000; // -1000e+00_010_000
+foo = 3.6e12000; // 3.6e12_000
+foo = -1200000e5; // -1_200_000e5
+foo = 3.65432E12000; // 3.654_32E12_000
+
+```
+
+# Diagnostics
+```
+invalid.js:6:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    5 │ // Hexadecimal
+  > 6 │ foo = 0xA_B_CDE_F0; // 0xA_BC_DE_F0
+      │       ^^^^^^^^^^^^
+    7 │ foo = 0xABCDEF; // 0xAB_CD_EF
+    8 │ foo = 0xA_B; // 0xAB
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+     4  4 │   
+     5  5 │   // Hexadecimal
+     6    │ - foo·=·0xA_B_CDE_F0;·//·0xA_BC_DE_F0
+        6 │ + foo·=·0xA_BC_DE_F0;·//·0xA_BC_DE_F0
+     7  7 │   foo = 0xABCDEF; // 0xAB_CD_EF
+     8  8 │   foo = 0xA_B; // 0xAB
+  
+
+```
+
+```
+invalid.js:7:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    5 │ // Hexadecimal
+    6 │ foo = 0xA_B_CDE_F0; // 0xA_BC_DE_F0
+  > 7 │ foo = 0xABCDEF; // 0xAB_CD_EF
+      │       ^^^^^^^^
+    8 │ foo = 0xA_B; // 0xAB
+    9 │ foo = 0XAB_C_D; // 0XAB_CD
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+     5  5 │   // Hexadecimal
+     6  6 │   foo = 0xA_B_CDE_F0; // 0xA_BC_DE_F0
+     7    │ - foo·=·0xABCDEF;·//·0xAB_CD_EF
+        7 │ + foo·=·0xAB_CD_EF;·//·0xAB_CD_EF
+     8  8 │   foo = 0xA_B; // 0xAB
+     9  9 │   foo = 0XAB_C_D; // 0XAB_CD
+  
+
+```
+
+```
+invalid.js:8:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary grouping of digits in numeric literal.
+  
+     6 │ foo = 0xA_B_CDE_F0; // 0xA_BC_DE_F0
+     7 │ foo = 0xABCDEF; // 0xAB_CD_EF
+   > 8 │ foo = 0xA_B; // 0xAB
+       │       ^^^^^
+     9 │ foo = 0XAB_C_D; // 0XAB_CD
+    10 │ 
+  
+  i Short numbers don't require separators.
+  
+  i Safe fix: Remove unnecessary numeric separators.
+  
+     6  6 │   foo = 0xA_B_CDE_F0; // 0xA_BC_DE_F0
+     7  7 │   foo = 0xABCDEF; // 0xAB_CD_EF
+     8    │ - foo·=·0xA_B;·//·0xAB
+        8 │ + foo·=·0xAB;·//·0xAB
+     9  9 │   foo = 0XAB_C_D; // 0XAB_CD
+    10 10 │   
+  
+
+```
+
+```
+invalid.js:9:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+     7 │ foo = 0xABCDEF; // 0xAB_CD_EF
+     8 │ foo = 0xA_B; // 0xAB
+   > 9 │ foo = 0XAB_C_D; // 0XAB_CD
+       │       ^^^^^^^^
+    10 │ 
+    11 │ // Octal
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+     7  7 │   foo = 0xABCDEF; // 0xAB_CD_EF
+     8  8 │   foo = 0xA_B; // 0xAB
+     9    │ - foo·=·0XAB_C_D;·//·0XAB_CD
+        9 │ + foo·=·0XAB_CD;·//·0XAB_CD
+    10 10 │   
+    11 11 │   // Octal
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    11 │ // Octal
+  > 12 │ foo = 0o12_34_5670; // 0o1234_5670
+       │       ^^^^^^^^^^^^
+    13 │ foo = 0o7_7_77; // 0o7777
+    14 │ foo = 0o010101010101; // 0o0101_0101_0101
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    10 10 │   
+    11 11 │   // Octal
+    12    │ - foo·=·0o12_34_5670;·//·0o1234_5670
+       12 │ + foo·=·0o1234_5670;·//·0o1234_5670
+    13 13 │   foo = 0o7_7_77; // 0o7777
+    14 14 │   foo = 0o010101010101; // 0o0101_0101_0101
+  
+
+```
+
+```
+invalid.js:13:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary grouping of digits in numeric literal.
+  
+    11 │ // Octal
+    12 │ foo = 0o12_34_5670; // 0o1234_5670
+  > 13 │ foo = 0o7_7_77; // 0o7777
+       │       ^^^^^^^^
+    14 │ foo = 0o010101010101; // 0o0101_0101_0101
+    15 │ foo = 0O010101010101; // 0O0101_0101_0101
+  
+  i Short numbers don't require separators.
+  
+  i Safe fix: Remove unnecessary numeric separators.
+  
+    11 11 │   // Octal
+    12 12 │   foo = 0o12_34_5670; // 0o1234_5670
+    13    │ - foo·=·0o7_7_77;·//·0o7777
+       13 │ + foo·=·0o7777;·//·0o7777
+    14 14 │   foo = 0o010101010101; // 0o0101_0101_0101
+    15 15 │   foo = 0O010101010101; // 0O0101_0101_0101
+  
+
+```
+
+```
+invalid.js:14:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    12 │ foo = 0o12_34_5670; // 0o1234_5670
+    13 │ foo = 0o7_7_77; // 0o7777
+  > 14 │ foo = 0o010101010101; // 0o0101_0101_0101
+       │       ^^^^^^^^^^^^^^
+    15 │ foo = 0O010101010101; // 0O0101_0101_0101
+    16 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    12 12 │   foo = 0o12_34_5670; // 0o1234_5670
+    13 13 │   foo = 0o7_7_77; // 0o7777
+    14    │ - foo·=·0o010101010101;·//·0o0101_0101_0101
+       14 │ + foo·=·0o0101_0101_0101;·//·0o0101_0101_0101
+    15 15 │   foo = 0O010101010101; // 0O0101_0101_0101
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    13 │ foo = 0o7_7_77; // 0o7777
+    14 │ foo = 0o010101010101; // 0o0101_0101_0101
+  > 15 │ foo = 0O010101010101; // 0O0101_0101_0101
+       │       ^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // Binary
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    13 13 │   foo = 0o7_7_77; // 0o7777
+    14 14 │   foo = 0o010101010101; // 0o0101_0101_0101
+    15    │ - foo·=·0O010101010101;·//·0O0101_0101_0101
+       15 │ + foo·=·0O0101_0101_0101;·//·0O0101_0101_0101
+    16 16 │   
+    17 17 │   // Binary
+  
+
+```
+
+```
+invalid.js:18:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    17 │ // Binary
+  > 18 │ foo = 0b10_10_0001; // 0b1010_0001
+       │       ^^^^^^^^^^^^
+    19 │ foo = 0b0_00_0; // 0b0000
+    20 │ foo = 0b10101010101010; // 0b10_1010_1010_1010
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    16 16 │   
+    17 17 │   // Binary
+    18    │ - foo·=·0b10_10_0001;·//·0b1010_0001
+       18 │ + foo·=·0b1010_0001;·//·0b1010_0001
+    19 19 │   foo = 0b0_00_0; // 0b0000
+    20 20 │   foo = 0b10101010101010; // 0b10_1010_1010_1010
+  
+
+```
+
+```
+invalid.js:19:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary grouping of digits in numeric literal.
+  
+    17 │ // Binary
+    18 │ foo = 0b10_10_0001; // 0b1010_0001
+  > 19 │ foo = 0b0_00_0; // 0b0000
+       │       ^^^^^^^^
+    20 │ foo = 0b10101010101010; // 0b10_1010_1010_1010
+    21 │ foo = 0B10101010101010; // 0B10_1010_1010_1010
+  
+  i Short numbers don't require separators.
+  
+  i Safe fix: Remove unnecessary numeric separators.
+  
+    17 17 │   // Binary
+    18 18 │   foo = 0b10_10_0001; // 0b1010_0001
+    19    │ - foo·=·0b0_00_0;·//·0b0000
+       19 │ + foo·=·0b0000;·//·0b0000
+    20 20 │   foo = 0b10101010101010; // 0b10_1010_1010_1010
+    21 21 │   foo = 0B10101010101010; // 0B10_1010_1010_1010
+  
+
+```
+
+```
+invalid.js:20:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    18 │ foo = 0b10_10_0001; // 0b1010_0001
+    19 │ foo = 0b0_00_0; // 0b0000
+  > 20 │ foo = 0b10101010101010; // 0b10_1010_1010_1010
+       │       ^^^^^^^^^^^^^^^^
+    21 │ foo = 0B10101010101010; // 0B10_1010_1010_1010
+    22 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    18 18 │   foo = 0b10_10_0001; // 0b1010_0001
+    19 19 │   foo = 0b0_00_0; // 0b0000
+    20    │ - foo·=·0b10101010101010;·//·0b10_1010_1010_1010
+       20 │ + foo·=·0b10_1010_1010_1010;·//·0b10_1010_1010_1010
+    21 21 │   foo = 0B10101010101010; // 0B10_1010_1010_1010
+    22 22 │   
+  
+
+```
+
+```
+invalid.js:21:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    19 │ foo = 0b0_00_0; // 0b0000
+    20 │ foo = 0b10101010101010; // 0b10_1010_1010_1010
+  > 21 │ foo = 0B10101010101010; // 0B10_1010_1010_1010
+       │       ^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ // BigInt
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    19 19 │   foo = 0b0_00_0; // 0b0000
+    20 20 │   foo = 0b10101010101010; // 0b10_1010_1010_1010
+    21    │ - foo·=·0B10101010101010;·//·0B10_1010_1010_1010
+       21 │ + foo·=·0B10_1010_1010_1010;·//·0B10_1010_1010_1010
+    22 22 │   
+    23 23 │   // BigInt
+  
+
+```
+
+```
+invalid.js:29:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    28 │ // Numbers
+  > 29 │ foo = 1_2_345_678; // 12_345_678
+       │       ^^^^^^^^^^^
+    30 │ foo = 12_3; // 123
+    31 │ foo = 1234567890; // 1_234_567_890
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    27 27 │   
+    28 28 │   // Numbers
+    29    │ - foo·=·1_2_345_678;·//·12_345_678
+       29 │ + foo·=·12_345_678;·//·12_345_678
+    30 30 │   foo = 12_3; // 123
+    31 31 │   foo = 1234567890; // 1_234_567_890
+  
+
+```
+
+```
+invalid.js:30:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary grouping of digits in numeric literal.
+  
+    28 │ // Numbers
+    29 │ foo = 1_2_345_678; // 12_345_678
+  > 30 │ foo = 12_3; // 123
+       │       ^^^^
+    31 │ foo = 1234567890; // 1_234_567_890
+    32 │ 
+  
+  i Short numbers don't require separators.
+  
+  i Safe fix: Remove unnecessary numeric separators.
+  
+    28 28 │   // Numbers
+    29 29 │   foo = 1_2_345_678; // 12_345_678
+    30    │ - foo·=·12_3;·//·123
+       30 │ + foo·=·123;·//·123
+    31 31 │   foo = 1234567890; // 1_234_567_890
+    32 32 │   
+  
+
+```
+
+```
+invalid.js:31:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    29 │ foo = 1_2_345_678; // 12_345_678
+    30 │ foo = 12_3; // 123
+  > 31 │ foo = 1234567890; // 1_234_567_890
+       │       ^^^^^^^^^^
+    32 │ 
+    33 │ // Decimal numbers
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    29 29 │   foo = 1_2_345_678; // 12_345_678
+    30 30 │   foo = 12_3; // 123
+    31    │ - foo·=·1234567890;·//·1_234_567_890
+       31 │ + foo·=·1_234_567_890;·//·1_234_567_890
+    32 32 │   
+    33 33 │   // Decimal numbers
+  
+
+```
+
+```
+invalid.js:34:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    33 │ // Decimal numbers
+  > 34 │ foo = 9807.1234567; // 9807.123_456_7
+       │       ^^^^^^^^^^^^
+    35 │ foo = 3819.123_4325; // 3819.123_432_5
+    36 │ foo = 138789.12343_2_42; // 138_789.123_432_42
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    32 32 │   
+    33 33 │   // Decimal numbers
+    34    │ - foo·=·9807.1234567;·//·9807.123_456_7
+       34 │ + foo·=·9807.123_456_7;·//·9807.123_456_7
+    35 35 │   foo = 3819.123_4325; // 3819.123_432_5
+    36 36 │   foo = 138789.12343_2_42; // 138_789.123_432_42
+  
+
+```
+
+```
+invalid.js:35:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    33 │ // Decimal numbers
+    34 │ foo = 9807.1234567; // 9807.123_456_7
+  > 35 │ foo = 3819.123_4325; // 3819.123_432_5
+       │       ^^^^^^^^^^^^^
+    36 │ foo = 138789.12343_2_42; // 138_789.123_432_42
+    37 │ foo = .000000_1; // .000_000_1
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    33 33 │   // Decimal numbers
+    34 34 │   foo = 9807.1234567; // 9807.123_456_7
+    35    │ - foo·=·3819.123_4325;·//·3819.123_432_5
+       35 │ + foo·=·3819.123_432_5;·//·3819.123_432_5
+    36 36 │   foo = 138789.12343_2_42; // 138_789.123_432_42
+    37 37 │   foo = .000000_1; // .000_000_1
+  
+
+```
+
+```
+invalid.js:36:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    34 │ foo = 9807.1234567; // 9807.123_456_7
+    35 │ foo = 3819.123_4325; // 3819.123_432_5
+  > 36 │ foo = 138789.12343_2_42; // 138_789.123_432_42
+       │       ^^^^^^^^^^^^^^^^^
+    37 │ foo = .000000_1; // .000_000_1
+    38 │ foo = 12345678..toString(); // 12_345_678..toString()
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    34 34 │   foo = 9807.1234567; // 9807.123_456_7
+    35 35 │   foo = 3819.123_4325; // 3819.123_432_5
+    36    │ - foo·=·138789.12343_2_42;·//·138_789.123_432_42
+       36 │ + foo·=·138_789.123_432_42;·//·138_789.123_432_42
+    37 37 │   foo = .000000_1; // .000_000_1
+    38 38 │   foo = 12345678..toString(); // 12_345_678..toString()
+  
+
+```
+
+```
+invalid.js:37:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    35 │ foo = 3819.123_4325; // 3819.123_432_5
+    36 │ foo = 138789.12343_2_42; // 138_789.123_432_42
+  > 37 │ foo = .000000_1; // .000_000_1
+       │       ^^^^^^^^^
+    38 │ foo = 12345678..toString(); // 12_345_678..toString()
+    39 │ foo = 12345678 .toString(); // 12_345_678 .toString()
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    35 35 │   foo = 3819.123_4325; // 3819.123_432_5
+    36 36 │   foo = 138789.12343_2_42; // 138_789.123_432_42
+    37    │ - foo·=·.000000_1;·//·.000_000_1
+       37 │ + foo·=·.000_000_1;·//·.000_000_1
+    38 38 │   foo = 12345678..toString(); // 12_345_678..toString()
+    39 39 │   foo = 12345678 .toString(); // 12_345_678 .toString()
+  
+
+```
+
+```
+invalid.js:38:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    36 │ foo = 138789.12343_2_42; // 138_789.123_432_42
+    37 │ foo = .000000_1; // .000_000_1
+  > 38 │ foo = 12345678..toString(); // 12_345_678..toString()
+       │       ^^^^^^^^^
+    39 │ foo = 12345678 .toString(); // 12_345_678 .toString()
+    40 │ foo = .00000; // .000_00
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    36 36 │   foo = 138789.12343_2_42; // 138_789.123_432_42
+    37 37 │   foo = .000000_1; // .000_000_1
+    38    │ - foo·=·12345678..toString();·//·12_345_678..toString()
+       38 │ + foo·=·12_345_678..toString();·//·12_345_678..toString()
+    39 39 │   foo = 12345678 .toString(); // 12_345_678 .toString()
+    40 40 │   foo = .00000; // .000_00
+  
+
+```
+
+```
+invalid.js:39:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    37 │ foo = .000000_1; // .000_000_1
+    38 │ foo = 12345678..toString(); // 12_345_678..toString()
+  > 39 │ foo = 12345678 .toString(); // 12_345_678 .toString()
+       │       ^^^^^^^^
+    40 │ foo = .00000; // .000_00
+    41 │ foo = 0.00000; // 0.000_00
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    37 37 │   foo = .000000_1; // .000_000_1
+    38 38 │   foo = 12345678..toString(); // 12_345_678..toString()
+    39    │ - foo·=·12345678·.toString();·//·12_345_678·.toString()
+       39 │ + foo·=·12_345_678·.toString();·//·12_345_678·.toString()
+    40 40 │   foo = .00000; // .000_00
+    41 41 │   foo = 0.00000; // 0.000_00
+  
+
+```
+
+```
+invalid.js:40:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    38 │ foo = 12345678..toString(); // 12_345_678..toString()
+    39 │ foo = 12345678 .toString(); // 12_345_678 .toString()
+  > 40 │ foo = .00000; // .000_00
+       │       ^^^^^^
+    41 │ foo = 0.00000; // 0.000_00
+    42 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    38 38 │   foo = 12345678..toString(); // 12_345_678..toString()
+    39 39 │   foo = 12345678 .toString(); // 12_345_678 .toString()
+    40    │ - foo·=·.00000;·//·.000_00
+       40 │ + foo·=·.000_00;·//·.000_00
+    41 41 │   foo = 0.00000; // 0.000_00
+    42 42 │   
+  
+
+```
+
+```
+invalid.js:41:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    39 │ foo = 12345678 .toString(); // 12_345_678 .toString()
+    40 │ foo = .00000; // .000_00
+  > 41 │ foo = 0.00000; // 0.000_00
+       │       ^^^^^^^
+    42 │ 
+    43 │ // Negative numbers
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    39 39 │   foo = 12345678 .toString(); // 12_345_678 .toString()
+    40 40 │   foo = .00000; // .000_00
+    41    │ - foo·=·0.00000;·//·0.000_00
+       41 │ + foo·=·0.000_00;·//·0.000_00
+    42 42 │   
+    43 43 │   // Negative numbers
+  
+
+```
+
+```
+invalid.js:44:8 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    43 │ // Negative numbers
+  > 44 │ foo = -100000_1; // -1_000_001
+       │        ^^^^^^^^
+    45 │ 
+    46 │ // Exponential notation
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    42 42 │   
+    43 43 │   // Negative numbers
+    44    │ - foo·=·-100000_1;·//·-1_000_001
+       44 │ + foo·=·-1_000_001;·//·-1_000_001
+    45 45 │   
+    46 46 │   // Exponential notation
+  
+
+```
+
+```
+invalid.js:47:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    46 │ // Exponential notation
+  > 47 │ foo = 1e10000; // 1e10_000
+       │       ^^^^^^^
+    48 │ foo = 39804e10000; // 39_804e10_000
+    49 │ foo = -123456e100; // -123_456e100
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    45 45 │   
+    46 46 │   // Exponential notation
+    47    │ - foo·=·1e10000;·//·1e10_000
+       47 │ + foo·=·1e10_000;·//·1e10_000
+    48 48 │   foo = 39804e10000; // 39_804e10_000
+    49 49 │   foo = -123456e100; // -123_456e100
+  
+
+```
+
+```
+invalid.js:48:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    46 │ // Exponential notation
+    47 │ foo = 1e10000; // 1e10_000
+  > 48 │ foo = 39804e10000; // 39_804e10_000
+       │       ^^^^^^^^^^^
+    49 │ foo = -123456e100; // -123_456e100
+    50 │ foo = -100000e-10000; // -100_000e-10_000
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    46 46 │   // Exponential notation
+    47 47 │   foo = 1e10000; // 1e10_000
+    48    │ - foo·=·39804e10000;·//·39_804e10_000
+       48 │ + foo·=·39_804e10_000;·//·39_804e10_000
+    49 49 │   foo = -123456e100; // -123_456e100
+    50 50 │   foo = -100000e-10000; // -100_000e-10_000
+  
+
+```
+
+```
+invalid.js:49:8 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    47 │ foo = 1e10000; // 1e10_000
+    48 │ foo = 39804e10000; // 39_804e10_000
+  > 49 │ foo = -123456e100; // -123_456e100
+       │        ^^^^^^^^^^
+    50 │ foo = -100000e-10000; // -100_000e-10_000
+    51 │ foo = -1000e+10000; // -1000e+10_000
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    47 47 │   foo = 1e10000; // 1e10_000
+    48 48 │   foo = 39804e10000; // 39_804e10_000
+    49    │ - foo·=·-123456e100;·//·-123_456e100
+       49 │ + foo·=·-123_456e100;·//·-123_456e100
+    50 50 │   foo = -100000e-10000; // -100_000e-10_000
+    51 51 │   foo = -1000e+10000; // -1000e+10_000
+  
+
+```
+
+```
+invalid.js:50:8 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    48 │ foo = 39804e10000; // 39_804e10_000
+    49 │ foo = -123456e100; // -123_456e100
+  > 50 │ foo = -100000e-10000; // -100_000e-10_000
+       │        ^^^^^^^^^^^^^
+    51 │ foo = -1000e+10000; // -1000e+10_000
+    52 │ foo = -1000e+00010000; // -1000e+00_010_000
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    48 48 │   foo = 39804e10000; // 39_804e10_000
+    49 49 │   foo = -123456e100; // -123_456e100
+    50    │ - foo·=·-100000e-10000;·//·-100_000e-10_000
+       50 │ + foo·=·-100_000e-10_000;·//·-100_000e-10_000
+    51 51 │   foo = -1000e+10000; // -1000e+10_000
+    52 52 │   foo = -1000e+00010000; // -1000e+00_010_000
+  
+
+```
+
+```
+invalid.js:51:8 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    49 │ foo = -123456e100; // -123_456e100
+    50 │ foo = -100000e-10000; // -100_000e-10_000
+  > 51 │ foo = -1000e+10000; // -1000e+10_000
+       │        ^^^^^^^^^^^
+    52 │ foo = -1000e+00010000; // -1000e+00_010_000
+    53 │ foo = 3.6e12000; // 3.6e12_000
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    49 49 │   foo = -123456e100; // -123_456e100
+    50 50 │   foo = -100000e-10000; // -100_000e-10_000
+    51    │ - foo·=·-1000e+10000;·//·-1000e+10_000
+       51 │ + foo·=·-1000e+10_000;·//·-1000e+10_000
+    52 52 │   foo = -1000e+00010000; // -1000e+00_010_000
+    53 53 │   foo = 3.6e12000; // 3.6e12_000
+  
+
+```
+
+```
+invalid.js:52:8 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    50 │ foo = -100000e-10000; // -100_000e-10_000
+    51 │ foo = -1000e+10000; // -1000e+10_000
+  > 52 │ foo = -1000e+00010000; // -1000e+00_010_000
+       │        ^^^^^^^^^^^^^^
+    53 │ foo = 3.6e12000; // 3.6e12_000
+    54 │ foo = -1200000e5; // -1_200_000e5
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    50 50 │   foo = -100000e-10000; // -100_000e-10_000
+    51 51 │   foo = -1000e+10000; // -1000e+10_000
+    52    │ - foo·=·-1000e+00010000;·//·-1000e+00_010_000
+       52 │ + foo·=·-1000e+00_010_000;·//·-1000e+00_010_000
+    53 53 │   foo = 3.6e12000; // 3.6e12_000
+    54 54 │   foo = -1200000e5; // -1_200_000e5
+  
+
+```
+
+```
+invalid.js:53:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    51 │ foo = -1000e+10000; // -1000e+10_000
+    52 │ foo = -1000e+00010000; // -1000e+00_010_000
+  > 53 │ foo = 3.6e12000; // 3.6e12_000
+       │       ^^^^^^^^^
+    54 │ foo = -1200000e5; // -1_200_000e5
+    55 │ foo = 3.65432E12000; // 3.654_32E12_000
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    51 51 │   foo = -1000e+10000; // -1000e+10_000
+    52 52 │   foo = -1000e+00010000; // -1000e+00_010_000
+    53    │ - foo·=·3.6e12000;·//·3.6e12_000
+       53 │ + foo·=·3.6e12_000;·//·3.6e12_000
+    54 54 │   foo = -1200000e5; // -1_200_000e5
+    55 55 │   foo = 3.65432E12000; // 3.654_32E12_000
+  
+
+```
+
+```
+invalid.js:54:8 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    52 │ foo = -1000e+00010000; // -1000e+00_010_000
+    53 │ foo = 3.6e12000; // 3.6e12_000
+  > 54 │ foo = -1200000e5; // -1_200_000e5
+       │        ^^^^^^^^^
+    55 │ foo = 3.65432E12000; // 3.654_32E12_000
+    56 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    52 52 │   foo = -1000e+00010000; // -1000e+00_010_000
+    53 53 │   foo = 3.6e12000; // 3.6e12_000
+    54    │ - foo·=·-1200000e5;·//·-1_200_000e5
+       54 │ + foo·=·-1_200_000e5;·//·-1_200_000e5
+    55 55 │   foo = 3.65432E12000; // 3.654_32E12_000
+    56 56 │   
+  
+
+```
+
+```
+invalid.js:55:7 lint/nursery/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    53 │ foo = 3.6e12000; // 3.6e12_000
+    54 │ foo = -1200000e5; // -1_200_000e5
+  > 55 │ foo = 3.65432E12000; // 3.654_32E12_000
+       │       ^^^^^^^^^^^^^
+    56 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    53 53 │   foo = 3.6e12000; // 3.6e12_000
+    54 54 │   foo = -1200000e5; // -1_200_000e5
+    55    │ - foo·=·3.65432E12000;·//·3.654_32E12_000
+       55 │ + foo·=·3.654_32E12_000;·//·3.654_32E12_000
+    56 56 │   
+  
+
+```

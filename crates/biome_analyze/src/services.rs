@@ -1,42 +1,37 @@
-use crate::{RuleKey, TextRange};
-use biome_diagnostics::{Diagnostic, LineIndexBuf, Resource, Result, SourceCode};
+use crate::{RuleKey, RuleMetadata};
+use biome_console::markup;
+use biome_diagnostics::{Diagnostic, MessageAndDescription, Result};
 use rustc_hash::FxHashMap;
 use std::any::{Any, TypeId};
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(category = "internalError/io", tags(INTERNAL))]
-pub struct MissingServicesDiagnostic {
+pub struct ServicesDiagnostic {
     #[message]
-    message: String,
     #[description]
-    description: String,
-    #[location(resource)]
-    path: Resource<&'static str>,
-    #[location(span)]
-    span: Option<TextRange>,
-    #[location(source_code)]
-    source_code: Option<SourceCode<String, LineIndexBuf>>,
+    message: MessageAndDescription,
 }
 
-impl MissingServicesDiagnostic {
+impl ServicesDiagnostic {
     pub fn new(rule_name: &str, missing_services: &'static [&'static str]) -> Self {
-        let description = missing_services.join(", ");
+        let services = missing_services.join(", ");
         Self {
-            message: format!("Errors emitted while attempting run the rule: {rule_name}"),
-            description: format!("Missing services: {description}"),
-            source_code: None,
-            path: Resource::Memory,
-            span: None,
+            message: MessageAndDescription::from(
+                markup! {
+                    "Missing services ["{services}"] for the rule " {rule_name}
+                }
+                .to_owned(),
+            ),
         }
     }
 }
 
 pub trait FromServices: Sized {
-    #[expect(clippy::result_large_err)]
     fn from_services(
         rule_key: &RuleKey,
+        rule_metadata: &RuleMetadata,
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic>;
+    ) -> Result<Self, ServicesDiagnostic>;
 }
 
 #[derive(Debug, Default)]
@@ -58,7 +53,11 @@ impl ServiceBag {
 }
 
 impl FromServices for () {
-    fn from_services(_: &RuleKey, _: &ServiceBag) -> Result<Self, MissingServicesDiagnostic> {
+    fn from_services(
+        _: &RuleKey,
+        _: &RuleMetadata,
+        _: &ServiceBag,
+    ) -> Result<Self, ServicesDiagnostic> {
         Ok(())
     }
 }

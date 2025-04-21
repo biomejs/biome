@@ -3061,6 +3061,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNumericSeparators": {
+					"description": "Enforce the use of numeric separators in numeric literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useParseIntRadix": {
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
@@ -3461,6 +3468,11 @@
 					"description": "Next.js framework rules",
 					"type": "string",
 					"enum": ["next"]
+				},
+				{
+					"description": "For rules that require querying multiple files inside a project",
+					"type": "string",
+					"enum": ["project"]
 				}
 			]
 		},
@@ -3926,6 +3938,10 @@
 			"type": "object",
 			"required": ["level"],
 			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]

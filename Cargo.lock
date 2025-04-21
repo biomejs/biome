@@ -164,7 +164,9 @@ dependencies = [
  "biome_analyze",
  "biome_configuration",
  "biome_console",
+ "biome_css_analyze",
  "biome_css_formatter",
+ "biome_css_syntax",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
@@ -172,10 +174,14 @@ dependencies = [
  "biome_formatter",
  "biome_fs",
  "biome_glob",
+ "biome_graphql_analyze",
+ "biome_graphql_syntax",
  "biome_grit_patterns",
  "biome_html_formatter",
  "biome_js_analyze",
  "biome_js_formatter",
+ "biome_js_syntax",
+ "biome_json_analyze",
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
@@ -3249,9 +3255,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.94"
+version = "1.0.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a31971752e70b8b2686d7e46ec17fb38dad4051d94024c88df49b667caea9c84"
+checksum = "02b3e5e68a3a1a02aad3ec490a98007cbc13c37cbe84a3cd7b8e406d76e7f778"
 dependencies = [
  "unicode-ident",
 ]
