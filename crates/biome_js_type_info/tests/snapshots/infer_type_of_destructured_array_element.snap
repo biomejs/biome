@@ -9,7 +9,7 @@ const [a]: Array<string> = [];
 
 ```
 a => instanceof "Array" {
-  params: unknown
+  resolved: unknown
   type_args: string
 }[0]
 

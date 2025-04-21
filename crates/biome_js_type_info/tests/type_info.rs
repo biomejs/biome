@@ -31,13 +31,13 @@ fn infer_type_of_async_function() {
 }
 
 #[test]
-fn infer_type_of_array_element() {
+fn infer_type_of_array() {
     const CODE: &str = r#"const array: Array<string> = [];"#;
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
     let bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
-    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_array_element");
+    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_array");
 }
 
 #[test]

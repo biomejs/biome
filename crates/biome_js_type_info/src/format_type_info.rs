@@ -520,7 +520,7 @@ impl Format<FormatTypeContext> for TypeReference {
                 space(),
                 text("{"),
                 &group(&block_indent(&format_args![
-                    text("params:"),
+                    text("resolved:"),
                     space(),
                     &self.ty,
                     hard_line_break(),

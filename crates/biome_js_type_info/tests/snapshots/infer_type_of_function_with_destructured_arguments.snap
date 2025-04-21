@@ -53,14 +53,14 @@ sync Function "destruct" {
           )}
         }.b
       ), required (unnamed): "Array" {
-        params: unknown
+        resolved: unknown
         type_args: boolean
       } (bindings:
         first:"Array" {
-          params: unknown
+          resolved: unknown
           type_args: boolean
         }[0], rest:[(1 others)..."Array" {
-          params: unknown
+          resolved: unknown
           type_args: boolean
         }]
       )
