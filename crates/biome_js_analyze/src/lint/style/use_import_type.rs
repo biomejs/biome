@@ -8,14 +8,15 @@ use biome_analyze::{
     declare_lint_rule, options::JsxRuntime,
 };
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsIdentifierUsage, AnyJsImportClause, AnyJsModuleItem,
-    AnyJsNamedImportSpecifier, JsFileSource, JsIdentifierBinding, JsImport, JsImportCombinedClause,
-    JsImportDefaultClause, JsLanguage, JsModuleItemList, JsNamedImportSpecifierList,
-    JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
+    AnyJsModuleSource, AnyJsNamedImportSpecifier, AnyJsRoot, JsFileSource, JsIdentifierBinding,
+    JsImport, JsImportCombinedClause, JsImportDefaultClause, JsLanguage, JsModuleItemList,
+    JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsSyntaxNode, JsSyntaxToken, T,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
@@ -56,12 +57,6 @@ declare_lint_rule! {
     ///
     /// We haven't found a way to support this pattern yet.
     /// We recommend disabling this rule when using such decorators.
-    ///
-    /// ## Options
-    ///
-    /// This rule respects the [`jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime)
-    /// setting and will make an exception for React globals if it is set to
-    /// `"reactClassic"`.
     ///
     /// ## Examples
     ///
@@ -109,6 +104,52 @@ declare_lint_rule! {
     /// import { B } from "./mod.js" with {};
     /// export type { B };
     /// ```
+    ///
+    /// ## Options
+    ///
+    /// This rule respects the [`jsxRuntime`](https://biomejs.dev/reference/configuration/#javascriptjsxruntime)
+    /// setting and will make an exception for React globals if it is set to
+    /// `"reactClassic"`.
+    ///
+    /// ### `style`
+    ///
+    /// The `style` option allows enforcing a style for importing types.
+    /// The option supports three values:
+    ///
+    /// - `inlineType`: always use `import { type T }` instead of `import type { T }`
+    /// - `separatedType`: always use `import type { T }` instead of `import { type T }`
+    /// - `auto`: use both `import type { T }` and `import { type T }` (default)
+    ///
+    /// ```jsonc,options
+    /// {
+    ///     "options": {
+    ///         "style": "inlineType"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// import { A } from "./mod.ts";
+    /// export type { A };
+    /// ```
+    ///
+    /// ```jsonc,options
+    /// {
+    ///     "options": {
+    ///         "style": "separatedType"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// import { A } from "./mod.ts";
+    /// export type { A };
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// import { type A, type B } from "./mod.ts";
+    /// export type { A, B };
+    /// ```
     pub UseImportType {
         version: "1.5.0",
         name: "useImportType",
@@ -125,7 +166,7 @@ impl Rule for UseImportType {
     type Query = Semantic<JsImport>;
     type State = ImportTypeFix;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = ImportTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>();
@@ -134,11 +175,17 @@ impl Rule for UseImportType {
         }
         let import = ctx.query();
         let import_clause = import.import_clause().ok()?;
-        // Import attributes and type-only imports are not compatible.
-        if import_clause.attribute().is_some() {
+        let extension = ctx.file_path().extension()?;
+        let extension = extension.as_bytes();
+        // Import attributes and type-only imports are not compatible in ESM.
+        if import_clause.attribute().is_some()
+            && extension != b"cts"
+            && !matches!(ctx.root(), AnyJsRoot::JsScript(_))
+        {
             return None;
         }
         let model = ctx.model();
+        let style = ctx.options().style.unwrap_or_default();
         match import_clause {
             AnyJsImportClause::JsImportBareClause(_) => None,
             AnyJsImportClause::JsImportCombinedClause(clause) => {
@@ -161,27 +208,42 @@ impl Rule for UseImportType {
                                     // Don't group inline type-imports,
                                     // when the default import is not only used as a type.
                                     None
+                                } else if style == Style::SeparatedType {
+                                    Some(ImportTypeFix::ExtractCombinedImportType(Box::default()))
                                 } else {
                                     // Prefer adding type keyword instead of
                                     // splitting the import statement into two import statements
-                                    Some(ImportTypeFix::AddInlineTypeQualifiers(specifiers))
+                                    Some(ImportTypeFix::AddTypeQualifiers(specifiers))
                                 }
                             }
                             Some(NamedImportTypeFix::AddInlineTypeQualifiers(specifiers)) => {
                                 if is_default_used_as_type {
-                                    Some(ImportTypeFix::ExtractDefaultImportType(specifiers))
+                                    if style == Style::SeparatedType {
+                                        Some(ImportTypeFix::UseSplitImportType(specifiers))
+                                    } else {
+                                        Some(ImportTypeFix::ExtractDefaultImportType(specifiers))
+                                    }
                                 } else if specifiers.is_empty() {
                                     None
+                                } else if style == Style::SeparatedType {
+                                    Some(ImportTypeFix::ExtractCombinedImportType(specifiers))
                                 } else {
-                                    Some(ImportTypeFix::AddInlineTypeQualifiers(specifiers))
+                                    Some(ImportTypeFix::AddTypeQualifiers(specifiers))
                                 }
                             }
                             Some(NamedImportTypeFix::RemoveInlineTypeQualifiers(_)) => {
                                 // Should not be reached because we pass `false` to `named_import_type_fix`.
                                 None
                             }
+                            Some(NamedImportTypeFix::CanSeparateType) => {
+                                if style == Style::SeparatedType {
+                                    Some(ImportTypeFix::UseSplitImportType(Box::default()))
+                                } else {
+                                    None
+                                }
+                            }
                             None => is_default_used_as_type
-                                .then_some(ImportTypeFix::ExtractDefaultImportType(vec![])),
+                                .then_some(ImportTypeFix::ExtractDefaultImportType(Box::default())),
                         }
                     }
                     AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(namespace_specifier) => {
@@ -198,8 +260,12 @@ impl Rule for UseImportType {
                             is_only_used_as_type(model, namespace_binding),
                         ) {
                             (true, true) => Some(ImportTypeFix::UseImportType),
-                            (true, false) => Some(ImportTypeFix::ExtractDefaultImportType(vec![])),
-                            (false, true) => Some(ImportTypeFix::ExtractCombinedImportType),
+                            (true, false) => {
+                                Some(ImportTypeFix::ExtractDefaultImportType(Box::default()))
+                            }
+                            (false, true) => {
+                                Some(ImportTypeFix::ExtractCombinedImportType(Box::default()))
+                            }
                             (false, false) => None,
                         }
                     }
@@ -225,12 +291,33 @@ impl Rule for UseImportType {
                     &clause.named_specifiers().ok()?,
                     clause.type_token().is_some(),
                 )? {
-                    NamedImportTypeFix::UseImportType(_) => Some(ImportTypeFix::UseImportType),
+                    NamedImportTypeFix::UseImportType(specifiers) => {
+                        if style == Style::InlineType {
+                            if specifiers.is_empty() {
+                                None
+                            } else {
+                                Some(ImportTypeFix::AddTypeQualifiers(specifiers))
+                            }
+                        } else {
+                            Some(ImportTypeFix::UseImportType)
+                        }
+                    }
                     NamedImportTypeFix::AddInlineTypeQualifiers(specifiers) => {
-                        Some(ImportTypeFix::AddInlineTypeQualifiers(specifiers))
+                        if style == Style::SeparatedType {
+                            Some(ImportTypeFix::UseSplitImportType(specifiers))
+                        } else {
+                            Some(ImportTypeFix::AddTypeQualifiers(specifiers))
+                        }
                     }
                     NamedImportTypeFix::RemoveInlineTypeQualifiers(type_tokens) => {
                         Some(ImportTypeFix::RemoveTypeQualifiers(type_tokens))
+                    }
+                    NamedImportTypeFix::CanSeparateType => {
+                        if style == Style::SeparatedType {
+                            Some(ImportTypeFix::UseSplitImportType(Box::default()))
+                        } else {
+                            None
+                        }
                     }
                 }
             }
@@ -261,6 +348,11 @@ impl Rule for UseImportType {
                 import_clause.range(),
                 "All these imports are only used as types.",
             ),
+            ImportTypeFix::UseSplitImportType(_) => RuleDiagnostic::new(
+                rule_category!(),
+                import_clause.range(),
+                "Separate type imports from other imports.",
+            ),
             ImportTypeFix::ExtractDefaultImportType(named_specifiers) => {
                 if named_specifiers.is_empty() {
                     RuleDiagnostic::new(
@@ -281,11 +373,11 @@ impl Rule for UseImportType {
                     diagnostic
                 }
             }
-            ImportTypeFix::ExtractCombinedImportType => {
+            ImportTypeFix::ExtractCombinedImportType(_) => {
                 let AnyJsImportClause::JsImportCombinedClause(import_combined_clause) =
                     import_clause
                 else {
-                    unreachable!();
+                    return None;
                 };
                 let specifier = import_combined_clause.specifier().ok()?;
                 match specifier {
@@ -301,7 +393,7 @@ impl Rule for UseImportType {
                     ),
                 }
             }
-            ImportTypeFix::AddInlineTypeQualifiers(named_specifiers) => {
+            ImportTypeFix::AddTypeQualifiers(named_specifiers) => {
                 let mut diagnostic = RuleDiagnostic::new(
                     rule_category!(),
                     import_clause.range(),
@@ -344,7 +436,7 @@ impl Rule for UseImportType {
         match state {
             ImportTypeFix::UseImportType => match import_clause {
                 AnyJsImportClause::JsImportBareClause(_) => {
-                    unreachable!();
+                    return None;
                 }
                 AnyJsImportClause::JsImportCombinedClause(import_combined_clause) => {
                     let type_token = Some(
@@ -356,7 +448,7 @@ impl Rule for UseImportType {
                         type_token.clone(),
                     )
                     .ok()?;
-                    let new_import = import.clone().with_import_clause(default_clause.into());
+                    let default_import = import.clone().with_import_clause(default_clause.into());
                     let extra_import = extract_combined_specifier_in_new_import(
                         &import_combined_clause,
                         type_token,
@@ -368,7 +460,7 @@ impl Rule for UseImportType {
                     add_module_items(
                         &mut mutation,
                         import.syntax(),
-                        [new_import.into(), extra_import.into()],
+                        [default_import.into(), extra_import.into()],
                     );
                 }
                 AnyJsImportClause::JsImportDefaultClause(import_clause) => {
@@ -432,6 +524,70 @@ impl Rule for UseImportType {
                     mutation.replace_node(import_clause, new_import_clause);
                 }
             },
+            ImportTypeFix::UseSplitImportType(specifiers_requiring_type_marker) => {
+                match import_clause {
+                    AnyJsImportClause::JsImportCombinedClause(import_combined_clause) => {
+                        let type_token = Some(
+                            make::token(T![type])
+                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        );
+                        let Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named)) =
+                            import_combined_clause.specifier()
+                        else {
+                            return None;
+                        };
+                        let default_clause = extract_into_default_import_clause(
+                            &import_combined_clause,
+                            type_token.clone(),
+                        )
+                        .ok()?;
+                        let default_import =
+                            import.clone().with_import_clause(default_clause.into());
+                        let (named_type, named_value) =
+                            split_named_import_specifiers(named, specifiers_requiring_type_marker)?;
+                        let (import_named_type, import_named_value) = new_named_imports(
+                            None,
+                            named_type,
+                            named_value,
+                            import_combined_clause.from_token().ok()?,
+                            import_combined_clause.source().ok()?,
+                            import.semicolon_token(),
+                        );
+                        add_module_items(
+                            &mut mutation,
+                            import.syntax(),
+                            [
+                                default_import.into(),
+                                import_named_type.into(),
+                                import_named_value.into(),
+                            ],
+                        );
+                    }
+                    AnyJsImportClause::JsImportNamedClause(import_clause) => {
+                        let named_specifiers = import_clause.named_specifiers().ok()?;
+                        let (named_type, named_value) = split_named_import_specifiers(
+                            named_specifiers,
+                            specifiers_requiring_type_marker,
+                        )?;
+                        let (import_named_type, import_named_value) = new_named_imports(
+                            None,
+                            named_type,
+                            named_value,
+                            import_clause.from_token().ok()?,
+                            import_clause.source().ok()?,
+                            import.semicolon_token(),
+                        );
+                        add_module_items(
+                            &mut mutation,
+                            import.syntax(),
+                            [import_named_type.into(), import_named_value.into()],
+                        );
+                    }
+                    _ => {
+                        return None;
+                    }
+                }
+            }
             ImportTypeFix::ExtractDefaultImportType(specifiers_requiring_type_marker) => {
                 let import_combined_clause = import_clause.as_js_import_combined_clause()?;
                 let default_import_clause = extract_into_default_import_clause(
@@ -515,35 +671,62 @@ impl Rule for UseImportType {
                     [new_import.into(), extra_import.into()],
                 );
             }
-            ImportTypeFix::ExtractCombinedImportType => {
+            ImportTypeFix::ExtractCombinedImportType(specifiers_requiring_type_marker) => {
                 let AnyJsImportClause::JsImportCombinedClause(import_combined_clause) =
                     import_clause
                 else {
-                    unreachable!();
+                    return None;
                 };
                 let default_import_clause =
                     extract_into_default_import_clause(&import_combined_clause, None).ok()?;
-                let new_import = import
+                let default_import = import
                     .clone()
                     .with_import_clause(default_import_clause.into());
-                let extra_import = extract_combined_specifier_in_new_import(
-                    &import_combined_clause,
-                    Some(
-                        make::token(T![type])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    ),
-                    import
-                        .semicolon_token()
-                        .is_some()
-                        .then_some(make::token(T![;])),
-                )?;
-                add_module_items(
-                    &mut mutation,
-                    import.syntax(),
-                    [new_import.into(), extra_import.into()],
-                );
+                if let Some(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named)) =
+                    import_combined_clause
+                        .specifier()
+                        .ok()
+                        .filter(|_| !specifiers_requiring_type_marker.is_empty())
+                {
+                    let (named_type, named_value) =
+                        split_named_import_specifiers(named, specifiers_requiring_type_marker)?;
+                    let (import_named_type, import_named_value) = new_named_imports(
+                        None,
+                        named_type,
+                        named_value,
+                        import_combined_clause.from_token().ok()?,
+                        import_combined_clause.source().ok()?,
+                        import.semicolon_token(),
+                    );
+                    add_module_items(
+                        &mut mutation,
+                        import.syntax(),
+                        [
+                            default_import.into(),
+                            import_named_type.into(),
+                            import_named_value.into(),
+                        ],
+                    );
+                } else {
+                    let extra_import = extract_combined_specifier_in_new_import(
+                        &import_combined_clause,
+                        Some(
+                            make::token(T![type])
+                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        ),
+                        import
+                            .semicolon_token()
+                            .is_some()
+                            .then_some(make::token(T![;])),
+                    )?;
+                    add_module_items(
+                        &mut mutation,
+                        import.syntax(),
+                        [default_import.into(), extra_import.into()],
+                    );
+                }
             }
-            ImportTypeFix::AddInlineTypeQualifiers(specifiers) => {
+            ImportTypeFix::AddTypeQualifiers(specifiers) => {
                 for specifier in specifiers {
                     let new_specifier = specifier
                         .clone()
@@ -586,13 +769,40 @@ impl Rule for UseImportType {
     }
 }
 
+/// Rule's options.
+#[derive(
+    Debug, Default, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ImportTypeOptions {
+    style: Option<Style>,
+}
+
+/// Rule's options.
+#[derive(
+    Debug, Default, Copy, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+enum Style {
+    /// Use the best fitting style according to the situation
+    #[default]
+    Auto,
+    /// Always use inline type keywords
+    InlineType,
+    /// Always separate types in a dedicated `import type`
+    SeparatedType,
+}
+
 #[derive(Debug)]
 pub enum ImportTypeFix {
     UseImportType,
-    ExtractDefaultImportType(Vec<AnyJsNamedImportSpecifier>),
-    ExtractCombinedImportType,
-    AddInlineTypeQualifiers(Vec<AnyJsNamedImportSpecifier>),
-    RemoveTypeQualifiers(Vec<JsSyntaxToken>),
+    UseSplitImportType(Box<[AnyJsNamedImportSpecifier]>),
+    ExtractDefaultImportType(Box<[AnyJsNamedImportSpecifier]>),
+    ExtractCombinedImportType(Box<[AnyJsNamedImportSpecifier]>),
+    AddTypeQualifiers(Box<[AnyJsNamedImportSpecifier]>),
+    RemoveTypeQualifiers(Box<[JsSyntaxToken]>),
 }
 
 /// Returns `true` if all references of `binding` are only used as a type.
@@ -612,9 +822,10 @@ fn is_only_used_as_type(model: &SemanticModel, binding: &JsIdentifierBinding) ->
 
 #[derive(Debug)]
 pub enum NamedImportTypeFix {
-    UseImportType(Vec<AnyJsNamedImportSpecifier>),
-    AddInlineTypeQualifiers(Vec<AnyJsNamedImportSpecifier>),
-    RemoveInlineTypeQualifiers(Vec<JsSyntaxToken>),
+    UseImportType(Box<[AnyJsNamedImportSpecifier]>),
+    AddInlineTypeQualifiers(Box<[AnyJsNamedImportSpecifier]>),
+    RemoveInlineTypeQualifiers(Box<[JsSyntaxToken]>),
+    CanSeparateType,
 }
 
 fn named_import_type_fix(
@@ -635,11 +846,12 @@ fn named_import_type_fix(
             None
         } else {
             Some(NamedImportTypeFix::RemoveInlineTypeQualifiers(
-                useless_type_tokens,
+                useless_type_tokens.into(),
             ))
         }
     } else {
         let mut imports_only_types = true;
+        let mut has_inline_types = false;
         let mut specifiers_requiring_type_marker = Vec::with_capacity(specifiers.len());
         for specifier in specifiers.iter() {
             let Ok(specifier) = specifier else {
@@ -661,17 +873,23 @@ fn named_import_type_fix(
                 } else {
                     imports_only_types = false;
                 }
+            } else {
+                has_inline_types = true;
             }
         }
         if imports_only_types {
             Some(NamedImportTypeFix::UseImportType(
-                specifiers_requiring_type_marker,
+                specifiers_requiring_type_marker.into(),
             ))
         } else if specifiers_requiring_type_marker.is_empty() {
-            None
+            if has_inline_types {
+                Some(NamedImportTypeFix::CanSeparateType)
+            } else {
+                None
+            }
         } else {
             Some(NamedImportTypeFix::AddInlineTypeQualifiers(
-                specifiers_requiring_type_marker,
+                specifiers_requiring_type_marker.into(),
             ))
         }
     }
@@ -785,4 +1003,89 @@ fn extract_combined_specifier_in_new_import(
     .build()
     .with_semicolon_token(semicolon_token)
     .prepend_trivia_pieces(comma_leading_trivia)
+}
+
+fn new_named_imports(
+    import_token: Option<JsSyntaxToken>,
+    named_type_specifiers: JsNamedImportSpecifiers,
+    named_value_specifiers: JsNamedImportSpecifiers,
+    from_token: JsSyntaxToken,
+    source: AnyJsModuleSource,
+    semicolon_token: Option<JsSyntaxToken>,
+) -> (JsImport, JsImport) {
+    let new_import_token = make::token(T![import])
+        .with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
+        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+    let type_import_clause =
+        make::js_import_named_clause(named_type_specifiers, from_token.clone(), source.clone())
+            .with_type_token(
+                make::token(T![type]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            )
+            .build();
+    let import_type = make::js_import(
+        import_token.unwrap_or_else(|| new_import_token.clone()),
+        type_import_clause.into(),
+    )
+    .build()
+    .with_semicolon_token(semicolon_token.clone());
+    let value_import_clause =
+        make::js_import_named_clause(named_value_specifiers, from_token, source).build();
+    let import_value = make::js_import(new_import_token, value_import_clause.into())
+        .build()
+        .with_semicolon_token(semicolon_token);
+    (import_type, import_value)
+}
+
+fn split_named_import_specifiers(
+    named_specifiers: JsNamedImportSpecifiers,
+    specifiers_requiring_type_marker: &[AnyJsNamedImportSpecifier],
+) -> Option<(JsNamedImportSpecifiers, JsNamedImportSpecifiers)> {
+    let specifiers = named_specifiers.specifiers();
+    let mut type_specifiers = Vec::with_capacity(specifiers.len() - 1);
+    let mut type_specifier_separators = Vec::with_capacity(specifiers.len() - 1);
+    let mut value_specifiers =
+        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_marker.len());
+    let mut value_specifier_separators =
+        Vec::with_capacity(specifiers.len() - specifiers_requiring_type_marker.len());
+    for specifier_element in specifiers.elements() {
+        let specifier = specifier_element.node().ok()?.clone();
+        let trailing_sep = specifier_element.into_trailing_separator().ok()?;
+        if let Some(type_token) = specifier.type_token() {
+            let new_specifier = specifier
+                .with_type_token(None)
+                .trim_leading_trivia()?
+                .prepend_trivia_pieces(chain_trivia_pieces(
+                    type_token.leading_trivia().pieces(),
+                    trim_leading_trivia_pieces(type_token.trailing_trivia().pieces()),
+                ))?;
+            type_specifiers.push(new_specifier);
+            if let Some(trailing_sep) = trailing_sep {
+                type_specifier_separators.push(trailing_sep);
+            }
+        } else if specifiers_requiring_type_marker
+            .iter()
+            .any(|x| x.range().start() == specifier.range().start())
+        {
+            type_specifiers.push(specifier);
+            if let Some(trailing_sep) = trailing_sep {
+                type_specifier_separators.push(trailing_sep);
+            }
+        } else {
+            value_specifiers.push(specifier);
+            if let Some(trailing_sep) = trailing_sep {
+                value_specifier_separators.push(trailing_sep);
+            }
+        }
+    }
+    let named_type = {
+        let type_specifiers =
+            make::js_named_import_specifier_list(type_specifiers, type_specifier_separators);
+        named_specifiers.clone().with_specifiers(type_specifiers)
+    };
+    let named_value = {
+        let value_specifiers =
+            make::js_named_import_specifier_list(value_specifiers, value_specifier_separators);
+        named_specifiers.with_specifiers(value_specifiers)
+    };
+    Some((named_type, named_value))
 }

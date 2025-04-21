@@ -1947,7 +1947,7 @@ export interface Style {
 	/**
 	 * Promotes the use of import type for types.
 	 */
-	useImportType?: RuleFixConfiguration_for_Null;
+	useImportType?: RuleFixConfiguration_for_ImportTypeOptions;
 	/**
 	 * Require all enum members to be literal values.
 	 */
@@ -2388,6 +2388,9 @@ export type RuleFixConfiguration_for_ConsistentArrayTypeOptions =
 export type RuleConfiguration_for_FilenamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_FilenamingConventionOptions;
+export type RuleFixConfiguration_for_ImportTypeOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_ImportTypeOptions;
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
@@ -2717,6 +2720,20 @@ export interface RuleWithOptions_for_FilenamingConventionOptions {
 	 */
 	options: FilenamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_ImportTypeOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: ImportTypeOptions;
+}
 export interface RuleWithFixOptions_for_NamingConventionOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -3002,6 +3019,12 @@ export interface FilenamingConventionOptions {
 /**
  * Rule's options.
  */
+export interface ImportTypeOptions {
+	style?: Style2;
+}
+/**
+ * Rule's options.
+ */
 export interface NamingConventionOptions {
 	/**
 	 * Custom conventions.
@@ -3085,6 +3108,10 @@ export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;
+/**
+ * Rule's options.
+ */
+export type Style2 = "auto" | "inlineType" | "separatedType";
 export interface Convention {
 	/**
 	 * String cases to enforce

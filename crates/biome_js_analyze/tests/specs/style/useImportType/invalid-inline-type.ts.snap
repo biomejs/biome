@@ -1,0 +1,179 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-inline-type.ts
+---
+# Input
+```ts
+import { T1, type T2 } from "mod";
+export type { T1, T2 };
+
+import { T3, V1, type T4 } from "mod";
+export type { T3, T4 };
+export { V1 };
+
+import T5, { T6, V2 } from "mod";
+export type { T5, T6 };
+export { V2 };
+
+import V3, { T7, V4, type T8 } from "mod";
+export type { T7, T8 };
+export { V3, V4 };
+
+import V5, { T9 } from "mod";
+export type { T9 };
+export { V5 };
+
+```
+
+# Diagnostics
+```
+invalid-inline-type.ts:1:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+  > 1 │ import { T1, type T2 } from "mod";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export type { T1, T2 };
+    3 │ 
+  
+  i This import is only used as a type.
+  
+  > 1 │ import { T1, type T2 } from "mod";
+      │          ^^
+    2 │ export type { T1, T2 };
+    3 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Add inline type keywords.
+  
+    1 │ import·{·type·T1,·type·T2·}·from·"mod";
+      │          +++++                         
+
+```
+
+```
+invalid-inline-type.ts:4:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+    2 │ export type { T1, T2 };
+    3 │ 
+  > 4 │ import { T3, V1, type T4 } from "mod";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ export type { T3, T4 };
+    6 │ export { V1 };
+  
+  i This import is only used as a type.
+  
+    2 │ export type { T1, T2 };
+    3 │ 
+  > 4 │ import { T3, V1, type T4 } from "mod";
+      │          ^^
+    5 │ export type { T3, T4 };
+    6 │ export { V1 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Add inline type keywords.
+  
+    4 │ import·{·type·T3,·V1,·type·T4·}·from·"mod";
+      │          +++++                             
+
+```
+
+```
+invalid-inline-type.ts:8:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The default import and some named imports are only used as types.
+  
+     6 │ export { V1 };
+     7 │ 
+   > 8 │ import T5, { T6, V2 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ export type { T5, T6 };
+    10 │ export { V2 };
+  
+  i This import is only used as a type.
+  
+     6 │ export { V1 };
+     7 │ 
+   > 8 │ import T5, { T6, V2 } from "mod";
+       │              ^^
+     9 │ export type { T5, T6 };
+    10 │ export { V2 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+     6  6 │   export { V1 };
+     7  7 │   
+     8    │ - import·T5,·{·T6,·V2·}·from·"mod";
+        8 │ + import·type·T5·from·"mod";
+        9 │ + import·{·type·T6,·V2·}·from·"mod"
+     9 10 │   export type { T5, T6 };
+    10 11 │   export { V2 };
+  
+
+```
+
+```
+invalid-inline-type.ts:12:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+    10 │ export { V2 };
+    11 │ 
+  > 12 │ import V3, { T7, V4, type T8 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ export type { T7, T8 };
+    14 │ export { V3, V4 };
+  
+  i This import is only used as a type.
+  
+    10 │ export { V2 };
+    11 │ 
+  > 12 │ import V3, { T7, V4, type T8 } from "mod";
+       │              ^^
+    13 │ export type { T7, T8 };
+    14 │ export { V3, V4 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Add inline type keywords.
+  
+    12 │ import·V3,·{·type·T7,·V4,·type·T8·}·from·"mod";
+       │              +++++                             
+
+```
+
+```
+invalid-inline-type.ts:16:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+    14 │ export { V3, V4 };
+    15 │ 
+  > 16 │ import V5, { T9 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^
+    17 │ export type { T9 };
+    18 │ export { V5 };
+  
+  i This import is only used as a type.
+  
+    14 │ export { V3, V4 };
+    15 │ 
+  > 16 │ import V5, { T9 } from "mod";
+       │              ^^
+    17 │ export type { T9 };
+    18 │ export { V5 };
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Add inline type keywords.
+  
+    16 │ import·V5,·{·type·T9·}·from·"mod";
+       │              +++++                
+
+```

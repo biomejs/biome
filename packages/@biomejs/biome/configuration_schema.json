@@ -1840,6 +1840,22 @@
 			"description": "Glob to match against import sources.",
 			"allOf": [{ "$ref": "#/definitions/Glob" }]
 		},
+		"ImportTypeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithImportTypeOptions" }
+			]
+		},
+		"ImportTypeOptions": {
+			"description": "Rule's options.",
+			"type": "object",
+			"properties": {
+				"style": {
+					"anyOf": [{ "$ref": "#/definitions/Style2" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"IndentScriptAndStyle": {
 			"description": "Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).\n\nWhen true, the content of `<script>` and `<style>` tags will be indented one level.",
 			"type": "boolean"
@@ -3627,6 +3643,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithImportTypeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ImportTypeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNamingConventionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -4553,7 +4588,7 @@
 				"useImportType": {
 					"description": "Promotes the use of import type for types.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/ImportTypeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4664,6 +4699,26 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"Style2": {
+			"description": "Rule's options.",
+			"oneOf": [
+				{
+					"description": "Use the best fitting style according to the situation",
+					"type": "string",
+					"enum": ["auto"]
+				},
+				{
+					"description": "Always use inline type keywords",
+					"type": "string",
+					"enum": ["inlineType"]
+				},
+				{
+					"description": "Always separate types in a dedicated `import type`",
+					"type": "string",
+					"enum": ["separatedType"]
+				}
+			]
 		},
 		"Suspicious": {
 			"description": "A list of rules that belong to this group",
