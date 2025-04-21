@@ -176,6 +176,16 @@ impl Type {
     }
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum Truthiness {
+    // The value is always evaluated to truthy.
+    Truthy,
+    // The value is always evaluated to falsy.
+    Falsy,
+    // The value is evaluated to truthy or falsy, but the truthiness is always same.
+    Either,
+}
+
 #[derive(Clone, Debug, Default, PartialEq, Resolvable)]
 pub enum TypeInner {
     /// The type is unknown because inference couldn't determine a type.
@@ -275,6 +285,13 @@ impl TypeInner {
         }
     }
 
+    pub fn as_literal(&self) -> Option<&Literal> {
+        match self {
+            Self::Literal(literal) => Some(literal.as_ref()),
+            _ => None,
+        }
+    }
+
     /// Returns whether the given type has been inferred.
     ///
     /// A type is considered inferred if it is anything except `Self::Unknown`,
@@ -310,6 +327,15 @@ impl TypeInner {
                 .as_type()
                 .is_some_and(|ty| ty.is_promise()),
             _ => false,
+        }
+    }
+
+    pub fn truthiness(&self) -> Option<Truthiness> {
+        match self {
+            Self::Class(_) | Self::Function(_) | Self::Object(_) => Some(Truthiness::Truthy),
+            Self::Undefined => Some(Truthiness::Falsy),
+            Self::Literal(lit) => lit.truthiness(),
+            _ => None,
         }
     }
 }
@@ -432,6 +458,16 @@ pub struct GenericTypeParameter {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Intersection(pub(super) Box<[Type]>);
 
+/// A template literal.
+#[derive(Clone, Debug, PartialEq, Resolvable)]
+pub struct TemplateLiteral(pub(super) Box<[Type]>);
+
+impl TemplateLiteral {
+    pub fn elements(&self) -> &[Type] {
+        &self.0
+    }
+}
+
 /// Literal value used as a type.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub enum Literal {
@@ -442,7 +478,54 @@ pub enum Literal {
     Object(ObjectLiteral),
     RegExp(Text),
     String(Text),
-    Template(Text),
+    Template(TemplateLiteral),
+}
+
+impl Literal {
+    pub fn truthiness(&self) -> Option<Truthiness> {
+        match self {
+            Self::BigInt(text) => match text.text() {
+                "0n" => Some(Truthiness::Falsy),
+                _ => Some(Truthiness::Truthy),
+            },
+            Self::Boolean(text) => match text.text().to_ascii_lowercase().as_str() {
+                "true" => Some(Truthiness::Truthy),
+                _ => Some(Truthiness::Falsy),
+            },
+            Self::Number(text) => match text.text() {
+                "0" => Some(Truthiness::Falsy),
+                _ => Some(Truthiness::Truthy),
+            },
+            Self::Null => Some(Truthiness::Falsy),
+            Self::Object(_) | Self::RegExp(_) => Some(Truthiness::Truthy),
+            Self::String(text) => match text.is_empty() {
+                true => Some(Truthiness::Falsy),
+                _ => Some(Truthiness::Truthy),
+            },
+            Self::Template(lit) => {
+                let mut has_truthy = true;
+                let mut has_falsy = true;
+                let mut has_unknown = true;
+
+                let elements = lit.elements();
+                for element in elements {
+                    match element.truthiness() {
+                        Some(Truthiness::Truthy) => has_truthy = true,
+                        Some(Truthiness::Falsy) => has_falsy = true,
+                        None => has_unknown = true,
+                        _ => {}
+                    }
+                }
+
+                match (has_truthy, has_falsy, has_unknown) {
+                    (true, _, _) => Some(Truthiness::Truthy),
+                    (false, true, false) => Some(Truthiness::Falsy),
+                    (_, _, false) => Some(Truthiness::Either),
+                    _ => None,
+                }
+            }
+        }
+    }
 }
 
 /// A namespace definition.
