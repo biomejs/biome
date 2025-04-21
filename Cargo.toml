@@ -199,7 +199,7 @@ oxc_resolver         = "=5.2.0"
 papaya               = "0.2"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 proc-macro-error2    = { version = "2.0.1", default-features = false }
-proc-macro2          = "1.0.94"
+proc-macro2          = "1.0.95"
 quickcheck           = "1.0.3"
 quickcheck_macros    = "1.0.0"
 quote                = "1.0.40"
