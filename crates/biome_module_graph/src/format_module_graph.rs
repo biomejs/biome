@@ -9,10 +9,10 @@ use biome_formatter::{
     format_args, write,
 };
 use biome_js_type_info::{
-    CallSignatureTypeMember, Class, ConstructorTypeMember, Function, FunctionParameter,
-    GenericTypeParameter, Literal, MethodTypeMember, Object, ObjectLiteral, PropertyTypeMember,
-    ReturnType, Type, TypeInner, TypeMember, TypeReference, TypeReferenceQualifier,
-    TypeofAwaitExpression, TypeofExpression,
+    CallArgumentType, CallSignatureTypeMember, Class, ConstructorTypeMember, DestructureField,
+    Function, FunctionParameter, GenericTypeParameter, Literal, MethodTypeMember, Object,
+    ObjectLiteral, PropertyTypeMember, ReturnType, Type, TypeInner, TypeMember, TypeReference,
+    TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression,
 };
 use biome_rowan::{Text, TextSize};
 use std::fmt::{Debug, Formatter};
@@ -397,6 +397,7 @@ impl Format<ModuleFormatContext> for Type {
                     text(")")
                 ]]
             ),
+            TypeInner::InstanceOf(ty) => write!(f, [text("instanceof"), space(), &ty.as_ref()]),
             TypeInner::Reference(reference) => write!(f, [&reference.as_ref(),]),
             TypeInner::TypeofType(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             TypeInner::TypeofValue(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
@@ -952,7 +953,60 @@ impl Format<ModuleFormatContext> for TypeofExpression {
                     ]]
                 )
             }
-            Self::Call(ty) => write!(f, [FmtVerbatim(&ty)]),
+            Self::Call(call) => {
+                write!(
+                    f,
+                    [&format_args![
+                        text("Call"),
+                        space(),
+                        call.callee,
+                        space(),
+                        text("("),
+                        group(&soft_block_indent(&FmtCallArgumentType(&call.arguments))),
+                        text(")")
+                    ]]
+                )
+            }
+            Self::Destructure(destructure) => match &destructure.destructure_field {
+                DestructureField::Index(index) => {
+                    write!(
+                        f,
+                        [&format_args![
+                            destructure.ty,
+                            text("["),
+                            dynamic_text(&index.to_string(), TextSize::default()),
+                            text("]")
+                        ]]
+                    )
+                }
+                DestructureField::Name(name) => {
+                    write!(f, [&format_args![destructure.ty, text("."), name]])
+                }
+                DestructureField::RestExcept(names) => {
+                    write!(
+                        f,
+                        [&format_args![
+                            text("{"),
+                            FmtNames(names),
+                            text("..."),
+                            destructure.ty,
+                            text("}")
+                        ]]
+                    )
+                }
+                DestructureField::RestFrom(index) => {
+                    write!(
+                        f,
+                        [&format_args![
+                            text("["),
+                            dynamic_text(&std::format!("({index} others)"), TextSize::default()),
+                            text("..."),
+                            destructure.ty,
+                            text("]")
+                        ]]
+                    )
+                }
+            },
             Self::New(ty) => write!(f, [FmtVerbatim(&ty)]),
             Self::StaticMember(ty) => write!(f, [FmtVerbatim(&ty)]),
             Self::Super(ty) => write!(f, [FmtVerbatim(&ty)]),
@@ -993,6 +1047,31 @@ impl Format<ModuleFormatContext> for FmtFunctionParameters<'_> {
             joiner.finish()
         });
         write!(f, [&function_parameters])
+    }
+}
+
+struct FmtCallArgumentType<'a>(&'a [CallArgumentType]);
+
+impl Format<ModuleFormatContext> for FmtCallArgumentType<'_> {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
+    ) -> FormatResult<()> {
+        if self.0.is_empty() {
+            return write!(f, [text("No parameters")]);
+        }
+
+        let type_parameters = format_with(|f| {
+            let mut joiner = f.join_with(soft_line_break());
+            for part in self.0 {
+                match part {
+                    CallArgumentType::Argument(ty) => joiner.entry(&format_args![ty]),
+                    CallArgumentType::Spread(ty) => joiner.entry(&format_args![text("..."), ty]),
+                };
+            }
+            joiner.finish()
+        });
+        write!(f, [&format_args![&type_parameters]])
     }
 }
 
@@ -1067,16 +1146,40 @@ impl Format<ModuleFormatContext> for FmtTypes<'_> {
     }
 }
 
-impl Format<ModuleFormatContext> for Option<Text> {
+struct FmtNames<'a>(&'a [Text]);
+
+impl Format<ModuleFormatContext> for FmtNames<'_> {
     fn fmt(
         &self,
         f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
     ) -> FormatResult<()> {
-        if let Some(name) = self.as_ref() {
-            write!(f, [&format_args![dynamic_text(name, TextSize::default())]])
-        } else {
-            write!(f, [&format_args![text("No name")]])
+        if self.0.is_empty() {
+            return Ok(());
         }
+
+        let types = format_with(|f| {
+            let mut joiner = f.join_with(soft_line_break());
+            for part in self.0 {
+                joiner.entry(&format_args![part]);
+            }
+            joiner.finish()
+        });
+        write!(f, [&format_args![&types]])
+    }
+}
+
+impl Format<ModuleFormatContext> for Text {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<ModuleFormatContext>,
+    ) -> FormatResult<()> {
+        write!(
+            f,
+            [&format_args![dynamic_text(
+                self.text(),
+                TextSize::default()
+            )]]
+        )
     }
 }
 struct FmtVerbatim<'a, T>(&'a T);

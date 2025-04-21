@@ -1,6 +1,14 @@
-use std::ops::Deref;
+use std::{
+    collections::{BTreeMap, btree_map::Entry},
+    ops::Deref,
+};
 
-use crate::{Resolvable, Type, TypeInner, TypeMember, TypeResolver, TypeofExpression};
+use biome_rowan::Text;
+
+use crate::{
+    DestructureField, Resolvable, Type, TypeInner, TypeMember, TypeResolver, TypeofExpression,
+    globals::ARRAY,
+};
 
 impl Type {
     /// Flattens the given type.
@@ -45,6 +53,13 @@ impl Type {
     /// ```
     pub fn flattened(&self, resolver: &dyn TypeResolver, stack: &[&TypeInner]) -> Self {
         match self.deref() {
+            TypeInner::InstanceOf(ty) => match ty.inner_type() {
+                TypeInner::Class(_class) => Self::instance_of(ty.as_ref().clone()),
+                TypeInner::Reference(reference) if reference.ty.is_inferred() => {
+                    Self::instance_of(reference.ty.clone())
+                }
+                _ => self.clone(),
+            },
             TypeInner::Reference(reference) if reference.ty.is_inferred() => reference
                 .ty
                 .with_type_parameters(&reference.type_parameters)
@@ -79,6 +94,82 @@ impl Type {
                     }
                     _ => self.clone(),
                 },
+                TypeofExpression::Destructure(expr) => {
+                    let ty = expr.ty.resolved(resolver, stack);
+                    match (ty.inner_type(), &expr.destructure_field) {
+                        (TypeInner::Class(class), DestructureField::Name(name)) => class
+                            .members
+                            .iter()
+                            .find(|own_member| {
+                                own_member.is_static() && own_member.has_name(name.text())
+                            })
+                            .map(|member| member.to_type(&ty))
+                            .unwrap_or_default(),
+                        (TypeInner::Class(class), DestructureField::RestExcept(names)) => {
+                            Self::object_with_members(
+                                class
+                                    .members
+                                    .iter()
+                                    .filter(|own_member| {
+                                        own_member.is_static()
+                                            && !names.iter().any(|name| own_member.has_name(name))
+                                    })
+                                    .cloned()
+                                    .collect(),
+                            )
+                        }
+                        (TypeInner::Object(object), DestructureField::Index(_index)) => {
+                            if let Some(array) = object.find_parent_class(&ARRAY) {
+                                array
+                                    .type_parameters
+                                    .first()
+                                    .map(|param| param.ty.union_with(Self::undefined()))
+                                    .unwrap_or_default()
+                            } else {
+                                Self::unknown()
+                            }
+                        }
+                        (TypeInner::Object(object), DestructureField::Name(name)) => object
+                            .all_members()
+                            .find(|member| !member.is_static() && member.has_name(name.text()))
+                            .map(|member| member.to_type(&ty))
+                            .unwrap_or_default(),
+                        (TypeInner::Object(object), DestructureField::RestExcept(names)) => {
+                            // We need to look up the prototype chain, which may
+                            // yield duplicate member names. We deduplicate
+                            // using a map before constructing a new object.
+                            let members: BTreeMap<Text, TypeMember> = object
+                                .all_members()
+                                .filter(|member| {
+                                    !member.is_static()
+                                        && !names.iter().any(|name| member.has_name(name))
+                                })
+                                .fold(BTreeMap::new(), |mut map, member| {
+                                    if let Some(name) = member.name() {
+                                        if let Entry::Vacant(entry) = map.entry(name) {
+                                            entry.insert(member.clone());
+                                        }
+                                    }
+                                    map
+                                });
+                            Self::object_with_members(members.into_values().collect())
+                        }
+                        (TypeInner::Object(object), DestructureField::RestFrom(_index)) => {
+                            if let Some(_array) = object.find_parent_class(&ARRAY) {
+                                expr.ty.clone()
+                            } else {
+                                Self::unknown()
+                            }
+                        }
+                        (TypeInner::Tuple(tuple), DestructureField::Index(index)) => {
+                            tuple.get_ty(*index)
+                        }
+                        (TypeInner::Tuple(tuple), DestructureField::RestFrom(index)) => {
+                            TypeInner::Tuple(Box::new(tuple.slice_from(*index))).into()
+                        }
+                        _ => Self::unknown(),
+                    }
+                }
                 TypeofExpression::New(expr) => {
                     let callee = expr.callee.resolved(resolver, stack);
                     match callee.inner_type() {

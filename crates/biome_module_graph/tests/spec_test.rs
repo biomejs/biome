@@ -302,10 +302,17 @@ fn test_resolve_exports() {
 
             var qux = 1;
 
-            /**
-             * TODO: No types can be detected on these yet.
-             */
             export const { a, b, c: [d, e] } = getObject();
+
+            type GetObjectResult = {
+                a: string,
+                b: Array<number>,
+                c: [first: boolean, last: boolean | undefined],
+            };
+
+            function getObject(): GetObjectResult {
+                return {}; // We're not a type checker, so this is a-okay.
+            }
 
             /**
              * @public

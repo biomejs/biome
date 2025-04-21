@@ -23,7 +23,7 @@ impl TypeResolver for GlobalScopeResolver<'_> {
         if qualifier.parts().len() == 1 {
             self.resolve_type_of(&qualifier.parts()[0]).or_else(|| {
                 qualifier
-                    .is_promise()
+                    .is_array()
                     .then(|| Type::promise_of(Type::unknown()))
             })
         } else {

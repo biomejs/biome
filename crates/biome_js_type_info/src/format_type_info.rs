@@ -1,7 +1,8 @@
 use crate::{
-    CallSignatureTypeMember, Class, Function, FunctionParameter, GenericTypeParameter,
-    MethodTypeMember, Object, PropertyTypeMember, ReturnType, Type, TypeInner, TypeMember,
-    TypeReference, TypeReferenceQualifier,
+    CallArgumentType, CallSignatureTypeMember, Class, DestructureField, Function,
+    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, MethodTypeMember, Object,
+    PropertyTypeMember, ReturnType, Type, TypeInner, TypeMember, TypeReference,
+    TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -98,8 +99,9 @@ impl Format<FormatTypeContext> for TypeInner {
             Self::TypeOperator(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::Alias(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::Literal(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::InstanceOf(ty) => write!(f, [text("instanceof"), space(), &ty.as_ref()]),
             Self::Reference(reference) => write!(f, [&reference.as_ref()]),
-            Self::TypeofExpression(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::TypeofExpression(expression) => write!(f, [&expression.as_ref()]),
             Self::TypeofType(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::TypeofValue(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::AnyKeyword => write!(f, [text("any")]),
@@ -218,34 +220,55 @@ impl Format<FormatTypeContext> for ReturnType {
 
 impl Format<FormatTypeContext> for FunctionParameter {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
-        let optional = format_with(|f| {
-            if self.is_optional {
-                write!(f, [&format_args![text("optional")]])
+        let bindings = format_with(|f| {
+            if !self.bindings.is_empty() {
+                write!(
+                    f,
+                    [&format_args![
+                        space(),
+                        text("(bindings:"),
+                        space(),
+                        FmtFunctionParameterBindings(&self.bindings),
+                        text(")")
+                    ]]
+                )
             } else {
-                write!(f, [&format_args![text("required")]])
+                Ok(())
             }
         });
-        let rest = format_with(|f| {
-            if self.is_rest {
-                write!(f, [&format_args![text("rest")]])
-            } else {
-                write!(f, [&format_args![text("not_rest")]])
-            }
-        });
-        write!(
-            f,
-            [&group(&format_args![
-                text("["),
-                self.name,
-                text(","),
-                space(),
-                optional,
-                text(","),
-                space(),
-                rest,
-                text("]")
-            ])]
-        )
+        if self.is_rest {
+            write!(
+                f,
+                [&group(&format_args![
+                    text("..."),
+                    self.name.as_ref().unwrap_or(&Text::Static("(unnamed)")),
+                    text(":"),
+                    space(),
+                    &self.ty,
+                    bindings
+                ])]
+            )
+        } else {
+            let optional = format_with(|f| {
+                if self.is_optional {
+                    write!(f, [&format_args![text("optional")]])
+                } else {
+                    write!(f, [&format_args![text("required")]])
+                }
+            });
+            write!(
+                f,
+                [&group(&format_args![
+                    optional,
+                    space(),
+                    self.name.as_ref().unwrap_or(&Text::Static("(unnamed)")),
+                    text(":"),
+                    space(),
+                    &self.ty,
+                    bindings
+                ])]
+            )
+        }
     }
 }
 
@@ -278,6 +301,98 @@ impl Format<FormatTypeContext> for TypeMember {
                     ]]
                 )
             }
+        }
+    }
+}
+
+impl Format<FormatTypeContext> for TypeofAwaitExpression {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        write!(
+            f,
+            [&format_args![group(&soft_block_indent(&self.argument)),]]
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for TypeofExpression {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        match self {
+            Self::Addition(_) => todo!(),
+            Self::Await(await_expression) => {
+                write!(
+                    f,
+                    [&format_args![
+                        text("Await"),
+                        text("("),
+                        group(&soft_block_indent(await_expression)),
+                        text(")")
+                    ]]
+                )
+            }
+            Self::Call(call) => {
+                write!(
+                    f,
+                    [&format_args![
+                        text("Call"),
+                        space(),
+                        call.callee,
+                        space(),
+                        text("("),
+                        group(&soft_block_indent(&FmtCallArgumentType(&call.arguments))),
+                        text(")")
+                    ]]
+                )
+            }
+            Self::Destructure(destructure) => match &destructure.destructure_field {
+                DestructureField::Index(index) => {
+                    write!(
+                        f,
+                        [&format_args![
+                            destructure.ty,
+                            text("["),
+                            dynamic_text(&index.to_string(), TextSize::default()),
+                            text("]")
+                        ]]
+                    )
+                }
+                DestructureField::Name(name) => {
+                    write!(f, [&format_args![destructure.ty, text("."), name]])
+                }
+                DestructureField::RestExcept(names) => {
+                    write!(
+                        f,
+                        [&format_args![
+                            text("{"),
+                            FmtNames(names),
+                            text("..."),
+                            destructure.ty,
+                            text("}")
+                        ]]
+                    )
+                }
+                DestructureField::RestFrom(index) => {
+                    write!(
+                        f,
+                        [&format_args![
+                            text("["),
+                            dynamic_text(&std::format!("({index} others)"), TextSize::default()),
+                            text("..."),
+                            destructure.ty,
+                            text("]")
+                        ]]
+                    )
+                }
+            },
+            Self::New(_) => todo!(),
+            Self::StaticMember(_) => todo!(),
+            Self::Super(_) => todo!(),
+            Self::This(_) => todo!(),
         }
     }
 }
@@ -405,7 +520,7 @@ impl Format<FormatTypeContext> for TypeReference {
                 space(),
                 text("{"),
                 &group(&block_indent(&format_args![
-                    text("params:"),
+                    text("resolved:"),
                     space(),
                     &self.ty,
                     hard_line_break(),
@@ -506,6 +621,30 @@ impl Format<FormatTypeContext> for FmtFunctionParameters<'_> {
     }
 }
 
+struct FmtFunctionParameterBindings<'a>(&'a [FunctionParameterBinding]);
+impl Format<FormatTypeContext> for FmtFunctionParameterBindings<'_> {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        if self.0.is_empty() {
+            return Ok(());
+        }
+
+        let function_parameters = format_with(|f| {
+            let separator = format_with(|f| write!(f, [&format_args![text(","), space()]]));
+            let mut joiner = f.join_with(separator);
+            for part in self.0 {
+                joiner.entry(&format_args![&part.name, text(":"), &part.ty]);
+            }
+            joiner.finish()
+        });
+        write!(
+            f,
+            [&format_args![&group(&soft_block_indent(
+                &function_parameters
+            )),]]
+        )
+    }
+}
+
 struct FmtGenericTypeParameters<'a>(&'a [GenericTypeParameter]);
 
 impl Format<FormatTypeContext> for FmtGenericTypeParameters<'_> {
@@ -576,13 +715,56 @@ impl Format<FormatTypeContext> for FmtTypes<'_> {
     }
 }
 
-impl Format<FormatTypeContext> for Option<Text> {
+impl Format<FormatTypeContext> for Text {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
-        if let Some(name) = self.as_ref() {
-            write!(f, [&format_args![dynamic_text(name, TextSize::default())]])
-        } else {
-            write!(f, [&format_args![text("No name")]])
+        write!(f, [&format_args![dynamic_text(self, TextSize::default())]])
+    }
+}
+
+struct FmtCallArgumentType<'a>(&'a [CallArgumentType]);
+
+impl Format<FormatTypeContext> for FmtCallArgumentType<'_> {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        if self.0.is_empty() {
+            return write!(f, [text("No parameters")]);
         }
+
+        let type_parameters = format_with(|f| {
+            let mut joiner = f.join_with(soft_line_break());
+            for part in self.0 {
+                match part {
+                    CallArgumentType::Argument(ty) => joiner.entry(&format_args![ty]),
+                    CallArgumentType::Spread(ty) => joiner.entry(&format_args![text("..."), ty]),
+                };
+            }
+            joiner.finish()
+        });
+        write!(f, [&format_args![&type_parameters]])
+    }
+}
+
+struct FmtNames<'a>(&'a [Text]);
+
+impl Format<FormatTypeContext> for FmtNames<'_> {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        if self.0.is_empty() {
+            return Ok(());
+        }
+
+        let types = format_with(|f| {
+            let mut joiner = f.join_with(soft_line_break());
+            for part in self.0 {
+                joiner.entry(&format_args![part]);
+            }
+            joiner.finish()
+        });
+        write!(f, [&format_args![&types]])
     }
 }
 

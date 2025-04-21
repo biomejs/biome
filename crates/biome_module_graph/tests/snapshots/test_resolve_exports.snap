@@ -1,7 +1,6 @@
 ---
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
-snapshot_kind: text
 ---
 ## /src/index.ts
 
@@ -24,14 +23,21 @@ export async function baz() {}
 
 var qux = 1;
 
-/**
- * TODO: No types can be detected on these yet.
- */
 export const {
 	a,
 	b,
 	c: [d, e],
 } = getObject();
+
+type GetObjectResult = {
+	a: string;
+	b: Array<number>;
+	c: [first: boolean, last: boolean | undefined];
+};
+
+function getObject(): GetObjectResult {
+	return {}; // We're not a type checker, so this is a-okay.
+}
 
 /**
  * @public
@@ -53,20 +59,17 @@ export * as renamed2 from "./renamed-reexports";
 Exports {
   "a" => {
     ExportOwnExport => JsOwnExport(
-      Unknown
+      String
       Local name: a
-      JsDoc(
-        TODO: No types can be detected on these yet.
-      )
     )
   }
   "b" => {
     ExportOwnExport => JsOwnExport(
-      Unknown
+      "Array" {
+        params: Unknown
+        type_args: Number
+      }
       Local name: b
-      JsDoc(
-        TODO: No types can be detected on these yet.
-      )
     )
   }
   "bar" => {
@@ -200,11 +203,8 @@ Exports {
   }
   "d" => {
     ExportOwnExport => JsOwnExport(
-      Unknown
+      Boolean
       Local name: d
-      JsDoc(
-        TODO: No types can be detected on these yet.
-      )
     )
   }
   "default" => {
@@ -228,11 +228,17 @@ Exports {
   }
   "e" => {
     ExportOwnExport => JsOwnExport(
-      Unknown
+      Union(
+    [
+        Type(
+            Boolean,
+        ),
+        Type(
+            Undefined,
+        ),
+    ],
+)
       Local name: e
-      JsDoc(
-        TODO: No types can be detected on these yet.
-      )
     )
   }
   "foo" => {
