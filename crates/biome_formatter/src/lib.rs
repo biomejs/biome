@@ -386,7 +386,7 @@ pub enum ParseFormatNumberError {
     ParseError(ParseIntError),
     /// The `u16` value of the string is not a valid [LineWidth]
     TryFromU16Error(LineWidthFromIntError),
-    /// The `u8 value of the string is not a valid [IndentWidth]
+    /// The `u8` value of the string is not a valid [IndentWidth]
     TryFromU8Error(IndentWidthFromIntError),
 }
 
