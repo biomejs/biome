@@ -3452,14 +3452,11 @@ fn format_skip_errors_continues_with_valid_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    // Prepare a valid JS file and an invalid JS file
     let valid = Utf8Path::new("valid.js");
     fs.insert(valid.into(), UNFORMATTED.as_bytes());
-
     let invalid = Utf8Path::new("invalid.js");
     fs.insert(invalid.into(), "while ) {}".as_bytes());
 
-    // Run format with skip-errors and write enabled
     let (fs, result) = run_cli(
         fs,
         &mut console,
@@ -3475,14 +3472,10 @@ fn format_skip_errors_continues_with_valid_files() {
         ),
     );
 
-    // Expect no errors for the command
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    // Valid file should be formatted, invalid file unchanged
     assert_file_contents(&fs, valid, FORMATTED);
     assert_file_contents(&fs, invalid, "while ) {}");
-
-    // Snapshot the console output and overall behavior
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_skip_errors_continues_with_valid_files",
