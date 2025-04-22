@@ -17,6 +17,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
+use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, CallSignatureTypeMember, Class, Constructor,
     ConstructorTypeMember, DestructureField, Function, FunctionParameter, FunctionParameterBinding,
@@ -465,19 +466,19 @@ impl Type {
             AnyJsLiteralExpression::JsBigintLiteralExpression(expr) => {
                 Literal::BigInt(text_from_token(expr.value_token())?)
             }
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(expr) => {
-                Literal::Boolean(text_from_token(expr.value_token())?)
-            }
+            AnyJsLiteralExpression::JsBooleanLiteralExpression(expr) => Literal::Boolean(
+                BooleanLiteral::parse(text_from_token(expr.value_token())?.text())?,
+            ),
             AnyJsLiteralExpression::JsNullLiteralExpression(_) => Literal::Null,
-            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => {
-                Literal::Number(text_from_token(expr.value_token())?)
-            }
+            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => Literal::Number(
+                NumberLiteral::parse(text_from_token(expr.value_token())?.text())?,
+            ),
             AnyJsLiteralExpression::JsRegexLiteralExpression(expr) => {
                 Literal::RegExp(text_from_token(expr.value_token())?)
             }
-            AnyJsLiteralExpression::JsStringLiteralExpression(expr) => {
-                Literal::String(text_from_token(expr.value_token())?)
-            }
+            AnyJsLiteralExpression::JsStringLiteralExpression(expr) => Literal::String(
+                StringLiteral::from(Text::Borrowed(expr.inner_string_text().ok()?)),
+            ),
         };
 
         Some(TypeInner::Literal(Box::new(literal)).into())
@@ -507,9 +508,9 @@ impl Type {
             AnyTsType::TsBigintType(_) => TypeInner::BigInt,
             AnyTsType::TsBogusType(_) => TypeInner::Unknown,
             AnyTsType::TsBooleanLiteralType(ty) => match ty.literal() {
-                Ok(token) => TypeInner::Literal(Box::new(Literal::Boolean(
-                    token.token_text_trimmed().into(),
-                ))),
+                Ok(token) => {
+                    Literal::Boolean(BooleanLiteral::parse(token.text_trimmed()).unwrap()).into()
+                }
                 Err(_) => TypeInner::Unknown,
             },
             AnyTsType::TsBooleanType(_) => TypeInner::Boolean,
@@ -559,15 +560,21 @@ impl Type {
             AnyTsType::TsNeverType(_) => TypeInner::NeverKeyword,
             AnyTsType::TsNonPrimitiveType(_) => TypeInner::ObjectKeyword,
             AnyTsType::TsNullLiteralType(_) => TypeInner::Literal(Box::new(Literal::Null)),
-            AnyTsType::TsNumberLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
-                (Some(minus_token), Ok(literal_token)) => TypeInner::Literal(Box::new(
-                    Literal::Number(Text::Owned(format!("{minus_token}{literal_token}"))),
-                )),
-                (None, Ok(literal_token)) => TypeInner::Literal(Box::new(Literal::Number(
-                    literal_token.token_text_trimmed().into(),
-                ))),
-                (_, Err(_)) => TypeInner::Unknown,
-            },
+            AnyTsType::TsNumberLiteralType(ty) => {
+                let Ok(literal_token) = ty.literal_token() else {
+                    return Self::unknown();
+                };
+
+                let Some(lit) = NumberLiteral::parse(literal_token.text_trimmed()) else {
+                    return Self::unknown();
+                };
+
+                Literal::Number(match ty.minus_token() {
+                    Some(_) => lit.inverse(),
+                    _ => lit,
+                })
+                .into()
+            }
             AnyTsType::TsNumberType(_) => TypeInner::Number,
             AnyTsType::TsObjectType(ty) => {
                 return Self::object_with_members(
@@ -586,10 +593,8 @@ impl Type {
             AnyTsType::TsReferenceType(ty) => {
                 return Self::from_ts_reference_type(ty);
             }
-            AnyTsType::TsStringLiteralType(ty) => match ty.literal_token() {
-                Ok(token) => {
-                    TypeInner::Literal(Box::new(Literal::String(token.token_text_trimmed().into())))
-                }
+            AnyTsType::TsStringLiteralType(ty) => match ty.inner_string_text() {
+                Ok(token) => Literal::String(token.text().into()).into(),
                 Err(_) => TypeInner::Unknown,
             },
             AnyTsType::TsStringType(_) => TypeInner::String,

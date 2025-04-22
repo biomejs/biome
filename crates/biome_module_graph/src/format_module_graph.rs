@@ -443,7 +443,7 @@ impl Format<ModuleFormatContext> for Literal {
                     text("Boolean"),
                     text(":"),
                     space(),
-                    dynamic_text(value.text(), TextSize::default()),
+                    dynamic_text(value.as_bool().to_string().as_str(), TextSize::default()),
                 ]]
             ),
             Self::Null => write!(f, [&format_args![text("Null")]]),
@@ -453,7 +453,7 @@ impl Format<ModuleFormatContext> for Literal {
                     text("Number"),
                     text(":"),
                     space(),
-                    dynamic_text(value.text(), TextSize::default()),
+                    dynamic_text(value.as_f64().to_string().as_str(), TextSize::default()),
                 ]]
             ),
             Self::Object(value) => write!(
@@ -480,7 +480,7 @@ impl Format<ModuleFormatContext> for Literal {
                     text("String"),
                     text(":"),
                     space(),
-                    dynamic_text(value.text(), TextSize::default()),
+                    dynamic_text(value.as_str(), TextSize::default()),
                 ]]
             ),
             Self::Template(value) => write!(
