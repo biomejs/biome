@@ -1,6 +1,7 @@
 ---
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
+snapshot_kind: text
 ---
 ## /src/index.ts
 
@@ -59,15 +60,15 @@ export * as renamed2 from "./renamed-reexports";
 Exports {
   "a" => {
     ExportOwnExport => JsOwnExport(
-      String
+      string
       Local name: a
     )
   }
   "b" => {
     ExportOwnExport => JsOwnExport(
       "Array" {
-        params: Unknown
-        type_args: Number
+        resolved: unknown
+        type_args: number
       }
       Local name: b
     )
@@ -77,9 +78,9 @@ Exports {
       sync Function "bar" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
-        returns: Unknown
+        returns: unknown
       }
       Local name: bar
       JsDoc(
@@ -92,118 +93,19 @@ Exports {
       async Function "baz" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
-        returns: [Promise]
-        Members(
-          required sync Method "all" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "allSettled" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "any" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "race" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "reject" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "resolve" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "try" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "catch" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "finally" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "then" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-        )
+        returns: "Promise" {
+          extends: none
+          type_args: [T -> unknown]
+        }
       }
       Local name: baz
     )
   }
   "d" => {
     ExportOwnExport => JsOwnExport(
-      Boolean
+      boolean
       Local name: d
     )
   }
@@ -212,10 +114,10 @@ Exports {
       sync Function "Component" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
         returns: "JSX.Element" {
-          params: Unknown
+          resolved: unknown
           type_args: No types
         }
       }
@@ -246,9 +148,9 @@ Exports {
       sync Function "foo" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
-        returns: Unknown
+        returns: unknown
       }
       Local name: foo
       JsDoc(
@@ -265,13 +167,16 @@ Exports {
   }
   "qux" => {
     ExportOwnExport => JsOwnExport(
-      Literal(Number: 1)
+      value: 1
       Local name: qux
     )
   }
   "quz" => {
     ExportOwnExport => JsOwnExport(
-      Object()
+      Object {
+        prototype: No prototype
+        members: {}
+      }
       Local name: quz
       JsDoc(
         @private
@@ -288,7 +193,9 @@ Exports {
       )
     )
   }
-}```
+}
+Imports {}
+```
 
 ## /src/renamed-reexports.ts
 
@@ -304,14 +211,16 @@ Exports {
       sync Function "ohNo" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
-        returns: Unknown
+        returns: unknown
       }
       Local name: ohNo
     )
   }
-}```
+}
+Imports {}
+```
 
 ## /src/reexports.ts
 
@@ -335,4 +244,6 @@ Exports {
       )
     )
   }
-}```
+}
+Imports {}
+```

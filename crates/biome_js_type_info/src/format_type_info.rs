@@ -1,8 +1,8 @@
 use crate::{
     CallArgumentType, CallSignatureTypeMember, Class, DestructureField, Function,
-    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, MethodTypeMember, Object,
-    PropertyTypeMember, ReturnType, Type, TypeInner, TypeMember, TypeReference,
-    TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression,
+    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Literal, MethodTypeMember,
+    Object, ObjectLiteral, PropertyTypeMember, ReturnType, Type, TypeInner, TypeMember,
+    TypeReference, TypeReferenceQualifier, TypeofAwaitExpression, TypeofExpression,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -15,7 +15,7 @@ use biome_rowan::Text;
 use std::fmt::Debug;
 use std::ops::Deref;
 
-struct FormatTypeOptions;
+pub struct FormatTypeOptions;
 
 impl FormatOptions for FormatTypeOptions {
     fn indent_style(&self) -> IndentStyle {
@@ -44,7 +44,7 @@ impl FormatOptions for FormatTypeOptions {
     }
 }
 
-struct FormatTypeContext;
+pub struct FormatTypeContext;
 
 impl FormatContext for FormatTypeContext {
     type Options = FormatTypeOptions;
@@ -98,8 +98,11 @@ impl Format<FormatTypeContext> for TypeInner {
             Self::Union(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::TypeOperator(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::Alias(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
-            Self::Literal(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
-            Self::InstanceOf(ty) => write!(f, [text("instanceof"), space(), &ty.as_ref()]),
+            Self::Literal(ty) => write!(f, [&ty.as_ref()]),
+            Self::InstanceOf(ty) => write!(
+                f,
+                [&format_args![text("instanceof"), space(), &ty.as_ref()]]
+            ),
             Self::Reference(reference) => write!(f, [&reference.as_ref()]),
             Self::TypeofExpression(expression) => write!(f, [&expression.as_ref()]),
             Self::TypeofType(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
@@ -586,6 +589,41 @@ impl Format<FormatTypeContext> for Class {
                     text("type_args:"),
                     space(),
                     FmtGenericTypeParameters(&self.type_parameters),
+                ])),
+                text("}")
+            ]]
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for Literal {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        write!(f, [&format_args![text("value:"), space()]])?;
+        match self {
+            Self::BigInt(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::Boolean(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::Null => write!(f, [text("null")]),
+            Self::Number(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::Object(obj) => write!(f, [&obj]),
+            Self::RegExp(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::String(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::Template(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+        }
+    }
+}
+
+impl Format<FormatTypeContext> for ObjectLiteral {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        write!(
+            f,
+            [&format_args![
+                text("ObjectLiteral"),
+                space(),
+                text("{"),
+                &group(&soft_block_indent(&format_args![
+                    text("members:"),
+                    space(),
+                    FmtTypeMembers(self.0.as_ref())
                 ])),
                 text("}")
             ]]

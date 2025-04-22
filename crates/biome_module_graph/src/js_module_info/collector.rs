@@ -22,9 +22,9 @@ use crate::{
 };
 
 use super::{
-    Exports, JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsModuleInfoInner, JsOwnExport,
-    JsReexport, JsResolvedPath, binding::JsBindingData, global_scope_resolver::GlobalScopeResolver,
-    scope::JsScopeData,
+    Exports, Imports, JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsModuleInfoInner,
+    JsOwnExport, JsReexport, JsResolvedPath, binding::JsBindingData,
+    global_scope_resolver::GlobalScopeResolver, scope::JsScopeData,
 };
 
 /// Responsible for collecting all the information from which to build the
@@ -545,7 +545,7 @@ impl JsModuleInfo {
         bag.resolve_module_types(&collector);
 
         Self(Arc::new(JsModuleInfoInner {
-            static_imports: bag.static_imports,
+            static_imports: Imports(bag.static_imports),
             static_import_paths: collector.static_import_paths,
             dynamic_import_paths: collector.dynamic_import_paths,
             exports: Exports(bag.exports),
