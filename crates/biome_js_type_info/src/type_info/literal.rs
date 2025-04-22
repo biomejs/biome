@@ -129,7 +129,7 @@ mod tests {
     fn parse_number_basic() {
         assert_eq!(
             NumberLiteral::parse("1234567890"),
-            Some(NumberLiteral(1234567890.0))
+            Some(NumberLiteral(1_234_567_890.0))
         );
         assert_eq!(NumberLiteral::parse("42"), Some(NumberLiteral(42.0)));
         assert_eq!(NumberLiteral::parse("0"), Some(NumberLiteral(0.0)));
@@ -156,15 +156,15 @@ mod tests {
     fn parse_number_binary() {
         assert_eq!(
             NumberLiteral::parse("0b10000000000000000000000000000000"),
-            Some(NumberLiteral(2147483648.0))
+            Some(NumberLiteral(2_147_483_648.0))
         );
         assert_eq!(
             NumberLiteral::parse("0b01111111100000000000000000000000"),
-            Some(NumberLiteral(2139095040.0))
+            Some(NumberLiteral(2_139_095_040.0))
         );
         assert_eq!(
             NumberLiteral::parse("0B00000000011111111111111111111111"),
-            Some(NumberLiteral(8388607.0))
+            Some(NumberLiteral(8_388_607.0))
         );
     }
 
@@ -182,7 +182,7 @@ mod tests {
         // );
         assert_eq!(
             NumberLiteral::parse("0x123456789ABCDEF"),
-            Some(NumberLiteral(81985529216486900.0))
+            Some(NumberLiteral(81_985_529_216_486_900.0))
         );
         assert_eq!(NumberLiteral::parse("0XA"), Some(NumberLiteral(10.0)));
     }
@@ -191,7 +191,7 @@ mod tests {
     fn parse_number_separators() {
         assert_eq!(
             NumberLiteral::parse("1_000_000_000_000"),
-            Some(NumberLiteral(1000000000000.0))
+            Some(NumberLiteral(1_000_000_000_000.0))
         );
         assert_eq!(
             NumberLiteral::parse("1_050.95"),
@@ -207,7 +207,7 @@ mod tests {
         );
         assert_eq!(
             NumberLiteral::parse("0xA0_B0_C0"),
-            Some(NumberLiteral(10531008.0))
+            Some(NumberLiteral(10_531_008.0))
         );
     }
 }
