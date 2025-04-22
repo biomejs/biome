@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: additionalGlobal.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -19,7 +18,7 @@ additionalGlobal.js:1:13 lint/style/noRestrictedGlobals ━━━━━━━━
       │             ^
     2 │ 
   
-  i Use a local variable instead.
+  i jQuery is not allowed. Use native DOM manipulation instead.
   
 
 ```

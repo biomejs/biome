@@ -1,0 +1,15 @@
+{
+  "linter": {
+    "rules": {
+      "noRestrictedGlobals": {
+        "options": {
+          // comment 1
+          "deniedGlobals": [ // comment 2
+            "$", // comment 3
+            "someGlobal" // comment 4
+          ] // comment 5
+        }
+      }
+    }
+  }
+}

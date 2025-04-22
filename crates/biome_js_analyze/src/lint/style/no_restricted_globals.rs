@@ -6,6 +6,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{Binding, BindingExtensions};
 use biome_js_syntax::{AnyJsIdentifierUsage, TextRange};
 use biome_rowan::AstNode;
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
@@ -38,7 +39,10 @@ declare_lint_rule! {
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "deniedGlobals": ["$", "MooTools"]
+    ///         "deniedGlobals": {
+    ///             "$": "jQuery is not allowed. Use native DOM manipulation instead.",
+    ///             "MooTools": "Do not use MooTools, use MeowTools instead."
+    ///         }
     ///     }
     /// }
     /// ```
@@ -63,13 +67,13 @@ const RESTRICTED_GLOBALS: [&str; 2] = ["event", "error"];
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct RestrictedGlobalsOptions {
     /// A list of names that should trigger the rule
-    #[serde(skip_serializing_if = "<[_]>::is_empty")]
-    pub denied_globals: Box<[Box<str>]>,
+    #[serde(skip_serializing_if = "FxHashMap::is_empty")]
+    pub denied_globals: FxHashMap<Box<str>, Box<str>>,
 }
 
 impl Rule for NoRestrictedGlobals {
     type Query = SemanticServices;
-    type State = (TextRange, Box<str>);
+    type State = (TextRange, Box<str>, Option<Box<str>>);
     type Signals = Box<[Self::State]>;
     type Options = Box<RestrictedGlobalsOptions>;
 
@@ -101,35 +105,57 @@ impl Rule for NoRestrictedGlobals {
                 };
                 let token = token.ok()?;
                 let text = token.text_trimmed();
-                let denied_globals: Vec<_> =
-                    options.denied_globals.iter().map(AsRef::as_ref).collect();
-                is_restricted(text, &binding, denied_globals.as_slice())
-                    .map(|text| (token.text_trimmed_range(), text.into_boxed_str()))
+
+                is_restricted(text, &binding, &options.denied_globals).map(|message| {
+                    (
+                        token.text_trimmed_range(),
+                        text.to_string().into_boxed_str(),
+                        message.map(|m| m.into_boxed_str()),
+                    )
+                })
             })
             .collect::<Vec<_>>()
             .into_boxed_slice()
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, (span, text): &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                *span,
-                markup! {
-                    "Do not use the global variable "<Emphasis>{text.as_ref()}</Emphasis>"."
-                },
-            )
-            .note(markup! {
-                "Use a local variable instead."
-            }),
-        )
+    fn diagnostic(
+        _ctx: &RuleContext<Self>,
+        (span, text, message): &Self::State,
+    ) -> Option<RuleDiagnostic> {
+        let mut diag = RuleDiagnostic::new(
+            rule_category!(),
+            *span,
+            markup! {
+                "Do not use the global variable "<Emphasis>{text.as_ref()}</Emphasis>"."
+            },
+        );
+
+        if let Some(message) = message {
+            diag = diag.note(message);
+        } else {
+            diag = diag.note(markup! { "Use a local variable instead." });
+        }
+
+        Some(diag)
     }
 }
 
-fn is_restricted(name: &str, binding: &Option<Binding>, denied_globals: &[&str]) -> Option<String> {
-    if binding.is_none() && (RESTRICTED_GLOBALS.contains(&name) || denied_globals.contains(&name)) {
-        Some(name.to_string())
-    } else {
-        None
+fn is_restricted(
+    name: &str,
+    binding: &Option<Binding>,
+    denied_globals: &FxHashMap<Box<str>, Box<str>>,
+) -> Option<Option<String>> {
+    if binding.is_some() {
+        return None;
     }
+
+    if RESTRICTED_GLOBALS.contains(&name) {
+        return Some(None);
+    }
+
+    if let Some(message) = denied_globals.get(name) {
+        return Some(Some(message.to_string()));
+    }
+
+    None
 }

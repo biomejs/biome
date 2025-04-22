@@ -3390,8 +3390,8 @@
 			"properties": {
 				"deniedGlobals": {
 					"description": "A list of names that should trigger the rule",
-					"type": "array",
-					"items": { "type": "string" }
+					"type": "object",
+					"additionalProperties": { "type": "string" }
 				}
 			},
 			"additionalProperties": false

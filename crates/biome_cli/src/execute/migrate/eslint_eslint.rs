@@ -539,10 +539,17 @@ pub(crate) enum NoRestrictedGlobal {
     WithMessage(GlobalWithMessage),
 }
 impl NoRestrictedGlobal {
-    pub(crate) fn into_name(self) -> String {
+    pub(crate) fn name(&self) -> &str {
         match self {
-            Self::Plain(name) => name,
-            Self::WithMessage(named) => named.name,
+            Self::Plain(name) => name.as_str(),
+            Self::WithMessage(named) => named.name.as_str(),
+        }
+    }
+
+    pub(crate) fn message(&self) -> Option<&str> {
+        match self {
+            Self::Plain(_) => None,
+            Self::WithMessage(named) => Some(named.message.as_str()),
         }
     }
 }
