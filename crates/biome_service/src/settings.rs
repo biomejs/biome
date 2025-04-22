@@ -733,17 +733,20 @@ pub struct Includes {
     working_directory: Option<Utf8PathBuf>,
     /// If `None`, then all files are included
     /// Otherwise this filtered out all files that doesn't match.
-    globs: Option<Vec<biome_glob::Glob>>,
+    globs: Option<Vec<biome_glob::NormalizedGlob>>,
 }
 impl Includes {
-    fn new(working_directory: Option<Utf8PathBuf>, globs: Option<Vec<biome_glob::Glob>>) -> Self {
+    fn new(
+        working_directory: Option<Utf8PathBuf>,
+        globs: Option<Vec<biome_glob::NormalizedGlob>>,
+    ) -> Self {
         Self {
             working_directory,
             globs,
         }
     }
 
-    pub fn store_globs(&mut self, globs: impl Into<Box<[biome_glob::Glob]>>) {
+    pub fn store_globs(&mut self, globs: impl Into<Box<[biome_glob::NormalizedGlob]>>) {
         let current_globs = self.globs.get_or_insert_default();
         current_globs.extend(globs.into());
     }

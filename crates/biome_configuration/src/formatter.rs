@@ -86,7 +86,7 @@ pub struct FormatterConfiguration {
     /// match these patterns.
     #[bpaf(pure(Default::default()), hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::Glob>>,
+    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 }
 
 impl FormatterConfiguration {

@@ -376,7 +376,7 @@
 				"includes": {
 					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"items": { "$ref": "#/definitions/NormalizedGlob" }
 				}
 			},
 			"additionalProperties": false
@@ -1384,7 +1384,7 @@
 				"includes": {
 					"description": "A list of glob patterns. Biome will handle only those files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"items": { "$ref": "#/definitions/NormalizedGlob" }
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
@@ -1462,7 +1462,7 @@
 				"includes": {
 					"description": "A list of glob patterns. The formatter will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"items": { "$ref": "#/definitions/NormalizedGlob" }
 				},
 				"indentStyle": {
 					"description": "The indent style.",
@@ -2311,7 +2311,7 @@
 				"includes": {
 					"description": "A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"items": { "$ref": "#/definitions/NormalizedGlob" }
 				},
 				"rules": {
 					"description": "List of rules",
@@ -2607,6 +2607,10 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"NormalizedGlob": {
+			"description": "Normalized Biome glob pattern that strips `./` from the pattern.",
+			"allOf": [{ "$ref": "#/definitions/Glob" }]
 		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",

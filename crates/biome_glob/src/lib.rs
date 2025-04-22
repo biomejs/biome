@@ -49,11 +49,25 @@
 //! Conversely, `src/lib.rs` doesn't match because it has two path segments (`src` and `lib.rs`).
 //!
 //! ```
-//! use biome_glob::Glob;
-//!
-//! let glob: Glob = "*.rs".parse().expect("correct glob");
+//! let glob: biome_glob::Glob = "*.rs".parse().expect("correct glob");
 //! assert!(glob.is_match("lib.rs"));
 //! assert!(!glob.is_match("src/lib.rs"));
+//! ```
+//!
+//! Note that [Glob] doesn't normalize the pattern.
+//! Thus, `lib.rs` doesn't match `./*.rs` as demonstrated in the following example:
+//!
+//! ```
+//! let glob: biome_glob::Glob = "./*.rs".parse().expect("correct glob");
+//! assert!(!glob.is_match("lib.rs"));
+//! ```
+//!
+//! For convenience, we provide [NormalizedGlob] which is the same as [Glob], but it strips any leading `./` from the pattern.
+//! In the following example, `././*.rs` is normalized to `*.rs`.
+//!
+//! ```
+//! let normalized_glob: biome_glob::NormalizedGlob = "./*.rs".parse().expect("correct glob");
+//! assert!(normalized_glob.is_match("lib.rs"));
 //! ```
 //!
 //! ## Matching against multiple globs
@@ -131,6 +145,60 @@
 
 pub mod editorconfig;
 
+/// Normalized Biome glob pattern that strips `./` from the pattern.
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "biome_deserialize",
+    derive(biome_deserialize_macros::Deserializable)
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
+pub struct NormalizedGlob(Glob);
+impl NormalizedGlob {
+    /// Returns the negated version of this glob.
+    ///
+    /// ```
+    /// let glob = "!*.js".parse::<biome_glob::NormalizedGlob>().unwrap();
+    /// assert!(!glob.negated().is_negated());
+    ///
+    /// let glob = "*.js".parse::<biome_glob::NormalizedGlob>().unwrap();
+    /// assert!(glob.negated().is_negated());
+    /// ```
+    pub fn negated(self) -> Self {
+        Self(self.0.negated())
+    }
+}
+impl std::ops::Deref for NormalizedGlob {
+    type Target = Glob;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl From<NormalizedGlob> for String {
+    fn from(value: NormalizedGlob) -> Self {
+        value.0.to_string()
+    }
+}
+impl std::str::FromStr for NormalizedGlob {
+    type Err = GlobError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let normalized = s.trim_start_matches("./");
+        Glob::from_str(normalized).map(Self)
+    }
+}
+impl TryFrom<String> for NormalizedGlob {
+    type Error = GlobError;
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+impl AsRef<Glob> for NormalizedGlob {
+    fn as_ref(&self) -> &Glob {
+        &self.0
+    }
+}
+
 /// A Biome glob pattern.
 #[derive(Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -187,6 +255,11 @@ impl Glob {
     /// Tests whether the given path matches this pattern, ignoring the negation.
     fn is_raw_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
         self.glob.is_match_candidate(&path.0)
+    }
+}
+impl AsRef<Self> for Glob {
+    fn as_ref(&self) -> &Self {
+        self
     }
 }
 impl PartialEq for Glob {
@@ -302,13 +375,13 @@ impl<'a> CandidatePath<'a> {
     }
 
     /// Tests whether the current path matches `glob`.
-    pub fn matches(&self, glob: &Glob) -> bool {
-        glob.is_match_candidate(self)
+    pub fn matches(&self, glob: impl AsRef<Glob>) -> bool {
+        glob.as_ref().is_match_candidate(self)
     }
 
     /// Tests whether the current path matches `glob` ignoring the negation of `glob`.
-    pub fn matches_raw(&self, glob: &Glob) -> bool {
-        glob.is_raw_match_candidate(self)
+    pub fn matches_raw(&self, glob: impl AsRef<Glob>) -> bool {
+        glob.as_ref().is_raw_match_candidate(self)
     }
 
     /// Match against a list of globs where negated globs are handled as exceptions.
@@ -338,10 +411,11 @@ impl<'a> CandidatePath<'a> {
     ///   However, it is included again by the last glob `a`.
     ///   Thus `a` matches the list of globs.
     ///
-    pub fn matches_with_exceptions<'b, I>(&self, globs: I) -> bool
+    pub fn matches_with_exceptions<I>(&self, globs: I) -> bool
     where
-        I: IntoIterator<Item = &'b Glob>,
+        I: IntoIterator,
         I::IntoIter: DoubleEndedIterator,
+        I::Item: AsRef<Glob>,
     {
         self.matches_with_exceptions_or(false, globs)
     }
@@ -371,25 +445,27 @@ impl<'a> CandidatePath<'a> {
     /// assert!(CandidatePath::new(&"c").matches_directory_with_exceptions(globs));
     /// assert!(CandidatePath::new(&"b/inner").matches_directory_with_exceptions(globs));
     /// ```
-    pub fn matches_directory_with_exceptions<'b, I>(&self, globs: I) -> bool
+    pub fn matches_directory_with_exceptions<I>(&self, globs: I) -> bool
     where
-        I: IntoIterator<Item = &'b Glob>,
+        I: IntoIterator,
         I::IntoIter: DoubleEndedIterator,
+        I::Item: AsRef<Glob>,
     {
         self.matches_with_exceptions_or(true, globs)
     }
 
     /// Match against a list of globs where negated globs are handled as exceptions.
     /// Returns `default` if there is no globs that match.
-    fn matches_with_exceptions_or<'b, I>(&self, default: bool, globs: I) -> bool
+    fn matches_with_exceptions_or<I>(&self, default: bool, globs: I) -> bool
     where
-        I: IntoIterator<Item = &'b Glob>,
+        I: IntoIterator,
         I::IntoIter: DoubleEndedIterator,
+        I::Item: AsRef<Glob>,
     {
         // Iterate in reverse order to avoid unnecessary glob matching.
         for glob in globs.into_iter().rev() {
-            if glob.is_raw_match_candidate(self) {
-                return !glob.is_negated();
+            if glob.as_ref().is_raw_match_candidate(self) {
+                return !glob.as_ref().is_negated();
             }
         }
         default
@@ -635,6 +711,19 @@ mod tests {
                 .parse::<Glob>()
                 .unwrap()
                 .is_match("file.jsx")
+        );
+
+        assert!(
+            "./*.rs"
+                .parse::<NormalizedGlob>()
+                .unwrap()
+                .is_match("lib.rs")
+        );
+        assert!(
+            "././*.rs"
+                .parse::<NormalizedGlob>()
+                .unwrap()
+                .is_match("lib.rs")
         );
     }
 
