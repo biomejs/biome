@@ -8,7 +8,7 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 pub type FormatterEnabled = Bool<true>;
-pub type UseEditorconfigEnabled = Bool<true>;
+pub type UseEditorconfigEnabled = Bool<false>;
 pub type FormatWithErrorsEnabled = Bool<false>;
 
 /// Generic options applied to all files

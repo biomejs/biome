@@ -1,14 +1,13 @@
+use crate::editorconfig::EditorConfigErrorKind;
 use biome_console::fmt::Display;
 use biome_console::{MarkupBuf, markup};
 use biome_deserialize::DeserializationDiagnostic;
+use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
-use biome_diagnostics::{LineIndexBuf, ResolveError, Resource, SourceCode};
 use biome_rowan::{SyntaxError, TextRange};
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
-
-use crate::editorconfig::EditorConfigErrorKind;
 
 /// Series of errors that can be thrown while computing the configuration.
 #[derive(Debug, Diagnostic, Deserialize, Serialize)]
@@ -356,7 +355,6 @@ impl EditorConfigDiagnostic {
 #[diagnostic(
     category = "configuration",
     severity = Error,
-    //message = "Failed to parse the .editorconfig file.",
 )]
 pub struct ParseFailedDiagnostic {
     #[description]
@@ -364,10 +362,10 @@ pub struct ParseFailedDiagnostic {
     #[serde(default, skip)]
     pub kind: EditorConfigErrorKind,
     #[location(resource)]
-    pub path: Resource<Box<str>>,
+    pub path: String,
     #[location(source_code)]
     #[serde(default, skip)]
-    pub source_code: Option<Box<SourceCode<Box<str>, LineIndexBuf>>>,
+    pub source_code: String,
     #[location(span)]
     pub span: TextRange,
 }

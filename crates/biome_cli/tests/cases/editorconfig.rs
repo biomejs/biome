@@ -30,7 +30,15 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -45,7 +53,7 @@ indent_size = 8
 }
 
 #[test]
-fn shoud_not_use_editorconfig() {
+fn should_not_use_editorconfig() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -166,7 +174,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_str()].as_slice()),
+        Args::from(["check", "--use-editorconfig=true", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -265,7 +273,15 @@ indent_style = tab
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -359,7 +375,15 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--indent-width=4", test_file.as_str()].as_slice()),
+        Args::from(
+            [
+                "check",
+                "--use-editorconfig=true",
+                "--indent-width=4",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -412,7 +436,15 @@ indent_style = space
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_str(), test_file2.as_str()].as_slice()),
+        Args::from(
+            [
+                "check",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+                test_file2.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -451,7 +483,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", test_file.as_str()].as_slice()),
+        Args::from(["ci", "--use-editorconfig=true", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -528,7 +560,11 @@ indent_size = 8
 "#,
     );
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -552,7 +588,11 @@ root = on
 "#,
     );
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -577,7 +617,11 @@ end_of_line = lfcr
 "#,
     );
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -602,7 +646,11 @@ fn indent_size_parse_error() {
 "#,
     );
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
