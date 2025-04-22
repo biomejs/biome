@@ -495,7 +495,7 @@ pub enum Literal {
 
 impl From<Literal> for TypeInner {
     fn from(value: Literal) -> Self {
-        TypeInner::Literal(Box::new(value))
+        Self::Literal(Box::new(value))
     }
 }
 

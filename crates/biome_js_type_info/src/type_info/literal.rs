@@ -12,8 +12,8 @@ impl BooleanLiteral {
 
     pub fn parse(s: &str) -> Option<Self> {
         match s.as_bytes().first() {
-            Some(b't') | Some(b'T') => Some(Self(true)),
-            Some(b'f') | Some(b'F') => Some(Self(false)),
+            Some(b't' | b'T') => Some(Self(true)),
+            Some(b'f' | b'F') => Some(Self(false)),
             _ => None,
         }
     }
@@ -41,7 +41,7 @@ impl NumberLiteral {
 
     pub fn parse(s: &str) -> Option<Self> {
         // Remove numeric separators first.
-        let s = s.replace("_", "");
+        let s = s.replace('_', "");
 
         if let Some(s) = s.strip_prefix("0b").or_else(|| s.strip_prefix("0B")) {
             return Some(Self(u64::from_str_radix(s, 2).ok()? as f64));
