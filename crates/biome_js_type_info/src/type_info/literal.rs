@@ -19,6 +19,12 @@ impl BooleanLiteral {
     }
 }
 
+impl From<bool> for BooleanLiteral {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
 #[derive(Clone, Debug, Default, PartialEq, Resolvable)]
 pub struct NumberLiteral(f64);
 
@@ -51,7 +57,7 @@ impl NumberLiteral {
 
         // Handle a legacy octal literal or a decimal literal with a leading zero.
         if let Some(s) = s.strip_prefix("0") {
-            if !s.starts_with('e') && !s.starts_with('E') {
+            if !s.is_empty() && !s.starts_with('e') && !s.starts_with('E') {
                 if !s.contains('8') && !s.contains('9') {
                     return Some(Self(u64::from_str_radix(s, 8).ok()? as f64));
                 }
@@ -126,6 +132,7 @@ mod tests {
             Some(NumberLiteral(1234567890.0))
         );
         assert_eq!(NumberLiteral::parse("42"), Some(NumberLiteral(42.0)));
+        assert_eq!(NumberLiteral::parse("0"), Some(NumberLiteral(0.0)));
     }
 
     #[test]

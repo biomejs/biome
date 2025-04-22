@@ -7,13 +7,13 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
     AnyJsObjectMemberName, AnyJsParameter, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
     AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, ClassMemberName,
-    JsArrayBindingPattern, JsArrowFunctionExpression, JsCallArguments, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsClassExpression, JsFormalParameter, JsFunctionDeclaration,
-    JsFunctionExpression, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
-    JsParameters, JsReferenceIdentifier, JsSyntaxToken, JsVariableDeclaration,
-    JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration,
-    TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters, TsTypeofType,
-    inner_string_text, unescape_js_string,
+    JsArrayBindingPattern, JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator,
+    JsCallArguments, JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
+    JsFormalParameter, JsFunctionDeclaration, JsFunctionExpression, JsNewExpression,
+    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier, JsSyntaxToken,
+    JsVariableDeclaration, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
+    TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -377,6 +377,7 @@ impl Type {
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(expr)
             }
+            AnyJsExpression::JsBinaryExpression(expr) => Self::from_js_binary_expression(expr),
             AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
                 Ok(callee) => TypeInner::TypeofExpression(Box::new(TypeofExpression::Call(
                     TypeofCallExpression {
@@ -681,6 +682,40 @@ impl Type {
                 .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
         }))
         .into()
+    }
+
+    pub fn from_js_binary_expression(expr: &JsBinaryExpression) -> Self {
+        let (Ok(left), Ok(operator), Ok(right)) = (expr.left(), expr.operator(), expr.right())
+        else {
+            return Self::unknown();
+        };
+
+        let left = Self::from_any_js_expression(&left);
+        let right = Self::from_any_js_expression(&right);
+
+        match operator {
+            JsBinaryOperator::StrictEquality => match (left.inner_type(), right.inner_type()) {
+                (TypeInner::Literal(left), TypeInner::Literal(right)) => {
+                    if left == right {
+                        Literal::Boolean(true.into()).into()
+                    } else {
+                        Literal::Boolean(false.into()).into()
+                    }
+                }
+                _ => Self::boolean(),
+            },
+            JsBinaryOperator::StrictInequality => match (left.inner_type(), right.inner_type()) {
+                (TypeInner::Literal(left), TypeInner::Literal(right)) => {
+                    if left == right {
+                        Literal::Boolean(false.into()).into()
+                    } else {
+                        Literal::Boolean(true.into()).into()
+                    }
+                }
+                _ => Self::boolean(),
+            },
+            _ => Self::unknown(), // TODO
+        }
     }
 
     pub fn from_js_class_declaration(decl: &JsClassDeclaration) -> Self {

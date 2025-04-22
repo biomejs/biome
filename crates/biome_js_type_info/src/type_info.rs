@@ -490,7 +490,7 @@ pub enum Literal {
     Object(ObjectLiteral),
     RegExp(Text),
     String(StringLiteral),
-    Template(Text),
+    Template(Text), // TODO: Custom impl of PartialEq for template literals
 }
 
 impl From<Literal> for TypeInner {
