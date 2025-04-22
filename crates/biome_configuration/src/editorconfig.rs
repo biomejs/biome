@@ -9,17 +9,15 @@
 //! | end_of_line          | line_ending  |
 //! | max_line_length      | line_width   |
 
-use std::fmt::{Debug, Display};
-use std::num::ParseIntError;
-use std::str::FromStr;
-
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, ParseFormatNumberError};
-use biome_rowan::TextRange;
-
 use crate::{
     Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
     OverridePattern, Overrides, diagnostics::EditorConfigDiagnostic,
 };
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, ParseFormatNumberError};
+use biome_rowan::TextRange;
+use std::fmt::{Debug, Display};
+use std::num::ParseIntError;
+use std::str::FromStr;
 
 /// Error type returned when parsing a [IndentSize] value
 pub enum ParseIndentSizeError {
@@ -398,15 +396,15 @@ impl EditorConfigOptions {
     }
 
     fn validate(&self) -> Vec<EditorConfigDiagnostic> {
-        let mut errors = vec![];
+        let mut diagnostics = vec![];
         // `insert_final_newline = false` results in formatting behavior that is incompatible with biome
         if let EditorconfigValue::Explicit(false) = self.insert_final_newline {
-            errors.push(EditorConfigDiagnostic::incompatible(
+            diagnostics.push(EditorConfigDiagnostic::incompatible(
                 "insert_final_newline",
                 "Biome always inserts a final newline. Set this option to true.",
             ));
         }
-        errors
+        diagnostics
     }
 }
 
