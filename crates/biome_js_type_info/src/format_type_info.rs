@@ -600,14 +600,14 @@ impl Format<FormatTypeContext> for Literal {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         write!(f, [&format_args![text("value:"), space()]])?;
         match self {
-            Literal::BigInt(text) => write!(f, [dynamic_text(text, TextSize::default())]),
-            Literal::Boolean(text) => write!(f, [dynamic_text(text, TextSize::default())]),
-            Literal::Null => write!(f, [text("null")]),
-            Literal::Number(text) => write!(f, [dynamic_text(text, TextSize::default())]),
-            Literal::Object(obj) => write!(f, [&obj]),
-            Literal::RegExp(text) => write!(f, [dynamic_text(text, TextSize::default())]),
-            Literal::String(text) => write!(f, [dynamic_text(text, TextSize::default())]),
-            Literal::Template(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::BigInt(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::Boolean(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::Null => write!(f, [text("null")]),
+            Self::Number(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::Object(obj) => write!(f, [&obj]),
+            Self::RegExp(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::String(text) => write!(f, [dynamic_text(text, TextSize::default())]),
+            Self::Template(text) => write!(f, [dynamic_text(text, TextSize::default())]),
         }
     }
 }
