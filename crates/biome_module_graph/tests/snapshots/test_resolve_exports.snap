@@ -1,7 +1,6 @@
 ---
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
-snapshot_kind: text
 ---
 ## /src/index.ts
 
@@ -60,28 +59,19 @@ export * as renamed2 from "./renamed-reexports";
 Exports {
   "a" => {
     ExportOwnExport => JsOwnExport(
-      string
+      Module TypeId(7)
       Local name: a
     )
   }
   "b" => {
     ExportOwnExport => JsOwnExport(
-      "Array" {
-        resolved: unknown
-        type_args: number
-      }
+      Module TypeId(8)
       Local name: b
     )
   }
   "bar" => {
     ExportOwnExport => JsOwnExport(
-      sync Function "bar" {
-        accepts: {
-          params: []
-          type_args: []
-        }
-        returns: unknown
-      }
+      Module TypeId(1)
       Local name: bar
       JsDoc(
         @package
@@ -90,37 +80,19 @@ Exports {
   }
   "baz" => {
     ExportOwnExport => JsOwnExport(
-      async Function "baz" {
-        accepts: {
-          params: []
-          type_args: []
-        }
-        returns: "Promise" {
-          extends: none
-          type_args: [T -> unknown]
-        }
-      }
+      Module TypeId(4)
       Local name: baz
     )
   }
   "d" => {
     ExportOwnExport => JsOwnExport(
-      boolean
+      Module TypeId(10)
       Local name: d
     )
   }
   "default" => {
     ExportOwnExport => JsOwnExport(
-      sync Function "Component" {
-        accepts: {
-          params: []
-          type_args: []
-        }
-        returns: "JSX.Element" {
-          resolved: unknown
-          type_args: No types
-        }
-      }
+      Module TypeId(20)
       Local name: Component
       JsDoc(
         @public
@@ -130,28 +102,13 @@ Exports {
   }
   "e" => {
     ExportOwnExport => JsOwnExport(
-      Union(
-    [
-        Type(
-            Boolean,
-        ),
-        Type(
-            Undefined,
-        ),
-    ],
-)
+      Module TypeId(11)
       Local name: e
     )
   }
   "foo" => {
     ExportOwnExport => JsOwnExport(
-      sync Function "foo" {
-        accepts: {
-          params: []
-          type_args: []
-        }
-        returns: unknown
-      }
+      Module TypeId(0)
       Local name: foo
       JsDoc(
         @returns {string}
@@ -167,16 +124,13 @@ Exports {
   }
   "qux" => {
     ExportOwnExport => JsOwnExport(
-      value: 1
+      Module TypeId(5)
       Local name: qux
     )
   }
   "quz" => {
     ExportOwnExport => JsOwnExport(
-      Object {
-        prototype: No prototype
-        members: {}
-      }
+      Module TypeId(2)
       Local name: quz
       JsDoc(
         @private
@@ -208,13 +162,7 @@ export function ohNo() {}
 Exports {
   "ohNo" => {
     ExportOwnExport => JsOwnExport(
-      sync Function "ohNo" {
-        accepts: {
-          params: []
-          type_args: []
-        }
-        returns: unknown
-      }
+      Module TypeId(0)
       Local name: ohNo
     )
   }

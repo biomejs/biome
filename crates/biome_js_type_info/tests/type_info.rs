@@ -1,10 +1,11 @@
 mod utils;
 
-use biome_js_type_info::{Type, TypeInner};
+use biome_js_type_info::GlobalsResolver;
+use biome_js_type_info::TypeData;
 
 use utils::assert_typed_bindings_snapshot;
 use utils::get_variable_declaration;
-use utils::{assert_type_snapshot, get_function_declaration, parse_ts};
+use utils::{assert_type_data_snapshot, get_function_declaration, parse_ts};
 
 #[test]
 fn infer_type_of_promise_returning_function() {
@@ -14,8 +15,14 @@ fn infer_type_of_promise_returning_function() {
 
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
-    let ty = Type::from_js_function_declaration(&decl);
-    assert_type_snapshot(CODE, ty, "infer_type_of_promise_returning_function");
+    let mut resolver = GlobalsResolver::default();
+    let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    assert_type_data_snapshot(
+        CODE,
+        ty,
+        &resolver,
+        "infer_type_of_promise_returning_function",
+    );
 }
 
 #[test]
@@ -26,8 +33,9 @@ fn infer_type_of_async_function() {
 
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
-    let ty = Type::from_js_function_declaration(&decl);
-    assert_type_snapshot(CODE, ty, "infer_type_of_async_function");
+    let mut resolver = GlobalsResolver::default();
+    let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    assert_type_data_snapshot(CODE, ty, &resolver, "infer_type_of_async_function");
 }
 
 #[test]
@@ -36,8 +44,9 @@ fn infer_type_of_array() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
-    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_array");
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_array");
 }
 
 #[test]
@@ -46,8 +55,14 @@ fn infer_type_of_destructured_array_element() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
-    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_destructured_array_element");
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    assert_typed_bindings_snapshot(
+        CODE,
+        &bindings,
+        &resolver,
+        "infer_type_of_destructured_array_element",
+    );
 }
 
 #[test]
@@ -56,10 +71,12 @@ fn infer_type_of_function_with_destructured_arguments() {
 
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
-    let ty = Type::from_js_function_declaration(&decl);
-    assert_type_snapshot(
+    let mut resolver = GlobalsResolver::default();
+    let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    assert_type_data_snapshot(
         CODE,
         ty,
+        &resolver,
         "infer_type_of_function_with_destructured_arguments",
     );
 }
@@ -70,8 +87,9 @@ fn infer_type_of_literal() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
-    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_literal");
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_literal");
 }
 
 #[test]
@@ -80,8 +98,14 @@ fn infer_type_of_binary_expression_eq() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
-    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_binary_expression_eq");
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    assert_typed_bindings_snapshot(
+        CODE,
+        &bindings,
+        &resolver,
+        "infer_type_of_binary_expression_eq",
+    );
 }
 
 #[test]
@@ -90,21 +114,22 @@ fn infer_type_of_binary_expression_ne() {
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
-    let bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
-    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_binary_expression_ne");
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    assert_typed_bindings_snapshot(
+        CODE,
+        &bindings,
+        &resolver,
+        "infer_type_of_binary_expression_ne",
+    );
 }
 
 #[test]
 #[cfg(target_pointer_width = "64")]
 fn verify_type_sizes() {
     assert_eq!(
-        std::mem::size_of::<Type>(),
-        8,
-        "`Type` should not be bigger than 8 bytes"
-    );
-    assert_eq!(
-        std::mem::size_of::<TypeInner>(),
+        std::mem::size_of::<TypeData>(),
         16,
-        "`TypeInner` should not be bigger than 16 bytes"
+        "`TypeData` should not be bigger than 16 bytes"
     );
 }

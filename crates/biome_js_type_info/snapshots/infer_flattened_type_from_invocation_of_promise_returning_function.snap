@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+```ts
+function returnsPromise(): Promise<number> {
+	return Promise.resolved(true);
+}
+
+returnsPromise();
+
+```
+
+```
+instanceof Promise<T = number>
+```
+
+## Registered types:
+
+Module TypeId(0) => sync Function "returnsPromise" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Global TypeId(6)
+}
+
+Global TypeId(6) => instanceof Promise<T = number>

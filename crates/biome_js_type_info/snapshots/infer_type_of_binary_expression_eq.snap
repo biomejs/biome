@@ -1,5 +1,5 @@
 ---
-source: crates/biome_js_type_info/tests/utils/mod.rs
+source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
 ```ts
@@ -11,3 +11,5 @@ const a = 1 === 1;
 a => value: true
 
 ```
+
+## Registered types:

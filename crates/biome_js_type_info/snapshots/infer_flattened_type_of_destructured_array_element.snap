@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+```ts
+const [a]: Array<string> = [];
+
+```
+
+```
+a => Global TypeId(6) | undefined
+
+```
+
+## Registered types:
+
+Global TypeId(6) => string
+
+Global TypeId(7) => instanceof Array<T = Global TypeId(6)>
+
+Global TypeId(8) => Global TypeId(6) | undefined
+
+Global TypeId(9) => instanceof Array<T = Global TypeId(6)>
+
+Global TypeId(10) => Global TypeId(6) | undefined

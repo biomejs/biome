@@ -1,7 +1,6 @@
 ---
-source: crates/biome_js_type_info/tests/utils/mod.rs
+source: crates/biome_js_type_info/tests/utils.rs
 expression: content
-snapshot_kind: text
 ---
 ```ts
 async function returnsPromise(): Promise<string> {
@@ -16,9 +15,12 @@ async Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: "Promise" {
-    extends: none
-    type_args: [T -> string]
-  }
+  returns: Global TypeId(7)
 }
 ```
+
+## Registered types:
+
+Global TypeId(6) => string
+
+Global TypeId(7) => instanceof Promise<T = Global TypeId(6)>

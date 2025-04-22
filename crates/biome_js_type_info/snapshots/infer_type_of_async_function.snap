@@ -1,5 +1,5 @@
 ---
-source: crates/biome_js_type_info/tests/utils/mod.rs
+source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
 ```ts
@@ -15,9 +15,10 @@ async Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: "Promise" {
-    resolved: unknown
-    type_args: string
-  }
+  returns: unresolved reference "Promise"<Global TypeId(6)>
 }
 ```
+
+## Registered types:
+
+Global TypeId(6) => string

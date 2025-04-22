@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+```ts
+async function returnsPromise(): Promise<string> {
+	return "value";
+}
+
+```
+
+```
+async Function "returnsPromise" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Global TypeId(7)
+}
+```
+
+## Registered types:
+
+Global TypeId(6) => string
+
+Global TypeId(7) => instanceof Promise<T = Global TypeId(6)>
