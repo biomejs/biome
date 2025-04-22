@@ -9,3 +9,5 @@ mod type_info;
 
 pub use resolver::*;
 pub use type_info::*;
+
+pub use format_type_info::{FormatTypeContext, FormatTypeOptions};
