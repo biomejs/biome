@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_type_info/tests/utils/mod.rs
+expression: content
+---
+```ts
+const a = 123.45;
+
+```
+
+```
+a => value: 123.45
+
+```

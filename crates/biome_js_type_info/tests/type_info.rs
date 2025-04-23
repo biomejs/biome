@@ -65,6 +65,36 @@ fn infer_type_of_function_with_destructured_arguments() {
 }
 
 #[test]
+fn infer_type_of_literal() {
+    const CODE: &str = r#"const a = 123.45;"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_variable_declaration(&root);
+    let bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
+    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_literal");
+}
+
+#[test]
+fn infer_type_of_binary_expression_eq() {
+    const CODE: &str = r#"const a = 1 === 1"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_variable_declaration(&root);
+    let bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
+    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_binary_expression_eq");
+}
+
+#[test]
+fn infer_type_of_binary_expression_ne() {
+    const CODE: &str = r#"const a = 0 !== 1"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_variable_declaration(&root);
+    let bindings = Type::typed_bindings_from_js_variable_declaration(&decl);
+    assert_typed_bindings_snapshot(CODE, &bindings, "infer_type_of_binary_expression_ne");
+}
+
+#[test]
 #[cfg(target_pointer_width = "64")]
 fn verify_type_sizes() {
     assert_eq!(

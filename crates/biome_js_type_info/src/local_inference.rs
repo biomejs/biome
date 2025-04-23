@@ -7,16 +7,17 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
     AnyJsObjectMemberName, AnyJsParameter, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
     AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, ClassMemberName,
-    JsArrayBindingPattern, JsArrowFunctionExpression, JsCallArguments, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsClassExpression, JsFormalParameter, JsFunctionDeclaration,
-    JsFunctionExpression, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
-    JsParameters, JsReferenceIdentifier, JsSyntaxToken, JsVariableDeclaration,
-    JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation, TsTypeAliasDeclaration,
-    TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters, TsTypeofType,
-    inner_string_text, unescape_js_string,
+    JsArrayBindingPattern, JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator,
+    JsCallArguments, JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
+    JsFormalParameter, JsFunctionDeclaration, JsFunctionExpression, JsNewExpression,
+    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier, JsSyntaxToken,
+    JsVariableDeclaration, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
+    TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
+use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, CallSignatureTypeMember, Class, Constructor,
     ConstructorTypeMember, DestructureField, Function, FunctionParameter, FunctionParameterBinding,
@@ -376,6 +377,7 @@ impl Type {
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(expr)
             }
+            AnyJsExpression::JsBinaryExpression(expr) => Self::from_js_binary_expression(expr),
             AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
                 Ok(callee) => TypeInner::TypeofExpression(Box::new(TypeofExpression::Call(
                     TypeofCallExpression {
@@ -465,19 +467,19 @@ impl Type {
             AnyJsLiteralExpression::JsBigintLiteralExpression(expr) => {
                 Literal::BigInt(text_from_token(expr.value_token())?)
             }
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(expr) => {
-                Literal::Boolean(text_from_token(expr.value_token())?)
-            }
+            AnyJsLiteralExpression::JsBooleanLiteralExpression(expr) => Literal::Boolean(
+                BooleanLiteral::parse(text_from_token(expr.value_token())?.text())?,
+            ),
             AnyJsLiteralExpression::JsNullLiteralExpression(_) => Literal::Null,
-            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => {
-                Literal::Number(text_from_token(expr.value_token())?)
-            }
+            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => Literal::Number(
+                NumberLiteral::parse(text_from_token(expr.value_token())?.text())?,
+            ),
             AnyJsLiteralExpression::JsRegexLiteralExpression(expr) => {
                 Literal::RegExp(text_from_token(expr.value_token())?)
             }
-            AnyJsLiteralExpression::JsStringLiteralExpression(expr) => {
-                Literal::String(text_from_token(expr.value_token())?)
-            }
+            AnyJsLiteralExpression::JsStringLiteralExpression(expr) => Literal::String(
+                StringLiteral::from(Text::Borrowed(expr.inner_string_text().ok()?)),
+            ),
         };
 
         Some(TypeInner::Literal(Box::new(literal)).into())
@@ -507,9 +509,9 @@ impl Type {
             AnyTsType::TsBigintType(_) => TypeInner::BigInt,
             AnyTsType::TsBogusType(_) => TypeInner::Unknown,
             AnyTsType::TsBooleanLiteralType(ty) => match ty.literal() {
-                Ok(token) => TypeInner::Literal(Box::new(Literal::Boolean(
-                    token.token_text_trimmed().into(),
-                ))),
+                Ok(token) => {
+                    Literal::Boolean(BooleanLiteral::parse(token.text_trimmed()).unwrap()).into()
+                }
                 Err(_) => TypeInner::Unknown,
             },
             AnyTsType::TsBooleanType(_) => TypeInner::Boolean,
@@ -559,15 +561,21 @@ impl Type {
             AnyTsType::TsNeverType(_) => TypeInner::NeverKeyword,
             AnyTsType::TsNonPrimitiveType(_) => TypeInner::ObjectKeyword,
             AnyTsType::TsNullLiteralType(_) => TypeInner::Literal(Box::new(Literal::Null)),
-            AnyTsType::TsNumberLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
-                (Some(minus_token), Ok(literal_token)) => TypeInner::Literal(Box::new(
-                    Literal::Number(Text::Owned(format!("{minus_token}{literal_token}"))),
-                )),
-                (None, Ok(literal_token)) => TypeInner::Literal(Box::new(Literal::Number(
-                    literal_token.token_text_trimmed().into(),
-                ))),
-                (_, Err(_)) => TypeInner::Unknown,
-            },
+            AnyTsType::TsNumberLiteralType(ty) => {
+                let Ok(literal_token) = ty.literal_token() else {
+                    return Self::unknown();
+                };
+
+                let Some(lit) = NumberLiteral::parse(literal_token.text_trimmed()) else {
+                    return Self::unknown();
+                };
+
+                Literal::Number(match ty.minus_token() {
+                    Some(_) => lit.inverse(),
+                    _ => lit,
+                })
+                .into()
+            }
             AnyTsType::TsNumberType(_) => TypeInner::Number,
             AnyTsType::TsObjectType(ty) => {
                 return Self::object_with_members(
@@ -586,10 +594,8 @@ impl Type {
             AnyTsType::TsReferenceType(ty) => {
                 return Self::from_ts_reference_type(ty);
             }
-            AnyTsType::TsStringLiteralType(ty) => match ty.literal_token() {
-                Ok(token) => {
-                    TypeInner::Literal(Box::new(Literal::String(token.token_text_trimmed().into())))
-                }
+            AnyTsType::TsStringLiteralType(ty) => match ty.inner_string_text() {
+                Ok(token) => Literal::String(token.text().into()).into(),
                 Err(_) => TypeInner::Unknown,
             },
             AnyTsType::TsStringType(_) => TypeInner::String,
@@ -676,6 +682,40 @@ impl Type {
                 .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
         }))
         .into()
+    }
+
+    pub fn from_js_binary_expression(expr: &JsBinaryExpression) -> Self {
+        let (Ok(left), Ok(operator), Ok(right)) = (expr.left(), expr.operator(), expr.right())
+        else {
+            return Self::unknown();
+        };
+
+        let left = Self::from_any_js_expression(&left);
+        let right = Self::from_any_js_expression(&right);
+
+        match operator {
+            JsBinaryOperator::StrictEquality => match (left.inner_type(), right.inner_type()) {
+                (TypeInner::Literal(left), TypeInner::Literal(right)) => {
+                    if left == right {
+                        Literal::Boolean(true.into()).into()
+                    } else {
+                        Literal::Boolean(false.into()).into()
+                    }
+                }
+                _ => Self::boolean(),
+            },
+            JsBinaryOperator::StrictInequality => match (left.inner_type(), right.inner_type()) {
+                (TypeInner::Literal(left), TypeInner::Literal(right)) => {
+                    if left == right {
+                        Literal::Boolean(false.into()).into()
+                    } else {
+                        Literal::Boolean(true.into()).into()
+                    }
+                }
+                _ => Self::boolean(),
+            },
+            _ => Self::unknown(), // TODO
+        }
     }
 
     pub fn from_js_class_declaration(decl: &JsClassDeclaration) -> Self {

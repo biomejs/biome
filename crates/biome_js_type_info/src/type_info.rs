@@ -9,6 +9,8 @@
 //! The type information is instantiated and updated inside the Workspace
 //! Server.
 
+pub mod literal;
+
 use std::fmt::Debug;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::{ops::Deref, str::FromStr, sync::Arc};
@@ -16,6 +18,7 @@ use std::{ops::Deref, str::FromStr, sync::Arc};
 use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
+use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     Resolvable,
     globals::{ARRAY, PROMISE, WINDOW_TYPE},
@@ -481,13 +484,25 @@ pub struct Intersection(pub(super) Box<[Type]>);
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub enum Literal {
     BigInt(Text),
-    Boolean(Text),
+    Boolean(BooleanLiteral),
     Null,
-    Number(Text),
+    Number(NumberLiteral),
     Object(ObjectLiteral),
     RegExp(Text),
-    String(Text),
-    Template(Text),
+    String(StringLiteral),
+    Template(Text), // TODO: Custom impl of PartialEq for template literals
+}
+
+impl From<Literal> for TypeInner {
+    fn from(value: Literal) -> Self {
+        Self::Literal(Box::new(value))
+    }
+}
+
+impl From<Literal> for Type {
+    fn from(value: Literal) -> Self {
+        TypeInner::from(value).into()
+    }
 }
 
 /// A namespace definition.
