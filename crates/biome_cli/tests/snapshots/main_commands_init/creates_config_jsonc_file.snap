@@ -56,7 +56,7 @@ Next Steps
 
   1. Setup an editor extension
      Get live errors as you type and format when you save.
-     Learn more at https://biomejs.dev/guides/integrate-in-editor/
+     Learn more at https://biomejs.dev/guides/editors/first-party-extensions/
 
   2. Try a command
      biome check  checks formatting, import sorting, and lint rules.
