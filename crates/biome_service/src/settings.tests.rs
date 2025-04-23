@@ -9,7 +9,6 @@ use biome_configuration::{
     RulePlainConfiguration, Rules,
 };
 use biome_fs::BiomePath;
-use biome_glob::Glob;
 use biome_js_syntax::JsLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
@@ -95,7 +94,7 @@ fn merge_override_linter_group_rule() {
         }),
         overrides: Some(Overrides(vec![OverridePattern {
             includes: Some(OverrideGlobs::Globs(Box::new([
-                Glob::from_str("**/*").unwrap()
+                biome_glob::NormalizedGlob::from_str("**/*").unwrap(),
             ]))),
             linter: Some(OverrideLinterConfiguration {
                 rules: Some(Rules {

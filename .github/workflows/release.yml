@@ -80,28 +80,28 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-2022
+          - os: depot-windows-2022
             target: x86_64-pc-windows-msvc
             code-target: win32-x64
-          - os: windows-2022
+          - os: depot-windows-2022
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
-          - os: ubuntu-20.04
+          - os: depot-ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-          - os: ubuntu-20.04
+          - os: depot-ubuntu-22.04-arm
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
-          - os: ubuntu-20.04
+          - os: depot-ubuntu-22.04
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
-          - os: ubuntu-20.04
+          - os: depot-ubuntu-22.04-arm
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
-          - os: macos-14
+          - os: depot-macos-14
             target: x86_64-apple-darwin
             code-target: darwin-x64
-          - os: macos-14
+          - os: depot-macos-14
             target: aarch64-apple-darwin
             code-target: darwin-arm64
 

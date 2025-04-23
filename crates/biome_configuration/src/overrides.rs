@@ -68,7 +68,7 @@ pub struct OverridePattern {
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum OverrideGlobs {
-    Globs(Box<[biome_glob::Glob]>),
+    Globs(Box<[biome_glob::NormalizedGlob]>),
     EditorconfigGlob(Box<biome_glob::editorconfig::EditorconfigGlob>),
 }
 impl OverrideGlobs {

@@ -337,8 +337,8 @@ fn migrate_eslint_rule(
 fn to_biome_includes(
     files: &[impl AsRef<str>],
     ignores: &[impl AsRef<str>],
-) -> Vec<biome_glob::Glob> {
-    let mut includes = Vec::new();
+) -> Vec<biome_glob::NormalizedGlob> {
+    let mut includes: Vec<biome_glob::NormalizedGlob> = Vec::new();
     if !files.is_empty() {
         includes.extend(files.iter().filter_map(|glob| glob.as_ref().parse().ok()));
     } else if let Ok(glob) = "**".parse() {
@@ -352,7 +352,7 @@ fn to_biome_includes(
             } else {
                 glob.as_ref()
                     .parse()
-                    .map(|glob: biome_glob::Glob| glob.negated())
+                    .map(|glob: biome_glob::NormalizedGlob| glob.negated())
             }
             .ok()
         }));

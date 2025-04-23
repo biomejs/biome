@@ -42,36 +42,22 @@ export const superComputer = new DeepThought();
 Exports {
   "superComputer" => {
     ExportOwnExport => JsOwnExport(
-      Object(
-        required sync Method "answerMe" {
-          accepts: {
-            params: []
-            type_args: No parameters
-          }
-          returns: Number
+      Object {
+        prototype: "DeepThought" {
+          extends: none
+          type_args: []
         }
-        required sync Method "giveMeABiggerAnswer" {
-          accepts: {
-            params: [delta, The parameter is not optional, The parameter is not rest]
-            type_args: No parameters
-          }
-          returns: Unknown
-        }
-        required sync Method "whatWasTheUltimateQuestion" {
-          accepts: {
-            params: []
-            type_args: No parameters
-          }
-          returns: UnknownKeyword
-        }
-      )
+        members: {}
+      }
       Local name: superComputer
     )
   }
   "theAnswer" => {
     ExportOwnExport => JsOwnExport(
-      Literal(Number: 42)
+      value: 42
       Local name: theAnswer
     )
   }
-}```
+}
+Imports {}
+```

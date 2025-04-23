@@ -32,7 +32,7 @@ pub struct LinterConfiguration {
     /// match these patterns.
     #[bpaf(pure(Default::default()), hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::Glob>>,
+    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 
     /// An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
     #[bpaf(hide, pure(Default::default()))]

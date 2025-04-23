@@ -60,7 +60,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
             content.push_str("\n\n");
             content.push_str("```\n");
             content.push_str(&data.to_string());
-            content.push_str("```\n\n");
+            content.push_str("\n```\n\n");
         }
 
         insta::with_settings!({

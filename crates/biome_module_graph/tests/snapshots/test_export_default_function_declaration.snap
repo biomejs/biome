@@ -21,10 +21,10 @@ Exports {
       sync Function "Component" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
         returns: "JSX.Element" {
-          params: Unknown
+          resolved: unknown
           type_args: No types
         }
       }
@@ -35,4 +35,6 @@ Exports {
       )
     )
   }
-}```
+}
+Imports {}
+```
