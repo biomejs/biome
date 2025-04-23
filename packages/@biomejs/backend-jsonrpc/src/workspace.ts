@@ -105,7 +105,7 @@ export interface AssistConfiguration {
 	/**
 	 * A list of glob patterns. Biome will include files/folders that will match these patterns.
 	 */
-	includes?: Glob[];
+	includes?: NormalizedGlob[];
 }
 /**
  * Options applied to CSS files
@@ -143,7 +143,7 @@ export interface FilesConfiguration {
 	/**
 	 * A list of glob patterns. Biome will handle only those files/folders that will match these patterns.
 	 */
-	includes?: Glob[];
+	includes?: NormalizedGlob[];
 	/**
 	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
@@ -177,7 +177,7 @@ export interface FormatterConfiguration {
 	/**
 	 * A list of glob patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	includes?: Glob[];
+	includes?: NormalizedGlob[];
 	/**
 	 * The indent style.
 	 */
@@ -309,7 +309,7 @@ export interface LinterConfiguration {
 	/**
 	 * A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.
 	 */
-	includes?: Glob[];
+	includes?: NormalizedGlob[];
 	/**
 	 * List of rules
 	 */
@@ -352,7 +352,10 @@ export interface Actions {
 	recommended?: boolean;
 	source?: Source;
 }
-export type Glob = string;
+/**
+ * Normalized Biome glob pattern that strips `./` from the pattern.
+ */
+export type NormalizedGlob = Glob;
 /**
  * Options that changes how the CSS assist behaves
  */
@@ -821,6 +824,7 @@ export interface Source {
 	 */
 	useSortedProperties?: RuleAssistConfiguration_for_Null;
 }
+export type Glob = string;
 export type QuoteStyle = "double" | "single";
 /**
 	* Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).

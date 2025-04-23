@@ -497,7 +497,7 @@ pub struct FilesConfiguration {
     /// match these patterns.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::Glob>>,
+    pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 }
 
 #[derive(Debug)]

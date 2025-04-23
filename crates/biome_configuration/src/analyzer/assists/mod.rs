@@ -22,7 +22,7 @@ pub struct AssistsConfiguration {
     /// A list of glob patterns. Biome will include files/folders that will
     /// match these patterns.
     #[partial(bpaf(pure(Default::default()), hide))]
-    pub includes: Vec<biome_glob::Glob>,
+    pub includes: Vec<biome_glob::NormalizedGlob>,
 }
 
 impl Default for AssistsConfiguration {
