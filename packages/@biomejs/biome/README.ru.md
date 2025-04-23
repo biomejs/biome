@@ -13,7 +13,6 @@
   [![npm version][npm-badge]][npm-url]
   [![VSCode version][vscode-badge]][vscode-url]
   [![Open VSX version][open-vsx-badge]][open-vsx-url]
-  [![Polar bounties][polar-badge]][polar-url]
 
   [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
   [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
@@ -26,7 +25,6 @@
   [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=60a5fa
   [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
   [polar-badge]: https://polar.sh/embed/seeks-funding-shield.svg?org=biomejs
-  [polar-url]: https://polar.sh/biomejs
 
 <!-- Insert new entries lexicographically by language code.
      For example given below is the same order as these files appear on page:
