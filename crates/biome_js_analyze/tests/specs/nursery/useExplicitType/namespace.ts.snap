@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: namespace.ts
+snapshot_kind: text
+---
+# Input
+```ts
+namespace Ns {
+	export const X = {};
+}
+
+```
+
+# Diagnostics
+```
+namespace.ts:2:15 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    1 │ namespace Ns {
+  > 2 │ 	export const X = {};
+      │ 	             ^
+    3 │ }
+    4 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```

@@ -1,5 +1,6 @@
-use crate::services::semantic::Semantic;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{HasClosureAstNode, SemanticModel};
@@ -291,14 +292,13 @@ impl AnyEntityWithTypes {
 }
 
 impl Rule for UseExplicitType {
-    type Query = Semantic<AnyEntityWithTypes>;
+    type Query = Ast<AnyEntityWithTypes>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>().language();
-        let model = ctx.model();
         if !source_type.is_typescript() || source_type.is_definition_file() {
             return None;
         }
@@ -372,7 +372,7 @@ impl Rule for UseExplicitType {
                 Some(decl.range())
             }
             AnyEntityWithTypes::JsVariableDeclarator(declarator) => {
-                handle_variable_declarator(declarator, model)
+                handle_variable_declarator(declarator)
             }
         }
     }
@@ -761,10 +761,7 @@ fn handle_any_function(func: &AnyJsFunction) -> Option<TextRange> {
 }
 
 /// Checks if a variable declarator needs to have an explicit type.
-fn handle_variable_declarator(
-    declarator: &JsVariableDeclarator,
-    model: &SemanticModel,
-) -> Option<TextRange> {
+fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<TextRange> {
     let variable_declaration = declarator
         .parent::<JsVariableDeclaratorList>()?
         .parent::<JsVariableDeclaration>()?;
@@ -784,9 +781,8 @@ fn handle_variable_declarator(
 
     let identifier = declarator.id().ok()?;
     let identifier = identifier.as_any_js_binding()?.as_js_identifier_binding()?;
-    let is_exported = model.is_exported(identifier);
 
-    if !is_top_level || !is_exported {
+    if !is_top_level {
         return None;
     }
 
@@ -804,6 +800,10 @@ fn handle_variable_declarator(
 
     if let Some(ty) = ty {
         if let Some(initializer_expression) = initializer_expression {
+            if initializer_expression.has_trivially_inferrable_type() {
+                return None;
+            }
+
             if (is_const && ty.is_non_null_literal_type())
                 || (!is_const
                     && ty.is_primitive_type()
