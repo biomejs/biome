@@ -63,3 +63,16 @@ React.Children.map(c => React.cloneElement(c));
 	const div = <div>{x}</div>;
 	return div;
 });
+
+data.map((item) => <><p>{item}</p></>)
+
+data.map((item) => <React.Fragment><p>{item}</p></React.Fragment>)
+
+[].map((item) => {
+	const div = <div />;
+	return <>{div}<div key={item.id}>{item}</div></>;
+});
+
+[].map((item) => {
+	return <><div key={item.id} /><div>{item}</div></>;
+});

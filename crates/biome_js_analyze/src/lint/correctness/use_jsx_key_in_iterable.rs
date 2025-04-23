@@ -321,23 +321,7 @@ fn handle_jsx_child(node: &AnyJsxChild, model: &SemanticModel) -> Option<Vec<Tex
                     ranges.extend(child_ranges);
                 }
             }
-            AnyJsxChild::JsxFragment(node) => {
-                let has_any_tags = node.children().iter().any(|child| match &child {
-                    AnyJsxChild::JsxElement(_) | AnyJsxChild::JsxSelfClosingElement(_) => true,
-                    // HACK: don't flag the entire fragment if there's a conditional expression
-                    AnyJsxChild::JsxExpressionChild(node) => node
-                        .expression()
-                        .is_some_and(|n| n.as_js_conditional_expression().is_some()),
-                    _ => false,
-                });
-
-                if !has_any_tags {
-                    ranges.push(node.range());
-                    break;
-                }
-
-                stack.extend(node.children());
-            }
+            AnyJsxChild::JsxFragment(node) => ranges.push(node.range()),
             _ => {}
         }
     }

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -69,6 +68,19 @@ React.Children.map(c => React.cloneElement(c));
 	const x = 5;
 	const div = <div>{x}</div>;
 	return div;
+});
+
+data.map((item) => <><p>{item}</p></>)
+
+data.map((item) => <React.Fragment><p>{item}</p></React.Fragment>)
+
+[].map((item) => {
+	const div = <div />;
+	return <>{div}<div key={item.id}>{item}</div></>;
+});
+
+[].map((item) => {
+	return <><div key={item.id} /><div>{item}</div></>;
 });
 
 ```
@@ -699,13 +711,13 @@ invalid.jsx:41:30 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:48:11 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:48:9 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing key property for this element in iterable.
   
     47 │ [].map((item) => {
   > 48 │ 	return <><div /><div>{item}</div></>;
-       │ 	         ^^^^^^^
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     49 │ });
     50 │ 
   
@@ -717,49 +729,13 @@ invalid.jsx:48:11 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:48:18 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    47 │ [].map((item) => {
-  > 48 │ 	return <><div /><div>{item}</div></>;
-       │ 	                ^^^^^
-    49 │ });
-    50 │ 
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalid.jsx:52:29 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:52:9 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing key property for this element in iterable.
   
     51 │ [].map((item) => {
   > 52 │ 	return <>{item.condition ? <div /> : <div>foo</div>}</>;
-       │ 	                           ^^^^^^^
-    53 │ });
-    54 │ 
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalid.jsx:52:39 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    51 │ [].map((item) => {
-  > 52 │ 	return <>{item.condition ? <div /> : <div>foo</div>}</>;
-       │ 	                                     ^^^^^
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     53 │ });
     54 │ 
   
@@ -800,6 +776,99 @@ invalid.jsx:63:14 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
        │ 	            ^^^^^
     64 │ 	return div;
     65 │ });
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:67:20 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    65 │ });
+    66 │ 
+  > 67 │ data.map((item) => <><p>{item}</p></>)
+       │                    ^^^^^^^^^^^^^^^^^^
+    68 │ 
+    69 │ data.map((item) => <React.Fragment><p>{item}</p></React.Fragment>)
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:72:14 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    71 │ [].map((item) => {
+  > 72 │ 	const div = <div />;
+       │ 	            ^^^^^^^
+    73 │ 	return <>{div}<div key={item.id}>{item}</div></>;
+    74 │ });
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:73:9 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    71 │ [].map((item) => {
+    72 │ 	const div = <div />;
+  > 73 │ 	return <>{div}<div key={item.id}>{item}</div></>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ });
+    75 │ 
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:69:20 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    67 │ data.map((item) => <><p>{item}</p></>)
+    68 │ 
+  > 69 │ data.map((item) => <React.Fragment><p>{item}</p></React.Fragment>)
+       │                    ^^^^^^^^^^^^^^^^
+    70 │ 
+    71 │ [].map((item) => {
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:77:9 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    76 │ [].map((item) => {
+  > 77 │ 	return <><div key={item.id} /><div>{item}</div></>;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    78 │ });
+    79 │ 
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
