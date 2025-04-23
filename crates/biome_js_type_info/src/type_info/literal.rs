@@ -12,8 +12,8 @@ impl BooleanLiteral {
 
     pub fn parse(s: &str) -> Option<Self> {
         match s.as_bytes().first() {
-            Some(b't' | b'T') => Some(Self(true)),
-            Some(b'f' | b'F') => Some(Self(false)),
+            Some(b't') => Some(Self(true)),
+            Some(b'f') => Some(Self(false)),
             _ => None,
         }
     }
@@ -118,11 +118,7 @@ mod tests {
     #[test]
     fn parse_boolean() {
         assert_eq!(BooleanLiteral::parse("true"), Some(BooleanLiteral(true)));
-        assert_eq!(BooleanLiteral::parse("True"), Some(BooleanLiteral(true)));
-        assert_eq!(BooleanLiteral::parse("TRUE"), Some(BooleanLiteral(true)));
         assert_eq!(BooleanLiteral::parse("false"), Some(BooleanLiteral(false)));
-        assert_eq!(BooleanLiteral::parse("False"), Some(BooleanLiteral(false)));
-        assert_eq!(BooleanLiteral::parse("FALSE"), Some(BooleanLiteral(false)));
     }
 
     #[test]
@@ -176,6 +172,9 @@ mod tests {
 
     #[test]
     fn parse_number_hexadecimal() {
+        // TODO: This is bigger than u64 and can't parse it via u64::from_str_radix.
+        //       However it's a valid number literal in ECMAScript, though it will be truncated
+        //       to the precision of f64.
         // assert_eq!(
         //     NumberLiteral::parse("0xFFFFFFFFFFFFFFFFF"),
         //     Some(NumberLiteral(295147905179352830000.0))
