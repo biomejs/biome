@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `index.ts`
@@ -46,7 +46,12 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Biome" tests="12" failures="12" errors="16" time="<TIME>">
+<testsuites name="Biome" tests="14" failures="14" errors="14" time="<TIME>">
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.assist.source.organizeImports" line="1" column="1">
+            <failure message="The imports and exports are not sorted.">line 0, col 0, The imports and exports are not sorted.</failure>
+        </testcase>
+    </testsuite>
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
             <failure message="Use === instead of ==. == is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==. == is only allowed when comparing against `null`</failure>
@@ -75,6 +80,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noRedeclare" line="9" column="7">
             <failure message="Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.">line 8, col 6, Shouldn&apos;t redeclare &apos;f&apos;. Consider to delete it or rename it.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.assist.source.organizeImports" line="1" column="1">
+            <failure message="The imports and exports are not sorted.">line 0, col 0, The imports and exports are not sorted.</failure>
         </testcase>
     </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">

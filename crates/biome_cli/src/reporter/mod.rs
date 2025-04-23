@@ -15,7 +15,6 @@ use std::time::Duration;
 
 pub struct DiagnosticsPayload {
     pub diagnostics: Vec<Error>,
-    pub verbose: bool,
     pub diagnostic_level: Severity,
 }
 
@@ -29,6 +28,9 @@ pub struct TraversalSummary {
     // We skip it during testing because the time isn't predictable
     #[cfg_attr(debug_assertions, serde(skip))]
     pub duration: Duration,
+    // We skip it during testing because the time isn't predictable
+    #[cfg_attr(debug_assertions, serde(skip))]
+    pub scanner_duration: Option<Duration>,
     pub errors: u32,
     pub warnings: u32,
     pub skipped: usize,
@@ -49,6 +51,7 @@ pub trait ReporterVisitor {
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
+        verbose: bool,
     ) -> io::Result<()>;
 
     /// Writes the paths that were handled during a run.
@@ -62,5 +65,6 @@ pub trait ReporterVisitor {
         &mut self,
         execution: &Execution,
         payload: DiagnosticsPayload,
+        verbose: bool,
     ) -> io::Result<()>;
 }

@@ -266,8 +266,7 @@ impl Cache for ResolverCache<'_> {
 
         callback(&mut tsconfig)?;
 
-        tsconfig.expand_template_variables();
-        let tsconfig = Arc::new(tsconfig);
+        let tsconfig = Arc::new(tsconfig.build());
         tsconfigs.insert(path.to_path_buf(), Arc::clone(&tsconfig));
         Ok(tsconfig)
     }

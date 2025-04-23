@@ -1,0 +1,63 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+snapshot_kind: text
+---
+## /src/index.ts
+
+```ts
+export const theAnswer = 42;
+
+/**
+ * Built by a race of hyper-intelligent pan-dimensional beings to
+ * calculate the Ultimate Answer to the Ultimate Question of Life,
+ * The Universe, and Everything.
+ *
+ * This JSDoc comment should not be transferred to the exported
+ * instance variable below.
+ */
+class DeepThought {
+	answerMe(): number {
+		return theAnswer;
+	}
+
+	giveMeABiggerAnswer(delta: number) {
+		// Return type should be inferred to `number`.
+		// TODO: At some point.
+		return theAnswer + delta;
+	}
+
+	whatWasTheUltimateQuestion(): unknown {
+		// This should not be inferred to `string` due to the
+		// explicit annotation in the signature.
+		return "Life, The Universe, and Everything";
+	}
+}
+
+export const superComputer = new DeepThought();
+
+```
+
+```
+Exports {
+  "superComputer" => {
+    ExportOwnExport => JsOwnExport(
+      Object {
+        prototype: "DeepThought" {
+          extends: none
+          type_args: []
+        }
+        members: {}
+      }
+      Local name: superComputer
+    )
+  }
+  "theAnswer" => {
+    ExportOwnExport => JsOwnExport(
+      value: 42
+      Local name: theAnswer
+    )
+  }
+}
+Imports {}
+```

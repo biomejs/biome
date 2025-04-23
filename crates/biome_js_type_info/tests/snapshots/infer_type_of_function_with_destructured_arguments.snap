@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_type_info/tests/utils/mod.rs
+expression: content
+---
+```ts
+function destruct(
+	{ a, b }: { a: number; b: string },
+	[first, ...rest]: Array<boolean>,
+) {}
+
+```
+
+```
+sync Function "destruct" {
+  accepts: {
+    params: [
+      required (unnamed): Object {
+        prototype: No prototype
+        members: {TypeMembers(
+          Property(
+            [a, required]
+            Type(number)
+          )
+          Property(
+            [b, required]
+            Type(string)
+          )
+        )}
+      } (bindings:
+        a:Object {
+          prototype: No prototype
+          members: {TypeMembers(
+            Property(
+              [a, required]
+              Type(number)
+            )
+            Property(
+              [b, required]
+              Type(string)
+            )
+          )}
+        }.a, b:Object {
+          prototype: No prototype
+          members: {TypeMembers(
+            Property(
+              [a, required]
+              Type(number)
+            )
+            Property(
+              [b, required]
+              Type(string)
+            )
+          )}
+        }.b
+      ), required (unnamed): "Array" {
+        resolved: unknown
+        type_args: boolean
+      } (bindings:
+        first:"Array" {
+          resolved: unknown
+          type_args: boolean
+        }[0], rest:[(1 others)..."Array" {
+          resolved: unknown
+          type_args: boolean
+        }]
+      )
+    ]
+    type_args: []
+  }
+  returns: unknown
+}
+```

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -137,5 +136,17 @@ describe("foo", () => {
   beforeEach(() => jest.useFakeTimers('legacy'));
   afterEach(() => jest.useRealTimers());
 })
+
+class DemoMethod {
+    useHook() {
+        return useMemo(() => "string", []);
+    }
+}
+
+class DemoProperty {
+    useHook = () => {
+        return useMemo(() => "string", []);
+    }
+}
 
 ```

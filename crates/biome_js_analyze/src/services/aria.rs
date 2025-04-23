@@ -1,6 +1,6 @@
 use biome_analyze::{
-    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, Queryable,
-    RuleKey, ServiceBag, SyntaxVisitor,
+    AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
+    ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_aria::AriaRoles;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
@@ -21,11 +21,12 @@ impl AriaServices {
 impl FromServices for AriaServices {
     fn from_services(
         rule_key: &RuleKey,
+        _rule_metadata: &RuleMetadata,
         services: &ServiceBag,
-    ) -> Result<Self, MissingServicesDiagnostic> {
+    ) -> Result<Self, ServicesDiagnostic> {
         let roles: &Arc<AriaRoles> = services
             .get_service()
-            .ok_or_else(|| MissingServicesDiagnostic::new(rule_key.rule_name(), &["AriaRoles"]))?;
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["AriaRoles"]))?;
         Ok(Self {
             roles: roles.clone(),
         })

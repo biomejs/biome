@@ -19,6 +19,7 @@
 //! * [`format_args!`]: Concatenates a sequence of Format objects.
 //! * [`write!`]: Writes a sequence of formatable objects into an output buffer.
 
+#![deny(clippy::use_self)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
 mod arguments;
@@ -100,12 +101,12 @@ impl IndentStyle {
 
     /// Returns `true` if this is an [IndentStyle::Tab].
     pub const fn is_tab(&self) -> bool {
-        matches!(self, IndentStyle::Tab)
+        matches!(self, Self::Tab)
     }
 
     /// Returns `true` if this is an [IndentStyle::Space].
     pub const fn is_space(&self) -> bool {
-        matches!(self, IndentStyle::Space)
+        matches!(self, Self::Space)
     }
 }
 
@@ -125,8 +126,8 @@ impl FromStr for IndentStyle {
 impl Display for IndentStyle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            IndentStyle::Tab => std::write!(f, "Tab"),
-            IndentStyle::Space => std::write!(f, "Space"),
+            Self::Tab => std::write!(f, "Tab"),
+            Self::Space => std::write!(f, "Space"),
         }
     }
 }
@@ -155,25 +156,25 @@ impl LineEnding {
     #[inline]
     pub const fn as_str(&self) -> &'static str {
         match self {
-            LineEnding::Lf => "\n",
-            LineEnding::Crlf => "\r\n",
-            LineEnding::Cr => "\r",
+            Self::Lf => "\n",
+            Self::Crlf => "\r\n",
+            Self::Cr => "\r",
         }
     }
 
     /// Returns `true` if this is a [LineEnding::Lf].
     pub const fn is_line_feed(&self) -> bool {
-        matches!(self, LineEnding::Lf)
+        matches!(self, Self::Lf)
     }
 
     /// Returns `true` if this is a [LineEnding::Crlf].
     pub const fn is_carriage_return_line_feed(&self) -> bool {
-        matches!(self, LineEnding::Crlf)
+        matches!(self, Self::Crlf)
     }
 
     /// Returns `true` if this is a [LineEnding::Cr].
     pub const fn is_carriage_return(&self) -> bool {
-        matches!(self, LineEnding::Cr)
+        matches!(self, Self::Cr)
     }
 }
 
@@ -194,9 +195,9 @@ impl FromStr for LineEnding {
 impl std::fmt::Display for LineEnding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            LineEnding::Lf => std::write!(f, "LF"),
-            LineEnding::Crlf => std::write!(f, "CRLF"),
-            LineEnding::Cr => std::write!(f, "CR"),
+            Self::Lf => std::write!(f, "LF"),
+            Self::Crlf => std::write!(f, "CRLF"),
+            Self::Cr => std::write!(f, "CR"),
         }
     }
 }
@@ -253,7 +254,7 @@ impl<'de> serde::Deserialize<'de> for IndentWidth {
         D: serde::Deserializer<'de>,
     {
         let value: u8 = serde::Deserialize::deserialize(deserializer)?;
-        let indent_width = IndentWidth::try_from(value).map_err(serde::de::Error::custom)?;
+        let indent_width = Self::try_from(value).map_err(serde::de::Error::custom)?;
         Ok(indent_width)
     }
 }
@@ -355,7 +356,7 @@ impl<'de> serde::Deserialize<'de> for LineWidth {
         D: serde::Deserializer<'de>,
     {
         let value: u16 = serde::Deserialize::deserialize(deserializer)?;
-        let line_width = LineWidth::try_from(value).map_err(serde::de::Error::custom)?;
+        let line_width = Self::try_from(value).map_err(serde::de::Error::custom)?;
         Ok(line_width)
     }
 }
@@ -385,7 +386,7 @@ pub enum ParseFormatNumberError {
     ParseError(ParseIntError),
     /// The `u16` value of the string is not a valid [LineWidth]
     TryFromU16Error(LineWidthFromIntError),
-    /// The `u8 value of the string is not a valid [IndentWidth]
+    /// The `u8` value of the string is not a valid [IndentWidth]
     TryFromU8Error(IndentWidthFromIntError),
 }
 
@@ -418,9 +419,9 @@ impl std::error::Error for ParseFormatNumberError {}
 impl std::fmt::Display for ParseFormatNumberError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ParseFormatNumberError::ParseError(err) => std::fmt::Display::fmt(err, fmt),
-            ParseFormatNumberError::TryFromU16Error(err) => std::fmt::Display::fmt(err, fmt),
-            ParseFormatNumberError::TryFromU8Error(err) => std::fmt::Display::fmt(err, fmt),
+            Self::ParseError(err) => std::fmt::Display::fmt(err, fmt),
+            Self::TryFromU16Error(err) => std::fmt::Display::fmt(err, fmt),
+            Self::TryFromU8Error(err) => std::fmt::Display::fmt(err, fmt),
         }
     }
 }
@@ -503,18 +504,18 @@ pub enum QuoteStyle {
 }
 
 impl QuoteStyle {
-    pub fn from_byte(byte: u8) -> Option<QuoteStyle> {
+    pub fn from_byte(byte: u8) -> Option<Self> {
         match byte {
-            b'"' => Some(QuoteStyle::Double),
-            b'\'' => Some(QuoteStyle::Single),
+            b'"' => Some(Self::Double),
+            b'\'' => Some(Self::Single),
             _ => None,
         }
     }
 
     pub fn as_char(&self) -> char {
         match self {
-            QuoteStyle::Double => '"',
-            QuoteStyle::Single => '\'',
+            Self::Double => '"',
+            Self::Single => '\'',
         }
     }
 
@@ -525,16 +526,16 @@ impl QuoteStyle {
     /// Returns the quote in HTML entity
     pub fn as_html_entity(&self) -> &str {
         match self {
-            QuoteStyle::Double => "&quot;",
-            QuoteStyle::Single => "&apos;",
+            Self::Double => "&quot;",
+            Self::Single => "&apos;",
         }
     }
 
     /// Given the current quote, it returns the other one
     pub fn other(&self) -> Self {
         match self {
-            QuoteStyle::Double => QuoteStyle::Single,
-            QuoteStyle::Single => QuoteStyle::Double,
+            Self::Double => Self::Single,
+            Self::Single => Self::Double,
         }
     }
 
@@ -559,8 +560,8 @@ impl FromStr for QuoteStyle {
 impl std::fmt::Display for QuoteStyle {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            QuoteStyle::Double => std::write!(f, "Double Quotes"),
-            QuoteStyle::Single => std::write!(f, "Single Quotes"),
+            Self::Double => std::write!(f, "Double Quotes"),
+            Self::Single => std::write!(f, "Single Quotes"),
         }
     }
 }
@@ -645,8 +646,8 @@ pub enum AttributePosition {
 impl std::fmt::Display for AttributePosition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AttributePosition::Auto => std::write!(f, "Auto"),
-            AttributePosition::Multiline => std::write!(f, "Multiline"),
+            Self::Auto => std::write!(f, "Auto"),
+            Self::Multiline => std::write!(f, "Multiline"),
         }
     }
 }
@@ -740,9 +741,9 @@ impl FromStr for Expand {
 impl fmt::Display for Expand {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Expand::Auto => std::write!(f, "Auto"),
-            Expand::Always => std::write!(f, "Always"),
-            Expand::Never => std::write!(f, "Never"),
+            Self::Auto => std::write!(f, "Auto"),
+            Self::Always => std::write!(f, "Always"),
+            Self::Never => std::write!(f, "Never"),
         }
     }
 }

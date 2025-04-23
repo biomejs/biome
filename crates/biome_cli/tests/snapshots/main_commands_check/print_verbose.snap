@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `check.js`
@@ -22,10 +22,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 # Emitted Messages
-
-```block
-Scanned project folder in <TIME>.
-```
 
 ```block
 check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -50,6 +46,7 @@ check.js format ━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+Scanned project folder in <TIME>.
 Checked 1 file in <TIME>. No fixes applied.
 Found 2 errors.
 ```

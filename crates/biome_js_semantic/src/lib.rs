@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod events;
 
 mod semantic_model;

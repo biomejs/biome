@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 # Emitted Messages
 
@@ -55,9 +54,17 @@ Invalid
  test.only("foo", () => {});
  ```
 
+ ```js,expect_diagnostic
+ test.only.each([["a"]])("%s", (a) => {});
+ ```
+
 Valid
  ```js
  test("foo", () => {});
+ ```
+
+ ```js
+ test.each([["a"]])("%s", (a) => {});
  ```
 
 ```

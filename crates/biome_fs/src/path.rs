@@ -57,12 +57,10 @@ pub struct FileKinds(BitFlags<FileKind>);
 
 impl From<SmallVec<[FileKind; 5]>> for FileKinds {
     fn from(value: SmallVec<[FileKind; 5]>) -> Self {
-        value
-            .into_iter()
-            .fold(FileKinds::default(), |mut acc, kind| {
-                acc.insert(kind);
-                acc
-            })
+        value.into_iter().fold(Self::default(), |mut acc, kind| {
+            acc.insert(kind);
+            acc
+        })
     }
 }
 
@@ -128,7 +126,7 @@ impl<'de> serde::Deserialize<'de> for BiomePath {
         let path = Utf8PathBuf::from_path_buf(path).map_err(|e| {
             serde::de::Error::custom(format!("Unable to deserialize path {}", e.display()))
         })?;
-        Ok(BiomePath::new(path))
+        Ok(Self::new(path))
     }
 }
 

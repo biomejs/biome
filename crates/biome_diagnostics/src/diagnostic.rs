@@ -210,10 +210,10 @@ impl DiagnosticTags {
     pub const fn empty() -> Self {
         Self(BitFlags::EMPTY)
     }
-    pub fn insert(&mut self, other: DiagnosticTags) {
+    pub fn insert(&mut self, other: Self) {
         self.0 |= other.0;
     }
-    pub fn contains(self, other: impl Into<DiagnosticTags>) -> bool {
+    pub fn contains(self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
     }
     pub const fn union(self, other: Self) -> Self {
@@ -231,7 +231,7 @@ impl BitOr for DiagnosticTags {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        DiagnosticTags(self.0 | rhs.0)
+        Self(self.0 | rhs.0)
     }
 }
 

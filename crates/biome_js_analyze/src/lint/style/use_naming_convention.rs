@@ -286,48 +286,7 @@ declare_lint_rule! {
     ///
     /// - Declarations inside an external TypeScript module
     ///
-    ///   :::caution
-    ///   **Bug:** Declarations inside external TypeScript modules are currently not ignored.
-    ///   This is a bug, and is tracked under [#4545](https://github.com/biomejs/biome/issues/4545).
-    ///
-    ///   Until the bug is fixed, we recommend one of the following workarounds:
-    ///
-    ///   - Move the type declarations for external modules into separate `.d.ts` files,
-    ///     and use [overrides](https://biomejs.dev/reference/configuration/#overrides)
-    ///     in your [`biome.json`](https://biomejs.dev/reference/configuration/)
-    ///     to disable the `useNamingConvention` rule for those files:
-    ///
-    ///     ```jsonc,full_options
-    ///     {
-    ///       "linter": {
-    ///         "rules": {
-    ///           "style": {
-    ///             "useNamingConvention": "warn"
-    ///           }
-    ///           // ...
-    ///         }
-    ///       },
-    ///       // ...
-    ///       "overrides": [
-    ///         {
-    ///           "includes": ["typings/*.d.ts"],
-    ///           "linter": {
-    ///             "rules": {
-    ///               "style": {
-    ///                 "useNamingConvention": "off"
-    ///               }
-    ///             }
-    ///           }
-    ///         }
-    ///       ]
-    ///     }
-    ///     ```
-    ///
-    ///   - Use [`// biome-ignore lint/style/useNamingConvention: <explanation>`](https://biomejs.dev/linter/#ignore-code)
-    ///     to ignore the problematic lines.
-    ///   :::
-    ///
-    ///   ```ts,ignore
+    ///   ```ts
     ///   declare module "myExternalModule" {
     ///     export interface my_INTERFACE {}
     ///   }
@@ -954,17 +913,13 @@ declare_node_union! {
 impl AnyIdentifierBindingLike {
     fn name_token(&self) -> SyntaxResult<JsSyntaxToken> {
         match self {
-            AnyIdentifierBindingLike::JsIdentifierBinding(binding) => binding.name_token(),
-            AnyIdentifierBindingLike::JsLiteralMemberName(member_name) => member_name.value(),
-            AnyIdentifierBindingLike::JsPrivateClassMemberName(member_name) => {
-                member_name.id_token()
-            }
-            AnyIdentifierBindingLike::JsLiteralExportName(export_name) => export_name.value(),
-            AnyIdentifierBindingLike::TsIdentifierBinding(binding) => binding.name_token(),
-            AnyIdentifierBindingLike::TsLiteralEnumMemberName(member_name) => member_name.value(),
-            AnyIdentifierBindingLike::TsTypeParameterName(type_parameter) => {
-                type_parameter.ident_token()
-            }
+            Self::JsIdentifierBinding(binding) => binding.name_token(),
+            Self::JsLiteralMemberName(member_name) => member_name.value(),
+            Self::JsPrivateClassMemberName(member_name) => member_name.id_token(),
+            Self::JsLiteralExportName(export_name) => export_name.value(),
+            Self::TsIdentifierBinding(binding) => binding.name_token(),
+            Self::TsLiteralEnumMemberName(member_name) => member_name.value(),
+            Self::TsTypeParameterName(type_parameter) => type_parameter.ident_token(),
         }
     }
 }
@@ -1133,19 +1088,19 @@ impl std::error::Error for InvalidSelector {}
 impl std::fmt::Display for InvalidSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            InvalidSelector::IncompatibleModifiers(modifier1, modifier2) => {
+            Self::IncompatibleModifiers(modifier1, modifier2) => {
                 write!(
                     f,
                     "The `{modifier1}` and `{modifier2}` modifiers cannot be used together.",
                 )
             }
-            InvalidSelector::UnsupportedModifiers(kind, modifier) => {
+            Self::UnsupportedModifiers(kind, modifier) => {
                 write!(
                     f,
                     "The `{modifier}` modifier cannot be used with the `{kind}` kind."
                 )
             }
-            InvalidSelector::UnsupportedScope(kind, scope) => {
+            Self::UnsupportedScope(kind, scope) => {
                 let scope = scope.to_string();
                 let scope = scope.trim_end();
                 write!(
@@ -1286,27 +1241,27 @@ impl Selector {
         }
     }
 
-    fn from_name(js_name: &AnyIdentifierBindingLike) -> Option<Selector> {
+    fn from_name(js_name: &AnyIdentifierBindingLike) -> Option<Self> {
         match js_name {
             AnyIdentifierBindingLike::JsIdentifierBinding(binding) => {
-                Selector::from_binding_declaration(&binding.declaration()?)
+                Self::from_binding_declaration(&binding.declaration()?)
             }
             AnyIdentifierBindingLike::TsIdentifierBinding(binding) => {
-                Selector::from_binding_declaration(&binding.declaration()?)
+                Self::from_binding_declaration(&binding.declaration()?)
             }
             AnyIdentifierBindingLike::JsLiteralMemberName(member_name) => {
                 if let Some(member) = member_name.parent::<AnyJsClassMember>() {
-                    Selector::from_class_member(&member)
+                    Self::from_class_member(&member)
                 } else if let Some(member) = member_name.parent::<AnyTsTypeMember>() {
-                    Selector::from_type_member(&member)
+                    Self::from_type_member(&member)
                 } else if let Some(member) = member_name.parent::<AnyJsObjectMember>() {
-                    Selector::from_object_member(&member)
+                    Self::from_object_member(&member)
                 } else {
                     None
                 }
             }
             AnyIdentifierBindingLike::JsPrivateClassMemberName(member_name) => {
-                Selector::from_class_member(&member_name.parent::<AnyJsClassMember>()?)
+                Self::from_class_member(&member_name.parent::<AnyJsClassMember>()?)
             }
             AnyIdentifierBindingLike::JsLiteralExportName(export_name) => {
                 let parent = export_name.syntax().parent()?;
@@ -1329,8 +1284,8 @@ impl Selector {
         }
     }
 
-    fn from_class_member(member: &AnyJsClassMember) -> Option<Selector> {
-        let Selector {
+    fn from_class_member(member: &AnyJsClassMember) -> Option<Self> {
+        let Self {
             kind,
             modifiers,
             scope,
@@ -1342,45 +1297,45 @@ impl Selector {
             | AnyJsClassMember::JsEmptyClassMember(_)
             | AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => return None,
             AnyJsClassMember::TsIndexSignatureClassMember(getter) => {
-                Selector::with_modifiers(Kind::IndexParameter, getter.modifiers())
+                Self::with_modifiers(Kind::IndexParameter, getter.modifiers())
             }
             AnyJsClassMember::JsGetterClassMember(getter) => {
-                Selector::with_modifiers(Kind::ClassGetter, getter.modifiers())
+                Self::with_modifiers(Kind::ClassGetter, getter.modifiers())
             }
             AnyJsClassMember::TsGetterSignatureClassMember(getter) => {
-                Selector::with_modifiers(Kind::ClassGetter, getter.modifiers())
+                Self::with_modifiers(Kind::ClassGetter, getter.modifiers())
             }
             AnyJsClassMember::JsMethodClassMember(method) => {
-                Selector::with_modifiers(Kind::ClassMethod, method.modifiers())
+                Self::with_modifiers(Kind::ClassMethod, method.modifiers())
             }
             AnyJsClassMember::TsMethodSignatureClassMember(method) => {
-                Selector::with_modifiers(Kind::ClassMethod, method.modifiers())
+                Self::with_modifiers(Kind::ClassMethod, method.modifiers())
             }
             AnyJsClassMember::JsPropertyClassMember(property) => {
-                Selector::with_modifiers(Kind::ClassProperty, property.modifiers())
+                Self::with_modifiers(Kind::ClassProperty, property.modifiers())
             }
             AnyJsClassMember::TsPropertySignatureClassMember(property) => {
-                Selector::with_modifiers(Kind::ClassProperty, property.modifiers())
+                Self::with_modifiers(Kind::ClassProperty, property.modifiers())
             }
             AnyJsClassMember::TsInitializedPropertySignatureClassMember(property) => {
-                Selector::with_modifiers(Kind::ClassProperty, property.modifiers())
+                Self::with_modifiers(Kind::ClassProperty, property.modifiers())
             }
             AnyJsClassMember::JsSetterClassMember(setter) => {
-                Selector::with_modifiers(Kind::ClassSetter, setter.modifiers())
+                Self::with_modifiers(Kind::ClassSetter, setter.modifiers())
             }
             AnyJsClassMember::TsSetterSignatureClassMember(setter) => {
-                Selector::with_modifiers(Kind::ClassSetter, setter.modifiers())
+                Self::with_modifiers(Kind::ClassSetter, setter.modifiers())
             }
         };
         // Ignore explicitly overridden members
-        (!modifiers.contains(Modifier::Override)).then_some(Selector {
+        (!modifiers.contains(Modifier::Override)).then_some(Self {
             kind,
             modifiers,
             scope,
         })
     }
 
-    fn from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<Selector> {
+    fn from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<Self> {
         match decl {
             AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
@@ -1389,7 +1344,7 @@ impl Selector {
                 Self::from_parent_binding_pattern_declaration(&decl.parent_binding_pattern_declaration()?)
             }
             AnyJsBindingDeclaration::JsVariableDeclarator(var) => {
-                Selector::from_variable_declarator(var, Scope::from_declaration(decl)?)
+                Self::from_variable_declarator(var, Scope::from_declaration(decl)?)
             }
             AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
             | AnyJsBindingDeclaration::JsBogusParameter(_)
@@ -1399,30 +1354,30 @@ impl Selector {
             AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Kind::ClassProperty.into()),
             AnyJsBindingDeclaration::TsIndexSignatureParameter(member_name) => {
                 if let Some(member) = member_name.parent::<>() {
-                    Selector::from_class_member(&member)
+                    Self::from_class_member(&member)
                 } else if let Some(member) = member_name.parent::<AnyTsTypeMember>() {
-                    Selector::from_type_member(&member)
+                    Self::from_type_member(&member)
                 } else if let Some(member) = member_name.parent::<AnyJsObjectMember>() {
-                    Selector::from_object_member(&member)
+                    Self::from_object_member(&member)
                 } else {
                     Some(Kind::IndexParameter.into())
                 }
             }
-            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportNamespace, Scope::Global)),
+            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Self::with_scope(Kind::ImportNamespace, Scope::Global)),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
             | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
             | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
             | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
-                Some(Selector::with_scope(Kind::Function, Scope::from_declaration(decl)?))
+                Some(Self::with_scope(Kind::Function, Scope::from_declaration(decl)?))
             }
             AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
             | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportAlias, Scope::Global)),
-            AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Selector::with_scope(Kind::Namespace, Scope::Global)),
-            AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => Some(Selector::with_scope(Kind::TypeAlias, Scope::from_declaration(decl)?)),
+            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Self::with_scope(Kind::ImportAlias, Scope::Global)),
+            AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Self::with_scope(Kind::Namespace, Scope::Global)),
+            AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => Some(Self::with_scope(Kind::TypeAlias, Scope::from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsClassDeclaration(class) => {
-                Some(Selector {
+                Some(Self {
                     kind: Kind::Class,
                     modifiers: if class.abstract_token().is_some() {
                         Modifier::Abstract.into()
@@ -1433,7 +1388,7 @@ impl Selector {
                 })
             }
             AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(class) => {
-                Some(Selector {
+                Some(Self {
                     kind: Kind::Class,
                     modifiers: if class.abstract_token().is_some() {
                         Modifier::Abstract.into()
@@ -1444,10 +1399,10 @@ impl Selector {
                 })
             }
             AnyJsBindingDeclaration::JsClassExpression(_) => {
-                Some(Selector::with_scope(Kind::Class, Scope::from_declaration(decl)?))
+                Some(Self::with_scope(Kind::Class, Scope::from_declaration(decl)?))
             }
-            AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(Selector::with_scope(Kind::Interface, Scope::from_declaration(decl)?)),
-            AnyJsBindingDeclaration::TsEnumDeclaration(_) => Some(Selector::with_scope(Kind::Enum, Scope::from_declaration(decl)?)),
+            AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(Self::with_scope(Kind::Interface, Scope::from_declaration(decl)?)),
+            AnyJsBindingDeclaration::TsEnumDeclaration(_) => Some(Self::with_scope(Kind::Enum, Scope::from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
@@ -1459,16 +1414,16 @@ impl Selector {
         }
     }
 
-    fn from_parent_binding_pattern_declaration(decl: &AnyJsBindingDeclaration) -> Option<Selector> {
+    fn from_parent_binding_pattern_declaration(decl: &AnyJsBindingDeclaration) -> Option<Self> {
         let scope = Scope::from_declaration(decl)?;
         if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = decl {
-            Selector::from_variable_declarator(declarator, scope)
+            Self::from_variable_declarator(declarator, scope)
         } else {
-            Some(Selector::with_scope(Kind::Variable, scope))
+            Some(Self::with_scope(Kind::Variable, scope))
         }
     }
 
-    fn from_variable_declarator(var: &JsVariableDeclarator, scope: Scope) -> Option<Selector> {
+    fn from_variable_declarator(var: &JsVariableDeclarator, scope: Scope) -> Option<Self> {
         let var_declaration = var
             .syntax()
             .ancestors()
@@ -1480,10 +1435,10 @@ impl Selector {
             JsVariableKind::Using => Kind::Using,
             JsVariableKind::Var => Kind::Var,
         };
-        Some(Selector::with_scope(kind, scope))
+        Some(Self::with_scope(kind, scope))
     }
 
-    fn from_object_member(member: &AnyJsObjectMember) -> Option<Selector> {
+    fn from_object_member(member: &AnyJsObjectMember) -> Option<Self> {
         match member {
             AnyJsObjectMember::JsBogusMember(_) | AnyJsObjectMember::JsSpread(_) => None,
             AnyJsObjectMember::JsGetterObjectMember(_) => Some(Kind::ObjectLiteralGetter.into()),
@@ -1496,14 +1451,14 @@ impl Selector {
         }
     }
 
-    fn from_type_member(member: &AnyTsTypeMember) -> Option<Selector> {
+    fn from_type_member(member: &AnyTsTypeMember) -> Option<Self> {
         match member {
             AnyTsTypeMember::JsBogusMember(_)
             | AnyTsTypeMember::TsCallSignatureTypeMember(_)
             | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => None,
             AnyTsTypeMember::TsIndexSignatureTypeMember(property) => {
                 Some(if property.readonly_token().is_some() {
-                    Selector::with_modifiers(Kind::IndexParameter, Modifier::Readonly)
+                    Self::with_modifiers(Kind::IndexParameter, Modifier::Readonly)
                 } else {
                     Kind::IndexParameter.into()
                 })
@@ -1512,7 +1467,7 @@ impl Selector {
             AnyTsTypeMember::TsMethodSignatureTypeMember(_) => Some(Kind::TypeMethod.into()),
             AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
                 Some(if property.readonly_token().is_some() {
-                    Selector::with_modifiers(Kind::TypeProperty, Modifier::Readonly)
+                    Self::with_modifiers(Kind::TypeProperty, Modifier::Readonly)
                 } else {
                     Kind::TypeProperty.into()
                 })
@@ -1527,7 +1482,7 @@ impl Selector {
         let kind = self.kind;
         match kind {
             Kind::TypeProperty if self.modifiers.contains(Modifier::Readonly) => Convention {
-                selector: Selector::with_modifiers(self.kind, Modifier::Readonly),
+                selector: Self::with_modifiers(self.kind, Modifier::Readonly),
                 matching: None,
                 formats: Formats(Case::Camel | Case::Constant),
             },
@@ -1537,13 +1492,13 @@ impl Selector {
                 formats: Formats(Case::Camel | Case::Constant),
             },
             Kind::Function if Scope::Global.contains(self.scope) => Convention {
-                selector: Selector::with_scope(kind, Scope::Global),
+                selector: Self::with_scope(kind, Scope::Global),
                 matching: None,
                 formats: Formats(Case::Camel | Case::Pascal | Case::Upper),
             },
             Kind::Variable | Kind::Const | Kind::Var if Scope::Global.contains(self.scope) => {
                 Convention {
-                    selector: Selector::with_scope(kind, Scope::Global),
+                    selector: Self::with_scope(kind, Scope::Global),
                     matching: None,
                     formats: Formats(Case::Camel | Case::Pascal | Case::Constant),
                 }
@@ -1557,7 +1512,7 @@ impl Selector {
                 if self.modifiers.contains(Modifier::Static) =>
             {
                 Convention {
-                    selector: Selector::with_modifiers(kind, Modifier::Static),
+                    selector: Self::with_modifiers(kind, Modifier::Static),
                     matching: None,
                     formats: Formats(Case::Camel | Case::Constant),
                 }
@@ -1616,7 +1571,7 @@ impl Selector {
         }
     }
 
-    fn contains(&self, other: Selector) -> bool {
+    fn contains(&self, other: Self) -> bool {
         other.kind.contains(self.kind)
             && self.modifiers.contains(other.modifiers.0)
             && other.scope.contains(self.scope)
@@ -1806,22 +1761,22 @@ pub enum RestrictedModifier {
 impl From<RestrictedModifier> for Modifier {
     fn from(modifier: RestrictedModifier) -> Self {
         match modifier {
-            RestrictedModifier::Abstract => Modifier::Abstract,
-            RestrictedModifier::Private => Modifier::Private,
-            RestrictedModifier::Protected => Modifier::Protected,
-            RestrictedModifier::Readonly => Modifier::Readonly,
-            RestrictedModifier::Static => Modifier::Static,
+            RestrictedModifier::Abstract => Self::Abstract,
+            RestrictedModifier::Private => Self::Private,
+            RestrictedModifier::Protected => Self::Protected,
+            RestrictedModifier::Readonly => Self::Readonly,
+            RestrictedModifier::Static => Self::Static,
         }
     }
 }
 impl From<Modifier> for RestrictedModifier {
     fn from(modifier: Modifier) -> Self {
         match modifier {
-            Modifier::Abstract => RestrictedModifier::Abstract,
-            Modifier::Private => RestrictedModifier::Private,
-            Modifier::Protected => RestrictedModifier::Protected,
-            Modifier::Readonly => RestrictedModifier::Readonly,
-            Modifier::Static => RestrictedModifier::Static,
+            Modifier::Abstract => Self::Abstract,
+            Modifier::Private => Self::Private,
+            Modifier::Protected => Self::Protected,
+            Modifier::Readonly => Self::Readonly,
+            Modifier::Static => Self::Static,
             _ => unreachable!("Unsupported case"),
         }
     }
@@ -1858,7 +1813,7 @@ impl Deref for Modifiers {
 }
 impl From<Modifier> for Modifiers {
     fn from(value: Modifier) -> Self {
-        Modifiers(value.into())
+        Self(value.into())
     }
 }
 impl From<Modifiers> for SmallVec<[RestrictedModifier; 4]> {
@@ -1893,27 +1848,27 @@ impl JsonSchema for Modifiers {
 }
 impl From<JsMethodModifierList> for Modifiers {
     fn from(value: JsMethodModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl From<JsPropertyModifierList> for Modifiers {
     fn from(value: JsPropertyModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl From<TsIndexSignatureModifierList> for Modifiers {
     fn from(value: TsIndexSignatureModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl From<TsMethodSignatureModifierList> for Modifiers {
     fn from(value: TsMethodSignatureModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl From<TsPropertySignatureModifierList> for Modifiers {
     fn from(value: TsPropertySignatureModifierList) -> Self {
-        Modifiers((&value).into())
+        Self((&value).into())
     }
 }
 impl std::fmt::Display for Modifiers {
@@ -1948,23 +1903,24 @@ pub enum Scope {
 impl Scope {
     /// Returns the scope of `node` or `None` if the scope cannot be determined or
     /// if the scope is an external module.
-    fn from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
+    fn from_declaration(node: &AnyJsBindingDeclaration) -> Option<Self> {
         let control_flow_root = node.syntax().ancestors().skip(1).find(|x| {
             AnyJsControlFlowRoot::can_cast(x.kind())
                 || x.kind() == JsSyntaxKind::TS_DECLARATION_MODULE
+                || x.kind() == JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION
         })?;
         match control_flow_root.kind() {
             JsSyntaxKind::JS_MODULE
             | JsSyntaxKind::JS_SCRIPT
             | JsSyntaxKind::TS_DECLARATION_MODULE
-            | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Scope::Global),
+            | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Self::Global),
             // Ignore declarations in an external module declaration
             JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION => None,
-            _ => Some(Scope::Any),
+            _ => Some(Self::Any),
         }
     }
 
-    fn contains(self, scope: Scope) -> bool {
+    fn contains(self, scope: Self) -> bool {
         matches!(self, Self::Any) || self == scope
     }
 }
@@ -2010,10 +1966,10 @@ pub enum Format {
 impl From<Format> for Case {
     fn from(value: Format) -> Self {
         match value {
-            Format::Camel => Case::Camel,
-            Format::Constant => Case::Constant,
-            Format::Pascal => Case::Pascal,
-            Format::Snake => Case::Snake,
+            Format::Camel => Self::Camel,
+            Format::Constant => Self::Constant,
+            Format::Pascal => Self::Pascal,
+            Format::Snake => Self::Snake,
         }
     }
 }
@@ -2022,10 +1978,10 @@ impl TryFrom<Case> for Format {
 
     fn try_from(value: Case) -> Result<Self, Self::Error> {
         match value {
-            Case::Camel => Ok(Format::Camel),
-            Case::Constant => Ok(Format::Constant),
-            Case::Pascal => Ok(Format::Pascal),
-            Case::Snake => Ok(Format::Snake),
+            Case::Camel => Ok(Self::Camel),
+            Case::Constant => Ok(Self::Constant),
+            Case::Pascal => Ok(Self::Pascal),
+            Case::Snake => Ok(Self::Snake),
             Case::Kebab
             | Case::Lower
             | Case::Number

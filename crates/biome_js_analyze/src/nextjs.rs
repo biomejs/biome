@@ -12,7 +12,7 @@ pub(crate) enum NextUtility {
 impl NextUtility {
     pub const fn import_names(self) -> &'static [&'static str] {
         match self {
-            NextUtility::Script => &["next/script"],
+            Self::Script => &["next/script"],
         }
     }
 }

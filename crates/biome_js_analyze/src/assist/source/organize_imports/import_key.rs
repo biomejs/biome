@@ -5,14 +5,15 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 
 use super::{
-    TypePlacement, comparable_token::ComparableToken, import_groups, import_source,
+    comparable_token::ComparableToken,
+    import_groups::{self, ImportCandidate, ImportSourceCandidate},
+    import_source,
     specifiers_attributes::JsNamedSpecifiers,
 };
 
 /// Type used to determine the order between imports
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct ImportKey {
-    pub section: ImportSection,
     pub group: u16,
     pub source: import_source::ImportSource<ComparableToken>,
     pub has_no_attributes: bool,
@@ -22,18 +23,9 @@ pub struct ImportKey {
     pub slot_index: u32,
 }
 impl ImportKey {
-    pub fn new(
-        info: ImportInfo,
-        groups: &import_groups::ImportGroups,
-        type_placement: TypePlacement,
-    ) -> Self {
-        let section = match type_placement {
-            TypePlacement::TypesFirst if info.kind.has_type_token() => ImportSection::TypesFirst,
-            _ => ImportSection::Mixed,
-        };
+    pub fn new(info: ImportInfo, groups: &import_groups::ImportGroups) -> Self {
         Self {
-            section,
-            group: groups.index(&info),
+            group: groups.index(&((&info).into())),
             source: info.source,
             has_no_attributes: info.has_no_attributes,
             kind: info.kind,
@@ -47,15 +39,6 @@ impl ImportKey {
             && self.has_no_attributes
             && other.has_no_attributes
     }
-}
-
-#[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
-pub enum ImportSection {
-    /// Section reserved for types with the [`TypePlacement::TypesFirst`] setting.
-    TypesFirst,
-    /// Section for mixed imports.
-    #[default]
-    Mixed,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -73,23 +56,16 @@ pub enum ImportStatementKind {
 }
 impl ImportStatementKind {
     pub fn has_type_token(self) -> bool {
-        (ImportStatementKind::DefaultType
-            | ImportStatementKind::NamespaceType
-            | ImportStatementKind::NamedType)
-            .contains(self)
+        (Self::DefaultType | Self::NamespaceType | Self::NamedType).contains(self)
     }
 
-    pub fn is_mergeable(self, kinds: enumflags2::BitFlags<ImportStatementKind>) -> bool {
+    pub fn is_mergeable(self, kinds: enumflags2::BitFlags<Self>) -> bool {
         match self {
-            ImportStatementKind::Namespace => kinds.contains(ImportStatementKind::Default),
-            ImportStatementKind::Default => {
-                kinds.intersects(ImportStatementKind::Namespace | ImportStatementKind::Named)
-            }
-            ImportStatementKind::DefaultNamed => kinds.contains(ImportStatementKind::Named),
-            ImportStatementKind::Named => {
-                kinds.intersects(ImportStatementKind::DefaultNamed | ImportStatementKind::Named)
-            }
-            ImportStatementKind::NamedType => kinds.contains(ImportStatementKind::NamedType),
+            Self::Namespace => kinds.contains(Self::Default),
+            Self::Default => kinds.intersects(Self::Namespace | Self::Named),
+            Self::DefaultNamed => kinds.contains(Self::Named),
+            Self::Named => kinds.intersects(Self::DefaultNamed | Self::Named),
+            Self::NamedType => kinds.contains(Self::NamedType),
             _ => false,
         }
     }
@@ -234,5 +210,13 @@ impl ImportInfo {
             named_specifiers.map(JsNamedSpecifiers::JsExportNamedFromSpecifierList),
             attributes,
         ))
+    }
+}
+impl<'a> From<&'a ImportInfo> for ImportCandidate<'a> {
+    fn from(value: &'a ImportInfo) -> Self {
+        Self {
+            has_type_token: value.kind.has_type_token(),
+            source: ImportSourceCandidate::new(&value.source),
+        }
     }
 }

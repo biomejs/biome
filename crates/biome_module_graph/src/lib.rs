@@ -1,9 +1,13 @@
-mod js_module_visitor;
-mod js_semantic_model;
+#![deny(clippy::use_self)]
+
+mod format_module_graph;
+mod js_module_info;
 mod jsdoc_comment;
 mod module_graph;
-mod module_info;
 mod resolver_cache;
 
+pub use js_module_info::{
+    JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsOwnExport, JsReexport, JsResolvedPath,
+};
+pub use jsdoc_comment::JsdocComment;
 pub use module_graph::{ModuleGraph, SUPPORTED_EXTENSIONS};
-pub use module_info::{Export, Import, ModuleInfo};

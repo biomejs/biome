@@ -18,7 +18,7 @@ use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonSyntaxNode;
+use biome_json_syntax::{JsonRoot, JsonSyntaxNode};
 use biome_parser::prelude::ParseDiagnostic;
 use biome_rowan::NodeCache;
 use criterion::black_box;
@@ -110,33 +110,33 @@ pub enum Parsed {
 impl Parsed {
     pub fn format_node(&self) -> Option<FormatNode> {
         match self {
-            Parsed::JavaScript(parse, source_type) => {
+            Self::JavaScript(parse, source_type) => {
                 Some(FormatNode::JavaScript(parse.syntax(), *source_type))
             }
-            Parsed::Json(parse) => Some(FormatNode::Json(parse.syntax())),
-            Parsed::Css(parse) => Some(FormatNode::Css(parse.syntax())),
-            Parsed::Graphql(parse) => Some(FormatNode::Graphql(parse.syntax())),
-            Parsed::Html(parse) => Some(FormatNode::Html(parse.syntax())),
+            Self::Json(parse) => Some(FormatNode::Json(parse.syntax())),
+            Self::Css(parse) => Some(FormatNode::Css(parse.syntax())),
+            Self::Graphql(parse) => Some(FormatNode::Graphql(parse.syntax())),
+            Self::Html(parse) => Some(FormatNode::Html(parse.syntax())),
         }
     }
 
     pub fn analyze(&self) -> Option<Analyze> {
         match self {
-            Parsed::JavaScript(parse, _) => Some(Analyze::JavaScript(parse.tree())),
-            Parsed::Json(_) => None,
-            Parsed::Graphql(_) => None,
-            Parsed::Css(parse) => Some(Analyze::Css(parse.tree())),
-            Parsed::Html(_) => None,
+            Self::JavaScript(parse, _) => Some(Analyze::JavaScript(parse.tree())),
+            Self::Json(parse) => Some(Analyze::Json(parse.tree())),
+            Self::Graphql(_) => None,
+            Self::Css(parse) => Some(Analyze::Css(parse.tree())),
+            Self::Html(_) => None,
         }
     }
 
     pub fn into_diagnostics(self) -> Vec<ParseDiagnostic> {
         match self {
-            Parsed::JavaScript(parse, _) => parse.into_diagnostics(),
-            Parsed::Json(parse) => parse.into_diagnostics(),
-            Parsed::Css(parse) => parse.into_diagnostics(),
-            Parsed::Graphql(parse) => parse.into_diagnostics(),
-            Parsed::Html(parse) => parse.into_diagnostics(),
+            Self::JavaScript(parse, _) => parse.into_diagnostics(),
+            Self::Json(parse) => parse.into_diagnostics(),
+            Self::Css(parse) => parse.into_diagnostics(),
+            Self::Graphql(parse) => parse.into_diagnostics(),
+            Self::Html(parse) => parse.into_diagnostics(),
         }
     }
 }
@@ -162,11 +162,11 @@ impl FormatNode {
             }
             Self::Css(root) => biome_css_formatter::format_node(CssFormatOptions::default(), root)
                 .map(FormattedNode::Css),
-            FormatNode::Graphql(root) => {
+            Self::Graphql(root) => {
                 biome_graphql_formatter::format_node(GraphqlFormatOptions::default(), root)
                     .map(FormattedNode::Graphql)
             }
-            FormatNode::Html(root) => {
+            Self::Html(root) => {
                 biome_html_formatter::format_node(HtmlFormatOptions::default(), root)
                     .map(FormattedNode::Html)
             }
@@ -185,11 +185,11 @@ pub enum FormattedNode {
 impl FormattedNode {
     pub fn print(&self) -> PrintResult<Printed> {
         match self {
-            FormattedNode::JavaScript(formatted) => formatted.print(),
-            FormattedNode::Json(formatted) => formatted.print(),
-            FormattedNode::Css(formatted) => formatted.print(),
-            FormattedNode::Graphql(formatted) => formatted.print(),
-            FormattedNode::Html(formatted) => formatted.print(),
+            Self::JavaScript(formatted) => formatted.print(),
+            Self::Json(formatted) => formatted.print(),
+            Self::Css(formatted) => formatted.print(),
+            Self::Graphql(formatted) => formatted.print(),
+            Self::Html(formatted) => formatted.print(),
         }
     }
 }
@@ -197,16 +197,18 @@ impl FormattedNode {
 pub enum Analyze {
     JavaScript(AnyJsRoot),
     Css(CssRoot),
+    Json(JsonRoot),
 }
 
 impl Analyze {
     pub fn analyze(&self) {
         match self {
-            Analyze::JavaScript(root) => {
+            Self::JavaScript(root) => {
                 let filter = AnalysisFilter {
                     categories: RuleCategoriesBuilder::default()
                         .with_syntax()
                         .with_lint()
+                        .with_assist()
                         .build(),
                     ..AnalysisFilter::default()
                 };
@@ -227,16 +229,34 @@ impl Analyze {
                     },
                 );
             }
-            Analyze::Css(root) => {
+            Self::Css(root) => {
                 let filter = AnalysisFilter {
                     categories: RuleCategoriesBuilder::default()
                         .with_syntax()
                         .with_lint()
+                        .with_assist()
                         .build(),
                     ..AnalysisFilter::default()
                 };
                 let options = AnalyzerOptions::default();
                 biome_css_analyze::analyze(root, filter, &options, &[], |event| {
+                    black_box(event.diagnostic());
+                    black_box(event.actions());
+                    ControlFlow::<Never>::Continue(())
+                });
+            }
+            Self::Json(root) => {
+                let filter = AnalysisFilter {
+                    categories: RuleCategoriesBuilder::default()
+                        .with_syntax()
+                        .with_lint()
+                        .with_assist()
+                        .build(),
+                    ..AnalysisFilter::default()
+                };
+
+                let options = AnalyzerOptions::default();
+                biome_json_analyze::analyze(root, filter, &options, Default::default(), |event| {
                     black_box(event.diagnostic());
                     black_box(event.actions());
                     ControlFlow::<Never>::Continue(())

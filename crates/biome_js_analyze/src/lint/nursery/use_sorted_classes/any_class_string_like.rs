@@ -74,13 +74,13 @@ fn inspect_string_literal(
 impl AnyClassStringLike {
     pub(crate) fn should_visit(&self, options: &UtilityClassSortingOptions) -> Option<bool> {
         match self {
-            AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
+            Self::JsStringLiteralExpression(string_literal) => {
                 inspect_string_literal(string_literal.syntax(), options)
             }
-            AnyClassStringLike::JsLiteralMemberName(literal_name) => {
+            Self::JsLiteralMemberName(literal_name) => {
                 inspect_string_literal(literal_name.syntax(), options)
             }
-            AnyClassStringLike::JsxString(jsx_string) => {
+            Self::JsxString(jsx_string) => {
                 let jsx_attribute = jsx_string
                     .syntax()
                     .ancestors()
@@ -93,7 +93,7 @@ impl AnyClassStringLike {
 
                 None
             }
-            AnyClassStringLike::JsTemplateChunkElement(template) => {
+            Self::JsTemplateChunkElement(template) => {
                 for ancestor in template.syntax().ancestors().skip(1) {
                     if let Some(template_expression) = JsTemplateExpression::cast_ref(&ancestor) {
                         if let Some(AnyJsExpression::JsIdentifierExpression(tag)) =
@@ -126,12 +126,12 @@ impl AnyClassStringLike {
 
     pub fn value(&self) -> Option<TokenText> {
         match &self {
-            AnyClassStringLike::JsStringLiteralExpression(node) => node.inner_string_text().ok(),
-            AnyClassStringLike::JsxString(node) => node.inner_string_text().ok(),
-            AnyClassStringLike::JsTemplateChunkElement(template_chunk) => {
+            Self::JsStringLiteralExpression(node) => node.inner_string_text().ok(),
+            Self::JsxString(node) => node.inner_string_text().ok(),
+            Self::JsTemplateChunkElement(template_chunk) => {
                 Some(template_chunk.template_chunk_token().ok()?.token_text())
             }
-            AnyClassStringLike::JsLiteralMemberName(node) => node.name().ok(),
+            Self::JsLiteralMemberName(node) => node.name().ok(),
         }
     }
 }

@@ -20,7 +20,7 @@ pub enum LanguageVersion {
 impl LanguageVersion {
     /// Returns the latest finalized ECMAScript version
     pub const fn latest() -> Self {
-        LanguageVersion::ES2022
+        Self::ES2022
     }
 }
 
@@ -48,10 +48,10 @@ pub enum ModuleKind {
 
 impl ModuleKind {
     pub const fn is_script(&self) -> bool {
-        matches!(self, ModuleKind::Script)
+        matches!(self, Self::Script)
     }
     pub const fn is_module(&self) -> bool {
-        matches!(self, ModuleKind::Module)
+        matches!(self, Self::Module)
     }
 }
 
@@ -74,13 +74,13 @@ pub enum LanguageVariant {
 
 impl LanguageVariant {
     pub const fn is_standard(&self) -> bool {
-        matches!(self, LanguageVariant::Standard)
+        matches!(self, Self::Standard)
     }
     pub const fn is_standard_restricted(&self) -> bool {
-        matches!(self, LanguageVariant::StandardRestricted)
+        matches!(self, Self::StandardRestricted)
     }
     pub const fn is_jsx(&self) -> bool {
-        matches!(self, LanguageVariant::Jsx)
+        matches!(self, Self::Jsx)
     }
 }
 
@@ -100,16 +100,16 @@ pub enum Language {
 
 impl Language {
     pub const fn is_javascript(&self) -> bool {
-        matches!(self, Language::JavaScript)
+        matches!(self, Self::JavaScript)
     }
     pub const fn is_typescript(&self) -> bool {
-        matches!(self, Language::TypeScript { .. })
+        matches!(self, Self::TypeScript { .. })
     }
 
     pub const fn is_definition_file(&self) -> bool {
         matches!(
             self,
-            Language::TypeScript {
+            Self::TypeScript {
                 definition_file: true
             }
         )
@@ -129,13 +129,13 @@ pub enum EmbeddingKind {
 
 impl EmbeddingKind {
     pub const fn is_astro(&self) -> bool {
-        matches!(self, EmbeddingKind::Astro)
+        matches!(self, Self::Astro)
     }
     pub const fn is_vue(&self) -> bool {
-        matches!(self, EmbeddingKind::Vue)
+        matches!(self, Self::Vue)
     }
     pub const fn is_svelte(&self) -> bool {
-        matches!(self, EmbeddingKind::Svelte)
+        matches!(self, Self::Svelte)
     }
 }
 
@@ -418,12 +418,12 @@ impl TryFrom<&Utf8Path> for JsFileSource {
 impl From<Language> for JsFileSource {
     fn from(value: Language) -> Self {
         match value {
-            Language::JavaScript => JsFileSource::js_module(),
+            Language::JavaScript => Self::js_module(),
             Language::TypeScript { definition_file } => {
                 if definition_file {
-                    JsFileSource::d_ts()
+                    Self::d_ts()
                 } else {
-                    JsFileSource::ts()
+                    Self::ts()
                 }
             }
         }

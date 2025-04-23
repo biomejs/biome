@@ -1,0 +1,29 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "files": { "includes": ["**/*"] } }
+```
+
+## `package.json`
+
+```json
+{ "type": "commonjs" }
+```
+
+## `src/file.mjs`
+
+```mjs
+import { foo } from "foo";
+var a = foo;
+
+```
+
+# Emitted Messages
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+```

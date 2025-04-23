@@ -53,8 +53,8 @@ impl PathKind {
 
     pub fn is_symlink(self) -> bool {
         match self {
-            PathKind::File { is_symlink } => is_symlink,
-            PathKind::Directory { is_symlink } => is_symlink,
+            Self::File { is_symlink } => is_symlink,
+            Self::Directory { is_symlink } => is_symlink,
         }
     }
 }
@@ -62,12 +62,8 @@ impl PathKind {
 impl From<PathKind> for oxc_resolver::FileMetadata {
     fn from(kind: PathKind) -> Self {
         match kind {
-            PathKind::File { is_symlink } => {
-                oxc_resolver::FileMetadata::new(true, false, is_symlink)
-            }
-            PathKind::Directory { is_symlink } => {
-                oxc_resolver::FileMetadata::new(false, true, is_symlink)
-            }
+            PathKind::File { is_symlink } => Self::new(true, false, is_symlink),
+            PathKind::Directory { is_symlink } => Self::new(false, true, is_symlink),
         }
     }
 }
@@ -127,6 +123,18 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
         search_dir: &Utf8Path,
         search_files: &[&str],
     ) -> Option<AutoSearchResult> {
+        self.auto_search_files_with_predicate(search_dir, search_files, &mut |_, _| true)
+    }
+
+    /// Same as `auto_search_files()`, but runs a predicate on the path and
+    /// content of any file that matches `search_files` before deciding if it
+    /// really is a match.
+    fn auto_search_files_with_predicate(
+        &self,
+        search_dir: &Utf8Path,
+        search_files: &[&str],
+        predicate: &mut dyn FnMut(&Utf8Path, &str) -> bool,
+    ) -> Option<AutoSearchResult> {
         let mut current_search_dir = search_dir.to_path_buf();
         let mut is_searching_in_parent_dir = false;
 
@@ -136,6 +144,9 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                 let file_path = current_search_dir.join(file_name);
                 match self.read_file_from_path(&file_path) {
                     Ok(content) => {
+                        if !predicate(&file_path, &content) {
+                            break;
+                        }
                         if is_searching_in_parent_dir {
                             info!(
                                 "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",

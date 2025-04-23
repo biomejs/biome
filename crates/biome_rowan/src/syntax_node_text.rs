@@ -13,13 +13,13 @@ pub struct SyntaxNodeText {
 }
 
 impl SyntaxNodeText {
-    pub(crate) fn new(node: SyntaxNode) -> SyntaxNodeText {
+    pub(crate) fn new(node: SyntaxNode) -> Self {
         let range = node.text_range();
-        SyntaxNodeText { node, range }
+        Self { node, range }
     }
 
-    pub(crate) fn with_range(node: SyntaxNode, range: TextRange) -> SyntaxNodeText {
-        SyntaxNodeText { node, range }
+    pub(crate) fn with_range(node: SyntaxNode, range: TextRange) -> Self {
+        Self { node, range }
     }
 
     pub fn len(&self) -> TextSize {
@@ -62,7 +62,7 @@ impl SyntaxNodeText {
         found(res)
     }
 
-    pub fn slice<R: private::SyntaxTextRange>(&self, range: R) -> SyntaxNodeText {
+    pub fn slice<R: private::SyntaxTextRange>(&self, range: R) -> Self {
         let start = range.start().unwrap_or_default();
         let end = range.end().unwrap_or_else(|| self.len());
         assert!(start <= end);
@@ -82,7 +82,7 @@ impl SyntaxNodeText {
             self.range,
             range,
         );
-        SyntaxNodeText {
+        Self {
             node: self.node.clone(),
             range,
         }
@@ -275,7 +275,7 @@ impl fmt::Display for SyntaxNodeText {
 }
 
 impl From<SyntaxNodeText> for String {
-    fn from(text: SyntaxNodeText) -> String {
+    fn from(text: SyntaxNodeText) -> Self {
         text.to_string()
     }
 }
@@ -313,7 +313,7 @@ impl PartialEq<SyntaxNodeText> for &'_ str {
 }
 
 impl PartialEq for SyntaxNodeText {
-    fn eq(&self, other: &SyntaxNodeText) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         if self.range.len() != other.range.len() {
             return false;
         }
@@ -360,10 +360,10 @@ mod private {
 
     impl SyntaxTextRange for TextRange {
         fn start(&self) -> Option<TextSize> {
-            Some(TextRange::start(*self))
+            Some(Self::start(*self))
         }
         fn end(&self) -> Option<TextSize> {
-            Some(TextRange::end(*self))
+            Some(Self::end(*self))
         }
     }
 

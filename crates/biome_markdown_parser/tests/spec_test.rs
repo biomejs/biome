@@ -5,7 +5,7 @@ use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_markdown_parser::parse_markdown;
 use biome_rowan::SyntaxKind;
-use biome_test_utils::has_bogus_nodes_or_empty_slots;
+use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;
@@ -37,6 +37,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
     let parsed = parse_markdown(&content);
+    validate_eof_token(parsed.syntax());
+
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();

@@ -1,104 +1,85 @@
-use biome_analyze::{AnalysisFilter, ControlFlow, Never, RuleFilter};
-use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_diagnostics::{DiagnosticExt, Severity};
-use biome_js_analyze::JsAnalyzerServices;
+use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
+use biome_deserialize::TextRange;
+use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
+use biome_fs::TemporaryFs;
+use biome_js_analyze::{JsAnalyzerServices, analyze};
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
-use biome_test_utils::{
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string, module_graph_for_test_file,
-    parse_test_path, project_layout_with_node_manifest, scripts_from_json,
-};
-use camino::Utf8Path;
-use std::ops::Deref;
-use std::{fs::read_to_string, slice};
+use biome_package::{Dependencies, PackageJson};
+use biome_project_layout::ProjectLayout;
+use biome_test_utils::module_graph_for_test_file;
+use camino::Utf8PathBuf;
+use std::slice;
+use std::sync::Arc;
+
+fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc<ProjectLayout> {
+    let manifest = PackageJson::default().with_dependencies(dependencies);
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest("/".into(), manifest);
+
+    Arc::new(project_layout)
+}
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
 #[ignore]
 #[test]
 fn quick_test() {
-    let input_file = Utf8Path::new("tests/specs/correctness/useImportExtensions/invalid.ts");
-    let file_name = input_file.file_name().unwrap();
+    const FILENAME: &str = "dummyFile.ts";
+    const SOURCE: &str = r#"const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) =>
+	resolve("value")
+);
+promiseWithGlobalIdentifier.then(() => {});"#;
 
-    let (group, rule) = parse_test_path(input_file);
-    if rule == "specs" || rule == "suppression" {
-        panic!("the test file must be placed in the {rule}/<group-name>/<rule-name>/ directory");
-    }
-    if group == "specs" || group == "suppression" {
-        panic!("the test file must be placed in the {group}/{rule}/<rule-name>/ directory");
-    }
-    if biome_js_analyze::METADATA
-        .deref()
-        .find_rule(group, rule)
-        .is_none()
-    {
-        panic!("could not find rule {group}/{rule}");
-    }
+    let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
-    let rule_filter = RuleFilter::Rule(group, rule);
-    let filter = AnalysisFilter {
-        enabled_rules: Some(slice::from_ref(&rule_filter)),
-        ..AnalysisFilter::default()
-    };
+    let mut fs = TemporaryFs::new("quick_test");
+    fs.create_file(FILENAME, SOURCE);
+    let file_path = Utf8PathBuf::from(format!("{}/{FILENAME}", fs.cli_path()));
 
-    let extension = input_file.extension().unwrap_or_default();
+    let mut error_ranges: Vec<TextRange> = Vec::new();
+    let options = AnalyzerOptions::default().with_file_path(file_path.clone());
+    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
 
-    let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
-    if let Some(scripts) = scripts_from_json(extension, &input_code) {
-        for script in scripts {
-            analyze(
-                &script,
-                JsFileSource::js_script(),
-                filter,
-                file_name,
-                input_file,
-            );
-        }
-    } else if let Ok(source_type) = input_file.try_into() {
-        analyze(&input_code, source_type, filter, file_name, input_file);
-    }
-}
+    let mut dependencies = Dependencies::default();
+    dependencies.add("buffer", "latest");
 
-fn analyze(
-    input_code: &str,
-    source_type: JsFileSource,
-    filter: AnalysisFilter,
-    file_name: &str,
-    input_file: &Utf8Path,
-) {
-    let parsed = parse(input_code, source_type, JsParserOptions::default());
-    let root = parsed.tree();
+    let project_layout = project_layout_with_top_level_dependencies(dependencies);
+    let services = crate::JsAnalyzerServices::from((
+        module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
+        project_layout,
+        JsFileSource::tsx(),
+    ));
 
-    let mut diagnostics = Vec::new();
-    let mut code_fixes = Vec::new();
-    let options = create_analyzer_options(input_file, &mut diagnostics);
-    let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
-
-    let module_graph = module_graph_for_test_file(input_file, &project_layout);
-
-    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
-
-    let (_, errors) = biome_js_analyze::analyze(&root, filter, &options, &[], services, |event| {
-        if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
-                diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+    analyze(
+        &parsed.tree(),
+        AnalysisFilter {
+            enabled_rules: Some(slice::from_ref(&rule_filter)),
+            ..AnalysisFilter::default()
+        },
+        &options,
+        &[],
+        services,
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                error_ranges.push(diag.location().span.unwrap());
+                let error = diag
+                    .with_severity(Severity::Warning)
+                    .with_file_path(FILENAME)
+                    .with_file_source_code(SOURCE);
+                let text = print_diagnostic_to_string(&error);
+                eprintln!("{text}");
             }
 
-            let error = diag.with_severity(Severity::Warning);
-            diagnostics.push(diagnostic_to_string(file_name, input_code, error));
-            return ControlFlow::Continue(());
-        }
+            for action in signal.actions() {
+                let new_code = action.mutation.commit();
+                eprintln!("new code!!!");
+                eprintln!("{new_code}");
+            }
 
-        for action in event.actions() {
-            code_fixes.push(code_fix_to_string(input_code, action));
-        }
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
-        ControlFlow::<Never>::Continue(())
-    });
-
-    for error in errors {
-        diagnostics.push(diagnostic_to_string(file_name, input_code, error));
-    }
-
-    println!("Diagnostics:\n{}", diagnostics.join("\n"));
+    // assert_eq!(error_ranges.as_slice(), &[]);
 }

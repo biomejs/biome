@@ -6,6 +6,8 @@
 //! to parse commands and arguments, redirect the execution of the commands and
 //! execute the traversal of directory and files, based on the command that were passed.
 
+#![deny(clippy::use_self)]
+
 use biome_console::{ColorMode, Console};
 use biome_service::{App, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
@@ -89,6 +91,7 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 formatter_enabled,
                 assist_enabled,
+                enforce_assist,
                 staged,
                 changed,
                 since,
@@ -105,6 +108,7 @@ impl<'app> CliSession<'app> {
                     linter_enabled,
                     formatter_enabled,
                     assist_enabled,
+                    enforce_assist,
                     staged,
                     changed,
                     since,
@@ -160,6 +164,7 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 formatter_enabled,
                 assist_enabled,
+                enforce_assist,
                 configuration,
                 paths,
                 cli_options,
@@ -173,6 +178,7 @@ impl<'app> CliSession<'app> {
                     linter_enabled,
                     formatter_enabled,
                     assist_enabled,
+                    enforce_assist,
                     configuration,
                     paths,
                     changed,

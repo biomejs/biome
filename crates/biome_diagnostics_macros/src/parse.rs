@@ -22,7 +22,7 @@ pub(crate) struct DeriveStructInput {
     pub(crate) category: Option<StaticOrDynamic<syn::LitStr>>,
     pub(crate) description: Option<StaticOrDynamic<StringOrMarkup>>,
     pub(crate) message: Option<StaticOrDynamic<StringOrMarkup>>,
-    pub(crate) advices: Vec<TokenStream>,
+    pub(crate) advices: Vec<StaticOrDynamic<syn::LitStr>>,
     pub(crate) verbose_advices: Vec<TokenStream>,
     pub(crate) location: Vec<(TokenStream, LocationField)>,
     pub(crate) tags: Option<StaticOrDynamic<Punctuated<Ident, Token![|]>>>,
@@ -125,6 +125,9 @@ impl DeriveStructInput {
                                 }
                             }
                         }
+                        DiagnosticAttr::Advice(attr) => {
+                            result.advices.push(StaticOrDynamic::Static(attr.value));
+                        }
                         DiagnosticAttr::Tags(attr) => {
                             result.tags = Some(StaticOrDynamic::Static(attr.tags));
                         }
@@ -163,7 +166,7 @@ impl DeriveStructInput {
                 }
 
                 if attr.path.is_ident("advice") {
-                    result.advices.push(ident.clone());
+                    result.advices.push(StaticOrDynamic::Dynamic(ident.clone()));
                     continue;
                 }
 
@@ -270,6 +273,7 @@ enum DiagnosticAttr {
     Severity(SeverityAttr),
     Category(CategoryAttr),
     Message(MessageAttr),
+    Advice(AdviceAttr),
     Tags(TagsAttr),
 }
 
@@ -287,6 +291,10 @@ impl Parse for DiagnosticAttr {
 
         if name == "message" {
             return Ok(Self::Message(input.parse()?));
+        }
+
+        if name == "advice" {
+            return Ok(Self::Advice(input.parse()?));
         }
 
         if name == "tags" {
@@ -411,6 +419,20 @@ impl Parse for SplitMessageAttr {
     }
 }
 
+struct AdviceAttr {
+    _eq_token: Token![=],
+    value: syn::LitStr,
+}
+
+impl Parse for AdviceAttr {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Ok(Self {
+            _eq_token: input.parse()?,
+            value: input.parse()?,
+        })
+    }
+}
+
 struct TagsAttr {
     _paren_token: Paren,
     tags: Punctuated<Ident, Token![|]>,
@@ -463,9 +485,9 @@ impl Parse for LocationAttr {
 impl ToTokens for LocationField {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
-            LocationField::Resource(ident) => ident.to_tokens(tokens),
-            LocationField::Span(ident) => ident.to_tokens(tokens),
-            LocationField::SourceCode(ident) => ident.to_tokens(tokens),
+            Self::Resource(ident) => ident.to_tokens(tokens),
+            Self::Span(ident) => ident.to_tokens(tokens),
+            Self::SourceCode(ident) => ident.to_tokens(tokens),
         }
     }
 }

@@ -93,6 +93,12 @@ impl From<Text> for String {
     }
 }
 
+impl From<Text> for Box<str> {
+    fn from(value: Text) -> Self {
+        Self::from(value.text())
+    }
+}
+
 impl Text {
     pub fn text(&self) -> &str {
         match self {

@@ -57,6 +57,7 @@ declare_lint_rule! {
 pub struct UseRegexLiteralsState {
     pattern: StaticValue,
     flags: Option<StaticValue>,
+    string_kind: StringKind,
 }
 
 impl Rule for UseRegexLiterals {
@@ -81,7 +82,7 @@ impl Rule for UseRegexLiterals {
         let mut args = args.iter();
 
         let pattern = args.next()?;
-        let pattern = extract_valid_pattern(pattern, model)?;
+        let (pattern, string_kind) = extract_valid_pattern(pattern, model)?;
 
         let flags = match args.next() {
             Some(flags) => {
@@ -90,7 +91,11 @@ impl Rule for UseRegexLiterals {
             }
             None => None,
         };
-        Some(UseRegexLiteralsState { pattern, flags })
+        Some(UseRegexLiteralsState {
+            pattern,
+            flags,
+            string_kind,
+        })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -117,6 +122,7 @@ impl Rule for UseRegexLiterals {
                 .flags
                 .as_ref()
                 .unwrap_or(&StaticValue::EmptyString(TextRange::empty(0.into()))),
+            state.string_kind,
         );
         let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_REGEX_LITERAL, &regex, [], []);
         let next = AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(
@@ -137,14 +143,22 @@ impl Rule for UseRegexLiterals {
     }
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum StringKind {
+    Literal,
+    Template,
+    RawTemplate,
+}
+
 fn extract_valid_pattern(
     pattern: Result<AnyJsCallArgument, SyntaxError>,
     model: &SemanticModel,
-) -> Option<StaticValue> {
+) -> Option<(StaticValue, StringKind)> {
     let Ok(AnyJsCallArgument::AnyJsExpression(expr)) = pattern else {
         return None;
     };
-    if let Some(template_expr) = expr.as_js_template_expression() {
+    let string_kind = if let Some(template_expr) = expr.as_js_template_expression() {
+        // Only accept `String.raw()` or untagged template strings.
         if let Some(tag) = template_expr.tag() {
             let (object, member) = match tag.omit_parentheses() {
                 AnyJsExpression::JsStaticMemberExpression(expr) => {
@@ -163,7 +177,12 @@ fn extract_valid_pattern(
             if model.binding(&reference).is_some() || name.text() != "String" || member != "raw" {
                 return None;
             }
-        };
+            StringKind::RawTemplate
+        } else {
+            StringKind::Template
+        }
+    } else {
+        StringKind::Literal
     };
 
     let pattern = expr.omit_parentheses().as_static_value()?;
@@ -171,10 +190,10 @@ fn extract_valid_pattern(
     if matches!(pattern.as_string_constant()?, "*" | "+" | "?") {
         return None;
     }
-    Some(pattern)
+    Some((pattern, string_kind))
 }
 
-fn create_regex(pattern: &str, flags: &StaticValue) -> String {
+fn create_regex(pattern: &str, flags: &StaticValue, string_kind: StringKind) -> String {
     let flags = flags.text();
     let mut pattern_bytes = pattern.bytes().enumerate();
     let mut last_copied_inmdex = 0;
@@ -188,10 +207,48 @@ fn create_regex(pattern: &str, flags: &StaticValue) -> String {
                 new_pattern.push_str(r"\n");
                 last_copied_inmdex = index + 1;
             }
-            b'\\' => {
-                if matches!(pattern_bytes.next(), Some((_, b'\\'))) {
-                    new_pattern.push_str(&pattern[last_copied_inmdex..index]);
-                    last_copied_inmdex = index + 1;
+            b'\\' if string_kind != StringKind::RawTemplate => {
+                match pattern_bytes.next() {
+                    Some((_, b'\\')) => {
+                        // turn `\\` into `\`
+                        new_pattern.push_str(&pattern[last_copied_inmdex..index]);
+                        last_copied_inmdex = index + 1;
+                    }
+                    Some((
+                        _,
+                        b'/' | b'0'..b'7' | b'f' | b'n' | b'r' | b't' | b'u' | b'v' | b'x',
+                    )) => {
+                        // Keep escape sequence valid in both strings and regexes.
+                    }
+                    Some((_, b'b')) => {
+                        // Backspace escape are not valid in regexes.
+                        new_pattern.push_str(&pattern[last_copied_inmdex..index]);
+                        // This could be represented more compactly with `\cH`.
+                        // However `\x08` is more familiar.
+                        new_pattern.push_str(r"\x08");
+                        last_copied_inmdex = index + 2;
+                    }
+                    Some((_, b'\n')) if string_kind == StringKind::Literal => {
+                        // String literal split over several lines.
+                        new_pattern.push_str(&pattern[last_copied_inmdex..index]);
+                        last_copied_inmdex = index + 2;
+                    }
+                    Some((_, b'\r')) if string_kind == StringKind::Literal => {
+                        if matches!(pattern_bytes.next(), Some((_, b'\n'))) {
+                            // String literal split over several lines.
+                            new_pattern.push_str(&pattern[last_copied_inmdex..index]);
+                            last_copied_inmdex = index + 3;
+                        } else {
+                            // Ignore `\` and preserve `\r`.
+                            new_pattern.push_str(&pattern[last_copied_inmdex..index]);
+                            last_copied_inmdex = index + 1;
+                        }
+                    }
+                    _ => {
+                        // Useless escaped character in strings are invalid escapes in regexes.
+                        new_pattern.push_str(&pattern[last_copied_inmdex..index]);
+                        last_copied_inmdex = index + 1;
+                    }
                 }
             }
             // Convert slash to "\/" to avoid parsing error in autofix.
@@ -204,6 +261,7 @@ fn create_regex(pattern: &str, flags: &StaticValue) -> String {
         }
     }
     if pattern.is_empty() {
+        // Emit `/(?:)/` instead of the invalid regex `//`.
         new_pattern.push_str("(?:)");
     } else {
         new_pattern.push_str(&pattern[last_copied_inmdex..]);

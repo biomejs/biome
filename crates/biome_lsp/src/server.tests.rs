@@ -12,7 +12,8 @@ use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::WorkspaceWatcher;
 use biome_service::workspace::{
     GetFileContentParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenProjectParams,
-    PullDiagnosticsParams, PullDiagnosticsResult, ScanProjectFolderParams, ScanProjectFolderResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectFolderParams,
+    ScanProjectFolderResult,
 };
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
@@ -361,11 +362,11 @@ enum ServerNotification {
 }
 impl ServerNotification {
     pub fn is_publish_diagnostics(&self) -> bool {
-        matches!(self, ServerNotification::PublishDiagnostics(_))
+        matches!(self, Self::PublishDiagnostics(_))
     }
 
     pub fn is_show_message(&self) -> bool {
-        matches!(self, ServerNotification::ShowMessage(_))
+        matches!(self, Self::ShowMessage(_))
     }
 }
 
@@ -3177,6 +3178,7 @@ export function bar() {
                 path: None,
                 watch: true,
                 force: false,
+                scan_kind: ScanKind::Project,
             },
         )
         .await?
@@ -3389,6 +3391,7 @@ export function bar() {
                 path: None,
                 watch: true,
                 force: false,
+                scan_kind: ScanKind::Project,
             },
         )
         .await?

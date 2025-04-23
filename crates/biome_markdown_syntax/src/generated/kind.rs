@@ -135,7 +135,7 @@ impl MarkdownSyntaxKind {
                 | MD_INDENTED_CODE_LINE_LIST
         )
     }
-    pub fn from_keyword(ident: &str) -> Option<MarkdownSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "null" => NULL_KW,
             _ => return None,
@@ -165,6 +165,7 @@ impl MarkdownSyntaxKind {
             HASH => "#",
             COMMA => ",",
             NULL_KW => "null",
+            EOF => "EOF",
             _ => return None,
         };
         Some(tok)

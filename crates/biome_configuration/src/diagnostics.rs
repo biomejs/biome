@@ -1,15 +1,16 @@
+use crate::editorconfig::EditorConfigErrorKind;
 use biome_console::fmt::Display;
 use biome_console::{MarkupBuf, markup};
 use biome_deserialize::DeserializationDiagnostic;
 use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
-use biome_rowan::SyntaxError;
+use biome_rowan::{SyntaxError, TextRange};
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
 /// Series of errors that can be thrown while computing the configuration.
-#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+#[derive(Debug, Diagnostic, Deserialize, Serialize)]
 pub enum ConfigurationDiagnostic {
     /// Diagnostics related to `biome.json` files
     Biome(BiomeDiagnostic),
@@ -36,6 +37,8 @@ pub enum BiomeDiagnostic {
     SerializationError(SerializationError),
 
     NoConfigurationFileFound(NoConfigurationFileFound),
+
+    NonRootConfiguration(NonRootConfiguration),
 
     /// Thrown when trying to **create** a new configuration file, but it exists already
     ConfigAlreadyExists(ConfigAlreadyExists),
@@ -64,13 +67,13 @@ pub enum BiomeDiagnostic {
 
 impl From<SyntaxError> for BiomeDiagnostic {
     fn from(_: SyntaxError) -> Self {
-        BiomeDiagnostic::Deserialization(DeserializationDiagnostic::new(markup! {"Syntax Error"}))
+        Self::Deserialization(DeserializationDiagnostic::new(markup! {"Syntax Error"}))
     }
 }
 
 impl From<DeserializationDiagnostic> for BiomeDiagnostic {
     fn from(value: DeserializationDiagnostic) -> Self {
-        BiomeDiagnostic::Deserialization(value)
+        Self::Deserialization(value)
     }
 }
 
@@ -125,6 +128,12 @@ impl BiomeDiagnostic {
 
     pub fn no_configuration_file_found(path: &Utf8Path) -> Self {
         Self::NoConfigurationFileFound(NoConfigurationFileFound {
+            path: path.to_string(),
+        })
+    }
+
+    pub fn non_root_configuration(path: &Utf8Path) -> Self {
+        Self::NonRootConfiguration(NonRootConfiguration {
             path: path.to_string(),
         })
     }
@@ -195,6 +204,21 @@ pub struct ConfigAlreadyExists {}
     )
 )]
 pub struct NoConfigurationFileFound {
+    #[location(resource)]
+    path: String,
+}
+
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        message("The given configuration file ("<Emphasis>{self.path}</Emphasis>") is not a root configuration."),
+        description = "The given configuration file {path} is not a root configuration."
+    ),
+    advice = "When an explicit configuration path is given, you must supply the project's root configuration"
+)]
+pub struct NonRootConfiguration {
     #[location(resource)]
     path: String,
 }
@@ -286,7 +310,7 @@ pub struct CantResolve {
     source: Option<Error>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[derive(Debug, Diagnostic, Deserialize, Serialize)]
 pub enum EditorConfigDiagnostic {
     /// Failed to parse the .editorconfig file.
     ParseFailed(ParseFailedDiagnostic),
@@ -327,16 +351,23 @@ impl EditorConfigDiagnostic {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[derive(Debug, Diagnostic, Deserialize, Serialize)]
 #[diagnostic(
     category = "configuration",
     severity = Error,
-    message = "Failed to parse the .editorconfig file.",
 )]
 pub struct ParseFailedDiagnostic {
-    #[serde(skip)]
-    #[source]
-    pub source: Option<Error>,
+    #[description]
+    #[message]
+    #[serde(default, skip)]
+    pub kind: EditorConfigErrorKind,
+    #[location(resource)]
+    pub path: String,
+    #[location(source_code)]
+    #[serde(default, skip)]
+    pub source_code: String,
+    #[location(span)]
+    pub span: TextRange,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]

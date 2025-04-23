@@ -2,6 +2,9 @@
 //!
 //! The configuration is divided by "tool", and then it's possible to further customise it
 //! by language. The language might further option divided by tool.
+
+#![deny(clippy::use_self)]
+
 pub mod analyzer;
 pub mod bool;
 pub mod css;
@@ -19,8 +22,8 @@ mod overrides;
 pub mod plugins;
 pub mod vcs;
 
-use crate::analyzer::RuleAssistConfiguration;
 use crate::analyzer::assist::{Actions, AssistConfiguration, Source, assist_configuration};
+use crate::analyzer::{RuleAssistConfiguration, RuleDomains};
 use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
 pub use crate::diagnostics::BiomeDiagnostic;
@@ -264,6 +267,10 @@ impl Configuration {
             .as_ref()
             .map(|f| f.get_rules())
             .unwrap_or_default()
+    }
+
+    pub fn get_linter_domains(&self) -> Option<&RuleDomains> {
+        self.linter.as_ref().and_then(|l| l.domains.as_ref())
     }
 
     pub fn get_assist_actions(&self) -> Actions {
@@ -527,16 +534,16 @@ pub enum ConfigurationPathHint {
 impl Display for ConfigurationPathHint {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
-            ConfigurationPathHint::None => write!(fmt, "Configuration file not provided.",),
-            ConfigurationPathHint::FromWorkspace(path) => write!(
+            Self::None => write!(fmt, "Configuration file not provided.",),
+            Self::FromWorkspace(path) => write!(
                 fmt,
                 "Configuration path provided from a workspace: {}",
                 path
             ),
-            ConfigurationPathHint::FromLsp(path) => {
+            Self::FromLsp(path) => {
                 write!(fmt, "Configuration path provided from the LSP: {}", path,)
             }
-            ConfigurationPathHint::FromUser(path) => {
+            Self::FromUser(path) => {
                 write!(fmt, "Configuration path provided by the user: {}", path,)
             }
         }

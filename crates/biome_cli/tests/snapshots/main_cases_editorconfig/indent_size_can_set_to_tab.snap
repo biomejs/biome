@@ -1,0 +1,28 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `.editorconfig`
+
+```editorconfig
+
+        [*]
+        indent_size = tab
+        
+```
+
+## `test.js`
+
+```js
+function setName(name) {
+	currentName = name;
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

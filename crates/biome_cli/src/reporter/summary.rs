@@ -15,12 +15,13 @@ pub(crate) struct SummaryReporter {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
+    pub(crate) verbose: bool,
 }
 
 impl Reporter for SummaryReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics_payload)?;
-        visitor.report_summary(&self.execution, self.summary)?;
+        visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
+        visitor.report_summary(&self.execution, self.summary, self.verbose)?;
         Ok(())
     }
 }
@@ -32,6 +33,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         &mut self,
         execution: &Execution,
         summary: TraversalSummary,
+        verbose: bool,
     ) -> io::Result<()> {
         if execution.is_check() && summary.suggested_fixes_skipped > 0 {
             self.0.log(markup! {
@@ -48,7 +50,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         }
 
         self.0.log(markup! {
-            {ConsoleTraversalSummary(execution.traversal_mode(), &summary)}
+            {ConsoleTraversalSummary(execution.traversal_mode(), &summary, verbose)}
         });
 
         Ok(())
@@ -58,6 +60,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
         &mut self,
         execution: &Execution,
         diagnostics_payload: DiagnosticsPayload,
+        verbose: bool,
     ) -> io::Result<()> {
         let mut files_to_diagnostics = FileToDiagnostics::default();
 
@@ -75,11 +78,11 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
 
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() {
-                    if diagnostics_payload.verbose {
+                    if verbose {
                         if execution.is_check() || execution.is_lint() {
                             if let Some(category) = category {
                                 if category.name().starts_with("lint/") {
-                                    files_to_diagnostics.insert_lint(category.name(), severity);
+                                    files_to_diagnostics.insert_rule(category.name(), severity);
                                 }
                             }
                         }
@@ -98,8 +101,9 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
                     if let Some(category) = category {
                         if category.name().starts_with("lint/")
                             || category.name().starts_with("suppressions/")
+                            || category.name().starts_with("assist/")
                         {
-                            files_to_diagnostics.insert_lint(category.name(), severity);
+                            files_to_diagnostics.insert_rule(category.name(), severity);
                         }
                     }
                 }
@@ -108,14 +112,6 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
                     if let Some(category) = category {
                         if category.name() == "format" {
                             files_to_diagnostics.insert_format(location);
-                        }
-                    }
-                }
-
-                if execution.is_check() || execution.is_ci() {
-                    if let Some(category) = category {
-                        if category.name() == "assist" {
-                            files_to_diagnostics.insert_assist(location);
                         }
                     }
                 }
@@ -131,23 +127,18 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
 #[derive(Debug, Default)]
 struct FileToDiagnostics {
     formats: BTreeSet<String>,
-    assists: BTreeSet<String>,
-    lints: LintsByCategory,
+    rules: RulesByCategory,
     parse: BTreeSet<String>,
 }
 
 impl FileToDiagnostics {
-    fn insert_lint(&mut self, rule_name: impl Into<RuleName>, severity: &Severity) {
+    fn insert_rule(&mut self, rule_name: impl Into<RuleName>, severity: &Severity) {
         let rule_name = rule_name.into();
-        self.lints.insert(rule_name, severity);
+        self.rules.insert(rule_name, severity);
     }
 
     fn insert_format(&mut self, location: &str) {
         self.formats.insert(location.into());
-    }
-
-    fn insert_assist(&mut self, location: &str) {
-        self.assists.insert(location.into());
     }
 
     fn insert_parse(&mut self, location: &str) {
@@ -173,12 +164,12 @@ struct SummaryListDiagnostic<'a> {
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
     severity = Information,
-    category = "reporter/linter",
-    message = "Some lint rules were triggered"
+    category = "reporter/violations",
+    message = "Some lint rules or assist actions reported some violations."
 )]
 struct LintSummaryDiagnostic<'a> {
     #[advice]
-    tables: &'a LintsByCategory,
+    tables: &'a RulesByCategory,
 }
 
 #[derive(Debug)]
@@ -225,25 +216,9 @@ impl Display for FileToDiagnostics {
             })?;
         }
 
-        if !self.assists.is_empty() {
-            let diagnostic = SummaryListDiagnostic {
-                message: MessageAndDescription::from(
-                    markup! {
-                        <Warn>"The following files needs to have their imports sorted."</Warn>
-                    }
-                    .to_owned(),
-                ),
-                list: SummaryListAdvice(&self.assists),
-                category: category!("reporter/assist"),
-            };
-            fmt.write_markup(markup! {
-                {PrintDiagnostic::simple(&diagnostic)}
-            })?;
-        }
-
-        if !self.lints.0.is_empty() {
+        if !self.rules.0.is_empty() {
             let diagnostic = LintSummaryDiagnostic {
-                tables: &self.lints,
+                tables: &self.rules,
             };
             fmt.write_markup(markup! {
                 {PrintDiagnostic::simple(&diagnostic)}
@@ -254,9 +229,9 @@ impl Display for FileToDiagnostics {
 }
 
 #[derive(Debug, Default)]
-struct LintsByCategory(BTreeMap<RuleName, DiagnosticsBySeverity>);
+struct RulesByCategory(BTreeMap<RuleName, DiagnosticsBySeverity>);
 
-impl LintsByCategory {
+impl RulesByCategory {
     fn insert(&mut self, rule: RuleName, severity: &Severity) {
         if let Some(value) = self.0.get_mut(&rule) {
             value.track_severity(severity);
@@ -268,7 +243,7 @@ impl LintsByCategory {
     }
 }
 
-impl Advices for &LintsByCategory {
+impl Advices for &RulesByCategory {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         let headers = &[
             markup!("Rule Name").to_owned(),

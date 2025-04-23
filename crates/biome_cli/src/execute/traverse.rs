@@ -2,8 +2,7 @@ use super::process_file::{DiffKind, FileStatus, Message, process_file};
 use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
-    AssistDiffDiagnostic, CIAssistDiffDiagnostic, CIFormatDiffDiagnostic, ContentDiffAdvice,
-    FormatDiffDiagnostic, PanicDiagnostic,
+    CIFormatDiffDiagnostic, ContentDiffAdvice, FormatDiffDiagnostic, PanicDiagnostic,
 };
 use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
@@ -142,6 +141,7 @@ pub(crate) fn traverse(
             changed,
             unchanged,
             duration,
+            scanner_duration: None,
             errors,
             matches,
             warnings,
@@ -467,37 +467,11 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             .with_file_source_code(old.clone()),
                                     );
                                 }
-                                DiffKind::Assist => {
-                                    let diag = CIAssistDiffDiagnostic {
-                                        file_name: file_name.to_string(),
-                                        diff: ContentDiffAdvice {
-                                            old: old.clone(),
-                                            new: new.clone(),
-                                        },
-                                    };
-                                    diagnostics_to_print.push(
-                                        diag.with_severity(severity)
-                                            .with_file_source_code(old.clone()),
-                                    )
-                                }
                             };
                         } else {
                             match diff_kind {
                                 DiffKind::Format => {
                                     let diag = FormatDiffDiagnostic {
-                                        file_name: file_name.to_string(),
-                                        diff: ContentDiffAdvice {
-                                            old: old.clone(),
-                                            new: new.clone(),
-                                        },
-                                    };
-                                    diagnostics_to_print.push(
-                                        diag.with_severity(severity)
-                                            .with_file_source_code(old.clone()),
-                                    )
-                                }
-                                DiffKind::Assist => {
-                                    let diag = AssistDiffDiagnostic {
                                         file_name: file_name.to_string(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
@@ -578,6 +552,7 @@ impl TraversalOptions<'_, '_> {
         );
     }
 
+    /// Sends a diagnostic regarding the use of a protected file that can't be handled by Biome
     pub(crate) fn protected_file(&self, biome_path: &BiomePath) {
         self.push_diagnostic(WorkspaceError::protected_file(biome_path.to_string()).into())
     }

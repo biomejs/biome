@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod comments;
 pub mod context;
 mod cst;

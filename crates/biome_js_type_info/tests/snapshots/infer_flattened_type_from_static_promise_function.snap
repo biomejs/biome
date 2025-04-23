@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_type_info/tests/utils/mod.rs
+expression: content
+snapshot_kind: text
+---
+```ts
+Promise.resolve("value");
+
+```
+
+```
+Object {
+  prototype: "Promise" {
+    extends: none
+    type_args: [T -> unknown]
+  }
+  members: {}
+}
+```

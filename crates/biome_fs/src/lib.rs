@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod dir;
 mod fs;
 mod interner;

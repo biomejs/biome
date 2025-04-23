@@ -1,6 +1,6 @@
 use biome_analyze::{
-    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, Queryable,
-    RuleKey, ServiceBag, SyntaxVisitor,
+    AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
+    ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_package::PackageJson;
@@ -46,12 +46,13 @@ impl ManifestServices {
 impl FromServices for ManifestServices {
     fn from_services(
         rule_key: &RuleKey,
+        _rule_metadata: &RuleMetadata,
+
         services: &ServiceBag,
-    ) -> biome_diagnostics::Result<Self, MissingServicesDiagnostic> {
-        let manifest_info: &Option<(Utf8PathBuf, PackageJson)> =
-            services.get_service().ok_or_else(|| {
-                MissingServicesDiagnostic::new(rule_key.rule_name(), &["PackageJson"])
-            })?;
+    ) -> biome_diagnostics::Result<Self, ServicesDiagnostic> {
+        let manifest_info: &Option<(Utf8PathBuf, PackageJson)> = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["PackageJson"]))?;
 
         let (package_path, manifest) = match manifest_info {
             Some((package_path, manifest)) => (Some(package_path.clone()), Some(manifest.clone())),

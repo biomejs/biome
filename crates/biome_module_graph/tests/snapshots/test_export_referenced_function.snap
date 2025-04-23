@@ -1,0 +1,37 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+snapshot_kind: text
+---
+## /src/index.ts
+
+```ts
+/**
+ * @returns {string}
+ */
+function foo() {}
+
+export { foo };
+
+```
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "foo" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: unknown
+      }
+      Local name: foo
+      JsDoc(
+        @returns {string}
+      )
+    )
+  }
+}
+Imports {}
+```

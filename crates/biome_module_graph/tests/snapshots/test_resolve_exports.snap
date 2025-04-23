@@ -1,0 +1,249 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+snapshot_kind: text
+---
+## /src/index.ts
+
+```ts
+/**
+ * @returns {string}
+ */
+function foo() {}
+
+export { foo, qux };
+
+/** @package */
+export function bar() {}
+
+/** @private */
+export const quz = {};
+
+/* @ignored because of incorrect amount of asterisks */
+export async function baz() {}
+
+var qux = 1;
+
+export const {
+	a,
+	b,
+	c: [d, e],
+} = getObject();
+
+type GetObjectResult = {
+	a: string;
+	b: Array<number>;
+	c: [first: boolean, last: boolean | undefined];
+};
+
+function getObject(): GetObjectResult {
+	return {}; // We're not a type checker, so this is a-okay.
+}
+
+/**
+ * @public
+ * @returns {JSX.Element}
+ */
+export default function Component(): JSX.Element {}
+
+export * from "./reexports";
+export { ohNo as "oh\x0Ano" } from "./renamed-reexports";
+
+/**
+ * Hello, namespace 2.
+ */
+export * as renamed2 from "./renamed-reexports";
+
+```
+
+```
+Exports {
+  "a" => {
+    ExportOwnExport => JsOwnExport(
+      string
+      Local name: a
+    )
+  }
+  "b" => {
+    ExportOwnExport => JsOwnExport(
+      "Array" {
+        resolved: unknown
+        type_args: number
+      }
+      Local name: b
+    )
+  }
+  "bar" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "bar" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: unknown
+      }
+      Local name: bar
+      JsDoc(
+        @package
+      )
+    )
+  }
+  "baz" => {
+    ExportOwnExport => JsOwnExport(
+      async Function "baz" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: "Promise" {
+          extends: none
+          type_args: [T -> unknown]
+        }
+      }
+      Local name: baz
+    )
+  }
+  "d" => {
+    ExportOwnExport => JsOwnExport(
+      boolean
+      Local name: d
+    )
+  }
+  "default" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "Component" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: "JSX.Element" {
+          resolved: unknown
+          type_args: No types
+        }
+      }
+      Local name: Component
+      JsDoc(
+        @public
+        @returns {JSX.Element}
+      )
+    )
+  }
+  "e" => {
+    ExportOwnExport => JsOwnExport(
+      Union(
+    [
+        Type(
+            Boolean,
+        ),
+        Type(
+            Undefined,
+        ),
+    ],
+)
+      Local name: e
+    )
+  }
+  "foo" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "foo" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: unknown
+      }
+      Local name: foo
+      JsDoc(
+        @returns {string}
+      )
+    )
+  }
+  "oh\nno" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: /src/renamed-reexports.ts
+      Import Symbol: ohNo
+    )
+  }
+  "qux" => {
+    ExportOwnExport => JsOwnExport(
+      value: 1
+      Local name: qux
+    )
+  }
+  "quz" => {
+    ExportOwnExport => JsOwnExport(
+      Object {
+        prototype: No prototype
+        members: {}
+      }
+      Local name: quz
+      JsDoc(
+        @private
+      )
+    )
+  }
+  "renamed2" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: /src/renamed-reexports.ts
+      Import Symbol: All
+      JsDoc(
+        Hello, namespace 2.
+      )
+    )
+  }
+}
+Imports {}
+```
+
+## /src/renamed-reexports.ts
+
+```ts
+export function ohNo() {}
+
+```
+
+```
+Exports {
+  "ohNo" => {
+    ExportOwnExport => JsOwnExport(
+      sync Function "ohNo" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: unknown
+      }
+      Local name: ohNo
+    )
+  }
+}
+Imports {}
+```
+
+## /src/reexports.ts
+
+```ts
+/**
+ * Hello, namespace 1.
+ */
+export * as renamed from "./renamed-reexports";
+
+```
+
+```
+Exports {
+  "renamed" => {
+    ExportReexport => Reexport(
+      Specifier: "./renamed-reexports"
+      Resolved path: /src/renamed-reexports.ts
+      Import Symbol: All
+      JsDoc(
+        Hello, namespace 1.
+      )
+    )
+  }
+}
+Imports {}
+```

@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod deserializable_derive;
 mod merge_derive;
 mod partial_derive;

@@ -82,6 +82,12 @@ pub trait Visit {
     }
 }
 
+impl Advices for str {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        visitor.record_log(LogCategory::Info, &self)
+    }
+}
+
 /// The category for a log advice, defines how the message should be presented
 /// to the user.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

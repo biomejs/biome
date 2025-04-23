@@ -1,11 +1,12 @@
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
-use biome_module_graph::{ModuleGraph, ModuleInfo, SUPPORTED_EXTENSIONS};
+use biome_module_graph::{JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -55,6 +56,7 @@ declare_lint_rule! {
             RuleSource::EslintImport("named")
         ],
         source_kind: RuleSourceKind::Inspired,
+        domains: &[RuleDomain::Project],
     }
 }
 
@@ -99,7 +101,7 @@ impl Rule for NoUnresolvedImports {
         };
 
         let node = ctx.query();
-        let Some(import) = module_info.get_import_by_js_node(node) else {
+        let Some(resolved_path) = module_info.get_import_path_by_js_node(node) else {
             return Vec::new();
         };
 
@@ -107,7 +109,7 @@ impl Rule for NoUnresolvedImports {
             return Vec::new();
         };
 
-        let resolved_path = match &import.resolved_path {
+        let resolved_path = match resolved_path.as_deref() {
             Ok(resolved_path) => resolved_path,
             Err(resolve_error) => {
                 if Utf8Path::new(&specifier)
@@ -237,7 +239,7 @@ struct GetUnresolvedImportsOptions<'a> {
     specifier: TokenText,
 
     /// Module info of the module we're importing from.
-    target_info: ModuleInfo,
+    target_info: JsModuleInfo,
 }
 
 fn get_unresolved_imports_from_module_source(

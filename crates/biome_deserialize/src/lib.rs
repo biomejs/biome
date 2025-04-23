@@ -29,6 +29,9 @@
 //!
 //! You can find a guide and more examples in the README.
 //!
+
+#![deny(clippy::use_self)]
+
 mod diagnostics;
 mod impls;
 pub mod json;
@@ -443,7 +446,7 @@ pub struct Deserialized<T> {
     /// Diagnostics emitted during the parsing and deserialization phase
     diagnostics: Vec<Error>,
     /// The deserialized result, or `None` if the deserialization failed
-    deserialized: Option<T>,
+    pub deserialized: Option<T>,
 }
 
 impl<T> Deserialized<T> {

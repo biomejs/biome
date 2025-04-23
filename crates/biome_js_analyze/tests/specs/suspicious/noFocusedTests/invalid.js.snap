@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -31,6 +30,10 @@ test.only(foo.bar, () => {});
 describe.only(name = name || "bar", () => {});
 it.only(name = name || "bar", () => {});
 test.only(name = name || "bar", () => {});
+
+describe.only.each([["a"], ["b"]])("%s", (a) => {});
+it.only.each([["a"], ["b"]])("%s", (a) => {});
+test.only.each([["a"], ["b"]])("%s", (a) => {});
 
 ```
 
@@ -483,6 +486,7 @@ invalid.js:26:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
   > 26 │ test.only(name = name || "bar", () => {});
        │      ^^^^
     27 │ 
+    28 │ describe.only.each([["a"], ["b"]])("%s", (a) => {});
   
   i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
   
@@ -492,5 +496,72 @@ invalid.js:26:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
   
     26 │ test.only(name·=·name·||·"bar",·()·=>·{});
        │     -----                                 
+
+```
+
+```
+invalid.js:28:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't focus the test.
+  
+    26 │ test.only(name = name || "bar", () => {});
+    27 │ 
+  > 28 │ describe.only.each([["a"], ["b"]])("%s", (a) => {});
+       │          ^^^^
+    29 │ it.only.each([["a"], ["b"]])("%s", (a) => {});
+    30 │ test.only.each([["a"], ["b"]])("%s", (a) => {});
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    28 │ describe.only.each([["a"],·["b"]])("%s",·(a)·=>·{});
+       │         -----                                       
+
+```
+
+```
+invalid.js:29:4 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't focus the test.
+  
+    28 │ describe.only.each([["a"], ["b"]])("%s", (a) => {});
+  > 29 │ it.only.each([["a"], ["b"]])("%s", (a) => {});
+       │    ^^^^
+    30 │ test.only.each([["a"], ["b"]])("%s", (a) => {});
+    31 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    29 │ it.only.each([["a"],·["b"]])("%s",·(a)·=>·{});
+       │   -----                                       
+
+```
+
+```
+invalid.js:30:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't focus the test.
+  
+    28 │ describe.only.each([["a"], ["b"]])("%s", (a) => {});
+    29 │ it.only.each([["a"], ["b"]])("%s", (a) => {});
+  > 30 │ test.only.each([["a"], ["b"]])("%s", (a) => {});
+       │      ^^^^
+    31 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    30 │ test.only.each([["a"],·["b"]])("%s",·(a)·=>·{});
+       │     -----                                       
 
 ```

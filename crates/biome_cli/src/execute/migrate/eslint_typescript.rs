@@ -20,7 +20,7 @@ pub(crate) struct ArrayTypeOptions {
 }
 impl From<ArrayTypeOptions> for use_consistent_array_type::ConsistentArrayTypeOptions {
     fn from(val: ArrayTypeOptions) -> Self {
-        use_consistent_array_type::ConsistentArrayTypeOptions {
+        Self {
             syntax: val.default.into(),
         }
     }
@@ -37,10 +37,8 @@ impl From<ArrayType> for use_consistent_array_type::ConsistentArrayType {
     fn from(val: ArrayType) -> Self {
         match val {
             // NOTE: we translate `array-simple` to `array`.
-            ArrayType::Array | ArrayType::ArraySimple => {
-                use_consistent_array_type::ConsistentArrayType::Shorthand
-            }
-            ArrayType::Generic => use_consistent_array_type::ConsistentArrayType::Generic,
+            ArrayType::Array | ArrayType::ArraySimple => Self::Shorthand,
+            ArrayType::Generic => Self::Generic,
         }
     }
 }
@@ -54,7 +52,7 @@ impl From<ExplicitMemberAccessibilityOptions>
     for use_consistent_member_accessibility::ConsistentMemberAccessibilityOptions
 {
     fn from(value: ExplicitMemberAccessibilityOptions) -> Self {
-        use_consistent_member_accessibility::ConsistentMemberAccessibilityOptions {
+        Self {
             accessibility: value.accessibility.map(|x| x.into()).unwrap_or_default(),
         }
     }
@@ -157,7 +155,7 @@ impl From<NamingConventionOptions> for use_naming_convention::NamingConventionOp
                 });
             }
         }
-        use_naming_convention::NamingConventionOptions {
+        Self {
             strict_case: false,
             require_ascii: false,
             conventions: conventions.into_boxed_slice(),
@@ -502,7 +500,7 @@ impl Deserializable for Anything {
         _value: &impl biome_deserialize::DeserializableValue,
         _name: &str,
     ) -> Option<Self> {
-        Some(Anything)
+        Some(Self)
     }
 }
 #[derive(Copy, Clone, Debug, Deserializable)]
@@ -585,17 +583,17 @@ pub(crate) enum Modifier {
 impl Modifier {
     fn as_modifier(self) -> Option<use_naming_convention::RestrictedModifier> {
         match self {
-            Modifier::Abstract => Some(use_naming_convention::RestrictedModifier::Abstract),
-            Modifier::Private => Some(use_naming_convention::RestrictedModifier::Private),
-            Modifier::Protected => Some(use_naming_convention::RestrictedModifier::Protected),
-            Modifier::Readonly => Some(use_naming_convention::RestrictedModifier::Readonly),
-            Modifier::Static => Some(use_naming_convention::RestrictedModifier::Static),
+            Self::Abstract => Some(use_naming_convention::RestrictedModifier::Abstract),
+            Self::Private => Some(use_naming_convention::RestrictedModifier::Private),
+            Self::Protected => Some(use_naming_convention::RestrictedModifier::Protected),
+            Self::Readonly => Some(use_naming_convention::RestrictedModifier::Readonly),
+            Self::Static => Some(use_naming_convention::RestrictedModifier::Static),
             _ => None,
         }
     }
     fn as_scope(self) -> Option<use_naming_convention::Scope> {
         match self {
-            Modifier::Global => Some(use_naming_convention::Scope::Global),
+            Self::Global => Some(use_naming_convention::Scope::Global),
             _ => None,
         }
     }

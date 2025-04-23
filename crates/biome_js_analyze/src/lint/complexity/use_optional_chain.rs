@@ -360,7 +360,7 @@ pub struct LogicalAndChain {
 }
 
 impl LogicalAndChain {
-    fn from_expression(head: AnyJsExpression) -> SyntaxResult<LogicalAndChain> {
+    fn from_expression(head: AnyJsExpression) -> SyntaxResult<Self> {
         /// Iterate over `JsAnyExpression` and collect every expression that is
         /// a part of the chain:
         ///
@@ -405,7 +405,7 @@ impl LogicalAndChain {
             Ok(buf)
         }
         let buf = collect_chain(head.clone())?;
-        Ok(LogicalAndChain { head, buf })
+        Ok(Self { head, buf })
     }
 
     /// This function checks if `LogicalAndChain` is inside another parent
@@ -427,7 +427,7 @@ impl LogicalAndChain {
                 // Here we check that we came from the left side of the logical expression.
                 // Because only the left-hand parts can be sub-chains.
                 if grand_parent_logical_left.as_js_logical_expression() == Some(&parent) {
-                    let grand_parent_right_chain = LogicalAndChain::from_expression(
+                    let grand_parent_right_chain = Self::from_expression(
                         normalized_optional_chain_like(grand_parent.right()?)?,
                     )?;
                     let result = grand_parent_right_chain.cmp_chain(self)?;
@@ -446,7 +446,7 @@ impl LogicalAndChain {
     /// This function compares two `LogicalAndChain` and returns
     /// `LogicalAndChainOrdering` by comparing their `token_text_trimmed` for
     /// every `JsAnyExpression` node.
-    fn cmp_chain(&self, other: &LogicalAndChain) -> SyntaxResult<LogicalAndChainOrdering> {
+    fn cmp_chain(&self, other: &Self) -> SyntaxResult<LogicalAndChainOrdering> {
         let chain_ordering = match self.buf.len().cmp(&other.buf.len()) {
             Ordering::Less => return Ok(LogicalAndChainOrdering::Different),
             Ordering::Equal => LogicalAndChainOrdering::Equal,
@@ -529,8 +529,8 @@ impl LogicalAndChain {
                 // they should be considered different even if `main_value_token`
                 // and `branch_value_token` are the same.
                 // Therefore, we need to check their arguments here.
-                if main_call_expression_args.args().to_trimmed_string()
-                    != branch_call_expression_args.args().to_trimmed_string()
+                if main_call_expression_args.args().to_trimmed_text()
+                    != branch_call_expression_args.args().to_trimmed_text()
                 {
                     return Ok(LogicalAndChainOrdering::Different);
                 }
@@ -551,7 +551,7 @@ impl LogicalAndChain {
         let mut next_chain_head = self.head.parent::<JsLogicalExpression>()?.left().ok();
         // Keep track of previous branches, so we can inspect them for optional
         // chains that were already present in said branches.
-        let mut prev_branch: Option<LogicalAndChain> = None;
+        let mut prev_branch: Option<Self> = None;
         while let Some(expression) = next_chain_head.take() {
             let expression = match expression {
                 // Extract a left `JsAnyExpression` from `JsBinaryExpression` if
@@ -585,9 +585,7 @@ impl LogicalAndChain {
                 | AnyJsExpression::JsCallExpression(_) => expression,
                 _ => return None,
             };
-            let branch =
-                LogicalAndChain::from_expression(normalized_optional_chain_like(head).ok()?)
-                    .ok()?;
+            let branch = Self::from_expression(normalized_optional_chain_like(head).ok()?).ok()?;
             match self.cmp_chain(&branch).ok()? {
                 LogicalAndChainOrdering::SubChain => {
                     // If the previous branch had other expressions that already
@@ -731,7 +729,7 @@ impl LogicalOrLikeChain {
     /// ```js
     /// (foo || {}).bar;
     /// ```
-    fn from_expression(logical: &JsLogicalExpression) -> Option<LogicalOrLikeChain> {
+    fn from_expression(logical: &JsLogicalExpression) -> Option<Self> {
         let is_right_empty_object = logical
             .right()
             .ok()?
@@ -743,8 +741,8 @@ impl LogicalOrLikeChain {
         if !is_right_empty_object {
             return None;
         }
-        let member = LogicalOrLikeChain::get_chain_parent_member(logical)?;
-        Some(LogicalOrLikeChain { member })
+        let member = Self::get_chain_parent_member(logical)?;
+        Some(Self { member })
     }
 
     /// This function checks if `LogicalOrLikeChain` is inside another parent
@@ -753,7 +751,7 @@ impl LogicalOrLikeChain {
     /// ### Example
     /// `(foo ?? {}).bar` is inside `((foo ?? {}).bar || {}).baz;`
     fn is_inside_another_chain(&self) -> bool {
-        LogicalOrLikeChain::get_chain_parent(&self.member).is_some_and(|parent| {
+        Self::get_chain_parent(&self.member).is_some_and(|parent| {
             parent
                 .as_js_logical_expression()
                 .filter(|parent_expression| {
@@ -762,7 +760,7 @@ impl LogicalOrLikeChain {
                         Ok(JsLogicalOperator::NullishCoalescing | JsLogicalOperator::LogicalOr)
                     )
                 })
-                .and_then(LogicalOrLikeChain::from_expression)
+                .and_then(Self::from_expression)
                 .is_some()
         })
     }
@@ -818,7 +816,7 @@ impl LogicalOrLikeChain {
                 // E.g. `((foo || {}).baz() || {}).bar`
                 // If current member chain is `bar` the next member chain is baz.
                 // Need to downward traversal to find first `JsAnyExpression` which we can't include in chain
-                next_member_chain = LogicalOrLikeChain::get_member(left.clone());
+                next_member_chain = Self::get_member(left.clone());
                 chain.push_front((left, member))
             }
         }

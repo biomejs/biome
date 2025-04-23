@@ -124,15 +124,15 @@ pub enum CommentKind {
 
 impl CommentKind {
     pub const fn is_line(&self) -> bool {
-        matches!(self, CommentKind::Line)
+        matches!(self, Self::Line)
     }
 
     pub const fn is_block(&self) -> bool {
-        matches!(self, CommentKind::Block)
+        matches!(self, Self::Block)
     }
 
     pub const fn is_inline_block(&self) -> bool {
-        matches!(self, CommentKind::InlineBlock)
+        matches!(self, Self::InlineBlock)
     }
 
     /// Returns `true` for comments that can appear inline between any two tokens.
@@ -150,7 +150,7 @@ impl CommentKind {
     /// assert!(!CommentKind::Line.is_inline())
     /// ```
     pub const fn is_inline(&self) -> bool {
-        matches!(self, CommentKind::InlineBlock | CommentKind::Block)
+        matches!(self, Self::InlineBlock | Self::Block)
     }
 }
 
@@ -523,15 +523,15 @@ pub enum CommentTextPosition {
 
 impl CommentTextPosition {
     pub const fn is_same_line(&self) -> bool {
-        matches!(self, CommentTextPosition::SameLine)
+        matches!(self, Self::SameLine)
     }
 
     pub const fn is_own_line(&self) -> bool {
-        matches!(self, CommentTextPosition::OwnLine)
+        matches!(self, Self::OwnLine)
     }
 
     pub const fn is_end_of_line(&self) -> bool {
-        matches!(self, CommentTextPosition::EndOfLine)
+        matches!(self, Self::EndOfLine)
     }
 }
 
@@ -750,10 +750,10 @@ impl<L: Language> CommentPlacement<L> {
     #[inline]
     pub fn or_else<F>(self, f: F) -> Self
     where
-        F: FnOnce(DecoratedComment<L>) -> CommentPlacement<L>,
+        F: FnOnce(DecoratedComment<L>) -> Self,
     {
         match self {
-            CommentPlacement::Default(comment) => f(comment),
+            Self::Default(comment) => f(comment),
             placement => placement,
         }
     }
@@ -1153,7 +1153,7 @@ pub struct FormatPlainComment<C> {
 
 impl<C> Default for FormatPlainComment<C> {
     fn default() -> Self {
-        FormatPlainComment {
+        Self {
             context: PhantomData,
         }
     }

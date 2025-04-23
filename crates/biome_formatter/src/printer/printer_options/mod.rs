@@ -40,7 +40,7 @@ impl From<LineWidth> for PrintWidth {
 
 impl From<PrintWidth> for usize {
     fn from(width: PrintWidth) -> Self {
-        width.0 as usize
+        width.0 as Self
     }
 }
 
@@ -49,7 +49,7 @@ where
     O: FormatOptions,
 {
     fn from(options: &'a O) -> Self {
-        PrinterOptions::default()
+        Self::default()
             .with_indent_style(options.indent_style())
             .with_indent_width(options.indent_width())
             .with_print_width(options.line_width().into())
@@ -98,7 +98,7 @@ impl PrinterOptions {
 
 impl Default for PrinterOptions {
     fn default() -> Self {
-        PrinterOptions {
+        Self {
             indent_width: IndentWidth::default(),
             print_width: PrintWidth::default(),
             indent_style: Default::default(),

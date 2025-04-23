@@ -17,14 +17,14 @@ pub enum JsNamedSpecifiers {
 impl JsNamedSpecifiers {
     pub fn are_sorted(&self) -> bool {
         match self {
-            JsNamedSpecifiers::JsNamedImportSpecifiers(specifeirs) => {
-                are_import_specifiers_sorted(specifeirs)
-            }
-            JsNamedSpecifiers::JsExportNamedFromSpecifierList(specifeirs) => {
+            Self::JsNamedImportSpecifiers(specifeirs) => are_import_specifiers_sorted(specifeirs),
+            Self::JsExportNamedFromSpecifierList(specifeirs) => {
                 are_export_specifiers_sorted(specifeirs)
             }
         }
-        .unwrap_or_default()
+        // Assume the import is already sorted if there are any bogus nodes, otherwise the `--write`
+        // flag will cause infinite loop.
+        .unwrap_or(true)
     }
 }
 

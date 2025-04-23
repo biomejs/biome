@@ -86,11 +86,11 @@ declare_node_union! {
 impl NoUselessFragmentsQuery {
     fn replace_node(&self, mutation: &mut BatchMutation<JsLanguage>, new_node: AnyJsxChild) {
         match self {
-            NoUselessFragmentsQuery::JsxFragment(fragment) => {
+            Self::JsxFragment(fragment) => {
                 let old_node = AnyJsxChild::JsxFragment(fragment.clone());
                 mutation.replace_node(old_node, new_node);
             }
-            NoUselessFragmentsQuery::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 let old_node = AnyJsxChild::JsxElement(element.clone());
                 mutation.replace_node(old_node, new_node);
             }
@@ -99,11 +99,11 @@ impl NoUselessFragmentsQuery {
 
     fn remove_node_from_list(&self, mutation: &mut BatchMutation<JsLanguage>) {
         match self {
-            NoUselessFragmentsQuery::JsxFragment(fragment) => {
+            Self::JsxFragment(fragment) => {
                 let old_node = AnyJsxChild::JsxFragment(fragment.clone());
                 mutation.remove_node(old_node);
             }
-            NoUselessFragmentsQuery::JsxElement(element) => {
+            Self::JsxElement(element) => {
                 let old_node = AnyJsxChild::JsxElement(element.clone());
                 mutation.remove_node(old_node);
             }
@@ -112,8 +112,8 @@ impl NoUselessFragmentsQuery {
 
     fn children(&self) -> JsxChildList {
         match self {
-            NoUselessFragmentsQuery::JsxFragment(element) => element.children(),
-            NoUselessFragmentsQuery::JsxElement(element) => element.children(),
+            Self::JsxFragment(element) => element.children(),
+            Self::JsxElement(element) => element.children(),
         }
     }
 }
@@ -121,8 +121,8 @@ impl NoUselessFragmentsQuery {
 impl From<NoUselessFragmentsQuery> for AnyJsxChild {
     fn from(value: NoUselessFragmentsQuery) -> Self {
         match value {
-            NoUselessFragmentsQuery::JsxFragment(fragment) => AnyJsxChild::JsxFragment(fragment),
-            NoUselessFragmentsQuery::JsxElement(element) => AnyJsxChild::JsxElement(element),
+            NoUselessFragmentsQuery::JsxFragment(fragment) => Self::JsxFragment(fragment),
+            NoUselessFragmentsQuery::JsxElement(element) => Self::JsxElement(element),
         }
     }
 }

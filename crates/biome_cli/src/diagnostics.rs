@@ -1,5 +1,6 @@
 use biome_console::fmt::Formatter;
 use biome_console::markup;
+use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, Error, LogCategory, MessageAndDescription, Severity, Visit,
     category,
@@ -229,11 +230,18 @@ pub struct IncompatibleEndConfiguration {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "internalError/io",
     severity = Error,
-    message = "No files were processed in the specified paths."
+    message = "No files were processed in the specified paths.",
+    advice = "Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.",
+    advice = "These paths were provided but ignored:",
 )]
-pub struct NoFilesWereProcessed;
+pub struct NoFilesWereProcessed {
+    #[category]
+    category: &'static Category,
+
+    #[advice]
+    paths: ListAdvice<String>,
+}
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
@@ -335,8 +343,11 @@ impl CliDiagnostic {
     }
 
     /// When no files were processed while traversing the file system
-    pub fn no_files_processed() -> Self {
-        Self::NoFilesWereProcessed(NoFilesWereProcessed)
+    pub fn no_files_processed(category: &'static Category, paths: impl Into<Vec<String>>) -> Self {
+        Self::NoFilesWereProcessed(NoFilesWereProcessed {
+            category,
+            paths: ListAdvice { list: paths.into() },
+        })
     }
 
     /// Returned when the CLI  doesn't recognize a command line argument
@@ -443,19 +454,19 @@ impl CliDiagnostic {
 
 impl From<WorkspaceError> for CliDiagnostic {
     fn from(error: WorkspaceError) -> Self {
-        CliDiagnostic::workspace_error(error)
+        Self::workspace_error(error)
     }
 }
 
 impl From<std::io::Error> for CliDiagnostic {
     fn from(error: std::io::Error) -> Self {
-        CliDiagnostic::io_error(error)
+        Self::io_error(error)
     }
 }
 
 impl From<StdinDiagnostic> for CliDiagnostic {
     fn from(error: StdinDiagnostic) -> Self {
-        CliDiagnostic::Stdin(error)
+        Self::Stdin(error)
     }
 }
 
@@ -497,10 +508,10 @@ impl Diagnostic for StdinDiagnostic {
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         match self {
-            StdinDiagnostic::NotFormatted => {
+            Self::NotFormatted => {
                 fmt.write_str("The contents aren't fixed. Use the `--fix` flag to fix them.")
             },
-            StdinDiagnostic::NoExtension => {
+            Self::NoExtension => {
                 fmt.write_markup(markup!{
                     "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how handle the file."
                 })

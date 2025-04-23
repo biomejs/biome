@@ -20,7 +20,7 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
 }
 
 impl TestCase {
-    pub fn try_from(file_url: &str) -> Result<TestCase, String> {
+    pub fn try_from(file_url: &str) -> Result<Self, String> {
         let url = url::Url::from_str(file_url).map_err(err_to_string)?;
         let segments = url
             .path_segments()
@@ -74,7 +74,7 @@ impl TestCase {
 
         content.map(|code| {
             println!("[{}] - using [{}]", filename.clone().fg(red()), path);
-            TestCase {
+            Self {
                 id: filename.to_string(),
                 code,
                 path,

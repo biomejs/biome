@@ -99,7 +99,7 @@ export interface AssistConfiguration {
 	 */
 	actions?: Actions;
 	/**
-	 * Whether Biome should enable assist via LSP.
+	 * Whether Biome should enable assist via LSP and CLI.
 	 */
 	enabled?: Bool;
 	/**
@@ -857,7 +857,7 @@ export type TrailingCommas2 = "none" | "all";
 /**
  * Rule domains
  */
-export type RuleDomain = "react" | "test" | "solid" | "next";
+export type RuleDomain = "react" | "test" | "solid" | "next" | "project";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
@@ -1688,7 +1688,7 @@ export interface Nursery {
 	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
-	useConsistentObjectDefinition?: RuleConfiguration_for_UseConsistentObjectDefinitionOptions;
+	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
 	/**
 	 * Require specifying the reason argument when using @deprecated directive
 	 */
@@ -1725,6 +1725,10 @@ export interface Nursery {
 	 * Validates that all enum values are capitalized.
 	 */
 	useNamingConvention?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce the use of numeric separators in numeric literals.
+	 */
+	useNumericSeparators?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
@@ -1943,7 +1947,7 @@ export interface Style {
 	/**
 	 * Promotes the use of import type for types.
 	 */
-	useImportType?: RuleFixConfiguration_for_Null;
+	useImportType?: RuleFixConfiguration_for_ImportTypeOptions;
 	/**
 	 * Require all enum members to be literal values.
 	 */
@@ -2363,9 +2367,9 @@ export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
-export type RuleConfiguration_for_UseConsistentObjectDefinitionOptions =
+export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseConsistentObjectDefinitionOptions;
+	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -2384,6 +2388,9 @@ export type RuleFixConfiguration_for_ConsistentArrayTypeOptions =
 export type RuleConfiguration_for_FilenamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_FilenamingConventionOptions;
+export type RuleFixConfiguration_for_ImportTypeOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_ImportTypeOptions;
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
@@ -2401,7 +2408,6 @@ export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
 export interface Options {
 	groups?: ImportGroups;
-	typePlacement?: TypePlacement;
 }
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_Null {
@@ -2628,7 +2634,11 @@ export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	 */
 	options: ConsistentMemberAccessibilityOptions;
 }
-export interface RuleWithOptions_for_UseConsistentObjectDefinitionOptions {
+export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -2710,6 +2720,20 @@ export interface RuleWithOptions_for_FilenamingConventionOptions {
 	 */
 	options: FilenamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_ImportTypeOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: ImportTypeOptions;
+}
 export interface RuleWithFixOptions_for_NamingConventionOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2777,7 +2801,6 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	options: NoDoubleEqualsOptions;
 }
 export type ImportGroups = ImportGroup[];
-export type TypePlacement = "mixed" | "typesFirst";
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -2967,7 +2990,7 @@ export interface RestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
 	 */
-	deniedGlobals: string[];
+	deniedGlobals: Record<string, string>;
 }
 export interface ConsistentArrayTypeOptions {
 	syntax?: ConsistentArrayType;
@@ -2992,6 +3015,12 @@ export interface FilenamingConventionOptions {
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
 	strictCase: boolean;
+}
+/**
+ * Rule's options.
+ */
+export interface ImportTypeOptions {
+	style?: Style2;
 }
 /**
  * Rule's options.
@@ -3079,6 +3108,10 @@ export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;
+/**
+ * Rule's options.
+ */
+export type Style2 = "auto" | "inlineType" | "separatedType";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -3093,7 +3126,7 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
-export type GroupMatcher = PredefinedGroupMatcher | ImportSourceGlob;
+export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[];
 export interface CustomRestrictedImportOptions {
 	/**
@@ -3137,11 +3170,11 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
-export type PredefinedGroupMatcher = string;
-/**
- * Glob to match against import sources.
- */
-export type ImportSourceGlob = Glob;
+export interface ImportMatcher {
+	source?: SourcesMatcher;
+	type?: boolean;
+}
+export type SourceMatcher = PredefinedGroupMatcher | ImportSourceGlob;
 /**
  * Supported cases.
  */
@@ -3191,6 +3224,12 @@ export type Kind =
 	| "typeMethod";
 export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
+export type SourcesMatcher = SourceMatcher | SourceMatcher[];
+export type PredefinedGroupMatcher = string;
+/**
+ * Glob to match against import sources.
+ */
+export type ImportSourceGlob = Glob;
 export type RestrictedModifier =
 	| "abstract"
 	| "private"
@@ -3359,7 +3398,6 @@ export type Category =
 	| "lint/nursery/noDuplicateFields"
 	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
-	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noFloatingPromises"
@@ -3382,6 +3420,7 @@ export type Category =
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
+	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noSecrets"
@@ -3431,6 +3470,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
+	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
@@ -3587,8 +3627,7 @@ export type Category =
 	| "internalError/panic"
 	| "reporter/parse"
 	| "reporter/format"
-	| "reporter/assist"
-	| "reporter/linter"
+	| "reporter/violations"
 	| "parse"
 	| "lint"
 	| "lint/a11y"

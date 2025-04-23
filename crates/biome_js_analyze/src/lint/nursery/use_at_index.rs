@@ -194,13 +194,13 @@ impl Rule for UseAtIndex {
 
 impl ErrorType {
     /// Return the error message corresponding to the ErrorType.
-    fn get_error_message(self: &ErrorType) -> MarkupBuf {
+    fn get_error_message(&self) -> MarkupBuf {
         match self {
-            ErrorType::Index { is_negative } | ErrorType::StringCharAt { is_negative } => {
+            Self::Index { is_negative } | Self::StringCharAt { is_negative } => {
                 let (method, old_method) = if *is_negative {
                     (
                         "X.at(-Y)",
-                        if matches!(self, ErrorType::StringCharAt { .. }) {
+                        if matches!(self, Self::StringCharAt { .. }) {
                             "X.charAt(X.length - Y)"
                         } else {
                             "X[X.length - Y]"
@@ -209,7 +209,7 @@ impl ErrorType {
                 } else {
                     (
                         "X.at(Y)",
-                        if matches!(self, ErrorType::StringCharAt { .. }) {
+                        if matches!(self, Self::StringCharAt { .. }) {
                             "X.charAt(Y)"
                         } else {
                             "X[Y]"
@@ -218,7 +218,7 @@ impl ErrorType {
                 };
                 markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
             }
-            ErrorType::Slice {
+            Self::Slice {
                 arg_type,
                 extract_type,
             } => {
@@ -283,7 +283,7 @@ fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bo
             else {
                 return Some(false);
             };
-            if left_member.to_trimmed_string() != right_member.to_trimmed_string() {
+            if left_member.to_trimmed_text() != right_member.to_trimmed_text() {
                 return Some(false);
             }
             is_same_reference(left.object().ok()?, right.object().ok()?)
@@ -295,7 +295,7 @@ fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bo
         ) => {
             let left_member = left.member().ok()?;
             let right_member = right.member().ok()?;
-            if left_member.to_trimmed_string() != right_member.to_trimmed_string() {
+            if left_member.to_trimmed_text() != right_member.to_trimmed_text() {
                 Some(false)
             } else {
                 is_same_reference(left.object().ok()?, right.object().ok()?)
@@ -305,7 +305,7 @@ fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bo
         (
             AnyJsExpression::JsIdentifierExpression(left),
             AnyJsExpression::JsIdentifierExpression(right),
-        ) => Some(left.name().ok()?.to_trimmed_string() == right.name().ok()?.to_trimmed_string()),
+        ) => Some(left.name().ok()?.to_trimmed_text() == right.name().ok()?.to_trimmed_text()),
         // this
         (AnyJsExpression::JsThisExpression(_), AnyJsExpression::JsThisExpression(_)) => Some(true),
         _ => Some(false),

@@ -308,10 +308,12 @@ impl WorkspaceServer {
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
 
         if let DocumentFileSource::Js(js) = &mut source {
-            let manifest = self.project_layout.get_node_manifest_for_path(&path);
-            if let Some((_, manifest)) = manifest {
-                if manifest.r#type == Some(PackageType::CommonJs) && js.file_extension() == "js" {
-                    js.set_module_kind(ModuleKind::Script);
+            if path.extension().is_some_and(|extension| extension == "js") {
+                let manifest = self.project_layout.get_node_manifest_for_path(&path);
+                if let Some((_, manifest)) = manifest {
+                    if manifest.r#type == Some(PackageType::CommonJs) {
+                        js.set_module_kind(ModuleKind::Script);
+                    }
                 }
             }
         }
@@ -824,6 +826,13 @@ impl Workspace for WorkspaceServer {
         &self,
         params: ScanProjectFolderParams,
     ) -> Result<ScanProjectFolderResult, WorkspaceError> {
+        if params.scan_kind.is_none() {
+            return Ok(ScanProjectFolderResult {
+                diagnostics: Vec::new(),
+                duration: Duration::from_millis(0),
+            });
+        }
+
         let path = params
             .path
             .map(Utf8PathBuf::from)
@@ -852,7 +861,7 @@ impl Workspace for WorkspaceServer {
                 .try_send(WatcherInstruction::WatchFolder(path.clone()));
         }
 
-        let result = self.scan(params.project_key, &path)?;
+        let result = self.scan(params.project_key, &path, params.scan_kind)?;
 
         Ok(ScanProjectFolderResult {
             diagnostics: result.diagnostics,

@@ -469,7 +469,7 @@ impl Deserializable for PathBuf {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        String::deserialize(ctx, value, name).map(PathBuf::from)
+        String::deserialize(ctx, value, name).map(Self::from)
     }
 }
 
@@ -479,7 +479,7 @@ impl<T: Deserializable> Deserializable for Box<T> {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        T::deserialize(ctx, value, name).map(Box::new)
+        T::deserialize(ctx, value, name).map(Self::new)
     }
 }
 

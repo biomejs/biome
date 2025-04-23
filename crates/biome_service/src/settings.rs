@@ -45,7 +45,9 @@ use std::borrow::Cow;
 use std::ops::Deref;
 use tracing::instrument;
 
-/// Global settings for the entire project.
+/// Settings active in a project.
+///
+/// These can be either root settings, or settings for a section of the project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
     /// Formatter settings applied to all files in the project.
@@ -369,7 +371,7 @@ pub struct LanguageListSettings {
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
     fn from(javascript: JsConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
 
         if let Some(formatter) = javascript.formatter {
             language_setting.formatter = formatter.into();
@@ -401,7 +403,7 @@ impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
 
 impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
     fn from(json: JsonConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
 
         if let Some(parser) = json.parser {
             language_setting.parser = parser.into();
@@ -422,7 +424,7 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
 
 impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
     fn from(css: CssConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
 
         if let Some(parser) = css.parser {
             language_setting.parser = parser.into();
@@ -448,7 +450,7 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
 
 impl From<GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
     fn from(graphql: GraphqlConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
 
         if let Some(formatter) = graphql.formatter {
             language_setting.formatter = formatter.into();
@@ -468,7 +470,7 @@ impl From<GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
 
 impl From<GritConfiguration> for LanguageSettings<GritLanguage> {
     fn from(grit: GritConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<GritLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
         if let Some(formatter) = grit.formatter {
             language_setting.formatter = formatter.into();
         }
@@ -487,7 +489,7 @@ impl From<GritConfiguration> for LanguageSettings<GritLanguage> {
 
 impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
     fn from(html: HtmlConfiguration) -> Self {
-        let mut language_setting: LanguageSettings<HtmlLanguage> = LanguageSettings::default();
+        let mut language_setting: Self = Self::default();
         if let Some(formatter) = html.formatter {
             language_setting.formatter = formatter.into();
         }
@@ -666,7 +668,7 @@ impl VcsIgnoredPatterns {
     #[instrument(level = "debug", skip(self, path, is_dir), fields(result))]
     pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
         match self {
-            VcsIgnoredPatterns::Git { root, nested } => {
+            Self::Git { root, nested } => {
                 root.matched(path, is_dir).is_ignore()
                     || nested.iter().any(|gitignore| {
                         let ignore_directory = if gitignore.path().is_file() {
@@ -690,7 +692,7 @@ impl VcsIgnoredPatterns {
 
     pub fn insert_git_match(&mut self, git_ignore: Gitignore) {
         match self {
-            VcsIgnoredPatterns::Git { nested, .. } => {
+            Self::Git { nested, .. } => {
                 nested.push(git_ignore);
             }
         }

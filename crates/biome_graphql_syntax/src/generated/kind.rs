@@ -202,7 +202,7 @@ impl GraphqlSyntaxKind {
                 | GRAPHQL_DIRECTIVE_LOCATION_LIST
         )
     }
-    pub fn from_keyword(ident: &str) -> Option<GraphqlSyntaxKind> {
+    pub fn from_keyword(ident: &str) -> Option<Self> {
         let kw = match ident {
             "true" => TRUE_KW,
             "false" => FALSE_KW,
@@ -300,6 +300,7 @@ impl GraphqlSyntaxKind {
             ENUM_VALUE_KW => "ENUM_VALUE",
             INPUT_OBJECT_KW => "INPUT_OBJECT",
             INPUT_FIELD_DEFINITION_KW => "INPUT_FIELD_DEFINITION",
+            EOF => "EOF",
             GRAPHQL_STRING_LITERAL => "string literal",
             _ => return None,
         };

@@ -1,5 +1,7 @@
 //! Extremely fast, lossless, and error tolerant CSS Parser.
 
+#![deny(clippy::use_self)]
+
 use crate::parser::CssParser;
 
 use crate::syntax::parse_root;
@@ -54,8 +56,8 @@ pub struct CssParse {
 }
 
 impl CssParse {
-    pub fn new(root: CssSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> CssParse {
-        CssParse { root, diagnostics }
+    pub fn new(root: CssSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
     }
 
     /// The syntax node represented by this Parse result

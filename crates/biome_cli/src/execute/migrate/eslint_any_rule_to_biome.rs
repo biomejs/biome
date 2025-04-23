@@ -121,6 +121,21 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "@typescript-eslint/ban-ts-comment" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_ts_ignore
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "@typescript-eslint/ban-types" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
@@ -508,21 +523,6 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .use_await
-                .get_or_insert(Default::default());
-            rule.set_level(rule.level().max(rule_severity.into()));
-        }
-        "ban-ts-comment" => {
-            if !options.include_inspired {
-                results.has_inspired_rules = true;
-                return false;
-            }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group
-                .unwrap_group_as_mut()
-                .no_ts_ignore
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -2306,6 +2306,17 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_useless_undefined
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "unicorn/numeric-separators-style" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_numeric_separators
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }

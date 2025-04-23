@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_5503.js
+snapshot_kind: text
+---
+# Input
+```jsx
+// biome-ignore assist/source/useSortedKeys: tst
+var foo = {
+	lorem: "lorem", // the text range starts at this line, which is missed by the suppression comment
+	ipsum: "ipsum",
+};
+
+```

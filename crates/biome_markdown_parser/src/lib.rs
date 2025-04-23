@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_markdown_factory::MarkdownSyntaxFactory;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
 use biome_parser::{prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
@@ -42,8 +44,8 @@ pub struct MarkdownParse {
 }
 
 impl MarkdownParse {
-    pub fn new(root: MarkdownSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> MarkdownParse {
-        MarkdownParse { root, diagnostics }
+    pub fn new(root: MarkdownSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+        Self { root, diagnostics }
     }
 
     pub fn syntax(&self) -> MarkdownSyntaxNode {

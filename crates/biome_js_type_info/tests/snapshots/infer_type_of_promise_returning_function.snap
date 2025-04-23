@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_type_info/tests/utils/mod.rs
+expression: content
+---
+```ts
+function returnsPromise(): Promise<number> {
+	return Promise.resolved(true);
+}
+
+```
+
+```
+sync Function "returnsPromise" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: "Promise" {
+    resolved: unknown
+    type_args: number
+  }
+}
+```

@@ -119,7 +119,7 @@ pub struct CallInfo {
 }
 
 impl CallInfo {
-    fn try_from_expr(expr: &JsCallExpression, model: &SemanticModel) -> Option<CallInfo> {
+    fn try_from_expr(expr: &JsCallExpression, model: &SemanticModel) -> Option<Self> {
         let args = expr.arguments().ok()?.args();
         if args.len() != 2 {
             return None;
@@ -139,7 +139,7 @@ impl CallInfo {
             .as_js_number_literal_expression()?
             .as_number()?;
         let callee = get_callee(expr, model)?;
-        Some(CallInfo {
+        Some(Self {
             callee,
             text,
             radix: Radix::from_f64(radix)?,

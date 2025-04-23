@@ -1,6 +1,6 @@
 use crate::{
-    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleGroup, RuleKey,
-    RuleMetadata, ServiceBag, SignalEntry, Visitor,
+    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleCategories, RuleGroup,
+    RuleKey, RuleMetadata, ServiceBag, SignalEntry, Visitor,
     context::RuleContext,
     matcher::{GroupKey, MatchQueryParams},
     query::{QueryKey, Queryable},
@@ -109,7 +109,7 @@ impl<L: Language + Default> RuleRegistry<L> {
         RuleRegistryBuilder {
             filter,
             root,
-            registry: RuleRegistry {
+            registry: Self {
                 phase_rules: Default::default(),
             },
             visitors: BTreeMap::default(),
@@ -240,6 +240,7 @@ type BuilderResult<L> = (
     ServiceBag,
     Vec<Error>,
     BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>,
+    RuleCategories,
 );
 
 impl<L: Language> RuleRegistryBuilder<'_, L> {
@@ -249,6 +250,7 @@ impl<L: Language> RuleRegistryBuilder<'_, L> {
             self.services,
             self.diagnostics,
             self.visitors,
+            self.filter.categories,
         )
     }
 }
@@ -439,6 +441,7 @@ impl<L: Language + Default> RegistryRule<L> {
                     rule: RuleKey::rule::<R>(),
                     instances,
                     text_range,
+                    category: <R::Group as RuleGroup>::Category::CATEGORY,
                 });
             }
 

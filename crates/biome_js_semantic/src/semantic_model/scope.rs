@@ -47,13 +47,13 @@ impl Scope {
 
     /// Returns all parents of this scope. Starting with the current
     /// [Scope].
-    pub fn ancestors(&self) -> impl Iterator<Item = Scope> + use<> {
+    pub fn ancestors(&self) -> impl Iterator<Item = Self> + use<> {
         std::iter::successors(Some(self.clone()), |scope| scope.parent())
     }
 
     /// Returns all descendents of this scope in breadth-first order. Starting with the current
     /// [Scope].
-    pub fn descendents(&self) -> impl Iterator<Item = Scope> + use<> {
+    pub fn descendents(&self) -> impl Iterator<Item = Self> + use<> {
         let mut q = VecDeque::new();
         q.push_back(self.id);
 
@@ -64,13 +64,13 @@ impl Scope {
     }
 
     /// Returns this scope parent.
-    pub fn parent(&self) -> Option<Scope> {
+    pub fn parent(&self) -> Option<Self> {
         // id will always be a valid scope because
         // it was created by [SemanticModel::scope] method.
         debug_assert!((self.id.index()) < self.data.scopes.len());
 
         let parent = self.data.scopes[self.id.index()].parent?;
-        Some(Scope {
+        Some(Self {
             data: self.data.clone(),
             id: parent,
         })
@@ -107,7 +107,7 @@ impl Scope {
     /// ```rust,ignore
     /// assert!(scope.is_ancestor_of(scope));
     /// ```
-    pub fn is_ancestor_of(&self, other: &Scope) -> bool {
+    pub fn is_ancestor_of(&self, other: &Self) -> bool {
         other.ancestors().any(|s| s == *self)
     }
 

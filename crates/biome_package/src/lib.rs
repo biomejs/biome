@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 mod diagnostics;
 mod license;
 mod node_js_package;

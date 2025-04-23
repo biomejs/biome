@@ -230,6 +230,10 @@ fn replace_temp_dir(input: Cow<str>) -> Cow<str> {
     while let Some(index) = rest.find(temp_dir) {
         let (before, after) = rest.split_at(index);
 
+        // Normalize /var and /private/var on macOS
+        #[cfg(target_os = "macos")]
+        let before = before.trim_end_matches("/private");
+
         result.push_str(before);
         result.push_str("<TEMP_DIR>");
 
@@ -327,7 +331,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             test_name: _,
             module_path: _,
         } = payload;
-        let mut cli_snapshot = CliSnapshot::from_result(result);
+        let mut cli_snapshot = Self::from_result(result);
 
         for file_name in ConfigName::file_names() {
             let config_path = Utf8PathBuf::from(file_name);

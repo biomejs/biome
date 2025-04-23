@@ -47,7 +47,8 @@ pub trait SyntaxKind: fmt::Debug + PartialEq + Copy {
     /// Returns `true` if this kind is a trivia.
     fn is_trivia(self) -> bool;
 
-    /// Returns a string for keywords and punctuation tokens or `None` otherwise.
+    /// Returns a string for keywords, punctuation tokens, and the `EOL` token,
+    /// or `None` otherwise.
     fn to_string(&self) -> Option<&'static str>;
 }
 

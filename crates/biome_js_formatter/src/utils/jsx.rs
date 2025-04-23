@@ -320,7 +320,7 @@ struct JsxSplitChildrenBuilder {
 
 impl JsxSplitChildrenBuilder {
     fn new() -> Self {
-        JsxSplitChildrenBuilder { buffer: vec![] }
+        Self { buffer: vec![] }
     }
 
     fn entry(&mut self, child: JsxChild) {
@@ -394,7 +394,7 @@ pub(crate) enum JsxChild {
 
 impl JsxChild {
     pub(crate) const fn is_any_line(&self) -> bool {
-        matches!(self, JsxChild::EmptyLine | JsxChild::Newline)
+        matches!(self, Self::EmptyLine | Self::Newline)
     }
 }
 
@@ -407,7 +407,7 @@ pub(crate) struct JsxWord {
 
 impl JsxWord {
     fn new(text: TokenText, source_position: TextSize) -> Self {
-        JsxWord {
+        Self {
             text,
             source_position,
         }

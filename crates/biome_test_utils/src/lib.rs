@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::Configuration;
@@ -11,7 +13,7 @@ use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
+use biome_rowan::{Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
@@ -200,7 +202,11 @@ pub fn get_added_paths<'a>(
                     .unwrap_or_default();
                 let parsed =
                     biome_js_parser::parse(&content, file_source, JsParserOptions::default());
-                assert!(parsed.diagnostics().is_empty());
+                let diagnostics = parsed.diagnostics();
+                assert!(
+                    diagnostics.is_empty(),
+                    "Unexpected diagnostics: {diagnostics:?}"
+                );
                 parsed.try_tree()
             });
             (path, root)
@@ -456,4 +462,19 @@ impl CheckActionType {
     pub const fn is_suppression(&self) -> bool {
         matches!(self, Self::Suppression)
     }
+}
+
+/// Validator to run in our parser's spec tests to make sure no excess data
+/// is collected in the EOF token.
+pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
+    let last_token = syntax.last_token().expect("no tokens parsed");
+    assert_eq!(
+        last_token.kind(),
+        L::Kind::EOF,
+        "the syntax tree's last token must be an EOF token"
+    );
+    assert!(
+        last_token.token_text_trimmed().is_empty(),
+        "the EOF token may not contain any data except trailing whitespace"
+    );
 }

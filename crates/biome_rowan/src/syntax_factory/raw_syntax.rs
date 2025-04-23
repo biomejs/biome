@@ -83,16 +83,16 @@ impl<K: SyntaxKind> RawSyntaxElement<K> {
     #[inline]
     pub fn kind(&self) -> K {
         match self {
-            NodeOrToken::Node(node) => node.kind(),
-            NodeOrToken::Token(token) => token.kind(),
+            Self::Node(node) => node.kind(),
+            Self::Token(token) => token.kind(),
         }
     }
 
     #[inline]
     fn into_green(self) -> GreenElement {
         match self {
-            NodeOrToken::Node(node) => NodeOrToken::Node(node.raw),
-            NodeOrToken::Token(token) => NodeOrToken::Token(token.raw),
+            Self::Node(node) => NodeOrToken::Node(node.raw),
+            Self::Token(token) => NodeOrToken::Token(token.raw),
         }
     }
 }
@@ -101,8 +101,8 @@ impl<K: SyntaxKind> From<GreenElement> for RawSyntaxElement<K> {
     #[inline]
     fn from(element: GreenElement) -> Self {
         match element {
-            NodeOrToken::Node(node) => NodeOrToken::Node(RawSyntaxNode::from(node)),
-            NodeOrToken::Token(token) => NodeOrToken::Token(RawSyntaxToken::from(token)),
+            NodeOrToken::Node(node) => Self::Node(RawSyntaxNode::from(node)),
+            NodeOrToken::Token(token) => Self::Token(RawSyntaxToken::from(token)),
         }
     }
 }

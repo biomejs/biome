@@ -14,13 +14,14 @@ use std::{
 };
 
 pub struct GitLabReporter {
-    pub execution: Execution,
-    pub diagnostics: DiagnosticsPayload,
+    pub(crate) execution: Execution,
+    pub(crate) diagnostics: DiagnosticsPayload,
+    pub(crate) verbose: bool,
 }
 
 impl Reporter for GitLabReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics)?;
+        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbose)?;
         Ok(())
     }
 }
@@ -59,7 +60,12 @@ impl<'a> GitLabReporterVisitor<'a> {
 }
 
 impl ReporterVisitor for GitLabReporterVisitor<'_> {
-    fn report_summary(&mut self, _: &Execution, _: TraversalSummary) -> std::io::Result<()> {
+    fn report_summary(
+        &mut self,
+        _: &Execution,
+        _: TraversalSummary,
+        _verbose: bool,
+    ) -> std::io::Result<()> {
         Ok(())
     }
 
@@ -67,19 +73,26 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
         &mut self,
         _execution: &Execution,
         payload: DiagnosticsPayload,
+        verbose: bool,
     ) -> std::io::Result<()> {
         let hasher = RwLock::default();
-        let diagnostics = GitLabDiagnostics(payload, &hasher, self.repository_root.as_deref());
+        let diagnostics = GitLabDiagnostics {
+            payload,
+            lock: &hasher,
+            path: self.repository_root.as_deref(),
+            verbose,
+        };
         self.console.log(markup!({ diagnostics }));
         Ok(())
     }
 }
 
-struct GitLabDiagnostics<'a>(
-    DiagnosticsPayload,
-    &'a RwLock<GitLabHasher>,
-    Option<&'a Utf8Path>,
-);
+struct GitLabDiagnostics<'a> {
+    payload: DiagnosticsPayload,
+    verbose: bool,
+    lock: &'a RwLock<GitLabHasher>,
+    path: Option<&'a Utf8Path>,
+}
 
 impl GitLabDiagnostics<'_> {
     fn attempt_to_relativize(&self, subject: &str) -> Option<Utf8PathBuf> {
@@ -87,7 +100,7 @@ impl GitLabDiagnostics<'_> {
             return None;
         };
 
-        let Ok(relativized) = resolved.strip_prefix(self.2?) else {
+        let Ok(relativized) = resolved.strip_prefix(self.path?) else {
             return None;
         };
 
@@ -119,14 +132,19 @@ impl GitLabDiagnostics<'_> {
 
 impl Display for GitLabDiagnostics<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        let mut hasher = self.1.write().unwrap();
-        let gitlab_diagnostics: Vec<_> = self
-            .0
+        let Self {
+            verbose,
+            lock,
+            payload,
+            path: _,
+        } = self;
+        let mut hasher = lock.write().unwrap();
+        let gitlab_diagnostics: Vec<_> = payload
             .diagnostics
             .iter()
-            .filter(|d| d.severity() >= self.0.diagnostic_level)
+            .filter(|d| d.severity() >= payload.diagnostic_level)
             .filter(|d| {
-                if self.0.verbose {
+                if *verbose {
                     d.tags().is_verbose()
                 } else {
                     true

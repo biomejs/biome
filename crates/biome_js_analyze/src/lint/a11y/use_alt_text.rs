@@ -66,7 +66,7 @@ pub enum ValidatedElement {
 impl Display for ValidatedElement {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
-            ValidatedElement::Object => fmt.write_markup(markup!(<Emphasis>"title"</Emphasis>)),
+            Self::Object => fmt.write_markup(markup!(<Emphasis>"title"</Emphasis>)),
             _ => fmt.write_markup(markup!(<Emphasis>"alt"</Emphasis>)),
         }
     }

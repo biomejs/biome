@@ -1,3 +1,5 @@
+#![deny(clippy::use_self)]
+
 pub mod roles;
 
 pub use roles::AriaRoles;
