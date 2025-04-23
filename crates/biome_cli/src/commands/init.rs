@@ -25,7 +25,7 @@ Welcome to Biome! Let's get you started...
 
   "<Dim>"1."</Dim>" "<Emphasis>"Setup an editor extension"</Emphasis>"
      Get live errors as you type and format when you save.
-     Learn more at "<Hyperlink href="https://biomejs.dev/guides/integrate-in-editor/">"https://biomejs.dev/guides/integrate-in-editor/"</Hyperlink>"
+     Learn more at "<Hyperlink href="https://biomejs.dev/guides/editors/first-party-extensions/">"https://biomejs.dev/guides/editors/first-party-extensions/"</Hyperlink>"
 
   "<Dim>"2."</Dim>" "<Emphasis>"Try a command"</Emphasis>"
      "<Italic>"biome check"</Italic>"  checks formatting, import sorting, and lint rules.
