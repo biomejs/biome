@@ -154,7 +154,7 @@ impl Rule for UseSortedProperties {
         ))
     }
 
-    fn text_range(ctx: &RuleContext<Self>, state: &Self::State) -> Option<TextRange> {
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
         Some(ctx.query().syntax().first_token()?.text_range())
     }
 

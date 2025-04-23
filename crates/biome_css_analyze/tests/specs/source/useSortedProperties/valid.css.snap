@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: valid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -83,5 +84,27 @@ expression: valid.css
   border:·1px·solid·black;
   transition:·opactity·1s·ease;
 }
+
+```
+
+# Diagnostics
+```
+valid.css:33:41 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    31 │ }
+    32 │ 
+  > 33 │ .should-ignore-shorthand-after-longhand {
+       │                                         ^
+  > 34 │   padding-right: 10px;
+  > 35 │   padding: 20px;
+  > 36 │   border-color: red;
+  > 37 │   border: 1px solid black;
+  > 38 │ }
+       │ ^
+    39 │ 
+    40 │ .stable-sort {
+  
 
 ```

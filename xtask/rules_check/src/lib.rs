@@ -57,13 +57,12 @@ impl Display for Errors {
 }
 
 impl std::error::Error for Errors {}
+
+type Data = BTreeMap<&'static str, (RuleMetadata, RuleCategory)>;
 pub fn check_rules() -> anyhow::Result<()> {
     #[derive(Default)]
     struct LintRulesVisitor {
-        groups: BTreeMap<
-            (&'static str, &'static str),
-            BTreeMap<&'static str, (RuleMetadata, RuleCategory)>,
-        >,
+        groups: BTreeMap<(&'static str, &'static str), Data>,
         errors: Vec<Errors>,
     }
 
