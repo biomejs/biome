@@ -8,10 +8,6 @@ const a = 0 !== 1;
 ```
 
 ```
-a => Boolean(
-    BooleanLiteral(
-        true,
-    ),
-)
+a => value: true
 
 ```

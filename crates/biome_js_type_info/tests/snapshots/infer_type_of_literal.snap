@@ -8,10 +8,6 @@ const a = 123.45;
 ```
 
 ```
-a => Number(
-    NumberLiteral(
-        123.45,
-    ),
-)
+a => value: 123.45
 
 ```
