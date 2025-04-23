@@ -1718,7 +1718,7 @@ export interface Nursery {
 	 */
 	useGuardForIn?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce consistent return values in iterable callbacks.
 	 */
 	useIterableCallbackReturn?: RuleConfiguration_for_Null;
 	/**

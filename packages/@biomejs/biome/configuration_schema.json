@@ -3064,7 +3064,7 @@
 					]
 				},
 				"useIterableCallbackReturn": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce consistent return values in iterable callbacks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

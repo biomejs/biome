@@ -3383,7 +3383,7 @@ pub struct Nursery {
     #[doc = "Require for-in loops to include an if statement."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_guard_for_in: Option<RuleConfiguration<biome_js_analyze::options::UseGuardForIn>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce consistent return values in iterable callbacks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_iterable_callback_return:
         Option<RuleConfiguration<biome_js_analyze::options::UseIterableCallbackReturn>>,
