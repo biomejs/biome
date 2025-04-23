@@ -171,7 +171,7 @@ pub(crate) fn analyze_and_snap(
 
     // FIXME: We probably want to enable it for all rules? Right now it seems to
     //        trigger a leak panic...
-    let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules.as_deref()).compute();
+    let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
     let module_graph = if needs_module_graph {
         module_graph_for_test_file(input_file, &project_layout)
     } else {
