@@ -1698,7 +1698,7 @@ export interface Nursery {
 	 */
 	useDeprecatedReason?: RuleConfiguration_for_Null;
 	/**
-	 * Require explicit return types on functions and class methods.
+	 * Enforce types in functions, methods, variables, and parameters.
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
 	/**
