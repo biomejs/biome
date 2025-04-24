@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 [].forEach((a) => {
     if (a > 1) {
         return;

@@ -5,6 +5,7 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::markup;
 use biome_control_flow::builder::ROOT_BLOCK_ID;
 use biome_control_flow::{ExceptionHandlerKind, InstructionKind};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsFunctionBody, JsArrowFunctionExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsFunctionExpression, JsReturnStatement, global_identifier,
@@ -22,8 +23,24 @@ declare_lint_rule! {
     ///
     /// ## Methods and Their Requirements
     ///
-    /// - Methods like `map`, `filter`, `reduce`, `some`, `every`, etc., require the callback to always return a value.
-    /// - Methods like `forEach` do not require the callback to return a value.
+    /// The following methods require a return in their callback:
+    ///
+    /// - `every`
+    /// - `filter`
+    /// - `find`
+    /// - `findIndex`
+    /// - `findLast`
+    /// - `findLastIndex`
+    /// - `flatMap`
+    /// - `map`
+    /// - `reduce`
+    /// - `reduceRight`
+    /// - `some`
+    /// - `sort`
+    /// - `toSorted`
+    /// — `from` (when called on `Array`)
+    ///
+    /// Method `forEach` do not require the callback to return a value.
     ///
     /// ## Examples
     ///
@@ -59,7 +76,8 @@ declare_lint_rule! {
         name: "useIterableCallbackReturn",
         language: "js",
         sources: &[RuleSource::Eslint("array-callback-return")],
-        recommended: false,
+        severity: Severity::Error,
+        recommended: true,
     }
 }
 
@@ -87,9 +105,11 @@ impl Rule for UseIterableCallbackReturn {
         let callee = call_expression.callee().ok()?;
 
         let member_expression = callee.as_js_static_member_expression()?;
-        let member = member_expression.member().ok()?;
-        let member_name = member.as_js_name()?;
-        let member_name = member_name.value_token().ok()?;
+        let member_name = member_expression
+            .member()
+            .ok()
+            .and_then(|member| member.as_js_name().cloned())
+            .and_then(|name| name.value_token().ok())?;
 
         let method_config = ITERABLE_METHOD_INFOS.get(member_name.text_trimmed())?;
 
@@ -115,13 +135,18 @@ impl Rule for UseIterableCallbackReturn {
         if method_config.return_value_required {
             if returns_info.has_paths_without_returns {
                 if returns_info.returns_with_value.is_empty() {
-                    problems.push(RuleProblemKind::MissingReturn);
+                    problems.push(RuleProblemKind::MissingReturnWithValue);
                 } else {
                     problems.push(RuleProblemKind::NotAllPathsReturnValue);
                 }
-            }
-            for return_range in returns_info.returns_without_value {
-                problems.push(RuleProblemKind::UnexpectedEmptyReturn(return_range));
+            } else if !returns_info.returns_without_value.is_empty() {
+                if !returns_info.returns_with_value.is_empty() {
+                    for return_range in returns_info.returns_without_value {
+                        problems.push(RuleProblemKind::UnexpectedEmptyReturn(return_range));
+                    }
+                } else {
+                    problems.push(RuleProblemKind::MissingReturnWithValue);
+                }
             }
         } else {
             for return_range in returns_info.returns_with_value {
@@ -162,7 +187,7 @@ impl Rule for UseIterableCallbackReturn {
                         },
                     );
                 }
-                RuleProblemKind::MissingReturn => {
+                RuleProblemKind::MissingReturnWithValue => {
                     diagnostic = diagnostic.note(markup! {
                         "Add a "<Emphasis>"return"</Emphasis>" with a value to this callback."
                     });
@@ -205,7 +230,7 @@ enum RuleProblemKind {
     /// The function has paths in control flow that do not return a value.
     NotAllPathsReturnValue,
     /// Missing `return` statement, though expected in this case.
-    MissingReturn,
+    MissingReturnWithValue,
     /// An unexpected `return` statement without value.
     UnexpectedEmptyReturn(TextRange),
     /// An unexpected `return` statement with value.
