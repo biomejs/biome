@@ -87,9 +87,11 @@ impl Rule for UseIterableCallbackReturn {
         let callee = call_expression.callee().ok()?;
 
         let member_expression = callee.as_js_static_member_expression()?;
-        let member = member_expression.member().ok()?;
-        let member_name = member.as_js_name()?;
-        let member_name = member_name.value_token().ok()?;
+        let member_name = member_expression
+            .member()
+            .ok()
+            .and_then(|member| member.as_js_name())
+            .and_then(|name| name.value_token().ok())?;
 
         let method_config = ITERABLE_METHOD_INFOS.get(member_name.text_trimmed())?;
 
@@ -158,20 +160,20 @@ impl Rule for UseIterableCallbackReturn {
                 RuleProblemKind::NotAllPathsReturnValue => {
                     diagnostic = diagnostic.note(
                         markup! {
-                            "Not all execution paths of this "<Emphasis>"callback"</Emphasis>" return a value."
+                            "Add missing "<Emphasis>"return"</Emphasis>" statements so that this "<Emphasis>"callback"</Emphasis>" returns a value on all execution paths."
                         },
                     );
                 }
                 RuleProblemKind::MissingReturn => {
                     diagnostic = diagnostic.note(markup! {
-                        "This "<Emphasis>"callback"</Emphasis>" does not return a value."
+                        "Add a "<Emphasis>"return"</Emphasis>" with a value to this callback."
                     });
                 }
                 RuleProblemKind::UnexpectedEmptyReturn(return_range) => {
                     diagnostic = diagnostic.detail(
                         *return_range,
                         markup! {
-                            "This "<Emphasis>"return"</Emphasis>" statement does not return a value."
+                            "Change this "<Emphasis>"return"</Emphasis>" so that it returns a value."
                         },
                     );
                 }
@@ -179,7 +181,7 @@ impl Rule for UseIterableCallbackReturn {
                     diagnostic = diagnostic.detail(
                         *return_range,
                         markup! {
-                            "This "<Emphasis>"return"</Emphasis>" statement returns a value."
+                            "Either remove this "<Emphasis>"return"</Emphasis>" or remove the returned value."
                         },
                     );
                 }
