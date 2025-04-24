@@ -501,6 +501,8 @@ pub enum RuleDomain {
     Next,
     /// For rules that require querying multiple files inside a project
     Project,
+    /// It enables all non-nursery rules
+    Full,
 }
 
 impl Display for RuleDomain {
@@ -512,6 +514,7 @@ impl Display for RuleDomain {
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
             Self::Project => fmt.write_str("project"),
+            Self::Full => fmt.write_str("full"),
         }
     }
 }
@@ -544,14 +547,13 @@ impl RuleDomain {
             ],
             Self::Solid => &[&("solid", ">=1.0.0")],
             Self::Next => &[&("next", ">=14.0.0")],
-            Self::Project => &[],
+            Self::Project | Self::Full => &[],
         }
     }
 
     /// Global identifiers that should be added to the `globals` of the [crate::AnalyzerConfiguration] type
     pub const fn globals(self) -> &'static [&'static str] {
         match self {
-            Self::React => &[],
             Self::Test => &[
                 "after",
                 "afterAll",
@@ -564,9 +566,7 @@ impl RuleDomain {
                 "expect",
                 "test",
             ],
-            Self::Solid => &[],
-            Self::Next => &[],
-            Self::Project => &[],
+            Self::React | Self::Solid | Self::Next | Self::Project | Self::Full => &[],
         }
     }
 }

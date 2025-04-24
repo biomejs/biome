@@ -4,7 +4,7 @@
 use anyhow::{bail, ensure};
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
-    RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
+    RuleCategory, RuleDomain, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_configuration::Configuration;
 use biome_console::{Console, markup};
@@ -48,6 +48,10 @@ impl Errors {
             rule_name
         ))
     }
+
+    fn no_all_domain() -> Self {
+        Self("Don't use the All domain. This is a special domain to enable all rules and no rule needs to be assigned to this domain.".to_string())
+    }
 }
 
 impl Display for Errors {
@@ -75,6 +79,8 @@ pub fn check_rules() -> anyhow::Result<()> {
                 && R::METADATA.severity != Severity::Information
             {
                 self.errors.push(Errors::action_error(R::METADATA.name));
+            } else if R::METADATA.domains.contains(&RuleDomain::Full) {
+                self.errors.push(Errors::no_all_domain());
             } else {
                 self.groups
                     .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))

@@ -302,3 +302,50 @@ describe("foo", () => {
         result,
     ));
 }
+
+#[test]
+fn full_domain_enables_all_rules() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        r#"{
+    "linter": {
+        "domains": {
+            "full": "recommended"
+        }
+    }
+}
+"#
+        .as_bytes(),
+    );
+
+    let content = r#"
+describe("foo", () => {
+	beforeEach(() => {});
+    beforeEach(() => {});
+    test("bar", () => {
+        someFn();
+    });
+});
+    "#;
+    let test2 = Utf8Path::new("test2.js");
+    fs.insert(test2.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test2.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_domain_enables_all_rules",
+        fs,
+        console,
+        result,
+    ));
+}

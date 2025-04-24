@@ -50,5 +50,14 @@ New domains introduced:
   - `useHookAtTopLevel`
 - `solid`: it will enable rules for Solid projects:
   - `noReactSpecificProps`
+- `full`: allows enabling or disabling **all** rules
+- `project`: it will enable rules that require scanning the whole project. These rules are generally slow because Biome needs to collect information across files (modules and types), hence they aren't recommended by default and only enabled via domain:
+  Rules enabled by this domain:
+  - `noPrivateImports` (recommended)
+  - `useImportExtensions`
+  - `noFloatingPromises` (recommended)
+  - `noImportCycles`
+  - `noUnresolvedImports`
+
 
 For more information regarding how Biome enables rules via domains, please refer to the documentation page of each rule.

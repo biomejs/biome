@@ -15,7 +15,7 @@ use crate::workspace::{
 use biome_analyze::{
     AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal, ControlFlow,
     GroupCategory, Never, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory,
-    RuleFilter, RuleGroup,
+    RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
@@ -961,7 +961,6 @@ impl RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'_> {
 struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: FxHashSet<RuleFilter<'a>>,
     pub(crate) disabled_rules: FxHashSet<RuleFilter<'a>>,
-    // lint_params: &'b LintParams<'a>,
     only: Option<&'b [RuleSelector]>,
     skip: Option<&'b [RuleSelector]>,
     settings: Option<&'b Settings>,
@@ -1026,9 +1025,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
     /// It inspects the [RuleDomain] of the configuration, and if the current rule belongs to at least a configured domain, it's enabled.
     ///
-    /// As per business logic, rules that have domains can be recommended, however they shouldn't be enabled when `linter.rules.recommended` is `true`.
-    ///
-    /// This means that
+    /// As per business logic, rules that have domains can be recommended, however, they shouldn't be enabled when `linter.rules.recommended` is `true`.
     fn record_rule_from_domains<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
@@ -1058,28 +1055,18 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             return;
         }
 
-        for rule_domain in R::METADATA.domains {
-            if let Some((configured_domain, configured_domain_value)) = domains
-                .as_ref()
-                .and_then(|domains| domains.get_key_value(rule_domain))
-            {
-                match configured_domain_value {
-                    RuleDomainValue::All => {
-                        self.enabled_rules.insert(rule_filter);
+        let group = <R::Group as RuleGroup>::NAME;
+        if let Some(domains) = domains {
+            for (configured_domain, configured_domain_value) in domains.iter() {
+                // Should track the rule only if:
+                // - the current configured domain is `RuleDomain::Full` and the current group isn't nursery
+                // - the current configured domain belongs to the domains of the current rule
+                let should_track = *configured_domain == RuleDomain::Full && group != "nursery"
+                    || R::METADATA.domains.contains(configured_domain);
 
-                        self.analyzer_options.push_globals(
-                            configured_domain
-                                .globals()
-                                .iter()
-                                .map(|s| Box::from(*s))
-                                .collect::<Vec<_>>(),
-                        );
-                    }
-                    RuleDomainValue::None => {
-                        self.disabled_rules.insert(rule_filter);
-                    }
-                    RuleDomainValue::Recommended => {
-                        if R::METADATA.recommended {
+                if should_track {
+                    match configured_domain_value {
+                        RuleDomainValue::All => {
                             self.enabled_rules.insert(rule_filter);
 
                             self.analyzer_options.push_globals(
@@ -1089,6 +1076,22 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                                     .map(|s| Box::from(*s))
                                     .collect::<Vec<_>>(),
                             );
+                        }
+                        RuleDomainValue::None => {
+                            self.disabled_rules.insert(rule_filter);
+                        }
+                        RuleDomainValue::Recommended => {
+                            if R::METADATA.recommended {
+                                self.enabled_rules.insert(rule_filter);
+
+                                self.analyzer_options.push_globals(
+                                    configured_domain
+                                        .globals()
+                                        .iter()
+                                        .map(|s| Box::from(*s))
+                                        .collect::<Vec<_>>(),
+                                );
+                            }
                         }
                     }
                 }

@@ -31,8 +31,8 @@ pub(crate) fn compute_scan_kind(execution: &Execution, configuration: &Configura
 
     if let TraversalMode::Lint { only, skip, .. } = execution.traversal_mode() {
         requires_project_scan = requires_project_scan
-            .with_skip(skip.clone())
-            .with_only(only.clone());
+            .with_skip(skip.as_slice())
+            .with_only(only.as_slice());
     }
 
     requires_project_scan.compute()
@@ -42,8 +42,8 @@ struct RequiresProjectScan<'a> {
     requires_project_scan: bool,
     enabled_rules: &'a FxHashSet<RuleFilter<'a>>,
     domains: Option<&'a RuleDomains>,
-    skip: Vec<RuleSelector>,
-    only: Vec<RuleSelector>,
+    skip: &'a [RuleSelector],
+    only: &'a [RuleSelector],
 }
 
 impl<'a> RequiresProjectScan<'a> {
@@ -52,16 +52,16 @@ impl<'a> RequiresProjectScan<'a> {
             enabled_rules,
             requires_project_scan: false,
             domains,
-            skip: vec![],
-            only: vec![],
+            skip: &[],
+            only: &[],
         }
     }
 
-    fn with_only(mut self, only: Vec<RuleSelector>) -> Self {
+    fn with_only(mut self, only: &'a [RuleSelector]) -> Self {
         self.only = only;
         self
     }
-    fn with_skip(mut self, skip: Vec<RuleSelector>) -> Self {
+    fn with_skip(mut self, skip: &'a [RuleSelector]) -> Self {
         self.skip = skip;
         self
     }
@@ -95,14 +95,54 @@ impl<'a> RequiresProjectScan<'a> {
     {
         let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
         let selector = RuleSelector::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+        // Only is very strict, and we only check the rules given by the user.
         if !self.only.is_empty() {
             if self.only.contains(&selector) {
-                let domains = R::METADATA.domains;
-                self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                self.requires_project_scan |= R::METADATA.domains.contains(&RuleDomain::Project);
             }
-        } else if !self.skip.contains(&selector) && self.enabled_rules.contains(&filter) {
-            let domains = R::METADATA.domains;
-            self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+        } else if !self.skip.contains(&selector) {
+            // We check if a rule was explicitly enabled via configuration, and if it contains the project domain we track it and return early
+            if self.enabled_rules.contains(&filter) {
+                self.requires_project_scan |= R::METADATA.domains.contains(&RuleDomain::Project);
+                return;
+            }
+
+            if <R::Group as RuleGroup>::NAME == "nursery" {
+                return;
+            }
+
+            // This is the case where users enable rules via domains only.
+            let Some(domains) = self.domains else {
+                return;
+            };
+
+            // If the project domain is disabled, we don't need to check the entire project
+            let domain_project_disabled = domains.iter().any(|(domain, value)| {
+                domain == &RuleDomain::Project && value == &RuleDomainValue::None
+            });
+            if domain_project_disabled {
+                return;
+            }
+
+            for value in domains
+                .iter()
+                .filter(|(domain, _)| matches!(domain, RuleDomain::Project | RuleDomain::Full))
+                .map(|(_, value)| value)
+            {
+                match value {
+                    RuleDomainValue::All => {
+                        self.requires_project_scan |=
+                            R::METADATA.domains.contains(&RuleDomain::Project);
+                    }
+                    RuleDomainValue::Recommended => {
+                        if R::METADATA.recommended {
+                            self.requires_project_scan |=
+                                R::METADATA.domains.contains(&RuleDomain::Project);
+                        }
+                    }
+                    RuleDomainValue::None => {}
+                }
+            }
         }
     }
 }
@@ -188,7 +228,7 @@ mod tests {
     }
 
     #[test]
-    fn should_scan_project_project_domain_is_enabled() {
+    fn should_scan_project_domain_is_enabled() {
         let mut domains = FxHashMap::default();
         domains.insert(RuleDomain::Project, RuleDomainValue::Recommended);
 
@@ -205,6 +245,27 @@ mod tests {
         assert_eq!(
             compute_scan_kind(&execution, &configuration),
             ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_scan_known_files_if_domain_is_disabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Project, RuleDomainValue::None);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        let execution = execution();
+
+        assert_eq!(
+            compute_scan_kind(&execution, &configuration),
+            ScanKind::KnownFiles
         );
     }
 
@@ -302,6 +363,48 @@ mod tests {
         assert_eq!(
             compute_scan_kind(&execution, &configuration),
             ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_return_project_if_all_domain_is_enabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Full, RuleDomainValue::All);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        let execution = execution();
+
+        assert_eq!(
+            compute_scan_kind(&execution, &configuration),
+            ScanKind::Project
+        );
+    }
+    #[test]
+    fn should_return_known_files_for_all_enabled_but_project_domain_is_disabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Full, RuleDomainValue::All);
+        domains.insert(RuleDomain::Project, RuleDomainValue::None);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        let execution = execution();
+
+        assert_eq!(
+            compute_scan_kind(&execution, &configuration),
+            ScanKind::KnownFiles
         );
     }
 }
