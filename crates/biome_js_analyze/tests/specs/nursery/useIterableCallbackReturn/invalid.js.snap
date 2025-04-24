@@ -220,7 +220,7 @@ invalid.js:1:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     2 │     return a.fn();
     3 │ });
   
-  i This return statement returns a value.
+  i Either remove this return or remove the returned value.
   
   > 1 │ [].forEach((a) => {
       │                    
@@ -244,7 +244,7 @@ invalid.js:4:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     5 │     return a.fn();
     6 │ });
   
-  i This return statement returns a value.
+  i Either remove this return or remove the returned value.
   
     2 │     return a.fn();
     3 │ });
@@ -270,7 +270,7 @@ invalid.js:7:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     8 │     if (a) {
     9 │         return a.fn();
   
-  i This return statement returns a value.
+  i Either remove this return or remove the returned value.
   
      6 │ });
      7 │ [].forEach((a) => {
@@ -296,7 +296,7 @@ invalid.js:12:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     13 │     if (a) {
     14 │         return;
   
-  i This return statement returns a value.
+  i Either remove this return or remove the returned value.
   
     13 │     if (a) {
     14 │         return;
@@ -322,7 +322,7 @@ invalid.js:18:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     19 │     if (a) {
     20 │         return;
   
-  i This return statement returns a value.
+  i Either remove this return or remove the returned value.
   
     19 │     if (a) {
     20 │         return;
@@ -348,7 +348,7 @@ invalid.js:24:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     25 │     if (a) {
     26 │         throw new Error();
   
-  i This return statement returns a value.
+  i Either remove this return or remove the returned value.
   
     25 │     if (a) {
     26 │         throw new Error();
@@ -374,7 +374,7 @@ invalid.js:30:7 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     31 │ Array.from([], function() {});
     32 │ Array.from([], () => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -391,7 +391,7 @@ invalid.js:31:7 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     32 │ Array.from([], () => {
     33 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -408,7 +408,7 @@ invalid.js:32:7 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     33 │     return;
     34 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     30 │ Array.from([], () => {});
     31 │ Array.from([], function() {});
@@ -434,7 +434,7 @@ invalid.js:35:7 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     36 │     return;
     37 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     33 │     return;
     34 │ });
@@ -460,7 +460,7 @@ invalid.js:38:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     39 │     return;
     40 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     36 │     return;
     37 │ });
@@ -486,7 +486,7 @@ invalid.js:41:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     42 │     return;
     43 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     39 │     return;
     40 │ });
@@ -512,7 +512,7 @@ invalid.js:44:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     45 │ [].every(function() {});
     46 │ [].every(() => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -529,7 +529,7 @@ invalid.js:45:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     46 │ [].every(() => {
     47 │     try {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -546,7 +546,7 @@ invalid.js:46:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     47 │     try {
     48 │         // ok
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -563,7 +563,7 @@ invalid.js:53:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     54 │     try {
     55 │         // ok
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -580,7 +580,7 @@ invalid.js:62:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     63 │     try {
     64 │         return true;
   
-  i Not all execution paths of this callback return a value.
+  i Add missing return statements so that this callback returns a value on all execution paths.
   
 
 ```
@@ -597,7 +597,7 @@ invalid.js:85:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     86 │     return;
     87 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     83 │     } finally {}
     84 │ });
@@ -623,7 +623,7 @@ invalid.js:88:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     89 │     return;
     90 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     86 │     return;
     87 │ });
@@ -649,7 +649,7 @@ invalid.js:91:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     92 │ [].filter(function() {});
     93 │ [].find(() => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -666,7 +666,7 @@ invalid.js:92:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     93 │ [].find(() => {
     94 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -683,7 +683,7 @@ invalid.js:93:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     94 │     return;
     95 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     91 │ [].filter(() => {});
     92 │ [].filter(function() {});
@@ -709,7 +709,7 @@ invalid.js:96:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     97 │     return;
     98 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     94 │     return;
     95 │ });
@@ -735,7 +735,7 @@ invalid.js:99:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━�
     100 │ [].find(function() {});
     101 │ [].findIndex(() => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -752,7 +752,7 @@ invalid.js:100:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     101 │ [].findIndex(() => {
     102 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -769,7 +769,7 @@ invalid.js:101:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     102 │     return;
     103 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
      99 │ [].find(() => {});
     100 │ [].find(function() {});
@@ -795,7 +795,7 @@ invalid.js:104:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     105 │     return;
     106 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     102 │     return;
     103 │ });
@@ -821,7 +821,7 @@ invalid.js:107:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     108 │ [].findIndex(function() {});
     109 │ [].findLast(() => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -838,7 +838,7 @@ invalid.js:108:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     109 │ [].findLast(() => {
     110 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -855,7 +855,7 @@ invalid.js:109:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     110 │     return;
     111 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     107 │ [].findIndex(() => {});
     108 │ [].findIndex(function() {});
@@ -881,7 +881,7 @@ invalid.js:112:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     113 │     return;
     114 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     110 │     return;
     111 │ });
@@ -907,7 +907,7 @@ invalid.js:115:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     116 │ [].findLast(function() {});
     117 │ [].findLastIndex(() => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -924,7 +924,7 @@ invalid.js:116:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     117 │ [].findLastIndex(() => {
     118 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -941,7 +941,7 @@ invalid.js:117:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     118 │     return;
     119 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     115 │ [].findLast(() => {});
     116 │ [].findLast(function() {});
@@ -967,7 +967,7 @@ invalid.js:120:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     121 │     return;
     122 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     118 │     return;
     119 │ });
@@ -993,7 +993,7 @@ invalid.js:123:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     124 │ [].findLastIndex(function() {});
     125 │ [].some(() => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1010,7 +1010,7 @@ invalid.js:124:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     125 │ [].some(() => {
     126 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1027,7 +1027,7 @@ invalid.js:125:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     126 │     return;
     127 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     123 │ [].findLastIndex(() => {});
     124 │ [].findLastIndex(function() {});
@@ -1053,7 +1053,7 @@ invalid.js:128:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     129 │     return;
     130 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     126 │     return;
     127 │ });
@@ -1079,7 +1079,7 @@ invalid.js:131:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     132 │ [].some(function() {});
     133 │ [].flatMap(() => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1096,7 +1096,7 @@ invalid.js:132:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     133 │ [].flatMap(() => {
     134 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1113,7 +1113,7 @@ invalid.js:133:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     134 │     return;
     135 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     131 │ [].some(() => {});
     132 │ [].some(function() {});
@@ -1139,7 +1139,7 @@ invalid.js:136:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     137 │     return;
     138 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     134 │     return;
     135 │ });
@@ -1165,7 +1165,7 @@ invalid.js:139:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     140 │ [].flatMap(function() {});
     141 │ [].map(() => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1182,7 +1182,7 @@ invalid.js:140:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     141 │ [].map(() => {
     142 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1199,7 +1199,7 @@ invalid.js:141:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     142 │     return;
     143 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     139 │ [].flatMap(() => {});
     140 │ [].flatMap(function() {});
@@ -1225,7 +1225,7 @@ invalid.js:144:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     145 │     return;
     146 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     142 │     return;
     143 │ });
@@ -1251,7 +1251,7 @@ invalid.js:147:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     148 │ [].map(function() {});
     149 │ [].reduce((a, b) => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1268,7 +1268,7 @@ invalid.js:148:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     149 │ [].reduce((a, b) => {
     150 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1285,7 +1285,7 @@ invalid.js:149:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     150 │     return;
     151 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     147 │ [].map(() => {});
     148 │ [].map(function() {});
@@ -1311,7 +1311,7 @@ invalid.js:152:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     153 │     return;
     154 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     150 │     return;
     151 │ });
@@ -1337,7 +1337,7 @@ invalid.js:155:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     156 │ [].reduce(function(a, b) {});
     157 │ [].reduceRight((a, b) => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1354,7 +1354,7 @@ invalid.js:156:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     157 │ [].reduceRight((a, b) => {
     158 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1371,7 +1371,7 @@ invalid.js:157:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     158 │     return;
     159 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     155 │ [].reduce((a, b) => {});
     156 │ [].reduce(function(a, b) {});
@@ -1397,7 +1397,7 @@ invalid.js:160:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     161 │     return;
     162 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     158 │     return;
     159 │ });
@@ -1423,7 +1423,7 @@ invalid.js:163:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     164 │ [].reduceRight(function(a, b) {});
     165 │ [].sort((a, b) => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1440,7 +1440,7 @@ invalid.js:164:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     165 │ [].sort((a, b) => {
     166 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1457,7 +1457,7 @@ invalid.js:165:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     166 │     return;
     167 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     163 │ [].reduceRight((a, b) => {});
     164 │ [].reduceRight(function(a, b) {});
@@ -1483,7 +1483,7 @@ invalid.js:168:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     169 │     return;
     170 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     166 │     return;
     167 │ });
@@ -1509,7 +1509,7 @@ invalid.js:171:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     172 │ [].sort(function(a, b) {});
     173 │ [].toSorted((a, b) => {
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1526,7 +1526,7 @@ invalid.js:172:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     173 │ [].toSorted((a, b) => {
     174 │     return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1543,7 +1543,7 @@ invalid.js:173:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     174 │     return;
     175 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     171 │ [].sort((a, b) => {});
     172 │ [].sort(function(a, b) {});
@@ -1569,7 +1569,7 @@ invalid.js:176:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     177 │     return;
     178 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     174 │     return;
     175 │ });
@@ -1595,7 +1595,7 @@ invalid.js:179:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     180 │     if (a > b) {
     181 │         return;
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     180 │     if (a > b) {
     181 │         return;
@@ -1606,7 +1606,7 @@ invalid.js:179:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     184 │     } else {
     185 │         return 1;
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     178 │ });
     179 │ [].toSorted((a, b) => {
@@ -1632,7 +1632,7 @@ invalid.js:188:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     189 │     if (a > b) {
     190 │         return;
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     189 │     if (a > b) {
     190 │         return;
@@ -1643,7 +1643,7 @@ invalid.js:188:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     193 │     }
     194 │ });
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     187 │ });
     188 │ [].toSorted((a, b) => {
@@ -1654,7 +1654,7 @@ invalid.js:188:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     191 │     } else if (a < b) {
     192 │         return;
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
@@ -1671,7 +1671,7 @@ invalid.js:195:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     196 │     if (a > b) {
     197 │         throw new Error();
   
-  i This return statement does not return a value.
+  i Change this return so that it returns a value.
   
     196 │     if (a > b) {
     197 │         throw new Error();
@@ -1682,7 +1682,7 @@ invalid.js:195:4 lint/nursery/useIterableCallbackReturn ━━━━━━━━
     200 │     }
     201 │ });
   
-  i This callback does not return a value.
+  i Add a return with a value to this callback.
   
 
 ```
