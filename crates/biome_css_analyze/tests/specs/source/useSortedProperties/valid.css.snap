@@ -5,6 +5,7 @@ snapshot_kind: text
 ---
 # Input
 ```css
+/* should not generate diagnostics */
 .in-order {
   display: block;
   font-size: 10px;
@@ -38,10 +39,10 @@ snapshot_kind: text
 }
 
 .should-ignore-shorthand-after-longhand {
-  padding-right: 10px;
   padding: 20px;
-  border-color: red;
+  padding-right: 10px;
   border: 1px solid black;
+  border-color: red;
 }
 
 .stable-sort {
@@ -84,27 +85,5 @@ snapshot_kind: text
   border:·1px·solid·black;
   transition:·opactity·1s·ease;
 }
-
-```
-
-# Diagnostics
-```
-valid.css:33:41 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-    31 │ }
-    32 │ 
-  > 33 │ .should-ignore-shorthand-after-longhand {
-       │                                         ^
-  > 34 │   padding-right: 10px;
-  > 35 │   padding: 20px;
-  > 36 │   border-color: red;
-  > 37 │   border: 1px solid black;
-  > 38 │ }
-       │ ^
-    39 │ 
-    40 │ .stable-sort {
-  
 
 ```

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 .in-order {
   display: block;
   font-size: 10px;
@@ -31,10 +32,10 @@
 }
 
 .should-ignore-shorthand-after-longhand {
-  padding-right: 10px;
   padding: 20px;
-  border-color: red;
+  padding-right: 10px;
   border: 1px solid black;
+  border-color: red;
 }
 
 .stable-sort {
