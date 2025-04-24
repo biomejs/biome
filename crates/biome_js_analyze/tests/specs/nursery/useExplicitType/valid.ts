@@ -43,11 +43,11 @@ var func = () => x as const;
 // check allow expressions
 node.addEventListener("click", () => {});
 node.addEventListener("click", function () {});
-var foo = arr.map((i) => i * i);
 fn(() => {});
 fn(function () {});
-new Promise((resolve) => {});
+new Promise(() => {});
 new Foo(1, () => {});
+[function () {}, () => {}];
 [function () {}, () => {}];
 (function () {
 	console.log("This is an IIFE");

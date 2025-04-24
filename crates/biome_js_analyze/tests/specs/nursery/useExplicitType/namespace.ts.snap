@@ -25,7 +25,7 @@ namespace.ts:2:15 lint/nursery/useExplicitType ━━━━━━━━━━━
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```

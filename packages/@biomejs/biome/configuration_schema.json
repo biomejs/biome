@@ -3026,7 +3026,7 @@
 					]
 				},
 				"useExplicitType": {
-					"description": "Require explicit return types on functions and class methods.",
+					"description": "Enforce types in functions, methods, variables, and parameters.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

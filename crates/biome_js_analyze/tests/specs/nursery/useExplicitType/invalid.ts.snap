@@ -162,7 +162,7 @@ invalid.ts:1:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -181,7 +181,7 @@ invalid.ts:5:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -200,7 +200,7 @@ invalid.ts:9:7 lint/nursery/useExplicitType ━━━━━━━━━━━━
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -222,7 +222,7 @@ invalid.ts:9:12 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -241,7 +241,7 @@ invalid.ts:13:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -260,7 +260,7 @@ invalid.ts:13:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -268,7 +268,7 @@ invalid.ts:13:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on member.
   
     15 │ class Test {
     16 │ 	constructor() {}
@@ -282,7 +282,7 @@ invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the member.
   
 
 ```
@@ -290,7 +290,7 @@ invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on member.
   
     19 │ 	}
     20 │ 	set prop() {}
@@ -304,7 +304,7 @@ invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the member.
   
 
 ```
@@ -323,7 +323,7 @@ invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -331,7 +331,7 @@ invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on member.
   
     23 │ 	}
     24 │ 	arrow = () => "arrow";
@@ -345,7 +345,7 @@ invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the member.
   
 
 ```
@@ -364,7 +364,7 @@ invalid.ts:30:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -372,7 +372,7 @@ invalid.ts:30:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on member.
   
     30 │ const obj = {
   > 31 │ 	method() {
@@ -385,7 +385,7 @@ invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the member.
   
 
 ```
@@ -404,7 +404,7 @@ invalid.ts:36:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -412,7 +412,7 @@ invalid.ts:36:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:37:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on member.
   
     36 │ const obj = {
   > 37 │ 	get method() {
@@ -425,7 +425,7 @@ invalid.ts:37:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the member.
   
 
 ```
@@ -444,7 +444,7 @@ invalid.ts:42:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -463,7 +463,7 @@ invalid.ts:42:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -481,7 +481,7 @@ invalid.ts:43:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -499,7 +499,7 @@ invalid.ts:43:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -518,7 +518,7 @@ invalid.ts:45:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -536,7 +536,7 @@ invalid.ts:46:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -554,7 +554,7 @@ invalid.ts:49:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -572,7 +572,7 @@ invalid.ts:49:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -591,7 +591,7 @@ invalid.ts:50:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -610,7 +610,7 @@ invalid.ts:50:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -629,7 +629,7 @@ invalid.ts:51:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -648,7 +648,7 @@ invalid.ts:52:9 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -667,7 +667,7 @@ invalid.ts:57:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -691,7 +691,7 @@ invalid.ts:57:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -710,7 +710,7 @@ invalid.ts:66:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -734,7 +734,7 @@ invalid.ts:66:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -753,7 +753,7 @@ invalid.ts:80:1 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -772,7 +772,7 @@ invalid.ts:87:1 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -791,7 +791,7 @@ invalid.ts:94:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -810,7 +810,7 @@ invalid.ts:94:29 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -829,7 +829,7 @@ invalid.ts:94:69 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -846,7 +846,7 @@ invalid.ts:95:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -863,7 +863,7 @@ invalid.ts:95:36 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -880,7 +880,7 @@ invalid.ts:95:76 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -899,7 +899,7 @@ invalid.ts:107:16 lint/nursery/useExplicitType ━━━━━━━━━━━
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -907,7 +907,7 @@ invalid.ts:107:16 lint/nursery/useExplicitType ━━━━━━━━━━━
 ```
 invalid.ts:115:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on member.
   
     113 │ 	pop(): Type | undefined;
     114 │ 	push(...items: Type[]): number;
@@ -918,7 +918,7 @@ invalid.ts:115:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the member.
   
 
 ```
@@ -926,7 +926,7 @@ invalid.ts:115:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:119:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on member.
   
     118 │ type MyObject = {
   > 119 │ 	(input: string);
@@ -936,7 +936,7 @@ invalid.ts:119:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the member.
   
 
 ```
@@ -944,7 +944,7 @@ invalid.ts:119:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:124:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on member.
   
     123 │ abstract class MyClass {
   > 124 │ 	public abstract method();
@@ -954,7 +954,7 @@ invalid.ts:124:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the member.
   
 
 ```
@@ -962,7 +962,7 @@ invalid.ts:124:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:129:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on member.
   
     127 │ abstract class P<T> {
     128 │ 	abstract method(): T;
@@ -973,7 +973,7 @@ invalid.ts:129:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the member.
   
 
 ```
@@ -981,7 +981,7 @@ invalid.ts:129:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:133:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on function declaration.
   
     132 │ declare namespace myLib {
   > 133 │ 	function makeGreeting(s: string);
@@ -991,7 +991,7 @@ invalid.ts:133:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function declaration.
   
 
 ```
@@ -999,7 +999,7 @@ invalid.ts:133:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:137:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Missing return type on function.
+  × Missing return type on function declaration.
   
     136 │ declare module "foo" {
   > 137 │ 	export default function bar();
@@ -1009,7 +1009,7 @@ invalid.ts:137:17 lint/nursery/useExplicitType ━━━━━━━━━━━
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function declaration.
   
 
 ```
@@ -1028,7 +1028,7 @@ invalid.ts:140:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -1047,7 +1047,7 @@ invalid.ts:140:19 lint/nursery/useExplicitType ━━━━━━━━━━━
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
@@ -1064,7 +1064,7 @@ invalid.ts:141:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -1081,7 +1081,7 @@ invalid.ts:141:26 lint/nursery/useExplicitType ━━━━━━━━━━━
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a return type to the function.
   
 
 ```
