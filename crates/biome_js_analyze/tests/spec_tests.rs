@@ -25,6 +25,7 @@ const TESTS_WITH_MODULE_GRAPH: &[&str] = &[
     "noImportCycles",
     "noPrivateImports",
     "noUnresolvedImports",
+    "useExhaustiveSwitchCases",
     "useImportExtensions",
 ];
 

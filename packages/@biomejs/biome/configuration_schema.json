@@ -3025,6 +3025,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExhaustiveSwitchCases": {
+					"description": "Require switch-case statements to exhaustive.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExplicitType": {
 					"description": "Enforce types in functions, methods, variables, and parameters.",
 					"anyOf": [

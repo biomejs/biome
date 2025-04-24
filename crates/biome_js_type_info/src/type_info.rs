@@ -480,6 +480,12 @@ pub struct GenericTypeParameter {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Intersection(pub(super) Box<[Type]>);
 
+impl Intersection {
+    pub fn types(&self) -> &[Type] {
+        &self.0
+    }
+}
+
 /// Literal value used as a type.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub enum Literal {
@@ -1141,6 +1147,10 @@ pub struct Union(pub(super) Box<[Type]>);
 impl Union {
     pub fn contains(&self, ty: &Type) -> bool {
         self.0.contains(ty)
+    }
+
+    pub fn types(&self) -> &[Type] {
+        &self.0
     }
 
     pub fn with_type(&self, ty: Type) -> Self {

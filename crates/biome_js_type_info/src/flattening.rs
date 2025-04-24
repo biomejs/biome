@@ -6,8 +6,8 @@ use std::{
 use biome_rowan::Text;
 
 use crate::{
-    DestructureField, Resolvable, Type, TypeInner, TypeMember, TypeResolver, TypeofExpression,
-    globals::ARRAY,
+    DestructureField, Intersection, Resolvable, Type, TypeInner, TypeMember, TypeResolver,
+    TypeofExpression, Union, globals::ARRAY,
 };
 
 impl Type {
@@ -198,34 +198,10 @@ impl Type {
                         _ => self.clone(),
                     }
                 }
-                TypeofExpression::StaticMember(expr) => {
-                    let object = expr.object.resolved(resolver, stack);
-                    match object.inner_type() {
-                        TypeInner::Class(class) => {
-                            let member = class
-                                .all_members()
-                                .find(|member| member.is_static() && member.has_name(&expr.member));
-                            match member {
-                                Some(member) => Self::instance_of(
-                                    member.to_type(&object).resolved(resolver, stack),
-                                ),
-                                None => Self::unknown(),
-                            }
-                        }
-                        TypeInner::Object(inner) => {
-                            let member = inner.all_members().find(|member| {
-                                !member.is_static() && member.has_name(&expr.member)
-                            });
-                            match member {
-                                Some(member) => Self::instance_of(
-                                    member.to_type(&object).resolved(resolver, stack),
-                                ),
-                                None => Self::unknown(),
-                            }
-                        }
-                        _ => self.clone(),
-                    }
-                }
+                TypeofExpression::StaticMember(expr) => expr
+                    .object
+                    .resolved(resolver, stack)
+                    .flattened_static_member(&expr.member, resolver, stack),
                 TypeofExpression::Super(expr) => {
                     let class = expr.parent.resolved(resolver, stack);
                     match class.inner_type() {
@@ -246,6 +222,69 @@ impl Type {
             TypeInner::TypeofValue(value) if value.ty.is_inferred() => {
                 value.ty.resolved(resolver, stack)
             }
+            _ => self.clone(),
+        }
+    }
+
+    fn flattened_static_member(
+        &self,
+        member_name: &Text,
+        resolver: &dyn TypeResolver,
+        stack: &[&TypeInner],
+    ) -> Self {
+        match self.inner_type() {
+            TypeInner::Class(class) => {
+                let member = class
+                    .all_members()
+                    .find(|member| member.is_static() && member.has_name(member_name));
+                match member {
+                    Some(member) => {
+                        Self::instance_of(member.to_type(self).resolved(resolver, stack))
+                    }
+                    None => Self::unknown(),
+                }
+            }
+            TypeInner::Object(inner) => {
+                let member = inner
+                    .all_members()
+                    .find(|member| !member.is_static() && member.has_name(member_name));
+                match member {
+                    Some(member) => {
+                        Self::instance_of(member.to_type(self).resolved(resolver, stack))
+                    }
+                    None => Self::unknown(),
+                }
+            }
+            TypeInner::Intersection(intersection) => {
+                TypeInner::Intersection(Box::new(Intersection(
+                    intersection
+                        .types()
+                        .iter()
+                        .map(|ty| {
+                            ty.resolved(resolver, stack).flattened_static_member(
+                                member_name,
+                                resolver,
+                                stack,
+                            )
+                        })
+                        .collect(),
+                )))
+                .into()
+            }
+            TypeInner::Union(union) => TypeInner::Union(Box::new(Union(
+                union
+                    .types()
+                    .iter()
+                    .map(|ty| {
+                        ty.resolved(resolver, stack).flattened_static_member(
+                            member_name,
+                            resolver,
+                            stack,
+                        )
+                    })
+                    .collect(),
+            )))
+            .into(),
             _ => self.clone(),
         }
     }
