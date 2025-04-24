@@ -8,7 +8,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::{BitFlags, bitflags};
 use smallvec::SmallVec;
 use std::cmp::Ordering;
-use std::fmt::Formatter;
+use std::fmt::{Debug, Formatter};
 use std::fs::read_to_string;
 use std::hash::Hash;
 use std::ops::DerefMut;
@@ -44,7 +44,7 @@ pub enum FileKind {
     Handleable,
 }
 
-#[derive(Debug, Clone, Hash, Ord, PartialOrd, Eq, PartialEq, Default)]
+#[derive(Clone, Hash, Ord, PartialOrd, Eq, PartialEq, Default)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -61,6 +61,22 @@ impl From<SmallVec<[FileKind; 5]>> for FileKinds {
             acc.insert(kind);
             acc
         })
+    }
+}
+
+impl Debug for FileKinds {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut list = f.debug_list();
+        for kind in self.iter() {
+            match kind {
+                FileKind::Config => list.entry(&"Config"),
+                FileKind::Manifest => list.entry(&"Manifest"),
+                FileKind::Ignore => list.entry(&"Ignore"),
+                FileKind::Inspectable => list.entry(&"Inspectable"),
+                FileKind::Handleable => list.entry(&"Handleable"),
+            };
+        }
+        list.finish()
     }
 }
 
@@ -230,6 +246,13 @@ impl BiomePath {
 
     pub fn is_to_inspect(&self) -> bool {
         self.kind.contains(FileKind::Inspectable)
+    }
+
+    /// Returns `true` if the path is inside `node_modules`
+    pub fn is_dependency(&self) -> bool {
+        self.path
+            .components()
+            .any(|component| component.as_str() == "node_modules")
     }
 }
 impl From<Utf8PathBuf> for BiomePath {
