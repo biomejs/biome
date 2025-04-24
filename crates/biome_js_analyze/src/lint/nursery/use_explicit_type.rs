@@ -71,17 +71,17 @@ declare_lint_rule! {
     ///
     /// ```ts,expect_diagnostic
     /// // Should use const assertions
-    /// const func = (value: number) => ({ type: 'X', value }) as any;
+    /// var func = (value: number) => ({ type: 'X', value }) as any;
     /// ```
     ///
     /// The following pattern is considered incorrect code for a higher-order function, as the returned function does not specify a return type:
     ///
     /// ```ts,expect_diagnostic
-    /// const arrowFn = () => () => {};
+    /// var arrowFn = () => () => {};
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// const arrowFn = () => {
+    /// var arrowFn = () => {
     ///   return () => { };
     /// }
     /// ```
@@ -105,6 +105,13 @@ declare_lint_rule! {
     ///   return (): string => {
     ///     str;
     ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // A function has multiple statements in the body
+    /// function f() {
+    ///   let str = "test";
     /// }
     /// ```
     ///
@@ -189,7 +196,7 @@ declare_lint_rule! {
     /// The following patterns are considered correct code for a function immediately returning a value with `as const`:
     ///
     /// ```ts
-    /// const func = (value: number) => ({ foo: 'bar', value }) as const;
+    /// var func = (value: number) => ({ foo: 'bar', value }) as const;
     /// ```
     ///
     /// The following patterns are considered correct code for a function allowed within specific expression contexts, such as an IIFE, a function passed as an argument, or a function inside an array:
@@ -212,12 +219,12 @@ declare_lint_rule! {
     ///
     /// ```ts
     /// // the outer function returns an inner function that has a `void` return type
-    /// const arrowFn = () => (): void => {};
+    /// var arrowFn = () => (): void => {};
     /// ```
     ///
     /// ```ts
     /// // the outer function returns an inner function that has a `void` return type
-    /// const arrowFn = () => {
+    /// var arrowFn = () => {
     ///   return (): void => { };
     /// }
     /// ```
@@ -226,24 +233,24 @@ declare_lint_rule! {
     ///
     /// ```ts
     /// // A function with a type assertion using `as`
-    /// const asTyped = (() => '') as () => string;
+    /// var asTyped = (() => '') as () => string;
     /// ```
     ///
     /// ```ts
     /// // A function with a type assertion using `<>`
-    /// const castTyped = <() => string>(() => '');
+    /// var castTyped = <() => string>(() => '');
     /// ```
     ///
     /// ```ts
     /// // A variable declarator with a type annotation.
     /// type FuncType = () => string;
-    /// const arrowFn: FuncType = () => 'test';
+    /// var arrowFn: FuncType = () => 'test';
     /// ```
     ///
     /// ```ts
     /// // A function is a default parameter with a type annotation
     /// type CallBack = () => void;
-    /// const f = (gotcha: CallBack = () => { }): void => { };
+    /// var f = (gotcha: CallBack = () => { }): void => { };
     /// ```
     ///
     /// ```ts
