@@ -218,6 +218,7 @@ pub type NoSelfCompare =
     <lint::suspicious::no_self_compare::NoSelfCompare as biome_analyze::Rule>::Options;
 pub type NoSetterReturn =
     <lint::correctness::no_setter_return::NoSetterReturn as biome_analyze::Rule>::Options;
+pub type NoShadow = <lint::nursery::no_shadow::NoShadow as biome_analyze::Rule>::Options;
 pub type NoShadowRestrictedNames = < lint :: suspicious :: no_shadow_restricted_names :: NoShadowRestrictedNames as biome_analyze :: Rule > :: Options ;
 pub type NoShoutyConstants =
     <lint::style::no_shouty_constants::NoShoutyConstants as biome_analyze::Rule>::Options;
