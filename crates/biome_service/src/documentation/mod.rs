@@ -60,7 +60,7 @@ impl RulesVisitor {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let category = <R::Group as RuleGroup>::Category::CATEGORY;
-        if matches!(category, RuleCategory::Lint) {
+        if matches!(category, RuleCategory::Lint | RuleCategory::Action) {
             self.rules_metadata.insert(R::METADATA.name, R::METADATA);
         }
     }

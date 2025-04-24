@@ -296,7 +296,7 @@ declare_source_rule! {
     ///
     /// ...and the following code...
     ///
-    /// ```js
+    /// ```js,ignore
     /// import sibling from "./file.js";
     /// import internal from "#alias";
     /// import fs from "fs";
@@ -328,7 +328,7 @@ declare_source_rule! {
     ///
     ///
     /// Groups matchers can also be glob patterns and list of glob patterns.
-    /// Glob patterns selects imports and exports with a source that matches the pattern.
+    /// Glob patterns select imports and exports with a source that matches the pattern.
     /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/speciaal` and the other that gathers imports/exports starting with `@/`.
     ///
     /// ```json
@@ -344,7 +344,7 @@ declare_source_rule! {
     ///
     /// By applying this configuration to the following code...
     ///
-    /// ```js
+    /// ```js,ignore
     /// import lib from "@my/lib";
     /// import aliased from "@/alias";
     /// import path from "@my/lib/special";
@@ -394,7 +394,7 @@ declare_source_rule! {
     ///
     /// ...the following code...
     ///
-    /// ```js
+    /// ```js,ignore
     /// import path from "node:path";
     /// import lib from "@my/lib";
     /// import test from "@my/lib/path";

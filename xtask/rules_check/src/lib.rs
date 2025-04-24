@@ -57,10 +57,12 @@ impl Display for Errors {
 }
 
 impl std::error::Error for Errors {}
+
+type Data = BTreeMap<&'static str, (RuleMetadata, RuleCategory)>;
 pub fn check_rules() -> anyhow::Result<()> {
     #[derive(Default)]
     struct LintRulesVisitor {
-        groups: BTreeMap<(&'static str, &'static str), BTreeMap<&'static str, RuleMetadata>>,
+        groups: BTreeMap<(&'static str, &'static str), Data>,
         errors: Vec<Errors>,
     }
 
@@ -69,6 +71,10 @@ pub fn check_rules() -> anyhow::Result<()> {
         where
             R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         {
+            let category = <R::Group as RuleGroup>::Category::CATEGORY;
+            if !matches!(category, RuleCategory::Lint | RuleCategory::Action) {
+                return;
+            }
             if R::Group::NAME == "style" && R::METADATA.severity == Severity::Error {
                 self.errors.push(Errors::style_rule_error(R::METADATA.name))
             } else if <R::Group as RuleGroup>::Category::CATEGORY == RuleCategory::Action
@@ -79,18 +85,12 @@ pub fn check_rules() -> anyhow::Result<()> {
                 self.groups
                     .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))
                     .or_default()
-                    .insert(R::METADATA.name, R::METADATA);
+                    .insert(R::METADATA.name, (R::METADATA, category));
             }
         }
     }
 
     impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
-        fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
-            if matches!(C::CATEGORY, RuleCategory::Lint) {
-                C::record_groups(self);
-            }
-        }
-
         fn record_rule<R>(&mut self)
         where
             R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>>
@@ -101,12 +101,6 @@ pub fn check_rules() -> anyhow::Result<()> {
     }
 
     impl RegistryVisitor<JsonLanguage> for LintRulesVisitor {
-        fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
-            if matches!(C::CATEGORY, RuleCategory::Lint) {
-                C::record_groups(self);
-            }
-        }
-
         fn record_rule<R>(&mut self)
         where
             R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
@@ -117,12 +111,6 @@ pub fn check_rules() -> anyhow::Result<()> {
     }
 
     impl RegistryVisitor<CssLanguage> for LintRulesVisitor {
-        fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
-            if matches!(C::CATEGORY, RuleCategory::Lint) {
-                C::record_groups(self);
-            }
-        }
-
         fn record_rule<R>(&mut self)
         where
             R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
@@ -133,12 +121,6 @@ pub fn check_rules() -> anyhow::Result<()> {
     }
 
     impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
-        fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
-            if matches!(C::CATEGORY, RuleCategory::Lint) {
-                C::record_groups(self);
-            }
-        }
-
         fn record_rule<R>(&mut self)
         where
             R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
@@ -163,8 +145,8 @@ pub fn check_rules() -> anyhow::Result<()> {
     }
 
     for ((group, _), rules) in groups {
-        for (_, meta) in rules {
-            parse_documentation(group, meta.name, meta.docs)?;
+        for (_, (meta, category)) in rules {
+            parse_documentation(group, meta, category)?;
         }
     }
 
@@ -666,7 +648,8 @@ fn get_first_member<V: Into<AnyJsonValue>>(parent: V, expected_name: &str) -> Op
 /// Parse the options fragment for a lint rule and return the parsed options.
 fn parse_rule_options(
     group: &'static str,
-    rule: &'static str,
+    rule_metadata: &RuleMetadata,
+    category: RuleCategory,
     test: &CodeBlockTest,
     code: &str,
 ) -> anyhow::Result<Option<Configuration>> {
@@ -674,7 +657,7 @@ fn parse_rule_options(
 
     // Record the diagnostics emitted during configuration parsing to later check
     // if what was emitted matches the expectations set for this code block.
-    let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
+    let mut diagnostics = DiagnosticWriter::new(group, rule_metadata.name, test, code);
 
     match test.document_file_source() {
         DocumentFileSource::Json(file_source) => {
@@ -720,13 +703,26 @@ fn parse_rule_options(
                     //         }
                     //     }
                     // }
+                    let lint_or_assist = if category == RuleCategory::Lint {
+                        "linter"
+                    } else {
+                        "assist"
+                    };
+                    let rules_or_actions = if category == RuleCategory::Lint {
+                        "rules"
+                    } else {
+                        "actions"
+                    };
                     let synthetic_tree = make_json_object_with_single_member(
-                        "linter",
+                        lint_or_assist,
                         make_json_object_with_single_member(
-                            "rules",
+                            rules_or_actions,
                             make_json_object_with_single_member(
                                 group,
-                                make_json_object_with_single_member(rule, parsed_options),
+                                make_json_object_with_single_member(
+                                    rule_metadata.name,
+                                    parsed_options,
+                                ),
                             ),
                         ),
                     );
@@ -746,10 +742,10 @@ fn parse_rule_options(
                     let wrapped_offset = synthetic_root
                         .value()
                         .ok()
-                        .and_then(|v| get_first_member(v, "linter"))
-                        .and_then(|v| get_first_member(v, "rules"))
+                        .and_then(|v| get_first_member(v, lint_or_assist))
+                        .and_then(|v| get_first_member(v, rules_or_actions))
                         .and_then(|v| get_first_member(v, group))
-                        .and_then(|v| get_first_member(v, rule))
+                        .and_then(|v| get_first_member(v, rule_metadata.name))
                         .map(|v| AstNode::range(&v).start());
                     diagnostics.subtract_offset = wrapped_offset
                         .zip(original_offset)
@@ -793,7 +789,8 @@ fn parse_rule_options(
 
             let Some(result) = partial_configuration else {
                 bail!(
-                    "Failed to deserialize configuration options for '{group}/{rule}' from the following code block due to unknown error.\n\n{code}"
+                    "Failed to deserialize configuration options for '{group}/{}' from the following code block due to unknown error.\n\n{code}",
+                    rule_metadata.name
                 );
             };
 
@@ -802,7 +799,8 @@ fn parse_rule_options(
         _ => {
             // Only JSON code blocks can contain configuration options
             bail!(
-                "The following non-JSON code block for '{group}/{rule}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}"
+                "The following non-JSON code block for '{group}/{}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}",
+                rule_metadata.name
             );
         }
     }
@@ -811,10 +809,10 @@ fn parse_rule_options(
 /// Parse the documentation fragment for a lint rule (in markdown) and lint the code blocks.
 fn parse_documentation(
     group: &'static str,
-    rule: &'static str,
-    docs: &'static str,
+    rule_metadata: RuleMetadata,
+    category: RuleCategory,
 ) -> anyhow::Result<()> {
-    let parser = Parser::new(docs);
+    let parser = Parser::new(rule_metadata.docs);
 
     // Track the last configuration options block that was encountered
     let mut last_options: Option<Configuration> = None;
@@ -833,9 +831,10 @@ fn parse_documentation(
             Event::End(TagEnd::CodeBlock) => {
                 if let Some((test, block)) = language.take() {
                     if test.options != OptionsParsingMode::NoOptions {
-                        last_options = parse_rule_options(group, rule, &test, &block)?;
+                        last_options =
+                            parse_rule_options(group, &rule_metadata, category, &test, &block)?;
                     } else {
-                        assert_lint(group, rule, &test, &block, &last_options)?;
+                        assert_lint(group, rule_metadata.name, &test, &block, &last_options)?;
                     }
                 }
             }

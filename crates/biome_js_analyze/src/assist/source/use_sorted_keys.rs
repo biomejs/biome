@@ -2,7 +2,7 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 
 use biome_analyze::{
-    Ast, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -77,6 +77,7 @@ declare_source_rule! {
         name: "useSortedKeys",
         language: "js",
         recommended: false,
+        fix_kind: FixKind::Safe,
     }
 }
 
