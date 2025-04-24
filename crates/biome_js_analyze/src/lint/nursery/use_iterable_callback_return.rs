@@ -87,11 +87,9 @@ impl Rule for UseIterableCallbackReturn {
         let callee = call_expression.callee().ok()?;
 
         let member_expression = callee.as_js_static_member_expression()?;
-        let member_name = member_expression
-            .member()
-            .ok()
-            .and_then(|member| member.as_js_name())
-            .and_then(|name| name.value_token().ok())?;
+        let member = member_expression.member().ok()?;
+        let member_name = member.as_js_name()?;
+        let member_name = member_name.value_token().ok()?;
 
         let method_config = ITERABLE_METHOD_INFOS.get(member_name.text_trimmed())?;
 
