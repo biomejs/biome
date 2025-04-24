@@ -13,11 +13,11 @@ function test() {
 	return;
 }
 
-var fn = function () {
+const fn = function () {
 	return 1;
 };
 
-var arrowFn = () => "test";
+const arrowFn = () => "test";
 
 class Test {
 	constructor() {}
@@ -98,8 +98,8 @@ function fn() {
 	};
 }
 
-const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
-const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
 
 
 // Returning object from function
@@ -160,7 +160,7 @@ invalid.ts:1:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
     2 │ 	return;
     3 │ }
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -179,7 +179,7 @@ invalid.ts:5:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
     6 │ 	return;
     7 │ }
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -187,21 +187,40 @@ invalid.ts:5:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:9:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+     7 │ }
+     8 │ 
+   > 9 │ const fn = function () {
+       │       ^^
+    10 │ 	return 1;
+    11 │ };
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:9:12 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
      7 │ }
      8 │ 
-   > 9 │ var fn = function () {
-       │          ^^^^^^^^^^^^^
+   > 9 │ const fn = function () {
+       │            ^^^^^^^^^^^^^
   > 10 │ 	return 1;
   > 11 │ };
        │ ^
     12 │ 
-    13 │ var arrowFn = () => "test";
+    13 │ const arrowFn = () => "test";
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -209,18 +228,37 @@ invalid.ts:9:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:13:15 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    11 │ };
+    12 │ 
+  > 13 │ const arrowFn = () => "test";
+       │       ^^^^^^^
+    14 │ 
+    15 │ class Test {
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:13:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
     11 │ };
     12 │ 
-  > 13 │ var arrowFn = () => "test";
-       │               ^^^^^^^^^^^^
+  > 13 │ const arrowFn = () => "test";
+       │                 ^^^^^^^^^^^^
     14 │ 
     15 │ class Test {
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -242,7 +280,7 @@ invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     20 │ 	set prop() {}
     21 │ 	method() {
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -264,7 +302,7 @@ invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     24 │ 	arrow = () => "arrow";
     25 │ 	private method() {
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -283,7 +321,7 @@ invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
     25 │ 	private method() {
     26 │ 		return;
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -305,7 +343,26 @@ invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     28 │ }
     29 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:30:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    28 │ }
+    29 │ 
+  > 30 │ const obj = {
+       │       ^^^
+    31 │ 	method() {
+    32 │ 		return "test";
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -326,7 +383,26 @@ invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     34 │ };
     35 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:36:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    34 │ };
+    35 │ 
+  > 36 │ const obj = {
+       │       ^^^
+    37 │ 	get method() {
+    38 │ 		return "test";
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -347,7 +423,26 @@ invalid.ts:37:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     40 │ };
     41 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:42:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    40 │ };
+    41 │ 
+  > 42 │ const func = (value: number) => ({ type: "X", value }) as any;
+       │       ^^^^
+    43 │ const func = (value: number) => ({ type: "X", value }) as Action;
+    44 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -366,7 +461,25 @@ invalid.ts:42:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
     43 │ const func = (value: number) => ({ type: "X", value }) as Action;
     44 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:43:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    42 │ const func = (value: number) => ({ type: "X", value }) as any;
+  > 43 │ const func = (value: number) => ({ type: "X", value }) as Action;
+       │       ^^^^
+    44 │ 
+    45 │ export default () => {};
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -384,7 +497,7 @@ invalid.ts:43:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
     44 │ 
     45 │ export default () => {};
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -403,7 +516,7 @@ invalid.ts:45:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
     46 │ export default function () {}
     47 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -421,7 +534,25 @@ invalid.ts:46:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
     47 │ 
     48 │ // check higher order functions
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:49:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    48 │ // check higher order functions
+  > 49 │ const arrowFn = () => () => {};
+       │       ^^^^^^^
+    50 │ const arrowFn = () => function () {};
+    51 │ const arrowFn = () => {
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -439,7 +570,26 @@ invalid.ts:49:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
     50 │ const arrowFn = () => function () {};
     51 │ const arrowFn = () => {
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:50:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    48 │ // check higher order functions
+    49 │ const arrowFn = () => () => {};
+  > 50 │ const arrowFn = () => function () {};
+       │       ^^^^^^^
+    51 │ const arrowFn = () => {
+    52 │ 	return () => {};
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -458,7 +608,26 @@ invalid.ts:50:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
     51 │ const arrowFn = () => {
     52 │ 	return () => {};
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:51:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    49 │ const arrowFn = () => () => {};
+    50 │ const arrowFn = () => function () {};
+  > 51 │ const arrowFn = () => {
+       │       ^^^^^^^
+    52 │ 	return () => {};
+    53 │ };
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -477,7 +646,26 @@ invalid.ts:52:9 lint/nursery/useExplicitType ━━━━━━━━━━━�
     53 │ };
     54 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:57:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    55 │ // does not support detecting a return of a function inside other statements like if, switch, etc.
+    56 │ // we check only the first statment
+  > 57 │ const arrowFn = (a: number) => {
+       │       ^^^^^^^
+    58 │ 	if (a === 1) {
+    59 │ 		return (): void => {};
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -501,7 +689,26 @@ invalid.ts:57:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
     66 │ const arrowFn = (a: number) => {
     67 │ 	switch (a) {
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:66:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    64 │ 	}
+    65 │ };
+  > 66 │ const arrowFn = (a: number) => {
+       │       ^^^^^^^
+    67 │ 	switch (a) {
+    68 │ 		case 1: {
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -525,7 +732,7 @@ invalid.ts:66:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
     79 │ 
     80 │ function f() {
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -544,7 +751,7 @@ invalid.ts:80:1 lint/nursery/useExplicitType ━━━━━━━━━━━�
     81 │ 	if (x) {
     82 │ 		return 0;
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -563,7 +770,26 @@ invalid.ts:87:1 lint/nursery/useExplicitType ━━━━━━━━━━━�
     88 │ 	let str = "hey";
     89 │ 	return function (): string {
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:94:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    92 │ }
+    93 │ 
+  > 94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+       │       ^
+    95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
+    96 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -577,12 +803,12 @@ invalid.ts:94:29 lint/nursery/useExplicitType ━━━━━━━━━━━�
   
     92 │ }
     93 │ 
-  > 94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
+  > 94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
        │                             ^^^^^^^^^^^^^^
-    95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+    95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
     96 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -590,18 +816,35 @@ invalid.ts:94:29 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:94:81 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:94:69 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
     92 │ }
     93 │ 
-  > 94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
-       │                                                                                 ^^^^^^^^
-    95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+  > 94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+       │                                                                     ^^^^^^^^^^^^^^
+    95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
     96 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:95:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+  > 95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
+       │       ^
+    96 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -613,12 +856,12 @@ invalid.ts:95:36 lint/nursery/useExplicitType ━━━━━━━━━━━�
 
   × Missing return type on function.
   
-    94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
-  > 95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+    94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+  > 95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
        │                                    ^^^^^^^^^^^^^^
     96 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -626,16 +869,16 @@ invalid.ts:95:36 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:95:79 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:95:76 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
-  > 95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
-       │                                                                               ^^^^^^^^^^^
+    94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+  > 95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
+       │                                                                            ^^^^^^^^^^^^^^
     96 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -654,7 +897,7 @@ invalid.ts:107:16 lint/nursery/useExplicitType ━━━━━━━━━━━
     108 │     arrowFunc: () => {},
     109 │   }
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -673,7 +916,7 @@ invalid.ts:115:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     116 │ }
     117 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -691,7 +934,7 @@ invalid.ts:119:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     120 │ 	propertyName: string;
     121 │ };
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -709,7 +952,7 @@ invalid.ts:124:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     125 │ }
     126 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -728,7 +971,7 @@ invalid.ts:129:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     130 │ }
     131 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -746,7 +989,7 @@ invalid.ts:133:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
     134 │ }
     135 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -764,7 +1007,26 @@ invalid.ts:137:17 lint/nursery/useExplicitType ━━━━━━━━━━━
     138 │ }
     139 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:140:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    138 │ }
+    139 │ 
+  > 140 │ const x = { prop: () => {} }
+        │       ^
+    141 │ const x = { bar: { prop: () => {} } }
+    142 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -783,7 +1045,24 @@ invalid.ts:140:19 lint/nursery/useExplicitType ━━━━━━━━━━━
     141 │ const x = { bar: { prop: () => {} } }
     142 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:141:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    140 │ const x = { prop: () => {} }
+  > 141 │ const x = { bar: { prop: () => {} } }
+        │       ^
+    142 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   
@@ -800,7 +1079,7 @@ invalid.ts:141:26 lint/nursery/useExplicitType ━━━━━━━━━━━
         │                          ^^^^^^^^
     142 │ 
   
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type annotation.
   

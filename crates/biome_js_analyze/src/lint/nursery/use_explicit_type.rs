@@ -5,15 +5,14 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType,
-    JsArrowFunctionExpression, JsCallExpression, JsFileSource, JsFormalParameter,
-    JsFunctionDeclaration, JsInitializerClause, JsLanguage, JsObjectExpression,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsReturnStatement,
-    JsStatementList, JsSyntaxKind, JsVariableDeclarator,
-};
-use biome_js_syntax::{
-    AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
-    JsMethodObjectMember, TsCallSignatureTypeMember, TsDeclareFunctionDeclaration,
+    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression,
+    AnyJsStatement, AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsFileSource,
+    JsFormalParameter, JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember,
+    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
+    JsObjectExpression, JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
+    JsReturnStatement, JsStatementList, JsSyntaxKind, JsVariableDeclaration,
+    JsVariableDeclarationClause, JsVariableDeclarator, JsVariableDeclaratorList,
+    JsVariableStatement, TsCallSignatureTypeMember, TsDeclareFunctionDeclaration,
     TsDeclareFunctionExportDefaultDeclaration, TsGetterSignatureClassMember,
     TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
 };
@@ -72,17 +71,17 @@ declare_lint_rule! {
     ///
     /// ```ts,expect_diagnostic
     /// // Should use const assertions
-    /// const func = (value: number) => ({ type: 'X', value }) as any;
+    /// var func = (value: number) => ({ type: 'X', value }) as any;
     /// ```
     ///
     /// The following pattern is considered incorrect code for a higher-order function, as the returned function does not specify a return type:
     ///
     /// ```ts,expect_diagnostic
-    /// const arrowFn = () => () => {};
+    /// var arrowFn = () => () => {};
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// const arrowFn = () => {
+    /// var arrowFn = () => {
     ///   return () => { };
     /// }
     /// ```
@@ -106,6 +105,13 @@ declare_lint_rule! {
     ///   return (): string => {
     ///     str;
     ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // A function has multiple statements in the body
+    /// function f() {
+    ///   let str = "test";
     /// }
     /// ```
     ///
@@ -190,7 +196,7 @@ declare_lint_rule! {
     /// The following patterns are considered correct code for a function immediately returning a value with `as const`:
     ///
     /// ```ts
-    /// const func = (value: number) => ({ foo: 'bar', value }) as const;
+    /// var func = (value: number) => ({ foo: 'bar', value }) as const;
     /// ```
     ///
     /// The following patterns are considered correct code for a function allowed within specific expression contexts, such as an IIFE, a function passed as an argument, or a function inside an array:
@@ -213,12 +219,12 @@ declare_lint_rule! {
     ///
     /// ```ts
     /// // the outer function returns an inner function that has a `void` return type
-    /// const arrowFn = () => (): void => {};
+    /// var arrowFn = () => (): void => {};
     /// ```
     ///
     /// ```ts
     /// // the outer function returns an inner function that has a `void` return type
-    /// const arrowFn = () => {
+    /// var arrowFn = () => {
     ///   return (): void => { };
     /// }
     /// ```
@@ -227,24 +233,24 @@ declare_lint_rule! {
     ///
     /// ```ts
     /// // A function with a type assertion using `as`
-    /// const asTyped = (() => '') as () => string;
+    /// var asTyped = (() => '') as () => string;
     /// ```
     ///
     /// ```ts
     /// // A function with a type assertion using `<>`
-    /// const castTyped = <() => string>(() => '');
+    /// var castTyped = <() => string>(() => '');
     /// ```
     ///
     /// ```ts
     /// // A variable declarator with a type annotation.
     /// type FuncType = () => string;
-    /// const arrowFn: FuncType = () => 'test';
+    /// var arrowFn: FuncType = () => 'test';
     /// ```
     ///
     /// ```ts
     /// // A function is a default parameter with a type annotation
     /// type CallBack = () => void;
-    /// const f = (gotcha: CallBack = () => { }): void => { };
+    /// var f = (gotcha: CallBack = () => { }): void => { };
     /// ```
     ///
     /// ```ts
@@ -266,7 +272,7 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub AnyCallableWithReturn =
+    pub AnyEntityWithTypes =
         AnyJsFunction
         | JsMethodClassMember
         | JsMethodObjectMember
@@ -278,10 +284,20 @@ declare_node_union! {
         | TsGetterSignatureClassMember
         | TsDeclareFunctionDeclaration
         | TsDeclareFunctionExportDefaultDeclaration
+        | JsVariableDeclarator
+}
+
+impl AnyEntityWithTypes {
+    fn to_message(&self) -> &str {
+        match self {
+            Self::JsVariableDeclarator(_) => "The variable doesn't have a type defined.",
+            _ => "Missing return type on function.",
+        }
+    }
 }
 
 impl Rule for UseExplicitType {
-    type Query = Ast<AnyCallableWithReturn>;
+    type Query = Ast<AnyEntityWithTypes>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -294,131 +310,99 @@ impl Rule for UseExplicitType {
 
         let node = ctx.query();
         match node {
-            AnyCallableWithReturn::AnyJsFunction(func) => {
-                if func.return_type_annotation().is_some() {
-                    return None;
-                }
-
-                if is_direct_const_assertion_in_arrow_functions(func) {
-                    return None;
-                }
-
-                if is_iife(func) {
-                    return None;
-                }
-
-                if is_function_used_in_argument_or_array(func) {
-                    return None;
-                }
-
-                if is_arrow_func(func)
-                    && (can_inline_function(func) || is_function_inside_typed_return(func))
-                {
-                    return None;
-                }
-
-                if is_higher_order_function(func) {
-                    return None;
-                }
-
-                if is_typed_function_expressions(func) {
-                    return None;
-                }
-
-                let func_range = func.syntax().text_trimmed_range();
-                if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
-                    return Some(TextRange::new(
-                        func_range.start(),
-                        id.syntax().text_trimmed_range().end(),
-                    ));
-                }
-
-                Some(func_range)
-            }
-            AnyCallableWithReturn::JsMethodClassMember(method) => {
+            AnyEntityWithTypes::AnyJsFunction(func) => handle_any_function(func),
+            AnyEntityWithTypes::JsMethodClassMember(method) => {
                 if method.return_type_annotation().is_some() {
                     return None;
                 }
 
                 Some(method.node_text_range())
             }
-            AnyCallableWithReturn::JsGetterClassMember(getter) => {
+            AnyEntityWithTypes::JsGetterClassMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
                 Some(getter.node_text_range())
             }
-            AnyCallableWithReturn::JsMethodObjectMember(method) => {
+            AnyEntityWithTypes::JsMethodObjectMember(method) => {
                 if method.return_type_annotation().is_some() {
                     return None;
                 }
 
                 Some(method.node_text_range())
             }
-            AnyCallableWithReturn::JsGetterObjectMember(getter) => {
+            AnyEntityWithTypes::JsGetterObjectMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
                 Some(getter.node_text_range())
             }
-            AnyCallableWithReturn::TsMethodSignatureTypeMember(member) => {
+            AnyEntityWithTypes::TsMethodSignatureTypeMember(member) => {
                 if member.return_type_annotation().is_some() {
                     return None;
                 }
 
                 Some(member.range())
             }
-            AnyCallableWithReturn::TsCallSignatureTypeMember(member) => {
+            AnyEntityWithTypes::TsCallSignatureTypeMember(member) => {
                 if member.return_type_annotation().is_some() {
                     return None;
                 }
                 Some(member.range())
             }
-            AnyCallableWithReturn::TsMethodSignatureClassMember(member) => {
+            AnyEntityWithTypes::TsMethodSignatureClassMember(member) => {
                 if member.return_type_annotation().is_some() {
                     return None;
                 }
                 Some(member.range())
             }
-            AnyCallableWithReturn::TsGetterSignatureClassMember(member) => {
+            AnyEntityWithTypes::TsGetterSignatureClassMember(member) => {
                 if member.return_type().is_some() {
                     return None;
                 }
                 Some(member.range())
             }
-            AnyCallableWithReturn::TsDeclareFunctionDeclaration(decl) => {
+            AnyEntityWithTypes::TsDeclareFunctionDeclaration(decl) => {
                 if decl.return_type_annotation().is_some() {
                     return None;
                 }
                 Some(decl.range())
             }
-            AnyCallableWithReturn::TsDeclareFunctionExportDefaultDeclaration(decl) => {
+            AnyEntityWithTypes::TsDeclareFunctionExportDefaultDeclaration(decl) => {
                 if decl.return_type_annotation().is_some() {
                     return None;
                 }
                 Some(decl.range())
+            }
+            AnyEntityWithTypes::JsVariableDeclarator(declarator) => {
+                handle_variable_declarator(declarator)
             }
         }
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let message = ctx.query().to_message();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state,
                 markup! {
-                    "Missing return type on function."
+                    {message}
                 },
             )
             .note(markup! {
-                "Declaring the return type makes the code self-documenting and can speed up TypeScript type checking."
+                "Declaring the type makes the code self-documented and can speed up TypeScript type checking."
             })
             .note(markup! {
                 "Add a return type annotation."
             }),
         )
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        Some(ctx.query().syntax().first_token()?.text_trimmed_range())
     }
 }
 
@@ -739,4 +723,107 @@ fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
             is_attribute_kind(parent.kind())
         }
     })
+}
+
+fn handle_any_function(func: &AnyJsFunction) -> Option<TextRange> {
+    if func.return_type_annotation().is_some() {
+        return None;
+    }
+
+    if is_direct_const_assertion_in_arrow_functions(func) {
+        return None;
+    }
+
+    if is_iife(func) {
+        return None;
+    }
+
+    if is_function_used_in_argument_or_array(func) {
+        return None;
+    }
+
+    if is_arrow_func(func) && (can_inline_function(func) || is_function_inside_typed_return(func)) {
+        return None;
+    }
+
+    if is_higher_order_function(func) {
+        return None;
+    }
+
+    if is_typed_function_expressions(func) {
+        return None;
+    }
+
+    let func_range = func.syntax().text_trimmed_range();
+    if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
+        return Some(TextRange::new(
+            func_range.start(),
+            id.syntax().text_trimmed_range().end(),
+        ));
+    }
+
+    Some(func_range)
+}
+
+/// Checks if a variable declarator needs to have an explicit type.
+fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<TextRange> {
+    let variable_declaration = declarator
+        .parent::<JsVariableDeclaratorList>()?
+        .parent::<JsVariableDeclaration>()?;
+    let is_top_level = declarator
+        .syntax()
+        .ancestors()
+        .find_map(JsVariableStatement::cast)
+        .is_some_and(|statement| {
+            statement
+                .syntax()
+                .parent()
+                .is_some_and(|parent| JsModuleItemList::can_cast(parent.kind()))
+        })
+        || variable_declaration
+            .parent::<JsVariableDeclarationClause>()
+            .is_some();
+
+    if !is_top_level {
+        return None;
+    }
+
+    let initializer_expression = declarator
+        .initializer()
+        .and_then(|init| init.expression().ok())
+        .map(|expr| expr.omit_parentheses());
+
+    let is_const = variable_declaration.is_const();
+
+    if !is_const {
+        return None;
+    }
+
+    let ty = declarator
+        .variable_annotation()
+        .and_then(|ty| ty.as_ts_type_annotation().cloned())
+        .and_then(|ty| ty.ty().ok());
+
+    if let Some(ty) = ty {
+        if let Some(initializer_expression) = initializer_expression {
+            if initializer_expression.has_trivially_inferrable_type() {
+                return None;
+            }
+
+            if (is_const && ty.is_non_null_literal_type())
+                || (!is_const
+                    && ty.is_primitive_type()
+                    && !matches!(
+                        initializer_expression,
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsNullLiteralExpression(_)
+                        )
+                    ))
+            {
+                return None;
+            }
+        }
+    }
+
+    Some(declarator.id().ok()?.syntax().text_trimmed_range())
 }
