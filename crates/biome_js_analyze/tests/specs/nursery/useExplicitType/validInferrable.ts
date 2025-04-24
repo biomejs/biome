@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const x: 1n = 1n;
 const x: -1n = -1n;
 const x: false = false;

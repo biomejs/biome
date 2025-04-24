@@ -28,7 +28,7 @@ invalidDeclarationStatements.ts:1:14 lint/nursery/useExplicitType ━━━━�
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
@@ -45,7 +45,7 @@ invalidDeclarationStatements.ts:4:7 lint/nursery/useExplicitType ━━━━━
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
-  i Add a return type annotation.
+  i Add a type to the variable.
   
 
 ```
