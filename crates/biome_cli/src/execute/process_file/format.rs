@@ -4,7 +4,7 @@ use crate::execute::process_file::{
     DiffKind, FileResult, FileStatus, Message, SharedTraversalOptions,
 };
 use biome_analyze::RuleCategoriesBuilder;
-use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
+use biome_diagnostics::{DiagnosticExt, Error, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
@@ -54,9 +54,10 @@ pub(crate) fn format_with_guard<'ctx>(
     tracing::Span::current().record("ignore_errors", tracing::field::display(&ignore_errors));
 
     if diagnostics_result.errors > 0 && ignore_errors {
-        return Err(Message::from(
+        ctx.push_message(Message::from(
             SkippedDiagnostic.with_file_path(workspace_file.path.to_string()),
         ));
+        return Ok(FileStatus::Ignored);
     }
 
     ctx.push_message(Message::Diagnostics {
@@ -65,13 +66,7 @@ pub(crate) fn format_with_guard<'ctx>(
         diagnostics: diagnostics_result
             .diagnostics
             .into_iter()
-            .filter_map(|diag| {
-                if diag.severity() >= Severity::Error && ignore_errors {
-                    None
-                } else {
-                    Some(Error::from(diag))
-                }
-            })
+            .map(Error::from)
             .collect(),
         skipped_diagnostics: diagnostics_result.skipped_diagnostics as u32,
     });
@@ -82,10 +77,6 @@ pub(crate) fn format_with_guard<'ctx>(
         .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
 
     let mut output = printed.into_code();
-
-    if ignore_errors {
-        return Ok(FileStatus::Ignored);
-    }
 
     match workspace_file.as_extension() {
         Some("astro") => {
@@ -110,10 +101,7 @@ pub(crate) fn format_with_guard<'ctx>(
         _ => {}
     }
 
-    debug!(
-        "Format output is different from intput: {}",
-        output != input
-    );
+    debug!("Format output is different from input: {}", output != input);
     if output != input {
         if should_write {
             workspace_file.update_file(output)?;
