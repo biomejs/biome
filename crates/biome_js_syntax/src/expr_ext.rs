@@ -1375,9 +1375,9 @@ impl AnyJsExpression {
 
     pub fn has_trivially_inferrable_type(&self) -> bool {
         match self {
-            AnyJsExpression::AnyJsLiteralExpression(_) => true,
-            AnyJsExpression::JsTemplateExpression(tpl_expr) => tpl_expr.tag().is_none(),
-            AnyJsExpression::JsUnaryExpression(unary_exp) => {
+            Self::AnyJsLiteralExpression(_) => true,
+            Self::JsTemplateExpression(tpl_expr) => tpl_expr.tag().is_none(),
+            Self::JsUnaryExpression(unary_exp) => {
                 let kind = unary_exp.operator_token().map(|t| t.kind());
                 matches!(
                     kind,

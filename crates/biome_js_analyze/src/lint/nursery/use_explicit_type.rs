@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_semantic::{HasClosureAstNode, SemanticModel};
+use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression,
     AnyJsStatement, AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsFileSource,
@@ -283,9 +283,7 @@ declare_node_union! {
 impl AnyEntityWithTypes {
     fn to_message(&self) -> &str {
         match self {
-            AnyEntityWithTypes::JsVariableDeclarator(_) => {
-                "The variable doesn't have a type defined."
-            }
+            Self::JsVariableDeclarator(_) => "The variable doesn't have a type defined.",
             _ => "Missing return type on function.",
         }
     }
@@ -778,9 +776,6 @@ fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<TextR
         || variable_declaration
             .parent::<JsVariableDeclarationClause>()
             .is_some();
-
-    let identifier = declarator.id().ok()?;
-    let identifier = identifier.as_any_js_binding()?.as_js_identifier_binding()?;
 
     if !is_top_level {
         return None;

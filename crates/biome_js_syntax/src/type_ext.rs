@@ -100,10 +100,10 @@ impl AnyTsType {
     pub const fn is_non_null_literal_type(&self) -> bool {
         matches!(
             self,
-            AnyTsType::TsBooleanLiteralType(_)
-                | AnyTsType::TsBigintLiteralType(_)
-                | AnyTsType::TsNumberLiteralType(_)
-                | AnyTsType::TsStringLiteralType(_)
+            Self::TsBooleanLiteralType(_)
+                | Self::TsBigintLiteralType(_)
+                | Self::TsNumberLiteralType(_)
+                | Self::TsStringLiteralType(_)
         )
     }
 
