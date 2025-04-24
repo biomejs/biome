@@ -104,13 +104,6 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
     let mut ignore_paths = Vec::new();
     for path in evaluated_paths {
-        if path
-            .file_name()
-            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name.as_bytes()))
-        {
-            continue;
-        }
-
         if path.is_config() {
             configs.push(path);
         } else if path.is_manifest() {
@@ -265,9 +258,18 @@ impl TraversalContext for ScanContext<'_> {
     }
 
     fn can_handle(&self, path: &BiomePath) -> bool {
+        if path
+            .file_name()
+            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name.as_bytes()))
+        {
+            return false;
+        }
+
         path.is_dir()
             || if self.scan_kind.is_known_files() {
                 path.is_ignore() || path.is_manifest() || path.is_config()
+            } else if path.is_dependency() {
+                path.ends_with(".d.ts")
             } else {
                 DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
             }

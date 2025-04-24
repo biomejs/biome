@@ -19,7 +19,8 @@ snapshot_kind: text
       "**",
       "!**/website/.next/**",
       "!**/website/.pages/**",
-      "!**/*.css"
+      "!**/*.css",
+      "**/node_modules/**"
     ]
   },
   "assist": {
