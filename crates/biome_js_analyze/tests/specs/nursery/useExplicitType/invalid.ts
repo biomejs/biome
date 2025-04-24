@@ -6,11 +6,11 @@ function test() {
 	return;
 }
 
-var fn = function () {
+const fn = function () {
 	return 1;
 };
 
-var arrowFn = () => "test";
+const arrowFn = () => "test";
 
 class Test {
 	constructor() {}

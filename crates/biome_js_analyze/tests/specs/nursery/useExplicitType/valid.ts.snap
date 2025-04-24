@@ -28,13 +28,13 @@ class Test {
 	arrow = (): string => "arrow";
 }
 
-const obj = {
+var obj = {
 	method(): string {
 		return "test";
 	},
 };
 
-const obj = {
+var obj = {
 	get method(): string {
 		return "test";
 	},
@@ -43,14 +43,14 @@ const obj = {
 export default (): void => {};
 export default function (): void {}
 
-// check direct const assertions
-const func = (value: number) => ({ foo: "bar", value }) as const;
-const func = () => x as const;
+// check direct var assertions
+var func = (value: number) => ({ foo: "bar", value }) as const;
+var func = () => x as const;
 
 // check allow expressions
 node.addEventListener("click", () => {});
 node.addEventListener("click", function () {});
-const foo = arr.map((i) => i * i);
+var foo = arr.map((i) => i * i);
 fn(() => {});
 fn(function () {});
 new Promise((resolve) => {});
@@ -67,26 +67,26 @@ setTimeout(function () {
 }, 1000);
 
 // check higher order functions
-const arrowFn = () => (): void => {};
-const arrowFn = () => function (): void {};
-const arrowFn = () => {
+var arrowFn = () => (): void => {};
+var arrowFn = () => function (): void {};
+var arrowFn = () => {
 	return (): void => {};
 };
 
 // type assertion
-const asTyped = (() => "") as () => string;
-const castTyped = <() => string>(() => "");
+var asTyped = (() => "") as () => string;
+var castTyped = <() => string>(() => "");
 
 // variable declarator with a type annotation
 type FuncType = () => string;
-const arrowFn: FuncType = () => "test";
-const funcExpr: FuncType = function () {
+var arrowFn: FuncType = () => "test";
+var funcExpr: FuncType = function () {
 	return "test";
 };
 
 // default parameter with a type annotation
 type CallBack = () => void;
-const f = (gotcha: CallBack = () => {}): void => {};
+var f = (gotcha: CallBack = () => {}): void => {};
 function f(gotcha: CallBack = () => {}): void {}
 
 // class property with a type annotation
@@ -96,11 +96,11 @@ class App {
 }
 
 // function as a property or a nested property of a typed object
-const x: Foo = { prop: () => {} };
-const x = { prop: () => {} } as Foo;
-const x = <Foo>{ prop: () => {} };
+var x: Foo = { prop: () => {} };
+var x = { prop: () => {} } as Foo;
+var x = <Foo>{ prop: () => {} };
 
-const x: Foo = { bar: { prop: () => {} } };
+var x: Foo = { bar: { prop: () => {} } };
 
 class Accumulator {
 	private count: number = 0;
@@ -123,7 +123,7 @@ function getObjectWithFunction(): Behavior {
   }
 }
 
-const getObjectWithFunction1 = (): Behavior => {
+var getObjectWithFunction1 = (): Behavior => {
 	return {
 		namedFunc: function myFunc(): string { return "value" },
 		arrowFunc: () => {},
@@ -158,403 +158,7 @@ declare module "foo" {
 	export default function bar(): string;
 }
 
-const X: Type = { prop: () => {} };
+var X: Type = { prop: () => {} };
 f({ prop: () => {} })
-
-```
-
-# Diagnostics
-```
-valid.ts:6:5 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    4 │ }
-    5 │ 
-  > 6 │ var fn = function (): number {
-      │     ^^
-    7 │ 	return 1;
-    8 │ };
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:10:5 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-     8 │ };
-     9 │ 
-  > 10 │ var arrowFn = (): string => "test";
-       │     ^^^^^^^
-    11 │ 
-    12 │ class Test {
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:24:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    22 │ }
-    23 │ 
-  > 24 │ const obj = {
-       │       ^^^
-    25 │ 	method(): string {
-    26 │ 		return "test";
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:30:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    28 │ };
-    29 │ 
-  > 30 │ const obj = {
-       │       ^^^
-    31 │ 	get method(): string {
-    32 │ 		return "test";
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:40:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    39 │ // check direct const assertions
-  > 40 │ const func = (value: number) => ({ foo: "bar", value }) as const;
-       │       ^^^^
-    41 │ const func = () => x as const;
-    42 │ 
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:41:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    39 │ // check direct const assertions
-    40 │ const func = (value: number) => ({ foo: "bar", value }) as const;
-  > 41 │ const func = () => x as const;
-       │       ^^^^
-    42 │ 
-    43 │ // check allow expressions
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:46:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    44 │ node.addEventListener("click", () => {});
-    45 │ node.addEventListener("click", function () {});
-  > 46 │ const foo = arr.map((i) => i * i);
-       │       ^^^
-    47 │ fn(() => {});
-    48 │ fn(function () {});
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:63:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    62 │ // check higher order functions
-  > 63 │ const arrowFn = () => (): void => {};
-       │       ^^^^^^^
-    64 │ const arrowFn = () => function (): void {};
-    65 │ const arrowFn = () => {
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:64:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    62 │ // check higher order functions
-    63 │ const arrowFn = () => (): void => {};
-  > 64 │ const arrowFn = () => function (): void {};
-       │       ^^^^^^^
-    65 │ const arrowFn = () => {
-    66 │ 	return (): void => {};
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:65:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    63 │ const arrowFn = () => (): void => {};
-    64 │ const arrowFn = () => function (): void {};
-  > 65 │ const arrowFn = () => {
-       │       ^^^^^^^
-    66 │ 	return (): void => {};
-    67 │ };
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:70:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    69 │ // type assertion
-  > 70 │ const asTyped = (() => "") as () => string;
-       │       ^^^^^^^
-    71 │ const castTyped = <() => string>(() => "");
-    72 │ 
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:71:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    69 │ // type assertion
-    70 │ const asTyped = (() => "") as () => string;
-  > 71 │ const castTyped = <() => string>(() => "");
-       │       ^^^^^^^^^
-    72 │ 
-    73 │ // variable declarator with a type annotation
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:75:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    73 │ // variable declarator with a type annotation
-    74 │ type FuncType = () => string;
-  > 75 │ const arrowFn: FuncType = () => "test";
-       │       ^^^^^^^
-    76 │ const funcExpr: FuncType = function () {
-    77 │ 	return "test";
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:76:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    74 │ type FuncType = () => string;
-    75 │ const arrowFn: FuncType = () => "test";
-  > 76 │ const funcExpr: FuncType = function () {
-       │       ^^^^^^^^
-    77 │ 	return "test";
-    78 │ };
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:82:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    80 │ // default parameter with a type annotation
-    81 │ type CallBack = () => void;
-  > 82 │ const f = (gotcha: CallBack = () => {}): void => {};
-       │       ^
-    83 │ function f(gotcha: CallBack = () => {}): void {}
-    84 │ 
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:92:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    91 │ // function as a property or a nested property of a typed object
-  > 92 │ const x: Foo = { prop: () => {} };
-       │       ^
-    93 │ const x = { prop: () => {} } as Foo;
-    94 │ const x = <Foo>{ prop: () => {} };
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:93:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    91 │ // function as a property or a nested property of a typed object
-    92 │ const x: Foo = { prop: () => {} };
-  > 93 │ const x = { prop: () => {} } as Foo;
-       │       ^
-    94 │ const x = <Foo>{ prop: () => {} };
-    95 │ 
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:94:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    92 │ const x: Foo = { prop: () => {} };
-    93 │ const x = { prop: () => {} } as Foo;
-  > 94 │ const x = <Foo>{ prop: () => {} };
-       │       ^
-    95 │ 
-    96 │ const x: Foo = { bar: { prop: () => {} } };
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:96:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    94 │ const x = <Foo>{ prop: () => {} };
-    95 │ 
-  > 96 │ const x: Foo = { bar: { prop: () => {} } };
-       │       ^
-    97 │ 
-    98 │ class Accumulator {
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:119:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    117 │ }
-    118 │ 
-  > 119 │ const getObjectWithFunction1 = (): Behavior => {
-        │       ^^^^^^^^^^^^^^^^^^^^^^
-    120 │ 	return {
-    121 │ 		namedFunc: function myFunc(): string { return "value" },
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-valid.ts:154:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    152 │ }
-    153 │ 
-  > 154 │ const X: Type = { prop: () => {} };
-        │       ^
-    155 │ f({ prop: () => {} })
-    156 │ 
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
 
 ```

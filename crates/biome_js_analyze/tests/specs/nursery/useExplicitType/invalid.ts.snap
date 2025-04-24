@@ -13,11 +13,11 @@ function test() {
 	return;
 }
 
-var fn = function () {
+const fn = function () {
 	return 1;
 };
 
-var arrowFn = () => "test";
+const arrowFn = () => "test";
 
 class Test {
 	constructor() {}
@@ -187,14 +187,14 @@ invalid.ts:5:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:9:5 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The variable doesn't have a type defined.
   
      7 │ }
      8 │ 
-   > 9 │ var fn = function () {
-       │     ^^
+   > 9 │ const fn = function () {
+       │       ^^
     10 │ 	return 1;
     11 │ };
   
@@ -206,19 +206,19 @@ invalid.ts:9:5 lint/nursery/useExplicitType ━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:9:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:12 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
      7 │ }
      8 │ 
-   > 9 │ var fn = function () {
-       │          ^^^^^^^^^^^^^
+   > 9 │ const fn = function () {
+       │            ^^^^^^^^^^^^^
   > 10 │ 	return 1;
   > 11 │ };
        │ ^
     12 │ 
-    13 │ var arrowFn = () => "test";
+    13 │ const arrowFn = () => "test";
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -228,14 +228,14 @@ invalid.ts:9:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:13:5 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The variable doesn't have a type defined.
   
     11 │ };
     12 │ 
-  > 13 │ var arrowFn = () => "test";
-       │     ^^^^^^^
+  > 13 │ const arrowFn = () => "test";
+       │       ^^^^^^^
     14 │ 
     15 │ class Test {
   
@@ -247,14 +247,14 @@ invalid.ts:13:5 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:13:15 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
     11 │ };
     12 │ 
-  > 13 │ var arrowFn = () => "test";
-       │               ^^^^^^^^^^^^
+  > 13 │ const arrowFn = () => "test";
+       │                 ^^^^^^^^^^^^
     14 │ 
     15 │ class Test {
   

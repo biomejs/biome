@@ -788,6 +788,10 @@ fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<TextR
 
     let is_const = variable_declaration.is_const();
 
+    if !is_const {
+        return None;
+    }
+
     let ty = declarator
         .variable_annotation()
         .and_then(|ty| ty.as_ts_type_annotation().cloned())
