@@ -75,7 +75,11 @@ pub(crate) struct PanicDiagnostic {
 pub(crate) struct UnhandledDiagnostic;
 
 #[derive(Debug, Diagnostic)]
-#[diagnostic(category = "parse", message = "Skipped file with syntax errors")]
+#[diagnostic(
+    category = "parse", 
+    message = "Skipped file with syntax errors",
+    severity = Information,
+)]
 pub(crate) struct SkippedDiagnostic;
 
 #[derive(Debug, Diagnostic)]

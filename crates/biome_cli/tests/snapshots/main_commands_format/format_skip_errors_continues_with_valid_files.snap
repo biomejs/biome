@@ -20,7 +20,7 @@ statement();
 ```block
 invalid.js parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Skipped file with syntax errors
+  i Skipped file with syntax errors
   
 
 ```
