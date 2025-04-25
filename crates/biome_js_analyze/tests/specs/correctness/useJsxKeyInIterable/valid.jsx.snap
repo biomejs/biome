@@ -84,4 +84,7 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
   return (<div key={el}>{content}</div>);
 });
 
+// is only checked when options.checkShorthandFragment is set
+data.map((x) => <>x</>)
+
 ```

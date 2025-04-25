@@ -3,6 +3,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -11,6 +12,7 @@ use biome_js_syntax::{
     JsxAttributeList, JsxExpressionChild, JsxTagExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
+use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
     /// Disallow missing key props in iterators/collection literals.
@@ -36,6 +38,16 @@ declare_lint_rule! {
     /// data.map((x) => <Hello key={x.id}>{x}</Hello>);
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "checkShorthandFragments": true
+    ///     }
+    /// }
+    /// ```
+    ///
     pub UseJsxKeyInIterable {
         version: "1.6.0",
         name: "useJsxKeyInIterable",
@@ -56,19 +68,29 @@ declare_node_union! {
     pub ReactComponentExpression = JsxTagExpression | JsCallExpression
 }
 
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable, Eq, PartialEq)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct UseJsxKeyInIterableOptions {
+    check_shorthand_fragments: bool,
+}
+
 impl Rule for UseJsxKeyInIterable {
     type Query = Semantic<UseJsxKeyInIterableQuery>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseJsxKeyInIterableOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
+        let options = ctx.options();
         match node {
-            UseJsxKeyInIterableQuery::JsArrayExpression(node) => handle_collections(node, model),
+            UseJsxKeyInIterableQuery::JsArrayExpression(node) => {
+                handle_collections(node, model, options)
+            }
             UseJsxKeyInIterableQuery::JsCallExpression(node) => {
-                handle_iterators(node, model).unwrap_or_default()
+                handle_iterators(node, model, options).unwrap_or_default()
             }
         }
         .into_boxed_slice()
@@ -98,7 +120,11 @@ impl Rule for UseJsxKeyInIterable {
 /// ```jsx
 /// [<h1></h1>, <h1></h1>]
 /// ```
-fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<TextRange> {
+fn handle_collections(
+    node: &JsArrayExpression,
+    model: &SemanticModel,
+    options: &UseJsxKeyInIterableOptions,
+) -> Vec<TextRange> {
     let is_inside_jsx = node.parent::<JsxExpressionChild>().is_some();
     node.elements()
         .iter()
@@ -107,7 +133,7 @@ fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<Te
             // no need to handle spread case, if the spread argument is itself a list it
             // will be handled during list declaration
             let node = AnyJsExpression::cast(node.into_syntax())?;
-            handle_potential_react_component(node, model, is_inside_jsx)
+            handle_potential_react_component(node, model, is_inside_jsx, options)
         })
         .flatten()
         .collect()
@@ -120,7 +146,11 @@ fn handle_collections(node: &JsArrayExpression, model: &SemanticModel) -> Vec<Te
 /// ```jsx
 /// data.map(x => <h1>{x}</h1>)
 /// ```
-fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
+fn handle_iterators(
+    node: &JsCallExpression,
+    model: &SemanticModel,
+    options: &UseJsxKeyInIterableOptions,
+) -> Option<Vec<TextRange>> {
     let callee = node.callee().ok()?;
     let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
     let arguments = node.arguments().ok()?;
@@ -164,16 +194,16 @@ fn handle_iterators(node: &JsCallExpression, model: &SemanticModel) -> Option<Ve
     match callback_argument {
         AnyJsExpression::JsFunctionExpression(callback) => {
             let body = callback.body().ok()?;
-            Some(handle_function_body(&body, model, is_inside_jsx))
+            Some(handle_function_body(&body, model, is_inside_jsx, options))
         }
         AnyJsExpression::JsArrowFunctionExpression(callback) => {
             let body = callback.body().ok()?;
             match body {
                 AnyJsFunctionBody::AnyJsExpression(expr) => {
-                    handle_potential_react_component(expr, model, is_inside_jsx)
+                    handle_potential_react_component(expr, model, is_inside_jsx, options)
                 }
                 AnyJsFunctionBody::JsFunctionBody(body) => {
-                    Some(handle_function_body(&body, model, is_inside_jsx))
+                    Some(handle_function_body(&body, model, is_inside_jsx, options))
                 }
             }
         }
@@ -186,6 +216,7 @@ fn handle_function_body(
     node: &JsFunctionBody,
     model: &SemanticModel,
     is_inside_jsx: bool,
+    options: &UseJsxKeyInIterableOptions,
 ) -> Vec<TextRange> {
     // if the return statement definitely has a key prop, don't need to check the rest of the function
     let return_statement = node
@@ -204,7 +235,7 @@ fn handle_function_body(
         .unwrap_or_default();
     let ranges = return_statement.and_then(|ret| {
         let returned_value = ret.argument()?;
-        handle_potential_react_component(returned_value, model, is_inside_jsx)
+        handle_potential_react_component(returned_value, model, is_inside_jsx, options)
     });
     if ranges.is_none() && is_return_component {
         return vec![];
@@ -222,14 +253,14 @@ fn handle_function_body(
                         .filter_map(|declarator| {
                             let decl = declarator.ok()?;
                             let init = decl.initializer()?.expression().ok()?;
-                            handle_potential_react_component(init, model, is_inside_jsx)
+                            handle_potential_react_component(init, model, is_inside_jsx, options)
                         })
                         .flatten()
                         .collect(),
                 )
             } else if let Some(statement) = statement.as_js_return_statement() {
                 let returned_value = statement.argument()?;
-                handle_potential_react_component(returned_value, model, is_inside_jsx)
+                handle_potential_react_component(returned_value, model, is_inside_jsx, options)
             } else {
                 None
             }
@@ -242,14 +273,19 @@ fn handle_potential_react_component(
     node: AnyJsExpression,
     model: &SemanticModel,
     is_inside_jsx: bool,
+    options: &UseJsxKeyInIterableOptions,
 ) -> Option<Vec<TextRange>> {
     let node = unwrap_parenthesis(node)?;
 
     if let AnyJsExpression::JsConditionalExpression(node) = node {
-        let consequent =
-            handle_potential_react_component(node.consequent().ok()?, model, is_inside_jsx);
+        let consequent = handle_potential_react_component(
+            node.consequent().ok()?,
+            model,
+            is_inside_jsx,
+            options,
+        );
         let alternate =
-            handle_potential_react_component(node.alternate().ok()?, model, is_inside_jsx);
+            handle_potential_react_component(node.alternate().ok()?, model, is_inside_jsx, options);
 
         return match (consequent, alternate) {
             (Some(consequent), Some(alternate)) => Some([consequent, alternate].concat()),
@@ -261,14 +297,17 @@ fn handle_potential_react_component(
 
     if is_inside_jsx {
         if let Some(node) = ReactComponentExpression::cast(node.into_syntax()) {
-            let range = handle_react_component(node, model)?;
+            let range = handle_react_component(node, model, options)?;
             Some(range)
         } else {
             None
         }
     } else {
-        let range =
-            handle_react_component(ReactComponentExpression::cast(node.into_syntax())?, model)?;
+        let range = handle_react_component(
+            ReactComponentExpression::cast(node.into_syntax())?,
+            model,
+            options,
+        )?;
         Some(range)
     }
 }
@@ -276,9 +315,10 @@ fn handle_potential_react_component(
 fn handle_react_component(
     node: ReactComponentExpression,
     model: &SemanticModel,
+    options: &UseJsxKeyInIterableOptions,
 ) -> Option<Vec<TextRange>> {
     match node {
-        ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node, model),
+        ReactComponentExpression::JsxTagExpression(node) => handle_jsx_tag(&node, model, options),
         ReactComponentExpression::JsCallExpression(node) => {
             handle_react_non_jsx(&node, model).map(|r| vec![r])
         }
@@ -292,13 +332,21 @@ fn handle_react_component(
 /// ```jsx
 /// <Hello></Hello>
 /// ```
-fn handle_jsx_tag(node: &JsxTagExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
+fn handle_jsx_tag(
+    node: &JsxTagExpression,
+    model: &SemanticModel,
+    options: &UseJsxKeyInIterableOptions,
+) -> Option<Vec<TextRange>> {
     let tag = node.tag().ok()?;
     let tag = AnyJsxChild::cast(tag.into_syntax())?;
-    handle_jsx_child(&tag, model)
+    handle_jsx_child(&tag, model, options)
 }
 
-fn handle_jsx_child(node: &AnyJsxChild, model: &SemanticModel) -> Option<Vec<TextRange>> {
+fn handle_jsx_child(
+    node: &AnyJsxChild,
+    model: &SemanticModel,
+    options: &UseJsxKeyInIterableOptions,
+) -> Option<Vec<TextRange>> {
     let mut stack: Vec<AnyJsxChild> = vec![node.clone()];
     let mut ranges: Vec<TextRange> = vec![];
 
@@ -317,11 +365,17 @@ fn handle_jsx_child(node: &AnyJsxChild, model: &SemanticModel) -> Option<Vec<Tex
             }
             AnyJsxChild::JsxExpressionChild(node) => {
                 let expr = node.expression()?;
-                if let Some(child_ranges) = handle_potential_react_component(expr, model, true) {
+                if let Some(child_ranges) =
+                    handle_potential_react_component(expr, model, true, options)
+                {
                     ranges.extend(child_ranges);
                 }
             }
-            AnyJsxChild::JsxFragment(node) => ranges.push(node.range()),
+            AnyJsxChild::JsxFragment(node) => {
+                if options.check_shorthand_fragments {
+                    ranges.push(node.range())
+                }
+            }
             _ => {}
         }
     }

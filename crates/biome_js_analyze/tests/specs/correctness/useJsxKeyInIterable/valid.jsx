@@ -77,3 +77,6 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
   const content = <p>Paragraph</p>
   return (<div key={el}>{content}</div>);
 });
+
+// is only checked when options.checkShorthandFragment is set
+data.map((x) => <>x</>)
