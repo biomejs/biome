@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// - `toSorted`
     /// — `from` (when called on `Array`)
     ///
-    /// Method `forEach` do not require the callback to return a value.
+    /// A return value is disallowed in the  method `forEach`.
     ///
     /// ## Examples
     ///
