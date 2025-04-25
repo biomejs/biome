@@ -272,6 +272,7 @@ fn correctly_pulls_lint_diagnostics() {
             "useDeprecatedReason",
         )],
         vec![],
+        true,
     );
     assert!(result.is_ok());
     let diagnostics = result.unwrap().diagnostics;
@@ -488,6 +489,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
+            pull_code_actions: true,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
@@ -555,6 +557,7 @@ language css;
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
+            pull_code_actions: true,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);
@@ -618,6 +621,7 @@ fn plugins_may_use_invalid_span() {
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
+            pull_code_actions: true,
         })
         .unwrap();
     assert_debug_snapshot!(result.diagnostics);

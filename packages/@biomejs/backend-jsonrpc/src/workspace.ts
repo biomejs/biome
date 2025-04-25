@@ -3884,6 +3884,10 @@ export interface PullDiagnosticsParams {
 	only?: RuleCode[];
 	path: BiomePath;
 	projectKey: ProjectKey;
+	/**
+	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
+	 */
+	pullCodeActions: boolean;
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];

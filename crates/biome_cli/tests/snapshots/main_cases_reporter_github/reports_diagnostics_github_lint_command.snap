@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `index.ts`
@@ -45,7 +45,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-::error title=lint/suspicious/noDoubleEquals,file=index.ts,line=4,endLine=4,col=3,endColumn=5::Use === instead of ==
+::error title=lint/suspicious/noDoubleEquals,file=index.ts,line=4,endLine=4,col=3,endColumn=5::Using == may be unsafe if you are relying on type coercion.
 ```
 
 ```block
@@ -69,7 +69,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-::error title=lint/suspicious/noDoubleEquals,file=main.ts,line=4,endLine=4,col=3,endColumn=5::Use === instead of ==
+::error title=lint/suspicious/noDoubleEquals,file=main.ts,line=4,endLine=4,col=3,endColumn=5::Using == may be unsafe if you are relying on type coercion.
 ```
 
 ```block

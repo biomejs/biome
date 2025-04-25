@@ -43,6 +43,7 @@ pub(crate) fn format_with_guard<'ctx>(
             max_diagnostics,
             Vec::new(),
             Vec::new(),
+            false, // NOTE: probably to revisit
         )
         .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
 

@@ -69,7 +69,7 @@ a = 1;
 ```
 invalid.js:2:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign a because it's a constant
+  × Can't assign a because it's a constant.
   
     1 │ const a = 1;
   > 2 │ a = 2;
@@ -77,7 +77,7 @@ invalid.js:2:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
     3 │ 
     4 │ const b = 2, c = 43;
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     54 │ r = 4;
     55 │ 
@@ -101,7 +101,7 @@ invalid.js:2:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:5:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign b because it's a constant
+  × Can't assign b because it's a constant.
   
     4 │ const b = 2, c = 43;
   > 5 │ b = 4;
@@ -109,7 +109,7 @@ invalid.js:5:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
     6 │ ++b;
     7 │ b += 45;
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     2 │ a = 2;
     3 │ 
@@ -133,7 +133,7 @@ invalid.js:5:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:6:3 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign b because it's a constant
+  × Can't assign b because it's a constant.
   
     4 │ const b = 2, c = 43;
     5 │ b = 4;
@@ -142,7 +142,7 @@ invalid.js:6:3 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
     7 │ b += 45;
     8 │ b--;
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     2 │ a = 2;
     3 │ 
@@ -166,7 +166,7 @@ invalid.js:6:3 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:7:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign b because it's a constant
+  × Can't assign b because it's a constant.
   
     5 │ b = 4;
     6 │ ++b;
@@ -175,7 +175,7 @@ invalid.js:7:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
     8 │ b--;
     9 │ function f() {
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     2 │ a = 2;
     3 │ 
@@ -199,7 +199,7 @@ invalid.js:7:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:8:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign b because it's a constant
+  × Can't assign b because it's a constant.
   
      6 │ ++b;
      7 │ b += 45;
@@ -208,7 +208,7 @@ invalid.js:8:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
      9 │ function f() {
     10 │ 	b++;
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     2 │ a = 2;
     3 │ 
@@ -232,7 +232,7 @@ invalid.js:8:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:10:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign b because it's a constant
+  × Can't assign b because it's a constant.
   
      8 │ b--;
      9 │ function f() {
@@ -241,7 +241,7 @@ invalid.js:10:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
     11 │ }
     12 │ function f(d) {
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     2 │ a = 2;
     3 │ 
@@ -265,7 +265,7 @@ invalid.js:10:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
 ```
 invalid.js:13:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign b because it's a constant
+  × Can't assign b because it's a constant.
   
     11 │ }
     12 │ function f(d) {
@@ -274,7 +274,7 @@ invalid.js:13:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
     14 │ }
     15 │ const fn = (val) => {
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     2 │ a = 2;
     3 │ 
@@ -298,7 +298,7 @@ invalid.js:13:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
 ```
 invalid.js:42:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign i because it's a constant
+  × Can't assign i because it's a constant.
   
     40 │ 	j: { l },
     41 │ } = { i: 1, j: { l: 2 } };
@@ -307,7 +307,7 @@ invalid.js:42:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
     43 │ l = 4;
     44 │ 
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     38 │ const {
   > 39 │ 	i,
@@ -330,7 +330,7 @@ invalid.js:42:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
 ```
 invalid.js:43:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign l because it's a constant
+  × Can't assign l because it's a constant.
   
     41 │ } = { i: 1, j: { l: 2 } };
     42 │ i = 4;
@@ -339,7 +339,7 @@ invalid.js:43:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
     44 │ 
     45 │ for (const k in [1, 2]) {
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     38 │ const {
     39 │ 	i,
@@ -363,7 +363,7 @@ invalid.js:43:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
 ```
 invalid.js:46:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign k because it's a constant
+  × Can't assign k because it's a constant.
   
     45 │ for (const k in [1, 2]) {
   > 46 │ 	k = 4;
@@ -371,7 +371,7 @@ invalid.js:46:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
     47 │ }
     48 │ 
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     43 │ l = 4;
     44 │ 
@@ -395,7 +395,7 @@ invalid.js:46:2 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
 ```
 invalid.js:50:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign p because it's a constant
+  × Can't assign p because it's a constant.
   
     49 │ const [p, { q }] = [1, { q: 2 }];
   > 50 │ p = 3;
@@ -403,7 +403,7 @@ invalid.js:50:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
     51 │ q = 4;
     52 │ 
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     47 │ }
     48 │ 
@@ -427,7 +427,7 @@ invalid.js:50:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
 ```
 invalid.js:51:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign q because it's a constant
+  × Can't assign q because it's a constant.
   
     49 │ const [p, { q }] = [1, { q: 2 }];
     50 │ p = 3;
@@ -436,7 +436,7 @@ invalid.js:51:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
     52 │ 
     53 │ const { r, ...rest } = s;
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     47 │ }
     48 │ 
@@ -460,7 +460,7 @@ invalid.js:51:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
 ```
 invalid.js:54:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign r because it's a constant
+  × Can't assign r because it's a constant.
   
     53 │ const { r, ...rest } = s;
   > 54 │ r = 4;
@@ -468,7 +468,7 @@ invalid.js:54:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
     55 │ 
     56 │ /*before*/const/*after*/ a = 0;
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     51 │ q = 4;
     52 │ 
@@ -492,14 +492,14 @@ invalid.js:54:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
 ```
 invalid.js:57:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Can't assign a because it's a constant
+  × Can't assign a because it's a constant.
   
     56 │ /*before*/const/*after*/ a = 0;
   > 57 │ a = 1;
        │ ^
     58 │ 
   
-  i This is where the variable is defined as constant
+  i This is where the variable is defined as constant.
   
     54 │ r = 4;
     55 │ 
