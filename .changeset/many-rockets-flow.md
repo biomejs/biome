@@ -4,7 +4,7 @@
 
 Added the new rule [`useIterableCallbackReturn`](https://biomejs.dev/linter/rules/use-iterable-callback-return), which enforces consistent return values in iterable callbacks.
 
-The following methods require a return in their callback:
+The following methods require a return value in their callback:
 
 - `every`
 - `filter`
