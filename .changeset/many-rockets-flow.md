@@ -33,6 +33,6 @@ Examples:
 
 ```js
 [].forEach(() => {
-    return 1; // Not required
+    return 1; // Disallowed 
 });
 ```
