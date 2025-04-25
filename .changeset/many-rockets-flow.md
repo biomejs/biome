@@ -21,7 +21,7 @@ The following methods require a return in their callback:
 - `toSorted`
 — `from` (when called on `Array`)
 
-Method `forEach` do not require the callback to return a value.
+The rule disallows a return value inside the callback of the method `forEach`.
 
 Examples:
 
