@@ -1722,6 +1722,10 @@ export interface Nursery {
 	 */
 	useGuardForIn?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce consistent return values in iterable callbacks.
+	 */
+	useIterableCallbackReturn?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
 	useNamedOperation?: RuleFixConfiguration_for_Null;
@@ -3471,6 +3475,7 @@ export type Category =
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useIterableCallbackReturn"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"

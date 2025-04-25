@@ -3067,6 +3067,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useIterableCallbackReturn": {
+					"description": "Enforce consistent return values in iterable callbacks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNamedOperation": {
 					"description": "Enforce specifying the name of GraphQL operations.",
 					"anyOf": [
