@@ -105,6 +105,8 @@ invalid.ts:13:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     19 │ 
     20 │ switch (day) {
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - "Tuesday"
@@ -114,7 +116,7 @@ invalid.ts:13:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   - "Saturday"
   - "Sunday"
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     15 15 │   		result = 1;
     16 16 │   		break;
@@ -146,6 +148,8 @@ invalid.ts:20:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     22 │ 
     23 │ type A = 'a';
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - "Monday"
@@ -156,7 +160,7 @@ invalid.ts:20:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   - "Saturday"
   - "Sunday"
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     18 18 │   }
     19 19 │   
@@ -189,12 +193,14 @@ invalid.ts:29:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     33 │ }
     34 │ 
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - 1
   - true
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     29 29 │   	switch (value) {
     30 30 │   		case 'a':
@@ -223,12 +229,14 @@ invalid.ts:42:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     46 │ }
     47 │ 
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - 1
   - true
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     42 42 │   	switch (value) {
     43 43 │   		case 'a':
@@ -257,11 +265,13 @@ invalid.ts:51:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     55 │ }
     56 │ 
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - "B"
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     51 51 │   	switch (value.type) {
     52 52 │   		case 'A':
@@ -287,11 +297,13 @@ invalid.ts:58:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     60 │ 
     61 │ declare const value2: 'literal' & { _brand: true };
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - "literal"
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     58 │ switch·(value)·{case·"literal":·throw·new·Error("TODO:·Not·implemented·yet");
        │                 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -311,11 +323,13 @@ invalid.ts:62:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     64 │ 
     65 │ declare const value3: ('literal' & { _brand: true }) | 1;
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - "literal"
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     62 │ switch·(value2)·{case·"literal":·throw·new·Error("TODO:·Not·implemented·yet");
        │                  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -337,11 +351,13 @@ invalid.ts:66:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     70 │ 
     71 │ declare const value4: '1' | '2' | number;
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - 1
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     66 66 │   switch (value3) {
     67 67 │   	case 'literal':
@@ -369,11 +385,13 @@ invalid.ts:72:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     76 │ 
     77 │ declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - "2"
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     72 72 │   switch (value4) {
     73 73 │   	case '1':
@@ -398,6 +416,8 @@ invalid.ts:78:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
        │ ^
     80 │ 
   
+  i Some variants of the union type are not handled here.
+  
   i These cases are missing:
   
   - "1"
@@ -405,7 +425,7 @@ invalid.ts:78:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   - null
   - undefined
   
-  i Unsafe fix: Add missing cases to the switch statement.
+  i Unsafe fix: Add the missing cases to the switch statement.
   
     76 76 │   
     77 77 │   declare const value5: (string & { foo: 'bar' }) | '1' | 1 | null | undefined;

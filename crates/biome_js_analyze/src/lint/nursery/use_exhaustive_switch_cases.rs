@@ -13,15 +13,15 @@ use crate::JsRuleAction;
 use crate::services::typed::Typed;
 
 declare_lint_rule! {
-    /// Require switch-case statements to exhaustive.
+    /// Require switch-case statements to be exhaustive.
     ///
-    /// When working with union types or enums in TypeScript, it's common to want to write a switch
-    /// statement intended to contain a case for each possible type in the union or the enum.
-    /// However, if the union type or the enum changes, it's easy to forget to modify the cases to
-    /// account for any new types.
+    /// When working with union types in TypeScript, it's common to want to write a switch statement
+    /// intended to contain a case for each possible variant.
+    /// However, if the union type changes, it's easy to forget to modify the cases to account for
+    /// any new types.
     ///
-    /// This rule reports when a switch statement over a value typed as a union of literals or as an
-    /// enum is missing a case for any of those literal types and does not have a default clause.
+    /// This rule reports when a switch statement over a value typed as a union of literals lacks
+    /// a case for any of those literal types and does not have a default clause.
     ///
     /// ## Examples
     ///
@@ -173,6 +173,7 @@ impl Rule for UseExhaustiveSwitchCases {
                 node.range(),
                 markup! { "The switch statement is not exhaustive." },
             )
+            .note("Some variants of the union type are not handled here.")
             .footer_list("These cases are missing:", state.iter().map(type_to_string)),
         )
     }
@@ -247,7 +248,7 @@ impl Rule for UseExhaustiveSwitchCases {
 
         mutation.replace_node(case_list, make::js_switch_case_list(clauses));
 
-        let message = markup! { "Add missing cases to the switch statement." };
+        let message = markup! { "Add the missing cases to the switch statement." };
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -259,7 +260,7 @@ impl Rule for UseExhaustiveSwitchCases {
 }
 
 /// Unwraps [`TypeInner::InstanceOf`] and [`TypeInner::TypeofType`] to get the inner type.
-/// TODO: I am not sure that if this should be in the type flattening logic.
+// TODO: I am not sure if this should be in the type flattening logic.
 fn flatten_type(ty: &Type) -> Type {
     match ty.inner_type() {
         TypeInner::InstanceOf(ty) if ty.is_inferred() => ty.owned_inner_type(),
