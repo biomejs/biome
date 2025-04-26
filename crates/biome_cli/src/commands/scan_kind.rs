@@ -166,6 +166,7 @@ mod tests {
             fix_file_mode: None,
             stdin: None,
             vcs_targeted: VcsTargeted::default(),
+            skip_errors: false,
         })
     }
 
@@ -246,6 +247,7 @@ mod tests {
             vcs_targeted: VcsTargeted::default(),
             suppress: false,
             suppression_reason: None,
+            skip_errors: false,
         });
 
         let configuration = Configuration {
@@ -281,6 +283,7 @@ mod tests {
             vcs_targeted: VcsTargeted::default(),
             suppress: false,
             suppression_reason: None,
+            skip_errors: false,
         });
 
         let configuration = Configuration {

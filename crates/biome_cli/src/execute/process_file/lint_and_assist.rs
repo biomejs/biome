@@ -1,5 +1,5 @@
 use crate::TraversalMode;
-use crate::execute::diagnostics::ResultExt;
+use crate::execute::diagnostics::{ResultExt, SkippedDiagnostic};
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use biome_analyze::RuleCategories;
@@ -119,6 +119,14 @@ pub(crate) fn analyze_with_guard<'ctx>(
             workspace_file.path.to_string(),
             ctx.execution.as_diagnostic_category(),
         )?;
+
+    let skip_errors = ctx.execution.should_ignore_errors();
+    if pull_diagnostics_result.errors > 0 && skip_errors {
+        ctx.push_message(Message::from(
+            SkippedDiagnostic.with_file_path(workspace_file.path.to_string()),
+        ));
+        return Ok(FileStatus::Ignored);
+    }
 
     let no_diagnostics = pull_diagnostics_result.diagnostics.is_empty()
         && pull_diagnostics_result.skipped_diagnostics == 0;
