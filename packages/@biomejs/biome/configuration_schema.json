@@ -1082,7 +1082,7 @@
 				"useJsxKeyInIterable": {
 					"description": "Disallow missing key props in iterators/collection literals.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UseJsxKeyInIterableConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3995,6 +3995,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseJsxKeyInIterableOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseJsxKeyInIterableOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseSelfClosingElementsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -5277,6 +5292,19 @@
 					"default": false,
 					"type": "boolean"
 				}
+			},
+			"additionalProperties": false
+		},
+		"UseJsxKeyInIterableConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseJsxKeyInIterableOptions" }
+			]
+		},
+		"UseJsxKeyInIterableOptions": {
+			"type": "object",
+			"properties": {
+				"checkShorthandFragments": { "default": false, "type": "boolean" }
 			},
 			"additionalProperties": false
 		},
