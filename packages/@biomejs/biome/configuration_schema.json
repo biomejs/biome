@@ -3026,7 +3026,7 @@
 					]
 				},
 				"useExhaustiveSwitchCases": {
-					"description": "Require switch-case statements to exhaustive.",
+					"description": "Require switch-case statements to be exhaustive.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

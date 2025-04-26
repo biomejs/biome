@@ -3363,7 +3363,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_deprecated_reason:
         Option<RuleConfiguration<biome_graphql_analyze::options::UseDeprecatedReason>>,
-    #[doc = "Require switch-case statements to exhaustive."]
+    #[doc = "Require switch-case statements to be exhaustive."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_exhaustive_switch_cases:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseExhaustiveSwitchCases>>,
