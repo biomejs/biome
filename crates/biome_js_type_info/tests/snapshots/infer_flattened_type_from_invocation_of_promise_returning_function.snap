@@ -2,21 +2,35 @@
 source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
+## Input
+
 ```ts
 function returnsPromise(): Promise<number> {
 	return Promise.resolved(true);
 }
 
-```
+returnsPromise();
 
 ```
-sync Function "returnsPromise" {
+
+## Result
+
+```
+Global TypeId(7)
+```
+
+## Registered types
+
+```
+
+Module TypeId(0) => sync Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unresolved reference "Promise"<number>
+  returns: Global TypeId(7)
 }
-```
 
-## Registered types:
+Global TypeId(7) => instanceof Promise<T = number>
+
+```

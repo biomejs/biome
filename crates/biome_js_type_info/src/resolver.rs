@@ -11,19 +11,19 @@ use crate::{
 pub struct ResolvedTypeId(pub TypeResolverLevel, pub TypeId);
 
 impl ResolvedTypeId {
-    pub fn id(&self) -> TypeId {
+    pub const fn id(&self) -> TypeId {
         self.1
     }
 
-    pub fn index(&self) -> usize {
+    pub const fn index(&self) -> usize {
         self.1.index()
     }
 
-    pub fn is_global(&self) -> bool {
+    pub const fn is_global(&self) -> bool {
         matches!(self.0, TypeResolverLevel::Global)
     }
 
-    pub fn level(&self) -> TypeResolverLevel {
+    pub const fn level(&self) -> TypeResolverLevel {
         self.0
     }
 }
@@ -87,6 +87,9 @@ pub trait TypeResolver {
     /// Returns a reference to the given type data, if possible.
     fn reference_to_data(&self, type_data: &TypeData) -> Option<TypeReference> {
         match type_data {
+            TypeData::InstanceOf(type_instance) if !type_instance.has_known_type_parameters() => {
+                Some(type_instance.ty.clone())
+            }
             TypeData::Reference(reference) => Some(reference.as_ref().clone()),
             other => self.find_type(other).map(|id| self.reference_to_id(id)),
         }
@@ -106,8 +109,8 @@ pub trait TypeResolver {
 
     /// Registers a type within the level handled by this resolver.
     ///
-    /// Should perform automatic deduplication if a type with the given
-    /// [`TypeData`] is already registered.
+    /// If the given `type_data` is already registered, this may return an
+    /// existing [`TypeId`].
     fn register_type(&mut self, type_data: TypeData) -> TypeId;
 
     /// Registers a type within the level handled by this resolver, and
@@ -127,8 +130,13 @@ pub trait TypeResolver {
     /// Resolves a type reference and immediately returns the associated
     /// [`TypeData`] if found.
     fn resolve_and_get(&self, ty: &TypeReference) -> Option<&TypeData> {
-        self.resolve_reference(ty)
+        match self
+            .resolve_reference(ty)
             .and_then(|id| self.get_by_resolved_id(id))
+        {
+            Some(TypeData::Reference(type_data)) => self.resolve_and_get(type_data),
+            other => other,
+        }
     }
 
     /// Resolves a type reference and returns the [`ResolvedTypeId`] if found.
@@ -394,7 +402,7 @@ impl Resolvable for TypeofValue {
                     TypeReference::Imported(TypeImportQualifier {
                         // TODO: Introduce module IDs for full inference.
                         identifier: identifier.clone(),
-                        type_parameters: Box::new([]),
+                        type_parameters: [].into(),
                     })
                 }
                 Some(resolved_id) => TypeReference::Resolved(resolved_id),

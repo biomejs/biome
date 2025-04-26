@@ -2,27 +2,23 @@
 source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
+## Input
+
 ```ts
 function returnsPromise(): Promise<number> {
 	return Promise.resolved(true);
 }
 
-returnsPromise();
-
 ```
 
-```
-Call Module TypeId(0)(No parameters)
-```
+## Result
 
-## Registered types:
-
-Module TypeId(0) => sync Function "returnsPromise" {
+```
+sync Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module TypeId(1)
+  returns: unresolved reference "Promise"<number>
 }
-
-Module TypeId(1) => instanceof Promise<T = number>
+```

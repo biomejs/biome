@@ -59,13 +59,13 @@ export * as renamed2 from "./renamed-reexports";
 Exports {
   "a" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(7)
+      Module TypeId(6)
       Local name: a
     )
   }
   "b" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(8)
+      Module TypeId(7)
       Local name: b
     )
   }
@@ -80,19 +80,19 @@ Exports {
   }
   "baz" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(4)
+      Module TypeId(3)
       Local name: baz
     )
   }
   "d" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(10)
+      Module TypeId(9)
       Local name: d
     )
   }
   "default" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(20)
+      Module TypeId(19)
       Local name: Component
       JsDoc(
         @public
@@ -102,7 +102,7 @@ Exports {
   }
   "e" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(11)
+      Module TypeId(10)
       Local name: e
     )
   }
@@ -124,7 +124,7 @@ Exports {
   }
   "qux" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(5)
+      Module TypeId(4)
       Local name: qux
     )
   }

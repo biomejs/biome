@@ -28,11 +28,12 @@ pub fn assert_type_data_snapshot(
         .print()
         .unwrap();
 
+    content.push_str("## Input\n\n");
     content.push_str("```ts\n");
     content.push_str(formatted.as_code());
-    content.push_str("\n```");
+    content.push_str("\n```\n\n");
 
-    content.push_str("\n\n");
+    content.push_str("## Result\n\n");
     content.push_str("```\n");
     content.push_str(&ty.to_string());
     content.push_str("\n```\n\n");
@@ -40,7 +41,7 @@ pub fn assert_type_data_snapshot(
     dump_registered_types(&mut content, resolver);
 
     insta::with_settings!({
-        snapshot_path => "../snapshots",
+        snapshot_path => "snapshots",
         prepend_module_to_snapshot => false,
     }, {
         insta::assert_snapshot!(test_name, content);
@@ -62,11 +63,12 @@ pub fn assert_typed_bindings_snapshot(
         .print()
         .unwrap();
 
+    content.push_str("## Input\n\n");
     content.push_str("```ts\n");
     content.push_str(formatted.as_code());
-    content.push_str("\n```");
+    content.push_str("\n```\n\n");
 
-    content.push_str("\n\n");
+    content.push_str("## Result\n\n");
     content.push_str("```\n");
     for (name, ty) in typed_bindings {
         content.push_str(&format!("{name} => {ty}\n"));
@@ -76,7 +78,7 @@ pub fn assert_typed_bindings_snapshot(
     dump_registered_types(&mut content, resolver);
 
     insta::with_settings!({
-        snapshot_path => "../snapshots",
+        snapshot_path => "snapshots",
         prepend_module_to_snapshot => false,
     }, {
         insta::assert_snapshot!(test_name, content);
@@ -84,8 +86,7 @@ pub fn assert_typed_bindings_snapshot(
 }
 
 fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) {
-    content.push_str("## Registered types:\n");
-
+    let mut registered_types = String::new();
     let mut resolver = Some(resolver);
     while let Some(current_resolver) = resolver {
         for (i, ty) in current_resolver.registered_types().iter().enumerate() {
@@ -95,10 +96,18 @@ fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) {
             } else {
                 i
             };
-            content.push_str(&format!("\n{level:?} TypeId({id}) => {ty}\n"));
+            registered_types.push_str(&format!("\n{level:?} TypeId({id}) => {ty}\n"));
         }
 
         resolver = current_resolver.fallback_resolver();
+    }
+
+    if !registered_types.is_empty() {
+        content.push_str("## Registered types\n\n");
+
+        content.push_str("```\n");
+        content.push_str(&registered_types);
+        content.push_str("\n```\n");
     }
 }
 

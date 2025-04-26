@@ -2,6 +2,8 @@
 source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
+## Input
+
 ```ts
 function returnsPromise(): Promise<number> {
 	return Promise.resolved(true);
@@ -13,11 +15,15 @@ returnsPromise()
 
 ```
 
+## Result
+
 ```
 instanceof Promise
 ```
 
-## Registered types:
+## Registered types
+
+```
 
 Module TypeId(0) => sync Function "returnsPromise" {
   accepts: {
@@ -27,14 +33,14 @@ Module TypeId(0) => sync Function "returnsPromise" {
   returns: Module TypeId(6)
 }
 
-Module TypeId(1) => instanceof Promise<T = number>
+Module TypeId(1) => Module TypeId(6)
 
 Module TypeId(2) => sync Function "then" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Promise
+  returns: instanceof Promise
 }
 
 Module TypeId(3) => sync Function {
@@ -52,7 +58,7 @@ Module TypeId(5) => sync Function "finally" {
     params: []
     type_args: []
   }
-  returns: Promise
+  returns: instanceof Promise
 }
 
 Module TypeId(6) => instanceof Promise<T = number>
@@ -62,7 +68,7 @@ Module TypeId(7) => sync Function "then" {
     params: []
     type_args: []
   }
-  returns: Promise
+  returns: instanceof Promise
 }
 
 Module TypeId(8) => sync Function "finally" {
@@ -70,5 +76,7 @@ Module TypeId(8) => sync Function "finally" {
     params: []
     type_args: []
   }
-  returns: Promise
+  returns: instanceof Promise
 }
+
+```

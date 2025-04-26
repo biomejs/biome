@@ -61,10 +61,14 @@ impl TypeData {
                     }))
                     .flattened(resolver)
                 }
-                Some(ty @ (Self::Function(_) | Self::Literal(_) | Self::Object(_))) => {
-                    ty.clone().flattened(resolver)
-                }
+                Some(
+                    ty @ (Self::Global | Self::Function(_) | Self::Literal(_) | Self::Object(_)),
+                ) => ty.clone().flattened(resolver),
                 _ => self.clone(),
+            },
+            Self::Reference(reference) => match resolver.resolve_and_get(reference) {
+                Some(ty) => ty.clone().flattened(resolver),
+                None => self.clone(),
             },
             Self::TypeofExpression(expr) => match expr.as_ref() {
                 TypeofExpression::Addition(_expr) => {
@@ -81,7 +85,7 @@ impl TypeData {
                 },
                 TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
                     Some(Self::Function(function)) => match function.return_type.as_type() {
-                        Some(ty) => Self::instance_of(ty.clone()).flattened(resolver),
+                        Some(ty) => Self::reference(ty.clone()),
                         None => self.clone(),
                     },
                     Some(ty @ Self::Object(object)) => {
@@ -172,7 +176,11 @@ impl TypeData {
                     }
                 }
                 TypeofExpression::New(expr) => {
-                    match resolver.resolve_and_get(&expr.callee) {
+                    match resolver
+                        .resolve_and_get(&expr.callee)
+                        .cloned()
+                        .map(|type_data| type_data.flattened(resolver))
+                    {
                         Some(Self::Class(class)) => {
                             let num_args = expr.arguments.len();
                             let ty = class
@@ -196,19 +204,20 @@ impl TypeData {
                     }
                 }
                 TypeofExpression::StaticMember(expr) => {
-                    match resolver.resolve_and_get(&expr.object) {
+                    match resolver
+                        .resolve_and_get(&expr.object)
+                        .cloned()
+                        .map(|type_data| type_data.flattened(resolver))
+                    {
                         Some(object @ Self::Class(_)) => {
                             let member = object
                                 .all_members(resolver)
                                 .find(|member| member.is_static() && member.has_name(&expr.member))
                                 .cloned();
                             match member {
-                                Some(member) => Self::instance_of(
-                                    resolver
-                                        .register_type_from_member(&object.clone(), &member)
-                                        .into(),
-                                )
-                                .flattened(resolver),
+                                Some(member) => Self::reference(
+                                    resolver.register_type_from_member(&object.clone(), &member),
+                                ),
                                 None => Self::unknown(),
                             }
                         }
@@ -218,10 +227,8 @@ impl TypeData {
                                 .find(|member| !member.is_static() && member.has_name(&expr.member))
                                 .cloned();
                             match member {
-                                Some(member) => Self::instance_of(
-                                    resolver
-                                        .register_type_from_member(&object.clone(), &member)
-                                        .into(),
+                                Some(member) => Self::reference(
+                                    resolver.register_type_from_member(&object.clone(), &member),
                                 )
                                 .flattened(resolver),
                                 None => Self::unknown(),

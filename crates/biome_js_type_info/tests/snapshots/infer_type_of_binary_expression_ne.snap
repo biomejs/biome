@@ -2,14 +2,16 @@
 source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
+## Input
+
 ```ts
-const a = 123.45;
+const a = 0 !== 1;
 
 ```
 
-```
-a => value: 123.45
+## Result
 
 ```
+a => value: true
 
-## Registered types:
+```

@@ -2,6 +2,8 @@
 source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
+## Input
+
 ```ts
 async function returnsPromise(): Promise<string> {
 	return "value";
@@ -9,16 +11,22 @@ async function returnsPromise(): Promise<string> {
 
 ```
 
+## Result
+
 ```
 async Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unresolved reference "Promise"<Global TypeId(6)>
+  returns: unresolved reference "Promise"<Global TypeId(7)>
 }
 ```
 
-## Registered types:
+## Registered types
 
-Global TypeId(6) => string
+```
+
+Global TypeId(7) => string
+
+```

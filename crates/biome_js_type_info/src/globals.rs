@@ -33,14 +33,17 @@ pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
 pub const UNKNOWN_ID: TypeId = TypeId::new(0);
 pub const ARRAY_ID: TypeId = TypeId::new(1);
 pub const GLOBAL_ID: TypeId = TypeId::new(2);
-pub const NUMBER_ID: TypeId = TypeId::new(3);
-pub const PROMISE_ID: TypeId = TypeId::new(4);
-pub const UNDEFINED_ID: TypeId = TypeId::new(5);
-pub const NUM_PREDEFINED_TYPES: usize = 6; // Most be one more than the highest `TypeId` above.
+pub const INSTANCEOF_PROMISE_ID: TypeId = TypeId::new(3);
+pub const NUMBER_ID: TypeId = TypeId::new(4);
+pub const PROMISE_ID: TypeId = TypeId::new(5);
+pub const UNDEFINED_ID: TypeId = TypeId::new(6);
+pub const NUM_PREDEFINED_TYPES: usize = 7; // Most be one more than the highest `TypeId` above.
 
 pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, UNKNOWN_ID);
 pub const GLOBAL_ARRAY_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, ARRAY_ID);
 pub const GLOBAL_GLOBAL_ID /* :smirk: */: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, GLOBAL_ID);
+pub const GLOBAL_INSTANCEOF_PROMISE_ID: ResolvedTypeId =
+    ResolvedTypeId(GLOBAL_LEVEL, INSTANCEOF_PROMISE_ID);
 pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, NUMBER_ID);
 pub const GLOBAL_PROMISE_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, PROMISE_ID);
 pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, UNDEFINED_ID);
@@ -51,9 +54,10 @@ pub fn global_type_name(id: TypeId) -> &'static str {
         0 => "unknown",
         1 => "Array",
         2 => "globalThis",
-        3 => "number",
-        4 => "Promise",
-        5 => "undefined",
+        3 => "instanceof Promise",
+        4 => "number",
+        5 => "Promise",
+        6 => "undefined",
         _ => "inferred type",
     }
 }
@@ -74,7 +78,7 @@ impl Default for GlobalsResolver {
             TypeMember::Method(
                 MethodTypeMember::default()
                     .with_name(Text::Static(name))
-                    .with_return_type(GLOBAL_PROMISE_ID.into()),
+                    .with_return_type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             )
         };
 
@@ -83,7 +87,7 @@ impl Default for GlobalsResolver {
                 MethodTypeMember::default()
                     .with_name(Text::Static(name))
                     .with_static()
-                    .with_return_type(GLOBAL_PROMISE_ID.into()),
+                    .with_return_type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             )
         };
 
@@ -103,6 +107,7 @@ impl Default for GlobalsResolver {
                 )]),
             })),
             TypeData::Global,
+            TypeData::instance_of(GLOBAL_PROMISE_ID.into()),
             TypeData::Number,
             TypeData::Class(Box::new(Class {
                 name: Some(Text::Static("Promise")),

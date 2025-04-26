@@ -39,7 +39,7 @@ impl TypeId {
         Self(index as u32)
     }
 
-    pub fn index(self) -> usize {
+    pub const fn index(self) -> usize {
         self.0 as usize
     }
 }
@@ -404,6 +404,10 @@ impl TypeData {
             Self::Object(object) => object.prototype.as_ref(),
             _ => None,
         }
+    }
+
+    pub fn reference(reference: impl Into<TypeReference>) -> Self {
+        Self::Reference(Box::new(reference.into()))
     }
 
     pub fn type_parameters(&self) -> Option<&[GenericTypeParameter]> {
@@ -1098,7 +1102,7 @@ impl TypeReference {
                 .iter()
                 .map(|param| param.resolved(resolver))
                 .collect(),
-            _ => Box::new([]),
+            _ => [].into(),
         }
     }
 }
@@ -1157,7 +1161,7 @@ impl TypeReferenceQualifier {
     pub fn without_type_parameters(&self) -> Self {
         Self {
             path: self.path.clone(),
-            type_parameters: Box::new([]),
+            type_parameters: [].into(),
         }
     }
 }

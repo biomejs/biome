@@ -218,8 +218,8 @@ impl TypeData {
 
     pub fn array_of(ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::Qualifier(TypeReferenceQualifier {
-            path: Box::new([Text::Static("Array")]),
-            type_parameters: Box::new([ty]),
+            path: [Text::Static("Array")].into(),
+            type_parameters: [ty].into(),
         }))
     }
 
@@ -878,10 +878,16 @@ impl TypeData {
         decl: &JsVariableDeclarator,
     ) -> Option<Self> {
         let ty = match decl.variable_annotation() {
-            Some(annotation) => Self::instance_of(TypeReference::from_any_ts_type(
-                resolver,
-                &annotation.type_annotation().ok()??.ty().ok()?,
-            )),
+            Some(annotation) => {
+                let data = Self::from_any_ts_type(
+                    resolver,
+                    &annotation.type_annotation().ok()??.ty().ok()?,
+                );
+                match data {
+                    Self::InstanceOf(type_instance) => Self::InstanceOf(type_instance),
+                    _ => Self::instance_of(resolver.reference_to_registered_data(data)),
+                }
+            }
             None => Self::from_any_js_expression(resolver, &decl.initializer()?.expression().ok()?),
         };
 
@@ -893,11 +899,8 @@ impl TypeData {
             .ok()
             .and_then(|name| TypeReferenceQualifier::from_any_ts_name(&name))
             .map(|qualifier| {
-                Self::Reference(Box::new(TypeReference::Qualifier(
-                    qualifier.with_type_parameters(TypeReference::types_from_ts_type_arguments(
-                        resolver,
-                        ty.type_arguments(),
-                    )),
+                Self::instance_of(TypeReference::Qualifier(qualifier.with_type_parameters(
+                    TypeReference::types_from_ts_type_arguments(resolver, ty.type_arguments()),
                 )))
             })
             .unwrap_or_default()
@@ -936,7 +939,7 @@ impl TypeData {
     pub fn instance_of(ty: TypeReference) -> Self {
         Self::InstanceOf(Box::new(TypeInstance {
             ty,
-            type_parameters: Box::new([]),
+            type_parameters: [].into(),
         }))
     }
 
@@ -1033,7 +1036,7 @@ impl FunctionParameter {
             AnyJsParameter::AnyJsFormalParameter(_) => Self {
                 name: None,
                 ty: TypeReference::Unknown,
-                bindings: Box::new([]),
+                bindings: [].into(),
                 is_optional: false,
                 is_rest: false,
             },
@@ -1067,7 +1070,7 @@ impl FunctionParameter {
                     .and_then(|annotation| annotation.ty().ok())
                     .map(|ty| TypeReference::from_any_ts_type(resolver, &ty))
                     .unwrap_or_default(),
-                bindings: Box::new([]),
+                bindings: [].into(),
                 is_optional: false,
                 is_rest: false,
             },
@@ -1599,7 +1602,7 @@ impl TypeReferenceQualifier {
                 }
                 Some(Self {
                     path: identifiers.into(),
-                    type_parameters: Box::new([]),
+                    type_parameters: [].into(),
                 })
             }
         }
@@ -1608,7 +1611,7 @@ impl TypeReferenceQualifier {
     pub fn from_name(name: Text) -> Self {
         Self {
             path: Box::new([name]),
-            type_parameters: Box::new([]),
+            type_parameters: [].into(),
         }
     }
 
