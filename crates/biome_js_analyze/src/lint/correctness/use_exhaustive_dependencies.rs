@@ -161,7 +161,7 @@ declare_lint_rule! {
     ///
     /// function component() {
     ///     let a = 1;
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): <explanation>
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
     ///     useEffect(() => {
     ///         console.log(a);
     ///     }, []);
