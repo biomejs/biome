@@ -237,10 +237,16 @@ impl Rule for UseSortedClasses {
                 mutation.replace_node(string_literal.clone(), replacement);
             }
             AnyClassStringLike::JsxString(jsx_string_node) => {
-                let replacement = jsx_string(if ctx.as_preferred_jsx_quote().is_double() {
-                    js_string_literal(state)
+                let jsx_quote_style_is_double = ctx.as_preferred_jsx_quote().is_double();
+                let quote_safe_state = if jsx_quote_style_is_double {
+                    state.replace('"', "'")
                 } else {
-                    js_string_literal_single_quotes(state)
+                    state.replace('\'', "\"")
+                };
+                let replacement = jsx_string(if jsx_quote_style_is_double {
+                    js_string_literal(&quote_safe_state)
+                } else {
+                    js_string_literal_single_quotes(&quote_safe_state)
                 });
                 mutation.replace_node(jsx_string_node.clone(), replacement);
             }
