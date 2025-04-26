@@ -1,5 +1,5 @@
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -91,7 +91,8 @@ declare_lint_rule! {
         version: "next",
         name: "useExhaustiveSwitchCases",
         language: "js",
-        recommended: false,
+        recommended: true,
+        sources: &[RuleSource::EslintTypeScript("switch-exhaustiveness-check")],
         fix_kind: FixKind::Unsafe,
         domains: &[RuleDomain::Project],
     }
