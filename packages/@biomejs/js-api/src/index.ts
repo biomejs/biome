@@ -215,6 +215,7 @@ export class Biome {
 				maxDiagnostics: Number.MAX_SAFE_INTEGER,
 				only: [],
 				skip: [],
+				pullCodeActions: false,
 			});
 
 			const hasErrors = diagnostics.some(
@@ -297,6 +298,7 @@ export class Biome {
 				maxDiagnostics: Number.MAX_SAFE_INTEGER,
 				only: [],
 				skip: [],
+				pullCodeActions: true,
 			});
 
 			return {
