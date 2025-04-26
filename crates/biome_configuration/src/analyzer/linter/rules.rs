@@ -3366,7 +3366,7 @@ pub struct Nursery {
     #[doc = "Require switch-case statements to exhaustive."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_exhaustive_switch_cases:
-        Option<RuleConfiguration<biome_js_analyze::options::UseExhaustiveSwitchCases>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseExhaustiveSwitchCases>>,
     #[doc = "Enforce types in functions, methods, variables, and parameters."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_explicit_type: Option<RuleConfiguration<biome_js_analyze::options::UseExplicitType>>,

@@ -1700,7 +1700,7 @@ export interface Nursery {
 	/**
 	 * Require switch-case statements to exhaustive.
 	 */
-	useExhaustiveSwitchCases?: RuleConfiguration_for_Null;
+	useExhaustiveSwitchCases?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce types in functions, methods, variables, and parameters.
 	 */

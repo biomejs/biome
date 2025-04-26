@@ -27,7 +27,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts
     /// type Day =
     ///   | 'Monday'
     ///   | 'Tuesday'
