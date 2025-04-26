@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `check.js`
 
@@ -26,6 +27,24 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+check.js:3:52 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have a <explanation> placeholder.
+  
+    2 │         debugger;
+  > 3 │         // biome-ignore lint/performance/noDelete: <explanation>
+      │                                                    ^^^^^^^^^^^^^
+    4 │         delete obj.prop;
+    5 │     
+  
+  i A reason shouldn't have a <explanation> placeholder. Provide a valid reason instead.
+  
+  i Example of suppression: // biome-ignore lint: reason
+  
+
+```
+
+```block
 check.js:2:9 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This is an unexpected use of the debugger statement.
@@ -49,4 +68,5 @@ check.js:2:9 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
+Found 1 warning.
 ```

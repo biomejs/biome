@@ -527,3 +527,34 @@ function sommething(chalk: ChalkInstance) {
         result,
     ));
 }
+
+#[test]
+fn should_emit_diagnostics_for_incorrect_reason() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.ts");
+    fs.insert(
+        file_path.into(),
+        *b"// biome-ignore-all lint/style/useConst:
+var foo = 2;
+// biome-ignore-all lint/style/useConst: <explanation>
+var bar = 33;",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_emit_diagnostics_for_incorrect_reason",
+        fs,
+        console,
+        result,
+    ));
+}

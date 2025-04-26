@@ -18,7 +18,7 @@ function supported2(){
 
 function supported3(){
 	return (
-		// biome-ignore format:
+		// biome-ignore format: test
 		aVeryLongLogicalExpression &&
 		thatBreaksOverMultipleLines
 	);
