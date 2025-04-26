@@ -49,12 +49,12 @@ pub(crate) fn format_with_guard<'ctx>(
 
     let input = workspace_file.input()?;
     let should_write = ctx.execution.should_write();
-    let ignore_errors = ctx.execution.should_ignore_errors();
+    let skip_errors = ctx.execution.should_ignore_errors();
 
     tracing::Span::current().record("should_write", tracing::field::display(&should_write));
-    tracing::Span::current().record("ignore_errors", tracing::field::display(&ignore_errors));
+    tracing::Span::current().record("skip_errors", tracing::field::display(&skip_errors));
 
-    if diagnostics_result.errors > 0 && ignore_errors {
+    if diagnostics_result.errors > 0 && skip_errors {
         ctx.push_message(Message::from(
             SkippedDiagnostic.with_file_path(workspace_file.path.to_string()),
         ));
