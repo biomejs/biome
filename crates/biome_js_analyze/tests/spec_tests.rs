@@ -169,8 +169,6 @@ pub(crate) fn analyze_and_snap(
 
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
-    // FIXME: We probably want to enable it for all rules? Right now it seems to
-    //        trigger a leak panic...
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
     let module_graph = if needs_module_graph {
         module_graph_for_test_file(input_file, &project_layout)
