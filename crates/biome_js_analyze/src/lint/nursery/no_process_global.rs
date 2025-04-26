@@ -118,10 +118,10 @@ impl Rule for NoProcessGlobal {
 
         if let Some(import) = most_recent_import {
             slot = import.index();
-            new_items = smallvec![import, create_porcess_import(false).into()];
+            new_items = smallvec![import, create_process_import(false).into()];
         } else {
             new_items = smallvec![
-                create_porcess_import(true).into(),
+                create_process_import(true).into(),
                 module_item_list
                     .first_child()?
                     .with_leading_trivia_pieces([])?,
@@ -153,7 +153,7 @@ fn is_top_level_statement(node: &SyntaxNode<JsLanguage>) -> bool {
         .is_some_and(|node| JsModuleItemList::can_cast(node.kind()))
 }
 
-fn create_porcess_import(with_trailing_new_line: bool) -> JsImport {
+fn create_process_import(with_trailing_new_line: bool) -> JsImport {
     let whitespace = [(TriviaPieceKind::Whitespace, " ")];
     let new_line = [(TriviaPieceKind::Newline, "\n")];
     let mut semicolon = make::token(T![;]);
@@ -161,7 +161,7 @@ fn create_porcess_import(with_trailing_new_line: bool) -> JsImport {
         semicolon = semicolon.with_trailing_trivia(new_line);
     }
 
-    let source = make::js_module_source(make::js_string_literal("node::process"));
+    let source = make::js_module_source(make::js_string_literal("node:process"));
     let binding =
         make::js_identifier_binding(make::ident("process").with_trailing_trivia(whitespace));
     let specifier = make::js_default_import_specifier(binding.into());
