@@ -445,71 +445,48 @@ pub trait Collator {
     ) -> Ordering {
         let mut iter1 = iter1.into_iter();
         let mut iter2 = iter2.into_iter();
-        loop {
-            match (iter1.next(), iter2.next()) {
-                (Some(c1), Some(c2)) if c1 == c2 => {}
-                (Some(mut c1), Some(mut c2)) => {
-                    if let (Some(n1), Some(n2)) =
-                        (self.as_ascii_digit(&c1), self.as_ascii_digit(&c2))
-                    {
-                        // Compare numbers
-                        // We don't skip leading zeroes.
-                        let mut number_ordering = n1.cmp(&n2);
-                        loop {
-                            match (iter1.next(), iter2.next()) {
-                                (None, None) => {
-                                    return number_ordering;
-                                }
-                                (None, Some(_)) => {
-                                    return Ordering::Less;
-                                }
-                                (Some(_), None) => {
-                                    return Ordering::Greater;
-                                }
-                                (Some(next1), Some(next2)) => {
-                                    c1 = next1;
-                                    c2 = next2;
-                                }
-                            }
-                            match (self.as_ascii_digit(&c1), self.as_ascii_digit(&c2)) {
-                                (Some(n1), Some(_n2)) => {
-                                    number_ordering = number_ordering.then(n1.cmp(&n2));
-                                }
-                                (Some(_), None) => {
-                                    return Ordering::Greater;
-                                }
-                                (None, Some(_)) => {
-                                    return Ordering::Less;
-                                }
-                                (None, None) => match number_ordering {
-                                    Ordering::Equal => {
-                                        break;
-                                    }
-                                    ordering => {
-                                        return ordering;
-                                    }
-                                },
-                            }
+        return match (iter1.next(), iter2.next()) {
+            (Some(c1), Some(c2)) if c1 == c2 => Ordering::Equal,
+            (Some(mut c1), Some(mut c2)) => {
+                if let (Some(n1), Some(n2)) = (self.as_ascii_digit(&c1), self.as_ascii_digit(&c2)) {
+                    // Compare numbers
+                    // We don't skip leading zeroes.
+                    let mut number_ordering = n1.cmp(&n2);
+                    match (iter1.next(), iter2.next()) {
+                        (None, None) => {
+                            return number_ordering;
+                        }
+                        (None, Some(_)) => {
+                            return Ordering::Less;
+                        }
+                        (Some(_), None) => {
+                            return Ordering::Greater;
+                        }
+                        (Some(next1), Some(next2)) => {
+                            c1 = next1;
+                            c2 = next2;
                         }
                     }
-                    match self.weight(&c1).cmp(&self.weight(&c2)) {
-                        Ordering::Equal => {}
-                        ordering => {
-                            return ordering;
+                    match (self.as_ascii_digit(&c1), self.as_ascii_digit(&c2)) {
+                        (Some(n1), Some(_n2)) => {
+                            number_ordering = number_ordering.then(n1.cmp(&n2));
                         }
+                        (Some(_), None) => {
+                            return Ordering::Greater;
+                        }
+                        (None, Some(_)) => {
+                            return Ordering::Less;
+                        }
+                        (None, None) => return number_ordering,
                     }
+                    return number_ordering;
                 }
-                (None, Some(_)) => {
-                    return Ordering::Less;
-                }
-                (None, None) => {
-                    return Ordering::Equal;
-                }
-                (Some(_), None) => {
-                    return Ordering::Greater;
-                }
+                return self.weight(&c1).cmp(&self.weight(&c2));
             }
-        }
+            (None, Some(_)) => Ordering::Less,
+            (None, None) => Ordering::Equal,
+            (Some(_), None) => Ordering::Greater,
+        };
     }
 }
 
