@@ -33,11 +33,16 @@ declare_source_rule! {
     }
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Debug)]
 pub struct MemberKey {
     node: JsonMember,
 }
-
+impl Eq for MemberKey {}
+impl PartialEq for MemberKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other) == Ordering::Equal
+    }
+}
 impl Ord for MemberKey {
     fn cmp(&self, other: &Self) -> Ordering {
         // Keep the order for elements that cannot be compared
