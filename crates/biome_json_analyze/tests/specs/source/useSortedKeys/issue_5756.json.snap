@@ -5,462 +5,64 @@ expression: issue_5756.json
 # Input
 ```json
 {
-  "282828": [
-    {
-      "cssNote": "",
-      "usageNote": "UI leet"
-    }
-  ],
-  "404040": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "444444": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "493099": [
-    {
-      "cssNote": "",
-      "usageNote": "burnedParagon"
-    }
-  ],
-  "555555": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "666666": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "696969": [
-    {
-      "cssNote": "(`dimgray`, `color-black` CSS class)",
-      "usageNote": "kitten color 3"
-    }
-  ],
-  "777777": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "808080": [
-    {
-      "cssNote": "(`gray`)",
-      "usageNote": "alloy"
-    },
-    {
-      "cssNote": "(`gray`)",
-      "usageNote": "faith"
-    },
-    {
-      "cssNote": "(`gray`)",
-      "usageNote": "gear"
-    },
-    {
-      "cssNote": "(`gray`)",
-      "usageNote": "megalith"
-    },
-    {
-      "cssNote": "(`gray`)",
-      "usageNote": "steel"
-    }
-  ],
-  "999999": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "000000": [
-    {
-      "cssNote": "(`black`)",
-      "usageNote": "sorrow"
-    }
-  ],
-  "0000FF": [
-    {
-      "cssNote": "",
-      "usageNote": "UI rainbow 4"
-    }
-  ],
-  "001F3F": [
-    {
-      "cssNote": "",
-      "usageNote": "`pulse` animation 0"
-    }
-  ],
-  "008000": [
-    {
-      "cssNote": "(`green`)",
-      "usageNote": "UI only"
-    }
-  ],
-  "00E6B8": [
-    {
-      "cssNote": "",
-      "usageNote": "tMythril"
-    }
-  ],
-  "00FF00": [
-    {
-      "cssNote": "",
-      "usageNote": "UI rainbow 2"
-    }
-  ],
-  "00FFFF": [
-    {
-      "cssNote": "",
-      "usageNote": "UI rainbow 3"
-    }
-  ],
-  "01A9DB": [
-    {
-      "cssNote": "",
-      "usageNote": "`notice` message"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "blueprint"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "compedium"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "cycleYear 3"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "manuscript"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "science"
-    }
-  ],
-  "14CD61": [
-    {
-      "cssNote": "",
-      "usageNote": "cycleYear 2"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "timeCrystal"
-    }
-  ],
-  "33FF00": [
-    {
-      "cssNote": "",
-      "usageNote": "UI leet"
-    }
-  ],
-  "4EA24E": [
-    {
-      "cssNote": "",
-      "usageNote": "thorium"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "uranium"
-    }
-  ],
-  "5A0EDE": [
-    {
-      "cssNote": "",
-      "usageNote": "antimatter"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "relic"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "void"
-    }
-  ],
-  "6141CD": [
-    {
-      "cssNote": "",
-      "usageNote": "paragon"
-    }
-  ],
-  "64C864": [
-    {
-      "cssNote": "",
-      "usageNote": "UI progress bar"
-    }
-  ],
-  "8A2BE2": [
-    {
-      "cssNote": "(`blueviolet`)",
-      "usageNote": "`urgent` message"
-    }
-  ],
-  "8B0000": [
-    {
-      "cssNote": "(`darkred`)",
-      "usageNote": "UI only"
-    }
-  ],
-  "8B4513": [
-    {
-      "cssNote": "(`saddlebrown`, `color-brown` CSS class)",
-      "usageNote": "kitten color 0"
-    }
-  ],
-  "9400D3": [
-    {
-      "cssNote": "(`darkViolet`)",
-      "usageNote": "eludium"
-    }
-  ],
-  "9A2EFE": [
-    {
-      "cssNote": "",
-      "usageNote": "UI neon-purple"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "cycleYear 4"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "starchart"
-    }
-  ],
-  "A00000": [
-    {
-      "cssNote": "",
-      "usageNote": "cycleYear 0"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "unobtainium"
-    }
-  ],
-  "A8A7AC": [
-    {
-      "cssNote": "",
-      "usageNote": "UI tooltip"
-    }
-  ],
-  "AAAAAA": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "C0C0C0": [
-    {
-      "cssNote": "(`silver`, `color-white` CSS class)",
-      "usageNote": "kitten color 5"
-    }
-  ],
-  "CD853F": [
-    {
-      "cssNote": "(`peru`)",
-      "usageNote": "kitten variety"
-    }
-  ],
-  "CECEC3": [
-    {
-      "cssNote": "",
-      "usageNote": "UI progress bar"
-    }
-  ],
-  "CF4F20": [
-    {
-      "cssNote": "",
-      "usageNote": "tanker"
-    }
-  ],
-  "D2B48C": [
-    {
-      "cssNote": "(`tan`, `color-cream` CSS class)",
-      "usageNote": "kitten color 2"
-    }
-  ],
-  "D3D3D3": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "DBA901": [
-    {
-      "cssNote": "",
-      "usageNote": "cycleYear 1"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "manpower"
-    }
-  ],
-  "DCDCDC": [
-    {
-      "cssNote": "(`gainsboro`)",
-      "usageNote": "UI credits"
-    }
-  ],
-  "DF01D7": [
-    {
-      "cssNote": "",
-      "usageNote": "culture"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "parchment"
-    }
-  ],
-  "E00000": [
-    {
-      "cssNote": "",
-      "usageNote": "necrocorn"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "necrocornDeficit"
-    }
-  ],
-  "EEEEEE": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "EFEFF4": [
-    {
-      "cssNote": "",
-      "usageNote": "UI tooltip"
-    }
-  ],
-  "F4A460": [
-    {
-      "cssNote": "(`sandybrown`, `color-fawn` CSS class)",
-      "usageNote": "kitten color 4"
-    }
-  ],
-  "F6F6F6": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "F9F9F9": [
-    {
-      "cssNote": "",
-      "usageNote": "UI only"
-    }
-  ],
-  "FA0EDE": [
-    {
-      "cssNote": "",
-      "usageNote": "elderBox"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "wrappingPaper"
-    }
-  ],
-  "FF0000": [
-    {
-      "cssNote": "(`red`)",
-      "usageNote": "`alert` message"
-    },
-    {
-      "cssNote": "(`red`)",
-      "usageNote": "bloodstone"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "UI rainbow 0"
-    }
-  ],
-  "FF00FF": [
-    {
-      "cssNote": "",
-      "usageNote": "UI rainbow 5"
-    }
-  ],
-  "FF3030": [
-    {
-      "cssNote": "",
-      "usageNote": "UI `noRes`"
-    }
-  ],
-  "FF4136": [
-    {
-      "cssNote": "",
-      "usageNote": "`pulse` animation 1"
-    }
-  ],
-  "FF571A": [
-    {
-      "cssNote": "",
-      "usageNote": "ship"
-    }
-  ],
-  "FF7F50": [
-    {
-      "cssNote": "(`Coral`)",
-      "usageNote": "`uncommon` resources"
-    },
-    {
-      "cssNote": "(`coral`)",
-      "usageNote": "`important` message"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "date message"
-    },
-    {
-      "cssNote": "",
-      "usageNote": "scaffold"
-    }
-  ],
-  "FFA500": [
-    {
-      "cssNote": "(`orange`)",
-      "usageNote": "`rare` resources + textShadow: \"1px 0px 10px Coral\""
-    }
-  ],
-  "FFD700": [
-    {
-      "cssNote": "(`gold`)",
-      "usageNote": "blackcoin"
-    }
-  ],
-  "FFFF00": [
-    {
-      "cssNote": "",
-      "usageNote": "UI rainbow 1"
-    }
-  ],
-  "FFFFFF": [
-    {
-      "cssNote": "(`color-cinamon` CSS class, TYPO 'cinnamon')",
-      "usageNote": "kitten color 1"
-    },
-    {
-      "cssNote": "(`color-lilac` CSS class)",
-      "usageNote": "kitten color 6"
-    },
-    {
-      "cssNote": "(`darkYellow` NOT A VALID HTML COLOR)",
-      "usageNote": "kerosene"
-    }
-  ]
+  "282828": null,
+  "404040": null,
+  "444444": null,
+  "493099": null,
+  "555555": null,
+  "666666": null,
+  "696969": null,
+  "777777": null,
+  "808080": null,
+  "999999": null,
+  "000000": null,
+  "0000FF": null,
+  "001F3F": null,
+  "008000": null,
+  "00E6B8": null,
+  "00FF00": null,
+  "00FFFF": null,
+  "01A9DB": null,
+  "14CD61": null,
+  "33FF00": null,
+  "4EA24E": null,
+  "5A0EDE": null,
+  "6141CD": null,
+  "64C864": null,
+  "8A2BE2": null,
+  "8B0000": null,
+  "8B4513": null,
+  "9400D3": null,
+  "9A2EFE": null,
+  "A00000": null,
+  "A8A7AC": null,
+  "AAAAAA": null,
+  "C0C0C0": null,
+  "CD853F": null,
+  "CECEC3": null,
+  "CF4F20": null,
+  "D2B48C": null,
+  "D3D3D3": null,
+  "DBA901": null,
+  "DCDCDC": null,
+  "DF01D7": null,
+  "E00000": null,
+  "EEEEEE": null,
+  "EFEFF4": null,
+  "F4A460": null,
+  "F6F6F6": null,
+  "F9F9F9": null,
+  "FA0EDE": null,
+  "FF0000": null,
+  "FF00FF": null,
+  "FF3030": null,
+  "FF4136": null,
+  "FF571A": null,
+  "FF7F50": null,
+  "FFA500": null,
+  "FFD700": null,
+  "FFFF00": null,
+  "FFFFFF": null
 }
 
 ```
@@ -471,172 +73,139 @@ issue_5756.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━�
 
   i The keys are not sorted.
   
-    > 1 │ {
-        │ ^
-    > 2 │   "282828": [
-    > 3 │     {
-    > 4 │       "cssNote": "",
-         ...
-  > 456 │     }
-  > 457 │   ]
-  > 458 │ }
-        │ ^
-    459 │ 
+   > 1 │ {
+       │ ^
+   > 2 │   "282828": null,
+   > 3 │   "404040": null,
+   > 4 │   "444444": null,
+        ...
+  > 58 │   "FFFF00": null,
+  > 59 │   "FFFFFF": null
+  > 60 │ }
+       │ ^
+    61 │ 
   
   i Safe fix: They keys of the current object can be sorted.
   
-      1   1 │   {
-      2     │ - ··"282828":·[
-          2 │ + ··"AAAAAA":·[
-      3   3 │       {
-      4   4 │         "cssNote": "",
-      5     │ - ······"usageNote":·"UI·leet"
-          5 │ + ······"usageNote":·"UI·only"
-      6   6 │       }
-      7   7 │     ],
-      8     │ - ··"404040":·[
-          8 │ + ··"A8A7AC":·[
-      9   9 │       {
-     10  10 │         "cssNote": "",
-     11     │ - ······"usageNote":·"UI·only"
-         11 │ + ······"usageNote":·"UI·tooltip"
-     12  12 │       }
-     13  13 │     ],
-     14     │ - ··"444444":·[
-         14 │ + ··"A00000":·[
-     15  15 │       {
-     16  16 │         "cssNote": "",
-     17     │ - ······"usageNote":·"UI·only"
-     18     │ - ····}
-         17 │ + ······"usageNote":·"cycleYear·0"
-         18 │ + ····},
-         19 │ + ····{
-         20 │ + ······"cssNote":·"",
-         21 │ + ······"usageNote":·"unobtainium"
-         22 │ + ····}
-     19  23 │     ],
-     20     │ - ··"493099":·[
-         24 │ + ··"CD853F":·[
-     21  25 │       {
-     22     │ - ······"cssNote":·"",
-     23     │ - ······"usageNote":·"burnedParagon"
-         26 │ + ······"cssNote":·"(`peru`)",
-         27 │ + ······"usageNote":·"kitten·variety"
-     24  28 │       }
-     25  29 │     ],
-     26     │ - ··"555555":·[
-         30 │ + ··"CECEC3":·[
-     27  31 │       {
-     28  32 │         "cssNote": "",
-     29     │ - ······"usageNote":·"UI·only"
-         33 │ + ······"usageNote":·"UI·progress·bar"
-     30  34 │       }
-     31  35 │     ],
-     32     │ - ··"666666":·[
-         36 │ + ··"CF4F20":·[
-     33  37 │       {
-     34  38 │         "cssNote": "",
-     35     │ - ······"usageNote":·"UI·only"
-         39 │ + ······"usageNote":·"tanker"
-     36  40 │       }
-     37  41 │     ],
-     38     │ - ··"696969":·[
-         42 │ + ··"C0C0C0":·[
-     39  43 │       {
-     40     │ - ······"cssNote":·"(`dimgray`,·`color-black`·CSS·class)",
-     41     │ - ······"usageNote":·"kitten·color·3"
-         44 │ + ······"cssNote":·"(`silver`,·`color-white`·CSS·class)",
-         45 │ + ······"usageNote":·"kitten·color·5"
-     42  46 │       }
-     43  47 │     ],
-     44     │ - ··"777777":·[
-         48 │ + ··"DBA901":·[
-     45  49 │       {
-     46  50 │         "cssNote": "",
-     47     │ - ······"usageNote":·"UI·only"
-     48     │ - ····}
-     49     │ - ··],
-     50     │ - ··"808080":·[
-         51 │ + ······"usageNote":·"cycleYear·1"
-         52 │ + ····},
-     51  53 │       {
-     52     │ - ······"cssNote":·"(`gray`)",
-     53     │ - ······"usageNote":·"alloy"
-     54     │ - ····},
-         54 │ + ······"cssNote":·"",
-         55 │ + ······"usageNote":·"manpower"
-         56 │ + ····}
-         57 │ + ··],
-         58 │ + ··"DCDCDC":·[
-     55  59 │       {
-     56     │ - ······"cssNote":·"(`gray`)",
-     57     │ - ······"usageNote":·"faith"
-     58     │ - ····},
-         60 │ + ······"cssNote":·"(`gainsboro`)",
-         61 │ + ······"usageNote":·"UI·credits"
-         62 │ + ····}
-         63 │ + ··],
-         64 │ + ··"DF01D7":·[
-     59  65 │       {
-     60     │ - ······"cssNote":·"(`gray`)",
-     61     │ - ······"usageNote":·"gear"
-         66 │ + ······"cssNote":·"",
-         67 │ + ······"usageNote":·"culture"
-     62  68 │       },
-     63  69 │       {
-     64     │ - ······"cssNote":·"(`gray`)",
-     65     │ - ······"usageNote":·"megalith"
-     66     │ - ····},
-         70 │ + ······"cssNote":·"",
-         71 │ + ······"usageNote":·"parchment"
-         72 │ + ····}
-         73 │ + ··],
-         74 │ + ··"D2B48C":·[
-     67  75 │       {
-     68     │ - ······"cssNote":·"(`gray`)",
-     69     │ - ······"usageNote":·"steel"
-         76 │ + ······"cssNote":·"(`tan`,·`color-cream`·CSS·class)",
-         77 │ + ······"usageNote":·"kitten·color·2"
-     70  78 │       }
-     71  79 │     ],
-     72     │ - ··"999999":·[
-         80 │ + ··"D3D3D3":·[
-     73  81 │       {
-     74  82 │         "cssNote": "",
-    ······· │ 
-     76  84 │       }
-     77  85 │     ],
-     78     │ - ··"000000":·[
-         86 │ + ··"EEEEEE":·[
-     79  87 │       {
-     80     │ - ······"cssNote":·"(`black`)",
-     81     │ - ······"usageNote":·"sorrow"
-         88 │ + ······"cssNote":·"",
-         89 │ + ······"usageNote":·"UI·only"
-     82  90 │       }
-     83  91 │     ],
-     84     │ - ··"0000FF":·[
-         92 │ + ··"EFEFF4":·[
-     85  93 │       {
-     86  94 │         "cssNote": "",
-     87     │ - ······"usageNote":·"UI·rainbow·4"
-         95 │ + ······"usageNote":·"UI·tooltip"
-     88  96 │       }
-     89  97 │     ],
-     90     │ - ··"001F3F":·[
-         98 │ + ··"E00000":·[
-     91  99 │       {
-     92 100 │         "cssNote": "",
-     93     │ - ······"usageNote":·"`pulse`·animation·0"
-     94     │ - ····}
-     95     │ - ··],
-     96     │ - ··"008000":·[
-        101 │ + ······"usageNote":·"necrocorn"
-        102 │ + ····},
-     97 103 │       {
-     98     │ - ······"cssNote":·"(`green`)",
-     99     │ - ······"usageNote":·"UI·only"
-  538 more lines truncated
+     1  1 │   {
+     2    │ - ··"282828":·null,
+     3    │ - ··"404040":·null,
+     4    │ - ··"444444":·null,
+     5    │ - ··"493099":·null,
+     6    │ - ··"555555":·null,
+     7    │ - ··"666666":·null,
+     8    │ - ··"696969":·null,
+     9    │ - ··"777777":·null,
+    10    │ - ··"808080":·null,
+    11    │ - ··"999999":·null,
+    12    │ - ··"000000":·null,
+    13    │ - ··"0000FF":·null,
+    14    │ - ··"001F3F":·null,
+    15    │ - ··"008000":·null,
+    16    │ - ··"00E6B8":·null,
+    17    │ - ··"00FF00":·null,
+    18    │ - ··"00FFFF":·null,
+    19    │ - ··"01A9DB":·null,
+    20    │ - ··"14CD61":·null,
+    21    │ - ··"33FF00":·null,
+    22    │ - ··"4EA24E":·null,
+    23    │ - ··"5A0EDE":·null,
+    24    │ - ··"6141CD":·null,
+    25    │ - ··"64C864":·null,
+    26    │ - ··"8A2BE2":·null,
+    27    │ - ··"8B0000":·null,
+    28    │ - ··"8B4513":·null,
+    29    │ - ··"9400D3":·null,
+    30    │ - ··"9A2EFE":·null,
+    31    │ - ··"A00000":·null,
+    32    │ - ··"A8A7AC":·null,
+    33    │ - ··"AAAAAA":·null,
+    34    │ - ··"C0C0C0":·null,
+    35    │ - ··"CD853F":·null,
+    36    │ - ··"CECEC3":·null,
+    37    │ - ··"CF4F20":·null,
+    38    │ - ··"D2B48C":·null,
+    39    │ - ··"D3D3D3":·null,
+    40    │ - ··"DBA901":·null,
+    41    │ - ··"DCDCDC":·null,
+    42    │ - ··"DF01D7":·null,
+    43    │ - ··"E00000":·null,
+    44    │ - ··"EEEEEE":·null,
+    45    │ - ··"EFEFF4":·null,
+    46    │ - ··"F4A460":·null,
+    47    │ - ··"F6F6F6":·null,
+    48    │ - ··"F9F9F9":·null,
+    49    │ - ··"FA0EDE":·null,
+    50    │ - ··"FF0000":·null,
+    51    │ - ··"FF00FF":·null,
+    52    │ - ··"FF3030":·null,
+    53    │ - ··"FF4136":·null,
+    54    │ - ··"FF571A":·null,
+    55    │ - ··"FF7F50":·null,
+    56    │ - ··"FFA500":·null,
+    57    │ - ··"FFD700":·null,
+    58    │ - ··"FFFF00":·null,
+    59    │ - ··"FFFFFF":·null
+        2 │ + ··"AAAAAA":·null,
+        3 │ + ··"A8A7AC":·null,
+        4 │ + ··"A00000":·null,
+        5 │ + ··"CD853F":·null,
+        6 │ + ··"CECEC3":·null,
+        7 │ + ··"CF4F20":·null,
+        8 │ + ··"C0C0C0":·null,
+        9 │ + ··"DBA901":·null,
+       10 │ + ··"DCDCDC":·null,
+       11 │ + ··"DF01D7":·null,
+       12 │ + ··"D2B48C":·null,
+       13 │ + ··"D3D3D3":·null,
+       14 │ + ··"EEEEEE":·null,
+       15 │ + ··"EFEFF4":·null,
+       16 │ + ··"E00000":·null,
+       17 │ + ··"FA0EDE":·null,
+       18 │ + ··"FFA500":·null,
+       19 │ + ··"FFD700":·null,
+       20 │ + ··"FFFFFF":·null,
+       21 │ + ··"FFFF00":·null,
+       22 │ + ··"FF7F50":·null,
+       23 │ + ··"FF00FF":·null,
+       24 │ + ··"FF571A":·null,
+       25 │ + ··"FF0000":·null,
+       26 │ + ··"FF3030":·null,
+       27 │ + ··"FF4136":·null,
+       28 │ + ··"F4A460":·null,
+       29 │ + ··"F6F6F6":·null,
+       30 │ + ··"F9F9F9":·null,
+       31 │ + ··"4EA24E":·null,
+       32 │ + ··"5A0EDE":·null,
+       33 │ + ··"8A2BE2":·null,
+       34 │ + ··"8B0000":·null,
+       35 │ + ··"8B4513":·null,
+       36 │ + ··"9A2EFE":·null,
+       37 │ + ··"00E6B8":·null,
+       38 │ + ··"00FFFF":·null,
+       39 │ + ··"00FF00":·null,
+       40 │ + ··"01A9DB":·null,
+       41 │ + ··"14CD61":·null,
+       42 │ + ··"33FF00":·null,
+       43 │ + ··"64C864":·null,
+       44 │ + ··"001F3F":·null,
+       45 │ + ··"0000FF":·null,
+       46 │ + ··"6141CD":·null,
+       47 │ + ··"9400D3":·null,
+       48 │ + ··"000000":·null,
+       49 │ + ··"008000":·null,
+       50 │ + ··"282828":·null,
+       51 │ + ··"404040":·null,
+       52 │ + ··"444444":·null,
+       53 │ + ··"493099":·null,
+       54 │ + ··"555555":·null,
+       55 │ + ··"666666":·null,
+       56 │ + ··"696969":·null,
+       57 │ + ··"777777":·null,
+       58 │ + ··"808080":·null,
+       59 │ + ··"999999":·null
+    60 60 │   }
+    61 61 │   
   
 
 ```
