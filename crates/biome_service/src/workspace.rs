@@ -637,6 +637,14 @@ pub struct GetControlFlowGraphParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct GetTypeInfoParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFormatterIRParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -1152,6 +1160,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// document.
     fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
 
+    /// Returns a textual, debug representation of the control flow graph at a
+    /// given position in the document.
+    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
+
     /// Returns the content of a given file.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
 
@@ -1296,6 +1308,13 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
                 path: self.path.clone(),
                 cursor,
             })
+    }
+
+    pub fn get_type_info(&self) -> Result<String, WorkspaceError> {
+        self.workspace.get_type_info(GetTypeInfoParams {
+            project_key: self.project_key,
+            path: self.path.clone(),
+        })
     }
 
     pub fn change_file(&self, version: i32, content: String) -> Result<(), WorkspaceError> {

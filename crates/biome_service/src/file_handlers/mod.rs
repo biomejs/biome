@@ -450,6 +450,7 @@ type DebugFormatterIR = fn(
     AnyParse,
     WorkspaceSettingsHandle,
 ) -> Result<String, WorkspaceError>;
+type DebugTypeInfo = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -459,6 +460,8 @@ pub struct DebugCapabilities {
     pub(crate) debug_control_flow: Option<DebugControlFlow>,
     /// Prints the formatter IR
     pub(crate) debug_formatter_ir: Option<DebugFormatterIR>,
+    /// Prints the type info
+    pub(crate) debug_type_info: Option<DebugTypeInfo>,
 }
 
 #[derive(Debug)]
