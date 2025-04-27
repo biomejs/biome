@@ -445,6 +445,7 @@ pub trait Collator {
     ) -> Ordering {
         let mut iter1 = iter1.into_iter();
         let mut iter2 = iter2.into_iter();
+        let mut prev = None;
         loop {
             match (iter1.next(), iter2.next()) {
                 (None, None) => {
@@ -460,6 +461,7 @@ pub trait Collator {
                     return Ordering::Greater;
                 }
                 (Some(c1), Some(c2)) if c1 == c2 => {
+                    prev = Some(c1);
                     // For now, all characters of `iter1` and `iter2` are equal.
                 }
                 (Some(mut c1), Some(mut c2)) => {
@@ -476,14 +478,22 @@ pub trait Collator {
                                 return number_ordering;
                             }
                             (None, Some(_)) => {
-                                // right has more digits than left.
-                                // Thus left is smaller than right.
-                                return Ordering::Less;
+                                // We consider that we compare numbers if they have at least one digit.
+                                if prev.is_some_and(|c| self.as_ascii_digit(&c).is_some()) {
+                                    // right has more digits than left.
+                                    // Thus left is smaller than right.
+                                    return Ordering::Less;
+                                }
+                                break;
                             }
                             (Some(_), None) => {
-                                // left has more digits than right.
-                                // Thus left is larger than right.
-                                return Ordering::Greater;
+                                // We consider that we compare numbers if they have at least one digit.
+                                if prev.is_some_and(|c| self.as_ascii_digit(&c).is_some()) {
+                                    // left has more digits than right.
+                                    // Thus left is larger than right.
+                                    return Ordering::Greater;
+                                }
+                                break;
                             }
                             (Some(n1), Some(n2)) => {
                                 // Even if `number_ordering` is not `Ordering::Equal`,
@@ -520,17 +530,17 @@ pub trait Collator {
                                 };
                             }
                             (Some(next1), Some(next2)) => {
+                                prev = Some(c1);
                                 c1 = next1;
                                 c2 = next2;
                             }
                         }
                     }
-                    match self.weight(&c1).cmp(&self.weight(&c2)) {
-                        Ordering::Equal => {}
-                        ordering => {
-                            return ordering;
-                        }
+                    let ordering = self.weight(&c1).cmp(&self.weight(&c2));
+                    if ordering != Ordering::Equal {
+                        return ordering;
                     }
+                    prev = Some(c1);
                 }
             }
         }
@@ -1184,5 +1194,7 @@ mod tests {
 
         assert_eq!("1a".ascii_nat_cmp("9"), Ordering::Less);
         assert_eq!("9".ascii_nat_cmp("1a"), Ordering::Greater);
+
+        assert_eq!("0".ascii_nat_cmp("a"), Ordering::Less);
     }
 }
