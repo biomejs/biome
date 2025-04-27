@@ -65,7 +65,7 @@ issue_5601.jsx:17:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
     15 15 │   	- with single quotes outside and double quotes inside */
     16 16 │   }
     17    │ - <div·class='flex·gap-2·p-4·m-2·[&_svg:not([class*="size-"])]:w-4·items-center'·/>;
-       17 │ + <div·class="m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*='size-'])]:w-4"·/>;
+       17 │ + <div·class='m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*="size-"])]:w-4'·/>;
     18 18 │   
   
 

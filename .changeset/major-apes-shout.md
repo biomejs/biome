@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#5601](https://github.com/biomejs/biome/issues/5601): The linter now respects the preferred JSX quote style and safely converts conflicting inner quotes in class attributes, preventing syntax errors when sorting utility classes
+Fixed [#5601](https://github.com/biomejs/biome/issues/5601): The linter now properly preserves the original JSX quote style when sorting utility classes, preventing syntax errors.
