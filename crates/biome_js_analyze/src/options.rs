@@ -427,6 +427,7 @@ pub type UseSimpleNumberKeys =
     <lint::complexity::use_simple_number_keys::UseSimpleNumberKeys as biome_analyze::Rule>::Options;
 pub type UseSimplifiedLogicExpression = < lint :: complexity :: use_simplified_logic_expression :: UseSimplifiedLogicExpression as biome_analyze :: Rule > :: Options ;
 pub type UseSingleCaseStatement = < lint :: style :: use_single_case_statement :: UseSingleCaseStatement as biome_analyze :: Rule > :: Options ;
+pub type UseSingleJsDocAsterisk = < lint :: nursery :: use_single_js_doc_asterisk :: UseSingleJsDocAsterisk as biome_analyze :: Rule > :: Options ;
 pub type UseSingleVarDeclarator = < lint :: style :: use_single_var_declarator :: UseSingleVarDeclarator as biome_analyze :: Rule > :: Options ;
 pub type UseSortedAttributes =
     <assist::source::use_sorted_attributes::UseSortedAttributes as biome_analyze::Rule>::Options;
