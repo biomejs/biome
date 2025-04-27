@@ -447,48 +447,81 @@ pub trait Collator {
         let mut iter2 = iter2.into_iter();
         loop {
             match (iter1.next(), iter2.next()) {
-                (Some(c1), Some(c2)) if c1 == c2 => {}
+                (None, None) => {
+                    // All characters of `iter1` and `iter2` are equal.
+                    return Ordering::Equal;
+                }
+                (None, Some(_)) => {
+                    // `iter1` is a prefix of `iter2`.
+                    return Ordering::Less;
+                }
+                (Some(_), None) => {
+                    // `iter2` is a prefix of `iter1`.
+                    return Ordering::Greater;
+                }
+                (Some(c1), Some(c2)) if c1 == c2 => {
+                    // For now, all characters of `iter1` and `iter2` are equal.
+                }
                 (Some(mut c1), Some(mut c2)) => {
-                    if let (Some(n1), Some(n2)) =
-                        (self.as_ascii_digit(&c1), self.as_ascii_digit(&c2))
-                    {
-                        // Compare numbers
-                        // We don't skip leading zeroes.
-                        let mut number_ordering = n1.cmp(&n2);
-                        loop {
-                            match (iter1.next(), iter2.next()) {
-                                (None, None) => {
-                                    return number_ordering;
+                    let mut number_ordering = Ordering::Equal;
+                    // Compare numbers
+                    // We don't skip leading zeroes.
+                    loop {
+                        match (self.as_ascii_digit(&c1), self.as_ascii_digit(&c2)) {
+                            (None, None) => {
+                                if number_ordering == Ordering::Equal {
+                                    // The numbers are equal, we have to compare `c1` and `c2` that are not digits.
+                                    break;
                                 }
-                                (None, Some(_)) => {
-                                    return Ordering::Less;
-                                }
-                                (Some(_), None) => {
-                                    return Ordering::Greater;
-                                }
-                                (Some(next1), Some(next2)) => {
-                                    c1 = next1;
-                                    c2 = next2;
-                                }
+                                return number_ordering;
                             }
-                            match (self.as_ascii_digit(&c1), self.as_ascii_digit(&c2)) {
-                                (Some(n1), Some(_n2)) => {
-                                    number_ordering = number_ordering.then(n1.cmp(&n2));
-                                }
-                                (Some(_), None) => {
-                                    return Ordering::Greater;
-                                }
-                                (None, Some(_)) => {
-                                    return Ordering::Less;
-                                }
-                                (None, None) => match number_ordering {
-                                    Ordering::Equal => {
-                                        break;
-                                    }
-                                    ordering => {
-                                        return ordering;
-                                    }
-                                },
+                            (None, Some(_)) => {
+                                // right has more digits than left.
+                                // Thus left is smaller than right.
+                                return Ordering::Less;
+                            }
+                            (Some(_), None) => {
+                                // left has more digits than right.
+                                // Thus left is larger than right.
+                                return Ordering::Greater;
+                            }
+                            (Some(n1), Some(n2)) => {
+                                // Even if `number_ordering` is not `Ordering::Equal`,
+                                // we cannot return `number_ordering` because we have to check how many digits there are.
+                                // If one has more digits, then it is larger than the other regardless of `number_ordering`.
+                                // For example, `10` is larger than `9`, while `1` is smaller than `1`.
+                                number_ordering = number_ordering.then(n1.cmp(&n2));
+                            }
+                        }
+                        match (iter1.next(), iter2.next()) {
+                            (None, None) => {
+                                // left and right have the same number of digits.
+                                // Thus, the order of the first digit correspond to their order.
+                                return number_ordering;
+                            }
+                            (None, Some(c2)) => {
+                                return if self.as_ascii_digit(&c2).is_some() {
+                                    // right has more digits than left.
+                                    // Thus, left is smaller than right.
+                                    Ordering::Less
+                                } else {
+                                    // left and right have the same number of digits.
+                                    number_ordering.then(Ordering::Less)
+                                };
+                            }
+                            (Some(c1), None) => {
+                                return if self.as_ascii_digit(&c1).is_some() {
+                                    // left has more digits than right.
+                                    // Thus, left is larger than right.
+                                    Ordering::Greater
+                                } else {
+                                    // left and right have the same number of digits.
+                                    number_ordering.then(Ordering::Greater)
+                                };
+                            }
+                            (Some(next1), Some(next2)) => {
+                                c1 = next1;
+                                c2 = next2;
                             }
                         }
                     }
@@ -498,15 +531,6 @@ pub trait Collator {
                             return ordering;
                         }
                     }
-                }
-                (None, Some(_)) => {
-                    return Ordering::Less;
-                }
-                (None, None) => {
-                    return Ordering::Equal;
-                }
-                (Some(_), None) => {
-                    return Ordering::Greater;
                 }
             }
         }
@@ -1157,5 +1181,8 @@ mod tests {
         assert_eq!("a00b".ascii_nat_cmp("a01b"), Ordering::Less);
 
         assert_eq!("a10".ascii_nat_cmp("a009"), Ordering::Less);
+
+        assert_eq!("1a".ascii_nat_cmp("9"), Ordering::Less);
+        assert_eq!("9".ascii_nat_cmp("1a"), Ordering::Greater);
     }
 }
