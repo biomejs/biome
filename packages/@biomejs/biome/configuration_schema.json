@@ -3169,11 +3169,11 @@
 					"items": { "type": "string" }
 				},
 				"importNamePattern": {
-					"description": "A regex pattern for import names to forbid within the matched modules. Cannot be used with allowImportNames and allowImportNamePattern.",
+					"description": "A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.",
 					"type": ["string", "null"]
 				},
 				"importNames": {
-					"description": "An array of specific import names to forbid within the matched modules. Cannot be used with allowImportNames and allowImportNamePattern.",
+					"description": "An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},

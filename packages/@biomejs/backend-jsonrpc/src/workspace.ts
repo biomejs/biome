@@ -3218,11 +3218,11 @@ export interface PatternOptions {
 	 */
 	group?: string[];
 	/**
-	 * A regex pattern for import names to forbid within the matched modules. Cannot be used with allowImportNames and allowImportNamePattern.
+	 * A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.
 	 */
 	importNamePattern?: string;
 	/**
-	 * An array of specific import names to forbid within the matched modules. Cannot be used with allowImportNames and allowImportNamePattern.
+	 * An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.
 	 */
 	importNames?: string[];
 	/**

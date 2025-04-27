@@ -34,8 +34,8 @@ biome_suppression        = { workspace = true }
 biome_unicode_table      = { workspace = true }
 bitvec                   = "1.0.1"
 camino                   = { workspace = true }
-fancy-regex              = "0.14.0"
 enumflags2               = { workspace = true }
+fancy-regex              = "0.14.0"
 globset                  = { workspace = true }
 ignore                   = { workspace = true }
 regex                    = { workspace = true }
@@ -44,7 +44,6 @@ rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
-
 
 
 [dev-dependencies]
