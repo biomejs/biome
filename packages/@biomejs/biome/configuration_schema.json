@@ -376,7 +376,7 @@
 				"includes": {
 					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"items": { "$ref": "#/definitions/NormalizedGlob" }
 				}
 			},
 			"additionalProperties": false
@@ -1384,7 +1384,7 @@
 				"includes": {
 					"description": "A list of glob patterns. Biome will handle only those files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"items": { "$ref": "#/definitions/NormalizedGlob" }
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
@@ -1462,7 +1462,7 @@
 				"includes": {
 					"description": "A list of glob patterns. The formatter will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"items": { "$ref": "#/definitions/NormalizedGlob" }
 				},
 				"indentStyle": {
 					"description": "The indent style.",
@@ -1839,6 +1839,22 @@
 		"ImportSourceGlob": {
 			"description": "Glob to match against import sources.",
 			"allOf": [{ "$ref": "#/definitions/Glob" }]
+		},
+		"ImportTypeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithImportTypeOptions" }
+			]
+		},
+		"ImportTypeOptions": {
+			"description": "Rule's options.",
+			"type": "object",
+			"properties": {
+				"style": {
+					"anyOf": [{ "$ref": "#/definitions/Style2" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
 		},
 		"IndentScriptAndStyle": {
 			"description": "Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).\n\nWhen true, the content of `<script>` and `<style>` tags will be indented one level.",
@@ -2295,7 +2311,7 @@
 				"includes": {
 					"description": "A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"items": { "$ref": "#/definitions/NormalizedGlob" }
 				},
 				"rules": {
 					"description": "List of rules",
@@ -2591,6 +2607,10 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"NormalizedGlob": {
+			"description": "Normalized Biome glob pattern that strips `./` from the pattern.",
+			"allOf": [{ "$ref": "#/definitions/Glob" }]
 		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
@@ -3006,7 +3026,7 @@
 					]
 				},
 				"useExplicitType": {
-					"description": "Require explicit return types on functions and class methods.",
+					"description": "Enforce types in functions, methods, variables, and parameters.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -3042,6 +3062,13 @@
 				},
 				"useGuardForIn": {
 					"description": "Require for-in loops to include an if statement.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useIterableCallbackReturn": {
+					"description": "Enforce consistent return values in iterable callbacks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -3374,8 +3401,8 @@
 			"properties": {
 				"deniedGlobals": {
 					"description": "A list of names that should trigger the rule",
-					"type": "array",
-					"items": { "type": "string" }
+					"type": "object",
+					"additionalProperties": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -3623,6 +3650,25 @@
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithImportTypeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ImportTypeOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4568,7 +4614,7 @@
 				"useImportType": {
 					"description": "Promotes the use of import type for types.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/ImportTypeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4679,6 +4725,26 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"Style2": {
+			"description": "Rule's options.",
+			"oneOf": [
+				{
+					"description": "Use the best fitting style according to the situation",
+					"type": "string",
+					"enum": ["auto"]
+				},
+				{
+					"description": "Always use inline type keywords",
+					"type": "string",
+					"enum": ["inlineType"]
+				},
+				{
+					"description": "Always separate types in a dedicated `import type`",
+					"type": "string",
+					"enum": ["separatedType"]
+				}
+			]
 		},
 		"Suspicious": {
 			"description": "A list of rules that belong to this group",

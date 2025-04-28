@@ -28,28 +28,28 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-2022
+          - os: depot-windows-2022
             target: x86_64-pc-windows-msvc
             code-target: win32-x64
-          - os: windows-2022
+          - os: depot-windows-2022
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
-          - os: ubuntu-20.04
+          - os: depot-ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-          - os: ubuntu-20.04
+          - os: depot-ubuntu-22.04-arm
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
-          - os: ubuntu-20.04
+          - os: depot-ubuntu-22.04
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
-          - os: ubuntu-20.04
+          - os: depot-ubuntu-22.04-arm
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
-          - os: macos-14
+          - os: depot-macos-14
             target: x86_64-apple-darwin
             code-target: darwin-x64
-          - os: macos-14
+          - os: depot-macos-14
             target: aarch64-apple-darwin
             code-target: darwin-arm64
 
@@ -166,12 +166,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Download CLI artifacts
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: cli-*
           merge-multiple: true
       - name: Download WASM artifacts
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: wasm-*
           merge-multiple: true

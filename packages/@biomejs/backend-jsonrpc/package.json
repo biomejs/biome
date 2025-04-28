@@ -36,10 +36,10 @@
   },
   "license": "MIT OR Apache-2.0",
   "devDependencies": {
-    "@types/node": "22.14.1",
+    "@types/node": "22.15.2",
     "typescript": "5.8.3",
-    "vite": "6.3.2",
-    "vitest": "3.1.1"
+    "vite": "6.3.3",
+    "vitest": "3.1.2"
   },
   "publishConfig": {
     "provenance": true

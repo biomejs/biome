@@ -22,9 +22,9 @@ Exports {
       sync Function "foo" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
-        returns: Unknown
+        returns: unknown
       }
       Local name: foo
       JsDoc(
@@ -32,4 +32,6 @@ Exports {
       )
     )
   }
-}```
+}
+Imports {}
+```

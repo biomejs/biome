@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validExternalModule.ts
+---
+# Input
+```ts
+declare module "myExternalModule" {
+    export interface my_INTERFACE {}
+}
+
+```

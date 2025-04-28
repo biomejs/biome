@@ -24,14 +24,21 @@ export async function baz() {}
 
 var qux = 1;
 
-/**
- * TODO: No types can be detected on these yet.
- */
 export const {
 	a,
 	b,
 	c: [d, e],
 } = getObject();
+
+type GetObjectResult = {
+	a: string;
+	b: Array<number>;
+	c: [first: boolean, last: boolean | undefined];
+};
+
+function getObject(): GetObjectResult {
+	return {}; // We're not a type checker, so this is a-okay.
+}
 
 /**
  * @public
@@ -53,20 +60,17 @@ export * as renamed2 from "./renamed-reexports";
 Exports {
   "a" => {
     ExportOwnExport => JsOwnExport(
-      Unknown
+      string
       Local name: a
-      JsDoc(
-        TODO: No types can be detected on these yet.
-      )
     )
   }
   "b" => {
     ExportOwnExport => JsOwnExport(
-      Unknown
+      "Array" {
+        resolved: unknown
+        type_args: number
+      }
       Local name: b
-      JsDoc(
-        TODO: No types can be detected on these yet.
-      )
     )
   }
   "bar" => {
@@ -74,9 +78,9 @@ Exports {
       sync Function "bar" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
-        returns: Unknown
+        returns: unknown
       }
       Local name: bar
       JsDoc(
@@ -89,122 +93,20 @@ Exports {
       async Function "baz" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
-        returns: [Promise]
-        Members(
-          required sync Method "all" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "allSettled" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "any" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "race" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "reject" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "resolve" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "try" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "catch" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "finally" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-          required sync Method "then" {
-            accepts: {
-              params: []
-              type_args: No parameters
-            }
-            returns: "Promise" {
-              params: Unknown
-              type_args: Unknown
-            }
-          }
-        )
+        returns: "Promise" {
+          extends: none
+          type_args: [T -> unknown]
+        }
       }
       Local name: baz
     )
   }
   "d" => {
     ExportOwnExport => JsOwnExport(
-      Unknown
+      boolean
       Local name: d
-      JsDoc(
-        TODO: No types can be detected on these yet.
-      )
     )
   }
   "default" => {
@@ -212,10 +114,10 @@ Exports {
       sync Function "Component" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
         returns: "JSX.Element" {
-          params: Unknown
+          resolved: unknown
           type_args: No types
         }
       }
@@ -228,11 +130,17 @@ Exports {
   }
   "e" => {
     ExportOwnExport => JsOwnExport(
-      Unknown
+      Union(
+    [
+        Type(
+            Boolean,
+        ),
+        Type(
+            Undefined,
+        ),
+    ],
+)
       Local name: e
-      JsDoc(
-        TODO: No types can be detected on these yet.
-      )
     )
   }
   "foo" => {
@@ -240,9 +148,9 @@ Exports {
       sync Function "foo" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
-        returns: Unknown
+        returns: unknown
       }
       Local name: foo
       JsDoc(
@@ -259,13 +167,16 @@ Exports {
   }
   "qux" => {
     ExportOwnExport => JsOwnExport(
-      Literal(Number: 1)
+      value: 1
       Local name: qux
     )
   }
   "quz" => {
     ExportOwnExport => JsOwnExport(
-      Object()
+      Object {
+        prototype: No prototype
+        members: {}
+      }
       Local name: quz
       JsDoc(
         @private
@@ -282,7 +193,9 @@ Exports {
       )
     )
   }
-}```
+}
+Imports {}
+```
 
 ## /src/renamed-reexports.ts
 
@@ -298,14 +211,16 @@ Exports {
       sync Function "ohNo" {
         accepts: {
           params: []
-          type_args: No parameters
+          type_args: []
         }
-        returns: Unknown
+        returns: unknown
       }
       Local name: ohNo
     )
   }
-}```
+}
+Imports {}
+```
 
 ## /src/reexports.ts
 
@@ -329,4 +244,6 @@ Exports {
       )
     )
   }
-}```
+}
+Imports {}
+```

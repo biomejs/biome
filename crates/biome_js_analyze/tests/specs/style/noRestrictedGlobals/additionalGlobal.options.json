@@ -6,7 +6,9 @@
 				"noRestrictedGlobals": {
 					"level": "error",
 					"options": {
-						"deniedGlobals": ["$"]
+						"deniedGlobals": {
+              "$": "jQuery is not allowed. Use native DOM manipulation instead."
+            }
 					}
 				}
 			}

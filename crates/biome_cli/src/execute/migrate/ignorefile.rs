@@ -19,7 +19,7 @@ pub(crate) fn read_ignore_file(
 
 #[derive(Debug)]
 pub(crate) struct IgnorePatterns {
-    pub(crate) patterns: Box<[biome_glob::Glob]>,
+    pub(crate) patterns: Box<[biome_glob::NormalizedGlob]>,
 }
 impl IgnorePatterns {
     pub(crate) fn from(content: &str) -> Self {

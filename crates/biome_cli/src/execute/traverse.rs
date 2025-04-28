@@ -558,6 +558,17 @@ impl TraversalOptions<'_, '_> {
     }
 }
 
+/// Path entries that we want to ignore during the OS traversal.
+pub const IGNORE_ENTRIES: &[&[u8]] = &[
+    b".cache",
+    b".git",
+    b".hg",
+    b".svn",
+    b".yarn",
+    b".timestamp",
+    b".DS_Store",
+];
+
 impl TraversalContext for TraversalOptions<'_, '_> {
     fn interner(&self) -> &PathInterner {
         &self.interner
@@ -573,6 +584,12 @@ impl TraversalContext for TraversalOptions<'_, '_> {
 
     #[instrument(level = "trace", skip(self, biome_path), fields(can_handle))]
     fn can_handle(&self, biome_path: &BiomePath) -> bool {
+        if biome_path
+            .file_name()
+            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name.as_bytes()))
+        {
+            return false;
+        }
         let path = biome_path.as_path();
         if self.fs.path_is_dir(path) || self.fs.path_is_symlink(path) {
             // handle:

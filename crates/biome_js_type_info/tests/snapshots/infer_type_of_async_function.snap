@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_type_info/tests/utils/mod.rs
 expression: content
-snapshot_kind: text
 ---
 ```ts
 async function returnsPromise(): Promise<string> {
@@ -17,7 +16,7 @@ async Function "returnsPromise" {
     type_args: []
   }
   returns: "Promise" {
-    params: unknown
+    resolved: unknown
     type_args: string
   }
 }

@@ -1,31 +1,212 @@
 use std::{str::FromStr, sync::Arc};
 
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMember,
-    AnyJsDeclaration, AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMember, AnyJsParameter,
-    AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, ClassMemberName, JsArrowFunctionExpression, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsFunctionDeclaration,
-    JsFunctionExpression, JsNewExpression, JsObjectExpression, JsParameters, JsReferenceIdentifier,
-    JsSyntaxToken, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
+    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsDeclaration,
+    AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
+    AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
+    AnyJsObjectMemberName, AnyJsParameter, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement,
+    AnyTsType, AnyTsTypeMember, AnyTsTypePredicateParameterName, ClassMemberName,
+    JsArrayBindingPattern, JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator,
+    JsCallArguments, JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
+    JsFormalParameter, JsFunctionDeclaration, JsFunctionExpression, JsNewExpression,
+    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier, JsSyntaxToken,
+    JsVariableDeclaration, JsVariableDeclarator, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeParameter, TsTypeParameters,
     TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
+use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, CallSignatureTypeMember, Class, Constructor,
-    ConstructorTypeMember, Function, FunctionParameter, GenericTypeParameter, Intersection,
-    Literal, MethodTypeMember, Object, PredicateReturnType, PropertyTypeMember, ReturnType, Tuple,
-    TupleElementType, Type, TypeAlias, TypeId, TypeInner, TypeMember, TypeOperator,
-    TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeofCallExpression,
-    TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
+    ConstructorTypeMember, DestructureField, Function, FunctionParameter, FunctionParameterBinding,
+    GenericTypeParameter, Intersection, Literal, MethodTypeMember, PredicateReturnType,
+    PropertyTypeMember, ReturnType, Tuple, TupleElementType, Type, TypeAlias, TypeId, TypeInner,
+    TypeMember, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
+    TypeofCallExpression, TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
     TypeofThisOrSuperExpression, TypeofValue, Union,
-    globals::{ARRAY_TYPE, PROMISE_TYPE},
+    globals::{ARRAY, ARRAY_TYPE, PROMISE_TYPE},
 };
 
 impl Type {
+    /// Applies the given `pattern` and returns the named bindings, and their
+    /// associated types.
+    pub fn apply_array_binding_pattern(
+        &self,
+        pattern: &JsArrayBindingPattern,
+    ) -> Box<[(Text, Self)]> {
+        pattern
+            .elements()
+            .into_iter()
+            .enumerate()
+            .filter_map(|(i, elem)| elem.ok().map(|elem| (i, elem)))
+            .filter_map(|(i, elem)| self.apply_array_binding_pattern_element(i, elem))
+            .flatten()
+            .collect()
+    }
+
+    fn apply_array_binding_pattern_element(
+        &self,
+        i: usize,
+        elem: AnyJsArrayBindingPatternElement,
+    ) -> Option<Box<[(Text, Self)]>> {
+        match elem {
+            AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(elem) => {
+                match elem.pattern().ok()? {
+                    AnyJsBindingPattern::AnyJsBinding(binding) => {
+                        let binding = binding.as_js_identifier_binding()?;
+                        let name = text_from_token(binding.name_token())?;
+                        Some(Box::new([(
+                            name,
+                            Self::destructuring_of(self.clone(), DestructureField::Index(i)),
+                        )]))
+                    }
+                    AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some(
+                        Self::destructuring_of(self.clone(), DestructureField::Index(i))
+                            .apply_array_binding_pattern(&pattern),
+                    ),
+                    AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some(
+                        Self::destructuring_of(self.clone(), DestructureField::Index(i))
+                            .apply_object_binding_pattern(&pattern),
+                    ),
+                }
+            }
+            AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(elem) => {
+                match elem.pattern().ok()? {
+                    AnyJsBindingPattern::AnyJsBinding(binding) => {
+                        let binding = binding.as_js_identifier_binding()?;
+                        let name = text_from_token(binding.name_token())?;
+                        Some(Box::new([(
+                            name,
+                            Self::destructuring_of(self.clone(), DestructureField::RestFrom(i)),
+                        )]))
+                    }
+                    AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some(
+                        Self::destructuring_of(self.clone(), DestructureField::RestFrom(i))
+                            .apply_array_binding_pattern(&pattern),
+                    ),
+                    AnyJsBindingPattern::JsObjectBindingPattern(_pattern) => {
+                        // An array rest element destructures into another array,
+                        // so applying an object pattern would give nonsensical
+                        // results.
+                        None
+                    }
+                }
+            }
+            AnyJsArrayBindingPatternElement::JsArrayHole(_) => None,
+        }
+    }
+
+    /// Applies the given `pattern` and returns the named bindings, and their
+    /// associated types.
+    pub fn apply_object_binding_pattern(
+        &self,
+        pattern: &JsObjectBindingPattern,
+    ) -> Box<[(Text, Self)]> {
+        // Accumulate names to exclude from the rest operator.
+        let mut names = Vec::new();
+
+        pattern
+            .properties()
+            .into_iter()
+            .filter_map(|member| member.ok())
+            .filter_map(|member| {
+                let name = match &member {
+                    AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(prop) => {
+                        match prop.member().ok()? {
+                            AnyJsObjectMemberName::JsComputedMemberName(name) => {
+                                match name.expression() {
+                                    Ok(AnyJsExpression::AnyJsLiteralExpression(
+                                        AnyJsLiteralExpression::JsStringLiteralExpression(member),
+                                    )) => unescaped_text_from_token(member.value_token()),
+                                    // TODO: Support dynamic destructuring fields
+                                    _ => None,
+                                }
+                            }
+                            AnyJsObjectMemberName::JsLiteralMemberName(name) => {
+                                text_from_token(name.value())
+                            }
+                            AnyJsObjectMemberName::JsMetavariable(_) => None,
+                        }
+                    }
+                    AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                        prop,
+                    ) => {
+                        let binding = prop.identifier().ok()?;
+                        let binding = binding.as_js_identifier_binding()?;
+                        text_from_token(binding.name_token())
+                    }
+                    AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(_)
+                    | AnyJsObjectBindingPatternMember::JsBogusBinding(_)
+                    | AnyJsObjectBindingPatternMember::JsMetavariable(_) => None,
+                };
+
+                if let Some(name) = &name {
+                    names.push(name.clone());
+                }
+
+                self.apply_object_binding_pattern_member(&names, name, member)
+            })
+            .flatten()
+            .collect()
+    }
+
+    fn apply_object_binding_pattern_member(
+        &self,
+        names: &[Text],
+        member_name: Option<Text>,
+        member: AnyJsObjectBindingPatternMember,
+    ) -> Option<Box<[(Text, Self)]>> {
+        match member {
+            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(prop) => {
+                let member_name = member_name?;
+                match prop.pattern().ok()? {
+                    AnyJsBindingPattern::AnyJsBinding(binding) => {
+                        let binding = binding.as_js_identifier_binding()?;
+                        let name = text_from_token(binding.name_token())?;
+                        Some(Box::new([(
+                            name,
+                            Self::destructuring_of(
+                                self.clone(),
+                                DestructureField::Name(member_name),
+                            ),
+                        )]))
+                    }
+                    AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some(
+                        Self::destructuring_of(self.clone(), DestructureField::Name(member_name))
+                            .apply_array_binding_pattern(&pattern),
+                    ),
+                    AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some(
+                        Self::destructuring_of(self.clone(), DestructureField::Name(member_name))
+                            .apply_object_binding_pattern(&pattern),
+                    ),
+                }
+            }
+            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(_) => {
+                let member_name = member_name?;
+                Some(Box::new([(
+                    member_name.clone(),
+                    Self::destructuring_of(self.clone(), DestructureField::Name(member_name)),
+                )]))
+            }
+            AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(rest) => {
+                let binding = rest.binding().ok()?;
+                let binding = binding.as_js_identifier_binding()?;
+                let name = text_from_token(binding.name_token())?;
+                Some(Box::new([(
+                    name,
+                    Self::destructuring_of(
+                        self.clone(),
+                        DestructureField::RestExcept(names.iter().cloned().collect()),
+                    ),
+                )]))
+            }
+            AnyJsObjectBindingPatternMember::JsBogusBinding(_)
+            | AnyJsObjectBindingPatternMember::JsMetavariable(_) => None,
+        }
+    }
+
     pub fn from_any_js_declaration(decl: &AnyJsDeclaration) -> Self {
         match decl {
             AnyJsDeclaration::JsClassDeclaration(decl) => Self::from_js_class_declaration(decl),
@@ -151,26 +332,44 @@ impl Type {
             AnyJsExpression::JsArrayExpression(expr) => TypeInner::Tuple(Box::new(Tuple(
                 expr.elements()
                     .into_iter()
-                    .map(|el| match el {
-                        Ok(AnyJsArrayElement::AnyJsExpression(expr)) => TupleElementType {
+                    .flat_map(|el| match el {
+                        Ok(AnyJsArrayElement::AnyJsExpression(expr)) => vec![TupleElementType {
                             ty: Self::from_any_js_expression(&expr),
                             name: None,
                             is_optional: false,
                             is_rest: false,
-                        },
-                        Ok(AnyJsArrayElement::JsSpread(_spread)) => TupleElementType {
-                            // TODO: We can definitely be smarter about this one.
+                        }],
+                        Ok(AnyJsArrayElement::JsSpread(spread)) => spread
+                            .argument()
+                            .map(|expr| Self::from_any_js_expression(&expr))
+                            .into_iter()
+                            .flat_map(|ty| match ty.inner_type() {
+                                TypeInner::Object(object) => {
+                                    vec![TupleElementType {
+                                        ty: object
+                                            .find_parent_class(&ARRAY)
+                                            .and_then(|array| {
+                                                array
+                                                    .type_parameters
+                                                    .first()
+                                                    .map(|param| param.ty.clone())
+                                            })
+                                            .unwrap_or_default(),
+                                        name: None,
+                                        is_optional: false,
+                                        is_rest: true,
+                                    }]
+                                }
+                                TypeInner::Tuple(tuple) => tuple.elements().to_vec(),
+                                _ => Vec::new(),
+                            })
+                            .collect(),
+                        Ok(AnyJsArrayElement::JsArrayHole(_)) | Err(_) => vec![TupleElementType {
                             ty: Self::unknown(),
                             name: None,
                             is_optional: false,
                             is_rest: false,
-                        },
-                        Ok(AnyJsArrayElement::JsArrayHole(_)) | Err(_) => TupleElementType {
-                            ty: Self::unknown(),
-                            name: None,
-                            is_optional: false,
-                            is_rest: false,
-                        },
+                        }],
                     })
                     .collect(),
             )))
@@ -178,6 +377,7 @@ impl Type {
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(expr)
             }
+            AnyJsExpression::JsBinaryExpression(expr) => Self::from_js_binary_expression(expr),
             AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
                 Ok(callee) => TypeInner::TypeofExpression(Box::new(TypeofExpression::Call(
                     TypeofCallExpression {
@@ -221,16 +421,13 @@ impl Type {
             AnyJsExpression::JsNewExpression(expr) => {
                 Self::from_js_new_expression(expr).unwrap_or_default()
             }
-            AnyJsExpression::JsObjectExpression(expr) => TypeInner::Object(Box::new(Object {
-                prototype: None,
-                members: expr
-                    .members()
+            AnyJsExpression::JsObjectExpression(expr) => Self::object_with_members(
+                expr.members()
                     .into_iter()
                     .filter_map(|member| member.ok())
                     .filter_map(|member| TypeMember::from_any_js_object_member(&member))
                     .collect(),
-            }))
-            .into(),
+            ),
             AnyJsExpression::JsParenthesizedExpression(expr) => expr
                 .expression()
                 .map(|expr| Self::from_any_js_expression(&expr))
@@ -270,19 +467,19 @@ impl Type {
             AnyJsLiteralExpression::JsBigintLiteralExpression(expr) => {
                 Literal::BigInt(text_from_token(expr.value_token())?)
             }
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(expr) => {
-                Literal::Boolean(text_from_token(expr.value_token())?)
-            }
+            AnyJsLiteralExpression::JsBooleanLiteralExpression(expr) => Literal::Boolean(
+                BooleanLiteral::parse(text_from_token(expr.value_token())?.text())?,
+            ),
             AnyJsLiteralExpression::JsNullLiteralExpression(_) => Literal::Null,
-            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => {
-                Literal::Number(text_from_token(expr.value_token())?)
-            }
+            AnyJsLiteralExpression::JsNumberLiteralExpression(expr) => Literal::Number(
+                NumberLiteral::parse(text_from_token(expr.value_token())?.text())?,
+            ),
             AnyJsLiteralExpression::JsRegexLiteralExpression(expr) => {
                 Literal::RegExp(text_from_token(expr.value_token())?)
             }
-            AnyJsLiteralExpression::JsStringLiteralExpression(expr) => {
-                Literal::String(text_from_token(expr.value_token())?)
-            }
+            AnyJsLiteralExpression::JsStringLiteralExpression(expr) => Literal::String(
+                StringLiteral::from(Text::Borrowed(expr.inner_string_text().ok()?)),
+            ),
         };
 
         Some(TypeInner::Literal(Box::new(literal)).into())
@@ -312,9 +509,9 @@ impl Type {
             AnyTsType::TsBigintType(_) => TypeInner::BigInt,
             AnyTsType::TsBogusType(_) => TypeInner::Unknown,
             AnyTsType::TsBooleanLiteralType(ty) => match ty.literal() {
-                Ok(token) => TypeInner::Literal(Box::new(Literal::Boolean(
-                    token.token_text_trimmed().into(),
-                ))),
+                Ok(token) => {
+                    Literal::Boolean(BooleanLiteral::parse(token.text_trimmed()).unwrap()).into()
+                }
                 Err(_) => TypeInner::Unknown,
             },
             AnyTsType::TsBooleanType(_) => TypeInner::Boolean,
@@ -364,24 +561,30 @@ impl Type {
             AnyTsType::TsNeverType(_) => TypeInner::NeverKeyword,
             AnyTsType::TsNonPrimitiveType(_) => TypeInner::ObjectKeyword,
             AnyTsType::TsNullLiteralType(_) => TypeInner::Literal(Box::new(Literal::Null)),
-            AnyTsType::TsNumberLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
-                (Some(minus_token), Ok(literal_token)) => TypeInner::Literal(Box::new(
-                    Literal::Number(Text::Owned(format!("{minus_token}{literal_token}"))),
-                )),
-                (None, Ok(literal_token)) => TypeInner::Literal(Box::new(Literal::Number(
-                    literal_token.token_text_trimmed().into(),
-                ))),
-                (_, Err(_)) => TypeInner::Unknown,
-            },
+            AnyTsType::TsNumberLiteralType(ty) => {
+                let Ok(literal_token) = ty.literal_token() else {
+                    return Self::unknown();
+                };
+
+                let Some(lit) = NumberLiteral::parse(literal_token.text_trimmed()) else {
+                    return Self::unknown();
+                };
+
+                Literal::Number(match ty.minus_token() {
+                    Some(_) => lit.inverse(),
+                    _ => lit,
+                })
+                .into()
+            }
             AnyTsType::TsNumberType(_) => TypeInner::Number,
-            AnyTsType::TsObjectType(ty) => TypeInner::Object(Box::new(Object {
-                prototype: None,
-                members: ty
-                    .members()
-                    .into_iter()
-                    .filter_map(|member| TypeMember::from_any_ts_type_member(&member))
-                    .collect(),
-            })),
+            AnyTsType::TsObjectType(ty) => {
+                return Self::object_with_members(
+                    ty.members()
+                        .into_iter()
+                        .filter_map(|member| TypeMember::from_any_ts_type_member(&member))
+                        .collect(),
+                );
+            }
             AnyTsType::TsParenthesizedType(ty) => {
                 return ty
                     .ty()
@@ -391,10 +594,8 @@ impl Type {
             AnyTsType::TsReferenceType(ty) => {
                 return Self::from_ts_reference_type(ty);
             }
-            AnyTsType::TsStringLiteralType(ty) => match ty.literal_token() {
-                Ok(token) => {
-                    TypeInner::Literal(Box::new(Literal::String(token.token_text_trimmed().into())))
-                }
+            AnyTsType::TsStringLiteralType(ty) => match ty.inner_string_text() {
+                Ok(token) => Literal::String(token.text().into()).into(),
                 Err(_) => TypeInner::Unknown,
             },
             AnyTsType::TsStringType(_) => TypeInner::String,
@@ -455,10 +656,18 @@ impl Type {
             name: None,
             parameters: match expr.parameters() {
                 Ok(AnyJsArrowFunctionParameters::AnyJsBinding(binding)) => {
+                    let name = binding
+                        .as_js_identifier_binding()
+                        .and_then(|binding| text_from_token(binding.name_token()));
                     Arc::new([FunctionParameter {
-                        name: binding
-                            .as_js_identifier_binding()
-                            .and_then(|binding| text_from_token(binding.name_token())),
+                        bindings: name
+                            .iter()
+                            .map(|name| FunctionParameterBinding {
+                                name: name.clone(),
+                                ty: Self::unknown(),
+                            })
+                            .collect(),
+                        name,
                         ty: Self::unknown(),
                         is_optional: false,
                         is_rest: false,
@@ -473,6 +682,40 @@ impl Type {
                 .unwrap_or_else(|| return_type_from_async_token(expr.async_token())),
         }))
         .into()
+    }
+
+    pub fn from_js_binary_expression(expr: &JsBinaryExpression) -> Self {
+        let (Ok(left), Ok(operator), Ok(right)) = (expr.left(), expr.operator(), expr.right())
+        else {
+            return Self::unknown();
+        };
+
+        let left = Self::from_any_js_expression(&left);
+        let right = Self::from_any_js_expression(&right);
+
+        match operator {
+            JsBinaryOperator::StrictEquality => match (left.inner_type(), right.inner_type()) {
+                (TypeInner::Literal(left), TypeInner::Literal(right)) => {
+                    if left == right {
+                        Literal::Boolean(true.into()).into()
+                    } else {
+                        Literal::Boolean(false.into()).into()
+                    }
+                }
+                _ => Self::boolean(),
+            },
+            JsBinaryOperator::StrictInequality => match (left.inner_type(), right.inner_type()) {
+                (TypeInner::Literal(left), TypeInner::Literal(right)) => {
+                    if left == right {
+                        Literal::Boolean(false.into()).into()
+                    } else {
+                        Literal::Boolean(true.into()).into()
+                    }
+                }
+                _ => Self::boolean(),
+            },
+            _ => Self::unknown(), // TODO
+        }
     }
 
     pub fn from_js_class_declaration(decl: &JsClassDeclaration) -> Self {
@@ -572,10 +815,8 @@ impl Type {
     }
 
     pub fn from_js_object_expression(expr: &JsObjectExpression) -> Self {
-        TypeInner::Object(Box::new(Object {
-            prototype: None,
-            members: expr
-                .members()
+        Self::object_with_members(
+            expr.members()
                 .into_iter()
                 .filter_map(|member| {
                     member
@@ -583,8 +824,7 @@ impl Type {
                         .and_then(|member| TypeMember::from_any_js_object_member(&member))
                 })
                 .collect(),
-        }))
-        .into()
+        )
     }
 
     pub fn from_js_reference_identifier(id: &JsReferenceIdentifier) -> Self {
@@ -602,7 +842,7 @@ impl Type {
         let ty = match decl.variable_annotation() {
             Some(annotation) => {
                 let annotation = annotation.type_annotation().ok()??;
-                Self::from_any_ts_type(&annotation.ty().ok()?)
+                Self::instance_of(Self::from_any_ts_type(&annotation.ty().ok()?))
             }
             None => Self::from_any_js_expression(&decl.initializer()?.expression().ok()?),
         };
@@ -654,6 +894,40 @@ impl Type {
             .unwrap_or_default()
     }
 
+    pub fn typed_bindings_from_js_variable_declaration(
+        decl: &JsVariableDeclaration,
+    ) -> Box<[(Text, Self)]> {
+        decl.declarators()
+            .into_iter()
+            .filter_map(|decl| decl.ok())
+            .filter_map(|decl| Self::typed_bindings_from_js_variable_declarator(&decl))
+            .flatten()
+            .collect()
+    }
+
+    pub fn typed_bindings_from_js_variable_declarator(
+        decl: &JsVariableDeclarator,
+    ) -> Option<Box<[(Text, Self)]>> {
+        match decl.id().ok()? {
+            AnyJsBindingPattern::AnyJsBinding(binding) => {
+                let binding = binding.as_js_identifier_binding()?;
+                let name_token = binding.name_token().ok()?;
+                Some(Box::new([(
+                    name_token.token_text_trimmed().into(),
+                    Self::from_js_variable_declarator(decl)?,
+                )]))
+            }
+            AnyJsBindingPattern::JsArrayBindingPattern(pattern) => {
+                let pattern_ty = Self::from_js_variable_declarator(decl)?;
+                Some(pattern_ty.apply_array_binding_pattern(&pattern))
+            }
+            AnyJsBindingPattern::JsObjectBindingPattern(pattern) => {
+                let pattern_ty = Self::from_js_variable_declarator(decl)?;
+                Some(pattern_ty.apply_object_binding_pattern(&pattern))
+            }
+        }
+    }
+
     pub fn types_from_ts_type_arguments(arguments: Option<TsTypeArguments>) -> Arc<[Self]> {
         arguments
             .map(|args| {
@@ -698,39 +972,37 @@ impl FunctionParameter {
         match param {
             AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(
                 param,
-            )) => Self {
-                name: param
-                    .binding()
-                    .ok()
-                    .as_ref()
-                    .and_then(|binding| binding.as_any_js_binding())
-                    .and_then(|binding| binding.as_js_identifier_binding())
-                    .and_then(|identifier| identifier.name_token().ok())
-                    .map(|token| token.token_text_trimmed().into()),
-                ty: param
-                    .type_annotation()
-                    .and_then(|annotation| annotation.ty().ok())
-                    .map(|ty| Type::from_any_ts_type(&ty))
-                    .unwrap_or_default(),
-                is_optional: param.question_mark_token().is_some(),
-                is_rest: false,
-            },
+            )) => Self::from_js_formal_parameter(param),
             AnyJsParameter::AnyJsFormalParameter(_) => Self {
                 name: None,
                 ty: Type::unknown(),
+                bindings: Box::new([]),
                 is_optional: false,
                 is_rest: false,
             },
-            AnyJsParameter::JsRestParameter(param) => Self {
-                name: None,
-                ty: param
+            AnyJsParameter::JsRestParameter(param) => {
+                let ty = param
                     .type_annotation()
                     .and_then(|annotation| annotation.ty().ok())
                     .map(|ty| Type::from_any_ts_type(&ty))
-                    .unwrap_or_default(),
-                is_optional: false,
-                is_rest: true,
-            },
+                    .unwrap_or_default();
+                let bindings = param
+                    .binding()
+                    .ok()
+                    .and_then(|binding| {
+                        FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
+                            &binding, &ty,
+                        )
+                    })
+                    .unwrap_or_default();
+                Self {
+                    name: None,
+                    ty,
+                    bindings,
+                    is_optional: false,
+                    is_rest: true,
+                }
+            }
             AnyJsParameter::TsThisParameter(param) => Self {
                 name: Some(Text::Static("this")),
                 ty: param
@@ -738,9 +1010,42 @@ impl FunctionParameter {
                     .and_then(|annotation| annotation.ty().ok())
                     .map(|ty| Type::from_any_ts_type(&ty))
                     .unwrap_or_default(),
+                bindings: Box::new([]),
                 is_optional: false,
                 is_rest: false,
             },
+        }
+    }
+
+    pub fn from_js_formal_parameter(param: &JsFormalParameter) -> Self {
+        let name = param
+            .binding()
+            .ok()
+            .as_ref()
+            .and_then(|binding| binding.as_any_js_binding())
+            .and_then(|binding| binding.as_js_identifier_binding())
+            .and_then(|identifier| identifier.name_token().ok())
+            .map(|token| token.token_text_trimmed().into());
+        let ty = param
+            .type_annotation()
+            .and_then(|annotation| annotation.ty().ok())
+            .map(|ty| Type::from_any_ts_type(&ty))
+            .unwrap_or_default();
+        let bindings = param
+            .binding()
+            .ok()
+            .and_then(|binding| {
+                FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
+                    &binding, &ty,
+                )
+            })
+            .unwrap_or_default();
+        Self {
+            name,
+            ty,
+            bindings,
+            is_optional: param.question_mark_token().is_some(),
+            is_rest: false,
         }
     }
 
@@ -751,6 +1056,42 @@ impl FunctionParameter {
             .into_iter()
             .filter_map(|param| param.ok().map(|param| Self::from_any_js_parameter(&param)))
             .collect()
+    }
+}
+
+impl From<(Text, Type)> for FunctionParameterBinding {
+    fn from((name, ty): (Text, Type)) -> Self {
+        Self { name, ty }
+    }
+}
+
+impl FunctionParameterBinding {
+    pub fn bindings_from_any_js_binding_pattern_of_type(
+        pattern: &AnyJsBindingPattern,
+        ty: &Type,
+    ) -> Option<Box<[Self]>> {
+        match pattern {
+            AnyJsBindingPattern::AnyJsBinding(binding) => {
+                let binding = binding.as_js_identifier_binding()?;
+                let name = text_from_token(binding.name_token())?;
+                Some(Box::new([Self {
+                    name,
+                    ty: ty.clone(),
+                }]))
+            }
+            AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some(
+                ty.apply_array_binding_pattern(pattern)
+                    .into_iter()
+                    .map(Into::into)
+                    .collect(),
+            ),
+            AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some(
+                ty.apply_object_binding_pattern(pattern)
+                    .into_iter()
+                    .map(Into::into)
+                    .collect(),
+            ),
+        }
     }
 }
 

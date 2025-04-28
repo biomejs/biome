@@ -528,6 +528,7 @@ name = "biome_glob"
 version = "0.1.0"
 dependencies = [
  "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_text_size",
  "globset",
  "schemars",

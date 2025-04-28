@@ -3446,3 +3446,41 @@ fn html_enabled_by_arg_format() {
         result,
     ));
 }
+
+#[test]
+fn format_skip_errors_continues_with_valid_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let valid = Utf8Path::new("valid.js");
+    fs.insert(valid.into(), UNFORMATTED.as_bytes());
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(invalid.into(), "while ) {}".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--skip-errors",
+                "--write",
+                valid.as_str(),
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, valid, FORMATTED);
+    assert_file_contents(&fs, invalid, "while ) {}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_skip_errors_continues_with_valid_files",
+        fs,
+        console,
+        result,
+    ));
+}

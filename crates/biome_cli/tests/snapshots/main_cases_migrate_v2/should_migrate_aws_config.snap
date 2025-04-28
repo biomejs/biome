@@ -10,7 +10,12 @@ snapshot_kind: text
   "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
   "files": {
     "maxSize": 5242880,
-    "includes": ["**", "!**/__fixtures__/**", "!**/package.json"]
+    "includes": [
+      "**",
+      "!**/__fixtures__/**",
+      "!**/package.json",
+      "**/node_modules/**"
+    ]
   },
   "formatter": {
     "enabled": true,

@@ -105,7 +105,7 @@ export interface AssistConfiguration {
 	/**
 	 * A list of glob patterns. Biome will include files/folders that will match these patterns.
 	 */
-	includes?: Glob[];
+	includes?: NormalizedGlob[];
 }
 /**
  * Options applied to CSS files
@@ -143,7 +143,7 @@ export interface FilesConfiguration {
 	/**
 	 * A list of glob patterns. Biome will handle only those files/folders that will match these patterns.
 	 */
-	includes?: Glob[];
+	includes?: NormalizedGlob[];
 	/**
 	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
@@ -177,7 +177,7 @@ export interface FormatterConfiguration {
 	/**
 	 * A list of glob patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	includes?: Glob[];
+	includes?: NormalizedGlob[];
 	/**
 	 * The indent style.
 	 */
@@ -309,7 +309,7 @@ export interface LinterConfiguration {
 	/**
 	 * A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.
 	 */
-	includes?: Glob[];
+	includes?: NormalizedGlob[];
 	/**
 	 * List of rules
 	 */
@@ -352,7 +352,10 @@ export interface Actions {
 	recommended?: boolean;
 	source?: Source;
 }
-export type Glob = string;
+/**
+ * Normalized Biome glob pattern that strips `./` from the pattern.
+ */
+export type NormalizedGlob = Glob;
 /**
  * Options that changes how the CSS assist behaves
  */
@@ -821,6 +824,7 @@ export interface Source {
 	 */
 	useSortedProperties?: RuleAssistConfiguration_for_Null;
 }
+export type Glob = string;
 export type QuoteStyle = "double" | "single";
 /**
 	* Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
@@ -1694,7 +1698,7 @@ export interface Nursery {
 	 */
 	useDeprecatedReason?: RuleConfiguration_for_Null;
 	/**
-	 * Require explicit return types on functions and class methods.
+	 * Enforce types in functions, methods, variables, and parameters.
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
 	/**
@@ -1717,6 +1721,10 @@ export interface Nursery {
 	 * Require for-in loops to include an if statement.
 	 */
 	useGuardForIn?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce consistent return values in iterable callbacks.
+	 */
+	useIterableCallbackReturn?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
@@ -1947,7 +1955,7 @@ export interface Style {
 	/**
 	 * Promotes the use of import type for types.
 	 */
-	useImportType?: RuleFixConfiguration_for_Null;
+	useImportType?: RuleFixConfiguration_for_ImportTypeOptions;
 	/**
 	 * Require all enum members to be literal values.
 	 */
@@ -2391,6 +2399,9 @@ export type RuleFixConfiguration_for_ConsistentArrayTypeOptions =
 export type RuleConfiguration_for_FilenamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_FilenamingConventionOptions;
+export type RuleFixConfiguration_for_ImportTypeOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_ImportTypeOptions;
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
@@ -2730,6 +2741,20 @@ export interface RuleWithOptions_for_FilenamingConventionOptions {
 	 */
 	options: FilenamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_ImportTypeOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: ImportTypeOptions;
+}
 export interface RuleWithFixOptions_for_NamingConventionOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2992,7 +3017,7 @@ export interface RestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
 	 */
-	deniedGlobals: string[];
+	deniedGlobals: Record<string, string>;
 }
 export interface ConsistentArrayTypeOptions {
 	syntax?: ConsistentArrayType;
@@ -3017,6 +3042,12 @@ export interface FilenamingConventionOptions {
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
 	strictCase: boolean;
+}
+/**
+ * Rule's options.
+ */
+export interface ImportTypeOptions {
+	style?: Style2;
 }
 /**
  * Rule's options.
@@ -3104,6 +3135,10 @@ export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;
+/**
+ * Rule's options.
+ */
+export type Style2 = "auto" | "inlineType" | "separatedType";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -3459,6 +3494,7 @@ export type Category =
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useIterableCallbackReturn"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"

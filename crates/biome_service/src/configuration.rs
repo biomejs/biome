@@ -13,7 +13,7 @@ use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
-use biome_diagnostics::{CaminoError, Resource, SourceCode};
+use biome_diagnostics::CaminoError;
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{
     AutoSearchResult, ConfigName, FileSystem, FileSystemDiagnostic, FsErrorKind, OpenOptions,
@@ -331,11 +331,8 @@ pub fn load_editorconfig(
         let editorconfig = EditorConfig::from_str(&content).map_err(|err| {
             EditorConfigDiagnostic::ParseFailed(ParseFailedDiagnostic {
                 kind: err.kind,
-                path: Resource::File(file_path.into_string().into()),
-                source_code: Some(Box::new(SourceCode {
-                    text: content.into(),
-                    line_starts: None,
-                })),
+                path: file_path.into_string(),
+                source_code: content,
                 span: err.span,
             })
         })?;

@@ -1372,6 +1372,24 @@ impl AnyJsExpression {
             _ => false,
         }
     }
+
+    pub fn has_trivially_inferrable_type(&self) -> bool {
+        match self {
+            Self::AnyJsLiteralExpression(_) => true,
+            Self::JsTemplateExpression(tpl_expr) => tpl_expr.tag().is_none(),
+            Self::JsUnaryExpression(unary_exp) => {
+                let kind = unary_exp.operator_token().map(|t| t.kind());
+                matches!(
+                    kind,
+                    Ok(JsSyntaxKind::BANG
+                        | JsSyntaxKind::MINUS
+                        | JsSyntaxKind::PLUS
+                        | JsSyntaxKind::VOID_KW)
+                )
+            }
+            _ => false,
+        }
+    }
 }
 
 /// Iterator that returns the callee names in "top down order".

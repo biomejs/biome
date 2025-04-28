@@ -2,6 +2,7 @@ use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::{self as biome_config};
 use biome_deserialize::Merge;
 use biome_js_analyze::lint::style::no_restricted_globals;
+use rustc_hash::FxHashMap;
 
 use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
 
@@ -220,10 +221,17 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::NoRestrictedGlobals(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
-                let globals = conf
-                    .into_vec()
-                    .into_iter()
-                    .map(|g| g.into_name().into_boxed_str());
+                let globals = conf.into_vec().into_iter().map(|g| {
+                    (
+                        g.name().to_string().into_boxed_str(),
+                        g.message()
+                            .map_or_else(
+                                || "TODO: Add a custom message here.".to_string(),
+                                |m| m.to_string(),
+                            )
+                            .into_boxed_str(),
+                    )
+                });
                 let group = rules.style.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
                     group.no_restricted_globals =
@@ -232,9 +240,7 @@ fn migrate_eslint_rule(
                                 level: severity.into(),
                                 options: Box::new(
                                     no_restricted_globals::RestrictedGlobalsOptions {
-                                        denied_globals: globals
-                                            .collect::<Vec<_>>()
-                                            .into_boxed_slice(),
+                                        denied_globals: globals.collect::<FxHashMap<_, _>>(),
                                     },
                                 ),
                             },
@@ -331,8 +337,8 @@ fn migrate_eslint_rule(
 fn to_biome_includes(
     files: &[impl AsRef<str>],
     ignores: &[impl AsRef<str>],
-) -> Vec<biome_glob::Glob> {
-    let mut includes = Vec::new();
+) -> Vec<biome_glob::NormalizedGlob> {
+    let mut includes: Vec<biome_glob::NormalizedGlob> = Vec::new();
     if !files.is_empty() {
         includes.extend(files.iter().filter_map(|glob| glob.as_ref().parse().ok()));
     } else if let Ok(glob) = "**".parse() {
@@ -346,7 +352,7 @@ fn to_biome_includes(
             } else {
                 glob.as_ref()
                     .parse()
-                    .map(|glob: biome_glob::Glob| glob.negated())
+                    .map(|glob: biome_glob::NormalizedGlob| glob.negated())
             }
             .ok()
         }));

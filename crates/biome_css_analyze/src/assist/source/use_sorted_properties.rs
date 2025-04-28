@@ -1,23 +1,25 @@
-use biome_analyze::{Ast, FixKind, Rule, context::RuleContext, declare_source_rule};
+use crate::{
+    CssRuleAction,
+    keywords::VENDOR_PREFIXES,
+    order::PROPERTY_ORDER_MAP,
+    utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix},
+};
+use biome_analyze::{
+    Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_source_rule,
+};
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssProperty, AnyCssRule,
     CssDeclarationOrRuleBlock, CssDeclarationOrRuleList, CssDeclarationWithSemicolon,
-    CssSyntaxKind,
+    CssSyntaxKind, TextRange,
 };
+use biome_diagnostics::category;
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
 use biome_string_case::StrOnlyExtension;
 use std::{
     borrow::Cow,
     cmp::Ordering,
     collections::{BTreeSet, HashSet},
-};
-
-use crate::{
-    CssRuleAction,
-    keywords::VENDOR_PREFIXES,
-    order::PROPERTY_ORDER_MAP,
-    utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix},
 };
 
 declare_source_rule! {
@@ -140,6 +142,20 @@ impl Rule for UseSortedProperties {
         };
 
         Some(state)
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            category!("assist/source/useSortedProperties"),
+            ctx.query().range(),
+            markup! {
+                "The properties are not sorted."
+            },
+        ))
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        Some(ctx.query().syntax().first_token()?.text_range())
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {

@@ -6,11 +6,11 @@ function test() {
 	return;
 }
 
-var fn = function () {
+const fn = function () {
 	return 1;
 };
 
-var arrowFn = () => "test";
+const arrowFn = () => "test";
 
 class Test {
 	constructor() {}
@@ -91,8 +91,8 @@ function fn() {
 	};
 }
 
-const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
-const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
 
 
 // Returning object from function

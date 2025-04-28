@@ -108,7 +108,7 @@ pub struct JsModuleInfoInner {
     /// import another module and immediately re-export from that module.
     /// Re-exports are tracked as part of [Self::exports] and
     /// [Self::blanket_reexports].
-    pub static_imports: BTreeMap<Text, JsImport>,
+    pub static_imports: Imports,
 
     /// Map of all the paths from static imports in the module.
     ///
@@ -166,6 +166,16 @@ pub struct Exports(pub(crate) BTreeMap<Text, JsExport>);
 impl Deref for Exports {
     type Target = BTreeMap<Text, JsExport>;
 
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Debug)]
+pub struct Imports(pub(crate) BTreeMap<Text, JsImport>);
+
+impl Deref for Imports {
+    type Target = BTreeMap<Text, JsImport>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }

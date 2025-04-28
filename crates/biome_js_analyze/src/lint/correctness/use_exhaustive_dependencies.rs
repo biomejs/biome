@@ -161,7 +161,7 @@ declare_lint_rule! {
     ///
     /// function component() {
     ///     let a = 1;
-    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): <explanation>
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
     ///     useEffect(() => {
     ///         console.log(a);
     ///     }, []);
@@ -173,7 +173,7 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Allows to specify custom hooks - from libraries or internal projects -
+    /// Allows specifying custom hooks - from libraries or internal projects -
     /// for which dependencies should be checked and/or which are known to have
     /// stable return values.
     ///

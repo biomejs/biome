@@ -2,8 +2,10 @@ use crate::analyzers::all::RulesAll;
 use crate::analyzers::deleted_rules::DeletedRules;
 use crate::analyzers::includes::Includes;
 use crate::analyzers::no_multiple_spaces_in_regex::UseMultipleSpacesInRegex;
+use crate::analyzers::no_restriected_globals::NoRestrictedGlobals;
 use crate::analyzers::no_unnecessary_continue::NoUnncesseraryContinue;
 use crate::analyzers::no_var::NoVar;
+use crate::analyzers::node_modules::NodeModules;
 use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::organize_imports::OrganizeImports;
 use crate::analyzers::schema::Schema;
@@ -18,8 +20,10 @@ mod all;
 mod deleted_rules;
 mod includes;
 mod no_multiple_spaces_in_regex;
+mod no_restriected_globals;
 mod no_unnecessary_continue;
 mod no_var;
+mod node_modules;
 mod nursery_rules;
 mod organize_imports;
 mod schema;
@@ -46,7 +50,6 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<RulesAll>();
         registry.record_rule::<StyleRules>();
         registry.record_rule::<NoVar>();
-
         registry.record_rule::<DeletedRules>();
         registry.record_rule::<UseWhile>();
         registry.record_rule::<OrganizeImports>();
@@ -55,6 +58,8 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<UseNamingConventionEnumMemberCase>();
         registry.record_rule::<UseMultipleSpacesInRegex>();
         registry.record_rule::<NoUnncesseraryContinue>();
+        registry.record_rule::<NoRestrictedGlobals>();
+        registry.record_rule::<NodeModules>();
     }
 }
 

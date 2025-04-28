@@ -263,11 +263,6 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
     }
 }
 
-// TODO: remove in Biome 2.0, and directly use `.gitignore`
-/// Default list of ignored directories, in the future will be supplanted by
-/// detecting and parsing .ignore files
-const DEFAULT_IGNORE: &[&str] = &[".git", ".svn", ".hg", ".yarn", "node_modules"];
-
 /// Traverse a single directory
 fn handle_dir<'scope>(
     scope: &Scope<'scope>,
@@ -276,11 +271,6 @@ fn handle_dir<'scope>(
     // The unresolved origin path in case the directory is behind a symbolic link
     origin_path: Option<Utf8PathBuf>,
 ) {
-    if let Some(file_name) = path.file_name() {
-        if DEFAULT_IGNORE.contains(&file_name) {
-            return;
-        }
-    }
     let iter = match path.read_dir_utf8() {
         Ok(iter) => iter,
         Err(err) => {

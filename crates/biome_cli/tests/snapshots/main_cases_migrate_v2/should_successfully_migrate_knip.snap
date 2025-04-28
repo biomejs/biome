@@ -15,7 +15,8 @@ snapshot_kind: text
       "!**/fixtures",
       "!**/packages/knip/package.json",
       "!**/packages/knip/vendor/bash-parser/index.js",
-      "!**/packages/docs/.astro"
+      "!**/packages/docs/.astro",
+      "**/node_modules/**"
     ]
   },
   "assist": {
@@ -107,7 +108,7 @@ snapshot_kind: text
   },
   "overrides": [
     {
-      "includes": ["**/*.astro"],
+      "includes": ["**/*.astro", "**/node_modules/**"],
       "linter": {
         "rules": {
           "correctness": {
@@ -124,7 +125,8 @@ snapshot_kind: text
         "**/packages/knip/src/cli.ts",
         "**/packages/knip/src/reporters/**",
         "**/packages/knip/src/util/cli-arguments.ts",
-        "**/packages/knip/src/util/debug.ts"
+        "**/packages/knip/src/util/debug.ts",
+        "**/node_modules/**"
       ],
       "linter": {
         "rules": {
@@ -140,7 +142,7 @@ snapshot_kind: text
       }
     },
     {
-      "includes": ["**/packages/knip/fixtures/**"],
+      "includes": ["**/packages/knip/fixtures/**", "**/node_modules/**"],
       "organizeImports": {
         "enabled": false
       },
@@ -158,7 +160,8 @@ snapshot_kind: text
     },
     {
       "includes": [
-        "**/packages/knip/test/util/get-inputs-from-scripts.test.ts"
+        "**/packages/knip/test/util/get-inputs-from-scripts.test.ts",
+        "**/node_modules/**"
       ],
       "formatter": {
         "lineWidth": 200
