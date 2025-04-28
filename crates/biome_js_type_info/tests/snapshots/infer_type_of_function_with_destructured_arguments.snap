@@ -26,44 +26,43 @@ sync Function "destruct" {
             Type(string)
           )
         )}
-      } (bindings:
-        a:Object {
-          prototype: No prototype
-          members: {TypeMembers(
-            Property(
-              [a, required]
-              Type(number)
-            )
-            Property(
-              [b, required]
-              Type(string)
-            )
-          )}
-        }.a, b:Object {
-          prototype: No prototype
-          members: {TypeMembers(
-            Property(
-              [a, required]
-              Type(number)
-            )
-            Property(
-              [b, required]
-              Type(string)
-            )
-          )}
-        }.b
-      ), required (unnamed): "Array" {
+      } (bindings: a:Object {
+        prototype: No prototype
+        members: {TypeMembers(
+          Property(
+            [a, required]
+            Type(number)
+          )
+          Property(
+            [b, required]
+            Type(string)
+          )
+        )}
+      }.a,
+      b:Object {
+        prototype: No prototype
+        members: {TypeMembers(
+          Property(
+            [a, required]
+            Type(number)
+          )
+          Property(
+            [b, required]
+            Type(string)
+          )
+        )}
+      }.b)
+      required (unnamed): "Array" {
         resolved: unknown
         type_args: boolean
-      } (bindings:
-        first:"Array" {
-          resolved: unknown
-          type_args: boolean
-        }[0], rest:[(1 others)..."Array" {
-          resolved: unknown
-          type_args: boolean
-        }]
-      )
+      } (bindings: first:"Array" {
+        resolved: unknown
+        type_args: boolean
+      }[0],
+      rest:[(1 others)..."Array" {
+        resolved: unknown
+        type_args: boolean
+      }])
     ]
     type_args: []
   }

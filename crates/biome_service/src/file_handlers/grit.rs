@@ -247,6 +247,7 @@ impl ExtensionHandler for GritFileHandler {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
                 debug_formatter_ir: Some(debug_formatter_ir),
+                debug_type_info: None,
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),

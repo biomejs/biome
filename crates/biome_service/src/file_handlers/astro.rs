@@ -80,6 +80,7 @@ impl ExtensionHandler for AstroFileHandler {
                 debug_syntax_tree: None,
                 debug_control_flow: None,
                 debug_formatter_ir: None,
+                debug_type_info: None,
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
