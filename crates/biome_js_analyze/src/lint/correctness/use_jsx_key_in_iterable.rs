@@ -48,6 +48,17 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ### checkShorthandFragments
+    ///
+    /// React fragments can not only be created with `<React.Fragment>`, but also with shorthand
+    /// fragments (`<></>`). To also check if those require a key, pass `true` to this option.
+    ///
+    /// #### Usage example
+    ///
+    /// ```jsx,expect_diagnostic,use_options
+    /// data.map((x) => <>{x}</>);
+    /// ```
+    ///
     pub UseJsxKeyInIterable {
         version: "1.6.0",
         name: "useJsxKeyInIterable",
@@ -72,6 +83,7 @@ declare_node_union! {
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseJsxKeyInIterableOptions {
+    /// Set to `true` to check shorthand fragments (`<></>`)
     check_shorthand_fragments: bool,
 }
 

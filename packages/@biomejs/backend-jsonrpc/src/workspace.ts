@@ -2902,6 +2902,9 @@ export interface UseImportExtensionsOptions {
 	forceJsExtensions?: boolean;
 }
 export interface UseJsxKeyInIterableOptions {
+	/**
+	 * Set to `true` to check shorthand fragments (`<></>`)
+	 */
 	checkShorthandFragments?: boolean;
 }
 /**

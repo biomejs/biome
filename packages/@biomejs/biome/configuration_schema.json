@@ -5304,7 +5304,11 @@
 		"UseJsxKeyInIterableOptions": {
 			"type": "object",
 			"properties": {
-				"checkShorthandFragments": { "default": false, "type": "boolean" }
+				"checkShorthandFragments": {
+					"description": "Set to `true` to check shorthand fragments (`<></>`)",
+					"default": false,
+					"type": "boolean"
+				}
 			},
 			"additionalProperties": false
 		},
