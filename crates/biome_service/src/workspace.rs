@@ -713,6 +713,8 @@ pub struct PullDiagnosticsParams {
     /// Rules to apply on top of the configuration
     #[serde(default)]
     pub enabled_rules: Vec<RuleSelector>,
+    /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
+    pub pull_code_actions: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1339,6 +1341,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         max_diagnostics: u32,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
+        pull_code_actions: bool,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
             project_key: self.project_key,
@@ -1348,6 +1351,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             enabled_rules: vec![],
+            pull_code_actions,
         })
     }
 

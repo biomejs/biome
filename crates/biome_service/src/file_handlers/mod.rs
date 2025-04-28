@@ -479,6 +479,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
+    pub(crate) pull_code_actions: bool,
 }
 
 pub(crate) struct LintResults {
@@ -494,6 +495,7 @@ pub(crate) struct ProcessLint<'a> {
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
     max_diagnostics: u32,
+    pull_code_actions: bool,
 }
 
 impl<'a> ProcessLint<'a> {
@@ -513,6 +515,7 @@ impl<'a> ProcessLint<'a> {
                 .as_ref()
                 .and_then(|settings| settings.as_linter_rules(params.path.as_path())),
             max_diagnostics: params.max_diagnostics,
+            pull_code_actions: params.pull_code_actions,
         }
     }
 
@@ -547,9 +550,11 @@ impl<'a> ProcessLint<'a> {
             }
 
             if self.diagnostic_count <= self.max_diagnostics {
-                for action in signal.actions() {
-                    if !action.is_suppression() {
-                        diagnostic = diagnostic.add_code_suggestion(action.into());
+                if self.pull_code_actions {
+                    for action in signal.actions() {
+                        if !action.is_suppression() {
+                            diagnostic = diagnostic.add_code_suggestion(action.into());
+                        }
                     }
                 }
 

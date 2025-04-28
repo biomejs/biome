@@ -12,19 +12,14 @@ const isZero = a == 0;
 ```
 invalid.jsonc:1:18 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
   > 1 │ const isZero = a == 0;
       │                  ^^
   
-  i == is only allowed when comparing against null
+  i == is only allowed when comparing against null.
   
-  > 1 │ const isZero = a == 0;
-      │                  ^^
-  
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     1 │ const·isZero·=·a·===·0;
       │                    +   
@@ -40,19 +35,14 @@ const isNonZero = a != 0;
 ```
 invalid.jsonc:1:21 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use !== instead of !=
+  × Using != may be unsafe if you are relying on type coercion.
   
   > 1 │ const isNonZero = a != 0;
       │                     ^^
   
-  i != is only allowed when comparing against null
+  i != is only allowed when comparing against null.
   
-  > 1 │ const isNonZero = a != 0;
-      │                     ^^
-  
-  i Using != may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use !==
+  i Unsafe fix: Use !== instead.
   
     1 │ const·isNonZero·=·a·!==·0;
       │                       +   

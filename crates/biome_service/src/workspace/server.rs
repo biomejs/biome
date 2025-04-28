@@ -1114,6 +1114,7 @@ impl Workspace for WorkspaceServer {
             only,
             skip,
             enabled_rules,
+            pull_code_actions,
         } = params;
         let parse = self.get_parse(&path)?;
         let language = self.get_file_source(&path);
@@ -1137,6 +1138,7 @@ impl Workspace for WorkspaceServer {
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_rules,
+                    pull_code_actions,
                     plugins: self.get_analyzer_plugins_for_project(project_key),
                 });
 

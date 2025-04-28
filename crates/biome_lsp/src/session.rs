@@ -422,6 +422,7 @@ impl Session {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
+                pull_code_actions: false,
             })?;
 
             let content = self.workspace.get_file_content(GetFileContentParams {

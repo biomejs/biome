@@ -31,7 +31,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     1 │ <script setup lang="js">
   > 2 │ a == b;
@@ -39,16 +39,9 @@ file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━�
     3 │ delete a.c;
     4 │ 
   
-  i == is only allowed when comparing against null
+  i == is only allowed when comparing against null.
   
-  > 1 │ <script setup lang="js">
-      │   ^^
-    2 │ a == b;
-    3 │ delete a.c;
-  
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     1 │ a·===·b;
       │     +   

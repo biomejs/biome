@@ -77,7 +77,6 @@ impl Rule for NoStringCaseMismatch {
             ),
         };
         diagnostic = diagnostic
-            .description("This expression always returns false, because the string is converted and will never match")
             .detail(
                 state.call.range(),
                 markup! {

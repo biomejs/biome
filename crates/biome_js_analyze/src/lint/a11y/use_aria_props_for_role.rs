@@ -104,8 +104,6 @@ impl Rule for UseAriaPropsForRole {
         }
         state.attribute.as_ref().map(|(attribute, role_name)| {
             let role_name = role_name.text();
-            let joined_attributes = &state.missing_aria_props.join(", ");
-            let description = format!("The element with the {role_name} ARIA role does not have the required ARIA attributes: {joined_attributes}.");
             RuleDiagnostic::new(
                 rule_category!(),
                 attribute.range(),
@@ -113,7 +111,6 @@ impl Rule for UseAriaPropsForRole {
                 "The element with the "<Emphasis>{role_name}</Emphasis>" ARIA role does not have the required ARIA attributes."
                 },
             )
-            .description(description)
             .footer_list(markup! { "Missing ARIA prop(s):" }, &state.missing_aria_props)
         })
     }
