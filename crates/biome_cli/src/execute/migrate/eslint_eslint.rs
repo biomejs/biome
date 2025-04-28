@@ -489,6 +489,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptArrayType(conf));
                             }
                         }
+                        "@typescript-eslint/consistent-type-imports" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::TypeScriptConsistentTypeImports(conf));
+                            }
+                        }
                         "@typescript-eslint/explicit-member-accessibility" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::TypeScriptExplicitMemberAccessibility(conf));
@@ -583,6 +588,7 @@ pub(crate) enum Rule {
     // Eslint plugins
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
     TypeScriptArrayType(RuleConf<eslint_typescript::ArrayTypeOptions>),
+    TypeScriptConsistentTypeImports(RuleConf<eslint_typescript::ConsistentTypeImportsOptions>),
     TypeScriptExplicitMemberAccessibility(
         RuleConf<eslint_typescript::ExplicitMemberAccessibilityOptions>,
     ),
@@ -598,6 +604,9 @@ impl Rule {
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Self::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
+            Self::TypeScriptConsistentTypeImports(_) => {
+                Cow::Borrowed("@typescript-eslint/consistent-type-imports")
+            }
             Self::TypeScriptExplicitMemberAccessibility(_) => {
                 Cow::Borrowed("@typescript-eslint/explicit-member-accessibility")
             }

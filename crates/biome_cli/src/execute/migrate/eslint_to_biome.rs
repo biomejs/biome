@@ -189,7 +189,7 @@ impl eslint_eslint::Rules {
 }
 
 /// Look for an equivalent Biome rule for ESLint `rule`,
-/// and then mutate `rules` if a equivalent rule is found.
+/// and then mutate `rules` if an equivalent rule is found.
 /// Also, takes care of Biome's rules with options.
 fn migrate_eslint_rule(
     rules: &mut biome_config::Rules,
@@ -271,6 +271,23 @@ fn migrate_eslint_rule(
                     let group = rules.style.get_or_insert_with(Default::default);
                     if let SeverityOrGroup::Group(group) = group {
                         group.use_consistent_array_type =
+                            Some(biome_config::RuleFixConfiguration::WithOptions(
+                                biome_config::RuleWithFixOptions {
+                                    level: severity.into(),
+                                    fix: None,
+                                    options: rule_options.into(),
+                                },
+                            ));
+                    }
+                }
+            }
+        }
+        eslint_eslint::Rule::TypeScriptConsistentTypeImports(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
+                    let group = rules.style.get_or_insert_with(Default::default);
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.use_import_type =
                             Some(biome_config::RuleFixConfiguration::WithOptions(
                                 biome_config::RuleWithFixOptions {
                                     level: severity.into(),

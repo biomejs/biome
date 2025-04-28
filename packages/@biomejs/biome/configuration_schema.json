@@ -1849,11 +1849,8 @@
 		"ImportTypeOptions": {
 			"description": "Rule's options.",
 			"type": "object",
-			"properties": {
-				"style": {
-					"anyOf": [{ "$ref": "#/definitions/Style2" }, { "type": "null" }]
-				}
-			},
+			"required": ["style"],
+			"properties": { "style": { "$ref": "#/definitions/Style2" } },
 			"additionalProperties": false
 		},
 		"IndentScriptAndStyle": {
