@@ -3028,7 +3028,7 @@ export interface FilenamingConventionOptions {
  * Rule's options.
  */
 export interface ImportTypeOptions {
-	style?: Style2;
+	style: Style2;
 }
 /**
  * Rule's options.
