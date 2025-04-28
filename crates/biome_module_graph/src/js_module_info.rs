@@ -43,6 +43,10 @@ impl JsModuleInfo {
         }
     }
 
+    pub fn as_resolver(&self) -> &impl TypeResolver {
+        self.0.as_ref()
+    }
+
     /// Finds an exported symbol by `name`, using the `module_graph` to
     /// lookup re-exports if necessary.
     #[inline]

@@ -13,6 +13,8 @@ export default function Component(): JSX.Element {}
 
 ```
 
+## Module Info
+
 ```
 Exports {
   "default" => {
@@ -27,4 +29,18 @@ Exports {
   }
 }
 Imports {}
+```
+
+## Registered types
+
+```
+
+Module TypeId(0) => sync Function "Component" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unresolved reference "JSX.Element"
+}
+
 ```

@@ -14,6 +14,8 @@ export { foo };
 
 ```
 
+## Module Info
+
 ```
 Exports {
   "foo" => {
@@ -27,4 +29,18 @@ Exports {
   }
 }
 Imports {}
+```
+
+## Registered types
+
+```
+
+Module TypeId(0) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
+
 ```

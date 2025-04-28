@@ -12,6 +12,7 @@ use biome_js_type_info::{
     TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
 use biome_rowan::{AstNode, Text};
+use biome_test_utils::dump_registered_types;
 
 pub fn assert_type_data_snapshot(
     source_code: &str,
@@ -83,32 +84,6 @@ pub fn assert_typed_bindings_snapshot(
     }, {
         insta::assert_snapshot!(test_name, content);
     });
-}
-
-fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) {
-    let mut registered_types = String::new();
-    let mut resolver = Some(resolver);
-    while let Some(current_resolver) = resolver {
-        for (i, ty) in current_resolver.registered_types().iter().enumerate() {
-            let level = current_resolver.level();
-            let id = if level == TypeResolverLevel::Global {
-                i + NUM_PREDEFINED_TYPES
-            } else {
-                i
-            };
-            registered_types.push_str(&format!("\n{level:?} TypeId({id}) => {ty}\n"));
-        }
-
-        resolver = current_resolver.fallback_resolver();
-    }
-
-    if !registered_types.is_empty() {
-        content.push_str("## Registered types\n\n");
-
-        content.push_str("```\n");
-        content.push_str(&registered_types);
-        content.push_str("\n```\n");
-    }
 }
 
 /// Test resolver that can resolve a single type with a hardcoded name, but

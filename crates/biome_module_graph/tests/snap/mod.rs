@@ -5,6 +5,7 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 use biome_module_graph::ModuleGraph;
 use biome_rowan::AstNode;
+use biome_test_utils::dump_registered_types;
 use camino::Utf8PathBuf;
 
 pub struct ModuleGraphSnapshot<'a> {
@@ -58,9 +59,12 @@ impl<'a> ModuleGraphSnapshot<'a> {
             let data = dependency_data.get(file_name.as_path()).unwrap().clone();
 
             content.push_str("\n\n");
+            content.push_str("## Module Info\n\n");
             content.push_str("```\n");
             content.push_str(&data.to_string());
             content.push_str("\n```\n\n");
+
+            dump_registered_types(&mut content, data.as_resolver());
         }
 
         insta::with_settings!({

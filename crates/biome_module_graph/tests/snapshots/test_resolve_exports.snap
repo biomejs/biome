@@ -55,6 +55,8 @@ export * as renamed2 from "./renamed-reexports";
 
 ```
 
+## Module Info
+
 ```
 Exports {
   "a" => {
@@ -151,12 +153,188 @@ Exports {
 Imports {}
 ```
 
+## Registered types
+
+```
+
+Module TypeId(0) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
+
+Module TypeId(1) => sync Function "bar" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: {}
+}
+
+Module TypeId(3) => async Function "baz" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unresolved reference "Promise"<unknown reference>
+}
+
+Module TypeId(4) => value: 1
+
+Module TypeId(5) => Module TypeId(17)
+
+Module TypeId(6) => string
+
+Module TypeId(7) => unresolved reference "Array"<Module TypeId(12)>
+
+Module TypeId(8) => Tuple(
+    [
+        TupleElementType {
+            ty: Resolved(
+                ResolvedTypeId(
+                    Module,
+                    TypeId(
+                        13,
+                    ),
+                ),
+            ),
+            name: Some(
+                Borrowed(
+                    "first",
+                ),
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                ResolvedTypeId(
+                    Module,
+                    TypeId(
+                        15,
+                    ),
+                ),
+            ),
+            name: Some(
+                Borrowed(
+                    "last",
+                ),
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+)
+
+Module TypeId(9) => Module TypeId(13)
+
+Module TypeId(10) => Module TypeId(15)
+
+Module TypeId(11) => string
+
+Module TypeId(12) => number
+
+Module TypeId(13) => boolean
+
+Module TypeId(14) => undefined
+
+Module TypeId(15) => Module TypeId(13) | Module TypeId(14)
+
+Module TypeId(16) => Tuple(
+    [
+        TupleElementType {
+            ty: Resolved(
+                ResolvedTypeId(
+                    Module,
+                    TypeId(
+                        13,
+                    ),
+                ),
+            ),
+            name: Some(
+                Borrowed(
+                    "first",
+                ),
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                ResolvedTypeId(
+                    Module,
+                    TypeId(
+                        15,
+                    ),
+                ),
+            ),
+            name: Some(
+                Borrowed(
+                    "last",
+                ),
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+)
+
+Module TypeId(17) => Object {
+  prototype: No prototype
+  members: {TypeMembers(
+    Property(
+      [a, required]
+      Type(Module TypeId(11))
+    )
+    Property(
+      [b, required]
+      Type(unresolved reference "Array"<Module TypeId(12)>)
+    )
+    Property(
+      [c, required]
+      Type(Module TypeId(16))
+    )
+  )}
+}
+
+Module TypeId(18) => sync Function "getObject" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module TypeId(17)
+}
+
+Module TypeId(19) => sync Function "Component" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unresolved reference "JSX.Element"
+}
+
+Module TypeId(20) => unresolved reference "Array"<Module TypeId(12)>
+
+Module TypeId(21) => boolean
+
+Module TypeId(22) => Module TypeId(13) | Module TypeId(14)
+
+```
 ## /src/renamed-reexports.ts
 
 ```ts
 export function ohNo() {}
 
 ```
+
+## Module Info
 
 ```
 Exports {
@@ -170,6 +348,19 @@ Exports {
 Imports {}
 ```
 
+## Registered types
+
+```
+
+Module TypeId(0) => sync Function "ohNo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
+
+```
 ## /src/reexports.ts
 
 ```ts
@@ -179,6 +370,8 @@ Imports {}
 export * as renamed from "./renamed-reexports";
 
 ```
+
+## Module Info
 
 ```
 Exports {

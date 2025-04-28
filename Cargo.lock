@@ -956,6 +956,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_js_type_info_macros",
  "biome_rowan",
+ "biome_test_utils",
  "insta",
 ]
 
@@ -1395,6 +1396,7 @@ dependencies = [
  "biome_formatter",
  "biome_fs",
  "biome_js_parser",
+ "biome_js_type_info",
  "biome_json_parser",
  "biome_module_graph",
  "biome_package",

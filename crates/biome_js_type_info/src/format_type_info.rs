@@ -608,6 +608,8 @@ impl Format<FormatTypeContext> for Class {
         write!(
             f,
             [&format_args![
+                text("class"),
+                space(),
                 name,
                 space(),
                 text("{"),
