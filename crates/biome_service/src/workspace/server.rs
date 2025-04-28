@@ -826,18 +826,29 @@ impl Workspace for WorkspaceServer {
         &self,
         params: ScanProjectFolderParams,
     ) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        if params.scan_kind.is_none() {
-            return Ok(ScanProjectFolderResult {
-                diagnostics: Vec::new(),
-                duration: Duration::from_millis(0),
-            });
-        }
-
         let path = params
             .path
             .map(Utf8PathBuf::from)
             .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
+
+        if params.scan_kind.is_none() {
+            let manifest = path.join("package.json");
+            if self.fs.path_exists(&manifest) {
+                self.open_file_by_scanner(OpenFileParams {
+                    project_key: params.project_key,
+                    path: BiomePath::from(manifest.clone()),
+                    content: FileContent::FromServer,
+                    document_file_source: None,
+                    persist_node_cache: false,
+                })?;
+                self.update_project_layout(WatcherSignalKind::AddedOrChanged, &manifest)?;
+            }
+            return Ok(ScanProjectFolderResult {
+                diagnostics: Vec::new(),
+                duration: Duration::from_millis(0),
+            });
+        }
 
         let should_scan = params.force
             || !self
