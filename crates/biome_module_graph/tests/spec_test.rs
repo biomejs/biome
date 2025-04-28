@@ -504,3 +504,36 @@ fn test_resolve_promise_export() {
 
     snapshot.assert_snapshot("test_resolve_promise_export");
 }
+
+#[test]
+fn test_resolve_export_type_referencing_imported_type() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/promisedResult.ts".into(),
+        "export type PromisedResult = Promise<{ result: true | false }>;\n",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import type { PromisedResult } from "./promisedResult.ts";
+
+        function returnPromiseResult(): PromisedResult {
+            return new Promise(resolve => resolve({ result: true }));
+        }
+
+        export { returnPromiseResult };
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/src/promisedResult.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_export_type_referencing_imported_type");
+}
