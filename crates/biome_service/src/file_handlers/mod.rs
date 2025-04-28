@@ -546,13 +546,13 @@ impl<'a> ProcessLint<'a> {
                 self.errors += 1;
             }
 
-                if self.pull_code_actions {
-                    for action in signal.actions() {
-                        if !action.is_suppression() {
-                            diagnostic = diagnostic.add_code_suggestion(action.into());
-                        }
+            if self.pull_code_actions {
+                for action in signal.actions() {
+                    if !action.is_suppression() {
+                        diagnostic = diagnostic.add_code_suggestion(action.into());
                     }
                 }
+            }
 
             let error = diagnostic.with_severity(severity);
 
