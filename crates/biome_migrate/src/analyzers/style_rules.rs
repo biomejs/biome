@@ -160,8 +160,6 @@ impl Rule for StyleRules {
             }
         };
 
-        eprintln!("{:#?}", new_styles_member.to_string());
-
         let new_rules_member = match rules_member {
             None => create_rules_member(vec![new_styles_member], vec![], 4),
             Some(rules_member) => {

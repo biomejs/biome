@@ -5,6 +5,7 @@ pub(crate) mod junit;
 pub(crate) mod summary;
 pub(crate) mod terminal;
 
+use crate::cli_options::MaxDiagnostics;
 use crate::execute::Execution;
 use biome_diagnostics::{Error, Severity};
 use biome_fs::BiomePath;
@@ -16,6 +17,7 @@ use std::time::Duration;
 pub struct DiagnosticsPayload {
     pub diagnostics: Vec<Error>,
     pub diagnostic_level: Severity,
+    pub max_diagnostics: MaxDiagnostics,
 }
 
 /// A type that holds the result of the traversal

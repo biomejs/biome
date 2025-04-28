@@ -469,7 +469,6 @@ pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) workspace: &'a WorkspaceSettingsHandle,
     pub(crate) language: DocumentFileSource,
-    pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
@@ -494,7 +493,6 @@ pub(crate) struct ProcessLint<'a> {
     diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
-    max_diagnostics: u32,
     pull_code_actions: bool,
 }
 
@@ -514,7 +512,6 @@ impl<'a> ProcessLint<'a> {
                 .settings()
                 .as_ref()
                 .and_then(|settings| settings.as_linter_rules(params.path.as_path())),
-            max_diagnostics: params.max_diagnostics,
             pull_code_actions: params.pull_code_actions,
         }
     }
@@ -549,7 +546,6 @@ impl<'a> ProcessLint<'a> {
                 self.errors += 1;
             }
 
-            if self.diagnostic_count <= self.max_diagnostics {
                 if self.pull_code_actions {
                     for action in signal.actions() {
                         if !action.is_suppression() {
@@ -558,11 +554,10 @@ impl<'a> ProcessLint<'a> {
                     }
                 }
 
-                let error = diagnostic.with_severity(severity);
+            let error = diagnostic.with_severity(severity);
 
-                self.diagnostics
-                    .push(biome_diagnostics::serde::Diagnostic::new(error));
-            }
+            self.diagnostics
+                .push(biome_diagnostics::serde::Diagnostic::new(error));
         }
 
         ControlFlow::<Never>::Continue(())

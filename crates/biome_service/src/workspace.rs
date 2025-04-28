@@ -705,7 +705,6 @@ pub struct PullDiagnosticsParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub categories: RuleCategories,
-    pub max_diagnostics: u64,
     #[serde(default)]
     pub only: Vec<RuleSelector>,
     #[serde(default)]
@@ -1338,7 +1337,6 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
-        max_diagnostics: u32,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
         pull_code_actions: bool,
@@ -1347,7 +1345,6 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             project_key: self.project_key,
             path: self.path.clone(),
             categories,
-            max_diagnostics: max_diagnostics.into(),
             only,
             skip,
             enabled_rules: vec![],

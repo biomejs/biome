@@ -266,7 +266,6 @@ fn correctly_pulls_lint_diagnostics() {
     .unwrap();
     let result = graphql_file.pull_diagnostics(
         RuleCategories::all(),
-        10,
         vec![RuleSelector::Rule(
             RuleGroup::Nursery.as_str(),
             "useDeprecatedReason",
@@ -485,7 +484,6 @@ fn plugins_are_loaded_and_used_during_analysis() {
             project_key,
             path: BiomePath::new("/project/a.ts"),
             categories: RuleCategories::default(),
-            max_diagnostics: 10,
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
@@ -553,7 +551,6 @@ language css;
             project_key,
             path: BiomePath::new("/project/a.css"),
             categories: RuleCategories::default(),
-            max_diagnostics: 10,
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),
@@ -617,7 +614,6 @@ fn plugins_may_use_invalid_span() {
             project_key,
             path: BiomePath::new("/project/a.ts"),
             categories: RuleCategories::default(),
-            max_diagnostics: 10,
             only: Vec::new(),
             skip: Vec::new(),
             enabled_rules: Vec::new(),

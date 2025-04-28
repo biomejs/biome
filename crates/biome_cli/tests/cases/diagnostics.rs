@@ -99,6 +99,40 @@ fn max_diagnostics_no_verbose() {
 }
 
 #[test]
+fn should_fail_when_max_diagnostics_is_zero() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    for i in 0..1 {
+        let file_path = Utf8PathBuf::from(format!("src/folder_{i}/package-lock.json"));
+        fs.insert(file_path, "{}".as_bytes());
+    }
+    let file_path = Utf8PathBuf::from("src/file.js".to_string());
+    fs.insert(file_path, UNFORMATTED.as_bytes());
+
+    let (mut fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["ci", "--max-diagnostics", "0", "src"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    for i in 0..1 {
+        let file_path = Utf8PathBuf::from(format!("src/folder_{i}/package-lock.json"));
+        fs.remove(Utf8Path::new(&file_path));
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_fail_when_max_diagnostics_is_zero",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn max_diagnostics_verbose() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
 expression: invalid.json
-snapshot_kind: text
 ---
 # Input
 ```json
@@ -17,7 +16,7 @@ snapshot_kind: text
 ```
 invalid.json:2:3 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The includes property don't include node_modules.
+  ! The includes property doesn't include node_modules.
   
     1 │ {
   > 2 │   "includes": [
@@ -28,9 +27,11 @@ invalid.json:2:3 migrate  FIXABLE  ━━━━━━━━━━━━━━━
     5 │ }
     6 │ 
   
-  i Safe fix: Add **/node_modules/** to the includes property.
+  i The new version of Biome doesn't exclude node_modules by default, so you have to manually ignore the folder.
   
-    3 │ ····"src/**/*.js",·"**/node_modules/**"
-      │                  ++++++++++++++++++++++
+  i Safe fix: Add !**/node_modules/** to the includes property.
+  
+    3 │ ····"src/**/*.js",·"!**/node_modules/**"
+      │                  +++++++++++++++++++++++
 
 ```

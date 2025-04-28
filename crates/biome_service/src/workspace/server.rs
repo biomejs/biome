@@ -1099,7 +1099,6 @@ impl Workspace for WorkspaceServer {
             project_key = debug(&params.project_key),
             skip = debug(&params.skip),
             only = debug(&params.only),
-            max_diagnostics = display(&params.max_diagnostics),
         )
     )]
     fn pull_diagnostics(
@@ -1110,7 +1109,6 @@ impl Workspace for WorkspaceServer {
             project_key,
             path,
             categories,
-            max_diagnostics,
             only,
             skip,
             enabled_rules,
@@ -1128,7 +1126,6 @@ impl Workspace for WorkspaceServer {
                 let results = lint(LintParams {
                     parse,
                     workspace: &settings.into(),
-                    max_diagnostics: max_diagnostics as u32,
                     path: &path,
                     only,
                     skip,
