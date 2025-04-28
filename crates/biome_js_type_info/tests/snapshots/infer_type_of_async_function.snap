@@ -19,7 +19,7 @@ async Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: unresolved reference "Promise"<Global TypeId(7)>
+  returns: Global TypeId(8)
 }
 ```
 
@@ -28,5 +28,7 @@ async Function "returnsPromise" {
 ```
 
 Global TypeId(7) => string
+
+Global TypeId(8) => instanceof unresolved reference "Promise"<Global TypeId(7)>
 
 ```

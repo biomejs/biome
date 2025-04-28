@@ -19,6 +19,14 @@ sync Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: unresolved reference "Promise"<number>
+  returns: Global TypeId(7)
 }
+```
+
+## Registered types
+
+```
+
+Global TypeId(7) => instanceof unresolved reference "Promise"<number>
+
 ```
