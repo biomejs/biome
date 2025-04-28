@@ -1,5 +1,6 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
+    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
+    RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
@@ -15,22 +16,51 @@ use biome_test_utils::{
     parse_test_path, project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
-use camino::{Utf8Component, Utf8Path};
+use camino::Utf8Path;
 use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-const TESTS_WITH_MODULE_GRAPH: &[&str] = &[
-    "noFloatingPromises",
-    "noImportCycles",
-    "noPrivateImports",
-    "noUnresolvedImports",
-    "useImportExtensions",
-];
-
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
+
+/// Checks if any of the enabled rules is in the project domain and requires the module graph.
+struct NeedsModuleGraph<'a> {
+    enabled_rules: Option<&'a [RuleFilter<'a>]>,
+    needs_module_graph: bool,
+}
+
+impl<'a> NeedsModuleGraph<'a> {
+    fn new(enabled_rules: Option<&'a [RuleFilter<'a>]>) -> Self {
+        Self {
+            enabled_rules,
+            needs_module_graph: false,
+        }
+    }
+
+    fn compute(mut self) -> bool {
+        biome_js_analyze::visit_registry(&mut self);
+        self.needs_module_graph
+    }
+}
+
+impl RegistryVisitor<JsLanguage> for NeedsModuleGraph<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
+    {
+        let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+
+        if self
+            .enabled_rules
+            .is_some_and(|enabled_rules| enabled_rules.contains(&filter))
+            && R::METADATA.domains.contains(&RuleDomain::Project)
+        {
+            self.needs_module_graph = true;
+        }
+    }
+}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -139,13 +169,8 @@ pub(crate) fn analyze_and_snap(
 
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
-    // FIXME: We probably want to enable it for all rules? Right now it seems to
-    //        trigger a leak panic...
-    let module_graph = if input_file.components().any(|component| {
-        TESTS_WITH_MODULE_GRAPH
-            .iter()
-            .any(|test_name| component == Utf8Component::Normal(test_name))
-    }) {
+    let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
+    let module_graph = if needs_module_graph {
         module_graph_for_test_file(input_file, &project_layout)
     } else {
         Default::default()
@@ -231,11 +256,7 @@ pub(crate) fn analyze_and_snap(
     //        for all tests, since it would cause many incorrect replacements.
     //        Maybe there's a regular expression that could work, but it feels
     //        flimsy too...
-    if input_file.components().any(|component| {
-        TESTS_WITH_MODULE_GRAPH
-            .iter()
-            .any(|test_name| component == Utf8Component::Normal(test_name))
-    }) {
+    if needs_module_graph {
         // Normalize Windows paths.
         *snapshot = snapshot.replace('\\', "/");
     }

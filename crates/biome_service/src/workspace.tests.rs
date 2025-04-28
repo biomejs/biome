@@ -7,7 +7,7 @@ use biome_configuration::{Configuration, FilesConfiguration};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_syntax::{JsFileSource, TextSize};
 use camino::Utf8PathBuf;
-use insta::assert_debug_snapshot;
+use insta::{assert_debug_snapshot, assert_snapshot};
 
 use crate::file_handlers::DocumentFileSource;
 use crate::projects::ProjectKey;
@@ -629,4 +629,38 @@ fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
+}
+
+#[test]
+fn debug_type_info() {
+    let (workspace, project_key) = create_server();
+
+    let file = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            project_key,
+            path: BiomePath::new("file.ts"),
+            content: FileContent::from_client(
+                r#"
+function foo(name: string, age: number): Person {
+    return new Person(string, age)
+}
+class Person {
+    #name: string
+    #age: number
+    constructor(name: string, age: number) {
+        this.#name = name;
+        this.#age = age;
+    }
+}
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        },
+    )
+    .unwrap();
+    let result = file.get_type_info();
+    assert!(result.is_ok());
+    assert_snapshot!(result.unwrap());
 }

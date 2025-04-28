@@ -28,7 +28,7 @@ invalid_with_import.js:4:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━�
   
     1 1 │   // head comment
     2 2 │   import a from 'b';
-      3 │ + import·process·from·"node::process";
+      3 │ + import·process·from·"node:process";
     3 4 │   
     4 5 │   const c = process.env;
   

@@ -21,7 +21,9 @@ instanceof Promise
 
 Global TypeId(7) => sync Function {
   accepts: {
-    params: [required resolve: unknown (bindings: resolve:unknown)]
+    params: [
+      required resolve: unknown (bindings: resolve:unknown)
+    ]
     type_args: []
   }
   returns: unknown reference

@@ -182,18 +182,22 @@ impl Rule for UseSortedKeys {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, Clone)]
 pub struct ObjectMember {
     member: AnyJsObjectMember,
     name: Option<TokenText>,
 }
-
 impl ObjectMember {
     fn new(member: AnyJsObjectMember, name: Option<TokenText>) -> Self {
         Self { member, name }
     }
 }
-
+impl Eq for ObjectMember {}
+impl PartialEq for ObjectMember {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other) == Ordering::Equal
+    }
+}
 impl Ord for ObjectMember {
     fn cmp(&self, other: &Self) -> Ordering {
         // If some doesn't have a name (e.g spread/calculated property) - keep the order.
@@ -204,7 +208,6 @@ impl Ord for ObjectMember {
         self_name.text().ascii_nat_cmp(other_name.text())
     }
 }
-
 impl PartialOrd for ObjectMember {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))

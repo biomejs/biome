@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_4855.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -45,7 +44,7 @@ issue_4855.jsx:2:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
   
     1 1 │   <div class="content-[''] absolute">Hello</div>;
     2   │ - <div·class='top-0·absolute'>Hello</div>;
-      2 │ + <div·class="absolute·top-0">Hello</div>;
+      2 │ + <div·class='absolute·top-0'>Hello</div>;
     3 3 │   
   
 

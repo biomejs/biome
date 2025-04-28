@@ -263,7 +263,7 @@ impl Format<FormatTypeContext> for FunctionParameter {
             });
             write!(
                 f,
-                [&group(&format_args![
+                [&group(&block_indent(&format_args![
                     optional,
                     space(),
                     self.name.as_ref().unwrap_or(&Text::Static("(unnamed)")),
@@ -271,7 +271,7 @@ impl Format<FormatTypeContext> for FunctionParameter {
                     space(),
                     &self.ty,
                     bindings
-                ])]
+                ]))]
             )
         }
     }
@@ -722,7 +722,7 @@ impl Format<FormatTypeContext> for FmtFunctionParameters<'_> {
         }
 
         let function_parameters = format_with(|f| {
-            let separator = format_with(|f| write!(f, [&format_args![text(","), space()]]));
+            let separator = format_with(|f| write!(f, [&format_args![soft_line_break_or_space()]]));
             let mut joiner = f.join_with(separator);
             for part in self.0 {
                 joiner.entry(&format_args![part]);
@@ -731,11 +731,7 @@ impl Format<FormatTypeContext> for FmtFunctionParameters<'_> {
         });
         write!(
             f,
-            [&format_args![
-                text("["),
-                &group(&soft_block_indent(&function_parameters)),
-                text("]")
-            ]]
+            [&format_args![text("["), &function_parameters, text("]")]]
         )
     }
 }
@@ -748,19 +744,15 @@ impl Format<FormatTypeContext> for FmtFunctionParameterBindings<'_> {
         }
 
         let function_parameters = format_with(|f| {
-            let separator = format_with(|f| write!(f, [&format_args![text(","), space()]]));
+            let separator =
+                format_with(|f| write!(f, [&format_args![text(","), soft_line_break_or_space()]]));
             let mut joiner = f.join_with(separator);
             for part in self.0 {
                 joiner.entry(&format_args![&part.name, text(":"), &part.ty]);
             }
             joiner.finish()
         });
-        write!(
-            f,
-            [&format_args![&group(&soft_block_indent(
-                &function_parameters
-            )),]]
-        )
+        write!(f, [&function_parameters])
     }
 }
 

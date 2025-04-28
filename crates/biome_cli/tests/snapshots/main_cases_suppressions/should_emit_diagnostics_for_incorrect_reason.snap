@@ -1,0 +1,55 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `file.ts`
+
+```ts
+// biome-ignore-all lint/style/useConst:
+var foo = 2;
+// biome-ignore-all lint/style/useConst: <explanation>
+var bar = 33;
+```
+
+# Emitted Messages
+
+```block
+file.ts:1:24 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Reason is missing and can't be empty.
+  
+  > 1 │ // biome-ignore-all lint/style/useConst:
+      │                        
+    2 │ var foo = 2;
+    3 │ // biome-ignore-all lint/style/useConst: <explanation>
+  
+  i A reason is mandatory: try to explain why the suppression is needed.
+  
+  i Example of suppression: // biome-ignore lint: reason
+  
+
+```
+
+```block
+file.ts:3:42 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have a <explanation> placeholder.
+  
+    1 │ // biome-ignore-all lint/style/useConst:
+    2 │ var foo = 2;
+  > 3 │ // biome-ignore-all lint/style/useConst: <explanation>
+      │                                          ^^^^^^^^^^^^^
+    4 │ var bar = 33;
+  
+  i A reason shouldn't have a <explanation> placeholder. Provide a valid reason instead.
+  
+  i Example of suppression: // biome-ignore lint: reason
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 warnings.
+```
