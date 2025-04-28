@@ -10,8 +10,6 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{PrintDiagnostic, category};
 use biome_fs::{BiomePath, OpenOptions};
-use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_formatter::format_node;
 use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
 use biome_migrate::{ControlFlow, migrate_configuration};
