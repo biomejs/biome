@@ -27,6 +27,6 @@ sync Function "returnsPromise" {
 
 ```
 
-Global TypeId(7) => instanceof Promise<T = number>
+Global TypeId(7) => instanceof unresolved reference "Promise"<number>
 
 ```

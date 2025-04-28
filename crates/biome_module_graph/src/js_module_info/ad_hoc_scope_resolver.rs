@@ -89,6 +89,7 @@ impl TypeResolver for AdHocScopeResolver {
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
         if qualifier.path.len() == 1 {
             self.resolve_type_of(&qualifier.path[0])
+                .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
         } else {
             // TODO: Resolve nested qualifiers
             None

@@ -61,13 +61,13 @@ export * as renamed2 from "./renamed-reexports";
 Exports {
   "a" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(6)
+      Module TypeId(7)
       Local name: a
     )
   }
   "b" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(7)
+      Module TypeId(8)
       Local name: b
     )
   }
@@ -82,19 +82,19 @@ Exports {
   }
   "baz" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(3)
+      Module TypeId(4)
       Local name: baz
     )
   }
   "d" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(9)
+      Module TypeId(10)
       Local name: d
     )
   }
   "default" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(19)
+      Module TypeId(23)
       Local name: Component
       JsDoc(
         @public
@@ -104,7 +104,7 @@ Exports {
   }
   "e" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(10)
+      Module TypeId(11)
       Local name: e
     )
   }
@@ -126,7 +126,7 @@ Exports {
   }
   "qux" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(4)
+      Module TypeId(5)
       Local name: qux
     )
   }
@@ -178,30 +178,32 @@ Module TypeId(2) => Object {
   members: {}
 }
 
-Module TypeId(3) => async Function "baz" {
+Module TypeId(3) => instanceof Promise
+
+Module TypeId(4) => async Function "baz" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unresolved reference "Promise"<unknown reference>
+  returns: Module TypeId(3)
 }
 
-Module TypeId(4) => value: 1
+Module TypeId(5) => value: 1
 
-Module TypeId(5) => Module TypeId(17)
+Module TypeId(6) => Module TypeId(20)
 
-Module TypeId(6) => string
+Module TypeId(7) => string
 
-Module TypeId(7) => unresolved reference "Array"<Module TypeId(12)>
+Module TypeId(8) => instanceof Module TypeId(24)
 
-Module TypeId(8) => Tuple(
+Module TypeId(9) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
                 ResolvedTypeId(
                     Module,
                     TypeId(
-                        13,
+                        15,
                     ),
                 ),
             ),
@@ -218,7 +220,7 @@ Module TypeId(8) => Tuple(
                 ResolvedTypeId(
                     Module,
                     TypeId(
-                        15,
+                        17,
                     ),
                 ),
             ),
@@ -232,29 +234,31 @@ Module TypeId(8) => Tuple(
         },
     ],
 )
-
-Module TypeId(9) => Module TypeId(13)
 
 Module TypeId(10) => Module TypeId(15)
 
-Module TypeId(11) => string
+Module TypeId(11) => Module TypeId(17)
 
-Module TypeId(12) => number
+Module TypeId(12) => string
 
-Module TypeId(13) => boolean
+Module TypeId(13) => number
 
-Module TypeId(14) => undefined
+Module TypeId(14) => instanceof Array<T = Module TypeId(13)>
 
-Module TypeId(15) => Module TypeId(13) | Module TypeId(14)
+Module TypeId(15) => boolean
 
-Module TypeId(16) => Tuple(
+Module TypeId(16) => undefined
+
+Module TypeId(17) => Module TypeId(15) | Module TypeId(16)
+
+Module TypeId(18) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
                 ResolvedTypeId(
                     Module,
                     TypeId(
-                        13,
+                        15,
                     ),
                 ),
             ),
@@ -271,7 +275,7 @@ Module TypeId(16) => Tuple(
                 ResolvedTypeId(
                     Module,
                     TypeId(
-                        15,
+                        17,
                     ),
                 ),
             ),
@@ -286,45 +290,65 @@ Module TypeId(16) => Tuple(
     ],
 )
 
-Module TypeId(17) => Object {
+Module TypeId(19) => Object {
   prototype: No prototype
   members: {TypeMembers(
     Property(
       [a, required]
-      Type(Module TypeId(11))
+      Type(Module TypeId(12))
     )
     Property(
       [b, required]
-      Type(unresolved reference "Array"<Module TypeId(12)>)
+      Type(Module TypeId(14))
     )
     Property(
       [c, required]
-      Type(Module TypeId(16))
+      Type(Module TypeId(18))
     )
   )}
 }
 
-Module TypeId(18) => sync Function "getObject" {
+Module TypeId(20) => Object {
+  prototype: No prototype
+  members: {TypeMembers(
+    Property(
+      [a, required]
+      Type(Module TypeId(12))
+    )
+    Property(
+      [b, required]
+      Type(Module TypeId(14))
+    )
+    Property(
+      [c, required]
+      Type(Module TypeId(18))
+    )
+  )}
+}
+
+Module TypeId(21) => sync Function "getObject" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module TypeId(17)
+  returns: Module TypeId(20)
 }
 
-Module TypeId(19) => sync Function "Component" {
+Module TypeId(22) => instanceof unresolved reference "JSX.Element"
+
+Module TypeId(23) => sync Function "Component" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unresolved reference "JSX.Element"
+  returns: Module TypeId(22)
 }
 
-Module TypeId(20) => unresolved reference "Array"<Module TypeId(12)>
+Module TypeId(24) => instanceof Array<T = Module TypeId(13)>
 
-Module TypeId(21) => boolean
+Module TypeId(25) => boolean
 
-Module TypeId(22) => Module TypeId(13) | Module TypeId(14)
+Module TypeId(26) => Module TypeId(15) | Module TypeId(16)
 
 ```
 ## /src/renamed-reexports.ts

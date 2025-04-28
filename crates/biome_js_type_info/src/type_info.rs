@@ -50,6 +50,12 @@ pub struct Type {
     id: ResolvedTypeId,
 }
 
+impl Debug for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(self.deref(), f)
+    }
+}
+
 impl Default for Type {
     fn default() -> Self {
         Self {
@@ -333,7 +339,7 @@ impl TypeData {
             }
 
             let Some(next_object) = current
-                .prototype()
+                .prototype(resolver)
                 .and_then(|prototype| resolver.resolve_reference(prototype))
             else {
                 break;
@@ -361,7 +367,7 @@ impl TypeData {
         let mut seen_types = Vec::new();
         let mut current_object = Some(self);
         while let Some(current) = current_object {
-            let Some(prototype) = current.prototype() else {
+            let Some(prototype) = current.prototype(resolver) else {
                 break;
             };
 
@@ -398,10 +404,13 @@ impl TypeData {
     }
 
     /// Returns a reference to the type's prototype, if any.
-    pub fn prototype(&self) -> Option<&TypeReference> {
+    pub fn prototype<'a>(&'a self, resolver: &'a dyn TypeResolver) -> Option<&'a TypeReference> {
         match self {
             Self::InstanceOf(instance_of) => Some(&instance_of.ty),
             Self::Object(object) => object.prototype.as_ref(),
+            Self::Reference(reference) => resolver
+                .resolve_and_get(reference)
+                .and_then(|ty| ty.prototype(resolver)),
             _ => None,
         }
     }

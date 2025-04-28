@@ -87,9 +87,6 @@ pub trait TypeResolver {
     /// Returns a reference to the given type data, if possible.
     fn reference_to_data(&self, type_data: &TypeData) -> Option<TypeReference> {
         match type_data {
-            TypeData::InstanceOf(type_instance) if !type_instance.has_known_type_parameters() => {
-                Some(type_instance.ty.clone())
-            }
             TypeData::Reference(reference) => Some(reference.as_ref().clone()),
             other => self.find_type(other).map(|id| self.reference_to_id(id)),
         }

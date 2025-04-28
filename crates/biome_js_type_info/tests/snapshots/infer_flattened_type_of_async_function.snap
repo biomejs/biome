@@ -29,6 +29,6 @@ async Function "returnsPromise" {
 
 Global TypeId(7) => string
 
-Global TypeId(8) => instanceof Promise<T = Global TypeId(7)>
+Global TypeId(8) => instanceof unresolved reference "Promise"<Global TypeId(7)>
 
 ```

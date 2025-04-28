@@ -30,10 +30,10 @@ Module TypeId(0) => sync Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: Module TypeId(6)
+  returns: Global TypeId(7)
 }
 
-Module TypeId(1) => Module TypeId(6)
+Module TypeId(1) => Global TypeId(7)
 
 Module TypeId(2) => sync Function "then" {
   accepts: {
@@ -61,9 +61,7 @@ Module TypeId(5) => sync Function "finally" {
   returns: instanceof Promise
 }
 
-Module TypeId(6) => instanceof Promise<T = number>
-
-Module TypeId(7) => sync Function "then" {
+Module TypeId(6) => sync Function "then" {
   accepts: {
     params: []
     type_args: []
@@ -71,12 +69,16 @@ Module TypeId(7) => sync Function "then" {
   returns: instanceof Promise
 }
 
-Module TypeId(8) => sync Function "finally" {
+Module TypeId(7) => sync Function "finally" {
   accepts: {
     params: []
     type_args: []
   }
   returns: instanceof Promise
 }
+
+Global TypeId(7) => instanceof Promise<T = number>
+
+Global TypeId(8) => instanceof Promise<T = number>
 
 ```
