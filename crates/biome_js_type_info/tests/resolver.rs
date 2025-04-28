@@ -1,7 +1,7 @@
 mod utils;
 
 use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsExpressionStatement};
-use biome_js_type_info::{GlobalsResolver, TypeData, TypeResolver};
+use biome_js_type_info::{GlobalsResolver, Resolvable, TypeData, TypeResolver};
 
 use utils::{
     HardcodedSymbolResolver, assert_type_data_snapshot, assert_typed_bindings_snapshot,
@@ -9,7 +9,7 @@ use utils::{
 };
 
 #[test]
-fn infer_flattened_type_of_promise_returning_function() {
+fn infer_resolved_type_of_promise_returning_function() {
     const CODE: &str = r#"function returnsPromise(): Promise<number> {
     return Promise.resolved(true);
 }"#;
@@ -18,18 +18,20 @@ fn infer_flattened_type_of_promise_returning_function() {
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
     let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
-    let ty = ty.inferred(&mut resolver);
+    resolver.resolve_all();
+
+    let ty = ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
         ty,
         &resolver,
-        "infer_flattened_type_of_promise_returning_function",
+        "infer_resolved_type_of_promise_returning_function",
     )
 }
 
 #[test]
-fn infer_flattened_type_of_async_function() {
+fn infer_resolved_type_of_async_function() {
     const CODE: &str = r#"async function returnsPromise(): Promise<string> {
 	return "value";
 }"#;
@@ -38,18 +40,15 @@ fn infer_flattened_type_of_async_function() {
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
     let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
-    let ty = ty.inferred(&mut resolver);
+    resolver.resolve_all();
 
-    assert_type_data_snapshot(
-        CODE,
-        ty,
-        &resolver,
-        "infer_flattened_type_of_async_function",
-    )
+    let ty = ty.resolved(&mut resolver);
+
+    assert_type_data_snapshot(CODE, ty, &resolver, "infer_resolved_type_of_async_function")
 }
 
 #[test]
-fn infer_flattened_type_from_invocation_of_promise_returning_function() {
+fn infer_resolved_type_from_invocation_of_promise_returning_function() {
     const CODE: &str = r#"function returnsPromise(): Promise<number> {
     return Promise.resolved(true);
 }
@@ -60,23 +59,25 @@ returnsPromise()"#;
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
     let function_ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
-    let function_ty = function_ty.inferred(&mut resolver);
+    resolver.resolve_all();
 
     let expr = get_expression_statement(&root);
     let mut resolver = HardcodedSymbolResolver::new("returnsPromise", function_ty, resolver);
     let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
-    let expr_ty = expr_ty.inferred(&mut resolver);
+    resolver.resolve_all();
+
+    let expr_ty = expr_ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
         expr_ty,
         &resolver,
-        "infer_flattened_type_from_invocation_of_promise_returning_function",
+        "infer_resolved_type_from_invocation_of_promise_returning_function",
     )
 }
 
 #[test]
-fn infer_flattened_type_from_chained_invocation_of_promise_returning_function() {
+fn infer_resolved_type_from_chained_invocation_of_promise_returning_function() {
     const CODE: &str = r#"function returnsPromise(): Promise<number> {
     return Promise.resolved(true);
 }
@@ -87,25 +88,25 @@ returnsPromise().then(() => {})"#;
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
     let function_ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
-    resolver.run_inference();
+    resolver.resolve_all();
 
     let expr = get_expression_statement(&root);
     let mut resolver = HardcodedSymbolResolver::new("returnsPromise", function_ty, resolver);
     let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
-    resolver.run_inference();
+    resolver.resolve_all();
 
-    let expr_ty = expr_ty.inferred(&mut resolver);
+    let expr_ty = expr_ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
         expr_ty,
         &resolver,
-        "infer_flattened_type_from_chained_invocation_of_promise_returning_function",
+        "infer_resolved_type_from_chained_invocation_of_promise_returning_function",
     )
 }
 
 #[test]
-fn infer_flattened_type_from_double_chained_invocation_of_promise_returning_function() {
+fn infer_resolved_type_from_double_chained_invocation_of_promise_returning_function() {
     const CODE: &str = r#"function returnsPromise(): Promise<number> {
     return Promise.resolved(true);
 }
@@ -116,81 +117,83 @@ returnsPromise().then(() => {}).finally(() => {})"#;
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
     let function_ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
-    resolver.run_inference();
+    resolver.resolve_all();
 
     let expr = get_expression_statement(&root);
     let mut resolver = HardcodedSymbolResolver::new("returnsPromise", function_ty, resolver);
     let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
-    resolver.run_inference();
+    resolver.resolve_all();
 
-    let expr_ty = expr_ty.inferred(&mut resolver);
+    let expr_ty = expr_ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
         expr_ty,
         &resolver,
-        "infer_flattened_type_from_double_chained_invocation_of_promise_returning_function",
+        "infer_resolved_type_from_double_chained_invocation_of_promise_returning_function",
     )
 }
 
 #[test]
-fn infer_flattened_type_from_direct_promise_instance() {
+fn infer_resolved_type_from_direct_promise_instance() {
     const CODE: &str = r#"new Promise((resolve) => resolve("value"))"#;
 
     let root = parse_ts(CODE);
     let expr = get_expression_statement(&root);
     let mut resolver = GlobalsResolver::default();
     let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
-    let expr_ty = expr_ty.inferred(&mut resolver);
+    resolver.resolve_all();
+
+    let expr_ty = expr_ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
         expr_ty,
         &resolver,
-        "infer_flattened_type_from_direct_promise_instance",
+        "infer_resolved_type_from_direct_promise_instance",
     )
 }
 
 #[test]
-fn infer_flattened_type_from_static_promise_function() {
+fn infer_resolved_type_from_static_promise_function() {
     const CODE: &str = r#"Promise.resolve("value")"#;
 
     let root = parse_ts(CODE);
     let expr = get_expression_statement(&root);
     let mut resolver = GlobalsResolver::default();
     let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
-    resolver.run_inference();
+    resolver.resolve_all();
 
-    let expr_ty = expr_ty.inferred(&mut resolver);
+    let expr_ty = expr_ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
         expr_ty,
         &resolver,
-        "infer_flattened_type_from_static_promise_function",
+        "infer_resolved_type_from_static_promise_function",
     )
 }
 
 #[test]
-fn infer_flattened_type_of_destructured_array_element() {
+fn infer_resolved_type_of_destructured_array_element() {
     const CODE: &str = r#"const [a]: Array<string> = [];"#;
 
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
     let mut resolver = GlobalsResolver::default();
     let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
-    resolver.run_inference();
+    resolver.resolve_all();
 
     let bindings: Vec<_> = bindings
         .into_iter()
-        .map(|(name, binding)| (name, binding.inferred(&mut resolver)))
+        .map(|(name, binding)| (name, binding.resolved(&mut resolver)))
         .collect();
 
     assert_typed_bindings_snapshot(
         CODE,
         &bindings,
         &resolver,
-        "infer_flattened_type_of_destructured_array_element",
+        "infer_resolved_type_of_destructured_array_element",
     );
 }
 

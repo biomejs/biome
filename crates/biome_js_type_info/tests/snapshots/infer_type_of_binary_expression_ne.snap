@@ -1,11 +1,15 @@
 ---
-source: crates/biome_js_type_info/tests/utils/mod.rs
+source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
+## Input
+
 ```ts
 const a = 0 !== 1;
 
 ```
+
+## Result
 
 ```
 a => value: true

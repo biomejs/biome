@@ -5,17 +5,24 @@ expression: result.unwrap()
 sync Function "foo" {
   accepts: {
     params: [
-      required name: string (bindings: name:string)
+      required name: Global TypeId(7) (bindings: name:string)
       required age: number (bindings: age:number)
     ]
     type_args: []
   }
-  returns: "Person" {
-    resolved: unknown
-    type_args: No types
-  }
+  returns: Global TypeId(8)
 }
-"Person" {
+class "Person" {
   extends: none
   type_args: []
 }
+
+## Registered types
+
+```
+
+TypeId(7) => string
+
+TypeId(8) => instanceof unresolved reference "Person"
+
+```

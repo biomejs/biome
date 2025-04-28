@@ -987,7 +987,7 @@ impl Rule for NoRestrictedImports {
                             ImportRestrictionCause::ImportSource,
                         ),
                         import_source: import_source.to_string(),
-                        allowed_import_names: Box::new([]),
+                        allowed_import_names: [].into(),
                     }]
                 } else {
                     // Check (and possibly report) each imported name individually
@@ -1015,7 +1015,7 @@ impl Rule for NoRestrictedImports {
                             ImportRestrictionCause::ImportSource,
                         ),
                         import_source: import_source.to_string(),
-                        allowed_import_names: Box::new([]),
+                        allowed_import_names: [].into(),
                     }]
                 } else {
                     // Check (and possibly report) each imported name individually
@@ -1043,7 +1043,7 @@ impl Rule for NoRestrictedImports {
                             ImportRestrictionCause::ImportSource,
                         ),
                         import_source: import_source.to_string(),
-                        allowed_import_names: Box::new([]),
+                        allowed_import_names: [].into(),
                     }]
                 } else {
                     vec![]

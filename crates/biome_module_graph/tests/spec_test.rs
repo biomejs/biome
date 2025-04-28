@@ -479,3 +479,28 @@ fn test_resolve_export_types() {
 
     snapshot.assert_snapshot("test_resolve_export_types");
 }
+
+#[test]
+fn test_resolve_promise_export() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            async function returnsPromise() {
+                return 'value';
+            }
+            
+            export const promise = returnsPromise();
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_promise_export");
+}

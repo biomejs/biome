@@ -12,7 +12,7 @@ new Promise((resolve) => resolve("value"));
 ## Result
 
 ```
-instanceof Promise
+new Promise
 ```
 
 ## Registered types

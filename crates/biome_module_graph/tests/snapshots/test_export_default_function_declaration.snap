@@ -1,7 +1,6 @@
 ---
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
-snapshot_kind: text
 ---
 ## /src/index.ts
 
@@ -14,20 +13,13 @@ export default function Component(): JSX.Element {}
 
 ```
 
+## Module Info
+
 ```
 Exports {
   "default" => {
     ExportOwnExport => JsOwnExport(
-      sync Function "Component" {
-        accepts: {
-          params: []
-          type_args: []
-        }
-        returns: "JSX.Element" {
-          resolved: unknown
-          type_args: No types
-        }
-      }
+      Module TypeId(1)
       Local name: Component
       JsDoc(
         @public
@@ -37,4 +29,20 @@ Exports {
   }
 }
 Imports {}
+```
+
+## Registered types
+
+```
+
+Module TypeId(0) => instanceof unresolved reference "JSX.Element"
+
+Module TypeId(1) => sync Function "Component" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module TypeId(0)
+}
+
 ```

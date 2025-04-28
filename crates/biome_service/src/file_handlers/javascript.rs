@@ -51,7 +51,7 @@ use biome_js_syntax::{
     JsLanguage, JsSyntaxNode, JsVariableDeclarator, LanguageVariant, TextRange, TextSize,
     TokenAtOffset,
 };
-use biome_js_type_info::Type;
+use biome_js_type_info::{GlobalsResolver, NUM_PREDEFINED_TYPES, TypeData, TypeResolver};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache, WalkEvent};
 use camino::Utf8Path;
@@ -638,28 +638,48 @@ fn debug_type_info(_path: &BiomePath, parse: AnyParse) -> Result<String, Workspa
     let mut result = String::new();
     let preorder = tree.syntax().preorder();
 
+    let mut resolver = GlobalsResolver::default();
+
     for event in preorder {
         match event {
             WalkEvent::Enter(node) => {
                 if let Some(node) = JsVariableDeclarator::cast_ref(&node) {
-                    if let Some(ty) = Type::from_js_variable_declarator(&node) {
+                    if let Some(ty) = TypeData::from_js_variable_declarator(&mut resolver, &node) {
                         result.push_str(&ty.to_string());
                         result.push('\n');
                     }
                 } else if let Some(function) = JsFunctionDeclaration::cast_ref(&node) {
-                    result.push_str(&Type::from_js_function_declaration(&function).to_string());
+                    result.push_str(
+                        &TypeData::from_js_function_declaration(&mut resolver, &function)
+                            .to_string(),
+                    );
                     result.push('\n');
                 } else if let Some(class) = JsClassDeclaration::cast_ref(&node) {
-                    result.push_str(&Type::from_js_class_declaration(&class).to_string());
+                    result.push_str(
+                        &TypeData::from_js_class_declaration(&mut resolver, &class).to_string(),
+                    );
                     result.push('\n');
                 } else if let Some(expression) = JsClassExpression::cast_ref(&node) {
-                    result.push_str(&Type::from_js_class_expression(&expression).to_string());
+                    result.push_str(
+                        &TypeData::from_js_class_expression(&mut resolver, &expression).to_string(),
+                    );
                     result.push('\n');
                 }
             }
             WalkEvent::Leave(_) => {}
         }
     }
+
+    result.push_str("\n## Registered types\n\n");
+    result.push_str("```\n");
+
+    for (i, ty) in resolver.registered_types().iter().enumerate() {
+        // TODO: Should we include the predefined types in debug info too?
+        let id = i + NUM_PREDEFINED_TYPES;
+        result.push_str(&format!("\nTypeId({id}) => {ty}\n"));
+    }
+
+    result.push_str("\n```\n");
 
     Ok(result)
 }

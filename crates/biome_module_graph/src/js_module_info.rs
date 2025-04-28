@@ -1,7 +1,6 @@
 mod ad_hoc_scope_resolver;
 mod binding;
 mod collector;
-mod global_scope_resolver;
 mod scope;
 mod visitor;
 
@@ -10,7 +9,10 @@ use ad_hoc_scope_resolver::AdHocScopeResolver;
 use binding::JsBindingData;
 use biome_js_semantic::{BindingId, ScopeId};
 use biome_js_syntax::{AnyJsExpression, AnyJsImportLike};
-use biome_js_type_info::Type;
+use biome_js_type_info::{
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ResolvedTypeId, Type, TypeData, TypeId, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+};
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use scope::{JsScope, JsScopeData};
@@ -41,6 +43,10 @@ impl JsModuleInfo {
         }
     }
 
+    pub fn as_resolver(&self) -> &impl TypeResolver {
+        self.0.as_ref()
+    }
+
     /// Finds an exported symbol by `name`, using the `module_graph` to
     /// lookup re-exports if necessary.
     #[inline]
@@ -64,16 +70,16 @@ impl JsModuleInfo {
     pub fn resolved_type_for_expression(
         &self,
         expr: &AnyJsExpression,
-        module_graph: &ModuleGraph,
+        module_graph: Arc<ModuleGraph>,
     ) -> Type {
-        let mut ty = Type::from_any_js_expression(expr);
         let scope = self.scope_for_range(expr.range());
-        ty.resolve(&AdHocScopeResolver::from_scope_in_module(
-            scope,
-            self,
-            module_graph,
-        ));
-        ty
+        let mut resolver =
+            AdHocScopeResolver::from_scope_in_module(scope, self.clone(), module_graph);
+        let ty = TypeData::from_any_js_expression(&mut resolver, expr);
+        resolver.run_inference();
+
+        let ty = ty.inferred(&mut resolver);
+        Type::from_data(Box::new(resolver), ty)
     }
 
     /// Returns the scope to be used for the given `range`.
@@ -158,6 +164,9 @@ pub struct JsModuleInfoInner {
 
     /// Lookup tree to find scopes by text range.
     pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
+
+    /// Collection of all types in the module.
+    pub(crate) types: Box<[TypeData]>,
 }
 
 #[derive(Debug)]
@@ -198,6 +207,76 @@ impl JsModuleInfoInner {
         } else {
             self.dynamic_import_paths.get(specifier)
         }
+    }
+}
+
+impl TypeResolver for JsModuleInfoInner {
+    fn level(&self) -> TypeResolverLevel {
+        TypeResolverLevel::Module
+    }
+
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.types
+            .iter()
+            .position(|data| data == type_data)
+            .map(TypeId::new)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        &self.types[id.index()]
+    }
+
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData> {
+        match id.level() {
+            TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
+            TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(id.id())),
+            TypeResolverLevel::AdHoc | TypeResolverLevel::Project => None,
+        }
+    }
+
+    fn register_type(&mut self, _type_data: TypeData) -> TypeId {
+        panic!("Cannot register new types after the module has been constructed");
+    }
+
+    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
+        match ty {
+            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
+            TypeReference::Resolved(resolved_id) => Some(*resolved_id),
+            TypeReference::Imported(_) => None,
+            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
+        }
+    }
+
+    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
+        if qualifier.path.len() == 1 {
+            self.resolve_type_of(&qualifier.path[0])
+                .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
+        } else {
+            // TODO: Resolve nested qualifiers
+            None
+        }
+    }
+
+    fn resolve_type_of(&self, identifier: &Text) -> Option<ResolvedTypeId> {
+        if let Some(export) = self.exports.get(identifier) {
+            export
+                .as_own_export()
+                .and_then(|own_export| self.resolve_reference(&own_export.ty))
+        } else {
+            GLOBAL_RESOLVER.resolve_type_of(identifier)
+        }
+    }
+
+    fn registered_types(&self) -> &[TypeData] {
+        &self.types
+    }
+
+    fn resolve_all(&mut self) {
+        panic!("Types must already be resolved");
+    }
+
+    fn flatten_all(&mut self) {
+        panic!("Types must already be flattened");
     }
 }
 
@@ -299,7 +378,7 @@ pub struct JsOwnExport {
     pub local_name: Option<TokenText>,
 
     /// Type of the exported symbol.
-    pub ty: Type,
+    pub ty: TypeReference,
 }
 
 /// Information about an export statement that re-exports all symbols from

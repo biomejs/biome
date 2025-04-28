@@ -24,7 +24,7 @@ impl TypedService {
     pub fn type_for_expression(&self, expr: &AnyJsExpression) -> Type {
         self.module_info
             .as_ref()
-            .map(|module_info| module_info.resolved_type_for_expression(expr, self.module_graph()))
+            .map(|module_info| module_info.resolved_type_for_expression(expr, self.modules.clone()))
             .unwrap_or_default()
     }
 }

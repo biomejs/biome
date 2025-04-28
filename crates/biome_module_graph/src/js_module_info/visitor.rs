@@ -5,7 +5,7 @@ use biome_js_syntax::{
     JsExportDefaultExpressionClause, JsExportFromClause, JsExportNamedFromClause,
     JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, unescape_js_string,
 };
-use biome_js_type_info::Type;
+use biome_js_type_info::{TypeData, TypeResolver};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{ResolveError, ResolverGeneric};
@@ -189,12 +189,14 @@ impl<'a> JsModuleVisitor<'a> {
         node: &JsExportDefaultExpressionClause,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
+        let type_data = TypeData::from_any_js_expression(collector, &node.expression().ok()?);
+        let ty = collector.register_and_resolve(type_data).into();
         collector.register_export(
             "default",
             JsExport::Own(JsOwnExport {
                 jsdoc_comment: None,
                 local_name: None,
-                ty: Type::from_any_js_expression(&node.expression().ok()?),
+                ty,
             }),
         )
     }

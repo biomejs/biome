@@ -11,7 +11,10 @@ use biome_js_syntax::{
     JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
     TsIdentifierBinding, inner_string_text,
 };
-use biome_js_type_info::{FunctionParameter, Type};
+use biome_js_type_info::{
+    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Resolvable, ResolvedTypeId, TypeData,
+    TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+};
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
 use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
@@ -23,8 +26,7 @@ use crate::{
 
 use super::{
     Exports, Imports, JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsModuleInfoInner,
-    JsOwnExport, JsReexport, JsResolvedPath, binding::JsBindingData,
-    global_scope_resolver::GlobalScopeResolver, scope::JsScopeData,
+    JsOwnExport, JsReexport, JsResolvedPath, binding::JsBindingData, scope::JsScopeData,
 };
 
 /// Responsible for collecting all the information from which to build the
@@ -72,11 +74,8 @@ pub(super) struct JsModuleInfoCollector {
     /// List of all blanket re-exports.
     blanket_reexports: Vec<JsReexport>,
 
-    /// Map of parsed declarations, for caching purposes.
-    parsed_declarations: FxHashMap<JsSyntaxNode, Box<[(Text, Type)]>>,
-
-    /// Map of parsed function parameters, for caching purposes.
-    parsed_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
+    /// Types collected in the module.
+    types: Vec<TypeData>,
 }
 
 impl JsModuleInfoCollector {
@@ -120,7 +119,7 @@ impl JsModuleInfoCollector {
             JsExport::Own(JsOwnExport {
                 jsdoc_comment: None,
                 local_name,
-                ty: Type::unknown(),
+                ty: TypeReference::Unknown,
             }),
         )
     }
@@ -148,12 +147,15 @@ impl JsModuleInfoCollector {
     }
 
     pub fn finalise(&mut self) {
+        let mut finaliser = JsModuleInfoCollectorFinaliser::default();
         while let Some(event) = self.extractor.pop() {
-            self.push_event(event);
+            self.push_event(&mut finaliser, event);
         }
+
+        self.run_inference();
     }
 
-    fn push_event(&mut self, event: SemanticEvent) {
+    fn push_event(&mut self, finaliser: &mut JsModuleInfoCollectorFinaliser, event: SemanticEvent) {
         use SemanticEvent::*;
         match event {
             ScopeStarted {
@@ -210,8 +212,8 @@ impl JsModuleInfoCollector {
                 // We must proceed and register the binding, even if the node
                 // cannot be found. Otherwise, later lookups for the binding
                 // may fail.
-                let node = self.binding_node_by_start.get(&range.start());
-                let name_token = node.and_then(|node| {
+                let node = self.binding_node_by_start.get(&range.start()).cloned();
+                let name_token = node.as_ref().and_then(|node| {
                     if let Some(node) = JsIdentifierBinding::cast_ref(node) {
                         node.name_token().ok()
                     } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
@@ -222,14 +224,9 @@ impl JsModuleInfoCollector {
                 });
 
                 let name = name_token.as_ref().map(JsSyntaxToken::token_text_trimmed);
-                let ty = match (node, &name) {
-                    (Some(node), Some(name)) => infer_type(
-                        node,
-                        name,
-                        &mut self.parsed_declarations,
-                        &mut self.parsed_parameters,
-                    ),
-                    _ => Type::unknown(),
+                let ty = match (&node, &name) {
+                    (Some(node), Some(name)) => self.infer_type(finaliser, node, name),
+                    _ => TypeReference::Unknown,
                 };
 
                 self.bindings.push(JsBindingData {
@@ -240,9 +237,12 @@ impl JsModuleInfoCollector {
                     range,
                     references: Vec::new(),
                     scope_id: *self.scope_stack.last().expect("scope must be present"),
-                    declaration_kind: node.map(JsDeclarationKind::from_node).unwrap_or_default(),
+                    declaration_kind: node
+                        .as_ref()
+                        .map(JsDeclarationKind::from_node)
+                        .unwrap_or_default(),
                     ty,
-                    jsdoc: node.and_then(find_jsdoc),
+                    jsdoc: node.as_ref().and_then(find_jsdoc),
                     export_ranges: Vec::new(),
                 });
                 self.bindings_by_start.insert(range.start(), binding_id);
@@ -329,6 +329,178 @@ impl JsModuleInfoCollector {
             UnresolvedReference { .. } => {}
         }
     }
+
+    fn infer_type(
+        &mut self,
+        finaliser: &mut JsModuleInfoCollectorFinaliser,
+        node: &JsSyntaxNode,
+        binding_name: &TokenText,
+    ) -> TypeReference {
+        let mut infer_type = || {
+            for ancestor in node.ancestors() {
+                if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
+                    return if let Some(var_decl) = decl.as_js_variable_declaration() {
+                        let typed_bindings = finaliser
+                            .parsed_declarations
+                            .entry(var_decl.syntax().clone())
+                            .or_insert_with(|| {
+                                TypeData::typed_bindings_from_js_variable_declaration(
+                                    self, var_decl,
+                                )
+                            });
+                        typed_bindings
+                            .iter()
+                            .find_map(|(name, ty)| {
+                                (*name == binding_name.text()).then(|| ty.clone())
+                            })
+                            .unwrap_or_default()
+                    } else {
+                        TypeData::from_any_js_declaration(self, &decl)
+                    };
+                } else if let Some(declaration) = AnyJsExportDefaultDeclaration::cast_ref(&ancestor)
+                {
+                    return TypeData::from_any_js_export_default_declaration(self, &declaration);
+                } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor) {
+                    let param = finaliser
+                        .parsed_parameters
+                        .entry(ancestor.clone())
+                        .or_insert_with(|| {
+                            FunctionParameter::from_js_formal_parameter(self, &param)
+                        });
+                    return param
+                        .bindings
+                        .iter()
+                        .find_map(|binding| {
+                            (binding.name == binding_name.text()).then(|| binding.ty.clone())
+                        })
+                        .unwrap_or_default();
+                }
+            }
+
+            TypeData::unknown()
+        };
+
+        let type_data = infer_type();
+        self.register_and_resolve(type_data).into()
+    }
+}
+
+impl TypeResolver for JsModuleInfoCollector {
+    fn level(&self) -> TypeResolverLevel {
+        TypeResolverLevel::Module
+    }
+
+    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
+        self.types
+            .iter()
+            .position(|data| data == type_data)
+            .map(TypeId::new)
+    }
+
+    fn get_by_id(&self, id: TypeId) -> &TypeData {
+        &self.types[id.index()]
+    }
+
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData> {
+        match id.level() {
+            TypeResolverLevel::AdHoc => None,
+            TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
+            TypeResolverLevel::Project => todo!("Project-level inference not yet implemented"),
+            TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(id.id())),
+        }
+    }
+
+    fn register_type(&mut self, type_data: TypeData) -> TypeId {
+        // Searching linearly may potentially become quite expensive, but it
+        // should be outweighed by index lookups quite heavily.
+        match self.types.iter().position(|data| data == &type_data) {
+            Some(index) => TypeId::new(index),
+            None => {
+                let id = TypeId::new(self.types.len());
+                self.types.push(type_data);
+                id
+            }
+        }
+    }
+
+    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
+        match ty {
+            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
+            TypeReference::Resolved(resolved_id) => Some(*resolved_id),
+            TypeReference::Imported(_) => None,
+            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
+        }
+    }
+
+    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
+        if qualifier.path.len() == 1 {
+            self.resolve_type_of(&qualifier.path[0])
+                .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
+        } else {
+            // TODO: Resolve nested qualifiers
+            None
+        }
+    }
+
+    fn resolve_type_of(&self, identifier: &Text) -> Option<ResolvedTypeId> {
+        // We only care about the global scope, since that's where all exported
+        // symbols reside.
+        if let Some(binding) = self.scopes[0]
+            .bindings_by_name
+            .get(identifier.text())
+            .map(|binding_id| &self.bindings[binding_id.index()])
+        {
+            return if binding.declaration_kind.is_import_declaration() {
+                // TODO: Create ResolvedTypeId at project level.
+                None
+            } else {
+                self.resolve_reference(&binding.ty)
+            };
+        }
+
+        GLOBAL_RESOLVER.resolve_type_of(identifier)
+    }
+
+    fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {
+        Some(&*GLOBAL_RESOLVER)
+    }
+
+    fn registered_types(&self) -> &[TypeData] {
+        &self.types
+    }
+
+    fn resolve_all(&mut self) {
+        let mut i = 0;
+        while i < self.types.len() {
+            // We need to swap to satisfy the borrow checker:
+            let mut ty = TypeData::Unknown;
+            std::mem::swap(&mut ty, &mut self.types[i]);
+            let mut ty = ty.resolved(self);
+            std::mem::swap(&mut ty, &mut self.types[i]);
+            i += 1;
+        }
+    }
+
+    fn flatten_all(&mut self) {
+        let mut i = 0;
+        while i < self.types.len() {
+            // We need to swap to satisfy the borrow checker:
+            let mut ty = TypeData::Unknown;
+            std::mem::swap(&mut ty, &mut self.types[i]);
+            let mut ty = ty.flattened(self);
+            std::mem::swap(&mut ty, &mut self.types[i]);
+            i += 1;
+        }
+    }
+}
+
+#[derive(Default)]
+struct JsModuleInfoCollectorFinaliser {
+    /// Map of parsed declarations, for caching purposes.
+    parsed_declarations: FxHashMap<JsSyntaxNode, Box<[(Text, TypeData)]>>,
+
+    /// Map of parsed function parameters, for caching purposes.
+    parsed_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
 }
 
 /// Used for collecting information to store in the [JsModuleInfo].
@@ -523,26 +695,11 @@ impl JsModuleInfoBag {
             }
         }
     }
-
-    /// Performs "thin" or module-level type resolution.
-    ///
-    /// Iterates over all exported symbols in the module and resolves them if
-    /// they refer to any other symbols in scope of the module.
-    fn resolve_module_types(&mut self, collector: &JsModuleInfoCollector) {
-        let resolver = GlobalScopeResolver::from_collector(collector);
-
-        for export in self.exports.values_mut() {
-            if let Some(export) = export.as_own_export_mut() {
-                export.ty.resolve(&resolver);
-            }
-        }
-    }
 }
 
 impl JsModuleInfo {
     pub(super) fn new(collector: JsModuleInfoCollector) -> Self {
-        let mut bag = JsModuleInfoBag::from_collector(&collector);
-        bag.resolve_module_types(&collector);
+        let bag = JsModuleInfoBag::from_collector(&collector);
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(bag.static_imports),
@@ -560,6 +717,7 @@ impl JsModuleInfo {
                     .cloned()
                     .collect(),
             ),
+            types: collector.types.into(),
         }))
     }
 }
@@ -572,42 +730,4 @@ fn find_jsdoc(node: &JsSyntaxNode) -> Option<JsdocComment> {
             None => JsdocComment::try_from(node).ok(),
         },
     }
-}
-
-fn infer_type(
-    node: &JsSyntaxNode,
-    binding_name: &TokenText,
-    parsed_declarations: &mut FxHashMap<JsSyntaxNode, Box<[(Text, Type)]>>,
-    parsed_parameters: &mut FxHashMap<JsSyntaxNode, FunctionParameter>,
-) -> Type {
-    for ancestor in node.ancestors() {
-        if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
-            return if let Some(var_decl) = decl.as_js_variable_declaration() {
-                let typed_bindings = parsed_declarations
-                    .entry(var_decl.syntax().clone())
-                    .or_insert_with(|| Type::typed_bindings_from_js_variable_declaration(var_decl));
-                typed_bindings
-                    .iter()
-                    .find_map(|(name, ty)| (*name == binding_name.text()).then(|| ty.clone()))
-                    .unwrap_or_default()
-            } else {
-                Type::from_any_js_declaration(&decl)
-            };
-        } else if let Some(declaration) = AnyJsExportDefaultDeclaration::cast_ref(&ancestor) {
-            return Type::from_any_js_export_default_declaration(&declaration);
-        } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor) {
-            let param = parsed_parameters
-                .entry(ancestor.clone())
-                .or_insert_with(|| FunctionParameter::from_js_formal_parameter(&param));
-            return param
-                .bindings
-                .iter()
-                .find_map(|binding| {
-                    (binding.name == binding_name.text()).then(|| binding.ty.clone())
-                })
-                .unwrap_or_default();
-        }
-    }
-
-    Type::unknown()
 }
