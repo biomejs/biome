@@ -287,17 +287,17 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             if biome_config_content != new_configuration_content {
                 if write {
                     let mut configuration_file = biome_config_file;
-                    let format_options = JsonFormatOptions::default();
-                    let formatted = format_node(format_options, tree.syntax())
-                        .ok()
-                        .map(|formatted| formatted.print())
-                        .and_then(|printed| printed.ok());
-
-                    if let Some(formatted) = formatted {
-                        configuration_file.set_content(formatted.as_code().as_bytes())?;
-                    } else {
-                        configuration_file.set_content(new_configuration_content.as_bytes())?;
-                    }
+                    workspace.change_file(ChangeFileParams {
+                        project_key,
+                        path: biome_path.clone(),
+                        content: new_configuration_content,
+                        version: 1,
+                    })?;
+                    let printed = workspace.format_file(FormatFileParams {
+                        project_key,
+                        path: biome_path,
+                    })?;
+                    configuration_file.set_content(printed.as_code().as_bytes())?;
                     console.log(markup!{
                             <Info>"The configuration "<Emphasis>{{configuration_file_path.to_string()}}</Emphasis>" has been successfully migrated."</Info>
                         })
