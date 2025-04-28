@@ -293,36 +293,18 @@ Module TypeId(18) => Tuple(
 Module TypeId(19) => Object {
   prototype: No prototype
   members: {TypeMembers(
-    Property(
-      [a, required]
-      Type(Module TypeId(12))
-    )
-    Property(
-      [b, required]
-      Type(Module TypeId(14))
-    )
-    Property(
-      [c, required]
-      Type(Module TypeId(18))
-    )
+    required property "a": Module TypeId(12)
+    required property "b": Module TypeId(14)
+    required property "c": Module TypeId(18)
   )}
 }
 
 Module TypeId(20) => Object {
   prototype: No prototype
   members: {TypeMembers(
-    Property(
-      [a, required]
-      Type(Module TypeId(12))
-    )
-    Property(
-      [b, required]
-      Type(Module TypeId(14))
-    )
-    Property(
-      [c, required]
-      Type(Module TypeId(18))
-    )
+    required property "a": Module TypeId(12)
+    required property "b": Module TypeId(14)
+    required property "c": Module TypeId(18)
   )}
 }
 

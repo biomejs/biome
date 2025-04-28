@@ -38,14 +38,8 @@ Global TypeId(7) => string
 Global TypeId(8) => Object {
   prototype: No prototype
   members: {TypeMembers(
-    Property(
-      [a, required]
-      Type(number)
-    )
-    Property(
-      [b, required]
-      Type(Global TypeId(7))
-    )
+    required property "a": number
+    required property "b": Global TypeId(7)
   )}
 }
 

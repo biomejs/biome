@@ -296,15 +296,7 @@ impl Format<FormatTypeContext> for TypeMember {
                 write!(f, [&format_args![&method]])
             }
             Self::Property(property) => {
-                write!(
-                    f,
-                    [&format_args![
-                        text("Property"),
-                        text("("),
-                        &group(&soft_block_indent(&property)),
-                        text(")")
-                    ]]
-                )
+                write!(f, [&format_args![&property]])
             }
         }
     }
@@ -417,17 +409,14 @@ impl Format<FormatTypeContext> for PropertyTypeMember {
         write!(
             f,
             [&format_args![
-                text("["),
-                dynamic_text(&self.name, TextSize::default()),
-                text(","),
-                space(),
                 is_optional,
-                text("]"),
-                hard_line_break(),
-                text("Type"),
-                text("("),
-                group(&soft_block_indent(&self.ty)),
-                text(")")
+                space(),
+                text("property"),
+                space(),
+                dynamic_text(&std::format!("\"{}\"", &self.name), TextSize::default()),
+                text(":"),
+                space(),
+                group(&soft_block_indent(&self.ty))
             ]]
         )
     }
@@ -457,7 +446,7 @@ impl Format<FormatTypeContext> for MethodTypeMember {
                 space(),
                 is_async,
                 space(),
-                text("Method"),
+                text("method"),
                 space(),
                 dynamic_text(&std::format!("\"{}\"", &self.name), TextSize::default()),
                 space(),
