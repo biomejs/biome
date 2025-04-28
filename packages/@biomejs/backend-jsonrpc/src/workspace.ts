@@ -3885,7 +3885,6 @@ export interface PullDiagnosticsParams {
 	 * Rules to apply on top of the configuration
 	 */
 	enabledRules?: RuleCode[];
-	maxDiagnostics: number;
 	only?: RuleCode[];
 	path: BiomePath;
 	projectKey: ProjectKey;
