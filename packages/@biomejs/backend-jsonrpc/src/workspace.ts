@@ -3883,6 +3883,10 @@ export interface GetTypeInfoParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
+export interface GetRegisteredTypesParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	/**
@@ -4102,6 +4106,7 @@ export interface Workspace {
 	getControlFlowGraph(params: GetControlFlowGraphParams): Promise<string>;
 	getFormatterIr(params: GetFormatterIRParams): Promise<string>;
 	getTypeInfo(params: GetTypeInfoParams): Promise<string>;
+	getRegisteredTypes(params: GetRegisteredTypesParams): Promise<string>;
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
@@ -4153,6 +4158,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getTypeInfo(params) {
 			return transport.request("biome/get_type_info", params);
+		},
+		getRegisteredTypes(params) {
+			return transport.request("biome/get_registered_types", params);
 		},
 		pullDiagnostics(params) {
 			return transport.request("biome/pull_diagnostics", params);
