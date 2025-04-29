@@ -127,7 +127,7 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = getRegisteredTypes)]
-    pub fn get_type_info(&self, params: IGetRegistredTypesParams) -> Result<String, Error> {
+    pub fn get_registered_types(&self, params: IGetRegisteredTypesParams) -> Result<String, Error> {
         let params: GetRegisteredTypesParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         self.inner.get_registered_types(params).map_err(into_error)
