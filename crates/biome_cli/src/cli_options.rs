@@ -37,8 +37,8 @@ pub struct CliOptions {
     pub max_diagnostics: MaxDiagnostics,
 
     /// Skip over files containing syntax errors instead of emitting an error diagnostic.
-    #[bpaf(long("skip-errors"), switch)]
-    pub skip_errors: bool,
+    #[bpaf(long("skip-parse-errors"), switch)]
+    pub skip_parse_errors: bool,
 
     /// Silence errors that would be emitted in case no files were processed during the execution of the command.
     #[bpaf(long("no-errors-on-unmatched"), switch)]
