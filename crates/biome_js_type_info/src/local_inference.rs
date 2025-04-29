@@ -1669,9 +1669,7 @@ impl TypeofThisOrSuperExpression {
 
                 let binding = binding.as_js_identifier_binding()?;
                 let name = text_from_token(binding.name_token())?;
-                Some(TypeReference::Qualifier(TypeReferenceQualifier::from_name(
-                    name,
-                )))
+                Some(TypeReferenceQualifier::from_name(name).into())
             })
             .unwrap_or_default();
 

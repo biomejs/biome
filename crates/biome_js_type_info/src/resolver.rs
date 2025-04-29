@@ -1,52 +1,142 @@
+use std::fmt::Debug;
+
 use biome_rowan::Text;
 
 use crate::{
-    Class, DestructureField, Function, GenericTypeParameter, TypeData, TypeId, TypeImportQualifier,
-    TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier, TypeofDestructureExpression,
-    TypeofExpression, TypeofValue, Union, globals::GLOBAL_UNDEFINED_ID,
+    Class, DestructureField, Function, GenericTypeParameter, Type, TypeData, TypeId,
+    TypeImportQualifier, TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier,
+    TypeofDestructureExpression, TypeofExpression, TypeofValue, Union,
+    globals::GLOBAL_UNDEFINED_ID,
 };
 
+const NUM_MODULE_ID_BITS: i32 = 30;
+const MODULE_ID_MASK: u32 = 0x3fff_ffff; // Lower 30 bits.
+const LEVEL_MASK: u32 = 0xc000_0000; // Upper 2 bits.
+
 /// Type ID combined with the level at which the type was resolved.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct ResolvedTypeId(pub TypeResolverLevel, pub TypeId);
+///
+/// `ResolvedTypeId` uses `u32` for its first field so that it can fit the
+/// module ID and the resolver level together in 4 bytes, making the struct as
+/// a whole still fit in 8 bytes without alignment issues.
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub struct ResolvedTypeId(u32, TypeId);
+
+impl Debug for ResolvedTypeId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let id = self.1;
+        match self.level() {
+            TypeResolverLevel::AdHoc => f.write_fmt(format_args!("AdHoc {id:?}")),
+            TypeResolverLevel::Module => f.write_fmt(format_args!(
+                "Module({:?}) {id:?}",
+                self.module_id().index()
+            )),
+            TypeResolverLevel::Project => f.write_fmt(format_args!("Project {id:?}")),
+            TypeResolverLevel::Global => f.write_fmt(format_args!("Global {id:?}")),
+        }
+    }
+}
 
 impl ResolvedTypeId {
-    pub const fn id(&self) -> TypeId {
+    pub const fn new(level: TypeResolverLevel, id: TypeId) -> Self {
+        let first = (level as u32) << NUM_MODULE_ID_BITS;
+        Self(first, id)
+    }
+
+    pub const fn id(self) -> TypeId {
         self.1
     }
 
-    pub const fn index(&self) -> usize {
+    pub const fn index(self) -> usize {
         self.1.index()
     }
 
-    pub const fn is_global(&self) -> bool {
-        matches!(self.0, TypeResolverLevel::Global)
+    pub const fn is_global(self) -> bool {
+        matches!(self.level(), TypeResolverLevel::Global)
     }
 
-    pub const fn level(&self) -> TypeResolverLevel {
-        self.0
+    pub const fn level(self) -> TypeResolverLevel {
+        TypeResolverLevel::from_u2(self.0 >> NUM_MODULE_ID_BITS)
+    }
+
+    pub const fn module_id(self) -> ModuleId {
+        ModuleId(self.0 & MODULE_ID_MASK)
+    }
+
+    pub const fn with_module_id(self, module_id: ModuleId) -> Self {
+        // Clear the bits of the old module ID, while preserving the resolver
+        // level, and OR with the bits from the new module ID.
+        Self((self.0 & LEVEL_MASK) | module_id.0, self.1)
+    }
+}
+
+/// Identifier that indicates which module a type is defined in.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ModuleId(u32);
+
+impl ModuleId {
+    pub const fn new(index: usize) -> Self {
+        // Top two bits are reserved to fit in resolver level.
+        debug_assert!(index < MODULE_ID_MASK as usize);
+
+        Self(index as u32)
+    }
+
+    pub const fn index(self) -> usize {
+        self.0 as usize
     }
 }
 
 /// Indicates the level within which a symbol has been resolved.
 ///
-/// The level is used by type resolvers to determine whether to look up a given
-/// [`TypeId`] within their own level, or to forward the resolution to another
-/// resolver that can handle the level.
+/// The level is used by type resolvers to determine _where_ to look up a given
+/// [`TypeId`]. They can look up types within their own registered types, within
+/// modules they may have access to and/or decide to forward resolution to
+/// another resolver that may be able to handle the level.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TypeResolverLevel {
-    /// Used for ad-hoc inference that is not cached anywhere.
+    /// Used for ad-hoc inference that is not cached except in the ad-hoc
+    /// resolver itself (which is discarded after use).
     AdHoc,
 
     /// Used for resolving types that exist within the same module as from which
     /// the resolution took place.
+    ///
+    /// A [`ResolvedTypeId`] that uses this level may have a [`ModuleId`] stored
+    /// as well. However, we **don't** store such module IDs as part of a
+    /// module's type information, because a module is unaware of its own ID.
+    /// Instead, we rely on the resolver to attach the module ID at resolution
+    /// time.
     Module,
 
     /// Used for resolving types that exist across modules within the project.
+    ///
+    /// Currently, we don't store resolved IDs with this level in the module
+    /// info. Instead, we use it to during a module's type collection to flag
+    /// resolved types that require imports from other modules. Such resolved
+    /// IDs then get converted to [`TypeReference::Imported`] before storing
+    /// them in the module info.
     Project,
 
     /// Used for language- and environment-level globals.
     Global,
+}
+
+impl TypeResolverLevel {
+    /// Creates `TypeResolverLevel` from the two least significant bits of a
+    /// `u32`.
+    ///
+    /// Only the two least significant bits may be set in order to let the type
+    /// fit into `ResolvedTypeId`. If more bits become necessary, we may need to
+    /// rebalance the layout of `ResolvedTypeId`.
+    pub const fn from_u2(bits: u32) -> Self {
+        match bits {
+            0 => Self::AdHoc,
+            1 => Self::Module,
+            2 => Self::Project,
+            3 => Self::Global,
+            _ => panic!("invalid bits passed to TypeResolverLevel"),
+        }
+    }
 }
 
 /// Trait for implementing type resolution.
@@ -81,7 +171,7 @@ pub trait TypeResolver {
     /// Returns the [`TypeReference`] to refer to a [`TypeId`] belonging to this
     /// resolver.
     fn reference_to_id(&self, id: TypeId) -> TypeReference {
-        TypeReference::Resolved(ResolvedTypeId(self.level(), id))
+        TypeReference::Resolved(ResolvedTypeId::new(self.level(), id))
     }
 
     /// Returns a reference to the given type data, if possible.
@@ -121,7 +211,7 @@ pub trait TypeResolver {
     /// a [`ResolvedTypeId`].
     fn register_and_resolve(&mut self, type_data: TypeData) -> ResolvedTypeId {
         let type_id = self.register_type(type_data);
-        ResolvedTypeId(self.level(), type_id)
+        ResolvedTypeId::new(self.level(), type_id)
     }
 
     /// Resolves a type reference and immediately returns the associated
@@ -148,7 +238,7 @@ pub trait TypeResolver {
     }
 
     /// Resolves a type by its import `qualifier`.
-    fn resolve_import(&self, _qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
+    fn resolve_import(&mut self, _qualifier: &TypeImportQualifier) -> Option<Type> {
         None
     }
 
@@ -266,11 +356,11 @@ pub trait TypeResolver {
                 } else {
                     id
                 };
-                ResolvedTypeId(self.level(), id)
+                ResolvedTypeId::new(self.level(), id)
             }
             TypeMember::Property(member) => {
                 if member.is_optional {
-                    ResolvedTypeId(self.level(), self.optional(member.ty.clone()))
+                    ResolvedTypeId::new(self.level(), self.optional(member.ty.clone()))
                 } else {
                     self.resolve_or_register(&member.ty)
                 }
@@ -323,17 +413,6 @@ impl Resolvable for TypeReference {
             Self::Qualifier(qualifier) => {
                 let resolved_id = resolver.resolve_qualifier(qualifier);
                 match resolved_id {
-                    Some(ResolvedTypeId(TypeResolverLevel::Project, _id)) => {
-                        Self::Imported(TypeImportQualifier {
-                            // TODO: Introduce module IDs for full inference.
-                            identifier: qualifier
-                                .path
-                                .first()
-                                .expect("resolved without path")
-                                .clone(),
-                            type_parameters: self.resolved_params(resolver),
-                        })
-                    }
                     Some(resolved_id) => Self::Resolved(resolved_id),
                     None => {
                         // If we can't resolve the qualifier as is, attempt to
@@ -370,20 +449,6 @@ impl Resolvable for TypeReference {
                     }
                 }
             }
-            Self::Imported(import) => {
-                let resolved_id = resolver.resolve_import(import);
-                match resolved_id {
-                    Some(ResolvedTypeId(TypeResolverLevel::Project, _id)) => {
-                        Self::Imported(TypeImportQualifier {
-                            // TODO: Introduce module IDs for full inference.
-                            identifier: import.identifier.clone(),
-                            type_parameters: self.resolved_params(resolver),
-                        })
-                    }
-                    Some(resolved_id) => Self::Resolved(resolved_id),
-                    None => Self::Unknown,
-                }
-            }
             unresolvable => unresolvable.clone(),
         }
     }
@@ -393,18 +458,9 @@ impl Resolvable for TypeofValue {
     fn resolved(&self, resolver: &mut dyn TypeResolver) -> Self {
         let identifier = self.identifier.clone();
         let ty = if self.ty == TypeReference::Unknown {
-            let resolved_id = resolver.resolve_type_of(&identifier);
-            match resolved_id {
-                Some(ResolvedTypeId(TypeResolverLevel::Project, _id)) => {
-                    TypeReference::Imported(TypeImportQualifier {
-                        // TODO: Introduce module IDs for full inference.
-                        identifier: identifier.clone(),
-                        type_parameters: [].into(),
-                    })
-                }
-                Some(resolved_id) => TypeReference::Resolved(resolved_id),
-                None => TypeReference::Unknown,
-            }
+            resolver
+                .resolve_type_of(&identifier)
+                .map_or(TypeReference::Unknown, TypeReference::Resolved)
         } else {
             self.ty.resolved(resolver)
         };

@@ -59,7 +59,6 @@ impl TypeData {
                             &instance_of.type_parameters,
                         ),
                     }))
-                    .flattened(resolver)
                 }
                 Some(
                     ty @ (Self::Global | Self::Function(_) | Self::Literal(_) | Self::Object(_)),

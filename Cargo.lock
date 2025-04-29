@@ -957,6 +957,7 @@ dependencies = [
  "biome_js_type_info_macros",
  "biome_rowan",
  "biome_test_utils",
+ "camino",
  "insta",
 ]
 

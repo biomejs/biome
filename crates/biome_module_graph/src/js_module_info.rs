@@ -4,19 +4,21 @@ mod collector;
 mod scope;
 mod visitor;
 
-use crate::{ModuleGraph, jsdoc_comment::JsdocComment};
-use ad_hoc_scope_resolver::AdHocScopeResolver;
-use binding::JsBindingData;
-use biome_js_semantic::{BindingId, ScopeId};
+use std::{collections::BTreeMap, ops::Deref, sync::Arc};
+
+use biome_js_semantic::ScopeId;
 use biome_js_syntax::{AnyJsExpression, AnyJsImportLike};
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ResolvedTypeId, Type, TypeData, TypeId, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedPath, ResolvedTypeId, Type, TypeData,
+    TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
-use camino::{Utf8Path, Utf8PathBuf};
+
+use crate::{ModuleGraph, jsdoc_comment::JsdocComment};
+
+use ad_hoc_scope_resolver::AdHocScopeResolver;
+use binding::{BindingId, JsBindingData};
 use scope::{JsScope, JsScopeData};
-use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 pub(crate) use visitor::JsModuleVisitor;
 
@@ -35,7 +37,7 @@ impl Deref for JsModuleInfo {
 impl JsModuleInfo {
     /// Returns an iterator over all the static and dynamic imports in this
     /// module.
-    pub fn all_import_paths(&self) -> impl Iterator<Item = JsResolvedPath> + use<> {
+    pub fn all_import_paths(&self) -> impl Iterator<Item = ResolvedPath> + use<> {
         let module_info = self.0.as_ref();
         ImportPathIterator {
             static_import_paths: module_info.static_import_paths.clone(),
@@ -122,7 +124,7 @@ pub struct JsModuleInfoInner {
     /// absolute path it resolves to. The resolved path may be looked up as key
     /// in the [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
-    pub static_import_paths: BTreeMap<Text, JsResolvedPath>,
+    pub static_import_paths: BTreeMap<Text, ResolvedPath>,
 
     /// Map of all dynamic import paths found in the module for which the import
     /// specifier could be statically determined.
@@ -138,7 +140,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Paths found in `require()` expressions in CommonJS sources are also
     /// included with the dynamic import paths.
-    pub dynamic_import_paths: BTreeMap<Text, JsResolvedPath>,
+    pub dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
 
     /// Map of exports from the module.
     ///
@@ -199,7 +201,7 @@ impl JsModuleInfoInner {
     }
 
     /// Returns the information about a given import by its syntax node.
-    pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&JsResolvedPath> {
+    pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&ResolvedPath> {
         let specifier_text = node.inner_string_text()?;
         let specifier = specifier_text.text();
         if node.is_static_import() {
@@ -337,35 +339,10 @@ pub struct JsImport {
     /// point towards the resolved entry point of the package.
     ///
     /// If `None`, import resolution failed.
-    pub resolved_path: JsResolvedPath,
+    pub resolved_path: ResolvedPath,
 
     /// The symbol(s) being imported.
-    pub symbol: JsImportSymbol,
-}
-
-#[derive(Clone, Debug, Default, PartialEq)]
-pub enum JsImportSymbol {
-    /// Imports the `default` export.
-    #[default]
-    Default,
-
-    /// Imports a named symbol.
-    Named(Text),
-
-    /// Imports all symbols, including the `default` export.
-    All,
-}
-
-impl From<Text> for JsImportSymbol {
-    fn from(name: Text) -> Self {
-        Self::Named(name)
-    }
-}
-
-impl From<&'static str> for JsImportSymbol {
-    fn from(name: &'static str) -> Self {
-        Self::Named(name.into())
-    }
+    pub symbol: ImportSymbol,
 }
 
 /// Information tracked for every "own" export.
@@ -392,40 +369,13 @@ pub struct JsReexport {
     pub import: JsImport,
 }
 
-/// Reference-counted resolved path wrapped in a [Result] that contains a string
-/// message if resolution failed.
-#[derive(Clone, Debug, PartialEq)]
-pub struct JsResolvedPath(Arc<Result<Utf8PathBuf, String>>);
-
-impl Deref for JsResolvedPath {
-    type Target = Result<Utf8PathBuf, String>;
-
-    fn deref(&self) -> &Self::Target {
-        self.0.as_ref()
-    }
-}
-
-impl JsResolvedPath {
-    pub(super) fn new(resolved_path: Result<Utf8PathBuf, String>) -> Self {
-        Self(Arc::new(resolved_path))
-    }
-
-    pub fn as_path(&self) -> Option<&Utf8Path> {
-        self.as_deref().ok()
-    }
-
-    pub fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
-        Self::new(Ok(path.into()))
-    }
-}
-
 struct ImportPathIterator {
-    static_import_paths: BTreeMap<Text, JsResolvedPath>,
-    dynamic_import_paths: BTreeMap<Text, JsResolvedPath>,
+    static_import_paths: BTreeMap<Text, ResolvedPath>,
+    dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
 }
 
 impl Iterator for ImportPathIterator {
-    type Item = JsResolvedPath;
+    type Item = ResolvedPath;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.static_import_paths.is_empty() {

@@ -41,7 +41,7 @@ Imports {
 
 Module TypeId(0) => unknown
 
-Module TypeId(1) => instanceof unresolved reference "PromisedResult"
+Module TypeId(1) => instanceof Project TypeId(0)
 
 Module TypeId(2) => sync Function "returnPromiseResult" {
   accepts: {

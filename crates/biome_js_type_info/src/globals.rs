@@ -22,7 +22,7 @@ pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
         .map(|id| {
             TypeMember::Property(PropertyTypeMember {
                 name: Text::Static(global_type_name(id)),
-                ty: ResolvedTypeId(GLOBAL_LEVEL, id).into(),
+                ty: ResolvedTypeId::new(GLOBAL_LEVEL, id).into(),
                 is_optional: false,
                 is_static: false,
             })
@@ -39,14 +39,14 @@ pub const PROMISE_ID: TypeId = TypeId::new(5);
 pub const UNDEFINED_ID: TypeId = TypeId::new(6);
 pub const NUM_PREDEFINED_TYPES: usize = 7; // Most be one more than the highest `TypeId` above.
 
-pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, UNKNOWN_ID);
-pub const GLOBAL_ARRAY_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, ARRAY_ID);
-pub const GLOBAL_GLOBAL_ID /* :smirk: */: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, GLOBAL_ID);
+pub const GLOBAL_UNKNOWN_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNKNOWN_ID);
+pub const GLOBAL_ARRAY_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, ARRAY_ID);
+pub const GLOBAL_GLOBAL_ID /* :smirk: */: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, GLOBAL_ID);
 pub const GLOBAL_INSTANCEOF_PROMISE_ID: ResolvedTypeId =
-    ResolvedTypeId(GLOBAL_LEVEL, INSTANCEOF_PROMISE_ID);
-pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, NUMBER_ID);
-pub const GLOBAL_PROMISE_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, PROMISE_ID);
-pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId(GLOBAL_LEVEL, UNDEFINED_ID);
+    ResolvedTypeId::new(GLOBAL_LEVEL, INSTANCEOF_PROMISE_ID);
+pub const GLOBAL_NUMBER_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, NUMBER_ID);
+pub const GLOBAL_PROMISE_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, PROMISE_ID);
+pub const GLOBAL_UNDEFINED_ID: ResolvedTypeId = ResolvedTypeId::new(GLOBAL_LEVEL, UNDEFINED_ID);
 
 /// Returns a string for formatting global IDs in test snapshots.
 pub fn global_type_name(id: TypeId) -> &'static str {
@@ -172,8 +172,8 @@ impl TypeResolver for GlobalsResolver {
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
         match ty {
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
-            TypeReference::Resolved(resolved_id @ ResolvedTypeId(level, _id)) => {
-                (*level == GLOBAL_LEVEL).then_some(*resolved_id)
+            TypeReference::Resolved(resolved_id) => {
+                (resolved_id.level() == GLOBAL_LEVEL).then_some(*resolved_id)
             }
             TypeReference::Imported(_) => None,
             TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
