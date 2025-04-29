@@ -95,6 +95,7 @@ impl ExtensionHandler for VueFileHandler {
                 debug_formatter_ir: None,
                 debug_type_info: None,
                 debug_registered_types: None,
+                debug_semantic_model: None,
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),

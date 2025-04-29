@@ -3892,6 +3892,10 @@ export interface GetRegisteredTypesParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
+export interface GetSemanticModelParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	/**
@@ -4112,6 +4116,7 @@ export interface Workspace {
 	getFormatterIr(params: GetFormatterIRParams): Promise<string>;
 	getTypeInfo(params: GetTypeInfoParams): Promise<string>;
 	getRegisteredTypes(params: GetRegisteredTypesParams): Promise<string>;
+	getSemanticModel(params: GetSemanticModelParams): Promise<string>;
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
@@ -4166,6 +4171,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getRegisteredTypes(params) {
 			return transport.request("biome/get_registered_types", params);
+		},
+		getSemanticModel(params) {
+			return transport.request("biome/get_semantic_model", params);
 		},
 		pullDiagnostics(params) {
 			return transport.request("biome/pull_diagnostics", params);

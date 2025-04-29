@@ -1,0 +1,62 @@
+---
+source: crates/biome_service/src/workspace.tests.rs
+expression: result.unwrap()
+---
+Scope {
+  id: ScopeId(1) @ 1..242
+  children: [
+    Scope {
+      id: ScopeId(2) @ 1..87
+      children: [
+        Binding {
+          id: BindingId(1) @ 14..18
+          scope: ScopeId(2)
+          ident: name
+        }
+        Binding {
+          id: BindingId(2) @ 28..31
+          scope: ScopeId(2)
+          ident: age
+        }
+        Scope {
+          id: ScopeId(3) @ 49..87
+          children: []
+        }
+      ]
+    }
+    Binding {
+      id: BindingId(0) @ 10..13
+      scope: ScopeId(2)
+      ident: foo
+    }
+    Scope {
+      id: ScopeId(4) @ 88..242
+      children: [
+        Scope {
+          id: ScopeId(5) @ 142..240
+          children: [
+            Binding {
+              id: BindingId(4) @ 154..158
+              scope: ScopeId(5)
+              ident: name
+            }
+            Binding {
+              id: BindingId(5) @ 168..171
+              scope: ScopeId(5)
+              ident: age
+            }
+            Scope {
+              id: ScopeId(6) @ 181..240
+              children: []
+            }
+          ]
+        }
+      ]
+    }
+    Binding {
+      id: BindingId(3) @ 94..100
+      scope: ScopeId(4)
+      ident: Person
+    }
+  ]
+}

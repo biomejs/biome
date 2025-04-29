@@ -51,11 +51,12 @@ use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
-    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
-    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
-    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
-    ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
+    OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
+    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    RenameResult, ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams,
+    SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams,
+    UpdateSettingsResult,
 };
 
 pub struct WorkspaceServer {
@@ -995,6 +996,17 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&params.path)?;
 
         debug_registered_types(&params.path, parse)
+    }
+
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_semantic_model = capabilities
+            .debug
+            .debug_semantic_model
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let parse = self.get_parse(&params.path)?;
+
+        debug_semantic_model(&params.path, parse)
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {

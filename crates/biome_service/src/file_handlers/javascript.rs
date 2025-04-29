@@ -485,6 +485,7 @@ impl ExtensionHandler for JsFileHandler {
                 debug_formatter_ir: Some(debug_formatter_ir),
                 debug_type_info: Some(debug_type_info),
                 debug_registered_types: Some(debug_registered_types),
+                debug_semantic_model: Some(debug_semantic_model),
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
@@ -704,6 +705,12 @@ fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, 
     }
 
     Ok(result)
+}
+
+fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+    let tree: AnyJsRoot = parse.tree();
+    let model = semantic_model(&tree, SemanticModelOptions::default());
+    Ok(model.to_string())
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
