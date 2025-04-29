@@ -105,7 +105,7 @@ jobs:
 
   publish:
     name: Publish
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ubuntu-24.04
     needs: build
     environment: npm-publish
     permissions:
