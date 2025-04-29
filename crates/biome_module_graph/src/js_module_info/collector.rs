@@ -3,9 +3,7 @@ use std::{
     sync::Arc,
 };
 
-use biome_js_semantic::{
-    BindingId, ReferenceId, ScopeId, SemanticEvent, SemanticEventExtractor, find_import_node,
-};
+use biome_js_semantic::{ScopeId, SemanticEvent, SemanticEventExtractor, find_import_node};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsImportClause,
     JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
@@ -13,7 +11,8 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{
     FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Resolvable, ResolvedTypeId, TypeData,
-    TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    TypeId, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeResolverLevel,
 };
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
 use rust_lapper::{Interval, Lapper};
@@ -25,8 +24,10 @@ use crate::{
 };
 
 use super::{
-    Exports, Imports, JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsModuleInfoInner,
-    JsOwnExport, JsReexport, JsResolvedPath, binding::JsBindingData, scope::JsScopeData,
+    Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoInner,
+    JsOwnExport, JsReexport, ResolvedPath,
+    binding::{BindingId, JsBindingData},
+    scope::JsScopeData,
 };
 
 /// Responsible for collecting all the information from which to build the
@@ -63,10 +64,10 @@ pub(super) struct JsModuleInfoCollector {
     scope_stack: Vec<ScopeId>,
 
     /// Map with all static import paths, from the source specifier to the resolved path.
-    static_import_paths: BTreeMap<Text, JsResolvedPath>,
+    static_import_paths: BTreeMap<Text, ResolvedPath>,
 
     /// Map with all dynamic import paths, from the import source to the resolved path.
-    dynamic_import_paths: BTreeMap<Text, JsResolvedPath>,
+    dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
 
     /// Map with exports, from the exported symbol name to a [JsExport] definition.
     exports: BTreeMap<Text, JsExport>,
@@ -131,7 +132,7 @@ impl JsModuleInfoCollector {
     pub fn register_static_import_path(
         &mut self,
         specifier: TokenText,
-        resolved_path: JsResolvedPath,
+        resolved_path: ResolvedPath,
     ) {
         self.static_import_paths
             .insert(specifier.into(), resolved_path);
@@ -140,7 +141,7 @@ impl JsModuleInfoCollector {
     pub fn register_dynamic_import_path(
         &mut self,
         specifier: TokenText,
-        resolved_path: JsResolvedPath,
+        resolved_path: ResolvedPath,
     ) {
         self.dynamic_import_paths
             .insert(specifier.into(), resolved_path);
@@ -161,7 +162,7 @@ impl JsModuleInfoCollector {
             ScopeStarted {
                 range,
                 parent_scope_id,
-                is_closure,
+                ..
             } => {
                 // Scopes will be raised in order
                 let scope_id = ScopeId::new(self.scopes.len());
@@ -172,9 +173,6 @@ impl JsModuleInfoCollector {
                     children: Vec::new(),
                     bindings: Vec::new(),
                     bindings_by_name: FxHashMap::default(),
-                    read_references: Vec::new(),
-                    _write_references: Vec::new(),
-                    _is_closure: is_closure,
                 });
 
                 if let Some(parent_scope_id) = parent_scope_id {
@@ -257,66 +255,50 @@ impl JsModuleInfoCollector {
             Read {
                 range,
                 declaration_at,
-                scope_id,
+                ..
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
-                let reference_id = ReferenceId::new(binding_id, binding.references.len());
                 binding.references.push(JsBindingReference {
                     range_start: range.start(),
                     kind: JsBindingReferenceKind::Read { _hoisted: false },
                 });
-
-                let scope = &mut self.scopes[scope_id.index()];
-                scope.read_references.push(reference_id);
             }
             HoistedRead {
                 range,
                 declaration_at,
-                scope_id,
+                ..
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
-                let reference_id = ReferenceId::new(binding_id, binding.references.len());
                 binding.references.push(JsBindingReference {
                     range_start: range.start(),
                     kind: JsBindingReferenceKind::Read { _hoisted: true },
                 });
-
-                let scope = &mut self.scopes[scope_id.index()];
-                scope.read_references.push(reference_id);
             }
             Write {
                 range,
                 declaration_at,
-                scope_id,
+                ..
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
-                let reference_id = ReferenceId::new(binding_id, binding.references.len());
                 binding.references.push(JsBindingReference {
                     range_start: range.start(),
                     kind: JsBindingReferenceKind::Write { _hoisted: false },
                 });
-
-                let scope = &mut self.scopes[scope_id.index()];
-                scope.read_references.push(reference_id);
             }
             HoistedWrite {
                 range,
                 declaration_at,
-                scope_id,
+                ..
             } => {
                 let binding_id = self.bindings_by_start[&declaration_at];
                 let binding = &mut self.bindings[binding_id.index()];
-                let reference_id = ReferenceId::new(binding_id, binding.references.len());
                 binding.references.push(JsBindingReference {
                     range_start: range.start(),
                     kind: JsBindingReferenceKind::Write { _hoisted: true },
                 });
-
-                let scope = &mut self.scopes[scope_id.index()];
-                scope.read_references.push(reference_id);
             }
             Export {
                 declaration_at,
@@ -403,10 +385,9 @@ impl TypeResolver for JsModuleInfoCollector {
 
     fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData> {
         match id.level() {
-            TypeResolverLevel::AdHoc => None,
             TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
-            TypeResolverLevel::Project => todo!("Project-level inference not yet implemented"),
             TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(id.id())),
+            TypeResolverLevel::AdHoc | TypeResolverLevel::Project => None,
         }
     }
 
@@ -445,14 +426,13 @@ impl TypeResolver for JsModuleInfoCollector {
     fn resolve_type_of(&self, identifier: &Text) -> Option<ResolvedTypeId> {
         // We only care about the global scope, since that's where all exported
         // symbols reside.
-        if let Some(binding) = self.scopes[0]
-            .bindings_by_name
-            .get(identifier.text())
-            .map(|binding_id| &self.bindings[binding_id.index()])
-        {
+        if let Some(binding_id) = self.scopes[0].bindings_by_name.get(identifier.text()) {
+            let binding = &self.bindings[binding_id.index()];
             return if binding.declaration_kind.is_import_declaration() {
-                // TODO: Create ResolvedTypeId at project level.
-                None
+                Some(ResolvedTypeId::new(
+                    TypeResolverLevel::Project,
+                    (*binding_id).into(),
+                ))
             } else {
                 self.resolve_reference(&binding.ty)
             };
@@ -565,7 +545,7 @@ impl JsModuleInfoBag {
                     JsImport {
                         specifier: source.clone().into(),
                         resolved_path: resolved_path.clone(),
-                        symbol: JsImportSymbol::Default,
+                        symbol: ImportSymbol::Default,
                     },
                 );
 
@@ -585,7 +565,7 @@ impl JsModuleInfoBag {
                                 JsImport {
                                     specifier: source.clone().into(),
                                     resolved_path: resolved_path.clone(),
-                                    symbol: JsImportSymbol::Named(symbol_name.into()),
+                                    symbol: ImportSymbol::Named(symbol_name.into()),
                                 },
                             );
                         }
@@ -599,7 +579,7 @@ impl JsModuleInfoBag {
                             JsImport {
                                 specifier: source.into(),
                                 resolved_path: resolved_path.clone(),
-                                symbol: JsImportSymbol::All,
+                                symbol: ImportSymbol::All,
                             },
                         );
                     }
@@ -619,7 +599,7 @@ impl JsModuleInfoBag {
                     JsImport {
                         specifier: source.into(),
                         resolved_path: resolved_path.clone(),
-                        symbol: JsImportSymbol::Default,
+                        symbol: ImportSymbol::Default,
                     },
                 );
             }
@@ -643,7 +623,7 @@ impl JsModuleInfoBag {
                         JsImport {
                             specifier: source.clone().into(),
                             resolved_path: resolved_path.clone(),
-                            symbol: JsImportSymbol::Named(symbol_name.into()),
+                            symbol: ImportSymbol::Named(symbol_name.into()),
                         },
                     );
                 }
@@ -663,7 +643,7 @@ impl JsModuleInfoBag {
                     JsImport {
                         specifier: source.into(),
                         resolved_path: resolved_path.clone(),
-                        symbol: JsImportSymbol::All,
+                        symbol: ImportSymbol::All,
                     },
                 );
             }
@@ -700,6 +680,34 @@ impl JsModuleInfoBag {
 impl JsModuleInfo {
     pub(super) fn new(collector: JsModuleInfoCollector) -> Self {
         let bag = JsModuleInfoBag::from_collector(&collector);
+        let types = collector
+            .types
+            .into_iter()
+            .map(|ty| match ty {
+                TypeData::Reference(reference) => match *reference {
+                    TypeReference::Resolved(resolved)
+                        if resolved.level() == TypeResolverLevel::Project =>
+                    {
+                        // At this point, the type has only been resolved to an
+                        // import binding, so we "downgrade" it from a resolved
+                        // reference to an import qualifier:
+                        let id: BindingId = resolved.id().into();
+                        let binding = &collector.bindings[id.index()];
+                        bag.static_imports.get(&binding.name).map_or(
+                            TypeData::reference(TypeReference::Unknown),
+                            |import| {
+                                TypeData::reference(TypeImportQualifier {
+                                    symbol: import.symbol.clone(),
+                                    resolved_path: import.resolved_path.clone(),
+                                })
+                            },
+                        )
+                    }
+                    other_reference => TypeData::reference(other_reference),
+                },
+                other => other,
+            })
+            .collect();
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(bag.static_imports),
@@ -717,7 +725,7 @@ impl JsModuleInfo {
                     .cloned()
                     .collect(),
             ),
-            types: collector.types.into(),
+            types,
         }))
     }
 }

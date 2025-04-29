@@ -200,12 +200,7 @@ Module TypeId(9) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
-                ResolvedTypeId(
-                    Module,
-                    TypeId(
-                        15,
-                    ),
-                ),
+                Module(0) TypeId(15),
             ),
             name: Some(
                 Borrowed(
@@ -217,12 +212,7 @@ Module TypeId(9) => Tuple(
         },
         TupleElementType {
             ty: Resolved(
-                ResolvedTypeId(
-                    Module,
-                    TypeId(
-                        17,
-                    ),
-                ),
+                Module(0) TypeId(17),
             ),
             name: Some(
                 Borrowed(
@@ -255,12 +245,7 @@ Module TypeId(18) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
-                ResolvedTypeId(
-                    Module,
-                    TypeId(
-                        15,
-                    ),
-                ),
+                Module(0) TypeId(15),
             ),
             name: Some(
                 Borrowed(
@@ -272,12 +257,7 @@ Module TypeId(18) => Tuple(
         },
         TupleElementType {
             ty: Resolved(
-                ResolvedTypeId(
-                    Module,
-                    TypeId(
-                        17,
-                    ),
-                ),
+                Module(0) TypeId(17),
             ),
             name: Some(
                 Borrowed(

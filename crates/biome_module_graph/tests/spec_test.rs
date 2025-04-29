@@ -5,8 +5,8 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
+use biome_module_graph::{ImportSymbol, JsImport, JsReexport, ModuleGraph, ResolvedPath};
 use biome_module_graph::{JsExport, JsdocComment};
-use biome_module_graph::{JsImport, JsImportSymbol, JsReexport, JsResolvedPath, ModuleGraph};
 use biome_package::{Dependencies, PackageJson, Version};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
@@ -101,7 +101,7 @@ fn test_resolve_relative_import() {
         file_imports.static_imports.get("bar"),
         Some(&JsImport {
             specifier: "./bar.ts".into(),
-            resolved_path: JsResolvedPath::from_path("/src/bar.ts"),
+            resolved_path: ResolvedPath::from_path("/src/bar.ts"),
             symbol: "bar".into()
         })
     );
@@ -127,7 +127,7 @@ fn test_resolve_package_import() {
         file_imports.static_imports.get("foo"),
         Some(&JsImport {
             specifier: "shared".into(),
-            resolved_path: JsResolvedPath::from_path("/node_modules/shared/dist/index.js"),
+            resolved_path: ResolvedPath::from_path("/node_modules/shared/dist/index.js"),
             symbol: "foo".into()
         })
     );
@@ -209,9 +209,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         file_imports.static_imports.get("sharedFoo"),
         Some(&JsImport {
             specifier: "shared".into(),
-            resolved_path: JsResolvedPath::from_path(format!(
-                "{fixtures_path}/shared/dist/index.js"
-            )),
+            resolved_path: ResolvedPath::from_path(format!("{fixtures_path}/shared/dist/index.js")),
             symbol: "sharedFoo".into()
         })
     );
@@ -219,9 +217,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         file_imports.static_imports.get("bar"),
         Some(&JsImport {
             specifier: "./bar".into(),
-            resolved_path: JsResolvedPath::from_path(format!(
-                "{fixtures_path}/frontend/src/bar.ts"
-            )),
+            resolved_path: ResolvedPath::from_path(format!("{fixtures_path}/frontend/src/bar.ts")),
             symbol: "bar".into()
         })
     );
@@ -376,7 +372,7 @@ fn test_resolve_exports() {
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
-                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
+                resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: "ohNo".into()
             },
             jsdoc_comment: None
@@ -387,8 +383,8 @@ fn test_resolve_exports() {
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
-                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
-                symbol: JsImportSymbol::All,
+                resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
+                symbol: ImportSymbol::All,
             },
             jsdoc_comment: Some(JsdocComment::from_comment_text(
                 "/**\n* Hello, namespace 2.\n*/"
@@ -405,8 +401,8 @@ fn test_resolve_exports() {
         &[JsReexport {
             import: JsImport {
                 specifier: "./reexports".into(),
-                resolved_path: JsResolvedPath::from_path("/src/reexports.ts"),
-                symbol: JsImportSymbol::All,
+                resolved_path: ResolvedPath::from_path("/src/reexports.ts"),
+                symbol: ImportSymbol::All,
             },
             jsdoc_comment: None
         }]
@@ -421,8 +417,8 @@ fn test_resolve_exports() {
         Some(&JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
-                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
-                symbol: JsImportSymbol::All,
+                resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
+                symbol: ImportSymbol::All,
             },
             jsdoc_comment: Some(JsdocComment::from_comment_text(
                 "/**\n* Hello, namespace 1.\n*/"

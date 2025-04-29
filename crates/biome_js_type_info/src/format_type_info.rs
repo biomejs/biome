@@ -1,10 +1,10 @@
 use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, CallSignatureTypeMember, Class, DestructureField, Function,
-    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Literal, MethodTypeMember,
-    NUM_PREDEFINED_TYPES, Object, ObjectLiteral, PropertyTypeMember, ResolvedTypeId, ReturnType,
-    Type, TypeData, TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier,
-    TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
+    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Literal,
+    MethodTypeMember, NUM_PREDEFINED_TYPES, Object, ObjectLiteral, PropertyTypeMember,
+    ResolvedPath, ReturnType, Type, TypeData, TypeInstance, TypeMember, TypeReference,
+    TypeReferenceQualifier, TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -521,9 +521,11 @@ impl Format<FormatTypeContext> for TypeReference {
                     ]]
                 )
             }
-            Self::Resolved(ResolvedTypeId(level, id)) => {
-                if *level == TypeResolverLevel::Global && id.index() < NUM_PREDEFINED_TYPES {
-                    write!(f, [text(global_type_name(*id))])
+            Self::Resolved(resolved) => {
+                let level = resolved.level();
+                let id = resolved.id();
+                if level == TypeResolverLevel::Global && resolved.index() < NUM_PREDEFINED_TYPES {
+                    write!(f, [text(global_type_name(id))])
                 } else {
                     write!(
                         f,
@@ -536,7 +538,7 @@ impl Format<FormatTypeContext> for TypeReference {
                 }
             }
             Self::Imported(_import) => todo!(),
-            Self::Unknown => write!(f, [&format_args!(text("unknown reference"))]),
+            Self::Unknown => write!(f, [text("unknown reference")]),
         }
     }
 }
@@ -549,7 +551,7 @@ impl Format<FormatTypeContext> for TypeReferenceQualifier {
             } else {
                 write!(f, [text("<")])?;
                 for (index, param) in self.type_parameters.iter().enumerate() {
-                    write!(f, [&format_args![param]])?;
+                    write!(f, [param])?;
                     if index != self.type_parameters.len() - 1 {
                         write!(f, [text(","), space()])?;
                     }
@@ -560,7 +562,7 @@ impl Format<FormatTypeContext> for TypeReferenceQualifier {
 
         write!(f, [text("\"")])?;
         for (index, part) in self.path.iter().enumerate() {
-            write!(f, [&format_args![dynamic_text(part, TextSize::default())]])?;
+            write!(f, [dynamic_text(part, TextSize::default())])?;
             if index != self.path.len() - 1 {
                 write!(f, [text(".")])?;
             }
@@ -579,7 +581,7 @@ impl Format<FormatTypeContext> for Class {
                     [dynamic_text(
                         &std::format!("\"{}\"", name),
                         TextSize::default()
-                    ),]
+                    )]
                 )
             } else {
                 Ok(())
@@ -672,7 +674,7 @@ impl Format<FormatTypeContext> for TypeInstance {
             } else {
                 write!(f, [text("<")])?;
                 for (index, param) in self.type_parameters.iter().enumerate() {
-                    write!(f, [&format_args![param]])?;
+                    write!(f, [param])?;
                     if index != self.type_parameters.len() - 1 {
                         write!(f, [text(","), space()])?;
                     }
@@ -698,6 +700,42 @@ impl Format<FormatTypeContext> for Union {
         });
 
         write!(f, [&format_args![references]])
+    }
+}
+
+impl Format<FormatTypeContext> for ResolvedPath {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let value = self.deref();
+        if let Ok(value) = value {
+            write!(
+                f,
+                [dynamic_text(
+                    value.as_str().replace('\\', "/").as_str(),
+                    TextSize::default()
+                )]
+            )?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Format<FormatTypeContext> for ImportSymbol {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let import = format_with(|f| match self {
+            Self::Default => write!(f, [text("Default")]),
+            Self::Named(name) => {
+                write!(f, [dynamic_text(name, TextSize::default())])
+            }
+            Self::All => write!(f, [text("All")]),
+        });
+        write!(f, [&format_args![text("Import Symbol:"), space(), &import]])
     }
 }
 

@@ -19,8 +19,8 @@ use super::{JsModuleInfo, scope::JsScope};
 /// applies to.
 pub(super) struct AdHocScopeResolver {
     scope: JsScope,
-    module_info: JsModuleInfo,
     module_graph: Arc<ModuleGraph>,
+    modules: Vec<JsModuleInfo>,
     types: Vec<TypeData>,
 }
 
@@ -32,9 +32,9 @@ impl AdHocScopeResolver {
     ) -> Self {
         Self {
             scope,
-            module_info,
             module_graph,
-            types: Vec::new(),
+            modules: vec![module_info],
+            types: Default::default(),
         }
     }
 }
@@ -55,12 +55,15 @@ impl TypeResolver for AdHocScopeResolver {
         &self.types[id.index()]
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData> {
-        match id.level() {
-            TypeResolverLevel::AdHoc => Some(self.get_by_id(id.id())),
-            TypeResolverLevel::Module => Some(&self.module_info.types[id.index()]),
+    fn get_by_resolved_id(&self, resolved_id: ResolvedTypeId) -> Option<&TypeData> {
+        match resolved_id.level() {
+            TypeResolverLevel::AdHoc => Some(self.get_by_id(resolved_id.id())),
+            TypeResolverLevel::Module => {
+                let module_id = resolved_id.module_id();
+                Some(&self.modules[module_id.index()].types[resolved_id.index()])
+            }
             TypeResolverLevel::Project => todo!("Project-level inference not yet implemented"),
-            TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(id.id())),
+            TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(resolved_id.id())),
         }
     }
 
@@ -101,7 +104,7 @@ impl TypeResolver for AdHocScopeResolver {
         loop {
             if let Some(binding) = scope.get_binding(identifier.text()) {
                 return if binding.is_imported() {
-                    self.module_info
+                    self.modules[0]
                         .find_exported_symbol(self.module_graph.as_ref(), &binding.name())
                         .and_then(|export| self.resolve_reference(&export.ty))
                 } else {

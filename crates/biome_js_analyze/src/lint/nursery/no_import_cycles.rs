@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
-use biome_module_graph::{JsModuleInfo, JsResolvedPath};
+use biome_module_graph::{JsModuleInfo, ResolvedPath};
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -103,7 +103,7 @@ impl Rule for NoImportCycles {
         let node = ctx.query();
         let resolved_path = module_info
             .get_import_path_by_js_node(node)
-            .and_then(JsResolvedPath::as_path)?;
+            .and_then(ResolvedPath::as_path)?;
 
         let imports = ctx.module_info_for_path(resolved_path)?;
         find_cycle(ctx, resolved_path, imports)

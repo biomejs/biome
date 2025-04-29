@@ -6,7 +6,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
-use biome_module_graph::{JsModuleInfo, JsResolvedPath, ModuleGraph};
+use biome_module_graph::{JsModuleInfo, ModuleGraph, ResolvedPath};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
@@ -220,7 +220,7 @@ impl Rule for NoPrivateImports {
         let node = ctx.query();
         let Some(target_path) = module_info
             .get_import_path_by_js_node(node)
-            .and_then(JsResolvedPath::as_path)
+            .and_then(ResolvedPath::as_path)
         else {
             return Vec::new();
         };

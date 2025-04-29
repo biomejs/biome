@@ -18,6 +18,7 @@ biome_formatter           = { workspace = true }
 biome_js_syntax           = { workspace = true }
 biome_js_type_info_macros = { workspace = true }
 biome_rowan               = { workspace = true }
+camino                    = { workspace = true }
 
 [dev-dependencies]
 biome_js_formatter = { workspace = true }
