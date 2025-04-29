@@ -3463,7 +3463,7 @@ fn format_skip_errors_continues_with_valid_files() {
         Args::from(
             [
                 "format",
-                "--skip-errors",
+                "--skip-parse-errors",
                 "--write",
                 valid.as_str(),
                 invalid.as_str(),
