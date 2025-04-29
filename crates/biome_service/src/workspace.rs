@@ -191,6 +191,8 @@ impl FileFeaturesResult {
         if capabilities.debug.debug_syntax_tree.is_some()
             || capabilities.debug.debug_formatter_ir.is_some()
             || capabilities.debug.debug_control_flow.is_some()
+            || capabilities.debug.debug_type_info.is_some()
+            || capabilities.debug.debug_registered_types.is_some()
         {
             self.features_supported
                 .insert(FeatureKind::Debug, SupportKind::Supported);
@@ -638,6 +640,14 @@ pub struct GetControlFlowGraphParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetTypeInfoParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct GetRegisteredTypesParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
 }
@@ -1161,9 +1171,14 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// document.
     fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
 
-    /// Returns a textual, debug representation of the control flow graph at a
-    /// given position in the document.
+    /// Returns an IR of the type information of the document
     fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
+
+    /// Returns the registered types of the document
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError>;
 
     /// Returns the content of a given file.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
@@ -1316,6 +1331,13 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             project_key: self.project_key,
             path: self.path.clone(),
         })
+    }
+    pub fn get_registered_types(&self) -> Result<String, WorkspaceError> {
+        self.workspace
+            .get_registered_types(GetRegisteredTypesParams {
+                project_key: self.project_key,
+                path: self.path.clone(),
+            })
     }
 
     pub fn change_file(&self, version: i32, content: String) -> Result<(), WorkspaceError> {

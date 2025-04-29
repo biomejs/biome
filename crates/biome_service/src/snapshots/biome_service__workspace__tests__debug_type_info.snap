@@ -16,13 +16,3 @@ class "Person" {
   extends: none
   type_args: []
 }
-
-## Registered types
-
-```
-
-TypeId(7) => string
-
-TypeId(8) => instanceof unresolved reference "Person"
-
-```

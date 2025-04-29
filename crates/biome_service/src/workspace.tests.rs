@@ -664,3 +664,37 @@ class Person {
     assert!(result.is_ok());
     assert_snapshot!(result.unwrap());
 }
+
+#[test]
+fn debug_registered_types() {
+    let (workspace, project_key) = create_server();
+
+    let file = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            project_key,
+            path: BiomePath::new("file.ts"),
+            content: FileContent::from_client(
+                r#"
+function foo(name: string, age: number): Person {
+    return new Person(string, age)
+}
+class Person {
+    #name: string
+    #age: number
+    constructor(name: string, age: number) {
+        this.#name = name;
+        this.#age = age;
+    }
+}
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        },
+    )
+    .unwrap();
+    let result = file.get_registered_types();
+    assert!(result.is_ok());
+    assert_snapshot!(result.unwrap());
+}

@@ -484,6 +484,7 @@ impl ExtensionHandler for JsFileHandler {
                 debug_control_flow: Some(debug_control_flow),
                 debug_formatter_ir: Some(debug_formatter_ir),
                 debug_type_info: Some(debug_type_info),
+                debug_registered_types: Some(debug_registered_types),
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
@@ -670,16 +671,37 @@ fn debug_type_info(_path: &BiomePath, parse: AnyParse) -> Result<String, Workspa
         }
     }
 
-    result.push_str("\n## Registered types\n\n");
-    result.push_str("```\n");
+    Ok(result)
+}
+
+fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+    let tree: AnyJsRoot = parse.tree();
+    let mut result = String::new();
+    let preorder = tree.syntax().preorder();
+
+    let mut resolver = GlobalsResolver::default();
+    for event in preorder {
+        match event {
+            WalkEvent::Enter(node) => {
+                if let Some(node) = JsVariableDeclarator::cast_ref(&node) {
+                    TypeData::from_js_variable_declarator(&mut resolver, &node);
+                } else if let Some(function) = JsFunctionDeclaration::cast_ref(&node) {
+                    TypeData::from_js_function_declaration(&mut resolver, &function);
+                } else if let Some(class) = JsClassDeclaration::cast_ref(&node) {
+                    TypeData::from_js_class_declaration(&mut resolver, &class);
+                } else if let Some(expression) = JsClassExpression::cast_ref(&node) {
+                    TypeData::from_js_class_expression(&mut resolver, &expression);
+                }
+            }
+            WalkEvent::Leave(_) => {}
+        }
+    }
 
     for (i, ty) in resolver.registered_types().iter().enumerate() {
         // TODO: Should we include the predefined types in debug info too?
         let id = i + NUM_PREDEFINED_TYPES;
         result.push_str(&format!("\nTypeId({id}) => {ty}\n"));
     }
-
-    result.push_str("\n```\n");
 
     Ok(result)
 }

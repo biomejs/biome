@@ -40,8 +40,8 @@ use crate::file_handlers::{
 use crate::projects::Projects;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, GetTypeInfoParams, IsPathIgnoredParams, RageEntry,
-    RageParams, RageResult, ServerInfo,
+    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
+    IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
 };
 use crate::workspace_watcher::WatcherSignalKind;
 use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
@@ -981,6 +981,20 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&params.path)?;
 
         debug_type_info(&params.path, parse)
+    }
+
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_registered_types = capabilities
+            .debug
+            .debug_registered_types
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let parse = self.get_parse(&params.path)?;
+
+        debug_registered_types(&params.path, parse)
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {

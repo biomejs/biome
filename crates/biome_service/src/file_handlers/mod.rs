@@ -451,6 +451,7 @@ type DebugFormatterIR = fn(
     WorkspaceSettingsHandle,
 ) -> Result<String, WorkspaceError>;
 type DebugTypeInfo = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -462,6 +463,8 @@ pub struct DebugCapabilities {
     pub(crate) debug_formatter_ir: Option<DebugFormatterIR>,
     /// Prints the type info
     pub(crate) debug_type_info: Option<DebugTypeInfo>,
+    /// Prints the registered types
+    pub(crate) debug_registered_types: Option<DebugRegisteredTypes>,
 }
 
 #[derive(Debug)]

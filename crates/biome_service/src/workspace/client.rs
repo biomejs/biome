@@ -1,7 +1,7 @@
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
-    GetFileContentParams, GetTypeInfoParams, IsPathIgnoredParams, OpenProjectParams, ProjectKey,
-    RageParams, RageResult, ServerInfo,
+    GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams, IsPathIgnoredParams,
+    OpenProjectParams, ProjectKey, RageParams, RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -162,6 +162,13 @@ where
 
     fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
         self.request("biome/get_type_info", params)
+    }
+
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError> {
+        self.request("biome/get_registered_types", params)
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
