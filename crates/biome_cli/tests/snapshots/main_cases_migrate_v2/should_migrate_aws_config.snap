@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -14,7 +13,7 @@ snapshot_kind: text
       "**",
       "!**/__fixtures__/**",
       "!**/package.json",
-      "**/node_modules/**"
+      "!**/node_modules/**"
     ]
   },
   "formatter": {

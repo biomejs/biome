@@ -81,7 +81,6 @@ pub(crate) fn traverse(
     let fs = workspace.fs();
 
     let max_diagnostics = execution.get_max_diagnostics();
-    let remaining_diagnostics = AtomicU32::new(max_diagnostics);
 
     let working_directory = fs.working_directory();
     let printer = DiagnosticsPrinter::new(execution, working_directory.as_deref())
@@ -111,7 +110,6 @@ pub(crate) fn traverse(
                 unchanged: &unchanged,
                 skipped: &skipped,
                 messages: sender,
-                remaining_diagnostics: &remaining_diagnostics,
                 evaluated_paths: RwLock::default(),
             },
         );
@@ -515,10 +513,6 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     skipped: &'ctx AtomicUsize,
     /// Channel sending messages to the display thread
     pub(crate) messages: Sender<Message>,
-    /// The approximate number of diagnostics the console will print before
-    /// folding the rest into the "skipped diagnostics" counter
-    pub(crate) remaining_diagnostics: &'ctx AtomicU32,
-
     /// List of paths that should be processed
     pub(crate) evaluated_paths: RwLock<BTreeSet<BiomePath>>,
 }

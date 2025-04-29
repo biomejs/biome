@@ -64,7 +64,12 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
     ) -> io::Result<()> {
         let mut files_to_diagnostics = FileToDiagnostics::default();
 
-        for diagnostic in &diagnostics_payload.diagnostics {
+        let iter = diagnostics_payload.diagnostics.iter().rev().enumerate();
+        for (index, diagnostic) in iter {
+            if diagnostics_payload.max_diagnostics.exceeded(index + 1) {
+                break;
+            }
+
             let location = diagnostic.location().resource.and_then(|r| match r {
                 Resource::File(p) => Some(p),
                 _ => None,

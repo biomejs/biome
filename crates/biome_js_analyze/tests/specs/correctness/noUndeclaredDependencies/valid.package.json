@@ -1,7 +1,6 @@
 {
 	"name": "my-package",
 	"exports": {
-	  ".": "./index.js"
 	},
 	"dependencies": {
 		"react": "1.0.0",

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -108,7 +107,7 @@ snapshot_kind: text
       "!**/fixtures",
       "!**/.devenv",
       "!**/package.json",
-      "**/node_modules/**"
+      "!**/node_modules/**"
     ]
   },
   "css": {
@@ -125,7 +124,7 @@ snapshot_kind: text
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "includes": ["**", "!**/tests/**/*.json", "**/node_modules/**"]
+    "includes": ["**", "!**/tests/**/*.json", "!**/node_modules/**"]
   },
   "javascript": {
     "formatter": {
@@ -162,7 +161,7 @@ snapshot_kind: text
         "**/tests/js/setup.ts",
         "**/tests/js/test-balancer/index.js",
         "**/*.config.ts",
-        "**/node_modules/**"
+        "!**/node_modules/**"
       ],
       "linter": {
         "rules": {
@@ -175,7 +174,7 @@ snapshot_kind: text
     {
       "includes": [
         "**/src/sentry/templates/sentry/error-page-embed.js",
-        "**/node_modules/**"
+        "!**/node_modules/**"
       ],
       "linter": {
         "rules": {
@@ -197,7 +196,7 @@ snapshot_kind: text
         "**/static/app/types/index.tsx",
         "**/tests/js/sentry-test/reactTestingLibrary.tsx",
         "**/tests/js/sentry-test/index.tsx",
-        "**/node_modules/**"
+        "!**/node_modules/**"
       ],
       "linter": {
         "rules": {

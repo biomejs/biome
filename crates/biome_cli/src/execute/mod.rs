@@ -590,7 +590,7 @@ pub fn execute_mode(
     let TraverseResult {
         mut summary,
         evaluated_paths,
-        diagnostics,
+        mut diagnostics,
     } = traverse(
         &execution,
         &mut session,
@@ -598,6 +598,7 @@ pub fn execute_mode(
         cli_options,
         paths.clone(),
     )?;
+    diagnostics.sort_by_key(|diagnostic| diagnostic.severity());
     // We join the duration of the scanning with the duration of the traverse.
     summary.scanner_duration = scanner_duration;
     let console = session.app.console;
@@ -608,6 +609,7 @@ pub fn execute_mode(
     let diagnostics_payload = DiagnosticsPayload {
         diagnostic_level: cli_options.diagnostic_level,
         diagnostics,
+        max_diagnostics: cli_options.max_diagnostics,
     };
 
     match execution.report_mode {

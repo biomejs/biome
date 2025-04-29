@@ -186,6 +186,13 @@ impl MaxDiagnostics {
             Self::Limit(value) => Some(*value),
         }
     }
+
+    pub fn exceeded(&self, count: usize) -> bool {
+        match self {
+            Self::None => false,
+            Self::Limit(limit) => count as u32 > *limit,
+        }
+    }
 }
 
 impl Default for MaxDiagnostics {

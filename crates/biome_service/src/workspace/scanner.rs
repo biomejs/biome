@@ -215,12 +215,12 @@ pub(crate) struct ScanContext<'app> {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum ScanKind {
-    /// It targets the project, so it attempts to open all the files in the project.
-    Project,
-    /// It targets specific files
-    KnownFiles,
     /// The scanner should not be triggered
     None,
+    /// It targets specific files
+    KnownFiles,
+    /// It targets the project, so it attempts to open all the files in the project.
+    Project,
 }
 
 impl ScanKind {

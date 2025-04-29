@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `index.ts`
 
@@ -73,6 +72,18 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     "severity": "minor",
     "location": {
       "path": "index.ts",
+      "lines": {
+        "begin": 1
+      }
+    }
+  },
+  {
+    "description": "The imports and exports are not sorted.",
+    "check_name": "assist/source/organizeImports",
+    "fingerprint": "71463377061397589",
+    "severity": "minor",
+    "location": {
+      "path": "main.ts",
       "lines": {
         "begin": 1
       }
@@ -315,18 +326,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
       "path": "index.ts",
       "lines": {
         "begin": 19
-      }
-    }
-  },
-  {
-    "description": "The imports and exports are not sorted.",
-    "check_name": "assist/source/organizeImports",
-    "fingerprint": "71463377061397589",
-    "severity": "minor",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 1
       }
     }
   },

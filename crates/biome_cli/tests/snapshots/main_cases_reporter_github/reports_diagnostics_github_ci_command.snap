@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `index.ts`
 
@@ -49,6 +48,10 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+::notice title=assist/source/organizeImports,file=main.ts,line=1,endLine=1,col=1,endColumn=21::The imports and exports are not sorted.
+```
+
+```block
 ::error title=lint/suspicious/noDoubleEquals,file=index.ts,line=4,endLine=4,col=3,endColumn=5::Using == may be unsafe if you are relying on type coercion.
 ```
 
@@ -74,10 +77,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 ::error title=format,file=index.ts,line=1,endLine=1,col=2,endColumn=2::File content differs from formatting output
-```
-
-```block
-::notice title=assist/source/organizeImports,file=main.ts,line=1,endLine=1,col=1,endColumn=21::The imports and exports are not sorted.
 ```
 
 ```block
