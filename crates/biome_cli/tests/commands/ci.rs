@@ -916,7 +916,15 @@ fn ci_skip_errors() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--skip-errors", valid.as_str(), invalid.as_str()].as_slice()),
+        Args::from(
+            [
+                "ci",
+                "--skip-parse-errors",
+                valid.as_str(),
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
