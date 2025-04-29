@@ -150,7 +150,9 @@ Exports {
     )
   }
 }
-Imports {}
+Imports {
+  No imports
+}
 ```
 
 ## Registered types
@@ -331,7 +333,9 @@ Exports {
     )
   }
 }
-Imports {}
+Imports {
+  No imports
+}
 ```
 
 ## Registered types
@@ -372,5 +376,7 @@ Exports {
     )
   }
 }
-Imports {}
+Imports {
+  No imports
+}
 ```

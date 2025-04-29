@@ -911,12 +911,12 @@ impl TypeData {
         decl: &TsTypeAliasDeclaration,
     ) -> Option<Self> {
         Some(match decl.type_parameters() {
-            Some(params) => Self::InstanceOf(Box::new(TypeInstance {
+            Some(params) => Self::instance_of(TypeInstance {
                 ty: TypeReference::from_any_ts_type(resolver, &decl.ty().ok()?),
                 type_parameters: GenericTypeParameter::params_from_ts_type_parameters(
                     resolver, &params,
                 ),
-            })),
+            }),
             None => Self::from_any_ts_type(resolver, &decl.ty().ok()?),
         })
     }
@@ -936,11 +936,8 @@ impl TypeData {
             .unwrap_or_default()
     }
 
-    pub fn instance_of(ty: TypeReference) -> Self {
-        Self::InstanceOf(Box::new(TypeInstance {
-            ty,
-            type_parameters: [].into(),
-        }))
+    pub fn instance_of(instance: impl Into<TypeInstance>) -> Self {
+        Self::InstanceOf(Box::new(instance.into()))
     }
 
     pub fn object_with_members(members: Box<[TypeMember]>) -> Self {

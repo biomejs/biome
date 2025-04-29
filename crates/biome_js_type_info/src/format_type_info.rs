@@ -3,8 +3,9 @@ use crate::{
     CallArgumentType, CallSignatureTypeMember, Class, DestructureField, Function,
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Literal,
     MethodTypeMember, NUM_PREDEFINED_TYPES, Object, ObjectLiteral, PropertyTypeMember,
-    ResolvedPath, ReturnType, Type, TypeData, TypeInstance, TypeMember, TypeReference,
-    TypeReferenceQualifier, TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
+    ResolvedPath, ReturnType, Type, TypeData, TypeImportQualifier, TypeInstance, TypeMember,
+    TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofAwaitExpression,
+    TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -537,7 +538,7 @@ impl Format<FormatTypeContext> for TypeReference {
                     )
                 }
             }
-            Self::Imported(_import) => todo!(),
+            Self::Import(import) => write!(f, [import]),
             Self::Unknown => write!(f, [text("unknown reference")]),
         }
     }
@@ -569,6 +570,21 @@ impl Format<FormatTypeContext> for TypeReferenceQualifier {
         }
         write!(f, [text("\""), type_args])?;
         Ok(())
+    }
+}
+
+impl Format<FormatTypeContext> for TypeImportQualifier {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        write!(
+            f,
+            [
+                self.symbol,
+                space(),
+                text("from"),
+                space(),
+                self.resolved_path
+            ]
+        )
     }
 }
 

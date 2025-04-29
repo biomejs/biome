@@ -112,7 +112,7 @@ pub enum TypeResolverLevel {
     /// Currently, we don't store resolved IDs with this level in the module
     /// info. Instead, we use it to during a module's type collection to flag
     /// resolved types that require imports from other modules. Such resolved
-    /// IDs then get converted to [`TypeReference::Imported`] before storing
+    /// IDs then get converted to [`TypeReference::Import`] before storing
     /// them in the module info.
     Project,
 
@@ -225,6 +225,24 @@ pub trait TypeResolver {
         }
     }
 
+    /// Same as [`TypeResolver::resolve_and_get()`], but applies the given
+    /// `module_id` during resolution.
+    fn resolve_and_get_with_module_id(
+        &self,
+        ty: &TypeReference,
+        module_id: ModuleId,
+    ) -> Option<&TypeData> {
+        match self
+            .resolve_reference(ty)
+            .and_then(|id| self.get_by_resolved_id(id.with_module_id(module_id)))
+        {
+            Some(TypeData::Reference(type_data)) => {
+                self.resolve_and_get_with_module_id(type_data, module_id)
+            }
+            other => other,
+        }
+    }
+
     /// Resolves a type reference and returns the [`ResolvedTypeId`] if found.
     ///
     /// If not found, the reference is registered within the level handled by
@@ -236,16 +254,17 @@ pub trait TypeResolver {
         }
     }
 
-    /// Resolves a type by its import `qualifier`.
+    /// Resolves the given import qualifier, registering the result into this
+    /// resolver's type array if necessary.
     fn resolve_import(&mut self, _qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
         None
     }
 
-    /// Resolves a type by its reference `qualifier`.
-    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId>;
-
     /// Resolves a type reference.
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId>;
+
+    /// Resolves a type by its reference `qualifier`.
+    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId>;
 
     /// Resolves the type of a value by its `identifier`.
     fn resolve_type_of(&self, identifier: &Text) -> Option<ResolvedTypeId>;
@@ -261,19 +280,6 @@ pub trait TypeResolver {
     fn registered_types(&self) -> &[TypeData];
 
     // #endregion
-
-    /// Runs type inference on all registered types in this resolver.
-    #[inline]
-    fn run_inference(&mut self) {
-        self.resolve_all();
-        self.flatten_all();
-    }
-
-    /// Resolves all registered types in this resolver.
-    fn resolve_all(&mut self);
-
-    /// Flattens all registered types in this resolver.
-    fn flatten_all(&mut self);
 
     // #region Registration utilities
 
@@ -401,9 +407,30 @@ pub trait TypeResolver {
 }
 
 /// Trait to be implemented by `TypeData` and its subtypes to aid the resolver.
-pub trait Resolvable {
+pub trait Resolvable: Sized {
     /// Returns the resolved version of this type.
     fn resolved(&self, resolver: &mut dyn TypeResolver) -> Self;
+
+    /// Returns the resolved version of this type, and applies a custom mapper
+    /// function on all instances of [`TypeReference`].
+    fn resolved_with_mapped_references(
+        &self,
+        map: impl Copy + Fn(TypeReference) -> TypeReference,
+        resolver: &mut dyn TypeResolver,
+    ) -> Self;
+
+    /// Returns the resolved version of this type, and applies the given
+    /// `module_id` to any returned module-level type references.
+    fn resolved_with_module_id(
+        &self,
+        module_id: ModuleId,
+        resolver: &mut dyn TypeResolver,
+    ) -> Self {
+        self.resolved_with_mapped_references(
+            |reference| reference.with_module_id(module_id),
+            resolver,
+        )
+    }
 }
 
 impl Resolvable for TypeReference {
@@ -448,8 +475,23 @@ impl Resolvable for TypeReference {
                     }
                 }
             }
-            unresolvable => unresolvable.clone(),
+            Self::Import(import) => {
+                let resolved_id = resolver.resolve_import(import);
+                match resolved_id {
+                    Some(resolved_id) => Self::Resolved(resolved_id),
+                    None => self.clone(),
+                }
+            }
+            other => other.clone(),
         }
+    }
+
+    fn resolved_with_mapped_references(
+        &self,
+        map: impl Copy + Fn(Self) -> Self,
+        resolver: &mut dyn TypeResolver,
+    ) -> Self {
+        map(self.resolved(resolver))
     }
 }
 
@@ -466,12 +508,32 @@ impl Resolvable for TypeofValue {
 
         Self { identifier, ty }
     }
+
+    fn resolved_with_mapped_references(
+        &self,
+        map: impl Copy + Fn(TypeReference) -> TypeReference,
+        resolver: &mut dyn TypeResolver,
+    ) -> Self {
+        let Self { identifier, ty } = self.resolved(resolver);
+        Self {
+            identifier,
+            ty: map(ty),
+        }
+    }
 }
 
 macro_rules! derive_primitive_resolved {
     ($($ty:ty),+) => {
         $(impl Resolvable for $ty {
             fn resolved(&self, _resolver: &mut dyn TypeResolver) -> Self {
+                *self
+            }
+
+            fn resolved_with_mapped_references(
+                &self,
+                _map: impl Copy + Fn(TypeReference) -> TypeReference,
+                _resolver: &mut dyn TypeResolver,
+            ) -> Self {
                 *self
             }
         })+

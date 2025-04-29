@@ -3,8 +3,8 @@ use std::collections::{BTreeMap, btree_map::Entry};
 use biome_rowan::Text;
 
 use crate::{
-    DestructureField, GenericTypeParameter, TypeData, TypeInstance, TypeMember, TypeResolver,
-    TypeofExpression,
+    DestructureField, GenericTypeParameter, TypeData, TypeInstance, TypeMember, TypeReference,
+    TypeResolver, TypeofExpression,
 };
 
 impl TypeData {
@@ -51,15 +51,13 @@ impl TypeData {
     pub fn flattened(&self, resolver: &mut dyn TypeResolver) -> Self {
         match self {
             Self::InstanceOf(instance_of) => match resolver.resolve_and_get(&instance_of.ty) {
-                Some(Self::InstanceOf(resolved_instance)) => {
-                    Self::InstanceOf(Box::new(TypeInstance {
-                        ty: resolved_instance.ty.clone(),
-                        type_parameters: GenericTypeParameter::merge_parameters(
-                            &resolved_instance.type_parameters,
-                            &instance_of.type_parameters,
-                        ),
-                    }))
-                }
+                Some(Self::InstanceOf(resolved_instance)) => Self::instance_of(TypeInstance {
+                    ty: resolved_instance.ty.clone(),
+                    type_parameters: GenericTypeParameter::merge_parameters(
+                        &resolved_instance.type_parameters,
+                        &instance_of.type_parameters,
+                    ),
+                }),
                 Some(
                     ty @ (Self::Global | Self::Function(_) | Self::Literal(_) | Self::Object(_)),
                 ) => ty.clone().flattened(resolver),
@@ -246,12 +244,14 @@ impl TypeData {
                     _ => self.clone(),
                 },
                 TypeofExpression::This(expr) => match resolver.resolve_reference(&expr.parent) {
-                    Some(class_id) => Self::instance_of(class_id.into()).flattened(resolver),
+                    Some(class_id) => {
+                        Self::instance_of(TypeReference::from(class_id)).flattened(resolver)
+                    }
                     None => self.clone(),
                 },
             },
             Self::TypeofValue(value) => match resolver.resolve_reference(&value.ty) {
-                Some(type_id) => Self::Reference(Box::new(type_id.into())).flattened(resolver),
+                Some(type_id) => Self::reference(type_id).flattened(resolver),
                 None => self.clone(),
             },
             _ => self.clone(),

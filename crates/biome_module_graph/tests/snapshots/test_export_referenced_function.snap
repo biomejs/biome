@@ -28,7 +28,9 @@ Exports {
     )
   }
 }
-Imports {}
+Imports {
+  No imports
+}
 ```
 
 ## Registered types

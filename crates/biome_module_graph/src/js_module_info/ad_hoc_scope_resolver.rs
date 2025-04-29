@@ -1,8 +1,12 @@
-use std::sync::Arc;
+use std::{
+    collections::{BTreeMap, btree_map::Entry},
+    sync::Arc,
+};
 
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Resolvable, ResolvedTypeId, TypeData, TypeId,
-    TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ModuleId, Resolvable, ResolvedPath,
+    ResolvedTypeId, TypeData, TypeId, TypeImportQualifier, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel,
 };
 use biome_rowan::Text;
 
@@ -21,6 +25,7 @@ pub(super) struct AdHocScopeResolver {
     scope: JsScope,
     module_graph: Arc<ModuleGraph>,
     modules: Vec<JsModuleInfo>,
+    modules_by_path: BTreeMap<ResolvedPath, ModuleId>,
     types: Vec<TypeData>,
 }
 
@@ -34,7 +39,46 @@ impl AdHocScopeResolver {
             scope,
             module_graph,
             modules: vec![module_info],
+            modules_by_path: Default::default(),
             types: Default::default(),
+        }
+    }
+
+    fn register_module(&mut self, path: ResolvedPath) -> Option<ModuleId> {
+        match self.modules_by_path.entry(path) {
+            Entry::Occupied(entry) => Some(*entry.get()),
+            Entry::Vacant(entry) => {
+                let path = entry.key().as_path()?;
+                let module_info = self.module_graph.module_info_for_path(path)?;
+                let module_id = ModuleId::new(self.modules.len());
+                self.modules.push(module_info);
+                Some(*entry.insert(module_id))
+            }
+        }
+    }
+
+    pub fn run_inference(&mut self) {
+        self.resolve_all();
+        self.flatten_all();
+    }
+
+    fn resolve_all(&mut self) {
+        let mut i = 0;
+        while i < self.types.len() {
+            // First take the type to satisfy the borrow checker:
+            let ty = std::mem::take(&mut self.types[i]);
+            self.types[i] = ty.resolved(self);
+            i += 1;
+        }
+    }
+
+    fn flatten_all(&mut self) {
+        let mut i = 0;
+        while i < self.types.len() {
+            // First take the type to satisfy the borrow checker:
+            let ty = std::mem::take(&mut self.types[i]);
+            self.types[i] = ty.flattened(self);
+            i += 1;
         }
     }
 }
@@ -84,8 +128,39 @@ impl TypeResolver for AdHocScopeResolver {
         match ty {
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
             TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-            TypeReference::Imported(_) => None,
+            TypeReference::Import(_import) => None,
             TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
+        }
+    }
+
+    fn resolve_import(&mut self, qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
+        let module_id = self.register_module(qualifier.resolved_path.clone())?;
+        let module = &self.modules[module_id.index()];
+
+        let name = match &qualifier.symbol {
+            ImportSymbol::Default => "default",
+            ImportSymbol::Named(name) => name.text(),
+            ImportSymbol::All => {
+                // TODO: Register type for imported namespace.
+                return None;
+            }
+        };
+
+        let export = module.find_exported_symbol(self.module_graph.as_ref(), name)?;
+        match export.ty {
+            TypeReference::Qualifier(_qualifier) => {
+                // If it wasn't resolved before exporting, we can't
+                // help it anymore.
+                None
+            }
+            TypeReference::Resolved(resolved) => {
+                let data = module.resolve_and_get_with_module_id(&resolved.into(), module_id)?;
+                Some(self.register_and_resolve(data.clone()))
+            }
+            TypeReference::Import(import) => {
+                Some(self.register_and_resolve(TypeData::reference(import)))
+            }
+            TypeReference::Unknown => None,
         }
     }
 
@@ -127,29 +202,5 @@ impl TypeResolver for AdHocScopeResolver {
 
     fn registered_types(&self) -> &[TypeData] {
         &self.types
-    }
-
-    fn resolve_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            // We need to swap to satisfy the borrow checker:
-            let mut ty = TypeData::Unknown;
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            let mut ty = ty.resolved(self);
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            i += 1;
-        }
-    }
-
-    fn flatten_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            // We need to swap to satisfy the borrow checker:
-            let mut ty = TypeData::Unknown;
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            let mut ty = ty.flattened(self);
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            i += 1;
-        }
     }
 }

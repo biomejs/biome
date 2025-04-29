@@ -107,7 +107,7 @@ impl Default for GlobalsResolver {
                 )]),
             })),
             TypeData::Global,
-            TypeData::instance_of(GLOBAL_PROMISE_ID.into()),
+            TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID)),
             TypeData::Number,
             TypeData::Class(Box::new(Class {
                 name: Some(Text::Static("Promise")),
@@ -133,6 +133,33 @@ impl Default for GlobalsResolver {
         ];
 
         Self { types }
+    }
+}
+
+impl GlobalsResolver {
+    pub fn run_inference(&mut self) {
+        self.resolve_all();
+        self.flatten_all();
+    }
+
+    pub fn resolve_all(&mut self) {
+        let mut i = NUM_PREDEFINED_TYPES;
+        while i < self.types.len() {
+            // First take the type to satisfy the borrow checker:
+            let ty = std::mem::take(&mut self.types[i]);
+            self.types[i] = ty.resolved(self);
+            i += 1;
+        }
+    }
+
+    fn flatten_all(&mut self) {
+        let mut i = NUM_PREDEFINED_TYPES;
+        while i < self.types.len() {
+            // First take the type to satisfy the borrow checker:
+            let ty = std::mem::take(&mut self.types[i]);
+            self.types[i] = ty.flattened(self);
+            i += 1;
+        }
     }
 }
 
@@ -175,7 +202,7 @@ impl TypeResolver for GlobalsResolver {
             TypeReference::Resolved(resolved_id) => {
                 (resolved_id.level() == GLOBAL_LEVEL).then_some(*resolved_id)
             }
-            TypeReference::Imported(_) => None,
+            TypeReference::Import(_) => None,
             TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
     }
@@ -199,29 +226,5 @@ impl TypeResolver for GlobalsResolver {
 
     fn registered_types(&self) -> &[TypeData] {
         &self.types[NUM_PREDEFINED_TYPES..]
-    }
-
-    fn resolve_all(&mut self) {
-        let mut i = NUM_PREDEFINED_TYPES;
-        while i < self.types.len() {
-            // We need to swap to satisfy the borrow checker:
-            let mut ty = TypeData::Unknown;
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            let mut ty = ty.resolved(self);
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            i += 1;
-        }
-    }
-
-    fn flatten_all(&mut self) {
-        let mut i = NUM_PREDEFINED_TYPES;
-        while i < self.types.len() {
-            // We need to swap to satisfy the borrow checker:
-            let mut ty = TypeData::Unknown;
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            let mut ty = ty.flattened(self);
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            i += 1;
-        }
     }
 }
