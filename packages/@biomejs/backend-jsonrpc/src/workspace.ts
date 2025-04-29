@@ -1642,6 +1642,10 @@ export interface Nursery {
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow useless backreferences in regular expression literals that match empty string.
+	 */
+	noUselessBackrefInRegex?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
@@ -3457,6 +3461,7 @@ export type Category =
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
+	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessStringRaw"

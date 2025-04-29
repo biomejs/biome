@@ -266,6 +266,7 @@ pub type NoUnusedVariables =
     <lint::correctness::no_unused_variables::NoUnusedVariables as biome_analyze::Rule>::Options;
 pub type NoUnwantedPolyfillio =
     <lint::nursery::no_unwanted_polyfillio::NoUnwantedPolyfillio as biome_analyze::Rule>::Options;
+pub type NoUselessBackrefInRegex = < lint :: nursery :: no_useless_backref_in_regex :: NoUselessBackrefInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoUselessCatch =
     <lint::complexity::no_useless_catch::NoUselessCatch as biome_analyze::Rule>::Options;
 pub type NoUselessConstructor = < lint :: complexity :: no_useless_constructor :: NoUselessConstructor as biome_analyze :: Rule > :: Options ;
