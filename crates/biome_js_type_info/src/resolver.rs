@@ -3,10 +3,9 @@ use std::fmt::Debug;
 use biome_rowan::Text;
 
 use crate::{
-    Class, DestructureField, Function, GenericTypeParameter, Type, TypeData, TypeId,
-    TypeImportQualifier, TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier,
-    TypeofDestructureExpression, TypeofExpression, TypeofValue, Union,
-    globals::GLOBAL_UNDEFINED_ID,
+    Class, DestructureField, Function, GenericTypeParameter, TypeData, TypeId, TypeImportQualifier,
+    TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier, TypeofDestructureExpression,
+    TypeofExpression, TypeofValue, Union, globals::GLOBAL_UNDEFINED_ID,
 };
 
 const NUM_MODULE_ID_BITS: i32 = 30;
@@ -238,7 +237,7 @@ pub trait TypeResolver {
     }
 
     /// Resolves a type by its import `qualifier`.
-    fn resolve_import(&mut self, _qualifier: &TypeImportQualifier) -> Option<Type> {
+    fn resolve_import(&mut self, _qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
         None
     }
 

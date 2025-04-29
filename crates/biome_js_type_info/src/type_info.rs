@@ -1163,10 +1163,9 @@ impl ResolvedPath {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ImportSymbol {
     /// Imports the `default` export.
-    #[default]
     Default,
 
     /// Imports a named symbol.
