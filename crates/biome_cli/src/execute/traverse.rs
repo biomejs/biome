@@ -553,14 +553,13 @@ impl TraversalOptions<'_, '_> {
 }
 
 /// Path entries that we want to ignore during the OS traversal.
-pub const IGNORE_ENTRIES: &[&[u8]] = &[
-    b".cache",
+pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
     b".git",
     b".hg",
     b".svn",
     b".yarn",
-    b".timestamp",
     b".DS_Store",
+    b"node_modules",
 ];
 
 impl TraversalContext for TraversalOptions<'_, '_> {
@@ -580,7 +579,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
     fn can_handle(&self, biome_path: &BiomePath) -> bool {
         if biome_path
             .file_name()
-            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name.as_bytes()))
+            .is_some_and(|file_name| TRAVERSAL_IGNORE_ENTRIES.contains(&file_name.as_bytes()))
         {
             return false;
         }
