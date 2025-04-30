@@ -1,10 +1,8 @@
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text,
-    json::deserialize_from_json_ast,
+    DeserializationVisitor, Deserialized, Text, json::deserialize_from_json_ast,
 };
-use biome_diagnostics::Severity;
 use biome_json_syntax::JsonLanguage;
 use biome_json_value::{JsonObject, JsonString, JsonValue};
 use biome_text_size::TextRange;
@@ -322,7 +320,7 @@ impl Version {
 
 impl From<&str> for Version {
     fn from(value: &str) -> Self {
-        parse_range(&value)
+        parse_range(value)
             .ok()
             .unwrap_or(Self::Literal(value.to_string()))
     }
@@ -421,14 +419,7 @@ impl Deserializable for Version {
         let version = Text::deserialize(ctx, value, name)?;
         match parse_range(version.text()) {
             Ok(result) => Some(result),
-            Err(err) => {
-                ctx.report(
-                    DeserializationDiagnostic::new(err.to_string())
-                        .with_range(value.range())
-                        .with_custom_severity(Severity::Error),
-                );
-                None
-            }
+            Err(_) => Some(Self::Literal(version.text().to_string())),
         }
     }
 }
@@ -462,7 +453,7 @@ impl From<PackageType> for oxc_resolver::PackageType {
 }
 
 fn parse_range(range: &str) -> Result<Version, SemverError> {
-    match catch_unwind(|| Range::parse(range).map(|result| Version::SemVer(result))) {
+    match catch_unwind(|| Range::parse(range).map(Version::SemVer)) {
         Ok(result) => result,
         Err(_) => Ok(Version::Literal(range.to_string())),
     }
