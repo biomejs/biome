@@ -177,6 +177,7 @@ dependencies = [
  "biome_graphql_analyze",
  "biome_graphql_syntax",
  "biome_grit_patterns",
+ "biome_html_analyze",
  "biome_html_formatter",
  "biome_js_analyze",
  "biome_js_formatter",
@@ -230,6 +231,7 @@ dependencies = [
  "biome_glob",
  "biome_graphql_analyze",
  "biome_graphql_syntax",
+ "biome_html_analyze",
  "biome_html_formatter",
  "biome_html_syntax",
  "biome_js_analyze",
@@ -721,6 +723,29 @@ dependencies = [
  "camino",
  "schemars",
  "serde",
+]
+
+[[package]]
+name = "biome_html_analyze"
+version = "0.5.7"
+dependencies = [
+ "biome_analyze",
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_html_factory",
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_rowan",
+ "biome_string_case",
+ "biome_suppression",
+ "biome_test_utils",
+ "camino",
+ "insta",
+ "schemars",
+ "serde",
+ "tests_macros",
 ]
 
 [[package]]
@@ -1320,6 +1345,7 @@ dependencies = [
  "biome_grit_parser",
  "biome_grit_patterns",
  "biome_grit_syntax",
+ "biome_html_analyze",
  "biome_html_formatter",
  "biome_html_parser",
  "biome_html_syntax",
@@ -3525,6 +3551,9 @@ dependencies = [
  "biome_graphql_analyze",
  "biome_graphql_parser",
  "biome_graphql_syntax",
+ "biome_html_analyze",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_parser",
  "biome_js_syntax",
@@ -5011,6 +5040,9 @@ dependencies = [
  "biome_graphql_analyze",
  "biome_graphql_parser",
  "biome_graphql_syntax",
+ "biome_html_analyze",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_factory",
  "biome_js_formatter",

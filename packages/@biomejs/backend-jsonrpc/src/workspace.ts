@@ -1542,6 +1542,10 @@ export interface Nursery {
 	 */
 	noHeadImportInDocument?: RuleConfiguration_for_Null;
 	/**
+	 * The scope prop should be used only on \<th> elements.
+	 */
+	noHeaderScope?: RuleFixConfiguration_for_Null;
+	/**
 	 * Prevent usage of \<img> element in a Next.js project.
 	 */
 	noImgElement?: RuleConfiguration_for_Null;

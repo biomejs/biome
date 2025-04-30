@@ -97,6 +97,7 @@ impl<'a> RequiresProjectScan<'a> {
         biome_css_analyze::visit_registry(&mut self);
         biome_json_analyze::visit_registry(&mut self);
         biome_js_analyze::visit_registry(&mut self);
+        biome_html_analyze::visit_registry(&mut self);
 
         if self.requires_project_scan {
             ScanKind::Project

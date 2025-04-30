@@ -2746,6 +2746,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noHeaderScope": {
+					"description": "The scope prop should be used only on \\<th> elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImgElement": {
 					"description": "Prevent usage of \\<img> element in a Next.js project.",
 					"anyOf": [

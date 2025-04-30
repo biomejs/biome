@@ -1,66 +1,67 @@
 [package]
-authors.workspace    = true
+authors.workspace = true
 categories.workspace = true
-description          = "Biome Configuration"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
-name                 = "biome_configuration"
+description = "Biome Configuration"
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+name = "biome_configuration"
 repository.workspace = true
-version              = "0.0.1"
+version = "0.0.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_analyze            = { workspace = true, features = ["serde"] }
-biome_console            = { workspace = true }
-biome_css_analyze        = { workspace = true }
-biome_css_syntax         = { workspace = true }
-biome_deserialize        = { workspace = true }
+biome_analyze = { workspace = true, features = ["serde"] }
+biome_console = { workspace = true }
+biome_css_analyze = { workspace = true }
+biome_css_syntax = { workspace = true }
+biome_deserialize = { workspace = true }
 biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true, features = ["oxc_resolver"] }
-biome_flags              = { workspace = true }
-biome_formatter          = { workspace = true, features = ["serde"] }
-biome_glob               = { workspace = true }
-biome_graphql_analyze    = { workspace = true }
-biome_graphql_syntax     = { workspace = true }
-biome_html_formatter     = { workspace = true, features = ["serde"] }
-biome_html_syntax        = { workspace = true }
-biome_js_analyze         = { workspace = true }
-biome_js_formatter       = { workspace = true, features = ["serde"] }
-biome_json_analyze       = { workspace = true }
-biome_json_formatter     = { workspace = true, features = ["serde"] }
-biome_json_parser        = { workspace = true }
-biome_json_syntax        = { workspace = true }
-biome_rowan              = { workspace = true, features = ["serde"] }
-bpaf                     = { workspace = true }
-camino                   = { workspace = true }
-oxc_resolver             = { workspace = true }
-regex                    = { workspace = true }
-rustc-hash               = { workspace = true }
-schemars                 = { workspace = true, optional = true }
-serde                    = { workspace = true, features = ["derive"] }
+biome_diagnostics = { workspace = true, features = ["oxc_resolver"] }
+biome_flags = { workspace = true }
+biome_formatter = { workspace = true, features = ["serde"] }
+biome_glob = { workspace = true }
+biome_graphql_analyze = { workspace = true }
+biome_graphql_syntax = { workspace = true }
+biome_html_formatter = { workspace = true, features = ["serde"] }
+biome_html_syntax = { workspace = true }
+biome_html_analyze = { workspace = true }
+biome_js_analyze = { workspace = true }
+biome_js_formatter = { workspace = true, features = ["serde"] }
+biome_json_analyze = { workspace = true }
+biome_json_formatter = { workspace = true, features = ["serde"] }
+biome_json_parser = { workspace = true }
+biome_json_syntax = { workspace = true }
+biome_rowan = { workspace = true, features = ["serde"] }
+bpaf = { workspace = true }
+camino = { workspace = true }
+oxc_resolver = { workspace = true }
+regex = { workspace = true }
+rustc-hash = { workspace = true }
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] }
 
 [features]
 default = ["schema"]
 schema = [
-  "dep:schemars",
-  "biome_js_analyze/schema",
-  "biome_css_analyze/schema",
-  "biome_formatter/schema",
-  "biome_json_syntax/schema",
-  "biome_css_syntax/schema",
-  "biome_graphql_syntax/schema",
-  "biome_html_formatter/schema",
-  "biome_html_syntax/schema",
-  "biome_analyze/schema",
-  "biome_json_formatter/schema",
-  "biome_js_formatter/schema",
+	"dep:schemars",
+	"biome_js_analyze/schema",
+	"biome_css_analyze/schema",
+	"biome_formatter/schema",
+	"biome_json_syntax/schema",
+	"biome_css_syntax/schema",
+	"biome_graphql_syntax/schema",
+	"biome_html_formatter/schema",
+	"biome_html_syntax/schema",
+	"biome_analyze/schema",
+	"biome_json_formatter/schema",
+	"biome_js_formatter/schema",
 ]
 
 [dev-dependencies]
-insta        = { workspace = true }
+insta = { workspace = true }
 tests_macros = { workspace = true }
 
 [lints]

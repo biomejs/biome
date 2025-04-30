@@ -12,6 +12,7 @@ pub fn generate_analyzer() -> Result<()> {
     generate_json_analyzer()?;
     generate_css_analyzer()?;
     generate_graphql_analyzer()?;
+    generate_html_analyzer()?;
     Ok(())
 }
 
@@ -49,6 +50,14 @@ fn generate_css_analyzer() -> Result<()> {
 
 fn generate_graphql_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_graphql_analyze/src");
+    let mut analyzers = BTreeMap::new();
+    generate_category("lint", &mut analyzers, &base_path)?;
+    generate_options(&base_path)?;
+    update_graphql_registry_builder(analyzers)
+}
+
+fn generate_html_analyzer() -> Result<()> {
+    let base_path = project_root().join("crates/biome_html_analyze/src");
     let mut analyzers = BTreeMap::new();
     generate_category("lint", &mut analyzers, &base_path)?;
     generate_options(&base_path)?;

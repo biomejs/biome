@@ -35,6 +35,7 @@ biome_grit_formatter    = { workspace = true }
 biome_grit_parser       = { workspace = true }
 biome_grit_patterns     = { workspace = true, features = ["serde"] }
 biome_grit_syntax       = { workspace = true }
+biome_html_analyze      = { workspace = true }
 biome_html_formatter    = { workspace = true, features = ["serde"] }
 biome_html_parser       = { workspace = true }
 biome_html_syntax       = { workspace = true }

@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_css_syntax::CssLanguage;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_rowan::Language;
@@ -43,6 +44,7 @@ impl RulesVisitor {
         };
 
         biome_graphql_analyze::visit_registry(&mut visitor);
+        biome_html_analyze::visit_registry(&mut visitor);
         biome_css_analyze::visit_registry(&mut visitor);
         biome_json_analyze::visit_registry(&mut visitor);
         biome_js_analyze::visit_registry(&mut visitor);
@@ -102,5 +104,15 @@ impl RegistryVisitor<GraphqlLanguage> for RulesVisitor {
             + 'static,
     {
         self.store_rule::<R, GraphqlLanguage>();
+    }
+}
+
+impl RegistryVisitor<HtmlLanguage> for RulesVisitor {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.store_rule::<R, HtmlLanguage>();
     }
 }
