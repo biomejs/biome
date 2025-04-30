@@ -7,8 +7,9 @@ use biome_fs::MemoryFileSystem;
 use biome_service::workspace::{
     self, ChangeFileParams, CloseFileParams, FixFileParams, FormatFileParams, FormatOnTypeParams,
     FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
-    GetRegisteredTypesParams, GetSyntaxTreeParams, GetTypeInfoParams, OpenProjectParams,
-    PullActionsParams, PullDiagnosticsParams, RenameParams, UpdateSettingsParams,
+    GetRegisteredTypesParams, GetSemanticModelParams, GetSyntaxTreeParams, GetTypeInfoParams,
+    OpenProjectParams, PullActionsParams, PullDiagnosticsParams, RenameParams,
+    UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
 
@@ -131,6 +132,13 @@ impl Workspace {
         let params: GetRegisteredTypesParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         self.inner.get_registered_types(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = getSemanticModel)]
+    pub fn get_semantic_model(&self, params: IGetSemanticModelParams) -> Result<String, Error> {
+        let params: GetSemanticModelParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        self.inner.get_semantic_model(params).map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = changeFile)]

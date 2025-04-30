@@ -655,6 +655,14 @@ pub struct GetRegisteredTypesParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct GetSemanticModelParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFormatterIRParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -1180,6 +1188,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         params: GetRegisteredTypesParams,
     ) -> Result<String, WorkspaceError>;
 
+    /// Returns a textual, debug representation of the semantic model for the document.
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
+
     /// Returns the content of a given file.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
 
@@ -1338,6 +1349,13 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
                 project_key: self.project_key,
                 path: self.path.clone(),
             })
+    }
+
+    pub fn get_semantic_model(&self) -> Result<String, WorkspaceError> {
+        self.workspace.get_semantic_model(GetSemanticModelParams {
+            project_key: self.project_key,
+            path: self.path.clone(),
+        })
     }
 
     pub fn change_file(&self, version: i32, content: String) -> Result<(), WorkspaceError> {

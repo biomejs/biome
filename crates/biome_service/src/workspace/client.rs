@@ -16,10 +16,11 @@ use std::{
 use super::{
     ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
-    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
+    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    RenameParams, RenameResult, ScanProjectFolderParams, ScanProjectFolderResult,
+    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateSettingsParams,
+    UpdateSettingsResult,
 };
 
 pub struct WorkspaceClient<T> {
@@ -169,6 +170,10 @@ where
         params: GetRegisteredTypesParams,
     ) -> Result<String, WorkspaceError> {
         self.request("biome/get_registered_types", params)
+    }
+
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
+        self.request("biome/get_semantic_model", params)
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {

@@ -905,6 +905,7 @@ version = "0.5.7"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
+ "biome_formatter",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_rowan",

@@ -452,6 +452,7 @@ type DebugFormatterIR = fn(
 ) -> Result<String, WorkspaceError>;
 type DebugTypeInfo = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+type DebugSemanticModel = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -465,6 +466,8 @@ pub struct DebugCapabilities {
     pub(crate) debug_type_info: Option<DebugTypeInfo>,
     /// Prints the registered types
     pub(crate) debug_registered_types: Option<DebugRegisteredTypes>,
+    /// Prints the binding/scope tree of the semantic model
+    pub(crate) debug_semantic_model: Option<DebugSemanticModel>,
 }
 
 #[derive(Debug)]

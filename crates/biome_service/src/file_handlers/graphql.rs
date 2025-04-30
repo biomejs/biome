@@ -277,6 +277,7 @@ impl ExtensionHandler for GraphqlFileHandler {
                 debug_formatter_ir: Some(debug_formatter_ir),
                 debug_type_info: None,
                 debug_registered_types: None,
+                debug_semantic_model: None,
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
