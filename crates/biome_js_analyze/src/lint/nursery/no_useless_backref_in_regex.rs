@@ -8,7 +8,7 @@ use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::{AstNode, TextRange};
 
 declare_lint_rule! {
-    /// Disallow useless backreferences in regular expression literals that match empty string.
+    /// Disallow useless backreferences in regular expression literals that always match an empty string.
     ///
     /// A backreference refers to the submatch of a previous capturing group and matches the same text as that group.
     /// JavaScript regular expression support two syntaxes:
@@ -18,7 +18,7 @@ declare_lint_rule! {
     ///   This syntax is only available in Unicode-aware regular expressions,
     ///   i.e. regular expressions using the `u` or `v` flag.
     ///
-    /// A backreferences always matches an empty string when it refers to:
+    /// A backreference always matches an empty string when it refers to:
     ///
     /// - A group that belongs to another alternate branch.
     ///   In `/(a)|b\1b/`, the group `(a)` and its backreference `\1` are in distinct alternate branches.
@@ -40,7 +40,7 @@ declare_lint_rule! {
     ///   In `/(?<=(a)\1)b/`, the backreference appears after the group while they are in a lookbehind assertion.
     ///   `/(?<=(a)\1)b/` is equivalent to `/(?<=(a))b/`.
     ///
-    /// A backreferences that matches an empty string is always successfully matched and is thus useless.
+    /// A backreference that always matches an empty string is always successfully matched and is therefore useless.
     ///
     /// ## Examples
     ///
@@ -134,7 +134,7 @@ impl Rule for NoUselessBackrefInRegex {
                 Some(RuleDiagnostic::new(
                     rule_category!(),
                     backref_range,
-                    "This backreference is nested within the group to which it refers, making it matches an empty string.",
+                    "This backreference is nested within the group to which it refers, making it always match an empty string.",
                 ).detail(group_range, "The group starts here.")
                 .note("Remove the backreference or place it outside the group to which it refers."))
             }
@@ -145,7 +145,7 @@ impl Rule for NoUselessBackrefInRegex {
                 Some(RuleDiagnostic::new(
                     rule_category!(),
                     backref_range,
-                    "This backreference refers to a group placed in another alternate branch, making it matches an empty string.",
+                    "This backreference refers to a group placed in another alternate branch, making it always match an empty string.",
                 ).detail(group_range, "The backreference refers to this group.")
                 .detail(TextRange::new(alternate_index.into(), (alternate_index + 1).into()), "The alternate separator is here.")
                 .note("Remove the backreference or place it in the same alternate branch as the group."))
@@ -154,7 +154,7 @@ impl Rule for NoUselessBackrefInRegex {
                 Some(RuleDiagnostic::new(
                     rule_category!(),
                     backref_range,
-                    "This backreference refers to a group that appears after it, making it matches an empty string.",
+                    "This backreference refers to a group that appears after it, making it always match an empty string.",
                 ).note("A backreference must refer to a group defined before its occurrence.")
                 .note("Remove the backreference."))
             }
@@ -164,10 +164,10 @@ impl Rule for NoUselessBackrefInRegex {
                 Some(RuleDiagnostic::new(
                     rule_category!(),
                     backref_range,
-                    "This backreference refers to a group that appears before it in a lookbehind assertion, making it matches an empty string.",
+                    "This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.",
                 ).detail(group_range, "The backreference refers to this group.")
                 .detail(TextRange::new(assertion_start.into(), assertion_end.into()), "The lookbehind assertion is here.")
-                .note("Remove the backreference or place it in the same alternate branch as the group."))
+                .note("Remove the backreference or place it after the group it refers to."))
             }
             BackRefIssue::ReferredGroupInNegatedLookaround {
                 negated_assertion_start, ..
@@ -177,10 +177,10 @@ impl Rule for NoUselessBackrefInRegex {
                 Some(RuleDiagnostic::new(
                     rule_category!(),
                     backref_range,
-                    "This backreference refers to a group within a negated assertion, making it matches an empty string.",
+                    "This backreference refers to a group within a negated assertion, making it always match an empty string.",
                 ).detail(group_range, "The backreference refers to this group.")
                 .detail(TextRange::new(assertion_start.into(), assertion_end.into()), "The negated assertion is here.")
-                .note("Remove the backreference or place it in the same alternate branch as the group."))
+                .note("Remove the backreference or place it in the negated assertion."))
             }
         }
     }

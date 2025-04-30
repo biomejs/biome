@@ -1642,7 +1642,7 @@ export interface Nursery {
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow useless backreferences in regular expression literals that match empty string.
+	 * Disallow useless backreferences in regular expression literals that always match an empty string.
 	 */
 	noUselessBackrefInRegex?: RuleConfiguration_for_Null;
 	/**

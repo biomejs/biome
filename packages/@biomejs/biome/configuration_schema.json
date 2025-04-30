@@ -2922,7 +2922,7 @@
 					]
 				},
 				"noUselessBackrefInRegex": {
-					"description": "Disallow useless backreferences in regular expression literals that match empty string.",
+					"description": "Disallow useless backreferences in regular expression literals that always match an empty string.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

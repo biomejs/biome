@@ -3313,7 +3313,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unwanted_polyfillio:
         Option<RuleConfiguration<biome_js_analyze::options::NoUnwantedPolyfillio>>,
-    #[doc = "Disallow useless backreferences in regular expression literals that match empty string."]
+    #[doc = "Disallow useless backreferences in regular expression literals that always match an empty string."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_backref_in_regex:
         Option<RuleConfiguration<biome_js_analyze::options::NoUselessBackrefInRegex>>,
