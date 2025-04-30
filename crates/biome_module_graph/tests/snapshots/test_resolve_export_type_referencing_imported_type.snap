@@ -41,7 +41,7 @@ Imports {
 
 Module TypeId(0) => unknown
 
-Module TypeId(1) => instanceof Project TypeId(0)
+Module TypeId(1) => instanceof Import Symbol: PromisedResult from /src/promisedResult.ts
 
 Module TypeId(2) => sync Function "returnPromiseResult" {
   accepts: {
@@ -70,7 +70,9 @@ Exports {
     )
   }
 }
-Imports {}
+Imports {
+  No imports
+}
 ```
 
 ## Registered types

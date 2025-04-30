@@ -34,8 +34,8 @@ impl Format<FormatTypeContext> for JsModuleInfo {
         });
 
         let static_imports = format_with(|f| {
-            if self.exports.is_empty() {
-                write!(f, [text("No exports")])
+            if self.static_imports.is_empty() {
+                write!(f, [text("No imports")])
             } else {
                 write!(f, [&self.static_imports])
             }

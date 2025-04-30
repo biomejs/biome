@@ -244,7 +244,7 @@ impl TypeResolver for JsModuleInfoInner {
         match ty {
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
             TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-            TypeReference::Imported(_) => None,
+            TypeReference::Import(_) => None,
             TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
     }
@@ -271,14 +271,6 @@ impl TypeResolver for JsModuleInfoInner {
 
     fn registered_types(&self) -> &[TypeData] {
         &self.types
-    }
-
-    fn resolve_all(&mut self) {
-        panic!("Types must already be resolved");
-    }
-
-    fn flatten_all(&mut self) {
-        panic!("Types must already be flattened");
     }
 }
 

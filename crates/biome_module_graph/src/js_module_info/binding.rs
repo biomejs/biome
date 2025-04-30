@@ -40,10 +40,9 @@ impl From<TypeId> for BindingId {
 }
 
 /// Internal type with all the semantic data of a specific binding
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct JsBindingData {
     pub name: Text,
-    pub range: TextRange,
     pub references: Vec<JsBindingReference>,
     pub scope_id: ScopeId,
     pub declaration_kind: JsDeclarationKind,
@@ -59,7 +58,7 @@ pub enum JsBindingReferenceKind {
 }
 
 /// Internal type with all the semantic data of a specific reference
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 #[expect(unused)]
 pub struct JsBindingReference {
     pub range_start: TextSize,

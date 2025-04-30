@@ -3,7 +3,7 @@ use std::{
     sync::Arc,
 };
 
-use biome_js_semantic::{ScopeId, SemanticEvent, SemanticEventExtractor, find_import_node};
+use biome_js_semantic::{ScopeId, SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsImportClause,
     JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
@@ -72,6 +72,9 @@ pub(super) struct JsModuleInfoCollector {
     /// Map with exports, from the exported symbol name to a [JsExport] definition.
     exports: BTreeMap<Text, JsExport>,
 
+    /// All imports nodes.
+    imports: Vec<biome_js_syntax::JsImport>,
+
     /// List of all blanket re-exports.
     blanket_reexports: Vec<JsReexport>,
 
@@ -94,6 +97,9 @@ impl JsModuleInfoCollector {
                 self.binding_node_by_start
                     .insert(node.text_trimmed_range().start(), node.clone());
             }
+            JS_IMPORT => self
+                .imports
+                .push(biome_js_syntax::JsImport::cast_ref(node).unwrap()),
             _ => {}
         }
 
@@ -152,8 +158,6 @@ impl JsModuleInfoCollector {
         while let Some(event) = self.extractor.pop() {
             self.push_event(&mut finaliser, event);
         }
-
-        self.run_inference();
     }
 
     fn push_event(&mut self, finaliser: &mut JsModuleInfoCollectorFinaliser, event: SemanticEvent) {
@@ -232,7 +236,6 @@ impl JsModuleInfoCollector {
                         .as_ref()
                         .map(|name| name.clone().into())
                         .unwrap_or_default(),
-                    range,
                     references: Vec::new(),
                     scope_id: *self.scope_stack.last().expect("scope must be present"),
                     declaration_kind: node
@@ -365,6 +368,56 @@ impl JsModuleInfoCollector {
         let type_data = infer_type();
         self.register_and_resolve(type_data).into()
     }
+
+    /// After the first pass of the collector, project-level references have
+    /// been resolved to an import binding. But we can't store the information
+    /// of the import target inside the `ResolvedTypeId`, because it resides in
+    /// the module's semantic data, and `ResolvedTypeId` is only 8 bytes. So
+    /// during resolving, we "downgrade" the project references from a resolved
+    /// reference to a [`TypeReference::Import`].
+    fn resolve_all_and_downgrade_project_references(&mut self, bag: &JsModuleInfoBag) {
+        let bindings = self.bindings.clone(); // TODO: Can we omit the clone?
+        let downgrade_project_reference = |id: BindingId| {
+            let binding = &bindings[id.index()];
+            bag.static_imports
+                .get(&binding.name)
+                .map_or(TypeReference::Unknown, |import| {
+                    TypeImportQualifier {
+                        symbol: import.symbol.clone(),
+                        resolved_path: import.resolved_path.clone(),
+                    }
+                    .into()
+                })
+        };
+
+        let mut i = 0;
+        while i < self.types.len() {
+            // First take the type to satisfy the borrow checker:
+            let ty = std::mem::take(&mut self.types[i]);
+            self.types[i] = ty.resolved_with_mapped_references(
+                |reference| match reference {
+                    TypeReference::Resolved(resolved)
+                        if resolved.level() == TypeResolverLevel::Project =>
+                    {
+                        downgrade_project_reference(resolved.id().into())
+                    }
+                    other => other,
+                },
+                self,
+            );
+            i += 1;
+        }
+    }
+
+    fn flatten_all(&mut self) {
+        let mut i = 0;
+        while i < self.types.len() {
+            // First take the type to satisfy the borrow checker:
+            let ty = std::mem::take(&mut self.types[i]);
+            self.types[i] = ty.flattened(self);
+            i += 1;
+        }
+    }
 }
 
 impl TypeResolver for JsModuleInfoCollector {
@@ -408,7 +461,7 @@ impl TypeResolver for JsModuleInfoCollector {
         match ty {
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
             TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-            TypeReference::Imported(_) => None,
+            TypeReference::Import(_) => None,
             TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
     }
@@ -448,30 +501,6 @@ impl TypeResolver for JsModuleInfoCollector {
     fn registered_types(&self) -> &[TypeData] {
         &self.types
     }
-
-    fn resolve_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            // We need to swap to satisfy the borrow checker:
-            let mut ty = TypeData::Unknown;
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            let mut ty = ty.resolved(self);
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            i += 1;
-        }
-    }
-
-    fn flatten_all(&mut self) {
-        let mut i = 0;
-        while i < self.types.len() {
-            // We need to swap to satisfy the borrow checker:
-            let mut ty = TypeData::Unknown;
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            let mut ty = ty.flattened(self);
-            std::mem::swap(&mut ty, &mut self.types[i]);
-            i += 1;
-        }
-    }
 }
 
 #[derive(Default)]
@@ -503,23 +532,9 @@ impl JsModuleInfoBag {
     }
 
     fn collect_imports(&mut self, collector: &JsModuleInfoCollector) {
-        // Iterate over all bindings in the global scope, and extract imports
-        // and exports.
-        for binding_id in &collector.scopes[0].bindings {
-            let binding = &collector.bindings[binding_id.index()];
-            let node = collector
-                .binding_node_by_start
-                .get(&binding.range.start())
-                .expect("missing node");
-
-            let import = find_import_node(node).and_then(|import_node| {
-                import_node
-                    .ancestors()
-                    .find_map(biome_js_syntax::JsImport::cast)
-            });
-            if let Some(import) = import {
-                self.push_static_import(import, collector);
-            }
+        // Extract imports from collected import nodes.
+        for import in &collector.imports {
+            self.push_static_import(import.clone(), collector);
         }
     }
 
@@ -678,36 +693,11 @@ impl JsModuleInfoBag {
 }
 
 impl JsModuleInfo {
-    pub(super) fn new(collector: JsModuleInfoCollector) -> Self {
+    pub(super) fn new(mut collector: JsModuleInfoCollector) -> Self {
         let bag = JsModuleInfoBag::from_collector(&collector);
-        let types = collector
-            .types
-            .into_iter()
-            .map(|ty| match ty {
-                TypeData::Reference(reference) => match *reference {
-                    TypeReference::Resolved(resolved)
-                        if resolved.level() == TypeResolverLevel::Project =>
-                    {
-                        // At this point, the type has only been resolved to an
-                        // import binding, so we "downgrade" it from a resolved
-                        // reference to an import qualifier:
-                        let id: BindingId = resolved.id().into();
-                        let binding = &collector.bindings[id.index()];
-                        bag.static_imports.get(&binding.name).map_or(
-                            TypeData::reference(TypeReference::Unknown),
-                            |import| {
-                                TypeData::reference(TypeImportQualifier {
-                                    symbol: import.symbol.clone(),
-                                    resolved_path: import.resolved_path.clone(),
-                                })
-                            },
-                        )
-                    }
-                    other_reference => TypeData::reference(other_reference),
-                },
-                other => other,
-            })
-            .collect();
+
+        collector.resolve_all_and_downgrade_project_references(&bag);
+        collector.flatten_all();
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(bag.static_imports),
@@ -725,7 +715,7 @@ impl JsModuleInfo {
                     .cloned()
                     .collect(),
             ),
-            types,
+            types: collector.types.into(),
         }))
     }
 }

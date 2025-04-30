@@ -22,7 +22,7 @@ use crate::globals::{
     GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS, GLOBAL_UNKNOWN_ID, PROMISE_ID,
 };
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
-use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeId, TypeResolver};
+use crate::{GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeId, TypeResolver};
 
 const UNKNOWN: TypeData = TypeData::Unknown;
 
@@ -958,6 +958,15 @@ pub struct TypeInstance {
     pub type_parameters: Box<[GenericTypeParameter]>,
 }
 
+impl From<TypeReference> for TypeInstance {
+    fn from(ty: TypeReference) -> Self {
+        Self {
+            ty,
+            type_parameters: [].into(),
+        }
+    }
+}
+
 impl TypeInstance {
     pub fn has_known_type_parameters(&self) -> bool {
         !self.type_parameters.is_empty()
@@ -1086,7 +1095,7 @@ impl FromStr for TypeOperator {
 pub enum TypeReference {
     Qualifier(TypeReferenceQualifier),
     Resolved(ResolvedTypeId),
-    Imported(TypeImportQualifier),
+    Import(TypeImportQualifier),
     #[default]
     Unknown,
 }
@@ -1105,7 +1114,7 @@ impl From<ResolvedTypeId> for TypeReference {
 
 impl From<TypeImportQualifier> for TypeReference {
     fn from(qualifier: TypeImportQualifier) -> Self {
-        Self::Imported(qualifier)
+        Self::Import(qualifier)
     }
 }
 
@@ -1124,6 +1133,17 @@ impl TypeReference {
             _ => [].into(),
         }
     }
+
+    pub fn with_module_id(&self, module_id: ModuleId) -> Self {
+        match self {
+            Self::Qualifier(qualifier) => Self::Qualifier(qualifier.clone()),
+            Self::Resolved(resolved_type_id) => {
+                Self::Resolved(resolved_type_id.with_module_id(module_id))
+            }
+            Self::Import(import) => Self::Import(import.clone()),
+            Self::Unknown => Self::Unknown,
+        }
+    }
 }
 
 /// Qualifier for a type that should be imported from another module.
@@ -1138,7 +1158,7 @@ pub struct TypeImportQualifier {
 
 /// Reference-counted resolved path wrapped in a [Result] that contains a string
 /// message if resolution failed.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct ResolvedPath(Arc<Result<Utf8PathBuf, String>>);
 
 impl Deref for ResolvedPath {
