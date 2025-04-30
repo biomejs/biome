@@ -1598,6 +1598,10 @@ export interface Nursery {
 	 */
 	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
 	/**
+	 * Disallow variable declarations from shadowing variables declared in the outer scope.
+	 */
+	noShadow?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
 	noStaticElementInteractions?: RuleConfiguration_for_Null;
@@ -3032,7 +3036,7 @@ export interface FilenamingConventionOptions {
  * Rule's options.
  */
 export interface ImportTypeOptions {
-	style?: Style2;
+	style: Style2;
 }
 /**
  * Rule's options.
@@ -3436,6 +3440,7 @@ export type Category =
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noSecrets"
+	| "lint/nursery/noShadow"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
@@ -3884,16 +3889,31 @@ export interface GetFormatterIRParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
+export interface GetTypeInfoParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface GetRegisteredTypesParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface GetSemanticModelParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	/**
 	 * Rules to apply on top of the configuration
 	 */
 	enabledRules?: RuleCode[];
-	maxDiagnostics: number;
 	only?: RuleCode[];
 	path: BiomePath;
 	projectKey: ProjectKey;
+	/**
+	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
+	 */
+	pullCodeActions: boolean;
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
@@ -4099,6 +4119,9 @@ export interface Workspace {
 	getFileContent(params: GetFileContentParams): Promise<string>;
 	getControlFlowGraph(params: GetControlFlowGraphParams): Promise<string>;
 	getFormatterIr(params: GetFormatterIRParams): Promise<string>;
+	getTypeInfo(params: GetTypeInfoParams): Promise<string>;
+	getRegisteredTypes(params: GetRegisteredTypesParams): Promise<string>;
+	getSemanticModel(params: GetSemanticModelParams): Promise<string>;
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
@@ -4147,6 +4170,15 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getFormatterIr(params) {
 			return transport.request("biome/get_formatter_ir", params);
+		},
+		getTypeInfo(params) {
+			return transport.request("biome/get_type_info", params);
+		},
+		getRegisteredTypes(params) {
+			return transport.request("biome/get_registered_types", params);
+		},
+		getSemanticModel(params) {
+			return transport.request("biome/get_semantic_model", params);
 		},
 		pullDiagnostics(params) {
 			return transport.request("biome/pull_diagnostics", params);

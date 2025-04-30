@@ -1,23 +1,52 @@
 use std::sync::Arc;
 
-use biome_js_semantic::{BindingId, ScopeId};
+use biome_js_semantic::ScopeId;
 use biome_js_syntax::{AnyJsDeclaration, JsImport, JsSyntaxNode, JsVariableKind, TextRange};
-use biome_js_type_info::Type;
+use biome_js_type_info::{TypeId, TypeReference};
 use biome_rowan::{AstNode, Text, TextSize};
 
 use crate::jsdoc_comment::JsdocComment;
 
 use super::{JsModuleInfoInner, scope::JsScope};
 
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
+pub struct BindingId(u32);
+
+impl BindingId {
+    pub const fn new(index: usize) -> Self {
+        // SAFETY: We don't handle files exceeding `u32::MAX` bytes.
+        // Thus, it isn't possible to exceed `u32::MAX` bindings.
+        Self(index as u32)
+    }
+
+    pub const fn index(self) -> usize {
+        self.0 as usize
+    }
+}
+
+// We allow conversion from `BindingId` into `TypeId`, and vice versa, because
+// for project-level `ResolvedTypeId` instances, the `TypeId` is an indirection
+// that is resolved through a binding.
+impl From<BindingId> for TypeId {
+    fn from(id: BindingId) -> Self {
+        Self::new(id.0 as usize)
+    }
+}
+
+impl From<TypeId> for BindingId {
+    fn from(id: TypeId) -> Self {
+        Self::new(id.index())
+    }
+}
+
 /// Internal type with all the semantic data of a specific binding
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct JsBindingData {
     pub name: Text,
-    pub range: TextRange,
     pub references: Vec<JsBindingReference>,
     pub scope_id: ScopeId,
     pub declaration_kind: JsDeclarationKind,
-    pub ty: Type,
+    pub ty: TypeReference,
     pub jsdoc: Option<JsdocComment>,
     pub export_ranges: Vec<TextRange>,
 }
@@ -29,7 +58,7 @@ pub enum JsBindingReferenceKind {
 }
 
 /// Internal type with all the semantic data of a specific reference
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 #[expect(unused)]
 pub struct JsBindingReference {
     pub range_start: TextSize,
@@ -90,7 +119,7 @@ impl JsBinding {
     }
 
     /// Returns a reference to the binding's type.
-    pub fn ty(&self) -> &Type {
+    pub fn ty(&self) -> &TypeReference {
         &self.data.binding(self.id).ty
     }
 }

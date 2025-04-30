@@ -14,15 +14,21 @@ use rustc_hash::FxHashSet;
 ///
 /// Rules:
 /// - CLI via `stdin` return [ScanKind::None]
-/// - `biome format` return [ScanKind::KnownFiles]
-/// - `biome lint`, `biome check` and `biome ci` varies. It depends on whether the user has enabled rules that require the `RuleDomain::Project`
+/// - `biome format` return [ScanKind::KnownFiles] if VCS is enabled, otherwise [ScanKind::None]
+/// - `biome lint`, `biome check` and `biome ci` may vary. It depends on whether the user has enabled rules that require the `RuleDomain::Project`.
+///   If not, returns [ScanKind::KnownFiles] if VCS is enabled, otherwise [ScanKind::None]
 pub(crate) fn compute_scan_kind(execution: &Execution, configuration: &Configuration) -> ScanKind {
     if execution.is_stdin() || execution.is_migrate() {
         return ScanKind::None;
     };
 
     if execution.is_format() {
-        return ScanKind::KnownFiles;
+        // There's no need to scan further known files if the VCS isn't enabled
+        return if !configuration.use_ignore_file() {
+            ScanKind::None
+        } else {
+            ScanKind::KnownFiles
+        };
     };
 
     let lint_rules = configuration.get_linter_rules().as_enabled_rules();
@@ -35,7 +41,18 @@ pub(crate) fn compute_scan_kind(execution: &Execution, configuration: &Configura
             .with_only(only.clone());
     }
 
-    requires_project_scan.compute()
+    let result = requires_project_scan.compute();
+
+    if result == ScanKind::KnownFiles {
+        // There's no need to scan further known files if the VCS isn't enabled
+        if !configuration.use_ignore_file() {
+            ScanKind::None
+        } else {
+            result
+        }
+    } else {
+        result
+    }
 }
 
 struct RequiresProjectScan<'a> {
@@ -153,6 +170,7 @@ mod tests {
     use biome_configuration::analyzer::{
         Correctness, RuleDomainValue, RuleDomains, SeverityOrGroup,
     };
+    use biome_configuration::vcs::{VcsClientKind, VcsConfiguration};
     use biome_configuration::{
         LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
     };
@@ -183,7 +201,7 @@ mod tests {
 
         assert_eq!(
             compute_scan_kind(&execution, &configuration),
-            ScanKind::KnownFiles
+            ScanKind::None
         );
     }
 
@@ -259,6 +277,48 @@ mod tests {
                     })),
                     ..Default::default()
                 }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            compute_scan_kind(&execution, &configuration),
+            ScanKind::None
+        );
+    }
+
+    #[test]
+    fn should_return_known_files_if_vcs_is_enabled() {
+        let execution = Execution::new(TraversalMode::Lint {
+            project_key: ProjectKey::new(),
+            fix_file_mode: None,
+            stdin: None,
+            only: vec![],
+            skip: vec![RuleSelector::Rule("correctness", "noPrivateImports")],
+
+            vcs_targeted: VcsTargeted::default(),
+            suppress: false,
+            suppression_reason: None,
+        });
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                rules: Some(Rules {
+                    correctness: Some(SeverityOrGroup::Group(Correctness {
+                        no_private_imports: Some(RuleConfiguration::Plain(
+                            RulePlainConfiguration::Error,
+                        )),
+                        ..Default::default()
+                    })),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            vcs: Some(VcsConfiguration {
+                enabled: Some(true.into()),
+                client_kind: Some(VcsClientKind::Git),
+                use_ignore_file: Some(true.into()),
                 ..Default::default()
             }),
             ..Default::default()

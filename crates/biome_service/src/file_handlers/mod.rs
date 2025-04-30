@@ -450,6 +450,9 @@ type DebugFormatterIR = fn(
     AnyParse,
     WorkspaceSettingsHandle,
 ) -> Result<String, WorkspaceError>;
+type DebugTypeInfo = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
+type DebugSemanticModel = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -459,6 +462,12 @@ pub struct DebugCapabilities {
     pub(crate) debug_control_flow: Option<DebugControlFlow>,
     /// Prints the formatter IR
     pub(crate) debug_formatter_ir: Option<DebugFormatterIR>,
+    /// Prints the type info
+    pub(crate) debug_type_info: Option<DebugTypeInfo>,
+    /// Prints the registered types
+    pub(crate) debug_registered_types: Option<DebugRegisteredTypes>,
+    /// Prints the binding/scope tree of the semantic model
+    pub(crate) debug_semantic_model: Option<DebugSemanticModel>,
 }
 
 #[derive(Debug)]
@@ -466,7 +475,6 @@ pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) workspace: &'a WorkspaceSettingsHandle,
     pub(crate) language: DocumentFileSource,
-    pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
@@ -476,6 +484,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
+    pub(crate) pull_code_actions: bool,
 }
 
 pub(crate) struct LintResults {
@@ -490,7 +499,7 @@ pub(crate) struct ProcessLint<'a> {
     diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
-    max_diagnostics: u32,
+    pull_code_actions: bool,
 }
 
 impl<'a> ProcessLint<'a> {
@@ -509,7 +518,7 @@ impl<'a> ProcessLint<'a> {
                 .settings()
                 .as_ref()
                 .and_then(|settings| settings.as_linter_rules(params.path.as_path())),
-            max_diagnostics: params.max_diagnostics,
+            pull_code_actions: params.pull_code_actions,
         }
     }
 
@@ -543,18 +552,18 @@ impl<'a> ProcessLint<'a> {
                 self.errors += 1;
             }
 
-            if self.diagnostic_count <= self.max_diagnostics {
+            if self.pull_code_actions {
                 for action in signal.actions() {
                     if !action.is_suppression() {
                         diagnostic = diagnostic.add_code_suggestion(action.into());
                     }
                 }
-
-                let error = diagnostic.with_severity(severity);
-
-                self.diagnostics
-                    .push(biome_diagnostics::serde::Diagnostic::new(error));
             }
+
+            let error = diagnostic.with_severity(severity);
+
+            self.diagnostics
+                .push(biome_diagnostics::serde::Diagnostic::new(error));
         }
 
         ControlFlow::<Never>::Continue(())

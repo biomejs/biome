@@ -284,6 +284,14 @@ impl Configuration {
         self.vcs.as_ref().is_some_and(|v| v.is_enabled())
     }
 
+    pub fn use_ignore_file(&self) -> bool {
+        self.is_vcs_enabled()
+            && self
+                .vcs
+                .as_ref()
+                .is_some_and(|vcs| vcs.use_ignore_file == Some(true.into()))
+    }
+
     /// Whether Biome should check for `.editorconfig` file
     pub fn use_editorconfig(&self) -> bool {
         self.formatter

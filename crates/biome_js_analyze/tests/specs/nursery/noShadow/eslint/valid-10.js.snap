@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-10.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+function foo() { var Object = 0; }
+
+```

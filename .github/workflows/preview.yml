@@ -97,12 +97,12 @@ jobs:
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
-        if: matrix.os == 'windows-2022'
+        if: matrix.os == 'depot-windows-2022'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
       - name: Copy CLI binary
-        if: matrix.os != 'windows-2022'
+        if: matrix.os != 'depot-windows-2022'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
@@ -145,7 +145,7 @@ jobs:
 
   publish:
     name: Publish
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: ubuntu-24.04
     needs:
       - build-binaries
       - build-wasm
@@ -156,12 +156,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Download CLI artifacts
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: cli-*
           merge-multiple: true
       - name: Download WASM artifacts
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: wasm-*
           merge-multiple: true

@@ -76,6 +76,16 @@ impl Scope {
         })
     }
 
+    /// Returns all the immediate children of this [Scope].
+    /// This does not include the descendents of the children.
+    pub fn children(&self) -> impl Iterator<Item = Self> + use<> {
+        ScopeChildrenIter {
+            data: self.data.clone(),
+            scope_id: self.id,
+            child_index: 0,
+        }
+    }
+
     /// Returns all bindings that were bound in this scope. It **does
     /// not** returns bindings of parent scopes.
     pub fn bindings(&self) -> ScopeBindingsIter {
@@ -151,6 +161,35 @@ impl Iterator for ScopeDescendentsIter {
 }
 
 impl FusedIterator for ScopeDescendentsIter {}
+
+pub struct ScopeChildrenIter {
+    data: Rc<SemanticModelData>,
+    scope_id: ScopeId,
+    child_index: u32,
+}
+
+impl Iterator for ScopeChildrenIter {
+    type Item = Scope;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // scope_id will always be a valid scope because
+        // it was created by [Scope::children] method.
+        debug_assert!(self.scope_id.index() < self.data.scopes.len());
+
+        let id = *self.data.scopes[self.scope_id.index()]
+            .children
+            .get(self.child_index as usize)?;
+
+        self.child_index += 1;
+
+        Some(Scope {
+            data: self.data.clone(),
+            id,
+        })
+    }
+}
+
+impl FusedIterator for ScopeChildrenIter {}
 
 /// Iterate all bindings that were bound in a given scope. It **does
 /// not** Returns bindings of parent scopes.

@@ -1,16 +1,25 @@
 ---
-source: crates/biome_js_type_info/tests/utils/mod.rs
+source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
+## Input
+
 ```ts
 const array: Array<string> = [];
 
 ```
 
+## Result
+
 ```
-array => instanceof "Array" {
-  resolved: unknown
-  type_args: string
-}
+array => instanceof unresolved reference "Array"<Global TypeId(7)>
+
+```
+
+## Registered types
+
+```
+
+Global TypeId(7) => string
 
 ```

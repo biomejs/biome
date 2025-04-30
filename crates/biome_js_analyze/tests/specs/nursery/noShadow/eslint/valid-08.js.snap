@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-08.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// This is caught by `noRedeclare`, so we don't need to flag it again as a shadow.
+{ var a; } var a;
+
+```

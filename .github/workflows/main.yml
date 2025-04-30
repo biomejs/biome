@@ -86,9 +86,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-latest
+          - os: depot-windows-2022
           - os: depot-ubuntu-24.04-arm-16
-          - os: macos-latest
+          - os: depot-macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

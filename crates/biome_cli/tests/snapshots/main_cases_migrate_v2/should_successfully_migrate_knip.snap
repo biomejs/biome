@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -15,8 +14,7 @@ snapshot_kind: text
       "!**/fixtures",
       "!**/packages/knip/package.json",
       "!**/packages/knip/vendor/bash-parser/index.js",
-      "!**/packages/docs/.astro",
-      "**/node_modules/**"
+      "!**/packages/docs/.astro"
     ]
   },
   "assist": {
@@ -108,7 +106,7 @@ snapshot_kind: text
   },
   "overrides": [
     {
-      "includes": ["**/*.astro", "**/node_modules/**"],
+      "includes": ["**/*.astro"],
       "linter": {
         "rules": {
           "correctness": {
@@ -125,8 +123,7 @@ snapshot_kind: text
         "**/packages/knip/src/cli.ts",
         "**/packages/knip/src/reporters/**",
         "**/packages/knip/src/util/cli-arguments.ts",
-        "**/packages/knip/src/util/debug.ts",
-        "**/node_modules/**"
+        "**/packages/knip/src/util/debug.ts"
       ],
       "linter": {
         "rules": {
@@ -142,7 +139,7 @@ snapshot_kind: text
       }
     },
     {
-      "includes": ["**/packages/knip/fixtures/**", "**/node_modules/**"],
+      "includes": ["**/packages/knip/fixtures/**"],
       "organizeImports": {
         "enabled": false
       },
@@ -160,8 +157,7 @@ snapshot_kind: text
     },
     {
       "includes": [
-        "**/packages/knip/test/util/get-inputs-from-scripts.test.ts",
-        "**/node_modules/**"
+        "**/packages/knip/test/util/get-inputs-from-scripts.test.ts"
       ],
       "formatter": {
         "lineWidth": 200

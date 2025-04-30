@@ -40,8 +40,8 @@ use crate::file_handlers::{
 use crate::projects::Projects;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, RageEntry, RageParams,
-    RageResult, ServerInfo,
+    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
+    IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
 };
 use crate::workspace_watcher::WatcherSignalKind;
 use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
@@ -51,11 +51,12 @@ use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
-    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
-    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
-    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
-    ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
+    OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
+    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    RenameResult, ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams,
+    SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams,
+    UpdateSettingsResult,
 };
 
 pub struct WorkspaceServer {
@@ -826,18 +827,29 @@ impl Workspace for WorkspaceServer {
         &self,
         params: ScanProjectFolderParams,
     ) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        if params.scan_kind.is_none() {
-            return Ok(ScanProjectFolderResult {
-                diagnostics: Vec::new(),
-                duration: Duration::from_millis(0),
-            });
-        }
-
         let path = params
             .path
             .map(Utf8PathBuf::from)
             .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
+
+        if params.scan_kind.is_none() {
+            let manifest = path.join("package.json");
+            if self.fs.path_exists(&manifest) {
+                self.open_file_by_scanner(OpenFileParams {
+                    project_key: params.project_key,
+                    path: BiomePath::from(manifest.clone()),
+                    content: FileContent::FromServer,
+                    document_file_source: None,
+                    persist_node_cache: false,
+                })?;
+                self.update_project_layout(WatcherSignalKind::AddedOrChanged, &manifest)?;
+            }
+            return Ok(ScanProjectFolderResult {
+                diagnostics: Vec::new(),
+                duration: Duration::from_millis(0),
+            });
+        }
 
         let should_scan = params.force
             || !self
@@ -959,6 +971,42 @@ impl Workspace for WorkspaceServer {
         let document_file_source = self.get_file_source(&params.path);
 
         debug_formatter_ir(&params.path, &document_file_source, parse, handle)
+    }
+
+    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_type_info = capabilities
+            .debug
+            .debug_type_info
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let parse = self.get_parse(&params.path)?;
+
+        debug_type_info(&params.path, parse)
+    }
+
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_registered_types = capabilities
+            .debug
+            .debug_registered_types
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let parse = self.get_parse(&params.path)?;
+
+        debug_registered_types(&params.path, parse)
+    }
+
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_semantic_model = capabilities
+            .debug
+            .debug_semantic_model
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let parse = self.get_parse(&params.path)?;
+
+        debug_semantic_model(&params.path, parse)
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
@@ -1088,7 +1136,6 @@ impl Workspace for WorkspaceServer {
             project_key = debug(&params.project_key),
             skip = debug(&params.skip),
             only = debug(&params.only),
-            max_diagnostics = display(&params.max_diagnostics),
         )
     )]
     fn pull_diagnostics(
@@ -1099,10 +1146,10 @@ impl Workspace for WorkspaceServer {
             project_key,
             path,
             categories,
-            max_diagnostics,
             only,
             skip,
             enabled_rules,
+            pull_code_actions,
         } = params;
         let parse = self.get_parse(&path)?;
         let language = self.get_file_source(&path);
@@ -1116,7 +1163,6 @@ impl Workspace for WorkspaceServer {
                 let results = lint(LintParams {
                     parse,
                     workspace: &settings.into(),
-                    max_diagnostics: max_diagnostics as u32,
                     path: &path,
                     only,
                     skip,
@@ -1126,6 +1172,7 @@ impl Workspace for WorkspaceServer {
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_rules,
+                    pull_code_actions,
                     plugins: self.get_analyzer_plugins_for_project(project_key),
                 });
 

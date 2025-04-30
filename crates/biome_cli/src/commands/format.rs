@@ -142,7 +142,7 @@ impl CommandRunner for FormatCommandPayload {
     ) -> Result<Execution, CliDiagnostic> {
         Ok(Execution::new(TraversalMode::Format {
             project_key,
-            ignore_errors: cli_options.skip_errors,
+            ignore_errors: cli_options.skip_parse_errors,
             write: self.should_write(),
             stdin: self.get_stdin(console)?,
             vcs_targeted: (self.staged, self.changed).into(),

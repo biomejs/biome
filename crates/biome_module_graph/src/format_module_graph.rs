@@ -1,8 +1,5 @@
 use crate::js_module_info::{Exports, Imports};
-use crate::{
-    JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsOwnExport, JsReexport, JsResolvedPath,
-    JsdocComment,
-};
+use crate::{JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, JsdocComment};
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
 use biome_js_type_info::FormatTypeContext;
@@ -37,8 +34,8 @@ impl Format<FormatTypeContext> for JsModuleInfo {
         });
 
         let static_imports = format_with(|f| {
-            if self.exports.is_empty() {
-                write!(f, [text("No exports")])
+            if self.static_imports.is_empty() {
+                write!(f, [text("No imports")])
             } else {
                 write!(f, [&self.static_imports])
             }
@@ -381,41 +378,5 @@ impl Format<FormatTypeContext> for JsImport {
 
         write!(f, [hard_line_break()])?;
         Ok(())
-    }
-}
-
-impl Format<FormatTypeContext> for JsResolvedPath {
-    fn fmt(
-        &self,
-        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
-    ) -> FormatResult<()> {
-        let value = self.deref();
-        if let Ok(value) = value {
-            write!(
-                f,
-                [format_args![dynamic_text(
-                    value.as_str().replace('\\', "/").as_str(),
-                    TextSize::default()
-                )]]
-            )?;
-        }
-
-        Ok(())
-    }
-}
-
-impl Format<FormatTypeContext> for JsImportSymbol {
-    fn fmt(
-        &self,
-        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
-    ) -> FormatResult<()> {
-        let import = format_with(|f| match self {
-            Self::Default => write!(f, [&format_args![text("Default")]]),
-            Self::Named(name) => {
-                write!(f, [&format_args![dynamic_text(name, TextSize::default())]])
-            }
-            Self::All => write!(f, [&format_args![text("All")]]),
-        });
-        write!(f, [&format_args![text("Import Symbol:"), space(), &import]])
     }
 }

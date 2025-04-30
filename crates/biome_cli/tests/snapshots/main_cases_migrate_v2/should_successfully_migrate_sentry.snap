@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -17,7 +16,7 @@ snapshot_kind: text
   "assist": {
     "actions": {
       "source": {
-        "organizeImports": "on"
+        "organizeImports": "off"
       }
     }
   },
@@ -107,8 +106,7 @@ snapshot_kind: text
       "!**/*.min.js",
       "!**/fixtures",
       "!**/.devenv",
-      "!**/package.json",
-      "**/node_modules/**"
+      "!**/package.json"
     ]
   },
   "css": {
@@ -125,7 +123,7 @@ snapshot_kind: text
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "includes": ["**", "!**/tests/**/*.json", "**/node_modules/**"]
+    "includes": ["**", "!**/tests/**/*.json"]
   },
   "javascript": {
     "formatter": {
@@ -161,8 +159,7 @@ snapshot_kind: text
         "**/tests/js/jest-pegjs-transform.js",
         "**/tests/js/setup.ts",
         "**/tests/js/test-balancer/index.js",
-        "**/*.config.ts",
-        "**/node_modules/**"
+        "**/*.config.ts"
       ],
       "linter": {
         "rules": {
@@ -173,10 +170,7 @@ snapshot_kind: text
       }
     },
     {
-      "includes": [
-        "**/src/sentry/templates/sentry/error-page-embed.js",
-        "**/node_modules/**"
-      ],
+      "includes": ["**/src/sentry/templates/sentry/error-page-embed.js"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -196,8 +190,7 @@ snapshot_kind: text
         "**/static/app/components/sparklines/line.tsx",
         "**/static/app/types/index.tsx",
         "**/tests/js/sentry-test/reactTestingLibrary.tsx",
-        "**/tests/js/sentry-test/index.tsx",
-        "**/node_modules/**"
+        "**/tests/js/sentry-test/index.tsx"
       ],
       "linter": {
         "rules": {

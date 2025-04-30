@@ -18,7 +18,7 @@ let a = <button
 ```
 invalid.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     1 │ let a = <button
     2 │     className="SomeManyClasses"
@@ -27,18 +27,9 @@ invalid.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━�
     4 │     style="color: red"
     5 │ >
   
-  i == is only allowed when comparing against null
+  i == is only allowed when comparing against null.
   
-    1 │ let a = <button
-    2 │     className="SomeManyClasses"
-  > 3 │     onClick={(event) => console.log(event.ctrlKey == true)}
-      │                                                   ^^
-    4 │     style="color: red"
-    5 │ >
-  
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     3 │ ····onClick={(event)·=>·console.log(event.ctrlKey·===·true)}
       │                                                     +       

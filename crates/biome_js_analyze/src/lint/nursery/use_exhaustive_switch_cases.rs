@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -6,7 +8,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsStatement, AnyJsSwitchClause, JsSwitchStatement, T,
 };
-use biome_js_type_info::{Literal, Type, TypeInner};
+use biome_js_type_info::{Literal, Type, TypeData};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 
 use crate::JsRuleAction;
@@ -120,7 +122,9 @@ impl Rule for UseExhaustiveSwitchCases {
             .filter_map(|case| match case {
                 AnyJsSwitchClause::JsCaseClause(case) => {
                     let test = case.test().ok()?;
-                    Some(flatten_type(&ctx.type_for_expression(&test)))
+                    flatten_type(&ctx.type_for_expression(&test))
+                        .as_deref()
+                        .cloned()
                 }
                 _ => None,
             })
@@ -129,26 +133,33 @@ impl Rule for UseExhaustiveSwitchCases {
         let mut missing_cases = Vec::new();
 
         let discriminant = stmt.discriminant().ok()?;
-        let discriminant_ty = flatten_type(&ctx.type_for_expression(&discriminant));
+        let discriminant_ty = flatten_type(&ctx.type_for_expression(&discriminant))?;
 
-        for union_part in match discriminant_ty.inner_type() {
-            TypeInner::Union(union) => union.types().to_vec(),
+        for union_part in match discriminant_ty.deref() {
+            TypeData::Union(union) => union
+                .types()
+                .iter()
+                .filter_map(|r| discriminant_ty.resolve(r))
+                .collect(),
             _ => vec![discriminant_ty],
         } {
-            let union_part = flatten_type(&union_part);
+            let union_part = flatten_type(&union_part)?;
 
-            for intersection_part in match union_part.inner_type() {
-                TypeInner::Intersection(intersection) => intersection.types().to_vec(),
+            for intersection_part in match union_part.deref() {
+                TypeData::Intersection(intersection) => intersection
+                    .types()
+                    .iter()
+                    .filter_map(|r| union_part.resolve(r))
+                    .collect(),
                 _ => vec![union_part],
             } {
-                let intersection_part = flatten_type(&intersection_part);
+                let intersection_part = flatten_type(&intersection_part)?;
+
+                dbg!(&intersection_part);
 
                 if !matches!(
-                    intersection_part.inner_type(),
-                    TypeInner::Literal(_)
-                        | TypeInner::Null
-                        | TypeInner::Undefined
-                        | TypeInner::Symbol
+                    intersection_part.deref(),
+                    TypeData::Literal(_) | TypeData::Null | TypeData::Undefined | TypeData::Symbol
                 ) || found_cases.contains(&intersection_part)
                 {
                     continue;
@@ -157,6 +168,8 @@ impl Rule for UseExhaustiveSwitchCases {
                 missing_cases.push(intersection_part);
             }
         }
+
+        dbg!(&found_cases, &missing_cases);
 
         if missing_cases.is_empty() {
             return None;
@@ -262,31 +275,32 @@ impl Rule for UseExhaustiveSwitchCases {
 
 /// Unwraps [`TypeInner::InstanceOf`] and [`TypeInner::TypeofType`] to get the inner type.
 // TODO: I am not sure if this should be in the type flattening logic.
-fn flatten_type(ty: &Type) -> Type {
-    match ty.inner_type() {
-        TypeInner::InstanceOf(ty) if ty.is_inferred() => ty.owned_inner_type(),
-        _ => ty.owned_inner_type(),
+fn flatten_type(ty: &Type) -> Option<Type> {
+    match ty.deref() {
+        TypeData::InstanceOf(instance) => ty.resolve(&instance.ty),
+        TypeData::TypeofType(inner) => ty.resolve(&inner),
+        _ => Some(ty.clone()),
     }
 }
 
 fn type_to_string(ty: &Type) -> String {
-    match ty.inner_type() {
-        TypeInner::Literal(lit) => match lit.as_ref() {
+    match ty.deref() {
+        TypeData::Literal(lit) => match lit.as_ref() {
             Literal::Boolean(b) => b.as_bool().to_string(),
             Literal::Null => "null".to_string(),
             Literal::Number(n) => n.as_f64().to_string(),
             Literal::String(s) => format!("\"{}\"", s.as_str()),
             _ => "unknown".to_string(),
         },
-        TypeInner::Null => "null".to_string(),
-        TypeInner::Undefined => "undefined".to_string(),
+        TypeData::Null => "null".to_string(),
+        TypeData::Undefined => "undefined".to_string(),
         _ => "unknown".to_string(),
     }
 }
 
 fn type_to_expression(ty: &Type) -> Option<AnyJsExpression> {
-    Some(match ty.inner_type() {
-        TypeInner::Literal(lit) => AnyJsExpression::AnyJsLiteralExpression(match lit.as_ref() {
+    Some(match ty.deref() {
+        TypeData::Literal(lit) => AnyJsExpression::AnyJsLiteralExpression(match lit.as_ref() {
             Literal::Boolean(b) => {
                 make::js_boolean_literal_expression(make::token(match b.as_bool() {
                     true => T![true],
@@ -304,10 +318,10 @@ fn type_to_expression(ty: &Type) -> Option<AnyJsExpression> {
             }
             _ => return None,
         }),
-        TypeInner::Null => AnyJsExpression::AnyJsLiteralExpression(
+        TypeData::Null => AnyJsExpression::AnyJsLiteralExpression(
             make::js_null_literal_expression(make::token(T![null])).into(),
         ),
-        TypeInner::Undefined => {
+        TypeData::Undefined => {
             make::js_identifier_expression(make::js_reference_identifier(make::ident("undefined")))
                 .into()
         }

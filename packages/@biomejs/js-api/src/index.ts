@@ -212,9 +212,9 @@ export class Biome {
 				projectKey,
 				path,
 				categories: ["syntax"],
-				maxDiagnostics: Number.MAX_SAFE_INTEGER,
 				only: [],
 				skip: [],
+				pullCodeActions: false,
 			});
 
 			const hasErrors = diagnostics.some(
@@ -294,9 +294,9 @@ export class Biome {
 				projectKey,
 				path,
 				categories: ["syntax", "lint"],
-				maxDiagnostics: Number.MAX_SAFE_INTEGER,
 				only: [],
 				skip: [],
+				pullCodeActions: true,
 			});
 
 			return {

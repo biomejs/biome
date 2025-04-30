@@ -136,6 +136,18 @@ impl Binding {
     }
 }
 
+impl PartialEq for Binding {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+impl Eq for Binding {}
+impl std::hash::Hash for Binding {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
+}
+
 /// Marker trait that groups all "AstNode" that are bindings
 pub trait IsBindingAstNode: AstNode<Language = JsLanguage> {
     #[inline(always)]

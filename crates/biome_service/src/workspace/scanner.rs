@@ -8,6 +8,13 @@
 //! In other words, the scanner is both the scanning logic in this module as
 //! well as the watcher to allow continuous scanning.
 
+use super::ServiceDataNotification;
+use super::server::WorkspaceServer;
+use crate::diagnostics::Panic;
+use crate::projects::ProjectKey;
+use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
+use crate::workspace_watcher::WatcherSignalKind;
+use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
@@ -19,15 +26,6 @@ use std::sync::RwLock;
 use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
-
-use crate::diagnostics::Panic;
-use crate::projects::ProjectKey;
-use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
-use crate::workspace_watcher::WatcherSignalKind;
-use crate::{IGNORE_ENTRIES, Workspace, WorkspaceError};
-
-use super::ServiceDataNotification;
-use super::server::WorkspaceServer;
 
 pub(crate) struct ScanResult {
     /// Diagnostics reported while scanning the project.
@@ -215,12 +213,12 @@ pub(crate) struct ScanContext<'app> {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum ScanKind {
-    /// It targets the project, so it attempts to open all the files in the project.
-    Project,
-    /// It targets specific files
-    KnownFiles,
     /// The scanner should not be triggered
     None,
+    /// It targets specific files
+    KnownFiles,
+    /// It targets the project, so it attempts to open all the files in the project.
+    Project,
 }
 
 impl ScanKind {
@@ -244,6 +242,17 @@ impl ScanContext<'_> {
     }
 }
 
+/// Path entries that we want to ignore during the scanning phase.
+pub const SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
+    b".cache",
+    b".git",
+    b".hg",
+    b".svn",
+    b".yarn",
+    b".timestamp",
+    b".DS_Store",
+];
+
 impl TraversalContext for ScanContext<'_> {
     fn interner(&self) -> &PathInterner {
         &self.interner
@@ -260,19 +269,26 @@ impl TraversalContext for ScanContext<'_> {
     fn can_handle(&self, path: &BiomePath) -> bool {
         if path
             .file_name()
-            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name.as_bytes()))
+            .is_some_and(|file_name| SCANNER_IGNORE_ENTRIES.contains(&file_name.as_bytes()))
         {
             return false;
         }
 
-        path.is_dir()
-            || if self.scan_kind.is_known_files() {
-                path.is_ignore() || path.is_manifest() || path.is_config()
-            } else if path.is_dependency() {
-                path.ends_with(".d.ts")
+        if path.is_dir() {
+            return true;
+        }
+        if self.scan_kind.is_known_files() {
+            // we don't need to check files inside node_modules if we are in known files mode
+            if path.is_dependency() {
+                false
             } else {
-                DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
+                path.is_ignore() || path.is_config() || path.is_manifest()
             }
+        } else if path.is_dependency() {
+            path.ends_with(".d.ts")
+        } else {
+            DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
+        }
     }
 
     fn handle_path(&self, path: BiomePath) {

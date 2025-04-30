@@ -5,17 +5,17 @@ use biome_js_syntax::{
     JsExportDefaultExpressionClause, JsExportFromClause, JsExportNamedFromClause,
     JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, unescape_js_string,
 };
-use biome_js_type_info::Type;
+use biome_js_type_info::{ImportSymbol, TypeData, TypeResolver};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{ResolveError, ResolverGeneric};
 
 use crate::{
-    JsExport, JsImport, JsImportSymbol, JsModuleInfo, JsOwnExport, JsReexport,
-    jsdoc_comment::JsdocComment, resolver_cache::ResolverCache,
+    JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, jsdoc_comment::JsdocComment,
+    resolver_cache::ResolverCache,
 };
 
-use super::{JsResolvedPath, collector::JsModuleInfoCollector};
+use super::{ResolvedPath, collector::JsModuleInfoCollector};
 
 pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
@@ -189,12 +189,14 @@ impl<'a> JsModuleVisitor<'a> {
         node: &JsExportDefaultExpressionClause,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
+        let type_data = TypeData::from_any_js_expression(collector, &node.expression().ok()?);
+        let ty = collector.register_and_resolve(type_data).into();
         collector.register_export(
             "default",
             JsExport::Own(JsOwnExport {
                 jsdoc_comment: None,
                 local_name: None,
-                ty: Type::from_any_js_expression(&node.expression().ok()?),
+                ty,
             }),
         )
     }
@@ -212,7 +214,7 @@ impl<'a> JsModuleVisitor<'a> {
         let import = JsImport {
             resolved_path: self.resolved_path_from_specifier(&specifier),
             specifier: specifier.into(),
-            symbol: JsImportSymbol::All,
+            symbol: ImportSymbol::All,
         };
         let jsdoc_comment = node
             .syntax()
@@ -275,7 +277,7 @@ impl<'a> JsModuleVisitor<'a> {
                     import: JsImport {
                         specifier: import_specifier.clone().into(),
                         resolved_path: resolved_path.clone(),
-                        symbol: JsImportSymbol::Named(imported_name),
+                        symbol: ImportSymbol::Named(imported_name),
                     },
                     jsdoc_comment: None,
                 }),
@@ -401,7 +403,7 @@ impl<'a> JsModuleVisitor<'a> {
         collector.register_export_with_name(name.clone(), Some(name))
     }
 
-    fn resolved_path_from_specifier(&self, specifier: &str) -> JsResolvedPath {
+    fn resolved_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
         let resolved_path = self
             .resolver
             .resolve(self.directory, specifier)
@@ -410,7 +412,7 @@ impl<'a> JsModuleVisitor<'a> {
                     .map_err(|path| ResolveError::NotFound(path.to_string_lossy().to_string()))
             })
             .map_err(|error| error.to_string());
-        JsResolvedPath::new(resolved_path)
+        ResolvedPath::new(resolved_path)
     }
 }
 

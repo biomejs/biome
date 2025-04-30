@@ -12,14 +12,12 @@ const isNull = a == null;
 ```
 invalidNoNull.jsonc:1:18 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
   > 1 │ const isNull = a == null;
       │                  ^^
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     1 │ const·isNull·=·a·===·null;
       │                    +      
@@ -35,14 +33,12 @@ const isNonNull = a != null;
 ```
 invalidNoNull.jsonc:1:21 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use !== instead of !=
+  × Using != may be unsafe if you are relying on type coercion.
   
   > 1 │ const isNonNull = a != null;
       │                     ^^
   
-  i Using != may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use !==
+  i Unsafe fix: Use !== instead.
   
     1 │ const·isNonNull·=·a·!==·null;
       │                       +      

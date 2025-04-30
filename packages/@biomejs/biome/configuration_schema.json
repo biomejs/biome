@@ -1849,11 +1849,8 @@
 		"ImportTypeOptions": {
 			"description": "Rule's options.",
 			"type": "object",
-			"properties": {
-				"style": {
-					"anyOf": [{ "$ref": "#/definitions/Style2" }, { "type": "null" }]
-				}
-			},
+			"required": ["style"],
+			"properties": { "style": { "$ref": "#/definitions/Style2" } },
 			"additionalProperties": false
 		},
 		"IndentScriptAndStyle": {
@@ -2844,6 +2841,13 @@
 					"description": "Disallow usage of sensitive data such as API keys and tokens.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoSecretsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noShadow": {
+					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

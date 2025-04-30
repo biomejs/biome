@@ -8,7 +8,6 @@ use biome_diagnostics::{DiagnosticExt, Error, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
-use std::sync::atomic::Ordering;
 use tracing::{debug, instrument};
 
 #[instrument(name = "cli_format", level = "debug", skip(ctx, path))]
@@ -35,14 +34,13 @@ pub(crate) fn format_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
 ) -> FileResult {
-    let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
     let diagnostics_result = workspace_file
         .guard()
         .pull_diagnostics(
             RuleCategoriesBuilder::default().with_syntax().build(),
-            max_diagnostics,
             Vec::new(),
             Vec::new(),
+            false, // NOTE: probably to revisit
         )
         .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
 

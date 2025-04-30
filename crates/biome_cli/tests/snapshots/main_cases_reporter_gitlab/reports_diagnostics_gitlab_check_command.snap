@@ -79,7 +79,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Use === instead of ==. == is only allowed when comparing against `null`",
+    "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "8145265504203493155",
     "severity": "critical",
@@ -91,7 +91,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Use === instead of ==. == is only allowed when comparing against `null`",
+    "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "9497329216962766751",
     "severity": "critical",
@@ -103,7 +103,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Use === instead of ==. == is only allowed when comparing against `null`",
+    "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "18366180239442454213",
     "severity": "critical",
@@ -115,7 +115,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Use === instead of ==. == is only allowed when comparing against `null`",
+    "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "17264185503232320851",
     "severity": "critical",
@@ -331,7 +331,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Use === instead of ==. == is only allowed when comparing against `null`",
+    "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "6143155163249580709",
     "severity": "critical",
@@ -343,7 +343,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Use === instead of ==. == is only allowed when comparing against `null`",
+    "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "16004470298861036684",
     "severity": "critical",
@@ -355,7 +355,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Use === instead of ==. == is only allowed when comparing against `null`",
+    "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "6844513959367944349",
     "severity": "critical",
@@ -367,7 +367,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "Use === instead of ==. == is only allowed when comparing against `null`",
+    "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
     "fingerprint": "3753031813987153088",
     "severity": "critical",

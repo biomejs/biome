@@ -8,7 +8,6 @@ use biome_fs::{BiomePath, TraversalContext};
 use biome_rowan::TextSize;
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
-use std::sync::atomic::Ordering;
 use tracing::{info, instrument};
 
 /// Lints a single file and returns a [FileResult]
@@ -111,10 +110,9 @@ pub(crate) fn analyze_with_guard<'ctx>(
         }
     }
 
-    let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
     let pull_diagnostics_result = workspace_file
         .guard()
-        .pull_diagnostics(categories, max_diagnostics, only, skip)
+        .pull_diagnostics(categories, only, skip, true)
         .with_file_path_and_code(
             workspace_file.path.to_string(),
             ctx.execution.as_diagnostic_category(),

@@ -6,8 +6,10 @@ use std::{cmp::Ordering, str::FromStr};
 use biome_deserialize::Deserializable;
 use biome_deserialize_macros::Deserializable;
 use biome_js_analyze::{
-    lint::nursery::use_consistent_member_accessibility,
-    lint::style::{use_consistent_array_type, use_naming_convention},
+    lint::{
+        nursery::use_consistent_member_accessibility,
+        style::{use_consistent_array_type, use_import_type, use_naming_convention},
+    },
     utils::restricted_regex::RestrictedRegex,
 };
 
@@ -39,6 +41,38 @@ impl From<ArrayType> for use_consistent_array_type::ConsistentArrayType {
             // NOTE: we translate `array-simple` to `array`.
             ArrayType::Array | ArrayType::ArraySimple => Self::Shorthand,
             ArrayType::Generic => Self::Generic,
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct ConsistentTypeImportsOptions {
+    #[deserializable(rename = "fixStyle")]
+    fix_style: Option<FixStyle>,
+}
+impl From<ConsistentTypeImportsOptions> for use_import_type::ImportTypeOptions {
+    fn from(val: ConsistentTypeImportsOptions) -> Self {
+        Self {
+            style: val
+                .fix_style
+                .map(|fix_style| fix_style.into())
+                .unwrap_or_default(),
+        }
+    }
+}
+#[derive(Debug, Deserializable)]
+enum FixStyle {
+    #[deserializable(rename = "inline-type-imports")]
+    InlineTypeImports,
+    #[deserializable(rename = "separate-type-imports")]
+    SeparateTypeImports,
+}
+impl From<FixStyle> for use_import_type::Style {
+    fn from(val: FixStyle) -> Self {
+        match val {
+            FixStyle::InlineTypeImports => Self::InlineType,
+            FixStyle::SeparateTypeImports => Self::SeparatedType,
         }
     }
 }
