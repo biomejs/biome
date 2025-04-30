@@ -265,14 +265,21 @@ impl TraversalContext for ScanContext<'_> {
             return false;
         }
 
-        path.is_dir()
-            || if self.scan_kind.is_known_files() {
-                path.is_ignore() || path.is_manifest() || path.is_config()
-            } else if path.is_dependency() {
-                path.ends_with(".d.ts")
+        if path.is_dir() {
+            return true;
+        }
+        if self.scan_kind.is_known_files() {
+            // we don't need to check files inside node_modules if we are in known files mode
+            if path.is_dependency() {
+                false
             } else {
-                DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
+                path.is_ignore() || path.is_config() || path.is_manifest()
             }
+        } else if path.is_dependency() {
+            path.ends_with(".d.ts")
+        } else {
+            DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
+        }
     }
 
     fn handle_path(&self, path: BiomePath) {
