@@ -1598,6 +1598,10 @@ export interface Nursery {
 	 */
 	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
 	/**
+	 * Disallow variable declarations from shadowing variables declared in the outer scope.
+	 */
+	noShadow?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
 	noStaticElementInteractions?: RuleConfiguration_for_Null;
@@ -3432,6 +3436,7 @@ export type Category =
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noSecrets"
+	| "lint/nursery/noShadow"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"

@@ -2844,6 +2844,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noShadow": {
+					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noStaticElementInteractions": {
 					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.",
 					"anyOf": [

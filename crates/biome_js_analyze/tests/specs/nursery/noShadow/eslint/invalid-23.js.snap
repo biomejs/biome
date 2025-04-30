@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-23.js
+---
+# Input
+```js
+(function() { var a = function() { (class a{}); }; })()
+
+```
+
+# Diagnostics
+```
+invalid-23.js:1:43 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+  > 1 │ (function() { var a = function() { (class a{}); }; })()
+      │                                           ^
+    2 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+  > 1 │ (function() { var a = function() { (class a{}); }; })()
+      │                   ^
+    2 │ 
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```

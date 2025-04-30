@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-17.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+class C { static { { let x; } { let x; } } }
+
+```
