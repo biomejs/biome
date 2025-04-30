@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-02.ts
+---
+# Input
+```ts
+type T = 1;
+function foo<T>(arg: T) {}
+
+```
+
+# Diagnostics
+```
+invalid-02.ts:2:14 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+    1 │ type T = 1;
+  > 2 │ function foo<T>(arg: T) {}
+      │              ^
+    3 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+  > 1 │ type T = 1;
+      │      ^
+    2 │ function foo<T>(arg: T) {}
+    3 │ 
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```

@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-01.ts
+---
+# Input
+```ts
+type T = string;
+{
+	type T = string;
+}
+
+```
+
+# Diagnostics
+```
+invalid-01.ts:3:7 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shadows another variable with the same name in the outer scope.
+  
+    1 │ type T = string;
+    2 │ {
+  > 3 │ 	type T = string;
+      │ 	     ^
+    4 │ }
+    5 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+  > 1 │ type T = string;
+      │      ^
+    2 │ {
+    3 │ 	type T = string;
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+```

@@ -96,7 +96,7 @@ impl Scope {
         }
     }
 
-    /// Returns a binding by its name, like it appears on code.  It **does
+    /// Returns a [Binding] by its name, like it appears on code.  It **does
     /// not** returns bindings of parent scopes.
     pub fn get_binding(&self, name: impl AsRef<str>) -> Option<Binding> {
         let data = &self.data.scopes[self.id.index()];

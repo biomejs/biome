@@ -4,8 +4,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    JsClassExpression, JsFunctionExpression, JsIdentifierBinding, JsVariableDeclarator,
-    TsIdentifierBinding, TsTypeAliasDeclaration,
+    JsClassExpression, JsFunctionExpression, JsIdentifierBinding, JsParameterList,
+    JsVariableDeclarator, TsIdentifierBinding, TsTypeAliasDeclaration, TsTypeParameter,
+    TsTypeParameterName,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TokenText, declare_node_union};
 
@@ -122,35 +123,57 @@ impl Rule for NoShadow {
 }
 
 fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBinding> {
-    let name = get_binding_name(&binding)?;
+    if binding.scope().is_global_scope() {
+        // global scope bindings can't shadow anything
+        return None;
+    }
 
-    for upper in binding.scope().ancestors().skip(1) {
+    let name = get_binding_name(&binding)?;
+    let binding_hoisted_scope = model
+        .scope_hoisted_to(binding.syntax())
+        .unwrap_or(binding.scope());
+
+    for upper in binding_hoisted_scope.ancestors().skip(1) {
         if let Some(upper_binding) = upper.get_binding(name.clone()) {
-            if binding.syntax() == upper_binding.syntax() {
-                // a binding can't shadow itself
-                continue;
+            if evaluate_shadowing(model, &binding, &upper_binding) {
+                // we found a shadowed binding
+                return Some(ShadowedBinding {
+                    binding,
+                    shadowed_binding: upper_binding,
+                });
             }
-            if is_on_initializer(&binding, &upper_binding) {
-                continue;
-            }
-            if is_redeclaration(model, &binding, &upper_binding) {
-                // redeclarations are not shadowing, they get caught by `noRedeclare`
-                continue;
-            }
-            if is_declaration(&binding)
-                && is_declaration(&upper_binding)
-                && upper_binding.syntax().text_range().start() >= binding.scope().range().end()
-            {
-                // the shadowed binding must be declared before the shadowing one
-                continue;
-            }
-            return Some(ShadowedBinding {
-                binding,
-                shadowed_binding: upper_binding,
-            });
         }
     }
     None
+}
+
+fn evaluate_shadowing(model: &SemanticModel, binding: &Binding, upper_binding: &Binding) -> bool {
+    if binding.syntax() == upper_binding.syntax() {
+        // a binding can't shadow itself
+        return false;
+    }
+    if is_on_initializer(binding, upper_binding) {
+        return false;
+    }
+    if is_declaration(binding) && is_declaration(upper_binding) {
+        let binding_hoisted_scope = model
+            .scope_hoisted_to(binding.syntax())
+            .unwrap_or(binding.scope());
+        let upper_binding_hoisted_scope = model
+            .scope_hoisted_to(upper_binding.syntax())
+            .unwrap_or(upper_binding.scope());
+        if binding_hoisted_scope == upper_binding_hoisted_scope {
+            // redeclarations are not shadowing, they get caught by `noRedeclare`
+            return false;
+        }
+        if upper_binding.syntax().text_range().start() >= binding_hoisted_scope.range().end() {
+            // the shadowed binding must be declared before the shadowing one
+            return false;
+        }
+    } else if is_inside_function_parameters(binding) && is_inside_type_parameter(binding) {
+        return false;
+    }
+    true
 }
 
 fn get_binding_name(binding: &Binding) -> Option<TokenText> {
@@ -161,6 +184,10 @@ fn get_binding_name(binding: &Binding) -> Option<TokenText> {
     }
     if let Some(ident) = node.clone().cast::<TsIdentifierBinding>() {
         let name = ident.name_token().ok()?;
+        return Some(name.token_text_trimmed());
+    }
+    if let Some(ident) = node.clone().cast::<TsTypeParameterName>() {
+        let name = ident.ident_token().ok()?;
         return Some(name.token_text_trimmed());
     }
     None
@@ -202,17 +229,6 @@ fn is_on_initializer(a: &Binding, b: &Binding) -> bool {
     false
 }
 
-/// Checks if the binding `a` is a redeclaration of the binding `b`. Assumes that both bindings have the same identifier name.
-fn is_redeclaration(model: &SemanticModel, a: &Binding, b: &Binding) -> bool {
-    if !is_declaration(a) || !is_declaration(b) {
-        return false;
-    }
-
-    let a_hoisted_scope = model.scope_hoisted_to(a.syntax()).unwrap_or(a.scope());
-    let b_hoisted_scope = model.scope_hoisted_to(b.syntax()).unwrap_or(b.scope());
-    a_hoisted_scope == b_hoisted_scope
-}
-
 /// Whether the binding is a declaration or not.
 ///
 /// Examples of declarations:
@@ -224,4 +240,18 @@ fn is_redeclaration(model: &SemanticModel, a: &Binding, b: &Binding) -> bool {
 fn is_declaration(binding: &Binding) -> bool {
     binding.tree().parent::<JsVariableDeclarator>().is_some()
         || binding.tree().parent::<TsTypeAliasDeclaration>().is_some()
+}
+
+fn is_inside_type_parameter(binding: &Binding) -> bool {
+    binding
+        .syntax()
+        .ancestors()
+        .any(|ancestor| ancestor.cast::<TsTypeParameter>().is_some())
+}
+
+fn is_inside_function_parameters(binding: &Binding) -> bool {
+    binding
+        .syntax()
+        .ancestors()
+        .any(|ancestor| ancestor.cast::<JsParameterList>().is_some())
 }
