@@ -22,7 +22,6 @@ instanceof Promise
 ## Registered types
 
 ```
-
 Module TypeId(0) => sync Function "returnsPromise" {
   accepts: {
     params: []
@@ -31,7 +30,7 @@ Module TypeId(0) => sync Function "returnsPromise" {
   returns: Global TypeId(7)
 }
 
-Module TypeId(1) => Global TypeId(7)
+Module TypeId(1) => instanceof Promise<T = number>
 
 Module TypeId(2) => sync Function "then" {
   accepts: {
@@ -60,5 +59,4 @@ Module TypeId(4) => sync Function "then" {
 Global TypeId(7) => instanceof Promise<T = number>
 
 Global TypeId(8) => instanceof Promise<T = number>
-
 ```

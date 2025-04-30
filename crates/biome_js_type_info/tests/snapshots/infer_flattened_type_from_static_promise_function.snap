@@ -18,7 +18,6 @@ instanceof Promise
 ## Registered types
 
 ```
-
 Global TypeId(7) => Global TypeId(9)
 
 Global TypeId(8) => value: value
@@ -30,5 +29,4 @@ Global TypeId(9) => sync Function "resolve" {
   }
   returns: instanceof Promise
 }
-
 ```

@@ -18,7 +18,6 @@ instanceof Promise
 ## Registered types
 
 ```
-
 Global TypeId(7) => sync Function {
   accepts: {
     params: [
@@ -28,5 +27,4 @@ Global TypeId(7) => sync Function {
   }
   returns: unknown reference
 }
-
 ```

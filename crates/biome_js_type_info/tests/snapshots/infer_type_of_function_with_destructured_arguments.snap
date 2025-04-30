@@ -32,7 +32,6 @@ sync Function "destruct" {
 ## Registered types
 
 ```
-
 Global TypeId(7) => string
 
 Global TypeId(8) => Object {
@@ -54,5 +53,4 @@ Global TypeId(12) => instanceof unresolved reference "Array"<Global TypeId(11)>
 Global TypeId(13) => Global TypeId(12)[0]
 
 Global TypeId(14) => [(1 others)...Global TypeId(12)]
-
 ```

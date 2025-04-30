@@ -26,7 +26,5 @@ sync Function "returnsPromise" {
 ## Registered types
 
 ```
-
 Global TypeId(7) => instanceof unresolved reference "Promise"<number>
-
 ```

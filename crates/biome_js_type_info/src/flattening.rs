@@ -82,7 +82,7 @@ impl TypeData {
                 },
                 TypeofExpression::Call(expr) => match resolver.resolve_and_get(&expr.callee) {
                     Some(Self::Function(function)) => match function.return_type.as_type() {
-                        Some(ty) => Self::reference(ty.clone()),
+                        Some(ty) => Self::reference(ty.clone()).flattened(resolver),
                         None => self.clone(),
                     },
                     Some(ty @ Self::Object(object)) => {

@@ -17,3 +17,19 @@ fn test_resolved_type_id() {
     assert_eq!(id.id(), TypeId::new(3));
     assert_eq!(id.module_id(), ModuleId::new(7));
 }
+
+#[test]
+fn verify_type_sizes() {
+    assert_eq!(
+        std::mem::size_of::<ResolvedTypeId>(),
+        8,
+        "`ResolvedTypeId` should not be bigger than 8 bytes"
+    );
+
+    #[cfg(target_pointer_width = "64")]
+    assert_eq!(
+        std::mem::size_of::<biome_js_type_info::TypeData>(),
+        16,
+        "`TypeData` should not be bigger than 16 bytes"
+    );
+}

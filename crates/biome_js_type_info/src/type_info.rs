@@ -22,7 +22,7 @@ use crate::globals::{
     GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS, GLOBAL_UNKNOWN_ID, PROMISE_ID,
 };
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
-use crate::{GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeId, TypeResolver};
+use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeId, TypeResolver};
 
 const UNKNOWN: TypeData = TypeData::Unknown;
 
@@ -1131,17 +1131,6 @@ impl TypeReference {
                 .map(|param| param.resolved(resolver))
                 .collect(),
             _ => [].into(),
-        }
-    }
-
-    pub fn with_module_id(&self, module_id: ModuleId) -> Self {
-        match self {
-            Self::Qualifier(qualifier) => Self::Qualifier(qualifier.clone()),
-            Self::Resolved(resolved_type_id) => {
-                Self::Resolved(resolved_type_id.with_module_id(module_id))
-            }
-            Self::Import(import) => Self::Import(import.clone()),
-            Self::Unknown => Self::Unknown,
         }
     }
 }

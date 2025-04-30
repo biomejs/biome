@@ -26,11 +26,9 @@ async Function "returnsPromise" {
 ## Registered types
 
 ```
-
 Global TypeId(7) => string
 
 Global TypeId(8) => instanceof Global TypeId(9)
 
 Global TypeId(9) => instanceof Promise<T = Global TypeId(7)>
-
 ```

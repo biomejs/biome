@@ -305,9 +305,9 @@ pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) 
     if !registered_types.is_empty() {
         content.push_str("## Registered types\n\n");
 
-        content.push_str("```\n");
+        content.push_str("```");
         content.push_str(&registered_types);
-        content.push_str("\n```\n");
+        content.push_str("```\n");
     }
 }
 
