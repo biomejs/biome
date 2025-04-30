@@ -3419,6 +3419,9 @@ export function bar() {
         "This import is part of a cycle."
     );
 
+    #[cfg(target_os = "windows")]
+    std::thread::sleep(Duration::from_secs(1));
+
     clear_notifications!(factory.service_data_rx);
 
     // ARRANGE: Move `utils` directory.
@@ -3455,6 +3458,9 @@ export function bar() {
     // ASSERT: Diagnostic should've disappeared because `utils/bar.ts` is no
     //         longer there.
     assert_eq!(result.diagnostics.len(), 0);
+
+    #[cfg(target_os = "windows")]
+    std::thread::sleep(Duration::from_secs(1));
 
     // ARRANGE: Move `utils` back.
     clear_notifications!(factory.service_data_rx);
