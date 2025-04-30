@@ -250,7 +250,9 @@ impl BiomePath {
 
     /// Returns `true` if the path is inside `node_modules`
     pub fn is_dependency(&self) -> bool {
-        self.path.as_str().contains("node_modules")
+        self.path
+            .components()
+            .any(|component| component.as_str() == "node_modules")
     }
 }
 impl From<Utf8PathBuf> for BiomePath {
