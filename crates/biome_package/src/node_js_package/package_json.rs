@@ -1,5 +1,4 @@
-use std::{ops::Deref, path::Path, str::FromStr};
-
+use crate::{LanguageRoot, Manifest};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
     DeserializationVisitor, Deserialized, Text, json::deserialize_from_json_ast,
@@ -8,11 +7,11 @@ use biome_json_syntax::JsonLanguage;
 use biome_json_value::{JsonObject, JsonString, JsonValue};
 use biome_text_size::TextRange;
 use camino::{Utf8Path, Utf8PathBuf};
-use node_semver::Range;
+use node_semver::{Range, SemverError};
 use oxc_resolver::{ImportsExportsEntry, ImportsExportsMap, PathUtil, ResolveError};
 use rustc_hash::{FxBuildHasher, FxHashMap};
-
-use crate::{LanguageRoot, Manifest};
+use std::panic::catch_unwind;
+use std::{ops::Deref, path::Path, str::FromStr};
 
 /// Deserialized `package.json`.
 #[derive(Debug, Default, Clone)]
@@ -299,7 +298,7 @@ impl Dependencies {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Version {
     SemVer(node_semver::Range),
     Literal(String),
@@ -321,17 +320,15 @@ impl Version {
 
 impl From<&str> for Version {
     fn from(value: &str) -> Self {
-        node_semver::Range::parse(value)
+        parse_range(value)
             .ok()
-            .map_or_else(|| Self::Literal(value.into()), Self::SemVer)
+            .unwrap_or(Self::Literal(value.to_string()))
     }
 }
 
 impl From<String> for Version {
     fn from(value: String) -> Self {
-        node_semver::Range::parse(value.as_str())
-            .ok()
-            .map_or_else(|| Self::Literal(value), Self::SemVer)
+        parse_range(&value).ok().unwrap_or(Self::Literal(value))
     }
 }
 
@@ -419,10 +416,10 @@ impl Deserializable for Version {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        let value = Text::deserialize(ctx, value, name)?;
-        match node_semver::Range::parse(value.text()) {
-            Ok(version) => Some(Self::SemVer(version)),
-            Err(_) => Some(Self::Literal(value.text().to_string())),
+        let version = Text::deserialize(ctx, value, name)?;
+        match parse_range(version.text()) {
+            Ok(result) => Some(result),
+            Err(_) => Some(Self::Literal(version.text().to_string())),
         }
     }
 }
@@ -452,5 +449,24 @@ impl From<PackageType> for oxc_resolver::PackageType {
             PackageType::Module => Self::Module,
             PackageType::CommonJs => Self::CommonJs,
         }
+    }
+}
+
+fn parse_range(range: &str) -> Result<Version, SemverError> {
+    match catch_unwind(|| Range::parse(range).map(Version::SemVer)) {
+        Ok(result) => result,
+        Err(_) => Ok(Version::Literal(range.to_string())),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn should_not_panic_on_invalid_semver_range() {
+        let result = parse_range("~0.x.0");
+
+        assert_eq!(result, Ok(Version::Literal("~0.x.0".to_string())));
     }
 }
