@@ -369,15 +369,15 @@ impl JsModuleInfoCollector {
         self.register_and_resolve(type_data).into()
     }
 
-    /// After the first pass of the collector, project-level references have
-    /// been resolved to an import binding. But we can't store the information
-    /// of the import target inside the `ResolvedTypeId`, because it resides in
-    /// the module's semantic data, and `ResolvedTypeId` is only 8 bytes. So
-    /// during resolving, we "downgrade" the project references from a resolved
-    /// reference to a [`TypeReference::Import`].
+    /// After the first pass of the collector, import references have been
+    /// resolved to an import binding. But we can't store the information of the
+    /// import target inside the `ResolvedTypeId`, because it resides in the
+    /// module's semantic data, and `ResolvedTypeId` is only 8 bytes. So during
+    /// resolving, we "downgrade" the import references from
+    /// [`TypeReference::Resolved`] to [`TypeReference::Import`].
     fn resolve_all_and_downgrade_project_references(&mut self, bag: &JsModuleInfoBag) {
         let bindings = self.bindings.clone(); // TODO: Can we omit the clone?
-        let downgrade_project_reference = |id: BindingId| {
+        let downgrade_import_reference = |id: BindingId| {
             let binding = &bindings[id.index()];
             bag.static_imports
                 .get(&binding.name)
@@ -395,11 +395,11 @@ impl JsModuleInfoCollector {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
             self.types[i] = ty.resolved_with_mapped_references(
-                |reference| match reference {
+                |reference, _| match reference {
                     TypeReference::Resolved(resolved)
-                        if resolved.level() == TypeResolverLevel::Project =>
+                        if resolved.level() == TypeResolverLevel::Import =>
                     {
-                        downgrade_project_reference(resolved.id().into())
+                        downgrade_import_reference(resolved.id().into())
                     }
                     other => other,
                 },
@@ -440,7 +440,7 @@ impl TypeResolver for JsModuleInfoCollector {
         match id.level() {
             TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
             TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(id.id())),
-            TypeResolverLevel::AdHoc | TypeResolverLevel::Project => None,
+            TypeResolverLevel::AdHoc | TypeResolverLevel::Import => None,
         }
     }
 
@@ -483,7 +483,7 @@ impl TypeResolver for JsModuleInfoCollector {
             let binding = &self.bindings[binding_id.index()];
             return if binding.declaration_kind.is_import_declaration() {
                 Some(ResolvedTypeId::new(
-                    TypeResolverLevel::Project,
+                    TypeResolverLevel::Import,
                     (*binding_id).into(),
                 ))
             } else {

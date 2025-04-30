@@ -26,9 +26,7 @@ sync Function "returnsPromise" {
 ## Registered types
 
 ```
-
 Global TypeId(7) => instanceof Global TypeId(8)
 
 Global TypeId(8) => instanceof Promise<T = number>
-
 ```

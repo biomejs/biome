@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     collections::{BTreeMap, btree_map::Entry},
     sync::Arc,
 };
@@ -21,16 +22,16 @@ use super::{JsModuleInfo, scope::JsScope};
 /// expressions, but it cannot create bindings for such types. Any references to
 /// named bindings are assumed to come from the scope in the module the resolver
 /// applies to.
-pub(super) struct AdHocScopeResolver {
+pub struct AdHocScopeResolver {
     scope: JsScope,
     module_graph: Arc<ModuleGraph>,
     modules: Vec<JsModuleInfo>,
-    modules_by_path: BTreeMap<ResolvedPath, ModuleId>,
+    pub modules_by_path: BTreeMap<ResolvedPath, ModuleId>,
     types: Vec<TypeData>,
 }
 
 impl AdHocScopeResolver {
-    pub(super) fn from_scope_in_module(
+    pub fn from_scope_in_module(
         scope: JsScope,
         module_info: JsModuleInfo,
         module_graph: Arc<ModuleGraph>,
@@ -42,6 +43,10 @@ impl AdHocScopeResolver {
             modules_by_path: Default::default(),
             types: Default::default(),
         }
+    }
+
+    fn find_module(&self, path: &ResolvedPath) -> Option<ModuleId> {
+        self.modules_by_path.get(path).copied()
     }
 
     fn register_module(&mut self, path: ResolvedPath) -> Option<ModuleId> {
@@ -58,16 +63,41 @@ impl AdHocScopeResolver {
     }
 
     pub fn run_inference(&mut self) {
-        self.resolve_all();
+        self.resolve_all_own_types();
+        self.resolve_imports_in_modules();
         self.flatten_all();
     }
 
-    fn resolve_all(&mut self) {
+    fn resolve_all_own_types(&mut self) {
         let mut i = 0;
         while i < self.types.len() {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.resolved(self);
+            self.types[i] = ty.resolved_with_mapped_references(
+                |reference, resolver| match reference {
+                    TypeReference::Import(import) => resolver
+                        .resolve_import(&import)
+                        .map_or(TypeReference::Unknown, Into::into),
+                    other => other,
+                },
+                self,
+            );
+            i += 1;
+        }
+    }
+
+    /// Actively resolves imports in the modules we are of.
+    fn resolve_imports_in_modules(&mut self) {
+        let mut i = 0;
+        while i < self.modules.len() {
+            let module = self.modules[i].clone();
+            let module_id = ModuleId::new(i);
+            for ty in &module.types {
+                // We don't care about the returned type here. Instead, we rely
+                // on the side-effect of registering the resolved imports.
+                let _ = ty.resolved_with_module_id(module_id, self);
+            }
+
             i += 1;
         }
     }
@@ -80,6 +110,51 @@ impl AdHocScopeResolver {
             self.types[i] = ty.flattened(self);
             i += 1;
         }
+    }
+
+    /// Attempts to resolve an import reference by its qualifier.
+    ///
+    /// Assumes full inference has already been performed.
+    fn resolve_import_reference(&self, qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
+        const MAX_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
+
+        let mut qualifier = Cow::Borrowed(qualifier);
+
+        for _ in 0..MAX_DEPTH {
+            let module_id = self.find_module(&qualifier.resolved_path)?;
+            let module = &self.modules[module_id.index()];
+
+            let name = match &qualifier.symbol {
+                ImportSymbol::Default => "default",
+                ImportSymbol::Named(name) => name.text(),
+                ImportSymbol::All => {
+                    // TODO: Register type for imported namespace.
+                    return None;
+                }
+            };
+
+            let export = module.find_exported_symbol(self.module_graph.as_ref(), name)?;
+            return match export.ty {
+                TypeReference::Qualifier(_qualifier) => {
+                    // If it wasn't resolved before exporting, we can't
+                    // help it anymore.
+                    None
+                }
+                TypeReference::Resolved(resolved_id) => {
+                    let data = module.get_by_resolved_id(resolved_id)?;
+                    let data = data.clone().with_module_id(module_id);
+                    self.find_type(&data)
+                        .map(|type_id| ResolvedTypeId::new(TypeResolverLevel::AdHoc, type_id))
+                }
+                TypeReference::Import(import) => {
+                    qualifier = Cow::Owned(import);
+                    continue;
+                }
+                TypeReference::Unknown => None,
+            };
+        }
+
+        None
     }
 }
 
@@ -106,7 +181,9 @@ impl TypeResolver for AdHocScopeResolver {
                 let module_id = resolved_id.module_id();
                 Some(&self.modules[module_id.index()].types[resolved_id.index()])
             }
-            TypeResolverLevel::Project => todo!("Project-level inference not yet implemented"),
+            TypeResolverLevel::Import => {
+                panic!("import IDs should not be exposed outside the module info collector")
+            }
             TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(resolved_id.id())),
         }
     }
@@ -128,7 +205,7 @@ impl TypeResolver for AdHocScopeResolver {
         match ty {
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
             TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-            TypeReference::Import(_import) => None,
+            TypeReference::Import(import) => self.resolve_import_reference(import),
             TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
     }
@@ -155,7 +232,7 @@ impl TypeResolver for AdHocScopeResolver {
             }
             TypeReference::Resolved(resolved) => {
                 let data = module.resolve_and_get_with_module_id(&resolved.into(), module_id)?;
-                Some(self.register_and_resolve(data.clone()))
+                Some(self.register_and_resolve(data.clone().with_module_id(module_id)))
             }
             TypeReference::Import(import) => {
                 Some(self.register_and_resolve(TypeData::reference(import)))

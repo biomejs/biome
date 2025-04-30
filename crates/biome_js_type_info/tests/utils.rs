@@ -151,8 +151,8 @@ impl TypeResolver for HardcodedSymbolResolver {
                 panic!("Ad-hoc references unsupported by resolver")
             }
             TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
-            TypeResolverLevel::Project => {
-                panic!("Project-level references unsupported by resolver")
+            TypeResolverLevel::Import => {
+                panic!("Import references unsupported by resolver")
             }
             TypeResolverLevel::Global => Some(self.globals.get_by_id(id.id())),
         }

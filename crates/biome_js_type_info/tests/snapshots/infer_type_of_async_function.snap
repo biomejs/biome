@@ -26,9 +26,7 @@ async Function "returnsPromise" {
 ## Registered types
 
 ```
-
 Global TypeId(7) => string
 
 Global TypeId(8) => instanceof unresolved reference "Promise"<Global TypeId(7)>
-
 ```

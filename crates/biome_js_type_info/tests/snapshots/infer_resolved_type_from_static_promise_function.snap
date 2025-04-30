@@ -18,9 +18,7 @@ Call Global TypeId(7)(Global TypeId(8))
 ## Registered types
 
 ```
-
 Global TypeId(7) => Promise.resolve
 
 Global TypeId(8) => value: value
-
 ```

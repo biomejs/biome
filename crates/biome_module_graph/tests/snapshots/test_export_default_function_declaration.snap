@@ -2,7 +2,9 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
-## /src/index.ts
+# `/src/index.ts`
+
+## Source
 
 ```ts
 /**
@@ -10,7 +12,6 @@ expression: content
  * @returns {JSX.Element}
  */
 export default function Component(): JSX.Element {}
-
 ```
 
 ## Module Info
@@ -19,7 +20,7 @@ export default function Component(): JSX.Element {}
 Exports {
   "default" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(1)
+      Module(0) TypeId(1)
       Local name: Component
       JsDoc(
         @public
@@ -36,7 +37,6 @@ Imports {
 ## Registered types
 
 ```
-
 Module TypeId(0) => instanceof unresolved reference "JSX.Element"
 
 Module TypeId(1) => sync Function "Component" {
@@ -44,7 +44,6 @@ Module TypeId(1) => sync Function "Component" {
     params: []
     type_args: []
   }
-  returns: Module TypeId(0)
+  returns: Module(0) TypeId(0)
 }
-
 ```

@@ -16,10 +16,10 @@ use biome_rowan::{AstNode, Text, TextRange, TokenText};
 
 use crate::{ModuleGraph, jsdoc_comment::JsdocComment};
 
-use ad_hoc_scope_resolver::AdHocScopeResolver;
 use binding::{BindingId, JsBindingData};
 use scope::{JsScope, JsScopeData};
 
+pub use ad_hoc_scope_resolver::AdHocScopeResolver;
 pub(crate) use visitor::JsModuleVisitor;
 
 /// Information restricted to a single module in the [ModuleGraph].
@@ -171,7 +171,7 @@ pub struct JsModuleInfoInner {
     pub(crate) types: Box<[TypeData]>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Exports(pub(crate) BTreeMap<Text, JsExport>);
 
 impl Deref for Exports {
@@ -182,7 +182,7 @@ impl Deref for Exports {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Imports(pub(crate) BTreeMap<Text, JsImport>);
 
 impl Deref for Imports {
@@ -232,7 +232,7 @@ impl TypeResolver for JsModuleInfoInner {
         match id.level() {
             TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
             TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(id.id())),
-            TypeResolverLevel::AdHoc | TypeResolverLevel::Project => None,
+            TypeResolverLevel::AdHoc | TypeResolverLevel::Import => None,
         }
     }
 

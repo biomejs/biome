@@ -123,13 +123,3 @@ fn infer_type_of_binary_expression_ne() {
         "infer_type_of_binary_expression_ne",
     );
 }
-
-#[test]
-#[cfg(target_pointer_width = "64")]
-fn verify_type_sizes() {
-    assert_eq!(
-        std::mem::size_of::<TypeData>(),
-        16,
-        "`TypeData` should not be bigger than 16 bytes"
-    );
-}

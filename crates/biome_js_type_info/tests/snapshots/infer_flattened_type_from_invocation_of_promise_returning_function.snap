@@ -16,13 +16,12 @@ returnsPromise();
 ## Result
 
 ```
-Global TypeId(7)
+instanceof unresolved reference "Promise"<number>
 ```
 
 ## Registered types
 
 ```
-
 Module TypeId(0) => sync Function "returnsPromise" {
   accepts: {
     params: []
@@ -32,5 +31,4 @@ Module TypeId(0) => sync Function "returnsPromise" {
 }
 
 Global TypeId(7) => instanceof unresolved reference "Promise"<number>
-
 ```
