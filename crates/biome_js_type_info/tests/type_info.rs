@@ -10,10 +10,16 @@ fn test_resolved_type_id() {
     let id = id.with_module_id(ModuleId::new(5));
     assert_eq!(id.level(), TypeResolverLevel::Global);
     assert_eq!(id.id(), TypeId::new(3));
+    assert_eq!(id.module_id(), ModuleId::new(0)); // Module ID shouldn't be applied to global level.
+
+    let id = ResolvedTypeId::new(TypeResolverLevel::Module, TypeId::new(3));
+    let id = id.with_module_id(ModuleId::new(5));
+    assert_eq!(id.level(), TypeResolverLevel::Module);
+    assert_eq!(id.id(), TypeId::new(3));
     assert_eq!(id.module_id(), ModuleId::new(5));
 
     let id = id.with_module_id(ModuleId::new(7));
-    assert_eq!(id.level(), TypeResolverLevel::Global);
+    assert_eq!(id.level(), TypeResolverLevel::Module);
     assert_eq!(id.id(), TypeId::new(3));
     assert_eq!(id.module_id(), ModuleId::new(7));
 }
