@@ -65,7 +65,7 @@ pub(crate) fn check_file<'ctx>(
 
     if file_features.supports_format() {
         if ctx.execution.should_skip_parse_errors() && skipped_parse_error {
-            // skip format to parse error files, a message for it already pushed by analyzer
+            // Parse errors are already skipped during the analyze phase, so no need to do it here.
         } else {
             let format_result = format_with_guard(ctx, &mut workspace_file);
             match format_result {
