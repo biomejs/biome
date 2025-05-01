@@ -142,9 +142,6 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
         }
     }));
 
-    ctx.workspace
-        .update_module_graph(WatcherSignalKind::AddedOrChanged, &handleable_paths);
-
     let _ = ctx
         .workspace
         .notification_tx
@@ -292,7 +289,10 @@ impl TraversalContext for ScanContext<'_> {
     }
 
     fn handle_path(&self, path: BiomePath) {
-        open_file(self, &path)
+        open_file(self, &path);
+
+        self.workspace
+            .update_module_graph(WatcherSignalKind::AddedOrChanged, &[path]);
     }
 
     fn store_path(&self, path: BiomePath) {
