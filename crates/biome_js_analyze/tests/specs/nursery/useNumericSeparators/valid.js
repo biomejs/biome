@@ -40,6 +40,7 @@ foo = 0n;
 // Numbers
 foo = 12_345_678;
 foo = 123;
+foo = 0;
 foo = 1;
 foo = 1234;
 
