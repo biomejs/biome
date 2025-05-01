@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
     ServiceBag, ServicesDiagnostic, SyntaxVisitor,
@@ -10,35 +12,35 @@ use camino::Utf8PathBuf;
 #[derive(Debug, Clone)]
 pub struct ManifestServices {
     pub(crate) package_path: Option<Utf8PathBuf>,
-    pub(crate) manifest: Option<PackageJson>,
+    pub(crate) manifest: Option<Arc<PackageJson>>,
 }
 
 impl ManifestServices {
     pub(crate) fn name(&self) -> Option<&str> {
-        self.manifest.as_ref().and_then(|pkg| pkg.name.as_deref())
+        self.manifest.as_deref().and_then(|pkg| pkg.name.as_deref())
     }
 
     pub(crate) fn is_dependency(&self, specifier: &str) -> bool {
         self.manifest
-            .as_ref()
+            .as_deref()
             .is_some_and(|pkg| pkg.dependencies.contains(specifier))
     }
 
     pub(crate) fn is_dev_dependency(&self, specifier: &str) -> bool {
         self.manifest
-            .as_ref()
+            .as_deref()
             .is_some_and(|pkg| pkg.dev_dependencies.contains(specifier))
     }
 
     pub(crate) fn is_peer_dependency(&self, specifier: &str) -> bool {
         self.manifest
-            .as_ref()
+            .as_deref()
             .is_some_and(|pkg| pkg.peer_dependencies.contains(specifier))
     }
 
     pub(crate) fn is_optional_dependency(&self, specifier: &str) -> bool {
         self.manifest
-            .as_ref()
+            .as_deref()
             .is_some_and(|pkg| pkg.optional_dependencies.contains(specifier))
     }
 }
@@ -47,10 +49,9 @@ impl FromServices for ManifestServices {
     fn from_services(
         rule_key: &RuleKey,
         _rule_metadata: &RuleMetadata,
-
         services: &ServiceBag,
     ) -> biome_diagnostics::Result<Self, ServicesDiagnostic> {
-        let manifest_info: &Option<(Utf8PathBuf, PackageJson)> = services
+        let manifest_info: &Option<(Utf8PathBuf, Arc<PackageJson>)> = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["PackageJson"]))?;
 
