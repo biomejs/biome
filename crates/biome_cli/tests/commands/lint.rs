@@ -3969,7 +3969,7 @@ var a = foo;
 }
 
 #[test]
-fn lint_skip_errors() {
+fn lint_skip_parse_errors() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -3996,7 +3996,7 @@ fn lint_skip_errors() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "lint_skip_errors",
+        "lint_skip_parse_errors",
         fs,
         console,
         result,

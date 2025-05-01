@@ -903,7 +903,7 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
 }
 
 #[test]
-fn ci_skip_errors() {
+fn ci_skip_parse_errors() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -931,7 +931,7 @@ fn ci_skip_errors() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "ci_skip_errors",
+        "ci_skip_parse_errors",
         fs,
         console,
         result,

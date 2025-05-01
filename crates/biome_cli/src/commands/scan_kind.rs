@@ -302,6 +302,7 @@ mod tests {
             vcs_targeted: VcsTargeted::default(),
             suppress: false,
             suppression_reason: None,
+            skip_parse_errors: false,
         });
 
         let configuration = Configuration {

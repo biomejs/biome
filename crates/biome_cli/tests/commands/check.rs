@@ -2879,7 +2879,7 @@ fn html_enabled_by_arg_check() {
 }
 
 #[test]
-fn check_skip_errors() {
+fn check_skip_parse_errors() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -2907,7 +2907,7 @@ fn check_skip_errors() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "check_skip_errors",
+        "check_skip_parse_errors",
         fs,
         console,
         result,
