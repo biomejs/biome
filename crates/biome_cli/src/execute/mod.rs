@@ -523,7 +523,7 @@ impl Execution {
     }
 
     #[instrument(level = "debug", skip(self), fields(result))]
-    pub(crate) fn should_ignore_errors(&self) -> bool {
+    pub(crate) fn should_skip_parse_errors(&self) -> bool {
         let result = match self.traversal_mode {
             TraversalMode::Format {
                 skip_parse_errors, ..

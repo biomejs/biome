@@ -118,7 +118,7 @@ pub(crate) fn analyze_with_guard<'ctx>(
             ctx.execution.as_diagnostic_category(),
         )?;
 
-    let skip_parse_errors = ctx.execution.should_ignore_errors();
+    let skip_parse_errors = ctx.execution.should_skip_parse_errors();
     if pull_diagnostics_result.errors > 0 && skip_parse_errors {
         ctx.push_message(Message::from(
             SkippedDiagnostic.with_file_path(workspace_file.path.to_string()),

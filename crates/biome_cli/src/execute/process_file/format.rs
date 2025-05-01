@@ -46,7 +46,7 @@ pub(crate) fn format_with_guard<'ctx>(
 
     let input = workspace_file.input()?;
     let should_write = ctx.execution.should_write();
-    let skip_parse_errors = ctx.execution.should_ignore_errors();
+    let skip_parse_errors = ctx.execution.should_skip_parse_errors();
 
     tracing::Span::current().record("should_write", tracing::field::display(&should_write));
     tracing::Span::current().record(

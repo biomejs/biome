@@ -43,7 +43,7 @@ pub(crate) fn check_file<'ctx>(
 
     match analyzer_result {
         Ok(status) => {
-            if matches!(status, FileStatus::Ignored) && ctx.execution.should_ignore_errors() {
+            if matches!(status, FileStatus::Ignored) && ctx.execution.should_skip_parse_errors() {
                 skipped_parse_error = true;
             }
 
@@ -64,7 +64,7 @@ pub(crate) fn check_file<'ctx>(
     }
 
     if file_features.supports_format() {
-        if ctx.execution.should_ignore_errors() && skipped_parse_error {
+        if ctx.execution.should_skip_parse_errors() && skipped_parse_error {
             // skip format to parse error files, a message for it already pushed by analyzer
         } else {
             let format_result = format_with_guard(ctx, &mut workspace_file);
