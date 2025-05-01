@@ -30,7 +30,7 @@ use crossbeam::channel::Sender;
 use papaya::{Compute, HashMap, HashSet, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use tokio::sync::watch;
-use tracing::{error, info, instrument, warn};
+use tracing::{info, instrument, warn};
 
 use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::{
@@ -547,19 +547,6 @@ impl WorkspaceServer {
             .get(&project_key)
             .map(|cache| cache.get_analyzer_plugins())
             .unwrap_or_default()
-    }
-
-    /// Updates the [ProjectLayout] for multiple `paths` at once.
-    pub(super) fn update_project_layout_for_paths(
-        &self,
-        signal_kind: WatcherSignalKind,
-        paths: &[BiomePath],
-    ) {
-        for path in paths {
-            if let Err(error) = self.update_project_layout(signal_kind, path) {
-                error!("Error while updating project layout: {error}");
-            }
-        }
     }
 
     /// It accepts a list of ignore files. If the VCS integration is enabled, the files
