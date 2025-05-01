@@ -97,7 +97,7 @@ impl<'a> ResolverCache<'a> {
             return self.fs.path_kind(path).ok();
         }
 
-        // Otherwise, prefer the cached data, the fallback to the real filesystem.
+        // Otherwise, prefer the cached data, then fallback to the real filesystem.
         self.module_graph
             .path_kind(path)
             .or_else(|| self.fs.path_kind(path).ok())
