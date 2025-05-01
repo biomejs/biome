@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 # Termination Message
 
@@ -17,7 +16,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-/symlinked/file.js:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+symlinked/file.js:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This is an unexpected use of the debugger statement.
   

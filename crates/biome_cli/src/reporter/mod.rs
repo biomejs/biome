@@ -9,6 +9,7 @@ use crate::cli_options::MaxDiagnostics;
 use crate::execute::Execution;
 use biome_diagnostics::{Error, Severity};
 use biome_fs::BiomePath;
+use camino::Utf8PathBuf;
 use serde::Serialize;
 use std::collections::BTreeSet;
 use std::io;
@@ -51,22 +52,25 @@ pub trait ReporterVisitor {
     /// Writes the summary in the underling writer
     fn report_summary(
         &mut self,
-        execution: &Execution,
-        summary: TraversalSummary,
-        verbose: bool,
+        _execution: &Execution,
+        _summary: TraversalSummary,
+        _verbose: bool,
     ) -> io::Result<()>;
 
-    /// Writes the paths that were handled during a run.
-    fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
-        let _ = evaluated_paths;
+    /// Writes the paths handled during a run.
+    fn report_handled_paths(
+        &mut self,
+        _evaluated_paths: BTreeSet<BiomePath>,
+        _working_directory: Option<Utf8PathBuf>,
+    ) -> io::Result<()> {
         Ok(())
     }
 
     /// Writes a diagnostics
     fn report_diagnostics(
         &mut self,
-        execution: &Execution,
-        payload: DiagnosticsPayload,
-        verbose: bool,
+        _execution: &Execution,
+        _payload: DiagnosticsPayload,
+        _verbose: bool,
     ) -> io::Result<()>;
 }
