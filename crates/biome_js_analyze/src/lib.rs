@@ -150,7 +150,11 @@ where
     services.insert_service(source_type);
     services.insert_service(module_graph);
     services.insert_service(options.file_path.clone());
-    services.insert_service(project_layout.get_node_manifest_for_path(options.file_path.as_ref()));
+    services.insert_service(
+        project_layout
+            .get_node_manifest_for_path(options.file_path.as_ref())
+            .map(|(path, manifest)| (path, Arc::new(manifest))),
+    );
     services.insert_service(project_layout);
 
     (
