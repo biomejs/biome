@@ -1,0 +1,2411 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/(b)(\2a)/;
+/\k<foo>(?<foo>bar)/v;
+/(a|bc)|\1')/;
+/(?!(?<foo>\n))\1/u;
+/(?<!(a)\1)b/;
+/(\1)')/;
+/^(a\1)$/;
+/^((a)\1)$/;
+/^(a\1b)$/;
+/^((\1))$/;
+/((\2))/;
+/a(?<foo>(.)b\1)/u;
+/a(?<foo>\k<foo>)b/v;
+/^(\1)*$/;
+/^(?:a)(?:((?:\1)))*$/;
+/(?!(\1))/;
+/a|(b\1c)/;
+/(a|(\1))/;
+/(a|(\2))/;
+/(?:a|(\1))/;
+/(a)?(b)*(\3)/;
+/(?<=(a\1))b/;
+/\1(a)/;
+/\1.(a)/;
+/(?:\1)(?:(a))/;
+/(?:\1)(?:((a)))/;
+/(?:\2)(?:((a)))/;
+/(?:\1)(?:((?:a)))/;
+/(\2)(a)/;
+/(a)\2(b)/;
+/(?:a)(b)\2(c)/;
+/\k<foo>(?<foo>a)/u;
+/(?:a(b)\2)(c)/;
+/(a)(b)\3(c)')/;
+/\1(?<=(a))./;
+/\1(?<!(a))./;
+/(?<=\1)(?<=(a))/;
+/(?<!\1)(?<!(a))/;
+/(?=\1(a))./;
+/(?!\1(a))./;
+
+// backward in the same lookbehind
+/(?<=(a)\1)b/;
+/(?<!.(a).\1.)b/;
+/(.)(?<!(b|c)\2)d/;
+/(?<=(?:(a)\1))b/;
+/(?<=(?:(a))\1)b/;
+/(?<=(a)(?:\1))b/;
+/(?<!(?:(a))(?:\1))b/;
+/(?<!(?:(a))(?:\1)|.)b/;
+/.(?!(?<!(a)\1))./;
+/.(?=(?<!(a)\1))./;
+/.(?!(?<=(a)\1))./;
+/.(?=(?<=(a)\1))./;
+
+// into another alternative
+/(a)|\1b/;
+/^(?:(a)|\1b)$/;
+/^(?:(a)|b(?:c|\1))$/;
+/^(?:a|b(?:(c)|\1))$/;
+/^(?:(a(?!b))|\1b)+$/;
+/^(?:(?:(a)(?!b))|\1b)+$/;
+/^(?:(a(?=a))|\1b)+$/;
+/^(?:(a)(?=a)|\1b)+$/;
+/.(?:a|(b)).|(?:(\1)|c)./;
+/.(?!(a)|\1)./;
+/.(?<=\1|(a))./;
+
+// into a negative lookaround
+/a(?!(b)).\1/;
+/(?<!(a))b\1/;
+/(?<!(a))(?:\1)/;
+/.(?<!a|(b)).\1/;
+/.(?!(a)).(?!\1)./;
+/.(?<!(a)).(?<!\1)./;
+/.(?=(?!(a))\1)./;
+/.(?<!\1(?!(a)))/;
+
+// valid and invalid
+/\1(a)(b)\2/;
+/\1(a)\1/;
+
+// ES2024
+/\1([[A--B]])/u;
+
+// ES2025
+/\k<foo>((?<foo>bar)|(?<foo>baz))/v;
+/((?<foo>bar)|\k<foo>(?<foo>baz))/v;
+/\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+/((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+/((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+/((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+/((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+/(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+/((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+
+```
+
+# Diagnostics
+```
+invalid.js:1:6 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+  > 1 │ /(b)(\2a)/;
+      │      ^^
+    2 │ /\k<foo>(?<foo>bar)/v;
+    3 │ /(a|bc)|\1')/;
+  
+  i The group starts here.
+  
+  > 1 │ /(b)(\2a)/;
+      │     ^^^^^
+    2 │ /\k<foo>(?<foo>bar)/v;
+    3 │ /(a|bc)|\1')/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:2:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    1 │ /(b)(\2a)/;
+  > 2 │ /\k<foo>(?<foo>bar)/v;
+      │  ^^^^^^^
+    3 │ /(a|bc)|\1')/;
+    4 │ /(?!(?<foo>\n))\1/u;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:3:9 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    1 │ /(b)(\2a)/;
+    2 │ /\k<foo>(?<foo>bar)/v;
+  > 3 │ /(a|bc)|\1')/;
+      │         ^^
+    4 │ /(?!(?<foo>\n))\1/u;
+    5 │ /(?<!(a)\1)b/;
+  
+  i The backreference refers to this group.
+  
+    1 │ /(b)(\2a)/;
+    2 │ /\k<foo>(?<foo>bar)/v;
+  > 3 │ /(a|bc)|\1')/;
+      │  ^^^^^^
+    4 │ /(?!(?<foo>\n))\1/u;
+    5 │ /(?<!(a)\1)b/;
+  
+  i The alternate separator is here.
+  
+    1 │ /(b)(\2a)/;
+    2 │ /\k<foo>(?<foo>bar)/v;
+  > 3 │ /(a|bc)|\1')/;
+      │        ^
+    4 │ /(?!(?<foo>\n))\1/u;
+    5 │ /(?<!(a)\1)b/;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:4:16 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group within a negated assertion, making it always match an empty string.
+  
+    2 │ /\k<foo>(?<foo>bar)/v;
+    3 │ /(a|bc)|\1')/;
+  > 4 │ /(?!(?<foo>\n))\1/u;
+      │                ^^
+    5 │ /(?<!(a)\1)b/;
+    6 │ /(\1)')/;
+  
+  i The backreference refers to this group.
+  
+    2 │ /\k<foo>(?<foo>bar)/v;
+    3 │ /(a|bc)|\1')/;
+  > 4 │ /(?!(?<foo>\n))\1/u;
+      │     ^^^^^^^^^^
+    5 │ /(?<!(a)\1)b/;
+    6 │ /(\1)')/;
+  
+  i The negated assertion is here.
+  
+    2 │ /\k<foo>(?<foo>bar)/v;
+    3 │ /(a|bc)|\1')/;
+  > 4 │ /(?!(?<foo>\n))\1/u;
+      │  ^^^
+    5 │ /(?<!(a)\1)b/;
+    6 │ /(\1)')/;
+  
+  i Remove the backreference or place it in the negated assertion.
+  
+
+```
+
+```
+invalid.js:5:9 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    3 │ /(a|bc)|\1')/;
+    4 │ /(?!(?<foo>\n))\1/u;
+  > 5 │ /(?<!(a)\1)b/;
+      │         ^^
+    6 │ /(\1)')/;
+    7 │ /^(a\1)$/;
+  
+  i The backreference refers to this group.
+  
+    3 │ /(a|bc)|\1')/;
+    4 │ /(?!(?<foo>\n))\1/u;
+  > 5 │ /(?<!(a)\1)b/;
+      │      ^^^
+    6 │ /(\1)')/;
+    7 │ /^(a\1)$/;
+  
+  i The lookbehind assertion is here.
+  
+    3 │ /(a|bc)|\1')/;
+    4 │ /(?!(?<foo>\n))\1/u;
+  > 5 │ /(?<!(a)\1)b/;
+      │  ^^^^
+    6 │ /(\1)')/;
+    7 │ /^(a\1)$/;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:6:3 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    4 │ /(?!(?<foo>\n))\1/u;
+    5 │ /(?<!(a)\1)b/;
+  > 6 │ /(\1)')/;
+      │   ^^
+    7 │ /^(a\1)$/;
+    8 │ /^((a)\1)$/;
+  
+  i The group starts here.
+  
+    4 │ /(?!(?<foo>\n))\1/u;
+    5 │ /(?<!(a)\1)b/;
+  > 6 │ /(\1)')/;
+      │  ^^^^
+    7 │ /^(a\1)$/;
+    8 │ /^((a)\1)$/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:7:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    5 │ /(?<!(a)\1)b/;
+    6 │ /(\1)')/;
+  > 7 │ /^(a\1)$/;
+      │     ^^
+    8 │ /^((a)\1)$/;
+    9 │ /^(a\1b)$/;
+  
+  i The group starts here.
+  
+    5 │ /(?<!(a)\1)b/;
+    6 │ /(\1)')/;
+  > 7 │ /^(a\1)$/;
+      │   ^^^^^
+    8 │ /^((a)\1)$/;
+    9 │ /^(a\1b)$/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:8:7 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+     6 │ /(\1)')/;
+     7 │ /^(a\1)$/;
+   > 8 │ /^((a)\1)$/;
+       │       ^^
+     9 │ /^(a\1b)$/;
+    10 │ /^((\1))$/;
+  
+  i The group starts here.
+  
+     6 │ /(\1)')/;
+     7 │ /^(a\1)$/;
+   > 8 │ /^((a)\1)$/;
+       │   ^^^^^^^
+     9 │ /^(a\1b)$/;
+    10 │ /^((\1))$/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+     7 │ /^(a\1)$/;
+     8 │ /^((a)\1)$/;
+   > 9 │ /^(a\1b)$/;
+       │     ^^
+    10 │ /^((\1))$/;
+    11 │ /((\2))/;
+  
+  i The group starts here.
+  
+     7 │ /^(a\1)$/;
+     8 │ /^((a)\1)$/;
+   > 9 │ /^(a\1b)$/;
+       │   ^^^^^^
+    10 │ /^((\1))$/;
+    11 │ /((\2))/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+     8 │ /^((a)\1)$/;
+     9 │ /^(a\1b)$/;
+  > 10 │ /^((\1))$/;
+       │     ^^
+    11 │ /((\2))/;
+    12 │ /a(?<foo>(.)b\1)/u;
+  
+  i The group starts here.
+  
+     8 │ /^((a)\1)$/;
+     9 │ /^(a\1b)$/;
+  > 10 │ /^((\1))$/;
+       │   ^^^^^^
+    11 │ /((\2))/;
+    12 │ /a(?<foo>(.)b\1)/u;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:11:4 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+     9 │ /^(a\1b)$/;
+    10 │ /^((\1))$/;
+  > 11 │ /((\2))/;
+       │    ^^
+    12 │ /a(?<foo>(.)b\1)/u;
+    13 │ /a(?<foo>\k<foo>)b/v;
+  
+  i The group starts here.
+  
+     9 │ /^(a\1b)$/;
+    10 │ /^((\1))$/;
+  > 11 │ /((\2))/;
+       │   ^^^^
+    12 │ /a(?<foo>(.)b\1)/u;
+    13 │ /a(?<foo>\k<foo>)b/v;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:12:14 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    10 │ /^((\1))$/;
+    11 │ /((\2))/;
+  > 12 │ /a(?<foo>(.)b\1)/u;
+       │              ^^
+    13 │ /a(?<foo>\k<foo>)b/v;
+    14 │ /^(\1)*$/;
+  
+  i The group starts here.
+  
+    10 │ /^((\1))$/;
+    11 │ /((\2))/;
+  > 12 │ /a(?<foo>(.)b\1)/u;
+       │   ^^^^^^^^^^^^^^
+    13 │ /a(?<foo>\k<foo>)b/v;
+    14 │ /^(\1)*$/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:13:10 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    11 │ /((\2))/;
+    12 │ /a(?<foo>(.)b\1)/u;
+  > 13 │ /a(?<foo>\k<foo>)b/v;
+       │          ^^^^^^^
+    14 │ /^(\1)*$/;
+    15 │ /^(?:a)(?:((?:\1)))*$/;
+  
+  i The group starts here.
+  
+    11 │ /((\2))/;
+    12 │ /a(?<foo>(.)b\1)/u;
+  > 13 │ /a(?<foo>\k<foo>)b/v;
+       │   ^^^^^^^^^^^^^^^
+    14 │ /^(\1)*$/;
+    15 │ /^(?:a)(?:((?:\1)))*$/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:14:4 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    12 │ /a(?<foo>(.)b\1)/u;
+    13 │ /a(?<foo>\k<foo>)b/v;
+  > 14 │ /^(\1)*$/;
+       │    ^^
+    15 │ /^(?:a)(?:((?:\1)))*$/;
+    16 │ /(?!(\1))/;
+  
+  i The group starts here.
+  
+    12 │ /a(?<foo>(.)b\1)/u;
+    13 │ /a(?<foo>\k<foo>)b/v;
+  > 14 │ /^(\1)*$/;
+       │   ^^^^
+    15 │ /^(?:a)(?:((?:\1)))*$/;
+    16 │ /(?!(\1))/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:15:15 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    13 │ /a(?<foo>\k<foo>)b/v;
+    14 │ /^(\1)*$/;
+  > 15 │ /^(?:a)(?:((?:\1)))*$/;
+       │               ^^
+    16 │ /(?!(\1))/;
+    17 │ /a|(b\1c)/;
+  
+  i The group starts here.
+  
+    13 │ /a(?<foo>\k<foo>)b/v;
+    14 │ /^(\1)*$/;
+  > 15 │ /^(?:a)(?:((?:\1)))*$/;
+       │           ^^^^^^^^
+    16 │ /(?!(\1))/;
+    17 │ /a|(b\1c)/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:16:6 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    14 │ /^(\1)*$/;
+    15 │ /^(?:a)(?:((?:\1)))*$/;
+  > 16 │ /(?!(\1))/;
+       │      ^^
+    17 │ /a|(b\1c)/;
+    18 │ /(a|(\1))/;
+  
+  i The group starts here.
+  
+    14 │ /^(\1)*$/;
+    15 │ /^(?:a)(?:((?:\1)))*$/;
+  > 16 │ /(?!(\1))/;
+       │     ^^^^
+    17 │ /a|(b\1c)/;
+    18 │ /(a|(\1))/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:17:6 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    15 │ /^(?:a)(?:((?:\1)))*$/;
+    16 │ /(?!(\1))/;
+  > 17 │ /a|(b\1c)/;
+       │      ^^
+    18 │ /(a|(\1))/;
+    19 │ /(a|(\2))/;
+  
+  i The group starts here.
+  
+    15 │ /^(?:a)(?:((?:\1)))*$/;
+    16 │ /(?!(\1))/;
+  > 17 │ /a|(b\1c)/;
+       │    ^^^^^^
+    18 │ /(a|(\1))/;
+    19 │ /(a|(\2))/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:18:6 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    16 │ /(?!(\1))/;
+    17 │ /a|(b\1c)/;
+  > 18 │ /(a|(\1))/;
+       │      ^^
+    19 │ /(a|(\2))/;
+    20 │ /(?:a|(\1))/;
+  
+  i The group starts here.
+  
+    16 │ /(?!(\1))/;
+    17 │ /a|(b\1c)/;
+  > 18 │ /(a|(\1))/;
+       │  ^^^^^^^^
+    19 │ /(a|(\2))/;
+    20 │ /(?:a|(\1))/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:19:6 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    17 │ /a|(b\1c)/;
+    18 │ /(a|(\1))/;
+  > 19 │ /(a|(\2))/;
+       │      ^^
+    20 │ /(?:a|(\1))/;
+    21 │ /(a)?(b)*(\3)/;
+  
+  i The group starts here.
+  
+    17 │ /a|(b\1c)/;
+    18 │ /(a|(\1))/;
+  > 19 │ /(a|(\2))/;
+       │     ^^^^
+    20 │ /(?:a|(\1))/;
+    21 │ /(a)?(b)*(\3)/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:20:8 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    18 │ /(a|(\1))/;
+    19 │ /(a|(\2))/;
+  > 20 │ /(?:a|(\1))/;
+       │        ^^
+    21 │ /(a)?(b)*(\3)/;
+    22 │ /(?<=(a\1))b/;
+  
+  i The group starts here.
+  
+    18 │ /(a|(\1))/;
+    19 │ /(a|(\2))/;
+  > 20 │ /(?:a|(\1))/;
+       │       ^^^^
+    21 │ /(a)?(b)*(\3)/;
+    22 │ /(?<=(a\1))b/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:21:11 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    19 │ /(a|(\2))/;
+    20 │ /(?:a|(\1))/;
+  > 21 │ /(a)?(b)*(\3)/;
+       │           ^^
+    22 │ /(?<=(a\1))b/;
+    23 │ /\1(a)/;
+  
+  i The group starts here.
+  
+    19 │ /(a|(\2))/;
+    20 │ /(?:a|(\1))/;
+  > 21 │ /(a)?(b)*(\3)/;
+       │          ^^^^
+    22 │ /(?<=(a\1))b/;
+    23 │ /\1(a)/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:22:8 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+    20 │ /(?:a|(\1))/;
+    21 │ /(a)?(b)*(\3)/;
+  > 22 │ /(?<=(a\1))b/;
+       │        ^^
+    23 │ /\1(a)/;
+    24 │ /\1.(a)/;
+  
+  i The group starts here.
+  
+    20 │ /(?:a|(\1))/;
+    21 │ /(a)?(b)*(\3)/;
+  > 22 │ /(?<=(a\1))b/;
+       │      ^^^^^
+    23 │ /\1(a)/;
+    24 │ /\1.(a)/;
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
+
+```
+invalid.js:23:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    21 │ /(a)?(b)*(\3)/;
+    22 │ /(?<=(a\1))b/;
+  > 23 │ /\1(a)/;
+       │  ^^
+    24 │ /\1.(a)/;
+    25 │ /(?:\1)(?:(a))/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:24:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    22 │ /(?<=(a\1))b/;
+    23 │ /\1(a)/;
+  > 24 │ /\1.(a)/;
+       │  ^^
+    25 │ /(?:\1)(?:(a))/;
+    26 │ /(?:\1)(?:((a)))/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:25:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    23 │ /\1(a)/;
+    24 │ /\1.(a)/;
+  > 25 │ /(?:\1)(?:(a))/;
+       │     ^^
+    26 │ /(?:\1)(?:((a)))/;
+    27 │ /(?:\2)(?:((a)))/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:26:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    24 │ /\1.(a)/;
+    25 │ /(?:\1)(?:(a))/;
+  > 26 │ /(?:\1)(?:((a)))/;
+       │     ^^
+    27 │ /(?:\2)(?:((a)))/;
+    28 │ /(?:\1)(?:((?:a)))/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:27:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    25 │ /(?:\1)(?:(a))/;
+    26 │ /(?:\1)(?:((a)))/;
+  > 27 │ /(?:\2)(?:((a)))/;
+       │     ^^
+    28 │ /(?:\1)(?:((?:a)))/;
+    29 │ /(\2)(a)/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:28:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    26 │ /(?:\1)(?:((a)))/;
+    27 │ /(?:\2)(?:((a)))/;
+  > 28 │ /(?:\1)(?:((?:a)))/;
+       │     ^^
+    29 │ /(\2)(a)/;
+    30 │ /(a)\2(b)/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:29:3 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    27 │ /(?:\2)(?:((a)))/;
+    28 │ /(?:\1)(?:((?:a)))/;
+  > 29 │ /(\2)(a)/;
+       │   ^^
+    30 │ /(a)\2(b)/;
+    31 │ /(?:a)(b)\2(c)/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:30:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    28 │ /(?:\1)(?:((?:a)))/;
+    29 │ /(\2)(a)/;
+  > 30 │ /(a)\2(b)/;
+       │     ^^
+    31 │ /(?:a)(b)\2(c)/;
+    32 │ /\k<foo>(?<foo>a)/u;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:31:10 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    29 │ /(\2)(a)/;
+    30 │ /(a)\2(b)/;
+  > 31 │ /(?:a)(b)\2(c)/;
+       │          ^^
+    32 │ /\k<foo>(?<foo>a)/u;
+    33 │ /(?:a(b)\2)(c)/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:32:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    30 │ /(a)\2(b)/;
+    31 │ /(?:a)(b)\2(c)/;
+  > 32 │ /\k<foo>(?<foo>a)/u;
+       │  ^^^^^^^
+    33 │ /(?:a(b)\2)(c)/;
+    34 │ /(a)(b)\3(c)')/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:33:9 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    31 │ /(?:a)(b)\2(c)/;
+    32 │ /\k<foo>(?<foo>a)/u;
+  > 33 │ /(?:a(b)\2)(c)/;
+       │         ^^
+    34 │ /(a)(b)\3(c)')/;
+    35 │ /\1(?<=(a))./;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:34:8 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    32 │ /\k<foo>(?<foo>a)/u;
+    33 │ /(?:a(b)\2)(c)/;
+  > 34 │ /(a)(b)\3(c)')/;
+       │        ^^
+    35 │ /\1(?<=(a))./;
+    36 │ /\1(?<!(a))./;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:35:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    33 │ /(?:a(b)\2)(c)/;
+    34 │ /(a)(b)\3(c)')/;
+  > 35 │ /\1(?<=(a))./;
+       │  ^^
+    36 │ /\1(?<!(a))./;
+    37 │ /(?<=\1)(?<=(a))/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:36:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    34 │ /(a)(b)\3(c)')/;
+    35 │ /\1(?<=(a))./;
+  > 36 │ /\1(?<!(a))./;
+       │  ^^
+    37 │ /(?<=\1)(?<=(a))/;
+    38 │ /(?<!\1)(?<!(a))/;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:37:6 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    35 │ /\1(?<=(a))./;
+    36 │ /\1(?<!(a))./;
+  > 37 │ /(?<=\1)(?<=(a))/;
+       │      ^^
+    38 │ /(?<!\1)(?<!(a))/;
+    39 │ /(?=\1(a))./;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:38:6 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    36 │ /\1(?<!(a))./;
+    37 │ /(?<=\1)(?<=(a))/;
+  > 38 │ /(?<!\1)(?<!(a))/;
+       │      ^^
+    39 │ /(?=\1(a))./;
+    40 │ /(?!\1(a))./;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:39:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    37 │ /(?<=\1)(?<=(a))/;
+    38 │ /(?<!\1)(?<!(a))/;
+  > 39 │ /(?=\1(a))./;
+       │     ^^
+    40 │ /(?!\1(a))./;
+    41 │ 
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:40:5 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    38 │ /(?<!\1)(?<!(a))/;
+    39 │ /(?=\1(a))./;
+  > 40 │ /(?!\1(a))./;
+       │     ^^
+    41 │ 
+    42 │ // backward in the same lookbehind
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:43:9 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    42 │ // backward in the same lookbehind
+  > 43 │ /(?<=(a)\1)b/;
+       │         ^^
+    44 │ /(?<!.(a).\1.)b/;
+    45 │ /(.)(?<!(b|c)\2)d/;
+  
+  i The backreference refers to this group.
+  
+    42 │ // backward in the same lookbehind
+  > 43 │ /(?<=(a)\1)b/;
+       │      ^^^
+    44 │ /(?<!.(a).\1.)b/;
+    45 │ /(.)(?<!(b|c)\2)d/;
+  
+  i The lookbehind assertion is here.
+  
+    42 │ // backward in the same lookbehind
+  > 43 │ /(?<=(a)\1)b/;
+       │  ^^^^
+    44 │ /(?<!.(a).\1.)b/;
+    45 │ /(.)(?<!(b|c)\2)d/;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:44:11 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    42 │ // backward in the same lookbehind
+    43 │ /(?<=(a)\1)b/;
+  > 44 │ /(?<!.(a).\1.)b/;
+       │           ^^
+    45 │ /(.)(?<!(b|c)\2)d/;
+    46 │ /(?<=(?:(a)\1))b/;
+  
+  i The backreference refers to this group.
+  
+    42 │ // backward in the same lookbehind
+    43 │ /(?<=(a)\1)b/;
+  > 44 │ /(?<!.(a).\1.)b/;
+       │       ^^^
+    45 │ /(.)(?<!(b|c)\2)d/;
+    46 │ /(?<=(?:(a)\1))b/;
+  
+  i The lookbehind assertion is here.
+  
+    42 │ // backward in the same lookbehind
+    43 │ /(?<=(a)\1)b/;
+  > 44 │ /(?<!.(a).\1.)b/;
+       │  ^^^^
+    45 │ /(.)(?<!(b|c)\2)d/;
+    46 │ /(?<=(?:(a)\1))b/;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:45:14 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    43 │ /(?<=(a)\1)b/;
+    44 │ /(?<!.(a).\1.)b/;
+  > 45 │ /(.)(?<!(b|c)\2)d/;
+       │              ^^
+    46 │ /(?<=(?:(a)\1))b/;
+    47 │ /(?<=(?:(a))\1)b/;
+  
+  i The backreference refers to this group.
+  
+    43 │ /(?<=(a)\1)b/;
+    44 │ /(?<!.(a).\1.)b/;
+  > 45 │ /(.)(?<!(b|c)\2)d/;
+       │         ^^^^^
+    46 │ /(?<=(?:(a)\1))b/;
+    47 │ /(?<=(?:(a))\1)b/;
+  
+  i The lookbehind assertion is here.
+  
+    43 │ /(?<=(a)\1)b/;
+    44 │ /(?<!.(a).\1.)b/;
+  > 45 │ /(.)(?<!(b|c)\2)d/;
+       │     ^^^^
+    46 │ /(?<=(?:(a)\1))b/;
+    47 │ /(?<=(?:(a))\1)b/;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:46:12 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    44 │ /(?<!.(a).\1.)b/;
+    45 │ /(.)(?<!(b|c)\2)d/;
+  > 46 │ /(?<=(?:(a)\1))b/;
+       │            ^^
+    47 │ /(?<=(?:(a))\1)b/;
+    48 │ /(?<=(a)(?:\1))b/;
+  
+  i The backreference refers to this group.
+  
+    44 │ /(?<!.(a).\1.)b/;
+    45 │ /(.)(?<!(b|c)\2)d/;
+  > 46 │ /(?<=(?:(a)\1))b/;
+       │         ^^^
+    47 │ /(?<=(?:(a))\1)b/;
+    48 │ /(?<=(a)(?:\1))b/;
+  
+  i The lookbehind assertion is here.
+  
+    44 │ /(?<!.(a).\1.)b/;
+    45 │ /(.)(?<!(b|c)\2)d/;
+  > 46 │ /(?<=(?:(a)\1))b/;
+       │  ^^^^
+    47 │ /(?<=(?:(a))\1)b/;
+    48 │ /(?<=(a)(?:\1))b/;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:47:13 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    45 │ /(.)(?<!(b|c)\2)d/;
+    46 │ /(?<=(?:(a)\1))b/;
+  > 47 │ /(?<=(?:(a))\1)b/;
+       │             ^^
+    48 │ /(?<=(a)(?:\1))b/;
+    49 │ /(?<!(?:(a))(?:\1))b/;
+  
+  i The backreference refers to this group.
+  
+    45 │ /(.)(?<!(b|c)\2)d/;
+    46 │ /(?<=(?:(a)\1))b/;
+  > 47 │ /(?<=(?:(a))\1)b/;
+       │         ^^^
+    48 │ /(?<=(a)(?:\1))b/;
+    49 │ /(?<!(?:(a))(?:\1))b/;
+  
+  i The lookbehind assertion is here.
+  
+    45 │ /(.)(?<!(b|c)\2)d/;
+    46 │ /(?<=(?:(a)\1))b/;
+  > 47 │ /(?<=(?:(a))\1)b/;
+       │  ^^^^
+    48 │ /(?<=(a)(?:\1))b/;
+    49 │ /(?<!(?:(a))(?:\1))b/;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:48:12 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    46 │ /(?<=(?:(a)\1))b/;
+    47 │ /(?<=(?:(a))\1)b/;
+  > 48 │ /(?<=(a)(?:\1))b/;
+       │            ^^
+    49 │ /(?<!(?:(a))(?:\1))b/;
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+  
+  i The backreference refers to this group.
+  
+    46 │ /(?<=(?:(a)\1))b/;
+    47 │ /(?<=(?:(a))\1)b/;
+  > 48 │ /(?<=(a)(?:\1))b/;
+       │      ^^^
+    49 │ /(?<!(?:(a))(?:\1))b/;
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+  
+  i The lookbehind assertion is here.
+  
+    46 │ /(?<=(?:(a)\1))b/;
+    47 │ /(?<=(?:(a))\1)b/;
+  > 48 │ /(?<=(a)(?:\1))b/;
+       │  ^^^^
+    49 │ /(?<!(?:(a))(?:\1))b/;
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:49:16 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    47 │ /(?<=(?:(a))\1)b/;
+    48 │ /(?<=(a)(?:\1))b/;
+  > 49 │ /(?<!(?:(a))(?:\1))b/;
+       │                ^^
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+    51 │ /.(?!(?<!(a)\1))./;
+  
+  i The backreference refers to this group.
+  
+    47 │ /(?<=(?:(a))\1)b/;
+    48 │ /(?<=(a)(?:\1))b/;
+  > 49 │ /(?<!(?:(a))(?:\1))b/;
+       │         ^^^
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+    51 │ /.(?!(?<!(a)\1))./;
+  
+  i The lookbehind assertion is here.
+  
+    47 │ /(?<=(?:(a))\1)b/;
+    48 │ /(?<=(a)(?:\1))b/;
+  > 49 │ /(?<!(?:(a))(?:\1))b/;
+       │  ^^^^
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+    51 │ /.(?!(?<!(a)\1))./;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:50:16 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    48 │ /(?<=(a)(?:\1))b/;
+    49 │ /(?<!(?:(a))(?:\1))b/;
+  > 50 │ /(?<!(?:(a))(?:\1)|.)b/;
+       │                ^^
+    51 │ /.(?!(?<!(a)\1))./;
+    52 │ /.(?=(?<!(a)\1))./;
+  
+  i The backreference refers to this group.
+  
+    48 │ /(?<=(a)(?:\1))b/;
+    49 │ /(?<!(?:(a))(?:\1))b/;
+  > 50 │ /(?<!(?:(a))(?:\1)|.)b/;
+       │         ^^^
+    51 │ /.(?!(?<!(a)\1))./;
+    52 │ /.(?=(?<!(a)\1))./;
+  
+  i The lookbehind assertion is here.
+  
+    48 │ /(?<=(a)(?:\1))b/;
+    49 │ /(?<!(?:(a))(?:\1))b/;
+  > 50 │ /(?<!(?:(a))(?:\1)|.)b/;
+       │  ^^^^
+    51 │ /.(?!(?<!(a)\1))./;
+    52 │ /.(?=(?<!(a)\1))./;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:51:13 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    49 │ /(?<!(?:(a))(?:\1))b/;
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+  > 51 │ /.(?!(?<!(a)\1))./;
+       │             ^^
+    52 │ /.(?=(?<!(a)\1))./;
+    53 │ /.(?!(?<=(a)\1))./;
+  
+  i The backreference refers to this group.
+  
+    49 │ /(?<!(?:(a))(?:\1))b/;
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+  > 51 │ /.(?!(?<!(a)\1))./;
+       │          ^^^
+    52 │ /.(?=(?<!(a)\1))./;
+    53 │ /.(?!(?<=(a)\1))./;
+  
+  i The lookbehind assertion is here.
+  
+    49 │ /(?<!(?:(a))(?:\1))b/;
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+  > 51 │ /.(?!(?<!(a)\1))./;
+       │      ^^^^
+    52 │ /.(?=(?<!(a)\1))./;
+    53 │ /.(?!(?<=(a)\1))./;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:52:13 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+    51 │ /.(?!(?<!(a)\1))./;
+  > 52 │ /.(?=(?<!(a)\1))./;
+       │             ^^
+    53 │ /.(?!(?<=(a)\1))./;
+    54 │ /.(?=(?<=(a)\1))./;
+  
+  i The backreference refers to this group.
+  
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+    51 │ /.(?!(?<!(a)\1))./;
+  > 52 │ /.(?=(?<!(a)\1))./;
+       │          ^^^
+    53 │ /.(?!(?<=(a)\1))./;
+    54 │ /.(?=(?<=(a)\1))./;
+  
+  i The lookbehind assertion is here.
+  
+    50 │ /(?<!(?:(a))(?:\1)|.)b/;
+    51 │ /.(?!(?<!(a)\1))./;
+  > 52 │ /.(?=(?<!(a)\1))./;
+       │      ^^^^
+    53 │ /.(?!(?<=(a)\1))./;
+    54 │ /.(?=(?<=(a)\1))./;
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:53:13 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    51 │ /.(?!(?<!(a)\1))./;
+    52 │ /.(?=(?<!(a)\1))./;
+  > 53 │ /.(?!(?<=(a)\1))./;
+       │             ^^
+    54 │ /.(?=(?<=(a)\1))./;
+    55 │ 
+  
+  i The backreference refers to this group.
+  
+    51 │ /.(?!(?<!(a)\1))./;
+    52 │ /.(?=(?<!(a)\1))./;
+  > 53 │ /.(?!(?<=(a)\1))./;
+       │          ^^^
+    54 │ /.(?=(?<=(a)\1))./;
+    55 │ 
+  
+  i The lookbehind assertion is here.
+  
+    51 │ /.(?!(?<!(a)\1))./;
+    52 │ /.(?=(?<!(a)\1))./;
+  > 53 │ /.(?!(?<=(a)\1))./;
+       │      ^^^^
+    54 │ /.(?=(?<=(a)\1))./;
+    55 │ 
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:54:13 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    52 │ /.(?=(?<!(a)\1))./;
+    53 │ /.(?!(?<=(a)\1))./;
+  > 54 │ /.(?=(?<=(a)\1))./;
+       │             ^^
+    55 │ 
+    56 │ // into another alternative
+  
+  i The backreference refers to this group.
+  
+    52 │ /.(?=(?<!(a)\1))./;
+    53 │ /.(?!(?<=(a)\1))./;
+  > 54 │ /.(?=(?<=(a)\1))./;
+       │          ^^^
+    55 │ 
+    56 │ // into another alternative
+  
+  i The lookbehind assertion is here.
+  
+    52 │ /.(?=(?<!(a)\1))./;
+    53 │ /.(?!(?<=(a)\1))./;
+  > 54 │ /.(?=(?<=(a)\1))./;
+       │      ^^^^
+    55 │ 
+    56 │ // into another alternative
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:57:6 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    56 │ // into another alternative
+  > 57 │ /(a)|\1b/;
+       │      ^^
+    58 │ /^(?:(a)|\1b)$/;
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+  
+  i The backreference refers to this group.
+  
+    56 │ // into another alternative
+  > 57 │ /(a)|\1b/;
+       │  ^^^
+    58 │ /^(?:(a)|\1b)$/;
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+  
+  i The alternate separator is here.
+  
+    56 │ // into another alternative
+  > 57 │ /(a)|\1b/;
+       │     ^
+    58 │ /^(?:(a)|\1b)$/;
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:58:10 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    56 │ // into another alternative
+    57 │ /(a)|\1b/;
+  > 58 │ /^(?:(a)|\1b)$/;
+       │          ^^
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+  
+  i The backreference refers to this group.
+  
+    56 │ // into another alternative
+    57 │ /(a)|\1b/;
+  > 58 │ /^(?:(a)|\1b)$/;
+       │      ^^^
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+  
+  i The alternate separator is here.
+  
+    56 │ // into another alternative
+    57 │ /(a)|\1b/;
+  > 58 │ /^(?:(a)|\1b)$/;
+       │         ^
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:59:16 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    57 │ /(a)|\1b/;
+    58 │ /^(?:(a)|\1b)$/;
+  > 59 │ /^(?:(a)|b(?:c|\1))$/;
+       │                ^^
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+  
+  i The backreference refers to this group.
+  
+    57 │ /(a)|\1b/;
+    58 │ /^(?:(a)|\1b)$/;
+  > 59 │ /^(?:(a)|b(?:c|\1))$/;
+       │      ^^^
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+  
+  i The alternate separator is here.
+  
+    57 │ /(a)|\1b/;
+    58 │ /^(?:(a)|\1b)$/;
+  > 59 │ /^(?:(a)|b(?:c|\1))$/;
+       │         ^
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:60:16 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    58 │ /^(?:(a)|\1b)$/;
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+  > 60 │ /^(?:a|b(?:(c)|\1))$/;
+       │                ^^
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+  
+  i The backreference refers to this group.
+  
+    58 │ /^(?:(a)|\1b)$/;
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+  > 60 │ /^(?:a|b(?:(c)|\1))$/;
+       │            ^^^
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+  
+  i The alternate separator is here.
+  
+    58 │ /^(?:(a)|\1b)$/;
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+  > 60 │ /^(?:a|b(?:(c)|\1))$/;
+       │               ^
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:61:15 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+  > 61 │ /^(?:(a(?!b))|\1b)+$/;
+       │               ^^
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+  
+  i The backreference refers to this group.
+  
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+  > 61 │ /^(?:(a(?!b))|\1b)+$/;
+       │      ^^^^^^^^
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+  
+  i The alternate separator is here.
+  
+    59 │ /^(?:(a)|b(?:c|\1))$/;
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+  > 61 │ /^(?:(a(?!b))|\1b)+$/;
+       │              ^
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:62:19 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+  > 62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+       │                   ^^
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+  
+  i The backreference refers to this group.
+  
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+  > 62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+       │         ^^^
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+  
+  i The alternate separator is here.
+  
+    60 │ /^(?:a|b(?:(c)|\1))$/;
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+  > 62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+       │                  ^
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:63:15 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+  > 63 │ /^(?:(a(?=a))|\1b)+$/;
+       │               ^^
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+  
+  i The backreference refers to this group.
+  
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+  > 63 │ /^(?:(a(?=a))|\1b)+$/;
+       │      ^^^^^^^^
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+  
+  i The alternate separator is here.
+  
+    61 │ /^(?:(a(?!b))|\1b)+$/;
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+  > 63 │ /^(?:(a(?=a))|\1b)+$/;
+       │              ^
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:64:15 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+  > 64 │ /^(?:(a)(?=a)|\1b)+$/;
+       │               ^^
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+    66 │ /.(?!(a)|\1)./;
+  
+  i The backreference refers to this group.
+  
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+  > 64 │ /^(?:(a)(?=a)|\1b)+$/;
+       │      ^^^
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+    66 │ /.(?!(a)|\1)./;
+  
+  i The alternate separator is here.
+  
+    62 │ /^(?:(?:(a)(?!b))|\1b)+$/;
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+  > 64 │ /^(?:(a)(?=a)|\1b)+$/;
+       │              ^
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+    66 │ /.(?!(a)|\1)./;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:65:18 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+  > 65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+       │                  ^^
+    66 │ /.(?!(a)|\1)./;
+    67 │ /.(?<=\1|(a))./;
+  
+  i The backreference refers to this group.
+  
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+  > 65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+       │        ^^^
+    66 │ /.(?!(a)|\1)./;
+    67 │ /.(?<=\1|(a))./;
+  
+  i The alternate separator is here.
+  
+    63 │ /^(?:(a(?=a))|\1b)+$/;
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+  > 65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+       │             ^
+    66 │ /.(?!(a)|\1)./;
+    67 │ /.(?<=\1|(a))./;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:66:10 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+  > 66 │ /.(?!(a)|\1)./;
+       │          ^^
+    67 │ /.(?<=\1|(a))./;
+    68 │ 
+  
+  i The backreference refers to this group.
+  
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+  > 66 │ /.(?!(a)|\1)./;
+       │      ^^^
+    67 │ /.(?<=\1|(a))./;
+    68 │ 
+  
+  i The alternate separator is here.
+  
+    64 │ /^(?:(a)(?=a)|\1b)+$/;
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+  > 66 │ /.(?!(a)|\1)./;
+       │         ^
+    67 │ /.(?<=\1|(a))./;
+    68 │ 
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:67:7 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    65 │ /.(?:a|(b)).|(?:(\1)|c)./;
+    66 │ /.(?!(a)|\1)./;
+  > 67 │ /.(?<=\1|(a))./;
+       │       ^^
+    68 │ 
+    69 │ // into a negative lookaround
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:70:11 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group within a negated assertion, making it always match an empty string.
+  
+    69 │ // into a negative lookaround
+  > 70 │ /a(?!(b)).\1/;
+       │           ^^
+    71 │ /(?<!(a))b\1/;
+    72 │ /(?<!(a))(?:\1)/;
+  
+  i The backreference refers to this group.
+  
+    69 │ // into a negative lookaround
+  > 70 │ /a(?!(b)).\1/;
+       │      ^^^
+    71 │ /(?<!(a))b\1/;
+    72 │ /(?<!(a))(?:\1)/;
+  
+  i The negated assertion is here.
+  
+    69 │ // into a negative lookaround
+  > 70 │ /a(?!(b)).\1/;
+       │   ^^^
+    71 │ /(?<!(a))b\1/;
+    72 │ /(?<!(a))(?:\1)/;
+  
+  i Remove the backreference or place it in the negated assertion.
+  
+
+```
+
+```
+invalid.js:71:11 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group within a negated assertion, making it always match an empty string.
+  
+    69 │ // into a negative lookaround
+    70 │ /a(?!(b)).\1/;
+  > 71 │ /(?<!(a))b\1/;
+       │           ^^
+    72 │ /(?<!(a))(?:\1)/;
+    73 │ /.(?<!a|(b)).\1/;
+  
+  i The backreference refers to this group.
+  
+    69 │ // into a negative lookaround
+    70 │ /a(?!(b)).\1/;
+  > 71 │ /(?<!(a))b\1/;
+       │      ^^^
+    72 │ /(?<!(a))(?:\1)/;
+    73 │ /.(?<!a|(b)).\1/;
+  
+  i The negated assertion is here.
+  
+    69 │ // into a negative lookaround
+    70 │ /a(?!(b)).\1/;
+  > 71 │ /(?<!(a))b\1/;
+       │  ^^^
+    72 │ /(?<!(a))(?:\1)/;
+    73 │ /.(?<!a|(b)).\1/;
+  
+  i Remove the backreference or place it in the negated assertion.
+  
+
+```
+
+```
+invalid.js:72:13 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group within a negated assertion, making it always match an empty string.
+  
+    70 │ /a(?!(b)).\1/;
+    71 │ /(?<!(a))b\1/;
+  > 72 │ /(?<!(a))(?:\1)/;
+       │             ^^
+    73 │ /.(?<!a|(b)).\1/;
+    74 │ /.(?!(a)).(?!\1)./;
+  
+  i The backreference refers to this group.
+  
+    70 │ /a(?!(b)).\1/;
+    71 │ /(?<!(a))b\1/;
+  > 72 │ /(?<!(a))(?:\1)/;
+       │      ^^^
+    73 │ /.(?<!a|(b)).\1/;
+    74 │ /.(?!(a)).(?!\1)./;
+  
+  i The negated assertion is here.
+  
+    70 │ /a(?!(b)).\1/;
+    71 │ /(?<!(a))b\1/;
+  > 72 │ /(?<!(a))(?:\1)/;
+       │  ^^^
+    73 │ /.(?<!a|(b)).\1/;
+    74 │ /.(?!(a)).(?!\1)./;
+  
+  i Remove the backreference or place it in the negated assertion.
+  
+
+```
+
+```
+invalid.js:73:14 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group within a negated assertion, making it always match an empty string.
+  
+    71 │ /(?<!(a))b\1/;
+    72 │ /(?<!(a))(?:\1)/;
+  > 73 │ /.(?<!a|(b)).\1/;
+       │              ^^
+    74 │ /.(?!(a)).(?!\1)./;
+    75 │ /.(?<!(a)).(?<!\1)./;
+  
+  i The backreference refers to this group.
+  
+    71 │ /(?<!(a))b\1/;
+    72 │ /(?<!(a))(?:\1)/;
+  > 73 │ /.(?<!a|(b)).\1/;
+       │         ^^^
+    74 │ /.(?!(a)).(?!\1)./;
+    75 │ /.(?<!(a)).(?<!\1)./;
+  
+  i The negated assertion is here.
+  
+    71 │ /(?<!(a))b\1/;
+    72 │ /(?<!(a))(?:\1)/;
+  > 73 │ /.(?<!a|(b)).\1/;
+       │   ^^^
+    74 │ /.(?!(a)).(?!\1)./;
+    75 │ /.(?<!(a)).(?<!\1)./;
+  
+  i Remove the backreference or place it in the negated assertion.
+  
+
+```
+
+```
+invalid.js:74:14 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group within a negated assertion, making it always match an empty string.
+  
+    72 │ /(?<!(a))(?:\1)/;
+    73 │ /.(?<!a|(b)).\1/;
+  > 74 │ /.(?!(a)).(?!\1)./;
+       │              ^^
+    75 │ /.(?<!(a)).(?<!\1)./;
+    76 │ /.(?=(?!(a))\1)./;
+  
+  i The backreference refers to this group.
+  
+    72 │ /(?<!(a))(?:\1)/;
+    73 │ /.(?<!a|(b)).\1/;
+  > 74 │ /.(?!(a)).(?!\1)./;
+       │      ^^^
+    75 │ /.(?<!(a)).(?<!\1)./;
+    76 │ /.(?=(?!(a))\1)./;
+  
+  i The negated assertion is here.
+  
+    72 │ /(?<!(a))(?:\1)/;
+    73 │ /.(?<!a|(b)).\1/;
+  > 74 │ /.(?!(a)).(?!\1)./;
+       │   ^^^
+    75 │ /.(?<!(a)).(?<!\1)./;
+    76 │ /.(?=(?!(a))\1)./;
+  
+  i Remove the backreference or place it in the negated assertion.
+  
+
+```
+
+```
+invalid.js:75:16 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group within a negated assertion, making it always match an empty string.
+  
+    73 │ /.(?<!a|(b)).\1/;
+    74 │ /.(?!(a)).(?!\1)./;
+  > 75 │ /.(?<!(a)).(?<!\1)./;
+       │                ^^
+    76 │ /.(?=(?!(a))\1)./;
+    77 │ /.(?<!\1(?!(a)))/;
+  
+  i The backreference refers to this group.
+  
+    73 │ /.(?<!a|(b)).\1/;
+    74 │ /.(?!(a)).(?!\1)./;
+  > 75 │ /.(?<!(a)).(?<!\1)./;
+       │       ^^^
+    76 │ /.(?=(?!(a))\1)./;
+    77 │ /.(?<!\1(?!(a)))/;
+  
+  i The negated assertion is here.
+  
+    73 │ /.(?<!a|(b)).\1/;
+    74 │ /.(?!(a)).(?!\1)./;
+  > 75 │ /.(?<!(a)).(?<!\1)./;
+       │   ^^^
+    76 │ /.(?=(?!(a))\1)./;
+    77 │ /.(?<!\1(?!(a)))/;
+  
+  i Remove the backreference or place it in the negated assertion.
+  
+
+```
+
+```
+invalid.js:76:13 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group within a negated assertion, making it always match an empty string.
+  
+    74 │ /.(?!(a)).(?!\1)./;
+    75 │ /.(?<!(a)).(?<!\1)./;
+  > 76 │ /.(?=(?!(a))\1)./;
+       │             ^^
+    77 │ /.(?<!\1(?!(a)))/;
+    78 │ 
+  
+  i The backreference refers to this group.
+  
+    74 │ /.(?!(a)).(?!\1)./;
+    75 │ /.(?<!(a)).(?<!\1)./;
+  > 76 │ /.(?=(?!(a))\1)./;
+       │         ^^^
+    77 │ /.(?<!\1(?!(a)))/;
+    78 │ 
+  
+  i The negated assertion is here.
+  
+    74 │ /.(?!(a)).(?!\1)./;
+    75 │ /.(?<!(a)).(?<!\1)./;
+  > 76 │ /.(?=(?!(a))\1)./;
+       │      ^^^
+    77 │ /.(?<!\1(?!(a)))/;
+    78 │ 
+  
+  i Remove the backreference or place it in the negated assertion.
+  
+
+```
+
+```
+invalid.js:77:7 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    75 │ /.(?<!(a)).(?<!\1)./;
+    76 │ /.(?=(?!(a))\1)./;
+  > 77 │ /.(?<!\1(?!(a)))/;
+       │       ^^
+    78 │ 
+    79 │ // valid and invalid
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:80:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    79 │ // valid and invalid
+  > 80 │ /\1(a)(b)\2/;
+       │  ^^
+    81 │ /\1(a)\1/;
+    82 │ 
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:81:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    79 │ // valid and invalid
+    80 │ /\1(a)(b)\2/;
+  > 81 │ /\1(a)\1/;
+       │  ^^
+    82 │ 
+    83 │ // ES2024
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:84:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    83 │ // ES2024
+  > 84 │ /\1([[A--B]])/u;
+       │  ^^
+    85 │ 
+    86 │ // ES2025
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:87:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    86 │ // ES2025
+  > 87 │ /\k<foo>((?<foo>bar)|(?<foo>baz))/v;
+       │  ^^^^^^^
+    88 │ /((?<foo>bar)|\k<foo>(?<foo>baz))/v;
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:88:15 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    86 │ // ES2025
+    87 │ /\k<foo>((?<foo>bar)|(?<foo>baz))/v;
+  > 88 │ /((?<foo>bar)|\k<foo>(?<foo>baz))/v;
+       │               ^^^^^^^
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+  
+  i The backreference refers to this group.
+  
+    86 │ // ES2025
+    87 │ /\k<foo>((?<foo>bar)|(?<foo>baz))/v;
+  > 88 │ /((?<foo>bar)|\k<foo>(?<foo>baz))/v;
+       │   ^^^^^^^^^^^
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+  
+  i The alternate separator is here.
+  
+    86 │ // ES2025
+    87 │ /\k<foo>((?<foo>bar)|(?<foo>baz))/v;
+  > 88 │ /((?<foo>bar)|\k<foo>(?<foo>baz))/v;
+       │              ^
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:89:2 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears after it, making it always match an empty string.
+  
+    87 │ /\k<foo>((?<foo>bar)|(?<foo>baz))/v;
+    88 │ /((?<foo>bar)|\k<foo>(?<foo>baz))/v;
+  > 89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+       │  ^^^^^^^
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+  
+  i A backreference must refer to a group defined before its occurrence.
+  
+  i Remove the backreference.
+  
+
+```
+
+```
+invalid.js:90:15 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    88 │ /((?<foo>bar)|\k<foo>(?<foo>baz))/v;
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+  > 90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+       │               ^^^^^^^
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+  
+  i The backreference refers to this group.
+  
+    88 │ /((?<foo>bar)|\k<foo>(?<foo>baz))/v;
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+  > 90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+       │   ^^^^^^^^^^^
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+  
+  i The alternate separator is here.
+  
+    88 │ /((?<foo>bar)|\k<foo>(?<foo>baz))/v;
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+  > 90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+       │              ^
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:91:15 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+  > 91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+       │               ^^^^^^^
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+  
+  i The backreference refers to this group.
+  
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+  > 91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+       │   ^^^^^^^^^^^
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+  
+  i The alternate separator is here.
+  
+    89 │ /\k<foo>((?<foo>bar)|(?<foo>baz)|(?<foo>qux))/v;
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+  > 91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+       │              ^
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:92:15 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+  > 92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+       │               ^^^^^^^
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+    94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+  
+  i The backreference refers to this group.
+  
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+  > 92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+       │   ^^^^^^^^^^^
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+    94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+  
+  i The alternate separator is here.
+  
+    90 │ /((?<foo>bar)|\k<foo>(?<foo>baz)|(?<foo>qux))/v;
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+  > 92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+       │              ^
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+    94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:93:25 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group placed in another alternate branch, making it always match an empty string.
+  
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+  > 93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+       │                         ^^^^^^^
+    94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+    95 │ /((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+  
+  i The backreference refers to this group.
+  
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+  > 93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+       │   ^^^^^^^^^^^
+    94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+    95 │ /((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+  
+  i The alternate separator is here.
+  
+    91 │ /((?<foo>bar)|\k<foo>|(?<foo>baz))/v;
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+  > 93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+       │              ^
+    94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+    95 │ /((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+  
+  i Remove the backreference or place it in the same alternate branch as the group.
+  
+
+```
+
+```
+invalid.js:94:31 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group that appears before itself in a lookbehind assertion, making it always match an empty string.
+  
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+  > 94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+       │                               ^^^^^^^
+    95 │ /((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+    96 │ 
+  
+  i The backreference refers to this group.
+  
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+  > 94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+       │       ^^^^^^^^^^^
+    95 │ /((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+    96 │ 
+  
+  i The lookbehind assertion is here.
+  
+    92 │ /((?<foo>bar)|\k<foo>|(?<foo>baz)|(?<foo>qux))/v;
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+  > 94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+       │  ^^^^
+    95 │ /((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+    96 │ 
+  
+  i Remove the backreference or place it after the group it refers to.
+  
+
+```
+
+```
+invalid.js:95:35 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference refers to a group within a negated assertion, making it always match an empty string.
+  
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+    94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+  > 95 │ /((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+       │                                   ^^^^^^^
+    96 │ 
+  
+  i The backreference refers to this group.
+  
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+    94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+  > 95 │ /((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+       │      ^^^^^^^^^^^
+    96 │ 
+  
+  i The negated assertion is here.
+  
+    93 │ /((?<foo>bar)|(?<foo>baz\k<foo>)|(?<foo>qux\k<foo>))/v;
+    94 │ /(?<=((?<foo>bar)|(?<foo>baz))\k<foo>)/v;
+  > 95 │ /((?!(?<foo>bar))|(?!(?<foo>baz)))\k<foo>/v;
+       │   ^^^
+    96 │ 
+  
+  i Remove the backreference or place it in the negated assertion.
+  
+
+```

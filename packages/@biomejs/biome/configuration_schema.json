@@ -2921,6 +2921,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessBackrefInRegex": {
+					"description": "Disallow useless backreferences in regular expression literals that always match an empty string.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessEscapeInRegex": {
 					"description": "Disallow unnecessary escape sequence in regular expression literals.",
 					"anyOf": [
