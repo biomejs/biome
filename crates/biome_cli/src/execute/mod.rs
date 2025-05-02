@@ -602,6 +602,8 @@ pub fn execute_mode(
     // We join the duration of the scanning with the duration of the traverse.
     summary.scanner_duration = scanner_duration;
     let console = session.app.console;
+    let workspace = &*session.app.workspace;
+    let fs = workspace.fs();
     let errors = summary.errors;
     let skipped = summary.skipped;
     let processed = summary.changed + summary.unchanged;
@@ -629,6 +631,7 @@ pub fn execute_mode(
                     execution: execution.clone(),
                     evaluated_paths,
                     verbose: cli_options.verbose,
+                    working_directory: fs.working_directory().clone(),
                 };
                 reporter.write(&mut ConsoleReporterVisitor(console))?;
             }

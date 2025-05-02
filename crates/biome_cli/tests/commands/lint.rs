@@ -3925,7 +3925,11 @@ fn should_report_when_schema_version_mismatch() {
 }
         "#,
     );
-    let (fs, result) = run_cli(fs, &mut console, Args::from([("check")].as_slice()));
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", biome_json.as_str()].as_slice()),
+    );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(

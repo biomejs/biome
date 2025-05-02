@@ -322,9 +322,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                         continue;
                     }
                     if err.severity() == Severity::Warning {
-                        // *warnings += 1;
                         self.warnings.fetch_add(1, Ordering::Relaxed);
-                        // self.warnings.set(self.warnings.get() + 1)
                     }
                     if let Some(Resource::File(file_path)) = location.resource.as_ref() {
                         // Retrieves the file name from the file ID cache, if it's a miss
@@ -365,6 +363,16 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     diagnostics,
                     skipped_diagnostics,
                 } => {
+                    // we transform the file string into a path object so we can correctly strip
+                    // the working directory without having leading slash in the file name
+                    let file_path = Utf8PathBuf::from(file_path);
+                    let file_path = self
+                        .working_directory
+                        .as_ref()
+                        .and_then(|wd| file_path.strip_prefix(wd.as_str()).ok())
+                        .map(|path| path.to_string())
+                        .unwrap_or(file_path.to_string());
+
                     self.not_printed_diagnostics
                         .fetch_add(skipped_diagnostics, Ordering::Relaxed);
 
@@ -383,12 +391,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                 self.warnings.fetch_add(1, Ordering::Relaxed);
                             }
 
-                            let file_path = self
-                                .working_directory
-                                .and_then(|wd| file_path.strip_prefix(wd.as_str()))
-                                .unwrap_or(file_path.as_str());
                             let diag = diag
-                                .with_file_path(file_path)
+                                .with_file_path(file_path.as_str())
                                 .with_file_source_code(&content);
                             diagnostics_to_print.push(diag);
                         }
@@ -408,12 +412,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             let should_print = self.should_print();
 
                             if should_print {
-                                let file_path = self
-                                    .working_directory
-                                    .and_then(|wd| file_path.strip_prefix(wd.as_str()))
-                                    .unwrap_or(file_path.as_str());
                                 let diag = diag
-                                    .with_file_path(file_path)
+                                    .with_file_path(file_path.as_str())
                                     .with_file_source_code(&content);
                                 diagnostics_to_print.push(diag)
                             }
@@ -539,9 +539,20 @@ impl TraversalOptions<'_, '_> {
     }
 
     pub(crate) fn miss_handler_err(&self, err: WorkspaceError, biome_path: &BiomePath) {
+        let file_path = self
+            .fs
+            .working_directory()
+            .as_ref()
+            .and_then(|wd| {
+                biome_path
+                    .strip_prefix(wd)
+                    .ok()
+                    .map(|path| path.to_string())
+            })
+            .unwrap_or(biome_path.to_string());
         self.push_diagnostic(
             err.with_category(category!("files/missingHandler"))
-                .with_file_path(biome_path.to_string())
+                .with_file_path(file_path)
                 .with_tags(DiagnosticTags::VERBOSE),
         );
     }
