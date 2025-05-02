@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-02.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+type Args = 1;
+function foo<T extends (Args: any) => void>(arg: T) {}
+
+```

@@ -1,5 +1,5 @@
 use super::*;
-use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange, TsConditionalType};
+use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange, TsConditionalType, TsTypeParameterName};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::hash_map::Entry;
 
@@ -189,6 +189,16 @@ impl SemanticModelBuilder {
                     if let Some(node) = JsIdentifierBinding::cast_ref(node) {
                         if let Ok(name_token) = node.name_token() {
                             let name = name_token.token_text_trimmed();
+                            scope.bindings_by_name.insert(name, binding_id);
+                        }
+                    } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
+                        if let Ok(name_token) = node.name_token() {
+                            let name = name_token.token_text_trimmed();
+                            scope.bindings_by_name.insert(name, binding_id);
+                        }
+                    } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
+                        if let Ok(ident_token) = node.ident_token() {
+                            let name = ident_token.token_text_trimmed();
                             scope.bindings_by_name.insert(name, binding_id);
                         }
                     }
