@@ -270,7 +270,7 @@ impl TraversalContext for ScanContext<'_> {
         if self.scan_kind.is_known_files() {
             (path.is_ignore() || path.is_config() || path.is_manifest()) && !path.is_dependency()
         } else if path.is_dependency() {
-            path.is_manifest() || path.is_type_declaration()
+            path.is_type_declaration()
         } else {
             DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
         }

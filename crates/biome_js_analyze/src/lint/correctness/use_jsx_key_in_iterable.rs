@@ -51,7 +51,7 @@ declare_lint_rule! {
     ///         "checkShorthandFragments": true
     ///     }
     /// }
-    /// ```    
+    /// ```
     /// ```jsx,expect_diagnostic,use_options
     /// data.map((x) => <>{x}</>);
     /// ```
