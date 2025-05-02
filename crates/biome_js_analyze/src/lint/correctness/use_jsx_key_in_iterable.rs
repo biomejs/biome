@@ -40,21 +40,18 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
+    /// ### checkShorthandFragments
+    ///
+    /// React fragments can not only be created with `<React.Fragment>`, but also with shorthand
+    /// fragments (`<></>`). To also check if those require a key, pass `true` to this option.
+    ///
     /// ```json,options
     /// {
     ///     "options": {
     ///         "checkShorthandFragments": true
     ///     }
     /// }
-    /// ```
-    ///
-    /// ### checkShorthandFragments
-    ///
-    /// React fragments can not only be created with `<React.Fragment>`, but also with shorthand
-    /// fragments (`<></>`). To also check if those require a key, pass `true` to this option.
-    ///
-    /// #### Usage example
-    ///
+    /// ```    
     /// ```jsx,expect_diagnostic,use_options
     /// data.map((x) => <>{x}</>);
     /// ```
