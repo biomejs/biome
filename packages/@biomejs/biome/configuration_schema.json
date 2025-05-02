@@ -1082,7 +1082,7 @@
 				"useJsxKeyInIterable": {
 					"description": "Disallow missing key props in iterators/collection literals.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UseJsxKeyInIterableConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4052,6 +4052,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseJsxKeyInIterableOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseJsxKeyInIterableOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseSelfClosingElementsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -5351,6 +5366,23 @@
 			"properties": {
 				"forceJsExtensions": {
 					"description": "If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseJsxKeyInIterableConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseJsxKeyInIterableOptions" }
+			]
+		},
+		"UseJsxKeyInIterableOptions": {
+			"type": "object",
+			"properties": {
+				"checkShorthandFragments": {
+					"description": "Set to `true` to check shorthand fragments (`<></>`)",
 					"default": false,
 					"type": "boolean"
 				}

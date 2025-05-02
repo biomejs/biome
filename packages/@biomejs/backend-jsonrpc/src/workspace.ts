@@ -1451,7 +1451,7 @@ export interface Correctness {
 	/**
 	 * Disallow missing key props in iterators/collection literals.
 	 */
-	useJsxKeyInIterable?: RuleConfiguration_for_Null;
+	useJsxKeyInIterable?: RuleConfiguration_for_UseJsxKeyInIterableOptions;
 	/**
 	 * Enforce "for" loop update clause moving the counter in the right direction.
 	 */
@@ -2362,6 +2362,9 @@ export type RuleConfiguration_for_DeprecatedHooksOptions =
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
+export type RuleConfiguration_for_UseJsxKeyInIterableOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseJsxKeyInIterableOptions;
 export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
@@ -2575,6 +2578,16 @@ export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	 * Rule's options
 	 */
 	options: UseImportExtensionsOptions;
+}
+export interface RuleWithOptions_for_UseJsxKeyInIterableOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseJsxKeyInIterableOptions;
 }
 export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	/**
@@ -2920,6 +2933,12 @@ export interface UseImportExtensionsOptions {
 	 * If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.
 	 */
 	forceJsExtensions?: boolean;
+}
+export interface UseJsxKeyInIterableOptions {
+	/**
+	 * Set to `true` to check shorthand fragments (`<></>`)
+	 */
+	checkShorthandFragments?: boolean;
 }
 /**
  * Rule's options
