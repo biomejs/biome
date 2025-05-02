@@ -1,6 +1,7 @@
 //! Implementation of the [FileSystem] and related traits for the underlying OS filesystem
 use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 use crate::fs::OpenOptions;
+use crate::normalize_path;
 use crate::{
     BiomePath, FileSystem, MemoryFileSystem,
     fs::{TraversalContext, TraversalScope},
@@ -456,7 +457,7 @@ fn follow_symlink(
     // Make sure relative symlinks are resolved:
     let target_path = path
         .parent()
-        .map(|parent_dir| parent_dir.join(&target_path))
+        .map(|parent_dir| normalize_path(&parent_dir.join(&target_path)))
         .unwrap_or(target_path);
 
     let target_file_type = match fs::symlink_metadata(&target_path) {

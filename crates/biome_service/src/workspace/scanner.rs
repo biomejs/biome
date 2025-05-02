@@ -260,18 +260,17 @@ impl TraversalContext for ScanContext<'_> {
             return false;
         }
 
-        if path.is_dir() {
+        if path
+            .symlink_metadata()
+            .is_ok_and(|metadata| metadata.is_dir())
+        {
             return true;
         }
+
         if self.scan_kind.is_known_files() {
-            // we don't need to check files inside node_modules if we are in known files mode
-            if path.is_dependency() {
-                false
-            } else {
-                path.is_ignore() || path.is_config() || path.is_manifest()
-            }
+            (path.is_ignore() || path.is_config() || path.is_manifest()) && !path.is_dependency()
         } else if path.is_dependency() {
-            path.ends_with(".d.ts")
+            path.is_manifest() || path.is_type_declaration()
         } else {
             DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
         }
