@@ -11,7 +11,7 @@ use biome_js_type_info::{
 };
 use biome_rowan::Text;
 
-use crate::ModuleGraph;
+use crate::{JsExport, ModuleGraph};
 
 use super::{JsModuleInfo, scope::JsScope};
 
@@ -133,21 +133,35 @@ impl AdHocScopeResolver {
                 }
             };
 
-            let export = module.find_exported_symbol(self.module_graph.as_ref(), name)?;
-            return match export.ty {
+            let export = match module.exports.get(name) {
+                Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
+                Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                    qualifier = Cow::Owned(TypeImportQualifier {
+                        symbol: reexport.import.symbol.clone(),
+                        resolved_path: reexport.import.resolved_path.clone(),
+                    });
+                    continue;
+                }
+                None => {
+                    // TODO: Follow blanket reexports.
+                    return None;
+                }
+            };
+
+            return match &export.ty {
                 TypeReference::Qualifier(_qualifier) => {
                     // If it wasn't resolved before exporting, we can't
                     // help it anymore.
                     None
                 }
                 TypeReference::Resolved(resolved_id) => {
-                    let data = module.get_by_resolved_id(resolved_id)?;
+                    let data = module.get_by_resolved_id(*resolved_id)?;
                     let data = data.clone().with_module_id(module_id);
                     self.find_type(&data)
                         .map(|type_id| ResolvedTypeId::new(TypeResolverLevel::AdHoc, type_id))
                 }
                 TypeReference::Import(import) => {
-                    qualifier = Cow::Owned(import);
+                    qualifier = Cow::Borrowed(import);
                     continue;
                 }
                 TypeReference::Unknown => None,
@@ -223,19 +237,34 @@ impl TypeResolver for AdHocScopeResolver {
             }
         };
 
-        let export = module.find_exported_symbol(self.module_graph.as_ref(), name)?;
-        match export.ty {
+        let export = match module.exports.get(name) {
+            Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
+            Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                return Some(
+                    self.register_and_resolve(TypeData::reference(TypeImportQualifier {
+                        symbol: reexport.import.symbol.clone(),
+                        resolved_path: reexport.import.resolved_path.clone(),
+                    })),
+                );
+            }
+            None => {
+                // TODO: Follow blanket reexports.
+                return None;
+            }
+        };
+
+        match &export.ty {
             TypeReference::Qualifier(_qualifier) => {
                 // If it wasn't resolved before exporting, we can't
                 // help it anymore.
                 None
             }
             TypeReference::Resolved(resolved) => {
-                let data = module.resolve_and_get_with_module_id(&resolved.into(), module_id)?;
+                let data = module.resolve_and_get_with_module_id(&(*resolved).into(), module_id)?;
                 Some(self.register_and_resolve(data.clone().with_module_id(module_id)))
             }
             TypeReference::Import(import) => {
-                Some(self.register_and_resolve(TypeData::reference(import)))
+                Some(self.register_and_resolve(TypeData::reference(import.clone())))
             }
             TypeReference::Unknown => None,
         }
@@ -256,9 +285,24 @@ impl TypeResolver for AdHocScopeResolver {
         loop {
             if let Some(binding) = scope.get_binding(identifier.text()) {
                 return if binding.is_imported() {
-                    self.modules[0]
-                        .find_exported_symbol(self.module_graph.as_ref(), &binding.name())
-                        .and_then(|export| self.resolve_reference(&export.ty))
+                    match self.modules[0].exports.get(&binding.name()) {
+                        Some(JsExport::Own(export) | JsExport::OwnType(export)) => {
+                            self.resolve_reference(&export.ty)
+                        }
+                        Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                            self.resolve_reference(
+                                &TypeImportQualifier {
+                                    symbol: reexport.import.symbol.clone(),
+                                    resolved_path: reexport.import.resolved_path.clone(),
+                                }
+                                .into(),
+                            )
+                        }
+                        None => {
+                            // TODO: Follow blanket reexports.
+                            None
+                        }
+                    }
                 } else {
                     self.resolve_reference(binding.ty())
                 };
