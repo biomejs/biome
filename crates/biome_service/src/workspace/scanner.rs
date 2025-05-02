@@ -260,7 +260,10 @@ impl TraversalContext for ScanContext<'_> {
             return false;
         }
 
-        if path.is_dir() {
+        if path
+            .symlink_metadata()
+            .is_ok_and(|metadata| metadata.is_dir())
+        {
             return true;
         }
 

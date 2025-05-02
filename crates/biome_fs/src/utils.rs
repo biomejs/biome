@@ -25,7 +25,6 @@ pub fn ensure_cache_dir() -> Utf8PathBuf {
     Utf8PathBuf::from_path_buf(path).expect("Failed to parse cache directory path")
 }
 
-
 /// Normalizes the given `path` without requiring filesystem access.
 ///
 /// This only normalizes `.` and `..` entries, but does not resolve symlinks.
