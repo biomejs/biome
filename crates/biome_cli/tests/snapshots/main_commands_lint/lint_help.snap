@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 # Emitted Messages
 
@@ -53,7 +52,7 @@ Global options applied to all commands
         --max-diagnostics=<none|<NUMBER>>  Cap the amount of diagnostics displayed. When `none` is
                               provided, the limit is lifted.
                               [default: 20]
-        --skip-errors         Skip over files containing syntax errors instead of emitting an error
+        --skip-parse-errors   Skip over files containing syntax errors instead of emitting an error
                               diagnostic.
         --no-errors-on-unmatched  Silence errors that would be emitted in case no files were
                               processed during the execution of the command.

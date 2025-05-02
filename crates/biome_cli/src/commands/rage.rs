@@ -238,7 +238,13 @@ impl Display for RageConfiguration<'_> {
 
                     let config_path = file_path.as_ref().map_or_else(
                         || directory_path.as_ref().unwrap().as_str(),
-                        |path| path.as_str(),
+                        |path| {
+                            self.fs
+                                .working_directory()
+                                .and_then(|wd| path.strip_prefix(wd).ok())
+                                .unwrap_or(path)
+                                .as_str()
+                        },
                     );
 
                     markup! (

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -10,12 +9,7 @@ snapshot_kind: text
   "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
   "files": {
     "maxSize": 5242880,
-    "includes": [
-      "**",
-      "!**/__fixtures__/**",
-      "!**/package.json",
-      "**/node_modules/**"
-    ]
+    "includes": ["**", "!**/__fixtures__/**", "!**/package.json"]
   },
   "formatter": {
     "enabled": true,

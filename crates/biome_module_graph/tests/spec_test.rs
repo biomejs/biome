@@ -1,12 +1,17 @@
 mod snap;
 
+use std::sync::Arc;
+
 use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
+use biome_js_type_info::{Type, TypeResolver};
 use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
+use biome_module_graph::{
+    AdHocScopeResolver, ImportSymbol, JsImport, JsReexport, ModuleGraph, ResolvedPath,
+};
 use biome_module_graph::{JsExport, JsdocComment};
-use biome_module_graph::{JsImport, JsImportSymbol, JsReexport, JsResolvedPath, ModuleGraph};
 use biome_package::{Dependencies, PackageJson, Version};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
@@ -101,7 +106,7 @@ fn test_resolve_relative_import() {
         file_imports.static_imports.get("bar"),
         Some(&JsImport {
             specifier: "./bar.ts".into(),
-            resolved_path: JsResolvedPath::from_path("/src/bar.ts"),
+            resolved_path: ResolvedPath::from_path("/src/bar.ts"),
             symbol: "bar".into()
         })
     );
@@ -127,7 +132,7 @@ fn test_resolve_package_import() {
         file_imports.static_imports.get("foo"),
         Some(&JsImport {
             specifier: "shared".into(),
-            resolved_path: JsResolvedPath::from_path("/node_modules/shared/dist/index.js"),
+            resolved_path: ResolvedPath::from_path("/node_modules/shared/dist/index.js"),
             symbol: "foo".into()
         })
     );
@@ -209,9 +214,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         file_imports.static_imports.get("sharedFoo"),
         Some(&JsImport {
             specifier: "shared".into(),
-            resolved_path: JsResolvedPath::from_path(format!(
-                "{fixtures_path}/shared/dist/index.js"
-            )),
+            resolved_path: ResolvedPath::from_path(format!("{fixtures_path}/shared/dist/index.js")),
             symbol: "sharedFoo".into()
         })
     );
@@ -219,9 +222,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         file_imports.static_imports.get("bar"),
         Some(&JsImport {
             specifier: "./bar".into(),
-            resolved_path: JsResolvedPath::from_path(format!(
-                "{fixtures_path}/frontend/src/bar.ts"
-            )),
+            resolved_path: ResolvedPath::from_path(format!("{fixtures_path}/frontend/src/bar.ts")),
             symbol: "bar".into()
         })
     );
@@ -376,7 +377,7 @@ fn test_resolve_exports() {
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
-                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
+                resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
                 symbol: "ohNo".into()
             },
             jsdoc_comment: None
@@ -387,8 +388,8 @@ fn test_resolve_exports() {
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
-                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
-                symbol: JsImportSymbol::All,
+                resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
+                symbol: ImportSymbol::All,
             },
             jsdoc_comment: Some(JsdocComment::from_comment_text(
                 "/**\n* Hello, namespace 2.\n*/"
@@ -405,8 +406,8 @@ fn test_resolve_exports() {
         &[JsReexport {
             import: JsImport {
                 specifier: "./reexports".into(),
-                resolved_path: JsResolvedPath::from_path("/src/reexports.ts"),
-                symbol: JsImportSymbol::All,
+                resolved_path: ResolvedPath::from_path("/src/reexports.ts"),
+                symbol: ImportSymbol::All,
             },
             jsdoc_comment: None
         }]
@@ -421,8 +422,8 @@ fn test_resolve_exports() {
         Some(&JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
-                resolved_path: JsResolvedPath::from_path("/src/renamed-reexports.ts"),
-                symbol: JsImportSymbol::All,
+                resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
+                symbol: ImportSymbol::All,
             },
             jsdoc_comment: Some(JsdocComment::from_comment_text(
                 "/**\n* Hello, namespace 1.\n*/"
@@ -478,4 +479,125 @@ fn test_resolve_export_types() {
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
 
     snapshot.assert_snapshot("test_resolve_export_types");
+}
+
+#[test]
+fn test_resolve_promise_export() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            async function returnsPromise() {
+                return 'value';
+            }
+            
+            export const promise = returnsPromise();
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_promise_export");
+}
+
+#[test]
+fn test_resolve_export_type_referencing_imported_type() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/promisedResult.ts".into(),
+        "export type PromisedResult = Promise<{ result: true | false }>;\n",
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import type { PromisedResult } from "./promisedResult.ts";
+
+        function returnPromiseResult(): PromisedResult {
+            return new Promise(resolve => resolve({ result: true }));
+        }
+
+        export { returnPromiseResult };
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/src/promisedResult.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+
+    snapshot.assert_snapshot("test_resolve_export_type_referencing_imported_type");
+}
+
+#[test]
+fn test_resolve_promise_from_imported_function_returning_imported_promise_type() {
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/promisedResult.ts".into(),
+        "export type PromisedResult = Promise<{ result: true | false }>;\n",
+    );
+    fs.insert(
+        "/src/returnPromiseResult.ts".into(),
+        r#"import type { PromisedResult } from "./promisedResult.ts";
+
+        function returnPromiseResult(): PromisedResult {
+            return new Promise(resolve => resolve({ result: true }));
+        }
+
+        export { returnPromiseResult };
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
+
+        const promise = returnPromiseResult();
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/src/promisedResult.ts"),
+        BiomePath::new("/src/returnPromiseResult.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let global_scope = index_module.global_scope();
+    let mut resolver =
+        AdHocScopeResolver::from_scope_in_module(global_scope, index_module, module_graph.clone());
+    resolver.run_inference();
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
+    snapshot.assert_snapshot(
+        "test_resolve_promise_from_imported_function_returning_imported_promise_type",
+    );
+
+    let resolved_id = resolver
+        .resolve_type_of(&Text::Static("promise"))
+        .expect("promise variable not found");
+    let ty = resolver
+        .get_by_resolved_id(resolved_id)
+        .expect("cannot find type data")
+        .clone();
+    let _ty_string = format!("{ty:?}"); // for debugging
+    let ty = ty.inferred(&mut resolver);
+    let _ty_string = format!("{ty:?}"); // for debugging
+    let ty = Type::from_data(Box::new(resolver), ty);
+    assert!(ty.is_promise_instance());
 }

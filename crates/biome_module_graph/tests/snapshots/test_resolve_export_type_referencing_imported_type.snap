@@ -1,0 +1,96 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+import type { PromisedResult } from "./promisedResult.ts";
+
+function returnPromiseResult(): PromisedResult {
+	return new Promise((resolve) => resolve({ result: true }));
+}
+
+export { returnPromiseResult };
+```
+
+## Module Info
+
+```
+Exports {
+  "returnPromiseResult" => {
+    ExportOwnExport => JsOwnExport(
+      Module(0) TypeId(2)
+      Local name: returnPromiseResult
+    )
+  }
+}
+Imports {
+  "PromisedResult" => {
+    Specifier: "./promisedResult.ts"
+    Resolved path: "/src/promisedResult.ts"
+    Import Symbol: PromisedResult
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => unknown
+
+Module TypeId(1) => instanceof Import Symbol: PromisedResult from "/src/promisedResult.ts"
+
+Module TypeId(2) => sync Function "returnPromiseResult" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(1)
+}
+```
+
+# `/src/promisedResult.ts`
+
+## Source
+
+```ts
+export type PromisedResult = Promise<{ result: true | false }>;
+```
+
+## Module Info
+
+```
+Exports {
+  "PromisedResult" => {
+    ExportOwnExport => JsOwnExport(
+      Module(0) TypeId(4)
+      Local name: PromisedResult
+    )
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => value: true
+
+Module TypeId(1) => value: false
+
+Module TypeId(2) => Module(0) TypeId(0) | Module(0) TypeId(1)
+
+Module TypeId(3) => Object {
+  prototype: No prototype
+  members: {TypeMembers(required property "result": Module(0) TypeId(2))}
+}
+
+Module TypeId(4) => instanceof Promise<T = Module(0) TypeId(3)>
+
+Module TypeId(5) => instanceof Promise<T = Module(0) TypeId(3)>
+```

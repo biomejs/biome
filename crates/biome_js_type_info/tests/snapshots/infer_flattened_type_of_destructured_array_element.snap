@@ -1,22 +1,31 @@
 ---
-source: crates/biome_js_type_info/tests/utils/mod.rs
+source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
+## Input
+
 ```ts
 const [a]: Array<string> = [];
 
 ```
 
-```
-a => Union(
-    [
-        Type(
-            String,
-        ),
-        Type(
-            Undefined,
-        ),
-    ],
-)
+## Result
 
+```
+a => Global TypeId(7) | undefined
+
+```
+
+## Registered types
+
+```
+Global TypeId(7) => string
+
+Global TypeId(8) => instanceof Array<T = Global TypeId(7)>
+
+Global TypeId(9) => Global TypeId(7) | undefined
+
+Global TypeId(10) => instanceof Array<T = Global TypeId(7)>
+
+Global TypeId(11) => Global TypeId(7) | undefined
 ```

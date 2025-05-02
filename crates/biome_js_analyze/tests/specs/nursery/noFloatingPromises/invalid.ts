@@ -1,3 +1,5 @@
+import { returnPromiseResult } from "./returnPromiseResult.ts";
+
 async function returnsPromise(): Promise<string> {
 	return "value";
 }
@@ -329,3 +331,6 @@ async function testDestructuringAndCallingReturnsPromiseFromRest({
 		.then(() => {})
 		.finally(() => {});
 }
+
+// TODO: Should throw a diagnostic through project-level resolution.
+returnPromiseResult();

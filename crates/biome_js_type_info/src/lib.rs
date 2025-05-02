@@ -7,6 +7,7 @@ mod local_inference;
 mod resolver;
 mod type_info;
 
+pub use globals::{GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GlobalsResolver, NUM_PREDEFINED_TYPES};
 pub use resolver::*;
 pub use type_info::*;
 

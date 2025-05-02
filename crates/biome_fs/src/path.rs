@@ -232,14 +232,17 @@ impl BiomePath {
         }
     }
 
+    #[inline(always)]
     pub fn is_config(&self) -> bool {
         self.kind.contains(FileKind::Config)
     }
 
+    #[inline(always)]
     pub fn is_manifest(&self) -> bool {
         self.kind.contains(FileKind::Manifest)
     }
 
+    #[inline(always)]
     pub fn is_ignore(&self) -> bool {
         self.kind.contains(FileKind::Ignore)
     }
@@ -254,7 +257,15 @@ impl BiomePath {
             .components()
             .any(|component| component.as_str() == "node_modules")
     }
+
+    /// Returns `true` if the path has one of the recognised extensions for
+    /// TypeScript type declarations.
+    pub fn is_type_declaration(&self) -> bool {
+        let bytes = self.path.as_os_str().as_encoded_bytes();
+        bytes.ends_with(b".d.ts") || bytes.ends_with(b".d.cts") || bytes.ends_with(b".d.mts")
+    }
 }
+
 impl From<Utf8PathBuf> for BiomePath {
     fn from(value: Utf8PathBuf) -> Self {
         Self::new(value)

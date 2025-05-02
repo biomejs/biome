@@ -218,6 +218,7 @@ pub type NoSelfCompare =
     <lint::suspicious::no_self_compare::NoSelfCompare as biome_analyze::Rule>::Options;
 pub type NoSetterReturn =
     <lint::correctness::no_setter_return::NoSetterReturn as biome_analyze::Rule>::Options;
+pub type NoShadow = <lint::nursery::no_shadow::NoShadow as biome_analyze::Rule>::Options;
 pub type NoShadowRestrictedNames = < lint :: suspicious :: no_shadow_restricted_names :: NoShadowRestrictedNames as biome_analyze :: Rule > :: Options ;
 pub type NoShoutyConstants =
     <lint::style::no_shouty_constants::NoShoutyConstants as biome_analyze::Rule>::Options;
@@ -265,6 +266,7 @@ pub type NoUnusedVariables =
     <lint::correctness::no_unused_variables::NoUnusedVariables as biome_analyze::Rule>::Options;
 pub type NoUnwantedPolyfillio =
     <lint::nursery::no_unwanted_polyfillio::NoUnwantedPolyfillio as biome_analyze::Rule>::Options;
+pub type NoUselessBackrefInRegex = < lint :: nursery :: no_useless_backref_in_regex :: NoUselessBackrefInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoUselessCatch =
     <lint::complexity::no_useless_catch::NoUselessCatch as biome_analyze::Rule>::Options;
 pub type NoUselessConstructor = < lint :: complexity :: no_useless_constructor :: NoUselessConstructor as biome_analyze :: Rule > :: Options ;

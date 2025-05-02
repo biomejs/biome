@@ -1,0 +1,47 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+async function returnsPromise() {
+	return "value";
+}
+
+export const promise = returnsPromise();
+```
+
+## Module Info
+
+```
+Exports {
+  "promise" => {
+    ExportOwnExport => JsOwnExport(
+      Module(0) TypeId(2)
+      Local name: promise
+    )
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof Promise
+
+Module TypeId(1) => async Function "returnsPromise" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Module TypeId(2) => instanceof Promise
+```

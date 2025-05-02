@@ -1,11 +1,14 @@
 use std::{collections::VecDeque, iter::FusedIterator, sync::Arc};
 
-use biome_js_semantic::{BindingId, ReferenceId, ScopeId};
+use biome_js_semantic::ScopeId;
 use biome_js_syntax::TextRange;
 use biome_rowan::TokenText;
 use rustc_hash::FxHashMap;
 
-use super::{JsModuleInfoInner, binding::JsBinding};
+use super::{
+    JsModuleInfoInner,
+    binding::{BindingId, JsBinding},
+};
 
 #[derive(Debug)]
 pub struct JsScopeData {
@@ -19,12 +22,6 @@ pub struct JsScopeData {
     pub bindings: Vec<BindingId>,
     // Map pointing to the [bindings] vec of each bindings by its name
     pub bindings_by_name: FxHashMap<TokenText, BindingId>,
-    // All read references of a scope
-    pub read_references: Vec<ReferenceId>,
-    // All write references of a scope
-    pub _write_references: Vec<ReferenceId>,
-    // Identify if this scope is from a closure or not
-    pub _is_closure: bool,
 }
 
 /// Provides all information regarding a specific scope.

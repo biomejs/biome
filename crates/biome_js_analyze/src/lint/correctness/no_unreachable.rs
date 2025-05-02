@@ -87,7 +87,6 @@ impl Rule for NoUnreachable {
                 "This code will never be reached ..."
             },
         )
-        .description("This code is unreachable")
         .unnecessary();
 
         // Pluralize and adapt the error message accordingly based on the

@@ -47,11 +47,13 @@ use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
-    AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, LanguageVariant, TextRange, TextSize,
+    AnyJsRoot, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
+    JsLanguage, JsSyntaxNode, JsVariableDeclarator, LanguageVariant, TextRange, TextSize,
     TokenAtOffset,
 };
+use biome_js_type_info::{GlobalsResolver, NUM_PREDEFINED_TYPES, TypeData, TypeResolver};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache};
+use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache, WalkEvent};
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
@@ -481,6 +483,9 @@ impl ExtensionHandler for JsFileHandler {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: Some(debug_control_flow),
                 debug_formatter_ir: Some(debug_formatter_ir),
+                debug_type_info: Some(debug_type_info),
+                debug_registered_types: Some(debug_registered_types),
+                debug_semantic_model: Some(debug_semantic_model),
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
@@ -628,6 +633,84 @@ fn debug_formatter_ir(
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
+}
+
+fn debug_type_info(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+    let tree: AnyJsRoot = parse.tree();
+    let mut result = String::new();
+    let preorder = tree.syntax().preorder();
+
+    let mut resolver = GlobalsResolver::default();
+
+    for event in preorder {
+        match event {
+            WalkEvent::Enter(node) => {
+                if let Some(node) = JsVariableDeclarator::cast_ref(&node) {
+                    if let Some(ty) = TypeData::from_js_variable_declarator(&mut resolver, &node) {
+                        result.push_str(&ty.to_string());
+                        result.push('\n');
+                    }
+                } else if let Some(function) = JsFunctionDeclaration::cast_ref(&node) {
+                    result.push_str(
+                        &TypeData::from_js_function_declaration(&mut resolver, &function)
+                            .to_string(),
+                    );
+                    result.push('\n');
+                } else if let Some(class) = JsClassDeclaration::cast_ref(&node) {
+                    result.push_str(
+                        &TypeData::from_js_class_declaration(&mut resolver, &class).to_string(),
+                    );
+                    result.push('\n');
+                } else if let Some(expression) = JsClassExpression::cast_ref(&node) {
+                    result.push_str(
+                        &TypeData::from_js_class_expression(&mut resolver, &expression).to_string(),
+                    );
+                    result.push('\n');
+                }
+            }
+            WalkEvent::Leave(_) => {}
+        }
+    }
+
+    Ok(result)
+}
+
+fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+    let tree: AnyJsRoot = parse.tree();
+    let mut result = String::new();
+    let preorder = tree.syntax().preorder();
+
+    let mut resolver = GlobalsResolver::default();
+    for event in preorder {
+        match event {
+            WalkEvent::Enter(node) => {
+                if let Some(node) = JsVariableDeclarator::cast_ref(&node) {
+                    TypeData::from_js_variable_declarator(&mut resolver, &node);
+                } else if let Some(function) = JsFunctionDeclaration::cast_ref(&node) {
+                    TypeData::from_js_function_declaration(&mut resolver, &function);
+                } else if let Some(class) = JsClassDeclaration::cast_ref(&node) {
+                    TypeData::from_js_class_declaration(&mut resolver, &class);
+                } else if let Some(expression) = JsClassExpression::cast_ref(&node) {
+                    TypeData::from_js_class_expression(&mut resolver, &expression);
+                }
+            }
+            WalkEvent::Leave(_) => {}
+        }
+    }
+
+    for (i, ty) in resolver.registered_types().iter().enumerate() {
+        // TODO: Should we include the predefined types in debug info too?
+        let id = i + NUM_PREDEFINED_TYPES;
+        result.push_str(&format!("\nTypeId({id}) => {ty}\n"));
+    }
+
+    Ok(result)
+}
+
+fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+    let tree: AnyJsRoot = parse.tree();
+    let model = semantic_model(&tree, SemanticModelOptions::default());
+    Ok(model.to_string())
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

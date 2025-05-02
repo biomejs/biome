@@ -1849,11 +1849,8 @@
 		"ImportTypeOptions": {
 			"description": "Rule's options.",
 			"type": "object",
-			"properties": {
-				"style": {
-					"anyOf": [{ "$ref": "#/definitions/Style2" }, { "type": "null" }]
-				}
-			},
+			"required": ["style"],
+			"properties": { "style": { "$ref": "#/definitions/Style2" } },
 			"additionalProperties": false
 		},
 		"IndentScriptAndStyle": {
@@ -2847,6 +2844,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noShadow": {
+					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noStaticElementInteractions": {
 					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.",
 					"anyOf": [
@@ -2912,6 +2916,13 @@
 				},
 				"noUnwantedPolyfillio": {
 					"description": "Prevent duplicate polyfills from Polyfill.io.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessBackrefInRegex": {
+					"description": "Disallow useless backreferences in regular expression literals that always match an empty string.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

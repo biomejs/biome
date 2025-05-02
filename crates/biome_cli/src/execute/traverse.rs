@@ -81,7 +81,6 @@ pub(crate) fn traverse(
     let fs = workspace.fs();
 
     let max_diagnostics = execution.get_max_diagnostics();
-    let remaining_diagnostics = AtomicU32::new(max_diagnostics);
 
     let working_directory = fs.working_directory();
     let printer = DiagnosticsPrinter::new(execution, working_directory.as_deref())
@@ -111,7 +110,6 @@ pub(crate) fn traverse(
                 unchanged: &unchanged,
                 skipped: &skipped,
                 messages: sender,
-                remaining_diagnostics: &remaining_diagnostics,
                 evaluated_paths: RwLock::default(),
             },
         );
@@ -324,9 +322,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                         continue;
                     }
                     if err.severity() == Severity::Warning {
-                        // *warnings += 1;
                         self.warnings.fetch_add(1, Ordering::Relaxed);
-                        // self.warnings.set(self.warnings.get() + 1)
                     }
                     if let Some(Resource::File(file_path)) = location.resource.as_ref() {
                         // Retrieves the file name from the file ID cache, if it's a miss
@@ -367,6 +363,16 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     diagnostics,
                     skipped_diagnostics,
                 } => {
+                    // we transform the file string into a path object so we can correctly strip
+                    // the working directory without having leading slash in the file name
+                    let file_path = Utf8PathBuf::from(file_path);
+                    let file_path = self
+                        .working_directory
+                        .as_ref()
+                        .and_then(|wd| file_path.strip_prefix(wd.as_str()).ok())
+                        .map(|path| path.to_string())
+                        .unwrap_or(file_path.to_string());
+
                     self.not_printed_diagnostics
                         .fetch_add(skipped_diagnostics, Ordering::Relaxed);
 
@@ -385,12 +391,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                 self.warnings.fetch_add(1, Ordering::Relaxed);
                             }
 
-                            let file_path = self
-                                .working_directory
-                                .and_then(|wd| file_path.strip_prefix(wd.as_str()))
-                                .unwrap_or(file_path.as_str());
                             let diag = diag
-                                .with_file_path(file_path)
+                                .with_file_path(file_path.as_str())
                                 .with_file_source_code(&content);
                             diagnostics_to_print.push(diag);
                         }
@@ -410,12 +412,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             let should_print = self.should_print();
 
                             if should_print {
-                                let file_path = self
-                                    .working_directory
-                                    .and_then(|wd| file_path.strip_prefix(wd.as_str()))
-                                    .unwrap_or(file_path.as_str());
                                 let diag = diag
-                                    .with_file_path(file_path)
+                                    .with_file_path(file_path.as_str())
                                     .with_file_source_code(&content);
                                 diagnostics_to_print.push(diag)
                             }
@@ -515,10 +513,6 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     skipped: &'ctx AtomicUsize,
     /// Channel sending messages to the display thread
     pub(crate) messages: Sender<Message>,
-    /// The approximate number of diagnostics the console will print before
-    /// folding the rest into the "skipped diagnostics" counter
-    pub(crate) remaining_diagnostics: &'ctx AtomicU32,
-
     /// List of paths that should be processed
     pub(crate) evaluated_paths: RwLock<BTreeSet<BiomePath>>,
 }
@@ -545,9 +539,20 @@ impl TraversalOptions<'_, '_> {
     }
 
     pub(crate) fn miss_handler_err(&self, err: WorkspaceError, biome_path: &BiomePath) {
+        let file_path = self
+            .fs
+            .working_directory()
+            .as_ref()
+            .and_then(|wd| {
+                biome_path
+                    .strip_prefix(wd)
+                    .ok()
+                    .map(|path| path.to_string())
+            })
+            .unwrap_or(biome_path.to_string());
         self.push_diagnostic(
             err.with_category(category!("files/missingHandler"))
-                .with_file_path(biome_path.to_string())
+                .with_file_path(file_path)
                 .with_tags(DiagnosticTags::VERBOSE),
         );
     }
@@ -559,14 +564,13 @@ impl TraversalOptions<'_, '_> {
 }
 
 /// Path entries that we want to ignore during the OS traversal.
-pub const IGNORE_ENTRIES: &[&[u8]] = &[
-    b".cache",
+pub const TRAVERSAL_IGNORE_ENTRIES: &[&[u8]] = &[
     b".git",
     b".hg",
     b".svn",
     b".yarn",
-    b".timestamp",
     b".DS_Store",
+    b"node_modules",
 ];
 
 impl TraversalContext for TraversalOptions<'_, '_> {
@@ -586,7 +590,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
     fn can_handle(&self, biome_path: &BiomePath) -> bool {
         if biome_path
             .file_name()
-            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name.as_bytes()))
+            .is_some_and(|file_name| TRAVERSAL_IGNORE_ENTRIES.contains(&file_name.as_bytes()))
         {
             return false;
         }

@@ -32,9 +32,7 @@ pub(crate) fn generate_configuration_schema(mode: Mode) -> Result<()> {
 fn rename_partial_references_in_schema(mut schema: RootSchema) -> RootSchema {
     if let Some(meta) = schema.schema.metadata.as_mut() {
         if let Some(title) = meta.title.as_ref() {
-            if let Some(stripped) = title.strip_prefix("Partial") {
-                meta.title = Some(stripped.to_string());
-            } else if title == "RuleWithOptions_for_Null" {
+            if title == "RuleWithOptions_for_Null" {
                 meta.title = Some("RuleWithNoOptions".to_string());
             } else if title == "RuleWithFixOptions_for_Null" {
                 meta.title = Some("RuleWithFixNoOptions".to_string());
@@ -66,9 +64,7 @@ fn rename_partial_references_in_schema(mut schema: RootSchema) -> RootSchema {
         .definitions
         .into_iter()
         .map(|(mut key, mut schema)| {
-            if let Some(stripped) = key.strip_prefix("Partial") {
-                key = stripped.to_string();
-            } else if key == "RuleWithOptions_for_Null" || key == "RuleWithFixOptions_for_Null" {
+            if key == "RuleWithOptions_for_Null" || key == "RuleWithFixOptions_for_Null" {
                 key = if key == "RuleWithOptions_for_Null" {
                     "RuleWithNoOptions".to_string()
                 } else {
@@ -131,9 +127,7 @@ fn rename_partial_references_in_schema_object(object: &mut SchemaObject) {
     }
 
     if let Some(reference) = &mut object.reference {
-        if let Some(stripped) = reference.strip_prefix("#/definitions/Partial") {
-            *reference = format!("#/definitions/{stripped}");
-        } else if reference == "#/definitions/RuleWithOptions_for_Null" {
+        if reference == "#/definitions/RuleWithOptions_for_Null" {
             *reference = "#/definitions/RuleWithNoOptions".to_string();
         } else if reference == "#/definitions/RuleWithFixOptions_for_Null" {
             *reference = "#/definitions/RuleWithFixNoOptions".to_string();

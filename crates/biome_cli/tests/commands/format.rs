@@ -3448,7 +3448,7 @@ fn html_enabled_by_arg_format() {
 }
 
 #[test]
-fn format_skip_errors_continues_with_valid_files() {
+fn format_skip_parse_errors_continues_with_valid_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -3463,7 +3463,7 @@ fn format_skip_errors_continues_with_valid_files() {
         Args::from(
             [
                 "format",
-                "--skip-errors",
+                "--skip-parse-errors",
                 "--write",
                 valid.as_str(),
                 invalid.as_str(),
@@ -3478,7 +3478,7 @@ fn format_skip_errors_continues_with_valid_files() {
     assert_file_contents(&fs, invalid, "while ) {}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "format_skip_errors_continues_with_valid_files",
+        "format_skip_parse_errors_continues_with_valid_files",
         fs,
         console,
         result,

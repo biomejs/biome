@@ -1,4 +1,6 @@
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
@@ -83,6 +85,7 @@ declare_lint_rule! {
             RuleSource::EslintImport("no-extraneous-dependencies"),
         ],
         recommended: false,
+        domains: &[RuleDomain::Project],
     }
 }
 

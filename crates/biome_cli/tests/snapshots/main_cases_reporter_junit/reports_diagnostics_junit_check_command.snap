@@ -54,7 +54,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     </testsuite>
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
-            <failure message="Use === instead of ==. == is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==. == is only allowed when comparing against `null`</failure>
+            <failure message="Using == may be unsafe if you are relying on type coercion.">line 3, col 2, Using == may be unsafe if you are relying on type coercion.</failure>
         </testcase>
     </testsuite>
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
@@ -89,7 +89,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.lint.suspicious.noDoubleEquals" line="4" column="3">
-            <failure message="Use === instead of ==. == is only allowed when comparing against `null`">line 3, col 2, Use === instead of ==. == is only allowed when comparing against `null`</failure>
+            <failure message="Using == may be unsafe if you are relying on type coercion.">line 3, col 2, Using == may be unsafe if you are relying on type coercion.</failure>
         </testcase>
     </testsuite>
     <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">

@@ -799,7 +799,7 @@ async fn pull_diagnostics() -> Result<()> {
     server.initialize().await?;
     server.initialized().await?;
 
-    server.open_document("if(a == b) {}").await?;
+    server.open_document("const a = 1; a = 2;").await?;
 
     let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
@@ -813,32 +813,30 @@ async fn pull_diagnostics() -> Result<()> {
                     range: Range {
                         start: Position {
                             line: 0,
-                            character: 5,
+                            character: 13,
                         },
                         end: Position {
                             line: 0,
-                            character: 7,
+                            character: 14,
                         },
                     },
                     severity: Some(lsp::DiagnosticSeverity::ERROR),
                     code: Some(lsp::NumberOrString::String(String::from(
-                        "lint/suspicious/noDoubleEquals",
+                        "lint/correctness/noConstAssign",
                     ))),
                     code_description: Some(CodeDescription {
-                        href: Url::parse("https://biomejs.dev/linter/rules/no-double-equals")
+                        href: Url::parse("https://biomejs.dev/linter/rules/no-const-assign")
                             .unwrap()
                     }),
                     source: Some(String::from("biome")),
-                    message: String::from(
-                        "Use === instead of ==. == is only allowed when comparing against `null`",
-                    ),
+                    message: String::from("Can't assign a because it's a constant.",),
                     related_information: Some(vec![lsp::DiagnosticRelatedInformation {
                         location: lsp::Location {
                             uri: url!("document.js"),
                             range: Range {
                                 start: Position {
                                     line: 0,
-                                    character: 5,
+                                    character: 6,
                                 },
                                 end: Position {
                                     line: 0,
@@ -846,7 +844,7 @@ async fn pull_diagnostics() -> Result<()> {
                                 },
                             },
                         },
-                        message: String::new(),
+                        message: "This is where the variable is defined as constant. ".to_string(),
                     }]),
                     tags: None,
                     data: None,
@@ -933,7 +931,7 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
     server.initialize().await?;
     server.initialized().await?;
 
-    server.open_untitled_document("if(a == b) {}").await?;
+    server.open_untitled_document("const a = 1; a = 2;").await?;
 
     let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
@@ -947,32 +945,30 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
                     range: Range {
                         start: Position {
                             line: 0,
-                            character: 5,
+                            character: 13,
                         },
                         end: Position {
                             line: 0,
-                            character: 7,
+                            character: 14,
                         },
                     },
                     severity: Some(lsp::DiagnosticSeverity::ERROR),
                     code: Some(lsp::NumberOrString::String(String::from(
-                        "lint/suspicious/noDoubleEquals",
+                        "lint/correctness/noConstAssign",
                     ))),
                     code_description: Some(CodeDescription {
-                        href: Url::parse("https://biomejs.dev/linter/rules/no-double-equals")
+                        href: Url::parse("https://biomejs.dev/linter/rules/no-const-assign")
                             .unwrap()
                     }),
                     source: Some(String::from("biome")),
-                    message: String::from(
-                        "Use === instead of ==. == is only allowed when comparing against `null`",
-                    ),
+                    message: String::from("Can't assign a because it's a constant.",),
                     related_information: Some(vec![lsp::DiagnosticRelatedInformation {
                         location: lsp::Location {
                             uri: url!("untitled-1"),
                             range: Range {
                                 start: Position {
                                     line: 0,
-                                    character: 5,
+                                    character: 6,
                                 },
                                 end: Position {
                                     line: 0,
@@ -980,7 +976,7 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
                                 },
                             },
                         },
-                        message: String::new(),
+                        message: "This is where the variable is defined as constant. ".to_string(),
                     }]),
                     tags: None,
                     data: None,
@@ -1445,7 +1441,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
     );
 
     let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
-        title: String::from("Use ==="),
+        title: String::from("Use === instead."),
         kind: Some(lsp::CodeActionKind::new(
             "quickfix.biome.suspicious.noDoubleEquals",
         )),
@@ -3194,10 +3190,10 @@ export function bar() {
                 project_key,
                 path: fs.working_directory.join("foo.ts").into(),
                 categories: RuleCategories::all(),
-                max_diagnostics: 10,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                pull_code_actions: false,
             },
         )
         .await?
@@ -3230,10 +3226,10 @@ export function bar() {
                 project_key,
                 path: fs.working_directory.join("foo.ts").into(),
                 categories: RuleCategories::empty(),
-                max_diagnostics: 10,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                pull_code_actions: false,
             },
         )
         .await?
@@ -3262,10 +3258,10 @@ export function bar() {
                 project_key,
                 path: fs.working_directory.join("foo.ts").into(),
                 categories: RuleCategories::all(),
-                max_diagnostics: 10,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                pull_code_actions: false,
             },
         )
         .await?
@@ -3298,10 +3294,10 @@ export function bar() {
                 project_key,
                 path: fs.working_directory.join("foo.ts").into(),
                 categories: RuleCategories::all(),
-                max_diagnostics: 10,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                pull_code_actions: false,
             },
         )
         .await?
@@ -3407,10 +3403,10 @@ export function bar() {
                 project_key,
                 path: fs.working_directory.join("foo.ts").into(),
                 categories: RuleCategories::all(),
-                max_diagnostics: 10,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                pull_code_actions: false,
             },
         )
         .await?
@@ -3422,6 +3418,9 @@ export function bar() {
         PrintDescription(&result.diagnostics[0]).to_string(),
         "This import is part of a cycle."
     );
+
+    #[cfg(target_os = "windows")]
+    std::thread::sleep(Duration::from_secs(1));
 
     clear_notifications!(factory.service_data_rx);
 
@@ -3447,10 +3446,10 @@ export function bar() {
                 project_key,
                 path: fs.working_directory.join("foo.ts").into(),
                 categories: RuleCategories::empty(),
-                max_diagnostics: 10,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                pull_code_actions: false,
             },
         )
         .await?
@@ -3459,6 +3458,9 @@ export function bar() {
     // ASSERT: Diagnostic should've disappeared because `utils/bar.ts` is no
     //         longer there.
     assert_eq!(result.diagnostics.len(), 0);
+
+    #[cfg(target_os = "windows")]
+    std::thread::sleep(Duration::from_secs(1));
 
     // ARRANGE: Move `utils` back.
     clear_notifications!(factory.service_data_rx);
@@ -3484,10 +3486,10 @@ export function bar() {
                 project_key,
                 path: fs.working_directory.join("foo.ts").into(),
                 categories: RuleCategories::all(),
-                max_diagnostics: 10,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+                pull_code_actions: false,
             },
         )
         .await?

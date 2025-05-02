@@ -1,7 +1,9 @@
 ---
-source: crates/biome_js_type_info/tests/utils/mod.rs
+source: crates/biome_js_type_info/tests/utils.rs
 expression: content
 ---
+## Input
+
 ```ts
 function destruct(
 	{ a, b }: { a: number; b: string },
@@ -10,63 +12,45 @@ function destruct(
 
 ```
 
+## Result
+
 ```
 sync Function "destruct" {
   accepts: {
     params: [
-      required (unnamed): Object {
-        prototype: No prototype
-        members: {TypeMembers(
-          Property(
-            [a, required]
-            Type(number)
-          )
-          Property(
-            [b, required]
-            Type(string)
-          )
-        )}
-      } (bindings:
-        a:Object {
-          prototype: No prototype
-          members: {TypeMembers(
-            Property(
-              [a, required]
-              Type(number)
-            )
-            Property(
-              [b, required]
-              Type(string)
-            )
-          )}
-        }.a, b:Object {
-          prototype: No prototype
-          members: {TypeMembers(
-            Property(
-              [a, required]
-              Type(number)
-            )
-            Property(
-              [b, required]
-              Type(string)
-            )
-          )}
-        }.b
-      ), required (unnamed): "Array" {
-        resolved: unknown
-        type_args: boolean
-      } (bindings:
-        first:"Array" {
-          resolved: unknown
-          type_args: boolean
-        }[0], rest:[(1 others)..."Array" {
-          resolved: unknown
-          type_args: boolean
-        }]
-      )
+      required (unnamed): Global TypeId(8) (bindings: a:Global TypeId(8).a,
+      b:Global TypeId(8).b)
+      required (unnamed): Global TypeId(12) (bindings: first:Global TypeId(12)[0],
+      rest:[(1 others)...Global TypeId(12)])
     ]
     type_args: []
   }
-  returns: unknown
+  returns: unknown reference
 }
+```
+
+## Registered types
+
+```
+Global TypeId(7) => string
+
+Global TypeId(8) => Object {
+  prototype: No prototype
+  members: {TypeMembers(
+    required property "a": number
+    required property "b": Global TypeId(7)
+  )}
+}
+
+Global TypeId(9) => Global TypeId(8).a
+
+Global TypeId(10) => Global TypeId(8).b
+
+Global TypeId(11) => boolean
+
+Global TypeId(12) => instanceof unresolved reference "Array"<Global TypeId(11)>
+
+Global TypeId(13) => Global TypeId(12)[0]
+
+Global TypeId(14) => [(1 others)...Global TypeId(12)]
 ```

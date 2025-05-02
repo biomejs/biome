@@ -12,213 +12,137 @@
 pub mod literal;
 
 use std::fmt::Debug;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::{ops::Deref, str::FromStr, sync::Arc};
 
 use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
+use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
-use crate::{
-    Resolvable,
-    globals::{ARRAY, PROMISE, WINDOW_TYPE},
+use crate::globals::{
+    GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS, GLOBAL_UNKNOWN_ID, PROMISE_ID,
 };
+use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
+use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeId, TypeResolver};
 
-/// Unique identifier to distinguish between identically named, complex types.
-#[derive(Clone, Copy, Eq, PartialEq, Resolvable)]
-pub(super) struct TypeId(u64);
+const UNKNOWN: TypeData = TypeData::Unknown;
 
-// FIXME: This implementation is only necessary for test stability. Once we have
-//        better snapshots for types, this won't be necessary anymore.
-impl Debug for TypeId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TypeId").finish()
-    }
-}
+/// Type identifier referencing the type in a resolver's `types` vector.
+///
+/// Note that separate modules typically use separate resolvers. Because of
+/// this, type IDs are only unique within a single module/resolver.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Resolvable)]
+pub struct TypeId(u32);
 
 impl TypeId {
-    pub fn new() -> Self {
-        static ID: AtomicU64 = AtomicU64::new(1);
+    pub const fn new(index: usize) -> Self {
+        // SAFETY: We don't handle files exceeding `u32::MAX` bytes.
+        // So it isn't possible to exceed `u32::MAX` types.
+        Self(index as u32)
+    }
 
-        Self(ID.fetch_add(1, Ordering::Relaxed))
+    pub const fn index(self) -> usize {
+        self.0 as usize
     }
 }
 
-/// Represents an inferred TypeScript type.
-#[derive(Clone, Debug, Default, PartialEq)]
-// TODO: Before moving onto full inference, we should probably use a different
-//       wrapper than `Arc`. I'm thinking of creating a type called
-//       `FragileArc`, which would have a single owner and any number of weak
-//       pointers to it. This would allow the types of one module to be dropped
-//       (for when the watcher reloads a module), after which we could simply
-//       re-lookup the broken arcs. The "fragileness" would come from the fact
-//       there would be a single type that can be either owner, or weak pointer,
-//       so at the type level you would never know when your pointer is going to
-//       break.
-pub struct Type(Arc<TypeInner>);
+#[derive(Clone)]
+pub struct Type {
+    resolver: Arc<dyn TypeResolver>,
+    id: ResolvedTypeId,
+}
+
+impl Debug for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(self.deref(), f)
+    }
+}
+
+impl Default for Type {
+    fn default() -> Self {
+        Self {
+            resolver: Arc::new(GLOBAL_RESOLVER.clone()),
+            id: GLOBAL_UNKNOWN_ID,
+        }
+    }
+}
 
 impl Deref for Type {
-    type Target = TypeInner;
+    type Target = TypeData;
 
     fn deref(&self) -> &Self::Target {
-        self.0.as_ref()
-    }
-}
-
-impl From<TypeInner> for Type {
-    fn from(inner: TypeInner) -> Self {
-        Self(Arc::new(inner))
+        self.resolver
+            .get_by_resolved_id(self.id)
+            .unwrap_or(&UNKNOWN)
     }
 }
 
 impl Type {
-    pub fn array_of(ty: Self) -> Self {
-        Self(Arc::new(TypeInner::Class(Box::new(ARRAY.clone())))).with_type_parameters(&[ty])
+    pub fn from_data(mut resolver: Box<dyn TypeResolver>, data: TypeData) -> Self {
+        let id = resolver.register_and_resolve(data);
+        Self {
+            resolver: Arc::from(resolver),
+            id,
+        }
     }
 
-    pub fn boolean() -> Self {
-        Self(Arc::new(TypeInner::Boolean))
-    }
-
-    pub fn destructuring_of(ty: Self, destructure_field: DestructureField) -> Self {
-        TypeInner::TypeofExpression(Box::new(TypeofExpression::Destructure(
-            TypeofDestructureExpression {
-                ty,
-                destructure_field,
-            },
-        )))
-        .into()
-    }
-
-    pub fn function(function: Function) -> Self {
-        Self(Arc::new(TypeInner::Function(Box::new(function))))
-    }
-
-    /// Returns the `TypeInner` referenced by this type.
+    /// Returns this type's [`TypeId`].
     ///
-    /// This method follows `TypeofType` references and should be used instead
-    /// of [`Self::deref()`] when you know you want to use the inner type as a
-    /// type rather than an instance.
-    pub fn inner_type(&self) -> &TypeInner {
-        let inner = &**self;
-        if let TypeInner::TypeofType(ty) = inner {
-            ty.deref()
-        } else {
-            inner
-        }
+    /// **Warning:** Type IDs can only be safely compared with other IDs from
+    ///              the same module.
+    pub fn id(&self) -> TypeId {
+        self.id.id()
     }
 
-    /// Returns a new instance of the given type.
-    pub fn instance_of(ty: Self) -> Self {
-        match ty.deref() {
-            TypeInner::Class(_) => TypeInner::Object(Box::new(Object {
-                prototype: Some(ty),
-                members: Arc::new([]),
-            }))
-            .into(),
-            TypeInner::Reference(_) => TypeInner::InstanceOf(Box::new(ty)).into(),
-            _ => ty,
-        }
+    /// Returns whether this type is the `Promise` class.
+    pub fn is_promise(&self) -> bool {
+        self.id.is_global() && self.id() == PROMISE_ID
     }
 
-    /// Takes the owned [TypeInner] from a `Type`.
-    ///
-    /// Returns `None` if the type has other owners.
-    pub fn into_inner(self) -> Option<TypeInner> {
-        Arc::into_inner(self.0)
+    /// Returns whether this type is an instance of a `Promise`.
+    pub fn is_promise_instance(&self) -> bool {
+        self.deref()
+            .is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID)
     }
 
-    pub fn number() -> Self {
-        Self(Arc::new(TypeInner::Number))
-    }
-
-    pub fn object_with_members(members: Arc<[TypeMember]>) -> Self {
-        Self(Arc::new(TypeInner::Object(Box::new(Object {
-            prototype: None,
-            members,
-        }))))
-    }
-
-    /// Returns the `Type` referenced by this type.
-    ///
-    /// This method follows `TypeofType` references and should be used instead
-    /// of [`Self::deref()`] when you know you want to use the inner type as a
-    /// type rather than an instance.
-    pub fn owned_inner_type(&self) -> Self {
-        if let TypeInner::TypeofType(ty) = self.deref() {
-            ty.as_ref().clone()
-        } else {
-            self.clone()
-        }
-    }
-
-    pub fn promise_of(ty: Self) -> Self {
-        Self(Arc::new(TypeInner::Class(Box::new(PROMISE.clone())))).with_type_parameters(&[ty])
-    }
-
-    pub fn undefined() -> Self {
-        Self(Arc::new(TypeInner::Undefined))
-    }
-
-    pub fn union_with(&self, ty: Self) -> Self {
-        if let TypeInner::Union(union) = self.inner_type() {
-            if union.contains(&ty) {
-                self.clone()
-            } else {
-                Self(Arc::new(TypeInner::Union(Box::new(union.with_type(ty)))))
-            }
-        } else {
-            Self(Arc::new(TypeInner::Union(Box::new(Union(Box::new([
-                self.clone(),
-                ty,
-            ]))))))
-        }
-    }
-
-    pub fn unknown() -> Self {
-        Self(Arc::new(TypeInner::Unknown))
-    }
-
-    pub fn void() -> Self {
-        Self(Arc::new(TypeInner::VoidKeyword))
-    }
-
-    pub fn window() -> Self {
-        WINDOW_TYPE.clone()
-    }
-
-    pub fn with_type_parameters(&self, type_parameters: &[Self]) -> Self {
+    /// Returns whether the given type is known to reference a function that
+    /// returns a `Promise`.
+    pub fn is_function_that_returns_promise(&self) -> bool {
         match self.deref() {
-            TypeInner::Class(class) => TypeInner::Class(Box::new(Class {
-                type_parameters: class
-                    .type_parameters
-                    .iter()
-                    .enumerate()
-                    .map(|(i, param)| GenericTypeParameter {
-                        name: param.name.clone(),
-                        ty: type_parameters
-                            .get(i)
-                            .cloned()
-                            .unwrap_or_else(|| param.ty.clone()),
-                    })
-                    .collect(),
-                ..class.as_ref().clone()
-            }))
-            .into(),
-            // TODO: Which other types do we need to handle here?
-            _ => self.clone(),
+            TypeData::Function(function) => function
+                .return_type
+                .as_type()
+                .and_then(|ty| self.resolve(ty))
+                .is_some_and(|ty| ty.is_promise()),
+            _ => false,
+        }
+    }
+
+    fn resolve(&self, ty: &TypeReference) -> Option<Self> {
+        self.resolver
+            .resolve_reference(ty)
+            .map(|resolved_id| self.with_resolved_id(resolved_id))
+    }
+
+    fn with_resolved_id(&self, id: ResolvedTypeId) -> Self {
+        Self {
+            resolver: self.resolver.clone(),
+            id,
         }
     }
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Resolvable)]
-pub enum TypeInner {
+pub enum TypeData {
     /// The type is unknown because inference couldn't determine a type.
     ///
     /// This is different from `UnknownKeyword`, because an explicit `unknown`
     /// should not be counted as a failure of the inference.
     #[default]
     Unknown,
+
+    /// Special type referencing the global scope, which can be explicitly
+    /// referenced using `window` or `globalThis`.
+    Global,
 
     // Primitives
     BigInt,
@@ -244,14 +168,11 @@ pub enum TypeInner {
     /// Type derived from another through a built-in operator.
     TypeOperator(Box<TypeOperatorType>),
 
-    /// Alias to another type.
-    Alias(Box<TypeAlias>),
-
     /// Literal value used as a type.
     Literal(Box<Literal>),
 
     /// Instance of another type.
-    InstanceOf(Box<Type>),
+    InstanceOf(Box<TypeInstance>),
 
     /// Reference to another type.
     Reference(Box<TypeReference>),
@@ -260,7 +181,7 @@ pub enum TypeInner {
     TypeofExpression(Box<TypeofExpression>),
 
     /// Reference to another type through the `typeof` operator.
-    TypeofType(Box<Type>),
+    TypeofType(Box<TypeReference>),
 
     /// Reference to the type of a named JavaScript value.
     TypeofValue(Box<TypeofValue>),
@@ -298,7 +219,25 @@ pub enum TypeInner {
     VoidKeyword,
 }
 
-impl TypeInner {
+impl TypeData {
+    /// Iterates all member fields, including those belonging to extended
+    /// classes or prototype objects.
+    ///
+    /// Note that members which are inherited and overridden may appear multiple
+    /// times, but the member that is closest to the current type is guaranteed
+    /// to come first.
+    pub fn all_members<'a>(
+        &'a self,
+        resolver: &'a dyn TypeResolver,
+    ) -> impl Iterator<Item = &'a TypeMember> {
+        TypeMemberIterator {
+            resolver,
+            seen_types: Vec::new(),
+            owner: TypeMemberOwner::from_type_data(self),
+            index: 0,
+        }
+    }
+
     pub fn as_class(&self) -> Option<&Class> {
         match self {
             Self::Class(class) => Some(class.as_ref()),
@@ -313,6 +252,150 @@ impl TypeInner {
         }
     }
 
+    pub fn boolean() -> Self {
+        Self::Boolean
+    }
+
+    /// Returns the type of an array's elements, if this object is an instance of `Array`.
+    pub fn find_array_element_type<'a>(
+        &'a self,
+        resolver: &'a dyn TypeResolver,
+    ) -> Option<&'a Self> {
+        if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
+            self.find_type_parameter(resolver, "T")
+                .and_then(|reference| resolver.resolve_and_get(reference))
+        } else {
+            None
+        }
+    }
+
+    /// Returns the type of an element at a given index, if this object is an
+    /// array or a tuple.
+    pub fn find_element_type_at_index<'a>(
+        &'a self,
+        resolver: &'a mut dyn TypeResolver,
+        index: usize,
+    ) -> Option<&'a Self> {
+        match self {
+            Self::Tuple(tuple) => Some(tuple.get_ty(resolver, index)),
+            _ if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) => self
+                .find_type_parameter(resolver, "T")
+                .cloned()
+                .map(|reference| resolver.optional(reference))
+                .map(|id| resolver.get_by_id(id)),
+            _ => None,
+        }
+    }
+
+    /// Returns the promised type, if this object is an instance of `Promise`.
+    pub fn find_promise_type<'a>(&'a self, resolver: &'a dyn TypeResolver) -> Option<&'a Self> {
+        if self.is_instance_of(resolver, GLOBAL_PROMISE_ID) {
+            self.find_type_parameter(resolver, "T")
+                .and_then(|reference| resolver.resolve_and_get(reference))
+        } else {
+            None
+        }
+    }
+
+    /// Returns the type of elements from a given index, if this object is an
+    /// array or a tuple.
+    pub fn find_type_of_elements_from_index(
+        &self,
+        resolver: &mut dyn TypeResolver,
+        index: usize,
+    ) -> Option<Self> {
+        match self {
+            Self::Tuple(tuple) => Some(Self::Tuple(Box::new(tuple.slice_from(index)))),
+            _ if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) => {
+                match self.find_type_parameter(resolver, "T") {
+                    Some(elem_ty) => Some(Self::InstanceOf(Box::new(TypeInstance {
+                        ty: GLOBAL_ARRAY_ID.into(),
+                        type_parameters: Box::new([GenericTypeParameter {
+                            name: Text::Static("T"),
+                            ty: elem_ty.clone(),
+                        }]),
+                    }))),
+                    None => resolver.get_by_resolved_id(GLOBAL_ARRAY_ID).cloned(),
+                }
+            }
+            _ => None,
+        }
+    }
+
+    pub fn find_type_parameter<'a>(
+        &'a self,
+        resolver: &'a dyn TypeResolver,
+        parameter_name: &str,
+    ) -> Option<&'a TypeReference> {
+        let mut seen_types = Vec::new();
+        let mut current_object = Some(self);
+        while let Some(current) = current_object {
+            if let Some(argument) = current
+                .type_parameters()
+                .iter()
+                .flat_map(|params| params.iter())
+                .find(|param| param.name == parameter_name && param.ty.is_known())
+            {
+                return Some(&argument.ty);
+            }
+
+            let Some(next_object) = current
+                .prototype(resolver)
+                .and_then(|prototype| resolver.resolve_reference(prototype))
+            else {
+                break;
+            };
+
+            if seen_types.contains(&next_object) {
+                break;
+            }
+
+            seen_types.push(next_object);
+            current_object = resolver.get_by_resolved_id(next_object);
+        }
+
+        None
+    }
+
+    /// Returns the type with inference up to the level supported by the given `resolver`.
+    #[inline]
+    pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
+        self.resolved(resolver).flattened(resolver)
+    }
+
+    /// Returns whether this object is an instance of the type with the given ID.
+    pub fn is_instance_of(&self, resolver: &dyn TypeResolver, id: ResolvedTypeId) -> bool {
+        let mut seen_types = Vec::new();
+        let mut current_object = Some(self);
+        while let Some(current) = current_object {
+            let Some(prototype) = current.prototype(resolver) else {
+                break;
+            };
+
+            let Some(next_id) = resolver.resolve_reference(prototype) else {
+                break;
+            };
+
+            if next_id == id {
+                return true;
+            }
+
+            if seen_types.contains(&next_id) {
+                break;
+            }
+
+            seen_types.push(next_id);
+            current_object = resolver.get_by_resolved_id(next_id);
+        }
+
+        false
+    }
+
+    /// Returns whether this type is an instance of a `Promise`.
+    pub fn is_promise_instance(&self, resolver: &dyn TypeResolver) -> bool {
+        self.is_instance_of(resolver, GLOBAL_PROMISE_ID)
+    }
+
     /// Returns whether the given type has been inferred.
     ///
     /// A type is considered inferred if it is anything except `Self::Unknown`,
@@ -321,59 +404,55 @@ impl TypeInner {
         !matches!(self, Self::Unknown)
     }
 
-    /// Returns whether the given type is known to reference the `Promise`
-    /// class.
-    pub fn is_promise(&self) -> bool {
+    /// Returns a reference to the type's prototype, if any.
+    pub fn prototype<'a>(&'a self, resolver: &'a dyn TypeResolver) -> Option<&'a TypeReference> {
         match self {
-            Self::Class(class) => class.id == PROMISE.id,
-            _ => false,
+            Self::InstanceOf(instance_of) => Some(&instance_of.ty),
+            Self::Object(object) => object.prototype.as_ref(),
+            Self::Reference(reference) => resolver
+                .resolve_and_get(reference)
+                .and_then(|ty| ty.prototype(resolver)),
+            _ => None,
         }
     }
 
-    /// Returns whether the given type is known to reference an instance of a
-    /// `Promise`.
-    pub fn is_promise_instance(&self) -> bool {
+    pub fn reference(reference: impl Into<TypeReference>) -> Self {
+        Self::Reference(Box::new(reference.into()))
+    }
+
+    pub fn type_parameters(&self) -> Option<&[GenericTypeParameter]> {
         match self {
-            Self::Object(object) => object.is_promise(),
-            _ => false,
+            Self::Class(class) => Some(&class.type_parameters),
+            Self::Function(function) => Some(&function.type_parameters),
+            Self::InstanceOf(instance) => Some(&instance.type_parameters),
+            _ => None,
         }
     }
 
-    /// Returns whether the given type is known to reference a function that
-    /// returns a `Promise`.
-    pub fn is_function_that_returns_promise(&self) -> bool {
-        match self {
-            Self::Function(function) => function
-                .return_type
-                .as_type()
-                .is_some_and(|ty| ty.is_promise()),
-            _ => false,
-        }
+    pub fn unknown() -> Self {
+        Self::Unknown
     }
 }
 
 /// A class definition.
 #[derive(Clone, PartialEq, Resolvable)]
 pub struct Class {
-    pub(super) id: TypeId,
-
     /// Name of the class, if specified in the definition.
     pub name: Option<Text>,
 
     /// The class's type parameters.
-    pub type_parameters: Arc<[GenericTypeParameter]>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Type of another class being extended by this one.
-    pub extends: Option<Type>,
+    pub extends: Option<TypeReference>,
 
     /// Class members.
-    pub members: Arc<[TypeMember]>,
+    pub members: Box<[TypeMember]>,
 }
 
 impl Debug for Class {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Class")
-            .field("id", &self.id)
             .field("name", &self.name)
             .field("type_parameters", &self.type_parameters)
             .field("extends", &self.extends)
@@ -381,32 +460,17 @@ impl Debug for Class {
     }
 }
 
-impl Class {
-    /// Iterates all member fields, including those belonging to extended
-    /// classes.
-    ///
-    /// Note that members which are inherited and overridden may appear multiple
-    /// times, but the member that is closest to the subclass is guaranteed to
-    /// come first.
-    pub fn all_members(&self) -> impl Iterator<Item = &TypeMember> {
-        TypeMemberIterator {
-            owner: Some(TypeMemberOwner::Class(self)),
-            index: 0,
-        }
-    }
-}
-
 /// A constructor definition.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Constructor {
     /// Generic type parameters used in the call signature.
-    pub type_parameters: Arc<[GenericTypeParameter]>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Call parameter of the constructor.
-    pub parameters: Arc<[FunctionParameter]>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// Return type when the constructor is called.
-    pub return_type: Option<Type>,
+    pub return_type: Option<TypeReference>,
 }
 
 /// A function definition.
@@ -416,20 +480,20 @@ pub struct Function {
     pub is_async: bool,
 
     /// Generic type parameters defined in the function signature.
-    pub type_parameters: Arc<[GenericTypeParameter]>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Name of the function, if specified in the definition.
     pub name: Option<Text>,
 
     /// Call parameters of the function.
-    pub parameters: Arc<[FunctionParameter]>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// The function's return type.
     pub return_type: ReturnType,
 }
 
 impl Function {
-    pub fn with_return_type(self, ty: Type) -> Self {
+    pub fn with_return_type(self, ty: TypeReference) -> Self {
         Self {
             return_type: ReturnType::Type(ty),
             ..self
@@ -444,7 +508,7 @@ pub struct FunctionParameter {
     pub name: Option<Text>,
 
     /// Type of the argument.
-    pub ty: Type,
+    pub ty: TypeReference,
 
     /// Bindings created for the parameter within the function body.
     pub bindings: Box<[FunctionParameterBinding]>,
@@ -460,7 +524,7 @@ pub struct FunctionParameter {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct FunctionParameterBinding {
     pub name: Text,
-    pub ty: Type,
+    pub ty: TypeData,
 }
 
 /// Definition of a generic type parameter.
@@ -473,12 +537,39 @@ pub struct GenericTypeParameter {
     /// The resolved type to use.
     ///
     /// May be the default type from the type definition.
-    pub ty: Type,
+    pub ty: TypeReference,
+}
+
+impl GenericTypeParameter {
+    /// Merges the parameters from `incoming` into `base`.
+    pub fn merge_parameters(base: &[Self], incoming: &[Self]) -> Box<[Self]> {
+        base.iter()
+            .enumerate()
+            .map(|(i, param)| Self {
+                name: param.name.clone(),
+                ty: incoming
+                    .get(i)
+                    .map_or_else(|| param.ty.clone(), |incoming| incoming.ty.clone()),
+            })
+            .collect()
+    }
+
+    /// Merges the `types` into `parameters`.
+    pub fn merge_types(parameters: &[Self], types: &[TypeReference]) -> Box<[Self]> {
+        parameters
+            .iter()
+            .enumerate()
+            .map(|(i, param)| Self {
+                name: param.name.clone(),
+                ty: types.get(i).cloned().unwrap_or_else(|| param.ty.clone()),
+            })
+            .collect()
+    }
 }
 
 /// The intersection between other types.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct Intersection(pub(super) Box<[Type]>);
+pub struct Intersection(pub(super) Box<[TypeReference]>);
 
 /// Literal value used as a type.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
@@ -493,15 +584,9 @@ pub enum Literal {
     Template(Text), // TODO: Custom impl of PartialEq for template literals
 }
 
-impl From<Literal> for TypeInner {
+impl From<Literal> for TypeData {
     fn from(value: Literal) -> Self {
         Self::Literal(Box::new(value))
-    }
-}
-
-impl From<Literal> for Type {
-    fn from(value: Literal) -> Self {
-        TypeInner::from(value).into()
     }
 }
 
@@ -522,60 +607,10 @@ pub struct Object {
     ///
     /// The type that would be returned by `Object.getPrototypeOf()` or the
     /// legacy `object.__proto__`.
-    pub prototype: Option<Type>,
+    pub prototype: Option<TypeReference>,
 
     /// The object's own members.
-    pub members: Arc<[TypeMember]>,
-}
-
-impl Object {
-    /// Iterates all member fields, including those belonging to the prototype
-    /// chain.
-    ///
-    /// Note that members which are inherited and overridden may appear multiple
-    /// times, but the member that is closest to the own object in the prototype
-    /// chain is guaranteed to come first.
-    pub fn all_members(&self) -> impl Iterator<Item = &TypeMember> {
-        TypeMemberIterator {
-            owner: Some(TypeMemberOwner::Object(self)),
-            index: 0,
-        }
-    }
-
-    /// Returns a parent class of this object, if it matches the given `class`.
-    ///
-    /// The returned [Class] will match the given `class`, but may still have
-    /// different type arguments.
-    pub fn find_parent_class(&self, class: &Class) -> Option<&Class> {
-        let mut prototype = self.prototype.as_ref();
-        while let Some(proto) = prototype {
-            match proto.as_class() {
-                Some(proto_class) if proto_class.id == class.id => return Some(proto_class),
-                _ => {}
-            }
-
-            prototype = proto.as_object().and_then(|p| p.prototype.as_ref())
-        }
-
-        None
-    }
-
-    /// Returns the promised type, if this object is an instance of a `Promise`.
-    pub fn find_promise_type(&self) -> Option<Type> {
-        self.find_parent_class(&PROMISE)
-            .map(|class| class.type_parameters[0].ty.clone())
-    }
-
-    /// Returns whether this object has the given `class` in its prototype
-    /// chain.
-    pub fn is_instance_of(&self, class: &Class) -> bool {
-        self.find_parent_class(class).is_some()
-    }
-
-    /// Returns whether this object is an instance of a `Promise`.
-    pub fn is_promise(&self) -> bool {
-        self.is_instance_of(&PROMISE)
-    }
+    pub members: Box<[TypeMember]>,
 }
 
 /// Object literal used as a type.
@@ -600,21 +635,28 @@ impl Tuple {
     }
 
     /// Returns the type at the given index.
-    pub fn get_ty(&self, index: usize) -> Type {
-        if let Some(elem_type) = self.0.get(index) {
-            let ty = &elem_type.ty;
-            if elem_type.is_optional {
-                ty.union_with(Type::undefined())
+    pub fn get_ty<'a>(&'a self, resolver: &'a mut dyn TypeResolver, index: usize) -> &'a TypeData {
+        let resolved_id = if let Some(elem_type) = self.0.get(index) {
+            let ty = elem_type.ty.clone();
+            let id = if elem_type.is_optional {
+                resolver.optional(ty)
             } else {
-                ty.clone()
-            }
+                resolver.register_type(TypeData::Reference(Box::new(ty)))
+            };
+            ResolvedTypeId::new(resolver.level(), id)
         } else {
             self.0
                 .last()
                 .filter(|last| last.is_rest)
-                .map(|last| last.ty.union_with(Type::undefined()))
-                .unwrap_or_default()
-        }
+                .map(|last| resolver.optional(last.ty.clone()))
+                .map_or(GLOBAL_UNKNOWN_ID, |id| {
+                    ResolvedTypeId::new(resolver.level(), id)
+                })
+        };
+
+        resolver
+            .get_by_resolved_id(resolved_id)
+            .expect("tuple element type must be registered")
     }
 
     /// Returns a new tuple starting at the given index.
@@ -627,7 +669,7 @@ impl Tuple {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TupleElementType {
     /// Type of the element.
-    pub ty: Type,
+    pub ty: TypeReference,
 
     /// Name of the element, if it has one.
     pub name: Option<Text>,
@@ -675,54 +717,16 @@ impl TypeMember {
             Self::Property(member) => Some(member.name.clone()),
         }
     }
-
-    pub fn to_type(&self, object: &Type) -> Type {
-        match self {
-            Self::CallSignature(member) => TypeInner::Function(Box::new(Function {
-                is_async: false,
-                type_parameters: member.type_parameters.clone(),
-                name: None,
-                parameters: member.parameters.clone(),
-                return_type: member.return_type.clone(),
-            }))
-            .into(),
-            Self::Constructor(member) => {
-                member.return_type.clone().unwrap_or_else(|| object.clone())
-            }
-            Self::Method(member) => {
-                let ty: Type = TypeInner::Function(Box::new(Function {
-                    is_async: member.is_async,
-                    type_parameters: member.type_parameters.clone(),
-                    name: Some(member.name.clone()),
-                    parameters: member.parameters.clone(),
-                    return_type: member.return_type.clone(),
-                }))
-                .into();
-                if member.is_optional {
-                    ty.union_with(Type::undefined())
-                } else {
-                    ty
-                }
-            }
-            Self::Property(member) => {
-                if member.is_optional {
-                    member.ty.union_with(Type::undefined())
-                } else {
-                    member.ty.clone()
-                }
-            }
-        }
-    }
 }
 
 /// Defines a call signature on an object definition.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct CallSignatureTypeMember {
     /// Generic type parameters defined in the call signature.
-    pub type_parameters: Arc<[GenericTypeParameter]>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Call parameters of the signature.
-    pub parameters: Arc<[FunctionParameter]>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// Return type when the object is called.
     pub return_type: ReturnType,
@@ -732,13 +736,13 @@ pub struct CallSignatureTypeMember {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct ConstructorTypeMember {
     /// Generic type parameters defined in the constructor.
-    pub type_parameters: Arc<[GenericTypeParameter]>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Call parameters of the constructor.
-    pub parameters: Arc<[FunctionParameter]>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// Return type when the constructor is called.
-    pub return_type: Option<Type>,
+    pub return_type: Option<TypeReference>,
 }
 
 /// Defines a method on an object.
@@ -748,13 +752,13 @@ pub struct MethodTypeMember {
     pub is_async: bool,
 
     /// Generic type parameters defined in the method.
-    pub type_parameters: Arc<[GenericTypeParameter]>,
+    pub type_parameters: Box<[GenericTypeParameter]>,
 
     /// Name of the method.
     pub name: Text,
 
     /// Call parameters of the method.
-    pub parameters: Arc<[FunctionParameter]>,
+    pub parameters: Box<[FunctionParameter]>,
 
     /// Return type of the method.
     pub return_type: ReturnType,
@@ -772,7 +776,7 @@ impl MethodTypeMember {
         self
     }
 
-    pub fn with_return_type(mut self, ty: Type) -> Self {
+    pub fn with_return_type(mut self, ty: TypeReference) -> Self {
         self.return_type = ReturnType::Type(ty);
         self
     }
@@ -790,7 +794,7 @@ pub struct PropertyTypeMember {
     pub name: Text,
 
     /// Type of the property.
-    pub ty: Type,
+    pub ty: TypeReference,
 
     /// Whether the property is optional.
     pub is_optional: bool,
@@ -805,13 +809,15 @@ impl PropertyTypeMember {
         self
     }
 
-    pub fn with_type(mut self, ty: Type) -> Self {
+    pub fn with_type(mut self, ty: TypeReference) -> Self {
         self.ty = ty;
         self
     }
 }
 
 struct TypeMemberIterator<'a> {
+    resolver: &'a dyn TypeResolver,
+    seen_types: Vec<ResolvedTypeId>,
     owner: Option<TypeMemberOwner<'a>>,
     index: usize,
 }
@@ -820,56 +826,80 @@ impl<'a> Iterator for TypeMemberIterator<'a> {
     type Item = &'a TypeMember;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match &self.owner {
+        let next_reference = match &self.owner {
             Some(TypeMemberOwner::Class(class)) => {
                 match (class.members.get(self.index), class.extends.as_ref()) {
                     (Some(member), _) => {
                         self.index += 1;
-                        Some(member)
+                        return Some(member);
                     }
-                    (None, Some(extends)) => {
-                        self.owner = extends.into();
-                        self.index = 0;
-                        self.next()
-                    }
+                    (None, Some(extends)) => extends,
                     (None, None) => {
                         self.owner = None;
-                        None
+                        return None;
                     }
                 }
             }
+            Some(TypeMemberOwner::Global) => {
+                if let Some(member) = GLOBAL_TYPE_MEMBERS.get(self.index) {
+                    self.index += 1;
+                    return Some(member);
+                } else {
+                    self.owner = None;
+                    return None;
+                }
+            }
+            Some(TypeMemberOwner::InstanceOf(instance_of)) => &instance_of.ty,
             Some(TypeMemberOwner::Object(object)) => {
                 match (object.members.get(self.index), object.prototype.as_ref()) {
                     (Some(member), _) => {
                         self.index += 1;
-                        Some(member)
+                        return Some(member);
                     }
-                    (None, Some(prototype)) => {
-                        self.owner = prototype.into();
-                        self.index = 0;
-                        self.next()
-                    }
+                    (None, Some(prototype)) => prototype,
                     (None, None) => {
                         self.owner = None;
-                        None
+                        return None;
                     }
                 }
             }
-            None => None,
+            None => return None,
+        };
+
+        let Some(next_resolved_id) = self.resolver.resolve_reference(next_reference) else {
+            self.owner = None;
+            return None;
+        };
+
+        if self.seen_types.contains(&next_resolved_id) {
+            self.owner = None;
+            return None;
         }
+
+        self.seen_types.push(next_resolved_id);
+        self.owner = self
+            .resolver
+            .get_by_resolved_id(next_resolved_id)
+            .and_then(TypeMemberOwner::from_type_data);
+        self.index = 0;
+        self.next()
     }
 }
 
 enum TypeMemberOwner<'a> {
     Class(&'a Class),
+    Global,
+    InstanceOf(&'a TypeInstance),
     Object(&'a Object),
 }
 
-impl<'a> From<&'a Type> for Option<TypeMemberOwner<'a>> {
-    fn from(ty: &'a Type) -> Self {
-        match ty.inner_type() {
-            TypeInner::Class(class) => Some(TypeMemberOwner::Class(class)),
-            TypeInner::Object(object) => Some(TypeMemberOwner::Object(object)),
+impl<'a> TypeMemberOwner<'a> {
+    fn from_type_data(type_data: &'a TypeData) -> Option<Self> {
+        match type_data {
+            TypeData::Class(class) => Some(Self::Class(class)),
+            TypeData::Global => Some(Self::Global),
+            TypeData::InstanceOf(type_instance) => Some(Self::InstanceOf(type_instance)),
+            TypeData::Object(object) => Some(Self::Object(object)),
             _ => None,
         }
     }
@@ -877,19 +907,19 @@ impl<'a> From<&'a Type> for Option<TypeMemberOwner<'a>> {
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub enum ReturnType {
-    Type(Type),
+    Type(TypeReference),
     Predicate(PredicateReturnType),
     Asserts(AssertsReturnType),
 }
 
 impl Default for ReturnType {
     fn default() -> Self {
-        Self::Type(Type::unknown())
+        Self::Type(TypeReference::Unknown)
     }
 }
 
 impl ReturnType {
-    pub fn as_type(&self) -> Option<&Type> {
+    pub fn as_type(&self) -> Option<&TypeReference> {
         match self {
             Self::Type(ty) => Some(ty),
             _ => None,
@@ -904,7 +934,7 @@ impl ReturnType {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct PredicateReturnType {
     pub parameter_name: Text,
-    pub ty: Type,
+    pub ty: TypeReference,
 }
 
 /// Defines the function to which it applies to be an assertion that asserts
@@ -914,17 +944,37 @@ pub struct PredicateReturnType {
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct AssertsReturnType {
     pub parameter_name: Text,
-    pub ty: Type,
+    pub ty: TypeReference,
 }
 
-/// Alias to another type.
+/// Instance of another type.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct TypeAlias {
-    /// The type being aliased.
-    pub ty: Type,
+pub struct TypeInstance {
+    /// The type being instantiated.
+    pub ty: TypeReference,
 
-    /// Generic type parameters that can be passed on the alias itself.
-    pub type_parameters: Arc<[GenericTypeParameter]>,
+    /// Generic type parameters that should be passed onto the type being
+    /// instantiated.
+    pub type_parameters: Box<[GenericTypeParameter]>,
+}
+
+impl From<TypeReference> for TypeInstance {
+    fn from(ty: TypeReference) -> Self {
+        Self {
+            ty,
+            type_parameters: [].into(),
+        }
+    }
+}
+
+impl TypeInstance {
+    pub fn has_known_type_parameters(&self) -> bool {
+        !self.type_parameters.is_empty()
+            && self
+                .type_parameters
+                .iter()
+                .any(|param| param.ty != TypeReference::Unknown)
+    }
 }
 
 /// Reference to the type of a JavaScript expression.
@@ -942,25 +992,25 @@ pub enum TypeofExpression {
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeofAdditionExpression {
-    pub left: Type,
-    pub right: Type,
+    pub left: TypeReference,
+    pub right: TypeReference,
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeofAwaitExpression {
-    pub argument: Type,
+    pub argument: TypeReference,
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeofCallExpression {
-    pub callee: Type,
-    pub arguments: Arc<[CallArgumentType]>,
+    pub callee: TypeReference,
+    pub arguments: Box<[CallArgumentType]>,
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeofDestructureExpression {
     /// The type being destructured.
-    pub ty: Type,
+    pub ty: TypeReference,
 
     /// The field being destructured.
     pub destructure_field: DestructureField,
@@ -976,26 +1026,26 @@ pub enum DestructureField {
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeofNewExpression {
-    pub callee: Type,
-    pub arguments: Arc<[CallArgumentType]>,
+    pub callee: TypeReference,
+    pub arguments: Box<[CallArgumentType]>,
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub enum CallArgumentType {
-    Argument(Type),
-    Spread(Type),
+    Argument(TypeReference),
+    Spread(TypeReference),
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeofStaticMemberExpression {
-    pub object: Type,
+    pub object: TypeReference,
     pub member: Text,
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeofThisOrSuperExpression {
     /// Type from which the `this` or `super` expression should be resolved.
-    pub parent: Type,
+    pub parent: TypeReference,
 }
 
 /// Reference to the type of a named JavaScript value.
@@ -1009,33 +1059,13 @@ pub struct TypeofValue {
     pub identifier: Text,
 
     /// The resolved type.
-    pub ty: Type,
-}
-
-impl Resolvable for TypeofValue {
-    fn needs_resolving(&self, resolver: &dyn crate::TypeResolver, _stack: &[&TypeInner]) -> bool {
-        !self.ty.is_inferred() && resolver.resolve_type_of(&self.identifier).is_some()
-    }
-
-    fn resolved(&self, resolver: &dyn crate::TypeResolver, stack: &[&TypeInner]) -> Self {
-        let ty = match self.ty.is_inferred() {
-            true => self.ty.clone(),
-            false => resolver
-                .resolve_type_of(&self.identifier)
-                .map_or_else(Type::unknown, |ty| ty.resolved(resolver, stack)),
-        };
-
-        Self {
-            identifier: self.identifier.clone(),
-            ty,
-        }
-    }
+    pub ty: TypeReference,
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct TypeOperatorType {
     pub operator: TypeOperator,
-    pub ty: Type,
+    pub ty: TypeReference,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Resolvable)]
@@ -1061,52 +1091,130 @@ impl FromStr for TypeOperator {
 /// Reference to another type definition.
 ///
 /// This definition may require importing from another module.
-#[derive(Clone, Debug, PartialEq)]
-pub struct TypeReference {
-    /// Qualifier of the type being referenced.
-    pub qualifier: TypeReferenceQualifier,
-
-    /// The resolved type.
-    pub ty: Type,
-
-    /// Generic type parameters specified in the reference.
-    pub type_parameters: Arc<[Type]>,
+#[derive(Clone, Debug, Default, PartialEq)]
+pub enum TypeReference {
+    Qualifier(TypeReferenceQualifier),
+    Resolved(ResolvedTypeId),
+    Import(TypeImportQualifier),
+    #[default]
+    Unknown,
 }
 
-impl Resolvable for TypeReference {
-    fn needs_resolving(&self, resolver: &dyn crate::TypeResolver, stack: &[&TypeInner]) -> bool {
-        (!self.ty.is_inferred() && resolver.resolve_qualifier(&self.qualifier).is_some())
-            || self
-                .type_parameters
-                .iter()
-                .any(|param| param.needs_resolving(resolver, stack))
+impl From<TypeReferenceQualifier> for TypeReference {
+    fn from(qualifier: TypeReferenceQualifier) -> Self {
+        Self::Qualifier(qualifier)
+    }
+}
+
+impl From<ResolvedTypeId> for TypeReference {
+    fn from(resolved_id: ResolvedTypeId) -> Self {
+        Self::Resolved(resolved_id)
+    }
+}
+
+impl From<TypeImportQualifier> for TypeReference {
+    fn from(qualifier: TypeImportQualifier) -> Self {
+        Self::Import(qualifier)
+    }
+}
+
+impl TypeReference {
+    pub fn is_known(&self) -> bool {
+        *self != Self::Unknown
     }
 
-    fn resolved(&self, resolver: &dyn crate::TypeResolver, stack: &[&TypeInner]) -> Self {
-        let ty = match self.ty.is_inferred() {
-            true => self.ty.clone(),
-            false => resolver
-                .resolve_qualifier(&self.qualifier)
-                .map_or_else(Type::unknown, |ty| ty.resolved(resolver, stack)),
-        };
-
-        Self {
-            qualifier: self.qualifier.clone(),
-            ty,
-            type_parameters: self
+    pub fn resolved_params(&self, resolver: &mut dyn TypeResolver) -> Box<[Self]> {
+        match self {
+            Self::Qualifier(qualifier) => qualifier
                 .type_parameters
                 .iter()
-                .map(|param| param.resolved(resolver, stack))
+                .map(|param| param.resolved(resolver))
                 .collect(),
+            _ => [].into(),
         }
     }
 }
 
-/// Path of identifiers to the type to a referenced type.
+/// Qualifier for a type that should be imported from another module.
 #[derive(Clone, Debug, PartialEq)]
-pub struct TypeReferenceQualifier(pub(super) Box<[Text]>);
+pub struct TypeImportQualifier {
+    /// The imported symbol.
+    pub symbol: ImportSymbol,
+
+    /// Resolved path of the module to import the type from.
+    pub resolved_path: ResolvedPath,
+}
+
+/// Reference-counted resolved path wrapped in a [Result] that contains a string
+/// message if resolution failed.
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct ResolvedPath(Arc<Result<Utf8PathBuf, String>>);
+
+impl Deref for ResolvedPath {
+    type Target = Result<Utf8PathBuf, String>;
+
+    fn deref(&self) -> &Self::Target {
+        self.0.as_ref()
+    }
+}
+
+impl ResolvedPath {
+    pub fn new(resolved_path: Result<Utf8PathBuf, String>) -> Self {
+        Self(Arc::new(resolved_path))
+    }
+
+    pub fn as_path(&self) -> Option<&Utf8Path> {
+        self.as_deref().ok()
+    }
+
+    pub fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
+        Self::new(Ok(path.into()))
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ImportSymbol {
+    /// Imports the `default` export.
+    Default,
+
+    /// Imports a named symbol.
+    Named(Text),
+
+    /// Imports all symbols, including the `default` export.
+    All,
+}
+
+impl From<Text> for ImportSymbol {
+    fn from(name: Text) -> Self {
+        Self::Named(name)
+    }
+}
+
+impl From<&'static str> for ImportSymbol {
+    fn from(name: &'static str) -> Self {
+        Self::Named(name.into())
+    }
+}
+
+/// Path of identifiers to a referenced type, with associated type parameters.
+#[derive(Clone, Debug, PartialEq)]
+pub struct TypeReferenceQualifier {
+    /// The identifier path.
+    pub path: Box<[Text]>,
+
+    /// Generic type parameters specified in the reference.
+    pub type_parameters: Box<[TypeReference]>,
+}
 
 impl TypeReferenceQualifier {
+    pub fn has_known_type_parameters(&self) -> bool {
+        !self.type_parameters.is_empty()
+            && self
+                .type_parameters
+                .iter()
+                .any(|param| *param != TypeReference::Unknown)
+    }
+
     /// Checks whether this type qualifier references an `Array` type.
     ///
     /// This method simply checks whether the reference is for a literal
@@ -1115,7 +1223,7 @@ impl TypeReferenceQualifier {
     /// `Array` symbol in scope, but should not be used _instead of_ such type
     /// resolution.
     pub fn is_array(&self) -> bool {
-        self.0.len() == 1 && self.0[0] == "Array"
+        self.path.len() == 1 && self.path[0] == "Array"
     }
 
     /// Checks whether this type qualifier references a `Promise` type.
@@ -1126,24 +1234,27 @@ impl TypeReferenceQualifier {
     /// `Promise` symbol in scope, but should not be used _instead of_ such type
     /// resolution.
     pub fn is_promise(&self) -> bool {
-        self.0.len() == 1 && self.0[0] == "Promise"
+        self.path.len() == 1 && self.path[0] == "Promise"
     }
 
-    pub fn parts(&self) -> &[Text] {
-        &self.0
+    pub fn without_type_parameters(&self) -> Self {
+        Self {
+            path: self.path.clone(),
+            type_parameters: [].into(),
+        }
     }
 }
 
 /// A union of types.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
-pub struct Union(pub(super) Box<[Type]>);
+pub struct Union(pub(super) Box<[TypeReference]>);
 
 impl Union {
-    pub fn contains(&self, ty: &Type) -> bool {
+    pub fn contains(&self, ty: &TypeReference) -> bool {
         self.0.contains(ty)
     }
 
-    pub fn with_type(&self, ty: Type) -> Self {
+    pub fn with_type(&self, ty: TypeReference) -> Self {
         Self(self.0.iter().cloned().chain(Some(ty)).collect())
     }
 }

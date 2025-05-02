@@ -6,7 +6,6 @@ use crate::{
 };
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, Padding, markup};
-use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
@@ -291,6 +290,8 @@ pub enum RuleSource {
     Stylelint(&'static str),
     /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
     EslintNoSecrets(&'static str),
+    /// Rules from [Eslint Plugin Regexp](https://github.com/ota-meshi/eslint-plugin-regexp)
+    EslintRegexp(&'static str),
     /// Rules from [deno lint](https://github.com/denoland/deno_lint)
     DenoLint(&'static str),
 }
@@ -327,6 +328,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintNext(_) => write!(f, "@next/eslint-plugin-next"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
             Self::EslintNoSecrets(_) => write!(f, "eslint-plugin-no-secrets"),
+            Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::DenoLint(_) => write!(f, "deno-lint"),
         }
     }
@@ -379,6 +381,7 @@ impl RuleSource {
             | Self::EslintN(rule_name)
             | Self::EslintNext(rule_name)
             | Self::EslintNoSecrets(rule_name)
+            | Self::EslintRegexp(rule_name)
             | Self::Stylelint(rule_name)
             | Self::DenoLint(rule_name) => rule_name,
         }
@@ -408,6 +411,7 @@ impl RuleSource {
             Self::EslintNext(rule_name) => format!("@next/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
             Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
+            Self::EslintRegexp(rule_name) => format!("regexp/{rule_name}"),
             Self::DenoLint(rule_name) => format!("deno-lint/{rule_name}"),
         }
     }
@@ -437,6 +441,7 @@ impl RuleSource {
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
+            Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
         }
     }
@@ -1288,7 +1293,6 @@ pub struct RuleAdvice {
     pub(crate) details: Vec<Detail>,
     pub(crate) notes: Vec<(LogCategory, MarkupBuf)>,
     pub(crate) suggestion_list: Option<SuggestionList>,
-    pub(crate) code_suggestion_list: Vec<CodeSuggestionAdvice<MarkupBuf>>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -1324,11 +1328,6 @@ impl Advices for RuleAdvice {
             visitor.record_list(&list)?;
         }
 
-        // finally, we print possible code suggestions on how to fix the issue
-        for suggestion in &self.code_suggestion_list {
-            suggestion.record(visitor)?;
-        }
-
         Ok(())
     }
 }
@@ -1354,12 +1353,6 @@ impl RuleDiagnostic {
             rule_advice: RuleAdvice::default(),
             severity: Severity::default(),
         }
-    }
-
-    /// Set an explicit plain-text summary for this diagnostic.
-    pub fn description(mut self, summary: impl Into<String>) -> Self {
-        self.message.set_description(summary.into());
-        self
     }
 
     /// Marks this diagnostic as deprecated code, which will
@@ -1390,7 +1383,7 @@ impl RuleDiagnostic {
 
     /// Attaches a label to this [`RuleDiagnostic`].
     ///
-    /// The given span has to be in the file that was provided while creating this [`RuleDiagnostic`].
+    /// The given span has to be in the file provided while creating this [`RuleDiagnostic`].
     pub fn label(mut self, span: impl AsSpan, msg: impl Display) -> Self {
         self.rule_advice.details.push(Detail {
             log_category: LogCategory::Info,
@@ -1454,11 +1447,11 @@ impl RuleDiagnostic {
         self
     }
 
-    /// Assigns an explicit severity.
+    /// Assigns explicit severity.
     ///
     /// In most cases, severity should _not_ be explicitly assigned, since rule
-    /// categories and configuration define the severity. Currently this is only
-    /// used for plugins to allow plugin authors to assign an explicit severity.
+    /// categories and configuration define the severity. Currently, this is only
+    /// used for plugins to allow plugin authors to assign explicit severity.
     pub fn with_severity(mut self, severity: Severity) -> Self {
         self.severity = severity;
         self

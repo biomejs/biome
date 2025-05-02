@@ -2,7 +2,7 @@ use super::*;
 use biome_js_syntax::{AnyJsFunction, AnyJsRoot};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
-pub struct BindingId(u32);
+pub struct BindingId(pub(crate) u32);
 
 impl BindingId {
     pub fn new(index: usize) -> Self {
@@ -38,7 +38,7 @@ impl ReferenceId {
 
 // We use `NonZeroU32` to allow niche optimizations.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct ScopeId(std::num::NonZeroU32);
+pub struct ScopeId(pub(crate) std::num::NonZeroU32);
 
 // We don't implement `From<usize> for ScopeId` and `From<ScopeId> for usize`
 // to ensure that the API consumers don't create `ScopeId`.
@@ -231,6 +231,20 @@ impl SemanticModel {
 
     /// Returns the [Scope] which the specified syntax node was hoisted to, if any.
     /// Can also be called from [AstNode]::scope_hoisted_to extension method.
+    ///
+    /// ### Example
+    /// In this example, the variable `x` in scope 3 is hoisted to scope 2.
+    /// ```js
+    /// // scope 1
+    /// function() {
+    ///     // scope 2
+    ///     if (b) {
+    ///       // scope 3
+    ///       var x = 0;
+    ///     }
+    ///   return x
+    /// }
+    /// ```
     pub fn scope_hoisted_to(&self, node: &JsSyntaxNode) -> Option<Scope> {
         let range = node.text_trimmed_range();
         let id = self.data.scope_hoisted_to(range)?;

@@ -32,29 +32,29 @@ impl Rule for OrganizeImports {
             .as_json_object_value()?
             .json_member_list();
 
-        for item in list.into_iter().flatten() {
-            let name = item.name().ok()?;
+        for list_item in list.into_iter().flatten() {
+            let name = list_item.name().ok()?;
             let text = name.inner_string_text().ok()?;
 
             if text.text() == "organizeImports" {
-                if let Some(object) = item.value().ok()?.as_json_object_value() {
-                    for item in object.json_member_list().into_iter().flatten() {
-                        let name = item.name().ok()?;
+                if let Some(object) = list_item.value().ok()?.as_json_object_value() {
+                    for member_item in object.json_member_list().into_iter().flatten() {
+                        let name = member_item.name().ok()?;
                         let name = name.inner_string_text().ok()?;
                         if name.text() == "enabled" {
-                            let value = item
+                            let value = member_item
                                 .value()
                                 .ok()?
                                 .as_json_boolean_value()?
                                 .value_token()
                                 .ok()?;
                             if value.text() == "false" {
-                                return Some((item, false));
+                                return Some((list_item, false));
                             }
                         }
                     }
                 }
-                return Some((item, true));
+                return Some((list_item, true));
             }
         }
 

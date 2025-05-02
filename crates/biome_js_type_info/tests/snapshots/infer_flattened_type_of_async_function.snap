@@ -1,8 +1,9 @@
 ---
-source: crates/biome_js_type_info/tests/utils/mod.rs
+source: crates/biome_js_type_info/tests/utils.rs
 expression: content
-snapshot_kind: text
 ---
+## Input
+
 ```ts
 async function returnsPromise(): Promise<string> {
 	return "value";
@@ -10,15 +11,22 @@ async function returnsPromise(): Promise<string> {
 
 ```
 
+## Result
+
 ```
 async Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: "Promise" {
-    extends: none
-    type_args: [T -> string]
-  }
+  returns: Global TypeId(8)
 }
+```
+
+## Registered types
+
+```
+Global TypeId(7) => string
+
+Global TypeId(8) => instanceof unresolved reference "Promise"<Global TypeId(7)>
 ```

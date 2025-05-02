@@ -418,10 +418,10 @@ impl Session {
                 project_key: doc.project_key,
                 path: biome_path.clone(),
                 categories: categories.build(),
-                max_diagnostics: u64::MAX,
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
+                pull_code_actions: false,
             })?;
 
             let content = self.workspace.get_file_content(GetFileContentParams {

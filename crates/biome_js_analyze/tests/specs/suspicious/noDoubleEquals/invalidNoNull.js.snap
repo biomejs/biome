@@ -68,7 +68,7 @@ let a3 = `Output of "biome rage":
 ```
 invalidNoNull.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     1 │ const foo1 = `
     2 │ text
@@ -77,9 +77,7 @@ invalidNoNull.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━
     4 │ `;
     5 │ 
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     3 │ ${a·===·b}
       │       +   
@@ -89,7 +87,7 @@ invalidNoNull.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━
 ```
 invalidNoNull.js:8:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
      6 │ const foo2 = `
      7 │ text
@@ -98,9 +96,7 @@ invalidNoNull.js:8:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━
      9 │ `;
     10 │ 
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     8 │ ${a·===·null}
       │       +      
@@ -110,7 +106,7 @@ invalidNoNull.js:8:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━
 ```
 invalidNoNull.js:13:8 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     11 │ const foo3 = `
     12 │ text
@@ -119,9 +115,7 @@ invalidNoNull.js:13:8 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     14 │ `;
     15 │ 
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     13 │ ${null·===·a}
        │          +   
@@ -131,7 +125,7 @@ invalidNoNull.js:13:8 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:17:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     16 │ // existing comment
   > 17 │ a == b;
@@ -139,9 +133,7 @@ invalidNoNull.js:17:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     18 │ 
     19 │ // existing comment
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     17 │ a·===·b;
        │     +   
@@ -151,7 +143,7 @@ invalidNoNull.js:17:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:20:6 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     19 │ // existing comment
   > 20 │ null == a;
@@ -159,9 +151,7 @@ invalidNoNull.js:20:6 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     21 │ 
     22 │ // existing comment
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     20 │ null·===·a;
        │        +   
@@ -171,16 +161,14 @@ invalidNoNull.js:20:6 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:23:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     22 │ // existing comment
   > 23 │ a == null;
        │   ^^
     24 │ 
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     23 │ a·===·null;
        │     +      
@@ -190,16 +178,14 @@ invalidNoNull.js:23:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:26:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
   > 26 │ if (a == b) {
        │       ^^
     27 │     false;
     28 │ }
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     26 │ if·(a·===·b)·{
        │         +     
@@ -209,7 +195,7 @@ invalidNoNull.js:26:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:30:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     28 │ }
     29 │ 
@@ -218,9 +204,7 @@ invalidNoNull.js:30:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     31 │ 	false;
     32 │ }
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     30 │ if·(a·===·null)·{
        │         +        
@@ -230,7 +214,7 @@ invalidNoNull.js:30:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:34:10 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     32 │ }
     33 │ 
@@ -239,9 +223,7 @@ invalidNoNull.js:34:10 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     35 │ 	false;
     36 │ }
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     34 │ if·(null·===·b)·{
        │            +     
@@ -251,7 +233,7 @@ invalidNoNull.js:34:10 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:39:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     38 │ if (/** some weird comment
   > 39 │     **/ a == b) {
@@ -259,9 +241,7 @@ invalidNoNull.js:39:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     40 │ 
     41 │     }
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     39 │ ····**/·a·===·b)·{
        │             +     
@@ -271,7 +251,7 @@ invalidNoNull.js:39:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:44:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     43 │ let a1 = `Output of "biome rage":
   > 44 │   formatter enabled: ${formatter == true}
@@ -279,9 +259,7 @@ invalidNoNull.js:44:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     45 │   linter: ${linter}
     46 │ `;
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     44 │ ··formatter·enabled:·${formatter·===·true}
        │                                    +      
@@ -291,7 +269,7 @@ invalidNoNull.js:44:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:49:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     48 │ let a2 = `Output of "biome rage":
   > 49 │   formatter enabled: ${formatter == null}
@@ -299,9 +277,7 @@ invalidNoNull.js:49:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     50 │   linter: ${linter}
     51 │ `;
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     49 │ ··formatter·enabled:·${formatter·===·null}
        │                                    +      
@@ -311,7 +287,7 @@ invalidNoNull.js:49:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:54:29 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use === instead of ==
+  × Using == may be unsafe if you are relying on type coercion.
   
     53 │ let a3 = `Output of "biome rage":
   > 54 │   formatter enabled: ${null == formatter}
@@ -319,9 +295,7 @@ invalidNoNull.js:54:29 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
     55 │   linter: ${linter}
     56 │ `;
   
-  i Using == may be unsafe if you are relying on type coercion
-  
-  i Unsafe fix: Use ===
+  i Unsafe fix: Use === instead.
   
     54 │ ··formatter·enabled:·${null·===·formatter}
        │                               +           

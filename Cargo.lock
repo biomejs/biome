@@ -905,6 +905,7 @@ version = "0.5.7"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
+ "biome_formatter",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_rowan",
@@ -956,6 +957,8 @@ dependencies = [
  "biome_js_syntax",
  "biome_js_type_info_macros",
  "biome_rowan",
+ "biome_test_utils",
+ "camino",
  "insta",
 ]
 
@@ -1395,6 +1398,7 @@ dependencies = [
  "biome_formatter",
  "biome_fs",
  "biome_js_parser",
+ "biome_js_type_info",
  "biome_json_parser",
  "biome_module_graph",
  "biome_package",

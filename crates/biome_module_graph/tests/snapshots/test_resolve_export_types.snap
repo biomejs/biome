@@ -1,9 +1,10 @@
 ---
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
-snapshot_kind: text
 ---
-## /src/index.ts
+# `/src/index.ts`
+
+## Source
 
 ```ts
 export const theAnswer = 42;
@@ -35,29 +36,43 @@ class DeepThought {
 }
 
 export const superComputer = new DeepThought();
-
 ```
+
+## Module Info
 
 ```
 Exports {
   "superComputer" => {
     ExportOwnExport => JsOwnExport(
-      Object {
-        prototype: "DeepThought" {
-          extends: none
-          type_args: []
-        }
-        members: {}
-      }
+      Module(0) TypeId(4)
       Local name: superComputer
     )
   }
   "theAnswer" => {
     ExportOwnExport => JsOwnExport(
-      value: 42
+      Module(0) TypeId(0)
       Local name: theAnswer
     )
   }
 }
-Imports {}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => value: 42
+
+Module TypeId(1) => number
+
+Module TypeId(2) => unknown
+
+Module TypeId(3) => class "DeepThought" {
+  extends: none
+  type_args: []
+}
+
+Module TypeId(4) => instanceof Module(0) TypeId(3)
 ```

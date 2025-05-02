@@ -191,6 +191,8 @@ impl FileFeaturesResult {
         if capabilities.debug.debug_syntax_tree.is_some()
             || capabilities.debug.debug_formatter_ir.is_some()
             || capabilities.debug.debug_control_flow.is_some()
+            || capabilities.debug.debug_type_info.is_some()
+            || capabilities.debug.debug_registered_types.is_some()
         {
             self.features_supported
                 .insert(FeatureKind::Debug, SupportKind::Supported);
@@ -637,6 +639,30 @@ pub struct GetControlFlowGraphParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct GetTypeInfoParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct GetRegisteredTypesParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct GetSemanticModelParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFormatterIRParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -697,7 +723,6 @@ pub struct PullDiagnosticsParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub categories: RuleCategories,
-    pub max_diagnostics: u64,
     #[serde(default)]
     pub only: Vec<RuleSelector>,
     #[serde(default)]
@@ -705,6 +730,8 @@ pub struct PullDiagnosticsParams {
     /// Rules to apply on top of the configuration
     #[serde(default)]
     pub enabled_rules: Vec<RuleSelector>,
+    /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
+    pub pull_code_actions: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1152,6 +1179,18 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// document.
     fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
 
+    /// Returns an IR of the type information of the document
+    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
+
+    /// Returns the registered types of the document
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError>;
+
+    /// Returns a textual, debug representation of the semantic model for the document.
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
+
     /// Returns the content of a given file.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
 
@@ -1298,6 +1337,27 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             })
     }
 
+    pub fn get_type_info(&self) -> Result<String, WorkspaceError> {
+        self.workspace.get_type_info(GetTypeInfoParams {
+            project_key: self.project_key,
+            path: self.path.clone(),
+        })
+    }
+    pub fn get_registered_types(&self) -> Result<String, WorkspaceError> {
+        self.workspace
+            .get_registered_types(GetRegisteredTypesParams {
+                project_key: self.project_key,
+                path: self.path.clone(),
+            })
+    }
+
+    pub fn get_semantic_model(&self) -> Result<String, WorkspaceError> {
+        self.workspace.get_semantic_model(GetSemanticModelParams {
+            project_key: self.project_key,
+            path: self.path.clone(),
+        })
+    }
+
     pub fn change_file(&self, version: i32, content: String) -> Result<(), WorkspaceError> {
         self.workspace.change_file(ChangeFileParams {
             project_key: self.project_key,
@@ -1317,18 +1377,18 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
-        max_diagnostics: u32,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
+        pull_code_actions: bool,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
             project_key: self.project_key,
             path: self.path.clone(),
             categories,
-            max_diagnostics: max_diagnostics.into(),
             only,
             skip,
             enabled_rules: vec![],
+            pull_code_actions,
         })
     }
 

@@ -328,6 +328,9 @@ impl ExtensionHandler for CssFileHandler {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
                 debug_formatter_ir: Some(debug_formatter_ir),
+                debug_type_info: None,
+                debug_registered_types: None,
+                debug_semantic_model: None,
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),

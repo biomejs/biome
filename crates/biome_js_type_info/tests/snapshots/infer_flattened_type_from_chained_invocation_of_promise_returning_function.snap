@@ -1,8 +1,9 @@
 ---
-source: crates/biome_js_type_info/tests/utils/mod.rs
+source: crates/biome_js_type_info/tests/utils.rs
 expression: content
-snapshot_kind: text
 ---
+## Input
+
 ```ts
 function returnsPromise(): Promise<number> {
 	return Promise.resolved(true);
@@ -12,12 +13,50 @@ returnsPromise().then(() => {});
 
 ```
 
+## Result
+
 ```
-Object {
-  prototype: "Promise" {
-    extends: none
-    type_args: [T -> unknown]
+instanceof Promise
+```
+
+## Registered types
+
+```
+Module TypeId(0) => sync Function "returnsPromise" {
+  accepts: {
+    params: []
+    type_args: []
   }
-  members: {}
+  returns: Global TypeId(7)
 }
+
+Module TypeId(1) => instanceof Promise<T = number>
+
+Module TypeId(2) => sync Function "then" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Module TypeId(3) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
+
+Module TypeId(4) => sync Function "then" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
+
+Global TypeId(7) => instanceof Promise<T = number>
+
+Global TypeId(8) => instanceof Promise<T = number>
 ```

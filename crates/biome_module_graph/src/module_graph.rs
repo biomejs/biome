@@ -9,7 +9,7 @@ use std::{collections::BTreeSet, sync::Arc};
 
 use biome_fs::{BiomePath, FileSystem, PathKind};
 use biome_js_syntax::AnyJsRoot;
-use biome_js_type_info::{Namespace, TypeInner};
+use biome_js_type_info::{ImportSymbol, TypeReference};
 use biome_project_layout::ProjectLayout;
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{EnforceExtension, ResolveOptions, ResolverGeneric};
@@ -17,7 +17,7 @@ use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::FxBuildHasher;
 
 use crate::{
-    JsExport, JsImportSymbol, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor,
+    JsExport, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor,
     resolver_cache::ResolverCache,
 };
 
@@ -160,15 +160,15 @@ impl ModuleGraph {
                     Some(own_export.clone())
                 }
                 Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-                    if reexport.import.symbol == JsImportSymbol::All {
+                    if reexport.import.symbol == ImportSymbol::All {
                         Some(JsOwnExport {
                             jsdoc_comment: reexport.jsdoc_comment.clone(),
                             local_name: None,
-                            // TODO: Infer members.
-                            ty: TypeInner::Namespace(Box::new(Namespace::from_type_members(
-                                Box::new([]),
-                            )))
-                            .into(),
+                            // TODO: Register namespace
+                            // TypeData::Namespace(Box::new(Namespace::from_type_members(
+                            //    Box::new([...]),
+                            // )))
+                            ty: TypeReference::Unknown,
                         })
                     } else {
                         match reexport.import.resolved_path.as_deref() {

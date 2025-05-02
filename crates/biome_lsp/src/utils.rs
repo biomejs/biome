@@ -1,11 +1,12 @@
 use anyhow::{Context, Result, ensure};
 use biome_analyze::ActionCategory;
-use biome_console::MarkupBuf;
 use biome_console::fmt::Termcolor;
 use biome_console::fmt::{self, Formatter};
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{
-    Applicability, {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
+    Applicability, LogCategory,
+    {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
 };
 use biome_lsp_converters::line_index::LineIndex;
 use biome_lsp_converters::{PositionEncoding, from_proto, to_proto};
@@ -215,6 +216,8 @@ pub(crate) fn diagnostic_to_lsp<D: Diagnostic>(
         line_index,
         position_encoding,
         related_information: &mut related_information,
+        current_message: None,
+        last_diagnostic_length: 0,
     };
 
     diagnostic.advices(&mut visitor).unwrap();
@@ -256,9 +259,37 @@ struct RelatedInformationVisitor<'a> {
     line_index: &'a LineIndex,
     position_encoding: PositionEncoding,
     related_information: &'a mut Option<Vec<lsp::DiagnosticRelatedInformation>>,
+    current_message: Option<String>,
+    last_diagnostic_length: usize,
 }
 
 impl Visit for RelatedInformationVisitor<'_> {
+    fn record_log(&mut self, _category: LogCategory, text: &dyn fmt::Display) -> io::Result<()> {
+        let mut message = {
+            let mut message = MarkupBuf::default();
+            let mut fmt = Formatter::new(&mut message);
+            fmt.write_markup(markup!({ { text } }))?;
+            print_markup(&message)
+        };
+        message.push(' ');
+        let current_diagnostic_length = self.related_information.as_ref().map_or(0, |v| v.len());
+
+        if self.last_diagnostic_length != current_diagnostic_length {
+            self.related_information
+                .get_or_insert_with(Vec::new)
+                .last_mut()
+                .unwrap()
+                .message
+                .push_str(&message);
+        } else if let Some(current_message) = self.current_message.as_mut() {
+            current_message.push_str(&message);
+        } else {
+            self.current_message = Some(message);
+        }
+
+        Ok(())
+    }
+
     fn record_frame(&mut self, location: Location<'_>) -> io::Result<()> {
         let span = match location.span {
             Some(span) => span,
@@ -271,13 +302,14 @@ impl Visit for RelatedInformationVisitor<'_> {
         };
 
         let related_information = self.related_information.get_or_insert_with(Vec::new);
+        self.last_diagnostic_length = related_information.len();
 
         related_information.push(lsp::DiagnosticRelatedInformation {
             location: lsp::Location {
                 uri: self.url.clone(),
                 range,
             },
-            message: String::new(),
+            message: self.current_message.take().unwrap_or_default(),
         });
 
         Ok(())

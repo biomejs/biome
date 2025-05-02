@@ -1,9 +1,10 @@
 ---
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
-snapshot_kind: text
 ---
-## /src/index.ts
+# `/src/index.ts`
+
+## Source
 
 ```ts
 /**
@@ -12,20 +13,15 @@ snapshot_kind: text
 function foo() {}
 
 export { foo };
-
 ```
+
+## Module Info
 
 ```
 Exports {
   "foo" => {
     ExportOwnExport => JsOwnExport(
-      sync Function "foo" {
-        accepts: {
-          params: []
-          type_args: []
-        }
-        returns: unknown
-      }
+      Module(0) TypeId(0)
       Local name: foo
       JsDoc(
         @returns {string}
@@ -33,5 +29,19 @@ Exports {
     )
   }
 }
-Imports {}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: unknown reference
+}
 ```
