@@ -1,6 +1,6 @@
 use camino::{Utf8Component, Utf8Path, Utf8PathBuf};
 use directories::ProjectDirs;
-use std::{env, fs};
+use std::{env, fs, path};
 use tracing::warn;
 
 pub fn ensure_cache_dir() -> Utf8PathBuf {
@@ -41,12 +41,13 @@ pub fn normalize_path(path: &Utf8Path) -> Utf8PathBuf {
                 }
             }
             Utf8Component::CurDir => {}
+            Utf8Component::Prefix(prefix) => {
+                stack.push(prefix.as_str());
+            }
             Utf8Component::RootDir => {
-                stack.clear();
-                stack.push("/");
+                stack.push(path::MAIN_SEPARATOR_STR);
             }
             Utf8Component::Normal(c) => stack.push(c),
-            _ => {}
         }
     }
 
