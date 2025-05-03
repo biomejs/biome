@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -86,13 +88,7 @@ impl Rule for UseSingleJsDocAsterisk {
                     let text = comment.text();
 
                     let invalid_line = get_invalid_jsdoc_line(text)?;
-
-                    let line_offset =
-                        text.lines()
-                            .take(invalid_line.line_index)
-                            .fold(0, |acc, line| {
-                                acc + line.len() + 1 // +1 for the line break
-                            });
+                    let line_offset = get_line_char_start_index(text, invalid_line.line_index);
 
                     let start_size =
                         comment.text_range().start() + TextSize::from(line_offset as u32);
@@ -107,7 +103,9 @@ impl Rule for UseSingleJsDocAsterisk {
                     Some(RuleState {
                         token: token.clone(),
                         range: range_modified,
-                        line_indexes: invalid_line,
+                        is_end_line: invalid_line.is_end_line,
+                        char_start: line_offset + invalid_line.char_start,
+                        char_end: line_offset + invalid_line.char_end,
                         comment_text: text.to_string(),
                     })
                 })
@@ -120,11 +118,7 @@ impl Rule for UseSingleJsDocAsterisk {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let position = if state.line_indexes.is_end_line {
-            "end"
-        } else {
-            "start"
-        };
+        let position = if state.is_end_line { "end" } else { "start" };
 
         Some(RuleDiagnostic::new(
             rule_category!(),
@@ -136,7 +130,6 @@ impl Rule for UseSingleJsDocAsterisk {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let invalid_line_data = &state.line_indexes;
         let token = state.token.clone();
         let mut mutation = ctx.root().begin();
         let mut new_trivia = vec![];
@@ -144,22 +137,19 @@ impl Rule for UseSingleJsDocAsterisk {
         for trivia in token.clone().leading_trivia().pieces() {
             let kind = trivia.kind();
             if let Some(comment) = trivia.as_comments() {
-                let comment_text = comment.text();
-                let mut lines: Vec<&str> = comment_text.lines().collect();
+                let mut comment_text = Cow::Borrowed(comment.text());
 
                 if comment.text() == state.comment_text {
-                    if let Some(line) = lines.get_mut(invalid_line_data.line_index) {
-                        let start = invalid_line_data.char_start;
-                        let end = invalid_line_data.char_end;
-
-                        let new_line = format!("{}{}", &line[..start], &line[end..]);
-                        lines[invalid_line_data.line_index] = Box::leak(new_line.into_boxed_str());
-                    }
+                    let new_comment_text = format!(
+                        "{}{}",
+                        &comment_text[..state.char_start],
+                        &comment_text[state.char_end..]
+                    );
+                    comment_text = Cow::Owned(new_comment_text);
                 }
 
-                let new_comment = lines.join("\n");
-                new_trivia.push(TriviaPiece::new(kind, new_comment.text_len()));
-                text.push_str(new_comment.as_str());
+                new_trivia.push(TriviaPiece::new(kind, comment_text.text_len()));
+                text.push_str(comment_text.as_ref());
             } else {
                 new_trivia.push(TriviaPiece::new(kind, trivia.text_len()));
                 text.push_str(trivia.text());
@@ -184,7 +174,9 @@ impl Rule for UseSingleJsDocAsterisk {
 pub struct RuleState {
     token: JsSyntaxToken,
     range: TextRange,
-    line_indexes: InvalidJsDocLineIndexes,
+    is_end_line: bool,
+    char_start: usize,
+    char_end: usize,
     comment_text: String,
 }
 
@@ -246,12 +238,9 @@ fn get_invalid_jsdoc_line_start(text: &str) -> Option<InvalidJsDocLineIndexes> {
                     continue;
                 }
 
-                if char_is_whitespace(b) {
-                    continue;
+                if !char_is_whitespace(b) {
+                    break;
                 }
-
-                // Found non-whitespace character
-                break;
             }
 
             invalid_asterisk_index.map(|char_index| (line_index, char_index + 1))
@@ -305,4 +294,11 @@ fn get_invalid_jsdoc_line(text: &str) -> Option<InvalidJsDocLineIndexes> {
     }
 
     get_invalid_jsdoc_line_start(text).or_else(|| get_invalid_jsdoc_last_line(text))
+}
+
+fn get_line_char_start_index(text: &str, line_index: usize) -> usize {
+    // Use split() instead of lines() to properly handle windows CRLF line endings
+    text.split('\n').take(line_index).fold(0, |acc, line| {
+        acc + line.len() + 1 // +1 for the newline character
+    })
 }
