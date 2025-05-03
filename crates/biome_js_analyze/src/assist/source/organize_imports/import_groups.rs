@@ -314,10 +314,20 @@ impl TryFrom<String> for NegatablePredefinedSourceMatcher {
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for NegatablePredefinedSourceMatcher {
     fn schema_name() -> String {
-        "PredefinedGroupMatcher".to_string()
+        "NegatablePredefinedSourceMatcher".to_string()
     }
     fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        String::json_schema(generator)
+        let schema = PredefinedSourceMatcher::json_schema(generator);
+        let mut schema_object = schema.into_object();
+        // Add negated variants
+        if let Some(enum_values) = &mut schema_object.enum_values {
+            for index in 0..enum_values.len() {
+                if let Some(val) = enum_values[index].as_str() {
+                    enum_values.push(format!("!{val}").into());
+                }
+            }
+        }
+        schema_object.into()
     }
 }
 

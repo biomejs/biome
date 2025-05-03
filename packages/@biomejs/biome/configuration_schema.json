@@ -2349,6 +2349,25 @@
 			},
 			"additionalProperties": false
 		},
+		"NegatablePredefinedSourceMatcher": {
+			"type": "string",
+			"enum": [
+				":ALIAS:",
+				":BUN:",
+				":NODE:",
+				":PACKAGE:",
+				":PACKAGE_WITH_PROTOCOL:",
+				":PATH:",
+				":URL:",
+				"!:ALIAS:",
+				"!:BUN:",
+				"!:NODE:",
+				"!:PACKAGE:",
+				"!:PACKAGE_WITH_PROTOCOL:",
+				"!:PATH:",
+				"!:URL:"
+			]
+		},
 		"NoBitwiseOperatorsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3396,7 +3415,6 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
-		"PredefinedGroupMatcher": { "type": "string" },
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -4361,7 +4379,7 @@
 		},
 		"SourceMatcher": {
 			"anyOf": [
-				{ "$ref": "#/definitions/PredefinedGroupMatcher" },
+				{ "$ref": "#/definitions/NegatablePredefinedSourceMatcher" },
 				{ "$ref": "#/definitions/ImportSourceGlob" }
 			]
 		},
