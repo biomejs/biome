@@ -101,6 +101,10 @@ pub struct RawLanguageRoot {
     node: SyntaxNode<RawLanguage>,
 }
 
+impl RawLanguageRoot {
+    pub const KIND: RawLanguageKind = RawLanguageKind::ROOT;
+}
+
 impl AstNode for RawLanguageRoot {
     type Language = RawLanguage;
 
@@ -135,6 +139,10 @@ impl AstNode for RawLanguageRoot {
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct LiteralExpression {
     node: SyntaxNode<RawLanguage>,
+}
+
+impl LiteralExpression {
+    pub const KIND: RawLanguageKind = RawLanguageKind::LITERAL_EXPRESSION;
 }
 
 impl AstNode for LiteralExpression {

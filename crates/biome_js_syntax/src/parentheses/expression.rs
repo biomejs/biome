@@ -8,16 +8,17 @@ use crate::{
     JsArrayExpression, JsArrowFunctionExpression, JsAssignmentExpression, JsAwaitExpression,
     JsBigintLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsBooleanLiteralExpression,
     JsCallExpression, JsClassExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
-    JsComputedMemberName, JsConditionalExpression, JsExpressionStatement, JsForStatement,
-    JsFunctionExpression, JsIdentifierExpression, JsImportCallExpression, JsImportMetaExpression,
-    JsInExpression, JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator, JsMetavariable,
-    JsNewExpression, JsNewTargetExpression, JsNullLiteralExpression, JsNumberLiteralExpression,
-    JsObjectExpression, JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsPreUpdateOperator, JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
+    JsComputedMemberName, JsConditionalExpression, JsExpressionStatement, JsExtendsClause,
+    JsForStatement, JsFunctionExpression, JsIdentifierExpression, JsImportCallExpression,
+    JsImportMetaExpression, JsInExpression, JsInstanceofExpression, JsLogicalExpression,
+    JsLogicalOperator, JsMetavariable, JsNewExpression, JsNewTargetExpression,
+    JsNullLiteralExpression, JsNumberLiteralExpression, JsObjectExpression,
+    JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsPreUpdateOperator,
+    JsRegexLiteralExpression, JsSequenceExpression, JsSpread, JsStaticMemberExpression,
     JsStringLiteralExpression, JsSuperExpression, JsSyntaxKind, JsSyntaxNode, JsTemplateExpression,
-    JsThisExpression, JsUnaryExpression, JsUnaryOperator, JsYieldExpression, JsxTagExpression,
-    TsAsExpression, TsInstantiationExpression, TsNonNullAssertionExpression, TsSatisfiesExpression,
-    TsTypeAssertionExpression,
+    JsThisExpression, JsUnaryExpression, JsUnaryOperator, JsYieldExpression, JsxSpreadAttribute,
+    JsxSpreadChild, JsxTagExpression, TsAsExpression, TsInstantiationExpression,
+    TsNonNullAssertionExpression, TsSatisfiesExpression, TsTypeAssertionExpression,
     assign_ext::AnyJsMemberAssignment,
     binary_like_expression::{
         AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression, should_flatten,
@@ -136,7 +137,7 @@ impl NeedsParentheses for JsAssignmentExpression {
             return false;
         };
         match_ast! {
-            match &parent {
+            match parent {
                 JsAssignmentExpression(_) => false,
                 // `[a = b]`
                 JsComputedMemberName(_) => false,
@@ -672,30 +673,31 @@ impl NeedsParentheses for JsxTagExpression {
         let Some(parent) = self.syntax().parent() else {
             return false;
         };
-        match parent.kind() {
-            JsSyntaxKind::JS_BINARY_EXPRESSION => {
-                let binary = JsBinaryExpression::unwrap_cast(parent);
-                let is_left = binary.left().map(AstNode::into_syntax).as_ref() == Ok(self.syntax());
-                matches!(binary.operator(), Ok(JsBinaryOperator::LessThan)) && is_left
+        match_ast! {
+            match parent {
+                JsBinaryExpression(binary) => {
+                    let is_left = binary.left().map(AstNode::into_syntax).as_ref() == Ok(self.syntax());
+                    matches!(binary.operator(), Ok(JsBinaryOperator::LessThan)) && is_left
+                },
+                TsAsExpression(_)
+                | TsSatisfiesExpression(_)
+                | JsAwaitExpression(_)
+                | JsExtendsClause(_)
+                | JsStaticMemberExpression(_)
+                | JsComputedMemberExpression(_)
+                | JsSequenceExpression(_)
+                | JsUnaryExpression(_)
+                | TsNonNullAssertionExpression(_)
+                | JsSpread(_)
+                | JsxSpreadAttribute(_)
+                | JsxSpreadChild(_) => true,
+                _ => matches!(
+                    parent.kind(),
+                    JsSyntaxKind::JS_CALL_EXPRESSION
+                        | JsSyntaxKind::JS_NEW_EXPRESSION
+                        | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
+                ),
             }
-            JsSyntaxKind::TS_AS_EXPRESSION
-            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
-            | JsSyntaxKind::JS_AWAIT_EXPRESSION
-            | JsSyntaxKind::JS_EXTENDS_CLAUSE
-            | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
-            | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
-            | JsSyntaxKind::JS_SEQUENCE_EXPRESSION
-            | JsSyntaxKind::JS_UNARY_EXPRESSION
-            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
-            | JsSyntaxKind::JS_SPREAD
-            | JsSyntaxKind::JSX_SPREAD_ATTRIBUTE
-            | JsSyntaxKind::JSX_SPREAD_CHILD => true,
-            _ => matches!(
-                parent.kind(),
-                JsSyntaxKind::JS_CALL_EXPRESSION
-                    | JsSyntaxKind::JS_NEW_EXPRESSION
-                    | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
-            ),
         }
     }
 }
@@ -745,14 +747,15 @@ impl NeedsParentheses for TsTypeAssertionExpression {
         let Some(parent) = self.syntax().parent() else {
             return false;
         };
-        match parent.kind() {
-            JsSyntaxKind::TS_AS_EXPRESSION => true,
-            JsSyntaxKind::TS_SATISFIES_EXPRESSION => true,
-            JsSyntaxKind::JS_BINARY_EXPRESSION => {
-                JsBinaryExpression::unwrap_cast(parent).operator()
-                    == Ok(JsBinaryOperator::LeftShift)
+        match_ast! {
+            match parent {
+                TsAsExpression(_) => true,
+                TsSatisfiesExpression(_) => true,
+                JsBinaryExpression(expr) => {
+                    expr.operator() == Ok(JsBinaryOperator::LeftShift)
+                },
+                _ => type_cast_like_needs_parens(self.syntax(), parent),
             }
-            _ => type_cast_like_needs_parens(self.syntax(), parent),
         }
     }
 }

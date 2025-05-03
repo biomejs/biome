@@ -5,8 +5,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsLanguage, JsSyntaxKind, JsxAttribute, jsx_ext::AnyJsxElement};
-use biome_rowan::{AstNode, BatchMutationExt, WalkEvent};
+use biome_js_syntax::{
+    JsLanguage, JsxAttribute, JsxOpeningElement, JsxSelfClosingElement, jsx_ext::AnyJsxElement,
+};
+use biome_rowan::{AstNode, BatchMutationExt, WalkEvent, match_ast};
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
@@ -115,46 +117,43 @@ impl Visitor for ValidAutofocusVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                let kind = node.kind();
+                match_ast! {
+                    match node {
+                        JsxOpeningElement(element) => {
+                            let element = AnyJsxElement::from(element);
 
-                match kind {
-                    JsSyntaxKind::JSX_OPENING_ELEMENT => {
-                        let element = AnyJsxElement::unwrap_cast(node.clone());
+                            let is_hold = match self.stack.last() {
+                                None => false,
+                                Some((_, value)) => *value,
+                            };
 
-                        let is_hold = match self.stack.last() {
-                            None => false,
-                            Some((_, value)) => *value,
-                        };
+                            if is_hold {
+                                self.stack.push((element.clone(), true));
+                            } else {
+                                let next_hold = find_kept_autofocus_mark(&element);
+                                self.stack.push((element.clone(), next_hold));
+                            }
 
-                        if is_hold {
-                            self.stack.push((element.clone(), true));
-                        } else {
-                            let next_hold = find_kept_autofocus_mark(&element);
-                            self.stack.push((element.clone(), next_hold));
-                        }
-
-                        ctx.match_query(ValidAutofocus(element));
-                    }
-                    JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => {
-                        let element = AnyJsxElement::unwrap_cast(node.clone());
-
-                        let is_hold = match self.stack.last() {
-                            None => false,
-                            Some((_, value)) => *value,
-                        };
-
-                        if !is_hold {
                             ctx.match_query(ValidAutofocus(element));
-                        }
+                        },
+                        JsxSelfClosingElement(element) => {
+                            let element = AnyJsxElement::from(element);
+
+                            let is_hold = match self.stack.last() {
+                                None => false,
+                                Some((_, value)) => *value,
+                            };
+
+                            if !is_hold {
+                                ctx.match_query(ValidAutofocus(element));
+                            }
+                        },
+                        _ => {}
                     }
-                    JsSyntaxKind::JSX_CLOSING_ELEMENT => {
-                        self.stack.pop();
-                    }
-                    _ => {}
                 }
             }
             WalkEvent::Leave(_) => {}
-        };
+        }
     }
 }
 

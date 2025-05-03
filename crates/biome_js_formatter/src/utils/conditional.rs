@@ -7,10 +7,10 @@ use biome_formatter::{
 use crate::{AsFormat, IntoFormat};
 use biome_js_syntax::{
     AnyJsExpression, AnyTsType, JsAssignmentExpression, JsConditionalExpression, JsFileSource,
-    JsInitializerClause, JsReturnStatement, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsConditionalType,
+    JsInitializerClause, JsReturnStatement, JsStaticMemberExpression, JsSyntaxNode, JsSyntaxToken,
+    JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsConditionalType,
 };
-use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union, match_ast};
 
 declare_node_union! {
     pub AnyJsConditional = JsConditionalExpression | TsConditionalType
@@ -404,32 +404,16 @@ impl FormatJsAnyConditionalRule {
         match parent {
             None => false,
             Some(parent) => {
-                let argument = match parent.kind() {
-                    JsSyntaxKind::JS_INITIALIZER_CLAUSE => {
-                        let initializer = JsInitializerClause::unwrap_cast(parent);
-                        initializer.expression().ok()
+                let argument = match_ast! {
+                    match parent {
+                        JsInitializerClause(initializer) => initializer.expression().ok(),
+                        JsReturnStatement(return_statmt) => return_statmt.argument(),
+                        JsThrowStatement(throw_stmt) => throw_stmt.argument().ok(),
+                        JsUnaryExpression(unary_expr) => unary_expr.argument().ok(),
+                        JsYieldArgument(yield_arg) => yield_arg.expression().ok(),
+                        JsAssignmentExpression(assignment_expr) => assignment_expr.right().ok(),
+                        _ => None,
                     }
-                    JsSyntaxKind::JS_RETURN_STATEMENT => {
-                        let return_statement = JsReturnStatement::unwrap_cast(parent);
-                        return_statement.argument()
-                    }
-                    JsSyntaxKind::JS_THROW_STATEMENT => {
-                        let throw_statement = JsThrowStatement::unwrap_cast(parent);
-                        throw_statement.argument().ok()
-                    }
-                    JsSyntaxKind::JS_UNARY_EXPRESSION => {
-                        let unary_expression = JsUnaryExpression::unwrap_cast(parent);
-                        unary_expression.argument().ok()
-                    }
-                    JsSyntaxKind::JS_YIELD_ARGUMENT => {
-                        let yield_argument = JsYieldArgument::unwrap_cast(parent);
-                        yield_argument.expression().ok()
-                    }
-                    JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
-                        let assignment_expression = JsAssignmentExpression::unwrap_cast(parent);
-                        assignment_expression.right().ok()
-                    }
-                    _ => None,
                 };
 
                 argument.is_some_and(|argument| argument == expression)

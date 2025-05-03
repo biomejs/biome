@@ -1,10 +1,11 @@
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, match_ast};
 
 use crate::{
-    AnyTsReturnType, AnyTsType, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsConstructorType,
-    TsFunctionType, TsIndexedAccessType, TsInferType, TsIntersectionType,
-    TsIntersectionTypeElementList, TsTypeOperatorType, TsTypeofType, TsUnionType,
-    TsUnionTypeVariantList, parentheses::NeedsParentheses, type_ext::AnyTsFunctionType,
+    AnyTsReturnType, AnyTsType, JsArrowFunctionExpression, JsSyntaxKind, JsSyntaxNode, TsArrayType,
+    TsConditionalType, TsConstructorType, TsFunctionType, TsIndexedAccessType, TsInferType,
+    TsIntersectionType, TsIntersectionTypeElementList, TsReturnTypeAnnotation, TsTypeOperatorType,
+    TsTypeofType, TsUnionType, TsUnionTypeVariantList, parentheses::NeedsParentheses,
+    type_ext::AnyTsFunctionType,
 };
 
 impl NeedsParentheses for TsConditionalType {
@@ -12,24 +13,25 @@ impl NeedsParentheses for TsConditionalType {
         let Some(parent) = self.syntax().parent() else {
             return false;
         };
-        match parent.kind() {
-            JsSyntaxKind::TS_CONDITIONAL_TYPE => {
-                let conditional = Self::unwrap_cast(parent.clone());
-                let is_extends_type = conditional
-                    .extends_type()
-                    .is_ok_and(|extends_type| extends_type.syntax() == self.syntax());
-                let is_check_type = conditional
-                    .check_type()
-                    .is_ok_and(|check_type| check_type.syntax() == self.syntax());
-                is_check_type || is_extends_type
+        match_ast! {
+            match parent {
+                TsConditionalType(conditional) => {
+                    let is_extends_type = conditional
+                        .extends_type()
+                        .is_ok_and(|extends_type| extends_type.syntax() == self.syntax());
+                    let is_check_type = conditional
+                        .check_type()
+                        .is_ok_and(|check_type| check_type.syntax() == self.syntax());
+                    is_check_type || is_extends_type
+                },
+                TsUnionTypeVariantList(list) => {
+                    list.len() > 1
+                },
+                TsIntersectionTypeElementList(list) => {
+                    list.len() > 1
+                },
+                _ => operator_type_or_higher_needs_parens(self.syntax(), parent),
             }
-            JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
-                TsUnionTypeVariantList::unwrap_cast(parent).len() > 1
-            }
-            JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST => {
-                TsIntersectionTypeElementList::unwrap_cast(parent).len() > 1
-            }
-            _ => operator_type_or_higher_needs_parens(self.syntax(), parent),
         }
     }
 }
@@ -68,15 +70,16 @@ impl NeedsParentheses for TsIntersectionType {
         let Some(parent) = self.syntax().parent() else {
             return false;
         };
-        match parent.kind() {
-            JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
-                self.types().len() > 1 && TsUnionTypeVariantList::unwrap_cast(parent).len() > 1
+        match_ast! {
+            match parent {
+                TsUnionTypeVariantList(list) => {
+                    list.len() > 1 && self.types().len() > 1
+                },
+                TsIntersectionTypeElementList(list) => {
+                    list.len() > 1 && self.types().len() > 1
+                },
+                _ => operator_type_or_higher_needs_parens(self.syntax(), parent),
             }
-            JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST => {
-                self.types().len() > 1
-                    && TsIntersectionTypeElementList::unwrap_cast(parent).len() > 1
-            }
-            _ => operator_type_or_higher_needs_parens(self.syntax(), parent),
         }
     }
 }
@@ -96,24 +99,25 @@ impl NeedsParentheses for TsTypeofType {
         let Some(parent) = self.syntax().parent() else {
             return false;
         };
-        match parent.kind() {
-            JsSyntaxKind::TS_ARRAY_TYPE => true,
-            // Typeof operators are parenthesized when used as an object type in an indexed access
-            // to avoid ambiguity of precedence, as it's higher than the JS equivalent:
-            // ```typescript
-            // const array = [1, 2, 3]
-            // type T = typeof array[0]; // => number
-            // type T2 = (typeof array)[0]; // => number
-            // const J1 = typeof array[0]; // => 'number'
-            // const J2 = (typeof array)[0]; // => 'o', because `typeof array` is 'object'
-            // ```
-            JsSyntaxKind::TS_INDEXED_ACCESS_TYPE => {
-                let indexed = TsIndexedAccessType::unwrap_cast(parent);
-                // The typeof operator only needs parens if it's the object of the indexed access.
-                // If it's the index_type, then the braces already act as the visual precedence.
-                indexed.object_type().map(AstNode::into_syntax).as_ref() == Ok(self.syntax())
+        match_ast! {
+            match parent {
+                TsArrayType(_) => true,
+                // Typeof operators are parenthesized when used as an object type in an indexed access
+                // to avoid ambiguity of precedence, as it's higher than the JS equivalent:
+                // ```typescript
+                // const array = [1, 2, 3]
+                // type T = typeof array[0]; // => number
+                // type T2 = (typeof array)[0]; // => number
+                // const J1 = typeof array[0]; // => 'number'
+                // const J2 = (typeof array)[0]; // => 'o', because `typeof array` is 'object'
+                // ```
+                TsIndexedAccessType(indexed) => {
+                    // The typeof operator only needs parens if it's the object of the indexed access.
+                    // If it's the index_type, then the braces already act as the visual precedence.
+                    indexed.object_type().map(AstNode::into_syntax).as_ref() == Ok(self.syntax())
+                },
+                _ => false,
             }
-            _ => false,
         }
     }
 }
@@ -124,15 +128,12 @@ impl NeedsParentheses for TsUnionType {
         let Some(parent) = self.syntax().parent() else {
             return false;
         };
-        match parent.kind() {
-            JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
-                self.types().len() > 1 && TsUnionTypeVariantList::unwrap_cast(parent).len() > 1
+        match_ast! {
+            match parent {
+                TsUnionTypeVariantList(list) => list.len() > 1 && self.types().len() > 1,
+                TsIntersectionTypeElementList(list) => list.len() > 1 && self.types().len() > 1,
+                _ => operator_type_or_higher_needs_parens(self.syntax(), parent),
             }
-            JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST => {
-                self.types().len() > 1
-                    && TsIntersectionTypeElementList::unwrap_cast(parent).len() > 1
-            }
-            _ => operator_type_or_higher_needs_parens(self.syntax(), parent),
         }
     }
 }
@@ -142,41 +143,36 @@ fn function_like_type_needs_parentheses(node: &JsSyntaxNode) -> bool {
     let Some(parent) = node.parent() else {
         return false;
     };
-    match parent.kind() {
-        JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION => parent.parent().is_some_and(|grand_parent| {
-            grand_parent.kind() == JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-        }),
-        JsSyntaxKind::TS_CONDITIONAL_TYPE => {
-            let conditional = TsConditionalType::unwrap_cast(parent.clone());
-            let is_check_type = conditional
-                .check_type()
-                .is_ok_and(|check_type| check_type.syntax() == node);
-            if is_check_type {
-                return true;
-            }
-            let is_not_extends_type = conditional
-                .extends_type()
-                .is_ok_and(|extends_type| extends_type.syntax() != node);
-            if is_not_extends_type {
-                return false;
-            }
-            match AnyTsFunctionType::unwrap_cast(node.clone()).return_type() {
-                Ok(AnyTsReturnType::AnyTsType(AnyTsType::TsInferType(infer_type))) => {
-                    infer_type.constraint().is_some()
+    match_ast! {
+        match parent {
+            TsReturnTypeAnnotation(node) => node.parent::<JsArrowFunctionExpression>().is_some(),
+            TsConditionalType(conditional) => {
+                let is_check_type = conditional
+                    .check_type()
+                    .is_ok_and(|check_type| check_type.syntax() == node);
+                if is_check_type {
+                    return true;
                 }
-                Ok(AnyTsReturnType::TsAssertsReturnType(asserts_type)) => {
-                    asserts_type.predicate().is_some()
+                let is_not_extends_type = conditional
+                    .extends_type()
+                    .is_ok_and(|extends_type| extends_type.syntax() != node);
+                if is_not_extends_type {
+                    return false;
                 }
-                _ => false,
-            }
+                match AnyTsFunctionType::unwrap_cast(node.clone()).return_type() {
+                    Ok(AnyTsReturnType::AnyTsType(AnyTsType::TsInferType(infer_type))) => {
+                        infer_type.constraint().is_some()
+                    }
+                    Ok(AnyTsReturnType::TsAssertsReturnType(asserts_type)) => {
+                        asserts_type.predicate().is_some()
+                    }
+                    _ => false,
+                }
+            },
+            TsUnionTypeVariantList(list) => list.len() > 1,
+            TsIntersectionTypeElementList(list) => list.len() > 1,
+            _ => operator_type_or_higher_needs_parens(node, parent),
         }
-        JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
-            TsUnionTypeVariantList::unwrap_cast(parent).len() > 1
-        }
-        JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST => {
-            TsIntersectionTypeElementList::unwrap_cast(parent).len() > 1
-        }
-        _ => operator_type_or_higher_needs_parens(node, parent),
     }
 }
 

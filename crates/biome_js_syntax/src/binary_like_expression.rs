@@ -11,7 +11,7 @@ use crate::{
     JsSyntaxNode, JsSyntaxToken, JsWhileStatement, OperatorPrecedence,
 };
 
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, declare_node_union};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, declare_node_union, match_ast};
 use std::fmt::Debug;
 use std::hash::Hash;
 
@@ -78,18 +78,14 @@ impl AnyJsBinaryLikeExpression {
     /// ```
     pub fn is_inside_condition(&self, parent: Option<&JsSyntaxNode>) -> bool {
         parent.is_some_and(|parent| {
-            let test = match parent.kind() {
-                JsSyntaxKind::JS_IF_STATEMENT => JsIfStatement::unwrap_cast(parent.clone()).test(),
-                JsSyntaxKind::JS_DO_WHILE_STATEMENT => {
-                    JsDoWhileStatement::unwrap_cast(parent.clone()).test()
+            let test = match_ast! {
+                match parent {
+                    JsIfStatement(stmt) => stmt.test(),
+                    JsDoWhileStatement(stmt) => stmt.test(),
+                    JsWhileStatement(stmt) => stmt.test(),
+                    JsSwitchStatement(stmt) => stmt.discriminant(),
+                    _ => { return false; },
                 }
-                JsSyntaxKind::JS_WHILE_STATEMENT => {
-                    JsWhileStatement::unwrap_cast(parent.clone()).test()
-                }
-                JsSyntaxKind::JS_SWITCH_STATEMENT => {
-                    JsSwitchStatement::unwrap_cast(parent.clone()).discriminant()
-                }
-                _ => return false,
             };
             test.is_ok_and(|test| test.syntax() == self.syntax())
         })

@@ -6,7 +6,7 @@ use biome_graphql_syntax::{
     GraphqlNameBinding, GraphqlNameReference, GraphqlOperationDefinition, GraphqlSyntaxKind,
     GraphqlSyntaxNode, GraphqlVariableBinding, GraphqlVariableReference, TextRange,
 };
-use biome_rowan::{AstNode, TokenText};
+use biome_rowan::{AstNode, TokenText, match_ast};
 use rustc_hash::FxHashMap;
 use std::collections::{HashSet, VecDeque};
 
@@ -154,32 +154,16 @@ impl SemanticEventExtractor {
     /// See [SemanticEvent] for a more detailed description of which events [GraphqlSyntaxNode] generates.
     #[inline]
     pub fn enter(&mut self, node: &GraphqlSyntaxNode) {
-        match node.kind() {
-            GRAPHQL_NAME_BINDING => {
-                self.enter_identifier_binding(&GraphqlNameBinding::unwrap_cast(node.clone()));
+        match_ast! {
+            match node {
+                GraphqlNameBinding(node) => self.enter_identifier_binding(&node),
+                GraphqlNameReference(node) => self.enter_identifier_usage(&node),
+                GraphqlVariableBinding(node) => self.enter_variable_binding(&node),
+                GraphqlVariableReference(node) => self.enter_variable_usage(&node),
+                GraphqlOperationDefinition(node) => self.push_operation_scope(&node),
+                GraphqlFragmentDefinition(node) => self.push_fragment_scope(&node),
+                _ => {}
             }
-
-            GRAPHQL_NAME_REFERENCE => {
-                self.enter_identifier_usage(&GraphqlNameReference::unwrap_cast(node.clone()));
-            }
-
-            GRAPHQL_VARIABLE_BINDING => {
-                self.enter_variable_binding(&GraphqlVariableBinding::unwrap_cast(node.clone()));
-            }
-
-            GRAPHQL_VARIABLE_REFERENCE => {
-                self.enter_variable_usage(&GraphqlVariableReference::unwrap_cast(node.clone()));
-            }
-
-            GRAPHQL_OPERATION_DEFINITION => {
-                self.push_operation_scope(&GraphqlOperationDefinition::unwrap_cast(node.clone()));
-            }
-
-            GRAPHQL_FRAGMENT_DEFINITION => {
-                self.push_fragment_scope(&GraphqlFragmentDefinition::unwrap_cast(node.clone()));
-            }
-
-            _ => {}
         }
     }
 

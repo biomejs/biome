@@ -715,6 +715,9 @@ impl AnyHtmlElement {
         }
     }
 }
+impl HtmlAttribute {
+    pub const KIND: SyntaxKind = HTML_ATTRIBUTE;
+}
 impl AstNode for HtmlAttribute {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -766,6 +769,9 @@ impl From<HtmlAttribute> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl HtmlAttributeInitializerClause {
+    pub const KIND: SyntaxKind = HTML_ATTRIBUTE_INITIALIZER_CLAUSE;
+}
 impl AstNode for HtmlAttributeInitializerClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -813,6 +819,9 @@ impl From<HtmlAttributeInitializerClause> for SyntaxElement {
     fn from(n: HtmlAttributeInitializerClause) -> Self {
         n.syntax.into()
     }
+}
+impl HtmlAttributeName {
+    pub const KIND: SyntaxKind = HTML_ATTRIBUTE_NAME;
 }
 impl AstNode for HtmlAttributeName {
     type Language = Language;
@@ -863,6 +872,9 @@ impl From<HtmlAttributeName> for SyntaxElement {
     fn from(n: HtmlAttributeName) -> Self {
         n.syntax.into()
     }
+}
+impl HtmlCdataSection {
+    pub const KIND: SyntaxKind = HTML_CDATA_SECTION;
 }
 impl AstNode for HtmlCdataSection {
     type Language = Language;
@@ -921,6 +933,9 @@ impl From<HtmlCdataSection> for SyntaxElement {
     fn from(n: HtmlCdataSection) -> Self {
         n.syntax.into()
     }
+}
+impl HtmlClosingElement {
+    pub const KIND: SyntaxKind = HTML_CLOSING_ELEMENT;
 }
 impl AstNode for HtmlClosingElement {
     type Language = Language;
@@ -981,6 +996,9 @@ impl From<HtmlClosingElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl HtmlComment {
+    pub const KIND: SyntaxKind = HTML_COMMENT;
+}
 impl AstNode for HtmlComment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1039,6 +1057,9 @@ impl From<HtmlComment> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl HtmlContent {
+    pub const KIND: SyntaxKind = HTML_CONTENT;
+}
 impl AstNode for HtmlContent {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1088,6 +1109,9 @@ impl From<HtmlContent> for SyntaxElement {
     fn from(n: HtmlContent) -> Self {
         n.syntax.into()
     }
+}
+impl HtmlDirective {
+    pub const KIND: SyntaxKind = HTML_DIRECTIVE;
 }
 impl AstNode for HtmlDirective {
     type Language = Language;
@@ -1164,6 +1188,9 @@ impl From<HtmlDirective> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl HtmlElement {
+    pub const KIND: SyntaxKind = HTML_ELEMENT;
+}
 impl AstNode for HtmlElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1218,6 +1245,9 @@ impl From<HtmlElement> for SyntaxElement {
     fn from(n: HtmlElement) -> Self {
         n.syntax.into()
     }
+}
+impl HtmlOpeningElement {
+    pub const KIND: SyntaxKind = HTML_OPENING_ELEMENT;
 }
 impl AstNode for HtmlOpeningElement {
     type Language = Language;
@@ -1275,6 +1305,9 @@ impl From<HtmlOpeningElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl HtmlRoot {
+    pub const KIND: SyntaxKind = HTML_ROOT;
+}
 impl AstNode for HtmlRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1330,6 +1363,9 @@ impl From<HtmlRoot> for SyntaxElement {
     fn from(n: HtmlRoot) -> Self {
         n.syntax.into()
     }
+}
+impl HtmlSelfClosingElement {
+    pub const KIND: SyntaxKind = HTML_SELF_CLOSING_ELEMENT;
 }
 impl AstNode for HtmlSelfClosingElement {
     type Language = Language;
@@ -1391,6 +1427,9 @@ impl From<HtmlSelfClosingElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl HtmlString {
+    pub const KIND: SyntaxKind = HTML_STRING;
+}
 impl AstNode for HtmlString {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1440,6 +1479,9 @@ impl From<HtmlString> for SyntaxElement {
     fn from(n: HtmlString) -> Self {
         n.syntax.into()
     }
+}
+impl HtmlTagName {
+    pub const KIND: SyntaxKind = HTML_TAG_NAME;
 }
 impl AstNode for HtmlTagName {
     type Language = Language;
@@ -1750,6 +1792,7 @@ pub struct HtmlBogus {
     syntax: SyntaxNode,
 }
 impl HtmlBogus {
+    pub const KIND: SyntaxKind = HTML_BOGUS;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1806,6 +1849,7 @@ pub struct HtmlBogusAttribute {
     syntax: SyntaxNode,
 }
 impl HtmlBogusAttribute {
+    pub const KIND: SyntaxKind = HTML_BOGUS_ATTRIBUTE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1862,6 +1906,7 @@ pub struct HtmlBogusElement {
     syntax: SyntaxNode,
 }
 impl HtmlBogusElement {
+    pub const KIND: SyntaxKind = HTML_BOGUS_ELEMENT;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1919,6 +1964,7 @@ pub struct HtmlAttributeList {
     syntax_list: SyntaxList,
 }
 impl HtmlAttributeList {
+    pub const KIND: SyntaxKind = HTML_ATTRIBUTE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -2001,6 +2047,7 @@ pub struct HtmlElementList {
     syntax_list: SyntaxList,
 }
 impl HtmlElementList {
+    pub const KIND: SyntaxKind = HTML_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]

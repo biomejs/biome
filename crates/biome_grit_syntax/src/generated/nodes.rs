@@ -5195,6 +5195,9 @@ impl AnyGritVersion {
         }
     }
 }
+impl GritAddOperation {
+    pub const KIND: SyntaxKind = GRIT_ADD_OPERATION;
+}
 impl AstNode for GritAddOperation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5243,6 +5246,9 @@ impl From<GritAddOperation> for SyntaxElement {
     fn from(n: GritAddOperation) -> Self {
         n.syntax.into()
     }
+}
+impl GritAnnotation {
+    pub const KIND: SyntaxKind = GRIT_ANNOTATION;
 }
 impl AstNode for GritAnnotation {
     type Language = Language;
@@ -5294,6 +5300,9 @@ impl From<GritAnnotation> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritAssignmentAsPattern {
+    pub const KIND: SyntaxKind = GRIT_ASSIGNMENT_AS_PATTERN;
+}
 impl AstNode for GritAssignmentAsPattern {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5342,6 +5351,9 @@ impl From<GritAssignmentAsPattern> for SyntaxElement {
     fn from(n: GritAssignmentAsPattern) -> Self {
         n.syntax.into()
     }
+}
+impl GritBacktickSnippetLiteral {
+    pub const KIND: SyntaxKind = GRIT_BACKTICK_SNIPPET_LITERAL;
 }
 impl AstNode for GritBacktickSnippetLiteral {
     type Language = Language;
@@ -5393,6 +5405,9 @@ impl From<GritBacktickSnippetLiteral> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritBooleanLiteral {
+    pub const KIND: SyntaxKind = GRIT_BOOLEAN_LITERAL;
+}
 impl AstNode for GritBooleanLiteral {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5439,6 +5454,9 @@ impl From<GritBooleanLiteral> for SyntaxElement {
     fn from(n: GritBooleanLiteral) -> Self {
         n.syntax.into()
     }
+}
+impl GritBracketedPattern {
+    pub const KIND: SyntaxKind = GRIT_BRACKETED_PATTERN;
 }
 impl AstNode for GritBracketedPattern {
     type Language = Language;
@@ -5495,6 +5513,9 @@ impl From<GritBracketedPattern> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritBracketedPredicate {
+    pub const KIND: SyntaxKind = GRIT_BRACKETED_PREDICATE;
+}
 impl AstNode for GritBracketedPredicate {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5550,6 +5571,9 @@ impl From<GritBracketedPredicate> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritBubble {
+    pub const KIND: SyntaxKind = GRIT_BUBBLE;
+}
 impl AstNode for GritBubble {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5601,6 +5625,9 @@ impl From<GritBubble> for SyntaxElement {
     fn from(n: GritBubble) -> Self {
         n.syntax.into()
     }
+}
+impl GritBubbleScope {
+    pub const KIND: SyntaxKind = GRIT_BUBBLE_SCOPE;
 }
 impl AstNode for GritBubbleScope {
     type Language = Language;
@@ -5657,6 +5684,9 @@ impl From<GritBubbleScope> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritCodeSnippet {
+    pub const KIND: SyntaxKind = GRIT_CODE_SNIPPET;
+}
 impl AstNode for GritCodeSnippet {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5703,6 +5733,9 @@ impl From<GritCodeSnippet> for SyntaxElement {
     fn from(n: GritCodeSnippet) -> Self {
         n.syntax.into()
     }
+}
+impl GritCurlyPattern {
+    pub const KIND: SyntaxKind = GRIT_CURLY_PATTERN;
 }
 impl AstNode for GritCurlyPattern {
     type Language = Language;
@@ -5759,6 +5792,9 @@ impl From<GritCurlyPattern> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritDivOperation {
+    pub const KIND: SyntaxKind = GRIT_DIV_OPERATION;
+}
 impl AstNode for GritDivOperation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5811,6 +5847,9 @@ impl From<GritDivOperation> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritDot {
+    pub const KIND: SyntaxKind = GRIT_DOT;
+}
 impl AstNode for GritDot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5857,6 +5896,9 @@ impl From<GritDot> for SyntaxElement {
     fn from(n: GritDot) -> Self {
         n.syntax.into()
     }
+}
+impl GritDotdotdot {
+    pub const KIND: SyntaxKind = GRIT_DOTDOTDOT;
 }
 impl AstNode for GritDotdotdot {
     type Language = Language;
@@ -5909,6 +5951,9 @@ impl From<GritDotdotdot> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritDoubleLiteral {
+    pub const KIND: SyntaxKind = GRIT_DOUBLE_LITERAL;
+}
 impl AstNode for GritDoubleLiteral {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -5958,6 +6003,9 @@ impl From<GritDoubleLiteral> for SyntaxElement {
     fn from(n: GritDoubleLiteral) -> Self {
         n.syntax.into()
     }
+}
+impl GritEngineName {
+    pub const KIND: SyntaxKind = GRIT_ENGINE_NAME;
 }
 impl AstNode for GritEngineName {
     type Language = Language;
@@ -6009,6 +6057,9 @@ impl From<GritEngineName> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritEvery {
+    pub const KIND: SyntaxKind = GRIT_EVERY;
+}
 impl AstNode for GritEvery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6059,6 +6110,9 @@ impl From<GritEvery> for SyntaxElement {
     fn from(n: GritEvery) -> Self {
         n.syntax.into()
     }
+}
+impl GritFiles {
+    pub const KIND: SyntaxKind = GRIT_FILES;
 }
 impl AstNode for GritFiles {
     type Language = Language;
@@ -6118,6 +6172,9 @@ impl From<GritFiles> for SyntaxElement {
     fn from(n: GritFiles) -> Self {
         n.syntax.into()
     }
+}
+impl GritFunctionDefinition {
+    pub const KIND: SyntaxKind = GRIT_FUNCTION_DEFINITION;
 }
 impl AstNode for GritFunctionDefinition {
     type Language = Language;
@@ -6180,6 +6237,9 @@ impl From<GritFunctionDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritIntLiteral {
+    pub const KIND: SyntaxKind = GRIT_INT_LITERAL;
+}
 impl AstNode for GritIntLiteral {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6230,6 +6290,9 @@ impl From<GritIntLiteral> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritJavascriptBodyWrapper {
+    pub const KIND: SyntaxKind = GRIT_JAVASCRIPT_BODY_WRAPPER;
+}
 impl AstNode for GritJavascriptBodyWrapper {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6279,6 +6342,9 @@ impl From<GritJavascriptBodyWrapper> for SyntaxElement {
     fn from(n: GritJavascriptBodyWrapper) -> Self {
         n.syntax.into()
     }
+}
+impl GritJavascriptFunctionDefinition {
+    pub const KIND: SyntaxKind = GRIT_JAVASCRIPT_FUNCTION_DEFINITION;
 }
 impl AstNode for GritJavascriptFunctionDefinition {
     type Language = Language;
@@ -6345,6 +6411,9 @@ impl From<GritJavascriptFunctionDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritLanguageDeclaration {
+    pub const KIND: SyntaxKind = GRIT_LANGUAGE_DECLARATION;
+}
 impl AstNode for GritLanguageDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6401,6 +6470,9 @@ impl From<GritLanguageDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritLanguageFlavor {
+    pub const KIND: SyntaxKind = GRIT_LANGUAGE_FLAVOR;
+}
 impl AstNode for GritLanguageFlavor {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6456,6 +6528,9 @@ impl From<GritLanguageFlavor> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritLanguageFlavorKind {
+    pub const KIND: SyntaxKind = GRIT_LANGUAGE_FLAVOR_KIND;
+}
 impl AstNode for GritLanguageFlavorKind {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6505,6 +6580,9 @@ impl From<GritLanguageFlavorKind> for SyntaxElement {
     fn from(n: GritLanguageFlavorKind) -> Self {
         n.syntax.into()
     }
+}
+impl GritLanguageName {
+    pub const KIND: SyntaxKind = GRIT_LANGUAGE_NAME;
 }
 impl AstNode for GritLanguageName {
     type Language = Language;
@@ -6556,6 +6634,9 @@ impl From<GritLanguageName> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritLanguageSpecificSnippet {
+    pub const KIND: SyntaxKind = GRIT_LANGUAGE_SPECIFIC_SNIPPET;
+}
 impl AstNode for GritLanguageSpecificSnippet {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6606,6 +6687,9 @@ impl From<GritLanguageSpecificSnippet> for SyntaxElement {
     fn from(n: GritLanguageSpecificSnippet) -> Self {
         n.syntax.into()
     }
+}
+impl GritLike {
+    pub const KIND: SyntaxKind = GRIT_LIKE;
 }
 impl AstNode for GritLike {
     type Language = Language;
@@ -6667,6 +6751,9 @@ impl From<GritLike> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritLikeThreshold {
+    pub const KIND: SyntaxKind = GRIT_LIKE_THRESHOLD;
+}
 impl AstNode for GritLikeThreshold {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6721,6 +6808,9 @@ impl From<GritLikeThreshold> for SyntaxElement {
     fn from(n: GritLikeThreshold) -> Self {
         n.syntax.into()
     }
+}
+impl GritList {
+    pub const KIND: SyntaxKind = GRIT_LIST;
 }
 impl AstNode for GritList {
     type Language = Language;
@@ -6778,6 +6868,9 @@ impl From<GritList> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritListAccessor {
+    pub const KIND: SyntaxKind = GRIT_LIST_ACCESSOR;
+}
 impl AstNode for GritListAccessor {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6834,6 +6927,9 @@ impl From<GritListAccessor> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritMap {
+    pub const KIND: SyntaxKind = GRIT_MAP;
+}
 impl AstNode for GritMap {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6889,6 +6985,9 @@ impl From<GritMap> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritMapAccessor {
+    pub const KIND: SyntaxKind = GRIT_MAP_ACCESSOR;
+}
 impl AstNode for GritMapAccessor {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6937,6 +7036,9 @@ impl From<GritMapAccessor> for SyntaxElement {
     fn from(n: GritMapAccessor) -> Self {
         n.syntax.into()
     }
+}
+impl GritMapElement {
+    pub const KIND: SyntaxKind = GRIT_MAP_ELEMENT;
 }
 impl AstNode for GritMapElement {
     type Language = Language;
@@ -6990,6 +7092,9 @@ impl From<GritMapElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritModOperation {
+    pub const KIND: SyntaxKind = GRIT_MOD_OPERATION;
+}
 impl AstNode for GritModOperation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7042,6 +7147,9 @@ impl From<GritModOperation> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritMulOperation {
+    pub const KIND: SyntaxKind = GRIT_MUL_OPERATION;
+}
 impl AstNode for GritMulOperation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7090,6 +7198,9 @@ impl From<GritMulOperation> for SyntaxElement {
     fn from(n: GritMulOperation) -> Self {
         n.syntax.into()
     }
+}
+impl GritName {
+    pub const KIND: SyntaxKind = GRIT_NAME;
 }
 impl AstNode for GritName {
     type Language = Language;
@@ -7141,6 +7252,9 @@ impl From<GritName> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritNamedArg {
+    pub const KIND: SyntaxKind = GRIT_NAMED_ARG;
+}
 impl AstNode for GritNamedArg {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7189,6 +7303,9 @@ impl From<GritNamedArg> for SyntaxElement {
     fn from(n: GritNamedArg) -> Self {
         n.syntax.into()
     }
+}
+impl GritNegativeIntLiteral {
+    pub const KIND: SyntaxKind = GRIT_NEGATIVE_INT_LITERAL;
 }
 impl AstNode for GritNegativeIntLiteral {
     type Language = Language;
@@ -7239,6 +7356,9 @@ impl From<GritNegativeIntLiteral> for SyntaxElement {
     fn from(n: GritNegativeIntLiteral) -> Self {
         n.syntax.into()
     }
+}
+impl GritNodeLike {
+    pub const KIND: SyntaxKind = GRIT_NODE_LIKE;
 }
 impl AstNode for GritNodeLike {
     type Language = Language;
@@ -7296,6 +7416,9 @@ impl From<GritNodeLike> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritNot {
+    pub const KIND: SyntaxKind = GRIT_NOT;
+}
 impl AstNode for GritNot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7342,6 +7465,9 @@ impl From<GritNot> for SyntaxElement {
     fn from(n: GritNot) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternAccumulate {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_ACCUMULATE;
 }
 impl AstNode for GritPatternAccumulate {
     type Language = Language;
@@ -7395,6 +7521,9 @@ impl From<GritPatternAccumulate> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPatternAfter {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_AFTER;
+}
 impl AstNode for GritPatternAfter {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7445,6 +7574,9 @@ impl From<GritPatternAfter> for SyntaxElement {
     fn from(n: GritPatternAfter) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternAnd {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_AND;
 }
 impl AstNode for GritPatternAnd {
     type Language = Language;
@@ -7502,6 +7634,9 @@ impl From<GritPatternAnd> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPatternAny {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_ANY;
+}
 impl AstNode for GritPatternAny {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7558,6 +7693,9 @@ impl From<GritPatternAny> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPatternAs {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_AS;
+}
 impl AstNode for GritPatternAs {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7606,6 +7744,9 @@ impl From<GritPatternAs> for SyntaxElement {
     fn from(n: GritPatternAs) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternBefore {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_BEFORE;
 }
 impl AstNode for GritPatternBefore {
     type Language = Language;
@@ -7657,6 +7798,9 @@ impl From<GritPatternBefore> for SyntaxElement {
     fn from(n: GritPatternBefore) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternContains {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_CONTAINS;
 }
 impl AstNode for GritPatternContains {
     type Language = Language;
@@ -7712,6 +7856,9 @@ impl From<GritPatternContains> for SyntaxElement {
     fn from(n: GritPatternContains) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternDefinition {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_DEFINITION;
 }
 impl AstNode for GritPatternDefinition {
     type Language = Language;
@@ -7779,6 +7926,9 @@ impl From<GritPatternDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPatternDefinitionBody {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_DEFINITION_BODY;
+}
 impl AstNode for GritPatternDefinitionBody {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7834,6 +7984,9 @@ impl From<GritPatternDefinitionBody> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPatternElseClause {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_ELSE_CLAUSE;
+}
 impl AstNode for GritPatternElseClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7884,6 +8037,9 @@ impl From<GritPatternElseClause> for SyntaxElement {
     fn from(n: GritPatternElseClause) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternIfElse {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_IF_ELSE;
 }
 impl AstNode for GritPatternIfElse {
     type Language = Language;
@@ -7952,6 +8108,9 @@ impl From<GritPatternIfElse> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPatternIncludes {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_INCLUDES;
+}
 impl AstNode for GritPatternIncludes {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8002,6 +8161,9 @@ impl From<GritPatternIncludes> for SyntaxElement {
     fn from(n: GritPatternIncludes) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternLimit {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_LIMIT;
 }
 impl AstNode for GritPatternLimit {
     type Language = Language;
@@ -8055,6 +8217,9 @@ impl From<GritPatternLimit> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPatternMaybe {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_MAYBE;
+}
 impl AstNode for GritPatternMaybe {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8106,6 +8271,9 @@ impl From<GritPatternMaybe> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPatternNot {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_NOT;
+}
 impl AstNode for GritPatternNot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8153,6 +8321,9 @@ impl From<GritPatternNot> for SyntaxElement {
     fn from(n: GritPatternNot) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternOr {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_OR;
 }
 impl AstNode for GritPatternOr {
     type Language = Language;
@@ -8209,6 +8380,9 @@ impl From<GritPatternOr> for SyntaxElement {
     fn from(n: GritPatternOr) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternOrElse {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_OR_ELSE;
 }
 impl AstNode for GritPatternOrElse {
     type Language = Language;
@@ -8269,6 +8443,9 @@ impl From<GritPatternOrElse> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPatternUntilClause {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_UNTIL_CLAUSE;
+}
 impl AstNode for GritPatternUntilClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8319,6 +8496,9 @@ impl From<GritPatternUntilClause> for SyntaxElement {
     fn from(n: GritPatternUntilClause) -> Self {
         n.syntax.into()
     }
+}
+impl GritPatternWhere {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_WHERE;
 }
 impl AstNode for GritPatternWhere {
     type Language = Language;
@@ -8375,6 +8555,9 @@ impl From<GritPatternWhere> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateAccumulate {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_ACCUMULATE;
+}
 impl AstNode for GritPredicateAccumulate {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8426,6 +8609,9 @@ impl From<GritPredicateAccumulate> for SyntaxElement {
     fn from(n: GritPredicateAccumulate) -> Self {
         n.syntax.into()
     }
+}
+impl GritPredicateAnd {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_AND;
 }
 impl AstNode for GritPredicateAnd {
     type Language = Language;
@@ -8486,6 +8672,9 @@ impl From<GritPredicateAnd> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateAny {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_ANY;
+}
 impl AstNode for GritPredicateAny {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8542,6 +8731,9 @@ impl From<GritPredicateAny> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateAssignment {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_ASSIGNMENT;
+}
 impl AstNode for GritPredicateAssignment {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8590,6 +8782,9 @@ impl From<GritPredicateAssignment> for SyntaxElement {
     fn from(n: GritPredicateAssignment) -> Self {
         n.syntax.into()
     }
+}
+impl GritPredicateCall {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_CALL;
 }
 impl AstNode for GritPredicateCall {
     type Language = Language;
@@ -8647,6 +8842,9 @@ impl From<GritPredicateCall> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateCurly {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_CURLY;
+}
 impl AstNode for GritPredicateCurly {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8701,6 +8899,9 @@ impl From<GritPredicateCurly> for SyntaxElement {
     fn from(n: GritPredicateCurly) -> Self {
         n.syntax.into()
     }
+}
+impl GritPredicateDefinition {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_DEFINITION;
 }
 impl AstNode for GritPredicateDefinition {
     type Language = Language;
@@ -8763,6 +8964,9 @@ impl From<GritPredicateDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateElseClause {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_ELSE_CLAUSE;
+}
 impl AstNode for GritPredicateElseClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8813,6 +9017,9 @@ impl From<GritPredicateElseClause> for SyntaxElement {
     fn from(n: GritPredicateElseClause) -> Self {
         n.syntax.into()
     }
+}
+impl GritPredicateEqual {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_EQUAL;
 }
 impl AstNode for GritPredicateEqual {
     type Language = Language;
@@ -8866,6 +9073,9 @@ impl From<GritPredicateEqual> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateGreater {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_GREATER;
+}
 impl AstNode for GritPredicateGreater {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8918,6 +9128,9 @@ impl From<GritPredicateGreater> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateGreaterEqual {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_GREATER_EQUAL;
+}
 impl AstNode for GritPredicateGreaterEqual {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8969,6 +9182,9 @@ impl From<GritPredicateGreaterEqual> for SyntaxElement {
     fn from(n: GritPredicateGreaterEqual) -> Self {
         n.syntax.into()
     }
+}
+impl GritPredicateIfElse {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_IF_ELSE;
 }
 impl AstNode for GritPredicateIfElse {
     type Language = Language;
@@ -9037,6 +9253,9 @@ impl From<GritPredicateIfElse> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateLess {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_LESS;
+}
 impl AstNode for GritPredicateLess {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9088,6 +9307,9 @@ impl From<GritPredicateLess> for SyntaxElement {
     fn from(n: GritPredicateLess) -> Self {
         n.syntax.into()
     }
+}
+impl GritPredicateLessEqual {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_LESS_EQUAL;
 }
 impl AstNode for GritPredicateLessEqual {
     type Language = Language;
@@ -9141,6 +9363,9 @@ impl From<GritPredicateLessEqual> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateMatch {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_MATCH;
+}
 impl AstNode for GritPredicateMatch {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9193,6 +9418,9 @@ impl From<GritPredicateMatch> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateMaybe {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_MAYBE;
+}
 impl AstNode for GritPredicateMaybe {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9244,6 +9472,9 @@ impl From<GritPredicateMaybe> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateNot {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_NOT;
+}
 impl AstNode for GritPredicateNot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9291,6 +9522,9 @@ impl From<GritPredicateNot> for SyntaxElement {
     fn from(n: GritPredicateNot) -> Self {
         n.syntax.into()
     }
+}
+impl GritPredicateNotEqual {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_NOT_EQUAL;
 }
 impl AstNode for GritPredicateNotEqual {
     type Language = Language;
@@ -9343,6 +9577,9 @@ impl From<GritPredicateNotEqual> for SyntaxElement {
     fn from(n: GritPredicateNotEqual) -> Self {
         n.syntax.into()
     }
+}
+impl GritPredicateOr {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_OR;
 }
 impl AstNode for GritPredicateOr {
     type Language = Language;
@@ -9400,6 +9637,9 @@ impl From<GritPredicateOr> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritPredicateReturn {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_RETURN;
+}
 impl AstNode for GritPredicateReturn {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9450,6 +9690,9 @@ impl From<GritPredicateReturn> for SyntaxElement {
     fn from(n: GritPredicateReturn) -> Self {
         n.syntax.into()
     }
+}
+impl GritPredicateRewrite {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_REWRITE;
 }
 impl AstNode for GritPredicateRewrite {
     type Language = Language;
@@ -9507,6 +9750,9 @@ impl From<GritPredicateRewrite> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritRawBacktickSnippetLiteral {
+    pub const KIND: SyntaxKind = GRIT_RAW_BACKTICK_SNIPPET_LITERAL;
+}
 impl AstNode for GritRawBacktickSnippetLiteral {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9556,6 +9802,9 @@ impl From<GritRawBacktickSnippetLiteral> for SyntaxElement {
     fn from(n: GritRawBacktickSnippetLiteral) -> Self {
         n.syntax.into()
     }
+}
+impl GritRegexLiteral {
+    pub const KIND: SyntaxKind = GRIT_REGEX_LITERAL;
 }
 impl AstNode for GritRegexLiteral {
     type Language = Language;
@@ -9607,6 +9856,9 @@ impl From<GritRegexLiteral> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritRegexPattern {
+    pub const KIND: SyntaxKind = GRIT_REGEX_PATTERN;
+}
 impl AstNode for GritRegexPattern {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9657,6 +9909,9 @@ impl From<GritRegexPattern> for SyntaxElement {
     fn from(n: GritRegexPattern) -> Self {
         n.syntax.into()
     }
+}
+impl GritRegexPatternVariables {
+    pub const KIND: SyntaxKind = GRIT_REGEX_PATTERN_VARIABLES;
 }
 impl AstNode for GritRegexPatternVariables {
     type Language = Language;
@@ -9712,6 +9967,9 @@ impl From<GritRegexPatternVariables> for SyntaxElement {
     fn from(n: GritRegexPatternVariables) -> Self {
         n.syntax.into()
     }
+}
+impl GritRewrite {
+    pub const KIND: SyntaxKind = GRIT_REWRITE;
 }
 impl AstNode for GritRewrite {
     type Language = Language;
@@ -9769,6 +10027,9 @@ impl From<GritRewrite> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritRoot {
+    pub const KIND: SyntaxKind = GRIT_ROOT;
+}
 impl AstNode for GritRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9822,6 +10083,9 @@ impl From<GritRoot> for SyntaxElement {
     fn from(n: GritRoot) -> Self {
         n.syntax.into()
     }
+}
+impl GritSequential {
+    pub const KIND: SyntaxKind = GRIT_SEQUENTIAL;
 }
 impl AstNode for GritSequential {
     type Language = Language;
@@ -9882,6 +10146,9 @@ impl From<GritSequential> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritSnippetRegexLiteral {
+    pub const KIND: SyntaxKind = GRIT_SNIPPET_REGEX_LITERAL;
+}
 impl AstNode for GritSnippetRegexLiteral {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9932,6 +10199,9 @@ impl From<GritSnippetRegexLiteral> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritSome {
+    pub const KIND: SyntaxKind = GRIT_SOME;
+}
 impl AstNode for GritSome {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9979,6 +10249,9 @@ impl From<GritSome> for SyntaxElement {
     fn from(n: GritSome) -> Self {
         n.syntax.into()
     }
+}
+impl GritStringLiteral {
+    pub const KIND: SyntaxKind = GRIT_STRING_LITERAL;
 }
 impl AstNode for GritStringLiteral {
     type Language = Language;
@@ -10029,6 +10302,9 @@ impl From<GritStringLiteral> for SyntaxElement {
     fn from(n: GritStringLiteral) -> Self {
         n.syntax.into()
     }
+}
+impl GritSubOperation {
+    pub const KIND: SyntaxKind = GRIT_SUB_OPERATION;
 }
 impl AstNode for GritSubOperation {
     type Language = Language;
@@ -10082,6 +10358,9 @@ impl From<GritSubOperation> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritUndefinedLiteral {
+    pub const KIND: SyntaxKind = GRIT_UNDEFINED_LITERAL;
+}
 impl AstNode for GritUndefinedLiteral {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10131,6 +10410,9 @@ impl From<GritUndefinedLiteral> for SyntaxElement {
     fn from(n: GritUndefinedLiteral) -> Self {
         n.syntax.into()
     }
+}
+impl GritUnderscore {
+    pub const KIND: SyntaxKind = GRIT_UNDERSCORE;
 }
 impl AstNode for GritUnderscore {
     type Language = Language;
@@ -10182,6 +10464,9 @@ impl From<GritUnderscore> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl GritVariable {
+    pub const KIND: SyntaxKind = GRIT_VARIABLE;
+}
 impl AstNode for GritVariable {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10231,6 +10516,9 @@ impl From<GritVariable> for SyntaxElement {
     fn from(n: GritVariable) -> Self {
         n.syntax.into()
     }
+}
+impl GritVersion {
+    pub const KIND: SyntaxKind = GRIT_VERSION;
 }
 impl AstNode for GritVersion {
     type Language = Language;
@@ -10294,6 +10582,9 @@ impl From<GritVersion> for SyntaxElement {
     fn from(n: GritVersion) -> Self {
         n.syntax.into()
     }
+}
+impl GritWithin {
+    pub const KIND: SyntaxKind = GRIT_WITHIN;
 }
 impl AstNode for GritWithin {
     type Language = Language;
@@ -13084,6 +13375,7 @@ pub struct GritBogus {
     syntax: SyntaxNode,
 }
 impl GritBogus {
+    pub const KIND: SyntaxKind = GRIT_BOGUS;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13140,6 +13432,7 @@ pub struct GritBogusContainer {
     syntax: SyntaxNode,
 }
 impl GritBogusContainer {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_CONTAINER;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13196,6 +13489,7 @@ pub struct GritBogusDefinition {
     syntax: SyntaxNode,
 }
 impl GritBogusDefinition {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_DEFINITION;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13252,6 +13546,7 @@ pub struct GritBogusLanguageDeclaration {
     syntax: SyntaxNode,
 }
 impl GritBogusLanguageDeclaration {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_LANGUAGE_DECLARATION;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13308,6 +13603,7 @@ pub struct GritBogusLanguageFlavorKind {
     syntax: SyntaxNode,
 }
 impl GritBogusLanguageFlavorKind {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_LANGUAGE_FLAVOR_KIND;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13364,6 +13660,7 @@ pub struct GritBogusLanguageName {
     syntax: SyntaxNode,
 }
 impl GritBogusLanguageName {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_LANGUAGE_NAME;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13420,6 +13717,7 @@ pub struct GritBogusLiteral {
     syntax: SyntaxNode,
 }
 impl GritBogusLiteral {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_LITERAL;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13476,6 +13774,7 @@ pub struct GritBogusMapElement {
     syntax: SyntaxNode,
 }
 impl GritBogusMapElement {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_MAP_ELEMENT;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13532,6 +13831,7 @@ pub struct GritBogusNamedArg {
     syntax: SyntaxNode,
 }
 impl GritBogusNamedArg {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_NAMED_ARG;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13588,6 +13888,7 @@ pub struct GritBogusPattern {
     syntax: SyntaxNode,
 }
 impl GritBogusPattern {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_PATTERN;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13644,6 +13945,7 @@ pub struct GritBogusPredicate {
     syntax: SyntaxNode,
 }
 impl GritBogusPredicate {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_PREDICATE;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13700,6 +14002,7 @@ pub struct GritBogusVersion {
     syntax: SyntaxNode,
 }
 impl GritBogusVersion {
+    pub const KIND: SyntaxKind = GRIT_BOGUS_VERSION;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13757,6 +14060,7 @@ pub struct GritDefinitionList {
     syntax_list: SyntaxList,
 }
 impl GritDefinitionList {
+    pub const KIND: SyntaxKind = GRIT_DEFINITION_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13839,6 +14143,7 @@ pub struct GritLanguageFlavorList {
     syntax_list: SyntaxList,
 }
 impl GritLanguageFlavorList {
+    pub const KIND: SyntaxKind = GRIT_LANGUAGE_FLAVOR_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -13921,6 +14226,7 @@ pub struct GritListPatternList {
     syntax_list: SyntaxList,
 }
 impl GritListPatternList {
+    pub const KIND: SyntaxKind = GRIT_LIST_PATTERN_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -14003,6 +14309,7 @@ pub struct GritMapElementList {
     syntax_list: SyntaxList,
 }
 impl GritMapElementList {
+    pub const KIND: SyntaxKind = GRIT_MAP_ELEMENT_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -14085,6 +14392,7 @@ pub struct GritNamedArgList {
     syntax_list: SyntaxList,
 }
 impl GritNamedArgList {
+    pub const KIND: SyntaxKind = GRIT_NAMED_ARG_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -14167,6 +14475,7 @@ pub struct GritPatternList {
     syntax_list: SyntaxList,
 }
 impl GritPatternList {
+    pub const KIND: SyntaxKind = GRIT_PATTERN_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -14249,6 +14558,7 @@ pub struct GritPredicateList {
     syntax_list: SyntaxList,
 }
 impl GritPredicateList {
+    pub const KIND: SyntaxKind = GRIT_PREDICATE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -14331,6 +14641,7 @@ pub struct GritVariableList {
     syntax_list: SyntaxList,
 }
 impl GritVariableList {
+    pub const KIND: SyntaxKind = GRIT_VARIABLE_LIST;
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]

@@ -7,11 +7,12 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType,
+    AnyJsExpression, JsClassExpression, JsExpressionStatement, JsFileSource, JsForStatement,
+    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsParenthesizedExpression,
+    JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule,
+    TsInferType,
 };
-use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
+use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult, match_ast};
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -495,29 +496,27 @@ fn is_unused_expression(expr: &JsSyntaxNode) -> SyntaxResult<bool> {
     // We use range as a way to identify nodes without owning them.
     let mut previous = expr.text_trimmed_range();
     for parent in expr.ancestors().skip(1) {
-        match parent.kind() {
-            JsSyntaxKind::JS_EXPRESSION_STATEMENT => return Ok(true),
-            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
-                previous = parent.text_trimmed_range();
-                continue;
-            }
-            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
-                let seq_expr = JsSequenceExpression::unwrap_cast(parent);
-                // If the expression is not the rightmost node in a comma sequence
-                if seq_expr.left()?.range() == previous {
+        match_ast! {
+            match parent {
+                JsExpressionStatement(_) => { return Ok(true); },
+                JsParenthesizedExpression(node) => {
+                    previous = node.range();
+                },
+                JsSequenceExpression(seq_expr) => {
+                    // If the expression is not the rightmost node in a comma sequence
+                    if seq_expr.left()?.range() == previous {
+                        return Ok(true);
+                    }
+                    previous = seq_expr.range();
+                },
+                JsForStatement(for_stmt) => {
+                    if let Some(for_test) = for_stmt.test() {
+                        return Ok(for_test.range() != previous);
+                    }
                     return Ok(true);
-                }
-                previous = seq_expr.range();
-                continue;
+                },
+                _ => { break; },
             }
-            JsSyntaxKind::JS_FOR_STATEMENT => {
-                let for_stmt = JsForStatement::unwrap_cast(parent);
-                if let Some(for_test) = for_stmt.test() {
-                    return Ok(for_test.range() != previous);
-                }
-                return Ok(true);
-            }
-            _ => break,
         }
     }
     Ok(false)
