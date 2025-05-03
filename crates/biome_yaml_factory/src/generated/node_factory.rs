@@ -18,14 +18,14 @@ pub fn yaml_anchor_property(value_token: SyntaxToken) -> YamlAnchorProperty {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn yaml_block_collection(content: AnyYamlBlockContent) -> YamlBlockCollectionBuilder {
+pub fn yaml_block_collection(content: AnyYamlBlockCollectionContent) -> YamlBlockCollectionBuilder {
     YamlBlockCollectionBuilder {
         content,
         properties: None,
     }
 }
 pub struct YamlBlockCollectionBuilder {
-    content: AnyYamlBlockContent,
+    content: AnyYamlBlockCollectionContent,
     properties: Option<AnyYamlPropertiesCombination>,
 }
 impl YamlBlockCollectionBuilder {
@@ -157,6 +157,32 @@ impl YamlBlockMappingBuilder {
                 Some(SyntaxElement::Token(self.indent_token)),
                 Some(SyntaxElement::Node(self.entries.into_syntax())),
                 self.dedent_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn yaml_block_scalar(content: AnyYamlBlockScalarContent) -> YamlBlockScalarBuilder {
+    YamlBlockScalarBuilder {
+        content,
+        properties: None,
+    }
+}
+pub struct YamlBlockScalarBuilder {
+    content: AnyYamlBlockScalarContent,
+    properties: Option<AnyYamlPropertiesCombination>,
+}
+impl YamlBlockScalarBuilder {
+    pub fn with_properties(mut self, properties: AnyYamlPropertiesCombination) -> Self {
+        self.properties = Some(properties);
+        self
+    }
+    pub fn build(self) -> YamlBlockScalar {
+        YamlBlockScalar::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_SCALAR,
+            [
+                self.properties
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.content.into_syntax())),
             ],
         ))
     }

@@ -145,18 +145,25 @@ AnyYamlFlowMapImplicitKey =
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
 AnyYamlBlockNode =
 	YamlBlockCollection
-	// https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
-	| YamlLiteralScalar
-	| YamlFoldedScalar
+	| YamlBlockScalar
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-collection
 YamlBlockCollection =
 	properties: AnyYamlPropertiesCombination?
-	content: AnyYamlBlockContent
+	content: AnyYamlBlockCollectionContent
 
-AnyYamlBlockContent =
+// https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
+YamlBlockScalar =
+	properties: AnyYamlPropertiesCombination?
+	content: AnyYamlBlockScalarContent
+
+AnyYamlBlockCollectionContent =
 	YamlBlockSequence
 	| YamlBlockMapping
+
+AnyYamlBlockScalarContent =
+	YamlLiteralScalar
+	| YamlFoldedScalar
 
 // a:
 //  - b
