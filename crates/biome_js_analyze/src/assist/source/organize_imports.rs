@@ -1,5 +1,5 @@
 use biome_analyze::{
-    ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, SourceActionKind, context::RuleContext,
+    ActionCategory, FixKind, Rule, RuleDiagnostic, SourceActionKind, context::RuleContext,
     declare_source_rule,
 };
 use biome_console::markup;
@@ -18,7 +18,7 @@ use specifiers_attributes::{
     sort_attributes, sort_export_specifiers, sort_import_specifiers,
 };
 
-use crate::JsRuleAction;
+use crate::{JsRuleAction, services::manifest::Manifest};
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
 pub mod comparable_token;
@@ -263,6 +263,7 @@ declare_source_rule! {
     /// - `:ALIAS:`: sources starting with `#`, `@/`, `~`, or `%`.
     /// - `:BUN:`: sources starting with the protocol `bun:` or that correspond to a built-in Bun module such as `bun`.
     /// - `:NODE:`: sources starting with the protocol `node:` or that correspond to a built-in Node.js module such as `fs` or `path`.
+    /// - `:DEPENDENCY:`: scoped and bare packages declared as dependencies (including dev, peer and optional dependencies) in the `package.json` file.
     /// - `:PACKAGE:`: scoped and bare packages.
     /// - `:PACKAGE_WITH_PROTOCOL:`: scoped and bare packages with a protocol.
     /// - `:PATH:`: absolute and relative paths.
@@ -631,7 +632,7 @@ declare_source_rule! {
 }
 
 impl Rule for OrganizeImports {
-    type Query = Ast<JsModule>;
+    type Query = Manifest<JsModule>;
     type State = Box<[Issue]>;
     type Signals = Option<Self::State>;
     type Options = Options;
@@ -698,7 +699,7 @@ impl Rule for OrganizeImports {
                     report_unsorted_chunk(chunk.take(), &mut result);
                     prev_group = 0;
                 }
-                let key = ImportKey::new(info, &options.groups);
+                let key = ImportKey::new(info, ctx, &options.groups);
                 let blank_line_separated_groups = options
                     .groups
                     .separated_by_blank_line(prev_group, key.group);
@@ -898,7 +899,7 @@ impl Rule for OrganizeImports {
                                 let info = ImportInfo::from_module_item(&item)?.0;
                                 let item = organized_items.remove(&info.slot_index).unwrap_or(item);
                                 Some(KeyedItem {
-                                    key: ImportKey::new(info, &options.groups),
+                                    key: ImportKey::new(info, ctx, &options.groups),
                                     was_merged: false,
                                     item: Some(item),
                                 })
@@ -1161,4 +1162,14 @@ fn merge(
         _ => {}
     }
     None
+}
+
+impl import_groups::Manifest for RuleContext<'_, OrganizeImports> {
+    fn is_any_dependency(&self, package_name: &str) -> bool {
+        self.is_dependency(package_name)
+            || self.is_dev_dependency(package_name)
+            || self.is_optional_dependency(package_name)
+            || self.is_peer_dependency(package_name)
+            || self.name() == Some(package_name)
+    }
 }

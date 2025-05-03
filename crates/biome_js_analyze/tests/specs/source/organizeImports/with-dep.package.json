@@ -1,0 +1,16 @@
+{
+	"name": "self-package",
+	"dependencies": {
+		"@a/dep": "1.0.0",
+		"a-dep": "1.0.0"
+	},
+	"devDependencies": {
+		"dev-dep": "1.0.0"
+	},
+	"peerDependencies": {
+		"peer-dep": "1.0.0"
+	},
+	"optionalDependencies": {
+		"optional-dep": "1.0.0"
+	}
+}

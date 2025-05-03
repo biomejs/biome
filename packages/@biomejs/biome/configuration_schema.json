@@ -2354,6 +2354,7 @@
 			"enum": [
 				":ALIAS:",
 				":BUN:",
+				":DEPENDENCY:",
 				":NODE:",
 				":PACKAGE:",
 				":PACKAGE_WITH_PROTOCOL:",
@@ -2361,6 +2362,7 @@
 				":URL:",
 				"!:ALIAS:",
 				"!:BUN:",
+				"!:DEPENDENCY:",
 				"!:NODE:",
 				"!:PACKAGE:",
 				"!:PACKAGE_WITH_PROTOCOL:",

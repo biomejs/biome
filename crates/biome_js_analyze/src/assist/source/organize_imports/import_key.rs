@@ -6,7 +6,7 @@ use biome_rowan::AstNode;
 
 use super::{
     comparable_token::ComparableToken,
-    import_groups::{self, ImportCandidate, ImportSourceCandidate},
+    import_groups::{self, ImportCandidate, ImportSourceCandidate, Manifest},
     import_source,
     specifiers_attributes::JsNamedSpecifiers,
 };
@@ -23,9 +23,13 @@ pub struct ImportKey {
     pub slot_index: u32,
 }
 impl ImportKey {
-    pub fn new(info: ImportInfo, groups: &import_groups::ImportGroups) -> Self {
+    pub fn new(
+        info: ImportInfo,
+        manifest: &impl Manifest,
+        groups: &import_groups::ImportGroups,
+    ) -> Self {
         Self {
-            group: groups.index(&((&info).into())),
+            group: groups.index(manifest, &((&info).into())),
             source: info.source,
             has_no_attributes: info.has_no_attributes,
             kind: info.kind,

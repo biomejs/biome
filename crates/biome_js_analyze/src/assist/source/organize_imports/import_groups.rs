@@ -9,6 +9,11 @@ use super::{
     import_source::{ImportSource, ImportSourceKind},
 };
 
+pub trait Manifest {
+    /// Is `package_name` a dependency of this manifest?
+    fn is_any_dependency(&self, package_name: &str) -> bool;
+}
+
 #[derive(
     Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
 )]
@@ -23,11 +28,11 @@ impl ImportGroups {
     /// Returns the index of the first group containing `candidate`.
     /// If no group contains `candidate`, then the returned value corresponds to the index of the implicit group.
     /// The index of the implicit group correspond to the number of groups.
-    pub fn index(&self, candidate: &ImportCandidate<'_>) -> u16 {
+    pub fn index(&self, manifest: &impl Manifest, candidate: &ImportCandidate<'_>) -> u16 {
         candidate.source.as_str();
         self.0
             .iter()
-            .position(|group| group.contains(candidate))
+            .position(|group| group.contains(manifest, candidate))
             .unwrap_or(self.0.len()) as u16
     }
 
@@ -50,14 +55,14 @@ pub struct ImportCandidate<'a> {
 impl ImportCandidate<'_> {
     /// Match against a list of matchers where negated matchers are handled as exceptions.
     /// Returns `default` if there is no matchers that match.
-    pub fn matches_with_exceptions<'b, I>(&self, matchers: I) -> bool
+    pub fn matches_with_exceptions<'b, I>(&self, manifest: &impl Manifest, matchers: I) -> bool
     where
         I: IntoIterator<Item = &'b GroupMatcher>,
         I::IntoIter: DoubleEndedIterator,
     {
         // Iterate in reverse order to avoid unnecessary glob matching.
         for matcher in matchers.into_iter().rev() {
-            if matcher.is_raw_match(self) {
+            if matcher.is_raw_match(manifest, self) {
                 return !matcher.is_negated();
             }
         }
@@ -75,11 +80,13 @@ enum ImportGroup {
     MatcherList(Box<[GroupMatcher]>),
 }
 impl ImportGroup {
-    fn contains(&self, candidate: &ImportCandidate<'_>) -> bool {
+    fn contains(&self, manifest: &impl Manifest, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             Self::BlankLine => false,
-            Self::Matcher(matcher) => matcher.is_match(candidate),
-            Self::MatcherList(matchers) => candidate.matches_with_exceptions(matchers.iter()),
+            Self::Matcher(matcher) => matcher.is_match(manifest, candidate),
+            Self::MatcherList(matchers) => {
+                candidate.matches_with_exceptions(manifest, matchers.iter())
+            }
         }
     }
 }
@@ -127,17 +134,17 @@ impl GroupMatcher {
         }
     }
 
-    pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+    pub fn is_match(&self, manifest: &impl Manifest, candidate: &ImportCandidate<'_>) -> bool {
         match self {
-            Self::Import(matcher) => matcher.is_match(candidate),
-            Self::Source(matcher) => matcher.is_match(&candidate.source),
+            Self::Import(matcher) => matcher.is_match(manifest, candidate),
+            Self::Source(matcher) => matcher.is_match(manifest, &candidate.source),
         }
     }
 
-    pub fn is_raw_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+    pub fn is_raw_match(&self, manifest: &impl Manifest, candidate: &ImportCandidate<'_>) -> bool {
         match self {
-            Self::Import(matcher) => matcher.is_match(candidate),
-            Self::Source(matcher) => matcher.is_raw_match(&candidate.source),
+            Self::Import(matcher) => matcher.is_match(manifest, candidate),
+            Self::Source(matcher) => matcher.is_raw_match(manifest, &candidate.source),
         }
     }
 }
@@ -164,7 +171,7 @@ pub struct ImportMatcher {
     source: Option<SourcesMatcher>,
 }
 impl ImportMatcher {
-    pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+    pub fn is_match(&self, manifest: &impl Manifest, candidate: &ImportCandidate<'_>) -> bool {
         let matches_type = self
             .r#type
             .is_none_or(|r#type| candidate.has_type_token == r#type);
@@ -172,7 +179,7 @@ impl ImportMatcher {
             && self
                 .source
                 .as_ref()
-                .is_none_or(|src| src.is_match(&candidate.source))
+                .is_none_or(|src| src.is_match(manifest, &candidate.source))
     }
 }
 
@@ -198,10 +205,10 @@ impl Deserializable for SourcesMatcher {
 }
 impl SourcesMatcher {
     /// Tests whether the given `candidate` matches this matcher.
-    pub fn is_match(&self, candidate: &ImportSourceCandidate) -> bool {
+    pub fn is_match(&self, manifest: &impl Manifest, candidate: &ImportSourceCandidate) -> bool {
         match self {
-            Self::Matcher(matcher) => candidate.matches(matcher),
-            Self::MatcherList(matchers) => candidate.matches_with_exceptions(matchers),
+            Self::Matcher(matcher) => candidate.matches(manifest, matcher),
+            Self::MatcherList(matchers) => candidate.matches_with_exceptions(manifest, matchers),
         }
     }
 }
@@ -222,17 +229,21 @@ impl SourceMatcher {
     }
 
     /// Tests whether the given `candidate` matches this matcher.
-    pub fn is_match(&self, candidate: &ImportSourceCandidate) -> bool {
+    pub fn is_match(&self, manifest: &impl Manifest, candidate: &ImportSourceCandidate) -> bool {
         match self {
-            Self::Predefined(matcher) => matcher.is_match(candidate),
+            Self::Predefined(matcher) => matcher.is_match(manifest, candidate),
             Self::Glob(glob) => glob.is_match(candidate),
         }
     }
 
     /// Tests whether the given `candidate` matches this matcher, ignoring the negation.
-    pub fn is_raw_match(&self, candidate: &ImportSourceCandidate) -> bool {
+    pub fn is_raw_match(
+        &self,
+        manifest: &impl Manifest,
+        candidate: &ImportSourceCandidate,
+    ) -> bool {
         match self {
-            Self::Predefined(matcher) => matcher.is_raw_match(candidate),
+            Self::Predefined(matcher) => matcher.is_raw_match(manifest, candidate),
             Self::Glob(glob) => glob.is_raw_match(candidate),
         }
     }
@@ -264,13 +275,17 @@ impl NegatablePredefinedSourceMatcher {
     }
 
     /// Tests whether the given `candidate` matches this matcher.
-    pub fn is_match(&self, candidate: &ImportSourceCandidate) -> bool {
-        self.is_raw_match(candidate) != self.is_negated
+    pub fn is_match(&self, manifest: &impl Manifest, candidate: &ImportSourceCandidate) -> bool {
+        self.is_raw_match(manifest, candidate) != self.is_negated
     }
 
     /// Tests whether the given `candidate` matches this matcher, ignoring the negation.
-    pub fn is_raw_match(&self, candidate: &ImportSourceCandidate) -> bool {
-        self.matcher.is_match(candidate)
+    pub fn is_raw_match(
+        &self,
+        manifest: &impl Manifest,
+        candidate: &ImportSourceCandidate,
+    ) -> bool {
+        self.matcher.is_match(manifest, candidate)
     }
 }
 impl std::fmt::Display for NegatablePredefinedSourceMatcher {
@@ -338,6 +353,8 @@ pub enum PredefinedSourceMatcher {
     Alias,
     #[serde(rename = ":BUN:")]
     Bun,
+    #[serde(rename = ":DEPENDENCY:")]
+    Dependency,
     #[serde(rename = ":NODE:")]
     Node,
     #[serde(rename = ":PACKAGE:")]
@@ -350,7 +367,7 @@ pub enum PredefinedSourceMatcher {
     Url,
 }
 impl PredefinedSourceMatcher {
-    fn is_match(&self, candidate: &ImportSourceCandidate) -> bool {
+    fn is_match(&self, manifest: &impl Manifest, candidate: &ImportSourceCandidate) -> bool {
         let source_kind = candidate.source_kund();
         let source = candidate.as_str();
         match self {
@@ -360,6 +377,9 @@ impl PredefinedSourceMatcher {
                     || (source_kind == ImportSourceKind::ProtocolPackage
                         && source.starts_with("bun:"))
             }
+            Self::Dependency => candidate
+                .package_name()
+                .is_some_and(|pkg_name| manifest.is_any_dependency(pkg_name)),
             Self::Node => {
                 (source_kind == ImportSourceKind::ProtocolPackage && source.starts_with("node:"))
                     || (source_kind == ImportSourceKind::Package && is_node_builtin_module(source))
@@ -374,14 +394,15 @@ impl PredefinedSourceMatcher {
 impl std::fmt::Display for PredefinedSourceMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
-            // Don't forget to update `impl std::str::FromStr for PredefinedImportGroup`
-            Self::Alias => "ALIAS",
-            Self::Bun => "BUN",
-            Self::Node => "NODE",
-            Self::Package => "PACKAGE",
-            Self::ProtocolPackage => "PACKAGE_WITH_PROTOCOL",
-            Self::Path => "PATH",
-            Self::Url => "URL",
+            // Don't forget to update `impl std::str::FromStr for PredefinedSourceMatcher`
+            Self::Alias => ":ALIAS:",
+            Self::Bun => ":BUN:",
+            Self::Dependency => ":DEPENDENCY:",
+            Self::Node => ":NODE:",
+            Self::Package => ":PACKAGE:",
+            Self::ProtocolPackage => ":PACKAGE_WITH_PROTOCOL:",
+            Self::Path => ":PATH:",
+            Self::Url => ":URL:",
         };
         f.write_str(repr)
     }
@@ -392,6 +413,7 @@ impl std::str::FromStr for PredefinedSourceMatcher {
         match value {
             ":ALIAS:" => Ok(Self::Alias),
             ":BUN:" => Ok(Self::Bun),
+            ":DEPENDENCY:" => Ok(Self::Dependency),
             ":NODE:" => Ok(Self::Node),
             ":PACKAGE:" => Ok(Self::Package),
             ":PACKAGE_WITH_PROTOCOL:" => Ok(Self::ProtocolPackage),
@@ -450,23 +472,29 @@ impl<'a> ImportSourceCandidate<'a> {
     }
 
     /// Tests whether the current path matches `matcher`.
-    pub fn matches(&self, matcher: &SourceMatcher) -> bool {
-        matcher.is_match(self)
+    pub fn matches(&self, manifest: &impl Manifest, matcher: &SourceMatcher) -> bool {
+        matcher.is_match(manifest, self)
     }
 
     /// Match against a list of matchers where negated matchers are handled as exceptions.
     /// Returns `default` if there is no matchers that match.
-    pub fn matches_with_exceptions<'b, I>(&self, matchers: I) -> bool
+    pub fn matches_with_exceptions<'b, I>(&self, manifest: &impl Manifest, matchers: I) -> bool
     where
         I: IntoIterator<Item = &'b SourceMatcher>,
         I::IntoIter: DoubleEndedIterator,
     {
         // Iterate in reverse order to avoid unnecessary glob matching.
         for matcher in matchers.into_iter().rev() {
-            if matcher.is_raw_match(self) {
+            if matcher.is_raw_match(manifest, self) {
                 return !matcher.is_negated();
             }
         }
         false
+    }
+
+    /// Returns the package name without the path segment if this is a package,
+    /// otherwise returns `None`.
+    pub fn package_name(&self) -> Option<&str> {
+        self.source.package_name()
     }
 }

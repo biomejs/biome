@@ -3263,6 +3263,7 @@ export type SourcesMatcher = SourceMatcher | SourceMatcher[];
 export type NegatablePredefinedSourceMatcher =
 	| ":ALIAS:"
 	| ":BUN:"
+	| ":DEPENDENCY:"
 	| ":NODE:"
 	| ":PACKAGE:"
 	| ":PACKAGE_WITH_PROTOCOL:"
@@ -3270,6 +3271,7 @@ export type NegatablePredefinedSourceMatcher =
 	| ":URL:"
 	| "!:ALIAS:"
 	| "!:BUN:"
+	| "!:DEPENDENCY:"
 	| "!:NODE:"
 	| "!:PACKAGE:"
 	| "!:PACKAGE_WITH_PROTOCOL:"

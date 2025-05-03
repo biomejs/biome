@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: with-dep.js
+---
+# Input
+```js
+import a from "self-package";
+import a from "@a/dep";
+import b from "@a/package";
+import c from "a-dep";
+import b from "a-package";
+import d from "dev-dep";
+import d from "optional-dep";
+import d from "peer-dep";
+import d from "node::assert";
+import a from "@a/dep/subpath";
+import c from "a-dep/subpath";
+
+```
+
+# Diagnostics
+```
+with-dep.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import a from "self-package";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import a from "@a/dep";
+    3 │ import b from "@a/package";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     1    │ - import·a·from·"self-package";
+     2    │ - import·a·from·"@a/dep";
+     3    │ - import·b·from·"@a/package";
+     4    │ - import·c·from·"a-dep";
+     5    │ - import·b·from·"a-package";
+     6    │ - import·d·from·"dev-dep";
+     7    │ - import·d·from·"optional-dep";
+     8    │ - import·d·from·"peer-dep";
+        1 │ + import·a·from·"@a/dep";
+        2 │ + import·a·from·"@a/dep/subpath";
+        3 │ + import·c·from·"a-dep";
+        4 │ + import·c·from·"a-dep/subpath";
+        5 │ + import·d·from·"dev-dep";
+        6 │ + import·d·from·"optional-dep";
+        7 │ + import·d·from·"peer-dep";
+        8 │ + import·a·from·"self-package";
+     9  9 │   import d from "node::assert";
+    10    │ - import·a·from·"@a/dep/subpath";
+    11    │ - import·c·from·"a-dep/subpath";
+       10 │ + import·b·from·"@a/package";
+       11 │ + import·b·from·"a-package";
+    12 12 │   
+  
+
+```

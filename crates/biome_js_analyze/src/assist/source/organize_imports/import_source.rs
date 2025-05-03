@@ -71,6 +71,31 @@ impl<T: AsRef<str> + Eq> Ord for ImportSource<T> {
         })
     }
 }
+impl<T: AsRef<str>> ImportSource<T> {
+    /// Returns the package name without the path segment if this is a package,
+    /// otherwise returns `None`.
+    pub fn package_name(&self) -> Option<&str> {
+        if self.kind == ImportSourceKind::Package {
+            let source = self.inner.as_ref();
+            if source.starts_with('@') {
+                Some(
+                    source
+                        .split_at(
+                            source
+                                .match_indices('/')
+                                .nth(1)
+                                .map_or(source.len(), |(pos, _)| pos),
+                        )
+                        .0,
+                )
+            } else {
+                source.split('/').next()
+            }
+        } else {
+            None
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ImportSourceKind {
@@ -297,6 +322,27 @@ mod test {
         assert_eq!(
             ImportSourceKind::from_source("/absolute/path"),
             ImportSourceKind::Path
+        );
+    }
+
+    #[test]
+    fn import_source_package_name() {
+        assert_eq!(ImportSource::from("/absolute/path").package_name(), None);
+        assert_eq!(
+            ImportSource::from("@a/package").package_name(),
+            Some("@a/package")
+        );
+        assert_eq!(
+            ImportSource::from("@a/package/subpath").package_name(),
+            Some("@a/package")
+        );
+        assert_eq!(
+            ImportSource::from("a-package").package_name(),
+            Some("a-package")
+        );
+        assert_eq!(
+            ImportSource::from("a-package/subpath").package_name(),
+            Some("a-package")
         );
     }
 
