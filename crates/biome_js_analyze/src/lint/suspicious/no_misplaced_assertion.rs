@@ -107,7 +107,7 @@ declare_lint_rule! {
         name: "noMisplacedAssertion",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintJest("no-standalone-expect")],
+        sources: &[RuleSource::EslintJest("no-standalone-expect"), RuleSource::EslintVitest("no-standalone-expect")],
         source_kind: RuleSourceKind::Inspired,
     }
 }
