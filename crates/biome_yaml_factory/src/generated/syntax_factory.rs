@@ -60,7 +60,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if YamlPropertyList::can_cast(element.kind()) {
+                    if AnyYamlPropertiesCombination::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -431,7 +431,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if YamlPropertyList::can_cast(element.kind()) {
+                    if AnyYamlPropertiesCombination::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -582,7 +582,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if YamlPropertyList::can_cast(element.kind()) {
+                    if AnyYamlPropertiesCombination::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -660,12 +660,19 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.into_node(YAML_PLAIN_SCALAR, children)
             }
-            YAML_PROPERTY_LIST => {
+            YAML_PROPERTIES_ANCHOR_FIRST => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if AnyYamlProperty::can_cast(element.kind()) {
+                    if YamlAnchorProperty::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if YamlTagProperty::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -673,11 +680,37 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        YAML_PROPERTY_LIST.to_bogus(),
+                        YAML_PROPERTIES_ANCHOR_FIRST.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(YAML_PROPERTY_LIST, children)
+                slots.into_node(YAML_PROPERTIES_ANCHOR_FIRST, children)
+            }
+            YAML_PROPERTIES_TAG_FIRST => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if YamlTagProperty::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if YamlAnchorProperty::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        YAML_PROPERTIES_TAG_FIRST.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(YAML_PROPERTIES_TAG_FIRST, children)
             }
             YAML_ROOT => {
                 let mut elements = (&children).into_iter();
