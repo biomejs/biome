@@ -4,7 +4,7 @@ use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
 use biome_rowan::TriviaPieceKind;
 use biome_yaml_syntax::YamlSyntaxKind::{self, EOF};
 
-use crate::lexer::YamlLexer;
+use crate::lexer::{YamlLexContext, YamlLexer};
 
 pub(crate) struct YamlTokenSource<'source> {
     lexer: BufferedLexer<YamlSyntaxKind, YamlLexer<'source>>,
@@ -24,15 +24,15 @@ impl<'source> YamlTokenSource<'source> {
         let lexer = BufferedLexer::new(lexer);
 
         let mut source = YamlTokenSource::new(lexer);
-        source.next_non_trivia_token(true);
+        source.next_non_trivia_token(true, YamlLexContext::Regular);
         source
     }
 
-    fn next_non_trivia_token(&mut self, first_token: bool) {
+    fn next_non_trivia_token(&mut self, first_token: bool, context: YamlLexContext) {
         let mut trailing = !first_token;
 
         loop {
-            let kind = self.lexer.next_token(());
+            let kind = self.lexer.next_token(context);
 
             let trivia_kind = TriviaPieceKind::try_from(kind);
 
@@ -75,7 +75,7 @@ impl TokenSource for YamlTokenSource<'_> {
 
     fn bump(&mut self) {
         if self.current() != EOF {
-            self.next_non_trivia_token(false)
+            self.next_non_trivia_token(false, YamlLexContext::Regular)
         }
     }
 
@@ -87,7 +87,7 @@ impl TokenSource for YamlTokenSource<'_> {
                 false,
             ));
 
-            self.next_non_trivia_token(false)
+            self.next_non_trivia_token(false, YamlLexContext::Regular)
         }
     }
 

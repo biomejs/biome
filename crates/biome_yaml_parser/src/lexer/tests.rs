@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use super::TextSize;
-use crate::lexer::YamlLexer;
+use crate::lexer::{YamlLexContext, YamlLexer};
 use biome_parser::lexer::Lexer;
 use biome_yaml_syntax::YamlSyntaxKind::*;
 use quickcheck_macros::quickcheck;
@@ -12,7 +12,7 @@ use std::time::Duration;
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
-    ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
+    ($context:expr, $src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
         let mut lexer = YamlLexer::from_str($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
@@ -20,9 +20,8 @@ macro_rules! assert_lex {
         let mut new_str = String::with_capacity($src.len());
         let mut tokens = vec![];
 
-        while lexer.next_token(()) != EOF {
+        while lexer.next_token($context) != EOF {
             tokens.push((lexer.current(), lexer.current_range()));
-
         }
 
         $(
@@ -76,7 +75,7 @@ fn losslessness(string: String) -> bool {
         let mut lexer = YamlLexer::from_str(&cloned);
         let mut tokens = vec![];
 
-        while lexer.next_token(()) != EOF {
+        while lexer.next_token(YamlLexContext::default()) != EOF {
             tokens.push(lexer.current_range());
         }
 
@@ -102,6 +101,7 @@ fn losslessness(string: String) -> bool {
 #[test]
 fn lex_double_quoted_literal() {
     assert_lex!(
+        YamlLexContext::Regular,
         "\"hello world\"",
         DOUBLE_QUOTED_LITERAL:13,
     );
@@ -110,6 +110,7 @@ fn lex_double_quoted_literal() {
 #[test]
 fn lex_single_quoted_literal() {
     assert_lex!(
+        YamlLexContext::Regular,
         "'hello world'",
         SINGLE_QUOTED_LITERAL:13,
     );
@@ -118,7 +119,52 @@ fn lex_single_quoted_literal() {
 #[test]
 fn lex_comment() {
     assert_lex!(
+        YamlLexContext::Regular,
         "# this is a comment",
         COMMENT:19,
+    );
+}
+
+#[test]
+fn lex_simple_mapping_key() {
+    assert_lex!(
+        YamlLexContext::BlockKey,
+        "abc:",
+        PLAIN_LITERAL:3,
+        COLON:1,
+    );
+}
+
+#[test]
+fn lex_plain_with_special_char() {
+    assert_lex!(
+        YamlLexContext::BlockKey,
+        "ab,c:d e-[f:#gh: ",
+        PLAIN_LITERAL:15,
+        COLON:1,
+        WHITESPACE:1,
+    );
+}
+
+#[test]
+fn lex_unambigous_mapping_and_comment() {
+    assert_lex!(
+        YamlLexContext::BlockKey,
+        "abc: #abc",
+        PLAIN_LITERAL:3,
+        COLON:1,
+        WHITESPACE:1,
+        COMMENT:4
+    );
+}
+
+#[test]
+fn lex_incorrect_flow_key() {
+    assert_lex!(
+        YamlLexContext::FlowKey,
+        "a bc[xyz",
+        PLAIN_LITERAL:4,
+        L_BRACK:1,
+        PLAIN_LITERAL:3,
     );
 }
