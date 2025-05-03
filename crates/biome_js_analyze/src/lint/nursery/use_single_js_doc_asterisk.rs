@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{JsModule, JsSyntaxToken};
-use biome_module_graph::JsdocComment;
+use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
     AstNode, BatchMutationExt, Direction, TextLen, TextRange, TextSize, TriviaPiece,
 };
@@ -286,12 +286,9 @@ fn get_invalid_jsdoc_last_line(text: &str) -> Option<InvalidJsDocLineIndexes> {
             continue;
         }
 
-        if char_is_whitespace(b) {
-            continue;
+        if !char_is_whitespace(b) {
+            break;
         }
-
-        // Found non-whitespace character
-        break;
     }
 
     Some(InvalidJsDocLineIndexes {

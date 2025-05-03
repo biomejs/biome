@@ -805,6 +805,7 @@ dependencies = [
  "biome_js_semantic",
  "biome_js_syntax",
  "biome_js_type_info",
+ "biome_jsdoc_comment",
  "biome_module_graph",
  "biome_package",
  "biome_plugin_loader",
@@ -970,6 +971,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "biome_jsdoc_comment"
+version = "0.0.1"
+dependencies = [
+ "biome_formatter",
+ "biome_js_syntax",
+ "biome_js_type_info",
+ "biome_rowan",
 ]
 
 [[package]]
@@ -1189,6 +1200,7 @@ dependencies = [
  "biome_js_semantic",
  "biome_js_syntax",
  "biome_js_type_info",
+ "biome_jsdoc_comment",
  "biome_json_parser",
  "biome_json_value",
  "biome_package",

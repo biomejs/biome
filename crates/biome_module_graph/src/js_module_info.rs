@@ -12,9 +12,10 @@ use biome_js_type_info::{
     GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedPath, ResolvedTypeId, Type, TypeData,
     TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
+use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 
-use crate::{ModuleGraph, jsdoc_comment::JsdocComment};
+use crate::ModuleGraph;
 
 use binding::{BindingId, JsBindingData};
 use scope::{JsScope, JsScopeData};
