@@ -50,7 +50,7 @@ invalid-crlf.js:3:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━�
   
   i Unsafe fix: Remove additional asterisks.
   
-    3 │ ·**/␍
+    3 │ ·**/
       │   - 
 
 ```
@@ -69,7 +69,7 @@ invalid-crlf.js:7:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━�
   
   i Unsafe fix: Remove additional asterisks.
   
-    7 │ ·**·Middle␍
+    7 │ ·**·Middle
       │   -       
 
 ```
@@ -88,7 +88,7 @@ invalid-crlf.js:12:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━�
   
   i Unsafe fix: Remove additional asterisks.
   
-    12 │ ·**␍
+    12 │ ·**
        │   -
 
 ```
@@ -107,7 +107,7 @@ invalid-crlf.js:18:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━�
   
   i Unsafe fix: Remove additional asterisks.
   
-    18 │ ·*·*Asterisk·right·next·to·the·text␍
+    18 │ ·*·*Asterisk·right·next·to·the·text
        │   --                               
 
 ```
@@ -126,7 +126,7 @@ invalid-crlf.js:24:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━�
   
   i Unsafe fix: Remove additional asterisks.
   
-    24 │ ·abc·*·**/␍
+    24 │ ·abc·*·**/
        │       --- 
 
 ```
@@ -145,7 +145,7 @@ invalid-crlf.js:26:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━�
   
   i Unsafe fix: Remove additional asterisks.
   
-    26 │ /**·@someTag·SameLine2·Double·**/␍
+    26 │ /**·@someTag·SameLine2·Double·**/
        │                                - 
 
 ```
@@ -163,7 +163,7 @@ invalid-crlf.js:28:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━�
   
   i Unsafe fix: Remove additional asterisks.
   
-    28 │ /**·SameLine·DoubleWithSpace·*·*/␍
+    28 │ /**·SameLine·DoubleWithSpace·*·*/
        │                               -- 
 
 ```
