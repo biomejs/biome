@@ -63,7 +63,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintJest("no-duplicate-hooks")],
+        sources: &[RuleSource::EslintJest("no-duplicate-hooks"), RuleSource::EslintVitest("no-duplicate-hooks")],
         source_kind: RuleSourceKind::Inspired,
         domains: &[RuleDomain::Test],
     }

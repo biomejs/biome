@@ -58,7 +58,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintJest("max-nested-describe")],
+        sources: &[RuleSource::EslintJest("max-nested-describe"), RuleSource::EslintVitest("max-nested-describe")],
         source_kind: RuleSourceKind::SameLogic,
         domains: &[RuleDomain::Test],
     }

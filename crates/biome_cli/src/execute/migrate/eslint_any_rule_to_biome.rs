@@ -2515,6 +2515,70 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "vitest/max-nested-describe" => {
+            let group = rules.complexity.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_excessive_nested_test_suites
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "vitest/no-disabled-tests" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_skipped_tests
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "vitest/no-done-callback" => {
+            let group = rules.style.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_done_callback
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "vitest/no-duplicate-hooks" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_duplicate_test_hooks
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "vitest/no-focused-tests" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_focused_tests
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "vitest/no-standalone-expect" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_misplaced_assertion
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "yoda" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
