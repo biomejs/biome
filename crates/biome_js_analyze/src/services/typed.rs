@@ -1,30 +1,28 @@
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
-    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
+    VisitorFinishContext,
 };
-use biome_js_syntax::{AnyJsExpression, AnyJsRoot, JsLanguage, JsSyntaxNode};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsRoot, JsExpressionStatement, JsLanguage, JsSyntaxNode,
+};
 use biome_js_type_info::Type;
-use biome_module_graph::{JsModuleInfo, ModuleGraph};
-use biome_rowan::{AstNode, TextRange};
+use biome_module_graph::{ModuleGraph, ScopedResolver};
+use biome_rowan::{AstNode, TextRange, WalkEvent};
 use camino::Utf8PathBuf;
 use std::sync::Arc;
 
 /// Service for use with type inference rules.
-#[derive(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct TypedService {
-    module_info: Option<JsModuleInfo>,
-    modules: Arc<ModuleGraph>,
+    resolver: Option<Arc<ScopedResolver>>,
 }
 
 impl TypedService {
-    pub fn module_graph(&self) -> &ModuleGraph {
-        self.modules.as_ref()
-    }
-
     pub fn type_for_expression(&self, expr: &AnyJsExpression) -> Type {
-        self.module_info
+        self.resolver
             .as_ref()
-            .map(|module_info| module_info.resolved_type_for_expression(expr, self.modules.clone()))
+            .map(|resolver| resolver.resolved_type_for_expression(expr))
             .unwrap_or_default()
     }
 }
@@ -47,23 +45,15 @@ impl FromServices for TypedService {
             }
         }
 
-        let file_path: &Arc<Utf8PathBuf> = services
-            .get_service()
-            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["FilePath"]))?;
-        let module_graph: &Arc<ModuleGraph> = services
-            .get_service()
-            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleGraph"]))?;
-        let module_info = module_graph.module_info_for_path(file_path.as_ref());
-        Ok(Self {
-            module_info,
-            modules: module_graph.clone(),
-        })
+        let resolver: Option<&Option<Arc<ScopedResolver>>> = services.get_service();
+        let resolver = resolver.and_then(|resolver| resolver.as_ref().map(Arc::clone));
+        Ok(Self { resolver })
     }
 }
 
 impl Phase for TypedService {
     fn phase() -> Phases {
-        Phases::Syntax
+        Phases::Semantic
     }
 }
 
@@ -92,7 +82,8 @@ where
     type Services = TypedService;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, SyntaxVisitor::default);
+        analyzer.add_visitor(Phases::Syntax, ScopeResolverBuilderVisitor::default);
+        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
     fn key() -> QueryKey<Self::Language> {
@@ -101,5 +92,46 @@ where
 
     fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
         N::unwrap_cast(node.clone())
+    }
+}
+
+#[derive(Default)]
+struct ScopeResolverBuilderVisitor {
+    resolver: Option<Option<ScopedResolver>>,
+}
+
+impl Visitor for ScopeResolverBuilderVisitor {
+    type Language = JsLanguage;
+
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {
+        let resolver = self.resolver.get_or_insert_with(|| {
+            let file_path: &Arc<Utf8PathBuf> = ctx.services.get_service()?;
+            let module_graph: &Arc<ModuleGraph> = ctx.services.get_service()?;
+            module_graph
+                .module_info_for_path(file_path.as_ref())
+                .map(|module_info| {
+                    ScopedResolver::from_global_scope(module_info, module_graph.clone())
+                })
+        });
+
+        let Some(resolver) = resolver else {
+            return;
+        };
+
+        match event {
+            WalkEvent::Enter(node) => {
+                if let Some(expr) =
+                    JsExpressionStatement::cast_ref(node).and_then(|node| node.expression().ok())
+                {
+                    resolver.register_types_for_expression(&expr);
+                }
+            }
+            WalkEvent::Leave(_node) => {}
+        }
+    }
+
+    fn finish(mut self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
+        let resolver = self.resolver.take().flatten().map(Arc::new);
+        ctx.services.insert_service(resolver);
     }
 }

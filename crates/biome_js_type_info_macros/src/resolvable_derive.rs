@@ -131,6 +131,14 @@ pub(crate) fn generate_resolvable_enum(ident: Ident, variants: Vec<VariantData>)
         None => quote! { Self::#ident => Self::#ident },
     });
 
+    let variants_with_scope_id = variants.iter().map(|VariantData { ident, ty }| match ty {
+        Some(ty) => {
+            let ty_with_scope_id = unit_type_with_scope_id(ty);
+            quote! { Self::#ident(ty) => Self::#ident(#ty_with_scope_id) }
+        }
+        None => quote! { Self::#ident => Self::#ident },
+    });
+
     quote! {
         impl crate::Resolvable for #ident {
             fn resolved(&self, resolver: &mut dyn crate::TypeResolver) -> Self {
@@ -154,6 +162,12 @@ pub(crate) fn generate_resolvable_enum(ident: Ident, variants: Vec<VariantData>)
                     #( #variants_with_module_id ),*
                 }
             }
+
+            fn with_scope_id(self, scope_id: crate::ScopeId) -> Self {
+                match self {
+                    #( #variants_with_scope_id ),*
+                }
+            }
         }
     }
 }
@@ -172,6 +186,11 @@ pub(crate) fn generate_resolvable_struct(ident: Ident, fields: Vec<FieldData>) -
     let fields_with_module_id = fields.iter().map(|FieldData { ident, ty }| {
         let ty_with_module_id = type_with_module_id(IdentOrZero::Ident(ident), ty);
         quote! { #ident: #ty_with_module_id }
+    });
+
+    let fields_with_scope_id = fields.iter().map(|FieldData { ident, ty }| {
+        let ty_with_scope_id = type_with_scope_id(IdentOrZero::Ident(ident), ty);
+        quote! { #ident: #ty_with_scope_id }
     });
 
     quote! {
@@ -197,6 +216,12 @@ pub(crate) fn generate_resolvable_struct(ident: Ident, fields: Vec<FieldData>) -
                     #( #fields_with_module_id ),*
                 }
             }
+
+            fn with_scope_id(self, scope_id: crate::ScopeId) -> Self {
+                Self {
+                    #( #fields_with_scope_id ),*
+                }
+            }
         }
     }
 }
@@ -208,6 +233,8 @@ fn generate_resolvable_unit_type(ident: Ident, ty: Type) -> TokenStream {
         resolved_type_with_mapped_references(IdentOrZero::Zero, &ty);
 
     let field_with_module_id = type_with_module_id(IdentOrZero::Zero, &ty);
+
+    let field_with_scope_id = type_with_scope_id(IdentOrZero::Zero, &ty);
 
     quote! {
         impl crate::Resolvable for #ident {
@@ -225,6 +252,10 @@ fn generate_resolvable_unit_type(ident: Ident, ty: Type) -> TokenStream {
 
             fn with_module_id(self, module_id: crate::ModuleId) -> Self {
                 Self(#field_with_module_id)
+            }
+
+            fn with_scope_id(self, scope_id: crate::ScopeId) -> Self {
+                Self(#field_with_scope_id)
             }
         }
     }
@@ -609,6 +640,123 @@ fn unit_type_with_module_id(ty: &Type) -> TokenStream {
         },
         _ => {
             quote! { ty.with_module_id(module_id) }
+        }
+    }
+}
+
+fn type_with_scope_id(ident: IdentOrZero, ty: &Type) -> TokenStream {
+    let Type::Path(path) = ty else {
+        abort!(ty, "Resolvable derive requires plain path types");
+    };
+
+    match path.path.segments.last() {
+        Some(segment) if segment.ident == "Text" => {
+            quote! { self.#ident }
+        }
+        Some(segment) if segment.ident == "Box" => match &segment.arguments {
+            PathArguments::None => abort!(segment, "Box is missing argument"),
+            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
+                match args.args.iter().next().unwrap() {
+                    GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
+                        Type::Path(ty) if ty.path.is_ident("Text") => {
+                            quote! { self.#ident }
+                        }
+                        Type::Path(_) => quote! {
+                            self.#ident.into_iter().map(|elem| elem.with_scope_id(scope_id)).collect()
+                        },
+                        _ => abort!(slice, "Unsupported arguments"),
+                    },
+                    GenericArgument::Type(Type::Path(ty)) => {
+                        if ty.path.is_ident("Text") {
+                            quote! { self.#ident }
+                        } else {
+                            quote! {
+                                Box::new(self.#ident.with_scope_id(scope_id))
+                            }
+                        }
+                    }
+                    _ => abort!(args, "Unsupported arguments"),
+                }
+            }
+            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                abort!(path, "Unsupported type arguments in path")
+            }
+        },
+        Some(segment) if segment.ident == "Option" => match &segment.arguments {
+            PathArguments::None => abort!(segment, "Option is missing argument"),
+            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
+                match args.args.iter().next().unwrap() {
+                    GenericArgument::Type(Type::Path(ty)) => {
+                        if ty.path.is_ident("Text") {
+                            quote! { self.#ident }
+                        } else {
+                            quote! { self.#ident.map(|f| f.with_scope_id(scope_id)) }
+                        }
+                    }
+                    _ => abort!(args, "Unsupported arguments"),
+                }
+            }
+            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                abort!(path, "Unsupported type arguments in path")
+            }
+        },
+        _ => {
+            quote! { self.#ident.with_scope_id(scope_id) }
+        }
+    }
+}
+
+fn unit_type_with_scope_id(ty: &Type) -> TokenStream {
+    let Type::Path(path) = ty else {
+        abort!(ty, "Resolvable derive requires plain path types");
+    };
+
+    match path.path.segments.last() {
+        Some(segment) if segment.ident == "Text" => {
+            quote! { ty }
+        }
+        Some(segment) if segment.ident == "Box" => match &segment.arguments {
+            PathArguments::None => abort!(segment, "Box is missing argument"),
+            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
+                match args.args.iter().next().unwrap() {
+                    GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
+                        Type::Path(ty) if ty.path.is_ident("Text") => quote! { ty.clone() },
+                        _ => abort!(args, "Unsupported arguments"),
+                    },
+                    GenericArgument::Type(Type::Path(ty)) => {
+                        if ty.path.is_ident("Text") {
+                            quote! { ty }
+                        } else {
+                            quote! { Box::new(ty.with_scope_id(scope_id)) }
+                        }
+                    }
+                    _ => abort!(args, "Unsupported arguments"),
+                }
+            }
+            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                abort!(path, "Unsupported type arguments in path")
+            }
+        },
+        Some(segment) if segment.ident == "Option" => match &segment.arguments {
+            PathArguments::None => abort!(segment, "Option is missing argument"),
+            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
+                match args.args.iter().next().unwrap() {
+                    GenericArgument::Type(Type::Path(ty)) => {
+                        if ty.path.is_ident("Text") {
+                            quote! { ty }
+                        } else {
+                            quote! { ty.map(|f| f.with_scope_id(scope_id)) }
+                        }
+                    }
+                    _ => abort!(args, "Unsupported arguments"),
+                }
+            }
+            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                abort!(path, "Unsupported type arguments in path")
+            }
+        },
+        _ => {
+            quote! { ty.with_scope_id(scope_id) }
         }
     }
 }

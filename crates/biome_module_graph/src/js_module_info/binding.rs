@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
-use biome_js_semantic::ScopeId;
 use biome_js_syntax::{AnyJsDeclaration, JsImport, JsSyntaxNode, JsVariableKind, TextRange};
-use biome_js_type_info::{TypeId, TypeReference};
+use biome_js_type_info::{ScopeId, TypeId, TypeReference};
 use biome_rowan::{AstNode, Text, TextSize};
 
 use crate::jsdoc_comment::JsdocComment;
