@@ -120,8 +120,13 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlPlainScalar::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_PROPERTY_LIST => {
-                    let $pattern = unsafe { $crate::YamlPropertyList::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_PROPERTIES_ANCHOR_FIRST => {
+                    let $pattern =
+                        unsafe { $crate::YamlPropertiesAnchorFirst::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_PROPERTIES_TAG_FIRST => {
+                    let $pattern = unsafe { $crate::YamlPropertiesTagFirst::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_ROOT => {

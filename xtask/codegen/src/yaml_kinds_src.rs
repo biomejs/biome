@@ -70,7 +70,8 @@ pub const YAML_KINDS_SRC: KindsSrc = KindsSrc {
         "YAML_PLAIN_SCALAR",
         "YAML_LITERAL_SCALAR",
         "YAML_FOLDED_SCALAR",
-        "YAML_PROPERTY_LIST",
+        "YAML_PROPERTIES_ANCHOR_FIRST",
+        "YAML_PROPERTIES_TAG_FIRST",
         "YAML_ANCHOR_PROPERTY",
         "YAML_TAG_PROPERTY",
         // Bogus nodes
