@@ -374,14 +374,14 @@ impl PredefinedSourceMatcher {
 impl std::fmt::Display for PredefinedSourceMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
-            // Don't forget to update `impl std::str::FromStr for PredefinedImportGroup`
-            Self::Alias => "ALIAS",
-            Self::Bun => "BUN",
-            Self::Node => "NODE",
-            Self::Package => "PACKAGE",
-            Self::ProtocolPackage => "PACKAGE_WITH_PROTOCOL",
-            Self::Path => "PATH",
-            Self::Url => "URL",
+            // Don't forget to update `impl std::str::FromStr for PredefinedSourceMatcher`
+            Self::Alias => ":ALIAS:",
+            Self::Bun => ":BUN:",
+            Self::Node => ":NODE:",
+            Self::Package => ":PACKAGE:",
+            Self::ProtocolPackage => ":PACKAGE_WITH_PROTOCOL:",
+            Self::Path => ":PATH:",
+            Self::Url => ":URL:",
         };
         f.write_str(repr)
     }
