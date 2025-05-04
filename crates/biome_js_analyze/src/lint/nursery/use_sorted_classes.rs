@@ -168,7 +168,7 @@ static SORT_CONFIG: LazyLock<SortConfig> =
 
 impl Rule for UseSortedClasses {
     type Query = Ast<AnyClassStringLike>;
-    type State = String;
+    type State = Box<str>;
     type Signals = Option<Self::State>;
     type Options = Box<UtilityClassSortingOptions>;
 
@@ -187,7 +187,7 @@ impl Rule for UseSortedClasses {
                     return None;
                 }
                 if value.text() != sorted_value {
-                    return Some(sorted_value);
+                    return Some(sorted_value.into());
                 }
             }
         }

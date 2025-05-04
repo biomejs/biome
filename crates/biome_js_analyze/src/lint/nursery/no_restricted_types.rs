@@ -139,7 +139,7 @@ pub struct NoRestrictedTypesOptions {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct CustomRestrictedTypeOptions {
-    message: String,
+    message: Box<str>,
     #[serde(rename = "use")]
     use_instead: Option<String>,
 }
@@ -148,7 +148,7 @@ pub struct CustomRestrictedTypeOptions {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum CustomRestrictedType {
-    Plain(String),
+    Plain(Box<str>),
     WithOptions(CustomRestrictedTypeOptions),
 }
 

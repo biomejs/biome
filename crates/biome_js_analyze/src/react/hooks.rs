@@ -187,7 +187,7 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
 /// of all function that are considered hooks. See [ReactHookConfiguration].
 pub(crate) fn react_hook_with_dependency(
     call: &JsCallExpression,
-    hooks: &FxHashMap<String, ReactHookConfiguration>,
+    hooks: &FxHashMap<Box<str>, ReactHookConfiguration>,
     model: &SemanticModel,
 ) -> Option<ReactCallWithDependencyResult> {
     let expression = call.callee().ok()?.omit_parentheses();
@@ -227,7 +227,7 @@ pub(crate) fn react_hook_with_dependency(
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct StableReactHookConfiguration {
     /// Name of the React hook
-    pub(crate) hook_name: String,
+    pub(crate) hook_name: Box<str>,
 
     /// The kind of (stable) result returned by the hook.
     pub(crate) result: StableHookResult,
@@ -456,7 +456,7 @@ pub fn is_binding_react_stable(
     };
     let function_name = function_name.text_trimmed();
     stable_config.iter().any(|config| {
-        if !config.builtin && config.hook_name.as_str() != function_name {
+        if !config.builtin && config.hook_name.as_ref() != function_name {
             return false;
         }
 

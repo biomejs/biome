@@ -180,7 +180,7 @@ pub fn sort_class_name(
     sorted_classes.extend(
         classes_info
             .iter()
-            .map(|class_info| class_info.text.as_str()),
+            .map(|class_info| class_info.text.as_ref()),
     );
 
     // Add the first class back if it was ignored.

@@ -166,7 +166,7 @@ impl AnyClassMemberDefinition {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct MemberState {
-    name: String,
+    name: Box<str>,
     is_static: bool,
 }
 
@@ -186,7 +186,7 @@ impl Rule for NoDuplicateClassMembers {
                 let member = AnyClassMemberDefinition::cast(member.into_syntax())?;
                 let member_name_node = member.name()?;
                 let member_state = MemberState {
-                    name: get_member_name(&member_name_node)?.to_string(),
+                    name: get_member_name(&member_name_node)?.text().into(),
                     is_static: is_static_member(member.modifiers_list()),
                 };
 

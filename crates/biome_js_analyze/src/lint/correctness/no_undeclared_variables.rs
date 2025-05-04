@@ -106,7 +106,7 @@ impl Rule for NoUndeclaredVariables {
                 }
 
                 let span = token.text_trimmed_range();
-                let text = text.to_string().into_boxed_str();
+                let text = text.into();
                 Some((span, text))
             })
             .collect::<Vec<_>>()

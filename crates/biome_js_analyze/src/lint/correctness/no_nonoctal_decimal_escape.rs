@@ -118,9 +118,10 @@ impl Rule for NoNonoctalDecimalEscape {
             let replace_string_range = *decimal_escape_string_start..*decimal_escape_string_end;
 
             if let Some(previous_escape) = previous_escape {
-                if *previous_escape == "\\0" {
+                if previous_escape.as_ref() == "\\0" {
                     if let Some(unicode_escape) = get_unicode_escape('\0') {
-                        let Some(previous_escape_range_start) = text.find(previous_escape) else {
+                        let Some(previous_escape_range_start) = text.find(previous_escape.as_ref())
+                        else {
                             continue;
                         };
                         let Some(unicode_escape_text_range) = TextRange::try_from((
@@ -152,8 +153,8 @@ impl Rule for NoNonoctalDecimalEscape {
                     result.push(RuleState {
                         kind: FixSuggestionKind::Refactor,
                         diagnostics_text_range: decimal_escape_range,
-                        replace_from: decimal_escape.clone().into_boxed_str(),
-                        replace_to: decimal_char_unicode_escaped.into_boxed_str(),
+                        replace_from: decimal_escape.clone(),
+                        replace_to: decimal_char_unicode_escaped.into(),
                         replace_string_range,
                     });
                 } else {
@@ -161,7 +162,7 @@ impl Rule for NoNonoctalDecimalEscape {
                     result.push(RuleState {
                         kind: FixSuggestionKind::Refactor,
                         diagnostics_text_range: decimal_escape_range,
-                        replace_from: decimal_escape.clone().into_boxed_str(),
+                        replace_from: decimal_escape.clone(),
                         replace_to: decimal_char.to_string().into_boxed_str(),
                         replace_string_range,
                     })
@@ -277,8 +278,8 @@ fn is_octal_escape_sequence(input: &str) -> bool {
 
 #[derive(Debug, PartialEq)]
 struct EscapeSequence {
-    previous_escape: Option<String>,
-    decimal_escape: String,
+    previous_escape: Option<Box<str>>,
+    decimal_escape: Box<str>,
     /// The range of the decimal escape sequence in the string literal
     decimal_escape_range: (usize, usize),
 }
@@ -294,7 +295,7 @@ fn lex_escape_sequences(input: &str) -> Vec<EscapeSequence> {
         match ch {
             '\\' => match chars.peek() {
                 Some((_, '0')) => {
-                    previous_escape = Some("\\0".to_string());
+                    previous_escape = Some("\\0".into());
                     // Consume '0'
                     let _ = chars.next();
                 }
@@ -307,8 +308,8 @@ fn lex_escape_sequences(input: &str) -> Vec<EscapeSequence> {
                 result.push(EscapeSequence {
                     previous_escape: previous_escape.take(),
                     decimal_escape: match ch {
-                        '8' => "\\8".to_string(),
-                        '9' => "\\9".to_string(),
+                        '8' => "\\8".into(),
+                        '9' => "\\9".into(),
                         _ => unreachable!(),
                     },
                     // SAFETY: We tested `decimal_escape_start.is_some()`
@@ -316,7 +317,7 @@ fn lex_escape_sequences(input: &str) -> Vec<EscapeSequence> {
                 });
                 decimal_escape_start = None;
             }
-            _ => previous_escape = Some(ch.to_string()),
+            _ => previous_escape = Some(ch.to_string().into()),
         }
     }
     result
@@ -347,9 +348,9 @@ mod tests {
 
     #[test]
     fn test_get_unicode_escape() {
-        assert_eq!(get_unicode_escape('\0'), Some("\\u0000".to_string()));
-        assert_eq!(get_unicode_escape('a'), Some("\\u0061".to_string()));
-        assert_eq!(get_unicode_escape('👍'), Some("\\u1f44d".to_string()));
+        assert_eq!(get_unicode_escape('\0'), Some("\\u0000".into()));
+        assert_eq!(get_unicode_escape('a'), Some("\\u0061".into()));
+        assert_eq!(get_unicode_escape('👍'), Some("\\u1f44d".into()));
     }
 
     #[test]
@@ -358,13 +359,13 @@ mod tests {
             lex_escape_sequences("test\\8\\9"),
             vec![
                 EscapeSequence {
-                    previous_escape: Some("t".to_string()),
-                    decimal_escape: "\\8".to_string(),
+                    previous_escape: Some("t".into()),
+                    decimal_escape: "\\8".into(),
                     decimal_escape_range: (4, 6)
                 },
                 EscapeSequence {
                     previous_escape: None,
-                    decimal_escape: "\\9".to_string(),
+                    decimal_escape: "\\9".into(),
                     decimal_escape_range: (6, 8)
                 }
             ]
@@ -372,8 +373,8 @@ mod tests {
         assert_eq!(
             lex_escape_sequences("\\0\\8"),
             vec![EscapeSequence {
-                previous_escape: Some("\\0".to_string()),
-                decimal_escape: "\\8".to_string(),
+                previous_escape: Some("\\0".into()),
+                decimal_escape: "\\8".into(),
                 decimal_escape_range: (2, 4)
             },]
         );
@@ -381,13 +382,13 @@ mod tests {
             lex_escape_sequences("👍\\8\\9"),
             vec![
                 EscapeSequence {
-                    previous_escape: Some("👍".to_string()),
-                    decimal_escape: "\\8".to_string(),
+                    previous_escape: Some("👍".into()),
+                    decimal_escape: "\\8".into(),
                     decimal_escape_range: (4, 6)
                 },
                 EscapeSequence {
                     previous_escape: None,
-                    decimal_escape: "\\9".to_string(),
+                    decimal_escape: "\\9".into(),
                     decimal_escape_range: (6, 8)
                 }
             ]
@@ -395,8 +396,8 @@ mod tests {
         assert_eq!(
             lex_escape_sequences("\\\\ \\8"),
             vec![EscapeSequence {
-                previous_escape: Some(" ".to_string()),
-                decimal_escape: "\\8".to_string(),
+                previous_escape: Some(" ".into()),
+                decimal_escape: "\\8".into(),
                 decimal_escape_range: (3, 5)
             },]
         )

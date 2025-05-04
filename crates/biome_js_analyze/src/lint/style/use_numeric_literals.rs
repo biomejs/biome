@@ -114,7 +114,7 @@ impl Rule for UseNumericLiterals {
 
 pub struct CallInfo {
     callee: &'static str,
-    text: String,
+    text: Box<str>,
     radix: Radix,
 }
 
@@ -132,7 +132,7 @@ impl CallInfo {
             .as_any_js_expression()?
             .as_static_value()?
             .as_string_constant()?
-            .to_string();
+            .into();
         let radix = radix
             .as_any_js_expression()?
             .as_any_js_literal_expression()?
