@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 for (var x in o);
 for (var x in o) {}
 for (var x in o) if (x) f();

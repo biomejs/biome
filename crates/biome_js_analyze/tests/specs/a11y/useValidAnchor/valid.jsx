@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
 	<Anchor />
 	<Anchor href="" onClick={() => void 0} />

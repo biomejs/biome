@@ -4,6 +4,7 @@ expression: valid.js
 ---
 # Input
 ```js
+/* should not generate diagnostics */
 // no capturing groups
 /(?:)/;
 /(?:a)/;

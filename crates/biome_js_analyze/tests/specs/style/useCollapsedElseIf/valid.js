@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 if (condition) {
 	// ...
 } else if (anotherCondition) {

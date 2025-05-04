@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 declare module "node:fs" { }
 
 import 'bare-allowed';

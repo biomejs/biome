@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 for (const el of els) {}
 
 els.forEach((el, i) => {});

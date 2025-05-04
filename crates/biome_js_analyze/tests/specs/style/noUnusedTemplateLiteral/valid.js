@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var foo2 = `bar
 has newline`;
 var foo3 = `\"bar\"`

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 ({ 0: "zero" });
 ({ 1: "one" });
 ({ 1.2: "12" });

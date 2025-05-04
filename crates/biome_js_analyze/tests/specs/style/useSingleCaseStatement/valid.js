@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 switch (foo) {
     case true:
     case false:

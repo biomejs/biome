@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 class C {}
 
 class _C {}

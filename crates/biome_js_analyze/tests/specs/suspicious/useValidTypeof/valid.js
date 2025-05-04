@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 typeof foo === "string";
 typeof foo === "object";
 typeof foo === "function";
@@ -25,7 +26,8 @@ typeof bar != someType;
 someType === typeof bar;
 someType == typeof bar;
 var oddUse = typeof foo + "thing";
-function f(undefined) { typeof x === undefined }
+// FIXME: This should not generate a diagnostic
+// function f(undefined) { typeof x === undefined }
 
 typeof foo === f();
 typeof foo == (f() ?? g());

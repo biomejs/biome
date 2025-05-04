@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
   <th scope />
 	<th scope="col"></th>

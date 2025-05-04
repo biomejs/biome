@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 
 switch(foo) { case 1: doSomething(); break; case 2: doSomething(); }
 

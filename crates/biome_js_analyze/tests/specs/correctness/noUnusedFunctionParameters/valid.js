@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function foo(myVar) {
     console.log(myVar);
 }

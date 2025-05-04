@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import type { MY_ATTRIBUTE} from './types';
 
 export type T = {

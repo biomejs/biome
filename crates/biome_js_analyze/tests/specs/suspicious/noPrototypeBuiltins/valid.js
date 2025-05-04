@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 Object.hasOwn(foo, "bar");
 Object.prototype.isPrototypeOf.call(foo, bar);
 Object.prototype.propertyIsEnumerable.call(foo, 'bar');

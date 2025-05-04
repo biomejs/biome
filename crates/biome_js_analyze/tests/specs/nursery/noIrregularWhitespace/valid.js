@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const foo = '\\u000B';
 const foo = '\\u000C';
 const foo = '\\u0085';

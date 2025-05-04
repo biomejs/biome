@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export { X as X }
 
 export { Y as CONSTANT_Y  }

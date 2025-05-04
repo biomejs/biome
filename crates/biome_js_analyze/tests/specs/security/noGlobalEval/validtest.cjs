@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function foo() {
 	var eval = "foo";
 	window[eval]("foo");

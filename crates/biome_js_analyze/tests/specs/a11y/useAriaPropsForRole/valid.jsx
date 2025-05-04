@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var a = <span role="checkbox" aria-checked="true"></span>;
 var a = <span role="switch" aria-checked="true"></span>;
 var a = <span role="spinbutton" aria-valuemax="100" aria-valuemin="0" aria-valuenow="50"></span>;

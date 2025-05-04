@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 class A { foo; foo; }
 class A { foo; #foo; }
 class A { #foo; #bar; }

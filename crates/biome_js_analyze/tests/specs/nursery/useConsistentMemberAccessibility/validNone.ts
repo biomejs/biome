@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 class ValidNone {
   constructor(foo: string) {}
 }

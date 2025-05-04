@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export * as x from ""
 
 export * as camelCase from ""

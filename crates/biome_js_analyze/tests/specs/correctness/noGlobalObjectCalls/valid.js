@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var x = Math;
 var x = Math.random();
 var x = Math.PI;

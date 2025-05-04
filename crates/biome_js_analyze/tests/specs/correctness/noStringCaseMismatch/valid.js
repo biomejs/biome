@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 s.toUpperCase() === 'ABC';
 s.toLowerCase() === 'abc';
 s.toUpperCase() === '20';

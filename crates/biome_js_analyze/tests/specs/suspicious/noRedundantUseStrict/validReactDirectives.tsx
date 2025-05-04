@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 'use client'
 
 import { useState } from "react"

@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <input accessKey={undefined} />;
 <input accessKey={null} />;
 <button>Next</button>;
@@ -13,5 +14,3 @@ expression: valid.jsx
 <context.Provider accessKey={key} />;
 
 ```
-
-

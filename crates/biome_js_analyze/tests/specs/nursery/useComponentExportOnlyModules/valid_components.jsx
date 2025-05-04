@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export const SampleComponentA = () => <></>
 export const SampleComponentB = () => <></>
 export function Hoge () {

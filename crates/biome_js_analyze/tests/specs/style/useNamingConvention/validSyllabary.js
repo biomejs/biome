@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 {
     const 안녕하세요 = 0;
 }

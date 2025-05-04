@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 for (let i = 0; i < 16; ++i) {}
 
 let i = 0;

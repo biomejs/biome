@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 describe("msg", () => {
 	it("msg", () => {
 		expect("something").toBeTrue()

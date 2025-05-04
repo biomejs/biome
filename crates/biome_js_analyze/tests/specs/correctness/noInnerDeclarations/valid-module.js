@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export var x = 1;
 
 var y = 2;

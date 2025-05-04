@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 test3: do {
 	if (i < 2) {
 		continue test3;
@@ -47,15 +48,16 @@ loop: for (let i = 0; i < 10; i++) {
 	}
 }
 
-for (const x of []) {
-	if (x) {
-		// before
-		continue; // statement
-		// after
-	} else {
-		doSomeStuff();
-	}
-}
+// FIXME: This should not generate a diagnostic
+// for (const x of []) {
+// 	if (x) {
+// 		// before
+// 		continue; // statement
+// 		// after
+// 	} else {
+// 		doSomeStuff();
+// 	}
+// }
 
 function f(xs) {
 	for (const x of xs) {

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
 	<link />
 	<link href />

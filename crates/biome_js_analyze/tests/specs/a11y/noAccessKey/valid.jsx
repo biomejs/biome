@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <input accessKey={undefined} />;
 <input accessKey={null} />;
 <button>Next</button>;

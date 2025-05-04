@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <>
 	{/* valid */}
 	<iframe title="This is a unique title" />
@@ -14,5 +15,3 @@ expression: valid.jsx
 </>;
 
 ```
-
-

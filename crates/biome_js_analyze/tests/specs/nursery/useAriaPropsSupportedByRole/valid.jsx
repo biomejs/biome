@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
 <Foo bar />
 <div />

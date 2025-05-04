@@ -4,6 +4,7 @@ expression: validThis.tsx
 ---
 # Input
 ```tsx
+/* should not generate diagnostics */
 export class MyComponent {
   render() {
     type T = typeof this.foo;

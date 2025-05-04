@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // Tests adapted from https://github.com/sindresorhus/eslint-plugin-unicorn/blob/756dbbf0a359a139745b092a676f6e535cb85128/test/numeric-separators-style.js.
 
 let foo;

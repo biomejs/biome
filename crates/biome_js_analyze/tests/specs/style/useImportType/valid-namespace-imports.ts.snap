@@ -4,6 +4,7 @@ expression: valid-namespace-imports.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 import * as A from "";
 export { A }
 const Inner = A.Inner;
@@ -19,5 +20,3 @@ import type * as D from "";
 export type { D };
 
 ```
-
-

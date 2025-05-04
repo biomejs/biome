@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import React, { createElement } from "noReact";
 
 React.createElement('div', {

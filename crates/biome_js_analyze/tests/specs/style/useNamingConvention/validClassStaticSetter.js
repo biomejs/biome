@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export default class {
     static set p(x) {}
 

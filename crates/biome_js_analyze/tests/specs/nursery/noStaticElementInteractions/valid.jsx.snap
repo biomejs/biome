@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <>
 	<TestComponent onClick={doFoo} />
 	<Button onClick={doFoo} />

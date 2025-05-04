@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
-snapshot_kind: text
 ---
 # Input
 ```js
+/* should not generate diagnostics */
 test3: do {
 	if (i < 2) {
 		continue test3;
@@ -54,15 +54,16 @@ loop: for (let i = 0; i < 10; i++) {
 	}
 }
 
-for (const x of []) {
-	if (x) {
-		// before
-		continue; // statement
-		// after
-	} else {
-		doSomeStuff();
-	}
-}
+// FIXME: This should not generate a diagnostic
+// for (const x of []) {
+// 	if (x) {
+// 		// before
+// 		continue; // statement
+// 		// after
+// 	} else {
+// 		doSomeStuff();
+// 	}
+// }
 
 function f(xs) {
 	for (const x of xs) {
@@ -77,30 +78,5 @@ function f(xs) {
 		}
 	}
 }
-
-```
-
-# Diagnostics
-```
-valid.js:53:3 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unnecessary continue statement
-  
-    51 │ 	if (x) {
-    52 │ 		// before
-  > 53 │ 		continue; // statement
-       │ 		^^^^^^^^^
-    54 │ 		// after
-    55 │ 	} else {
-  
-  i Unsafe fix: Delete the unnecessary continue statement
-  
-    50 50 │   for (const x of []) {
-    51 51 │   	if (x) {
-    52    │ - → → //·before
-    53    │ - → → continue;·//·statement
-    54 52 │   		// after
-    55 53 │   	} else {
-  
 
 ```

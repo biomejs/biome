@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let a = `Hello, ${name}`;
 let a = templateFunction`Hello, ${name}`;
 let a = `Hello, name`;

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export interface I {
 	p1: number
 

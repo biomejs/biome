@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 ReactDOM.render(<div />, document.body);
 function render1() {
     ReactDOM.render(<div />, document.body);

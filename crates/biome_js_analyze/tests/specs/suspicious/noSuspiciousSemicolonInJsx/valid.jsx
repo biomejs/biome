@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const Component = () => {
     return (
         <div>

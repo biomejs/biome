@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 class A  extends B {
     constructor() {
         super()

@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 const Component = () => {
     return (
         <div>
@@ -61,5 +62,3 @@ const Component7 = () => {
 }
 
 ```
-
-

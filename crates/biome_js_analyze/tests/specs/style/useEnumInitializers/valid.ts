@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export enum Status {
 	Open = 1,
 	Close = 2,

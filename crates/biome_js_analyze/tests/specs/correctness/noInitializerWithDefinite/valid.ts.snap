@@ -4,8 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 let b!: number;
 
 ```
-
-

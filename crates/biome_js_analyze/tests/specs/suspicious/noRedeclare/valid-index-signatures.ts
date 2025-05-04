@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 type ValidIndexSignatures = {
 	a: {
 		[index: string]: string;

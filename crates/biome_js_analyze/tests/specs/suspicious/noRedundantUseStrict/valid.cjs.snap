@@ -4,6 +4,7 @@ expression: valid.cjs
 ---
 # Input
 ```cjs
+/* should not generate diagnostics */
 function foo() {
 	"use strict";
 }
@@ -12,5 +13,3 @@ function bar() {
 }
 
 ```
-
-

@@ -4,6 +4,7 @@ expression: notFragmentValid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 import React, { StrictMode } from "react";
 
 <>
@@ -12,5 +13,3 @@ import React, { StrictMode } from "react";
 </>
 
 ```
-
-

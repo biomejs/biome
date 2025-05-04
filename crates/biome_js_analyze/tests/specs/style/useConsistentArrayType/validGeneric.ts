@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let valid: Array<foo>;
 let invalid2: Promise<Array<string>>;
 let invalid3: Array<Foo<Bar>>;

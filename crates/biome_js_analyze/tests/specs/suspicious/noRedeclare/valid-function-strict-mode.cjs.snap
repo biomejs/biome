@@ -4,6 +4,7 @@ expression: valid-function-strict-mode.cjs
 ---
 # Input
 ```cjs
+/* should not generate diagnostics */
 function f() {
 	"use strict"
 	switch (x) {

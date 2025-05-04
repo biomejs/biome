@@ -4,6 +4,7 @@ expression: validCustomLabelAttributes.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <label htmlFor="js_id" label="A label" />;
 
 ```
