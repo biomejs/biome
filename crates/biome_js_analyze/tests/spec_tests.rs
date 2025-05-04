@@ -10,6 +10,7 @@ use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
+use biome_string_case::StrLikeExtension;
 use biome_test_utils::{
     CheckActionType, assert_errors_are_absent, code_fix_to_string, create_analyzer_options,
     diagnostic_to_string, has_bogus_nodes_or_empty_slots, module_graph_for_test_file,
@@ -92,8 +93,22 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let mut snapshot = String::new();
     let extension = input_file.extension().unwrap_or_default();
 
+    let should_check_for_valid_diagnostic_comment = match extension {
+        "ts" | "tsx" | "js" | "jsx" | "mjs" | "mts" | "cjs" | "cts" => {
+            let name = file_name.to_ascii_lowercase_cow();
+            // We can't know all the valid file names, but this should catch most common cases.
+            name.contains("valid") && !name.contains("invalid")
+        },
+        _ => false
+    };
+
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+
+    if should_check_for_valid_diagnostic_comment && !input_code.contains("/* should not generate diagnostics */") && !input_code.contains("/* should generate diagnostics */") {
+        panic!("Valid test files should start with a comment \"/* should not generate diagnostics */\"\nFile: {}", input_file);
+    }
+
     let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
@@ -135,7 +150,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     });
 
     if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
-        panic!("This test should not generate diagnostics");
+        panic!("This test should not generate diagnostics\nFile: {}", input_file);
     }
 }
 
