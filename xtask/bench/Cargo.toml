@@ -6,12 +6,15 @@ version = "0.0.0"
 
 [dependencies]
 biome_analyze           = { workspace = true }
+biome_cli               = { workspace = true }
+biome_console           = { workspace = true }
 biome_css_analyze       = { workspace = true }
 biome_css_formatter     = { workspace = true }
 biome_css_parser        = { workspace = true }
 biome_css_syntax        = { workspace = true }
 biome_diagnostics       = { workspace = true }
 biome_formatter         = { workspace = true }
+biome_fs                = { workspace = true }
 biome_graphql_formatter = { workspace = true }
 biome_graphql_parser    = { workspace = true }
 biome_graphql_syntax    = { workspace = true }
@@ -27,9 +30,14 @@ biome_json_analyze      = { workspace = true }
 biome_json_formatter    = { workspace = true }
 biome_json_parser       = { workspace = true }
 biome_json_syntax       = { workspace = true }
+biome_lsp               = { workspace = true }
+biome_markup            = { workspace = true }
 biome_parser            = { workspace = true }
 biome_rowan             = { workspace = true }
+biome_service           = { workspace = true }
+bpaf                    = { workspace = true }
 camino                  = { workspace = true }
+tokio                   = { workspace = true }
 
 ansi_rgb  = "0.2.0"
 criterion = { package = "codspeed-criterion-compat", version = "*" }
@@ -48,6 +56,10 @@ tikv-jemallocator = "0.6.0"
 [[bench]]
 harness = false
 name    = "js_analyzer"
+
+[[bench]]
+harness = false
+name    = "js_project_analyzer"
 
 # JavaScript benches
 [[bench]]

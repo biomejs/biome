@@ -1,0 +1,1 @@
+opentelemetry-js-2.0.0: https://github.com/open-telemetry/opentelemetry-js/archive/refs/tags/v2.0.0.tar.gz
