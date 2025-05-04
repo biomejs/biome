@@ -67,7 +67,7 @@ declare_lint_rule! {
 }
 
 pub struct RuleState {
-    prototype_builtins_method_name: String,
+    prototype_builtins_method_name: Box<str>,
     text_range: TextRange,
     has_call_fn: bool,
 }
@@ -87,7 +87,7 @@ impl Rule for NoPrototypeBuiltins {
 
         if is_prototype_builtins(member_name_text) {
             return Some(RuleState {
-                prototype_builtins_method_name: member_name_text.to_string(),
+                prototype_builtins_method_name: member_name_text.into(),
                 text_range: member_name.range(),
                 has_call_fn: false,
             });
@@ -104,7 +104,7 @@ impl Rule for NoPrototypeBuiltins {
                 && is_global_object(ctx.model())
             {
                 return Some(RuleState {
-                    prototype_builtins_method_name: obj_name_text.to_string(),
+                    prototype_builtins_method_name: obj_name_text.into(),
                     text_range: call_expr.range(),
                     has_call_fn: true,
                 });
@@ -123,7 +123,7 @@ impl Rule for NoPrototypeBuiltins {
             },
         );
 
-        if state.prototype_builtins_method_name == "hasOwnProperty" {
+        if state.prototype_builtins_method_name.as_ref() == "hasOwnProperty" {
             Some(
                 diag.note(markup! {
                     "It's recommended using "<Emphasis>"Object.hasOwn()"</Emphasis>" instead of using "<Emphasis>"Object.hasOwnProperty()"</Emphasis>"."
@@ -140,7 +140,7 @@ impl Rule for NoPrototypeBuiltins {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
 
-        if node.is_optional() || state.prototype_builtins_method_name != "hasOwnProperty" {
+        if node.is_optional() || state.prototype_builtins_method_name.as_ref() != "hasOwnProperty" {
             return None;
         }
 
