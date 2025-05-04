@@ -326,15 +326,28 @@ impl<'src> LexerWithCheckpoint<'src> for YamlLexer<'src> {
 /// https://yaml.org/spec/1.2.2/#42-production-parameters
 #[derive(Default, Clone, Copy)]
 pub enum YamlLexContext {
+    /// Before getting into the document body, for example:
+    /// %YAML 1.2
+    /// ---
+    /// <document body>
+    /// ...
     #[default]
     Regular,
-    // Inside block key context
+    /// Inside block key context, for example:
+    /// abc: xyz
+    /// ^^^
     BlockKey,
-    // Outside flow context
+    /// Inside block value, but outside flow context, for example:
+    /// abc: [1, 2, 3]
+    ///      ^^^^^^^^^
     FlowOut,
-    // Inside flow context
+    /// Inside flow context, for example:
+    /// abc: [1, 2, [4, 5]]
+    ///       ^  ^  ^^^^^^
     FlowIn,
-    // Inside flow key context
+    /// Inside flow key context
+    /// abc: {{10: [100]}: 50}
+    ///       ^^^^^^^^^^
     FlowKey,
 }
 
@@ -373,6 +386,7 @@ fn is_break(c: u8) -> bool {
     c == b'\n' || c == b'\r'
 }
 
+// https://yaml.org/spec/1.2.2/#rule-c-indicator
 fn is_indicator(c: u8) -> bool {
     c == b'-'
         || c == b'?'
@@ -391,6 +405,7 @@ fn is_indicator(c: u8) -> bool {
         || is_flow_indicator(c)
 }
 
+// https://yaml.org/spec/1.2.2/#rule-c-flow-indicator
 fn is_flow_indicator(c: u8) -> bool {
     c == b',' || c == b'[' || c == b']' || c == b'{' || c == b'}'
 }
