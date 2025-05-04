@@ -1586,6 +1586,10 @@ export interface Nursery {
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	useExplicitTestAssertions?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce types in functions, methods, variables, and parameters.
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
@@ -3475,6 +3479,7 @@ export type Category =
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitTestAssertions"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
