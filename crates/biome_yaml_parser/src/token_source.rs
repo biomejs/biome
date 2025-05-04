@@ -24,11 +24,11 @@ impl<'source> YamlTokenSource<'source> {
         let lexer = BufferedLexer::new(lexer);
 
         let mut source = YamlTokenSource::new(lexer);
-        source.next_non_trivia_token(true, YamlLexContext::Regular);
+        source.next_non_trivia_token(YamlLexContext::Regular, true);
         source
     }
 
-    fn next_non_trivia_token(&mut self, first_token: bool, context: YamlLexContext) {
+    fn next_non_trivia_token(&mut self, context: YamlLexContext, first_token: bool) {
         let mut trailing = !first_token;
 
         loop {
@@ -75,7 +75,7 @@ impl TokenSource for YamlTokenSource<'_> {
 
     fn bump(&mut self) {
         if self.current() != EOF {
-            self.next_non_trivia_token(false, YamlLexContext::Regular)
+            self.next_non_trivia_token(YamlLexContext::Regular, false)
         }
     }
 
@@ -87,7 +87,7 @@ impl TokenSource for YamlTokenSource<'_> {
                 false,
             ));
 
-            self.next_non_trivia_token(false, YamlLexContext::Regular)
+            self.next_non_trivia_token(YamlLexContext::Regular, false)
         }
     }
 
