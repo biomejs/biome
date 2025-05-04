@@ -1712,6 +1712,10 @@ export interface Nursery {
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions;
 	/**
+	 * Require each test function (test(), it()) to have an assertion (expect(), assert(), etc.).
+	 */
+	useExplicitTestAssertions?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce types in functions, methods, variables, and parameters.
 	 */
 	useExplicitType?: RuleConfiguration_for_UseExplicitTypeOptions;
@@ -8586,6 +8590,7 @@ export type Category =
 	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitTestAssertions"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"

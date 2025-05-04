@@ -5046,6 +5046,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExplicitTestAssertions": {
+					"description": "Require each test function (test(), it()) to have an assertion (expect(), assert(), etc.).",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExplicitType": {
 					"description": "Enforce types in functions, methods, variables, and parameters.",
 					"anyOf": [
