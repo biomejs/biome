@@ -48,6 +48,8 @@ invalid.js:3:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━�
     4 │ 
     5 │ /**
   
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
   i Unsafe fix: Remove additional asterisks.
   
     3 │ ·**/
@@ -66,6 +68,8 @@ invalid.js:7:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━�
       │ ^^^^^^^^^^
     8 │  */
     9 │ 
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
   
   i Unsafe fix: Remove additional asterisks.
   
@@ -86,6 +90,8 @@ invalid.js:12:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━
     13 │  *
     14 │  */
   
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
   i Unsafe fix: Remove additional asterisks.
   
     12 │ ·**
@@ -104,6 +110,8 @@ invalid.js:18:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │  */
     20 │ 
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
   
   i Unsafe fix: Remove additional asterisks.
   
@@ -124,6 +132,8 @@ invalid.js:24:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━
     25 │ 
     26 │ /** @someTag SameLine Double **/
   
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
   i Unsafe fix: Remove additional asterisks.
   
     24 │ ·abc·*·**/
@@ -143,6 +153,8 @@ invalid.js:26:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━
     27 │ 
     28 │ /** SameLine DoubleWithSpace * */
   
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
+  
   i Unsafe fix: Remove additional asterisks.
   
     26 │ /**·@someTag·SameLine·Double·**/
@@ -160,6 +172,8 @@ invalid.js:28:1 lint/nursery/useSingleJsDocAsterisk  FIXABLE  ━━━━━━
   > 28 │ /** SameLine DoubleWithSpace * */
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     29 │ 
+  
+  i In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake.
   
   i Unsafe fix: Remove additional asterisks.
   

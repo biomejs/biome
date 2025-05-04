@@ -4,6 +4,8 @@ expression: valid.js
 ---
 # Input
 ```js
+/* should not generate diagnostics */
+
 /**
  * **bold**
  */

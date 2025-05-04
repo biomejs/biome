@@ -106,7 +106,7 @@ impl Rule for UseSingleJsDocAsterisk {
                         is_end_line: invalid_line.is_end_line,
                         char_start: line_offset + invalid_line.char_start,
                         char_end: line_offset + invalid_line.char_end,
-                        comment_text: text.to_string(),
+                        comment_text: text.into(),
                     })
                 })
                 .collect();
@@ -120,13 +120,17 @@ impl Rule for UseSingleJsDocAsterisk {
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let position = if state.is_end_line { "end" } else { "start" };
 
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.range,
-            markup! {
-                "JSDoc comment line should " {position} " with a single asterisk."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.range,
+                markup! {
+                    "JSDoc comment line should " {position} " with a single asterisk."
+                },
+            ).note(markup! {
+                "In JSDoc comments, extra asterisks beyond the first are unnecessary and are often added by mistake."
+            })
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
@@ -139,7 +143,7 @@ impl Rule for UseSingleJsDocAsterisk {
             if let Some(comment) = trivia.as_comments() {
                 let mut comment_text = Cow::Borrowed(comment.text());
 
-                if comment.text() == state.comment_text {
+                if comment.text() == state.comment_text.as_ref() {
                     let new_comment_text = format!(
                         "{}{}",
                         &comment_text[..state.char_start],
@@ -177,7 +181,7 @@ pub struct RuleState {
     is_end_line: bool,
     char_start: usize,
     char_end: usize,
-    comment_text: String,
+    comment_text: Box<str>,
 }
 
 pub struct InvalidJsDocLineIndexes {
