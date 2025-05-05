@@ -194,7 +194,7 @@ grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
 ignore               = "0.4.23"
 indexmap             = { version = "2.9.0" }
-insta                = "1.42.2"
+insta                = "1.43.1"
 oxc_resolver         = "=5.2.0"
 papaya               = "0.2"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
