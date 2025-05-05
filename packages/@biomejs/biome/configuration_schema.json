@@ -851,13 +851,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noInvalidNewBuiltin": {
-					"description": "Disallow new operators with global non-constructor functions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noInvalidPositionAtImportRule": {
 					"description": "Disallow the use of @import at-rules in invalid positions.",
 					"anyOf": [
@@ -869,13 +862,6 @@
 					"description": "Disallow the use of variables and function parameters before their declaration",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noNewSymbol": {
-					"description": "Disallow new operators with the Symbol object.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4626,13 +4612,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useShorthandArrayType": {
-					"description": "When expressing array types, this rule promotes the usage of T\\[] shorthand instead of Array\\<T>.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useShorthandAssign": {
 					"description": "Require assignment operator shorthand where possible.",
 					"anyOf": [
@@ -4642,13 +4621,6 @@
 				},
 				"useShorthandFunctionType": {
 					"description": "Enforce using function types instead of object type with call signatures.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useSingleCaseStatement": {
-					"description": "Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

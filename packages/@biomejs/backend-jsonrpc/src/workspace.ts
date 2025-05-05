@@ -1317,10 +1317,6 @@ export interface Correctness {
 	 */
 	noInvalidGridAreas?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow new operators with global non-constructor functions.
-	 */
-	noInvalidNewBuiltin?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow the use of @import at-rules in invalid positions.
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
@@ -1328,10 +1324,6 @@ export interface Correctness {
 	 * Disallow the use of variables and function parameters before their declaration
 	 */
 	noInvalidUseBeforeDeclaration?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow new operators with the Symbol object.
-	 */
-	noNewSymbol?: RuleFixConfiguration_for_Null;
 	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
@@ -1953,10 +1945,6 @@ export interface Style {
 	 */
 	useSelfClosingElements?: RuleFixConfiguration_for_UseSelfClosingElementsOptions;
 	/**
-	 * When expressing array types, this rule promotes the usage of T\[] shorthand instead of Array\<T>.
-	 */
-	useShorthandArrayType?: RuleFixConfiguration_for_Null;
-	/**
 	 * Require assignment operator shorthand where possible.
 	 */
 	useShorthandAssign?: RuleFixConfiguration_for_Null;
@@ -1964,10 +1952,6 @@ export interface Style {
 	 * Enforce using function types instead of object type with call signatures.
 	 */
 	useShorthandFunctionType?: RuleFixConfiguration_for_Null;
-	/**
-	 * Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block.
-	 */
-	useSingleCaseStatement?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow multiple variable declarations in the same variable statement
 	 */

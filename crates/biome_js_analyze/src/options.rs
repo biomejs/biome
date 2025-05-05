@@ -146,7 +146,6 @@ pub type NoInnerDeclarations =
 pub type NoInteractiveElementToNoninteractiveRole = < lint :: a11y :: no_interactive_element_to_noninteractive_role :: NoInteractiveElementToNoninteractiveRole as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidBuiltinInstantiation = < lint :: correctness :: no_invalid_builtin_instantiation :: NoInvalidBuiltinInstantiation as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidConstructorSuper = < lint :: correctness :: no_invalid_constructor_super :: NoInvalidConstructorSuper as biome_analyze :: Rule > :: Options ;
-pub type NoInvalidNewBuiltin = < lint :: correctness :: no_invalid_new_builtin :: NoInvalidNewBuiltin as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidUseBeforeDeclaration = < lint :: correctness :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration as biome_analyze :: Rule > :: Options ;
 pub type NoIrregularWhitespace = < lint :: suspicious :: no_irregular_whitespace :: NoIrregularWhitespace as biome_analyze :: Rule > :: Options ;
 pub type NoLabelVar = <lint::suspicious::no_label_var::NoLabelVar as biome_analyze::Rule>::Options;
@@ -163,8 +162,6 @@ pub type NoNegationElse =
     <lint::style::no_negation_else::NoNegationElse as biome_analyze::Rule>::Options;
 pub type NoNestedTernary =
     <lint::style::no_nested_ternary::NoNestedTernary as biome_analyze::Rule>::Options;
-pub type NoNewSymbol =
-    <lint::correctness::no_new_symbol::NoNewSymbol as biome_analyze::Rule>::Options;
 pub type NoNodejsModules =
     <lint::correctness::no_nodejs_modules::NoNodejsModules as biome_analyze::Rule>::Options;
 pub type NoNonNullAssertion =
@@ -416,15 +413,12 @@ pub type UseRegexLiterals =
 pub type UseSelfClosingElements = < lint :: style :: use_self_closing_elements :: UseSelfClosingElements as biome_analyze :: Rule > :: Options ;
 pub type UseSemanticElements =
     <lint::a11y::use_semantic_elements::UseSemanticElements as biome_analyze::Rule>::Options;
-pub type UseShorthandArrayType =
-    <lint::style::use_shorthand_array_type::UseShorthandArrayType as biome_analyze::Rule>::Options;
 pub type UseShorthandAssign =
     <lint::style::use_shorthand_assign::UseShorthandAssign as biome_analyze::Rule>::Options;
 pub type UseShorthandFunctionType = < lint :: style :: use_shorthand_function_type :: UseShorthandFunctionType as biome_analyze :: Rule > :: Options ;
 pub type UseSimpleNumberKeys =
     <lint::complexity::use_simple_number_keys::UseSimpleNumberKeys as biome_analyze::Rule>::Options;
 pub type UseSimplifiedLogicExpression = < lint :: complexity :: use_simplified_logic_expression :: UseSimplifiedLogicExpression as biome_analyze :: Rule > :: Options ;
-pub type UseSingleCaseStatement = < lint :: style :: use_single_case_statement :: UseSingleCaseStatement as biome_analyze :: Rule > :: Options ;
 pub type UseSingleJsDocAsterisk = < lint :: nursery :: use_single_js_doc_asterisk :: UseSingleJsDocAsterisk as biome_analyze :: Rule > :: Options ;
 pub type UseSingleVarDeclarator = < lint :: style :: use_single_var_declarator :: UseSingleVarDeclarator as biome_analyze :: Rule > :: Options ;
 pub type UseSortedAttributes =

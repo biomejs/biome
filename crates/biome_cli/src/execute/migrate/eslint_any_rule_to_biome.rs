@@ -1484,14 +1484,6 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
-        "no-new-symbol" => {
-            let group = rules.correctness.get_or_insert_with(Default::default);
-            let rule = group
-                .unwrap_group_as_mut()
-                .no_new_symbol
-                .get_or_insert(Default::default());
-            rule.set_level(rule.level().max(rule_severity.into()));
-        }
         "no-new-wrappers" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
