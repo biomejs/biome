@@ -7,7 +7,7 @@ use biome_deserialize::Deserializable;
 use biome_deserialize_macros::Deserializable;
 use biome_js_analyze::{
     lint::{
-        nursery::use_consistent_member_accessibility,
+        style::use_consistent_member_accessibility,
         style::{use_consistent_array_type, use_import_type, use_naming_convention},
     },
     utils::restricted_regex::RestrictedRegex,

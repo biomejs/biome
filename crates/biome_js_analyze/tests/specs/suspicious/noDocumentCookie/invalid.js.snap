@@ -1,0 +1,162 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+document.cookie = "foo=bar";
+document.cookie += ";foo=bar"
+
+window.document.cookie = "foo=bar";
+globalThis.window.document.cookie = "foo=bar";
+
+document["cookie"] = "foo=bar"
+
+function document_is_global1(){
+    const doc = document;
+    doc.cookie = "bar=foo"
+}
+
+function document_is_global2(){
+    const foo = window.document;
+    const bar = foo;
+    bar.cookie = "foo=bar";
+}
+
+const global_doc = globalThis.document;
+function document_is_global3(){
+    global_doc.cookie = "foo=bar";
+}
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Direct assigning to document.cookie is not recommended.
+  
+  > 1 │ document.cookie = "foo=bar";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ document.cookie += ";foo=bar"
+    3 │ 
+  
+  i Consider using the Cookie Store API.
+  
+
+```
+
+```
+invalid.js:2:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Direct assigning to document.cookie is not recommended.
+  
+    1 │ document.cookie = "foo=bar";
+  > 2 │ document.cookie += ";foo=bar"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ window.document.cookie = "foo=bar";
+  
+  i Consider using the Cookie Store API.
+  
+
+```
+
+```
+invalid.js:4:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Direct assigning to document.cookie is not recommended.
+  
+    2 │ document.cookie += ";foo=bar"
+    3 │ 
+  > 4 │ window.document.cookie = "foo=bar";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ globalThis.window.document.cookie = "foo=bar";
+    6 │ 
+  
+  i Consider using the Cookie Store API.
+  
+
+```
+
+```
+invalid.js:5:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Direct assigning to document.cookie is not recommended.
+  
+    4 │ window.document.cookie = "foo=bar";
+  > 5 │ globalThis.window.document.cookie = "foo=bar";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ document["cookie"] = "foo=bar"
+  
+  i Consider using the Cookie Store API.
+  
+
+```
+
+```
+invalid.js:7:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Direct assigning to document.cookie is not recommended.
+  
+    5 │ globalThis.window.document.cookie = "foo=bar";
+    6 │ 
+  > 7 │ document["cookie"] = "foo=bar"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ function document_is_global1(){
+  
+  i Consider using the Cookie Store API.
+  
+
+```
+
+```
+invalid.js:11:5 lint/suspicious/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Direct assigning to document.cookie is not recommended.
+  
+     9 │ function document_is_global1(){
+    10 │     const doc = document;
+  > 11 │     doc.cookie = "bar=foo"
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Consider using the Cookie Store API.
+  
+
+```
+
+```
+invalid.js:17:5 lint/suspicious/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Direct assigning to document.cookie is not recommended.
+  
+    15 │     const foo = window.document;
+    16 │     const bar = foo;
+  > 17 │     bar.cookie = "foo=bar";
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i Consider using the Cookie Store API.
+  
+
+```
+
+```
+invalid.js:22:5 lint/suspicious/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Direct assigning to document.cookie is not recommended.
+  
+    20 │ const global_doc = globalThis.document;
+    21 │ function document_is_global3(){
+  > 22 │     global_doc.cookie = "foo=bar";
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ }
+  
+  i Consider using the Cookie Store API.
+  
+
+```

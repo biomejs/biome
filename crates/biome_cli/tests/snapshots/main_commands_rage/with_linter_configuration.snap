@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -76,10 +75,12 @@ Linter:
     complexity/noUselessCatch
     complexity/noUselessConstructor
     complexity/noUselessEmptyExport
+    complexity/noUselessEscapeInRegex
     complexity/noUselessFragments
     complexity/noUselessLabel
     complexity/noUselessLoneBlockStatements
     complexity/noUselessRename
+    complexity/noUselessStringRaw
     complexity/noUselessSwitchCase
     complexity/noUselessTernary
     complexity/noUselessThisAlias

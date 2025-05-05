@@ -38,7 +38,7 @@ declare_lint_rule! {
         name: "noConstantMathMinMaxClamp",
         language: "js",
         sources: &[RuleSource::Clippy("min_max")],
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Unsafe,
     }
 }

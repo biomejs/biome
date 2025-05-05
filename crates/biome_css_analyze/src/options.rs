@@ -20,8 +20,7 @@ pub type NoInvalidDirectionInLinearGradient = < lint :: correctness :: no_invali
 pub type NoInvalidGridAreas =
     <lint::correctness::no_invalid_grid_areas::NoInvalidGridAreas as biome_analyze::Rule>::Options;
 pub type NoInvalidPositionAtImportRule = < lint :: correctness :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule as biome_analyze :: Rule > :: Options ;
-pub type NoIrregularWhitespace =
-    <lint::nursery::no_irregular_whitespace::NoIrregularWhitespace as biome_analyze::Rule>::Options;
+pub type NoIrregularWhitespace = < lint :: suspicious :: no_irregular_whitespace :: NoIrregularWhitespace as biome_analyze :: Rule > :: Options ;
 pub type NoMissingVarFunction =
     <lint::nursery::no_missing_var_function::NoMissingVarFunction as biome_analyze::Rule>::Options;
 pub type NoShorthandPropertyOverrides = < lint :: suspicious :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides as biome_analyze :: Rule > :: Options ;

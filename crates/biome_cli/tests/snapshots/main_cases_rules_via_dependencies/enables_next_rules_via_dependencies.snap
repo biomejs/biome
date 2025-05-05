@@ -33,9 +33,9 @@ export default IndexPage;
 # Emitted Messages
 
 ```block
-test.jsx:6:13 lint/nursery/noImgElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test.jsx:6:13 lint/performance/noImgElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't use <img> element.
+  ! Don't use <img> element.
   
     4 │     return (
     5 │         <div>
@@ -51,4 +51,5 @@ test.jsx:6:13 lint/nursery/noImgElement ━━━━━━━━━━━━━�
 
 ```block
 Checked 2 files in <TIME>. No fixes applied.
+Found 1 warning.
 ```

@@ -197,6 +197,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noStaticElementInteractions": {
+					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSvgWithoutTitle": {
 					"description": "Enforces the usage of the title element for the svg element.",
 					"anyOf": [
@@ -231,6 +238,13 @@
 				},
 				"useAriaPropsForRole": {
 					"description": "Enforce that elements with ARIA roles must have all required ARIA attributes for that role.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useAriaPropsSupportedByRole": {
+					"description": "Enforce that ARIA properties are valid for the roles that are supported by the element.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -331,6 +345,13 @@
 					"description": "Enforce that ARIA state and property values are valid.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useValidAutocomplete": {
+					"description": "Use valid values for the autocomplete attribute on input elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseValidAutocompleteConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -476,6 +497,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessEscapeInRegex": {
+					"description": "Disallow unnecessary escape sequence in regular expression literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessFragments": {
 					"description": "Disallow unnecessary fragments",
 					"anyOf": [
@@ -508,6 +536,13 @@
 					"description": "Disallow unnecessary concatenation of string or template literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessStringRaw": {
+					"description": "Disallow unnecessary String.raw function in template string literals without any escape sequence.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2646,13 +2681,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noCommonJs": {
-					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noConstantBinaryExpression": {
 					"description": "Disallow expressions where the operation doesn't affect the value",
 					"anyOf": [
@@ -2674,29 +2702,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noDocumentCookie": {
-					"description": "Disallow direct assignments to document.cookie.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDocumentImportInPage": {
-					"description": "Prevents importing next/document outside of pages/_document.jsx in Next.js projects.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateCustomProperties": {
 					"description": "Disallow duplicate custom properties within declaration blocks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateElseIf": {
-					"description": "Disallow duplicate conditions in if-else-if chains",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2716,27 +2723,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDynamicNamespaceImportAccess": {
-					"description": "Disallow accessing namespace imports dynamically.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noEnum": {
-					"description": "Disallow TypeScript enum.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noExportedImports": {
-					"description": "Disallow exporting an imported variable.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.",
 					"anyOf": [
@@ -2748,27 +2734,6 @@
 					"description": "Disallow the use of __dirname and __filename in the global scope.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noHeadElement": {
-					"description": "Prevent usage of \\<head> element in a Next.js project.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noHeadImportInDocument": {
-					"description": "Prevent using the next/head module in pages/_document.js on Next.js projects.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noImgElement": {
-					"description": "Prevent usage of \\<img> element in a Next.js project.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2786,13 +2751,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noIrregularWhitespace": {
-					"description": "Disallows the use of irregular whitespace characters.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noMissingVarFunction": {
 					"description": "Disallow missing var function for css variables.",
 					"anyOf": [
@@ -2800,29 +2758,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noNestedTernary": {
-					"description": "Disallow nested ternary expressions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noNoninteractiveElementInteractions": {
 					"description": "Disallow use event handlers on non-interactive elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noOctalEscape": {
-					"description": "Disallow octal escape sequences in string literals",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noProcessEnv": {
-					"description": "Disallow the use of process.env.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2842,20 +2779,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noRestrictedImports": {
-					"description": "Disallow specified modules when loaded by import or require.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RestrictedImportsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noRestrictedTypes": {
-					"description": "Disallow user defined types.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoRestrictedTypesConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noSecrets": {
 					"description": "Disallow usage of sensitive data such as API keys and tokens.",
 					"anyOf": [
@@ -2865,27 +2788,6 @@
 				},
 				"noShadow": {
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noStaticElementInteractions": {
-					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noSubstr": {
-					"description": "Enforce the use of String.slice() over String.substr() and String.substring().",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noTemplateCurlyInString": {
-					"description": "Disallow template literal placeholder syntax in regular strings.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2947,24 +2849,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noUselessEscapeInRegex": {
-					"description": "Disallow unnecessary escape sequence in regular expression literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUselessEscapeInString": {
 					"description": "Disallow unnecessary escapes in string literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessStringRaw": {
-					"description": "Disallow unnecessary String.raw function in template string literals without any escape sequence.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2985,59 +2873,6 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
-				},
-				"useAdjacentOverloadSignatures": {
-					"description": "Disallow the use of overload signatures that are not next to each other.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useAriaPropsSupportedByRole": {
-					"description": "Enforce that ARIA properties are valid for the roles that are supported by the element.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useAtIndex": {
-					"description": "Use at() instead of integer index access.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useCollapsedIf": {
-					"description": "Enforce using single if instead of nested if clauses.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useComponentExportOnlyModules": {
-					"description": "Enforce declaring components only within modules that export React Components exclusively.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/UseComponentExportOnlyModulesConfiguration"
-						},
-						{ "type": "null" }
-					]
-				},
-				"useConsistentCurlyBraces": {
-					"description": "This rule enforces consistent use of curly braces inside JSX attributes and JSX children.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentMemberAccessibility": {
-					"description": "Require consistent accessibility modifiers on class properties and methods.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/ConsistentMemberAccessibilityConfiguration"
-						},
-						{ "type": "null" }
-					]
 				},
 				"useConsistentObjectDefinition": {
 					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
@@ -3083,24 +2918,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useGoogleFontDisplay": {
-					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useGoogleFontPreconnect": {
 					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useGuardForIn": {
-					"description": "Require for-in loops to include an if statement.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3153,31 +2974,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useStrictMode": {
-					"description": "Enforce the use of the directive \"use strict\" in script files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useSymbolDescription": {
 					"description": "Require a description parameter for the Symbol().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useTrimStartEnd": {
-					"description": "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useValidAutocomplete": {
-					"description": "Use valid values for the autocomplete attribute on input elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseValidAutocompleteConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -3400,6 +3200,20 @@
 					"description": "Disallow the use of the delete operator.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDynamicNamespaceImportAccess": {
+					"description": "Disallow accessing namespace imports dynamically.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImgElement": {
+					"description": "Prevent usage of \\<img> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4440,6 +4254,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noCommonJs": {
+					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDefaultExport": {
 					"description": "Disallow default exports.",
 					"anyOf": [
@@ -4449,6 +4270,27 @@
 				},
 				"noDoneCallback": {
 					"description": "Disallow using a callback in asynchronous tests and hooks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEnum": {
+					"description": "Disallow TypeScript enum.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExportedImports": {
+					"description": "Disallow exporting an imported variable.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noHeadElement": {
+					"description": "Prevent usage of \\<head> element in a Next.js project.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -4489,6 +4331,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNestedTernary": {
+					"description": "Disallow nested ternary expressions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNonNullAssertion": {
 					"description": "Disallow non-null assertions using the ! postfix operator.",
 					"anyOf": [
@@ -4510,6 +4359,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noProcessEnv": {
+					"description": "Disallow the use of process.env.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRestrictedGlobals": {
 					"description": "This rule allows you to specify global variable names that you don’t want to use in your application.",
 					"anyOf": [
@@ -4517,8 +4373,29 @@
 						{ "type": "null" }
 					]
 				},
+				"noRestrictedImports": {
+					"description": "Disallow specified modules when loaded by import or require.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RestrictedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRestrictedTypes": {
+					"description": "Disallow user defined types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoRestrictedTypesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noShoutyConstants": {
 					"description": "Disallow the use of constants which its value is the upper-case version of its name.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSubstr": {
+					"description": "Enforce the use of String.slice() over String.substr() and String.substring().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4556,6 +4433,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAtIndex": {
+					"description": "Use at() instead of integer index access.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useBlockStatements": {
 					"description": "Requires following curly brace conventions.",
 					"anyOf": [
@@ -4570,6 +4454,22 @@
 						{ "type": "null" }
 					]
 				},
+				"useCollapsedIf": {
+					"description": "Enforce using single if instead of nested if clauses.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useComponentExportOnlyModules": {
+					"description": "Enforce declaring components only within modules that export React Components exclusively.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseComponentExportOnlyModulesConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useConsistentArrayType": {
 					"description": "Require consistently using either T\\[] or Array\\<T>",
 					"anyOf": [
@@ -4581,6 +4481,22 @@
 					"description": "Enforce the use of new for all builtins, except String, Number and Boolean.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentCurlyBraces": {
+					"description": "This rule enforces consistent use of curly braces inside JSX attributes and JSX children.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentMemberAccessibility": {
+					"description": "Require consistent accessibility modifiers on class properties and methods.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/ConsistentMemberAccessibilityConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -4765,6 +4681,13 @@
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useTrimStartEnd": {
+					"description": "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -4891,6 +4814,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noDocumentCookie": {
+					"description": "Disallow direct assignments to document.cookie.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDocumentImportInPage": {
+					"description": "Prevents importing next/document outside of pages/_document.jsx in Next.js projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDoubleEquals": {
 					"description": "Require the use of === and !==.",
 					"anyOf": [
@@ -4914,6 +4851,13 @@
 				},
 				"noDuplicateClassMembers": {
 					"description": "Disallow duplicate class members.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateElseIf": {
+					"description": "Disallow duplicate conditions in if-else-if chains",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -5052,6 +4996,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noHeadImportInDocument": {
+					"description": "Prevent using the next/head module in pages/_document.js on Next.js projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImplicitAnyLet": {
 					"description": "Disallow use of implicit any type on variable declarations.",
 					"anyOf": [
@@ -5068,6 +5019,13 @@
 				},
 				"noImportantInKeyframe": {
 					"description": "Disallow invalid !important within keyframe declarations",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noIrregularWhitespace": {
+					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -5103,6 +5061,13 @@
 				},
 				"noMisrefactoredShorthandAssign": {
 					"description": "Disallow shorthand assign when variable appears on both sides.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noOctalEscape": {
+					"description": "Disallow octal escape sequences in string literals",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -5178,6 +5143,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noTemplateCurlyInString": {
+					"description": "Disallow template literal placeholder syntax in regular strings.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noThenProperty": {
 					"description": "Disallow then property.",
 					"anyOf": [
@@ -5210,6 +5182,13 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"useAdjacentOverloadSignatures": {
+					"description": "Disallow the use of overload signatures that are not next to each other.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useAwait": {
 					"description": "Ensure async functions utilize await.",
 					"anyOf": [
@@ -5238,6 +5217,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useGoogleFontDisplay": {
+					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGuardForIn": {
+					"description": "Require for-in loops to include an if statement.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useIsArray": {
 					"description": "Use Array.isArray() instead of instanceof Array.",
 					"anyOf": [
@@ -5254,6 +5247,13 @@
 				},
 				"useNumberToFixedDigitsArgument": {
 					"description": "Enforce using the digits argument with Number#toFixed().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useStrictMode": {
+					"description": "Enforce the use of the directive \"use strict\" in script files.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

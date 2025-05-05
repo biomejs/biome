@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+String.raw`a`;
+String.raw`abc`;
+String.raw`a ${x}`;
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+  > 1 │ String.raw`a`;
+      │ ^^^^^^^^^^^^^
+    2 │ String.raw`abc`;
+    3 │ String.raw`a ${x}`;
+  
+  i Remove the String.raw call beacause it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+```
+
+```
+invalid.js:2:1 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    1 │ String.raw`a`;
+  > 2 │ String.raw`abc`;
+      │ ^^^^^^^^^^^^^^^
+    3 │ String.raw`a ${x}`;
+  
+  i Remove the String.raw call beacause it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+```
+
+```
+invalid.js:3:1 lint/complexity/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
+  
+    1 │ String.raw`a`;
+    2 │ String.raw`abc`;
+  > 3 │ String.raw`a ${x}`;
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Remove the String.raw call beacause it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  
+
+```

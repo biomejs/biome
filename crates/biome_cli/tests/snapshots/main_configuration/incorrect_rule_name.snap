@@ -123,26 +123,40 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - recommended
   - noArguments
   - noCommaOperator
+  - noCommonJs
   - noDefaultExport
   - noDoneCallback
+  - noEnum
+  - noExportedImports
+  - noHeadElement
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace
   - noNamespaceImport
   - noNegationElse
+  - noNestedTernary
   - noNonNullAssertion
   - noParameterAssign
   - noParameterProperties
+  - noProcessEnv
   - noRestrictedGlobals
+  - noRestrictedImports
+  - noRestrictedTypes
   - noShoutyConstants
+  - noSubstr
   - noUnusedTemplateLiteral
   - noUselessElse
   - noYodaExpression
   - useAsConstAssertion
+  - useAtIndex
   - useBlockStatements
   - useCollapsedElseIf
+  - useCollapsedIf
+  - useComponentExportOnlyModules
   - useConsistentArrayType
   - useConsistentBuiltinInstantiation
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
@@ -169,6 +183,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useTemplate
   - useThrowNewError
   - useThrowOnlyError
+  - useTrimStartEnd
   
 
 ```

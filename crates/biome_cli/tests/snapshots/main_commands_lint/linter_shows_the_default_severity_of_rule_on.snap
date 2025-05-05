@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -53,26 +52,40 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - recommended
   - noArguments
   - noCommaOperator
+  - noCommonJs
   - noDefaultExport
   - noDoneCallback
+  - noEnum
+  - noExportedImports
+  - noHeadElement
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace
   - noNamespaceImport
   - noNegationElse
+  - noNestedTernary
   - noNonNullAssertion
   - noParameterAssign
   - noParameterProperties
+  - noProcessEnv
   - noRestrictedGlobals
+  - noRestrictedImports
+  - noRestrictedTypes
   - noShoutyConstants
+  - noSubstr
   - noUnusedTemplateLiteral
   - noUselessElse
   - noYodaExpression
   - useAsConstAssertion
+  - useAtIndex
   - useBlockStatements
   - useCollapsedElseIf
+  - useCollapsedIf
+  - useComponentExportOnlyModules
   - useConsistentArrayType
   - useConsistentBuiltinInstantiation
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
@@ -99,6 +112,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useTemplate
   - useThrowNewError
   - useThrowOnlyError
+  - useTrimStartEnd
   
 
 ```
