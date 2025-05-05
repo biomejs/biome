@@ -35,17 +35,7 @@ expression: redactor(content)
       "complexity": {
         "useLiteralKeys": "off"
       },
-      "nursery": {
-        "noRestrictedImports": {
-          "level": "error",
-          "options": {
-            "paths": {
-              "node:path": "Please use src/util/path.js instead.",
-              "path": "Please use src/util/path.js instead."
-            }
-          }
-        }
-      },
+      "nursery": {},
       "style": {
         "noParameterAssign": "off",
         "useNodeAssertStrict": "error",
@@ -68,7 +58,16 @@ expression: redactor(content)
         "noArguments": "error",
         "useExportType": "error",
         "noUselessElse": "error",
-        "useShorthandFunctionType": "error"
+        "useShorthandFunctionType": "error",
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "node:path": "Please use src/util/path.js instead.",
+              "path": "Please use src/util/path.js instead."
+            }
+          }
+        }
       },
       "suspicious": {
         "noConsole": {
