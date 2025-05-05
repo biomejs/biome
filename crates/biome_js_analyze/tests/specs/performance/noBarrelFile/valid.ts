@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export type * from "foo";
 export type * as bar from "foo";
 export type { foo } from "foo";

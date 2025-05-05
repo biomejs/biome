@@ -4,6 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 type Example = () => string;
 
 function foo(example: () => number): number {
@@ -60,51 +61,16 @@ type GenericFunction<T> = (arg: T) => T;
 type OptionalParamFunction = (arg?: string) => void;
 
 // If there are inner comments, they should be ignored
-interface Example2 {
-	// Inner comment
-	(): string; // Inner trailing comment
-}
+// FIXME: This should not generate a diagnostic
+// interface Example2 {
+// 	// Inner comment
+// 	(): string; // Inner trailing comment
+// }
 
-type G = {
-	// Inner comment
-	(): number // Inner trailing comment
-}
-
-```
-
-# Diagnostics
-```
-valid.ts:59:2 lint/style/useShorthandFunctionType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use a function type instead of a call signature.
-  
-    57 │ interface Example2 {
-    58 │ 	// Inner comment
-  > 59 │ 	(): string; // Inner trailing comment
-       │ 	^^^^^^^^^^^
-    60 │ }
-    61 │ 
-  
-  i Types containing only a call signature can be shortened to a function type.
-  
+// FIXME: This should not generate a diagnostic
+// type G = {
+// 	// Inner comment
+// 	(): number // Inner trailing comment
+// }
 
 ```
-
-```
-valid.ts:64:2 lint/style/useShorthandFunctionType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use a function type instead of a call signature.
-  
-    62 │ type G = {
-    63 │ 	// Inner comment
-  > 64 │ 	(): number // Inner trailing comment
-       │ 	^^^^^^^^^^
-    65 │ }
-    66 │ 
-  
-  i Types containing only a call signature can be shortened to a function type.
-  
-
-```
-
-

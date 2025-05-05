@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let Component = (props) => <ol><For each={props.data}>{d => <li>{d.text}</li>}</For></ol>;
 
 let abc = x.map(y => y + z);

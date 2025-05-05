@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const { a, b } = this;
 const [c, d] = this;
 const property = this.property;

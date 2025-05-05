@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const validShorthand = {
     // Property shorthand
     foo,

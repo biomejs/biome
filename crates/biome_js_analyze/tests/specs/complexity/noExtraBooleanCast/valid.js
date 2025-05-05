@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 Boolean(!x);
 
 !x;

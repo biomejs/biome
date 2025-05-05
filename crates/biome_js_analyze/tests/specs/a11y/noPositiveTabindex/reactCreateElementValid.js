@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 React.createElement("div", { tabIndex: '0' })
 React.createElement("div", { tabIndex: '-1' })
 React.createElement("div", { tabIndex: dynamic })

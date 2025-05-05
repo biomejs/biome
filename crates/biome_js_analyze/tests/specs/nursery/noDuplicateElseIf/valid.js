@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // ref: https://github.com/eslint/eslint/blob/main/tests/lib/rules/no-dupe-else-if.js
 
 if (isSomething(x)) {

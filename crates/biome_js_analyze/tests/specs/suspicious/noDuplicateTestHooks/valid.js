@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 describe("foo", () => {
 	beforeEach(() => {});
 	test("bar", () => {

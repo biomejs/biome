@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 
 g();
 function g() { f(); }

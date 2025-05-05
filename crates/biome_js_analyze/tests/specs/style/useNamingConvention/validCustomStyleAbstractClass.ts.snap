@@ -4,5 +4,6 @@ expression: validCustomStyleAbstractClass.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 abstract class AClass {}
 ```

@@ -4,6 +4,7 @@ expression: validReactDirectives.tsx
 ---
 # Input
 ```tsx
+/* should not generate diagnostics */
 'use client'
 
 import { useState } from "react"
@@ -20,5 +21,3 @@ export default function Counter() {
 }
 
 ```
-
-

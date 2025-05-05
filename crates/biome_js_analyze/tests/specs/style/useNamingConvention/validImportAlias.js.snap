@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validImportAlias.js
-snapshot_kind: text
 ---
 # Input
 ```js
+/* should not generate diagnostics */
 import { X as X } from ""
 
 import { Y as CONSTANT_Y  } from ""

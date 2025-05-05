@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
     <div>{/* comment */}</div>
     <div>{/** comment */}</div>

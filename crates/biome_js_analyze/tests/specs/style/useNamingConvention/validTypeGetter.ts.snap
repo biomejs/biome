@@ -4,6 +4,7 @@ expression: validTypeGetter.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 export interface X {
     get p(): unknown
 
@@ -24,5 +25,3 @@ export interface X {
     get READONLY_PROPERTY(): unknown
 }
 ```
-
-

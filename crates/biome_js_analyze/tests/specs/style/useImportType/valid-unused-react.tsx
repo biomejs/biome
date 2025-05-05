@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import React from "react";
 
 function Component() {

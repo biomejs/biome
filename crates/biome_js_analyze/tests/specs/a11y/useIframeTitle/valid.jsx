@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
 	{/* valid */}
 	<iframe title="This is a unique title" />

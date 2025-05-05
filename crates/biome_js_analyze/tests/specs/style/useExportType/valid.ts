@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export { Foo } from 'foo';
 
 export type { Type1 } from './consistent-type-exports';

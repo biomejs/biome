@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let f = Object();
 
 let foo: { x: number; y: number } = { x: 1, y: 1 };

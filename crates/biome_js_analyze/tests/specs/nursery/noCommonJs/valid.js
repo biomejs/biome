@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import 'node:fs'
 import { join } from 'node:path'
 

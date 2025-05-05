@@ -4,6 +4,7 @@ expression: validTypeMethod.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 export interface X {
     m(): void
 
@@ -22,5 +23,3 @@ export interface X {
     "%"(): void
 }
 ```
-
-

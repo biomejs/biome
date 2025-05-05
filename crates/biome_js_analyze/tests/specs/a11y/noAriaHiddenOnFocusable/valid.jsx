@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
   <div aria-hidden="true" />
   <img aria-hidden="true" />

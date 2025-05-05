@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 describe("foo", function () {
 	describe("bar", function () {
 		describe("baz", function () {

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function fetchData() {
 	return "data";
 }

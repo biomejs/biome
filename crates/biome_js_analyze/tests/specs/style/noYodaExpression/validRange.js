@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 if ("a" < x && x < MAX ) {}
 while ("a" < x && x < MAX ) {}
 if (1 < x && x < MAX ) {}

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const number: number = 1;
 
 function greet(): string {}

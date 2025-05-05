@@ -4,6 +4,7 @@ expression: validIndexParameter.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 export interface X {
     [s: string]: unknown
 

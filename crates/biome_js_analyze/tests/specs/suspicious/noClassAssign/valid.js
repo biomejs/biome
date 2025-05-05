@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function case1() {
 	class A { }
 	foo(A);

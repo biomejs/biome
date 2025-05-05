@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var foo;
 class Foo {}
 !!obj?.foo

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function foo() { this }
 () => { this }
 class A { constructor() { this } }

@@ -4,6 +4,7 @@ expression: fromImportValid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 import React, {Fragment} from "notReact";
 
 <>
@@ -12,5 +13,3 @@ import React, {Fragment} from "notReact";
 </>
 
 ```
-
-

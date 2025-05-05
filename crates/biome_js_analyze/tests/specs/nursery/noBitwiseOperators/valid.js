@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let x = y || z;
 
 const x1 = y && z;

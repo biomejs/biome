@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // `object`
 const then = {}
 const notThen = then

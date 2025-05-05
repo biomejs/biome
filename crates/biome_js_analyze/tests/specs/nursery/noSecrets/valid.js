@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const a = 1;
 const userName = 'testUser';
 const count = 10;

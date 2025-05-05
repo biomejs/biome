@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import { type T1, type T2 } from "mod";
 export type { T1, T2 };
 

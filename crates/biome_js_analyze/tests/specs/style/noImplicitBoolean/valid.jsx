@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <input disabled={false} />;
 <input disabled={""} />;
 <input disabled={0} />;

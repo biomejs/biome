@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 config.newIsCap = config.newIsCap !== false;
 var a = x === 2 ? 'Yes' : 'No';
 var a = x === 2 ? true : 'No';

@@ -4,6 +4,7 @@ expression: validExplicit.js
 ---
 # Input
 ```js
+/* should not generate diagnostics */
 const validExplicit = {
     // Properties with explicit values
     foo: foo,

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 new Object()
 new Array()
 new ArrayBuffer()

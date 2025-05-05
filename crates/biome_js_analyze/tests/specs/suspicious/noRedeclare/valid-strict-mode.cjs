@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 "use strict"
 switch (x) {
 	case 0: {

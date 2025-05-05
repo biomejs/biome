@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // Empty import
 import {} from "";
 

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // no capturing groups
 /(?:)/;
 /(?:a)/;

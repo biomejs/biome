@@ -4,6 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 /* does not generate diagnostics */
 
 const Component1 = () => {
@@ -15,5 +16,3 @@ const Component2 = () => {
 };
 
 ```
-
-

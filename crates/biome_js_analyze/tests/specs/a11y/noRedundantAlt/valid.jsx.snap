@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 let a = <img alt="foo" />;
 let a = <img alt="picture of me taking a photo of an image" aria-hidden />;
 let a = <img aria-hidden alt="photo of image" />;
@@ -38,5 +39,3 @@ let a = <img alt="ImageMagick" />;
 let a = <img alt="photo image picture" aria-hidden={foo?.bar} />;
 
 ```
-
-

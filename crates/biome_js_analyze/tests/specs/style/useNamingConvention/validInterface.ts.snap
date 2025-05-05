@@ -4,6 +4,7 @@ expression: validInterface.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 export interface X {}
 
 export interface PascalCase {}
@@ -14,5 +15,3 @@ export interface _ {}
 
 export interface $ {}
 ```
-
-

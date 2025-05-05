@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
     <a>content</a>
     <a><TextWrapper /></a>
