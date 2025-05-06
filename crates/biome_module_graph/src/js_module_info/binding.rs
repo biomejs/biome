@@ -4,7 +4,7 @@ use biome_js_syntax::{AnyJsDeclaration, JsImport, JsSyntaxNode, JsVariableKind, 
 use biome_js_type_info::{ScopeId, TypeId, TypeReference};
 use biome_rowan::{AstNode, Text, TextSize};
 
-use crate::jsdoc_comment::JsdocComment;
+use biome_jsdoc_comment::JsdocComment;
 
 use super::{JsModuleInfoInner, scope::JsScope};
 

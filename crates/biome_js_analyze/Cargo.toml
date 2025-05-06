@@ -24,6 +24,7 @@ biome_js_factory         = { workspace = true }
 biome_js_semantic        = { workspace = true }
 biome_js_syntax          = { workspace = true }
 biome_js_type_info       = { workspace = true }
+biome_jsdoc_comment      = { workspace = true }
 biome_module_graph       = { workspace = true }
 biome_package            = { workspace = true }
 biome_project_layout     = { workspace = true }
