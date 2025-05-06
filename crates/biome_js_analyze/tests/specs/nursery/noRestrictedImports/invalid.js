@@ -129,3 +129,5 @@ import { forbidden1 } from 'bare-allowed';
 const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
 import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
 import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+
+import foo from 'import-foo/foo';
