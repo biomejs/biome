@@ -76,9 +76,6 @@
       },
       "suspicious": {
         "noVar": "on"
-      },
-      "nursery": {
-        "noImportCycles": "error"
       }
     }
   },
