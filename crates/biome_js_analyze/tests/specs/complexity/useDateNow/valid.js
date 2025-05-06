@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const ts = Date.now();
 // Test `new Date()`
 // Not `NewExpression`

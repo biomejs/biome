@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const x = Math.PI;
 const y = Math.LN10;
 const z = 2.301;

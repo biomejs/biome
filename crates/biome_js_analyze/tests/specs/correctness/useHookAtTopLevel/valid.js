@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 /* does not generate diagnostics */
 
 function Component1({ a }) {

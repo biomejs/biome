@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // With ignoreRestSiblings: true, unused variables should be ignored
 const car = { brand: "Tesla", year: 2019, countryCode: "US" };
 const { brand, year, ...other } = car;

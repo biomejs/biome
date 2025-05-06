@@ -15,13 +15,7 @@ expression: redactor(content)
 ```block
 check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × No files were processed in the specified paths.
-  
-  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
-  
-  i These paths were provided but ignored:
-  
-  ! The list is empty.
+  × Some errors were emitted while running checks.
   
 
 
@@ -50,5 +44,22 @@ biome.json:2:16 deserialize ━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Checked 0 files in <TIME>. No fixes applied.
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   {
+    2   │ - ····"$schema":·"https://biomejs.dev/schemas/0.0.1/schema.json"
+      2 │ + → "$schema":·"https://biomejs.dev/schemas/0.0.1/schema.json"
+    3 3 │   }
+    4   │ - ········
+      4 │ + 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+Found 1 warning.
 ```

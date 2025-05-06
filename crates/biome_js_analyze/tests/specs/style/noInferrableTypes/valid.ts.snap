@@ -4,6 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 const x: undefined = undefined; // undefined is an identifier
 const x: RegExp = /a/; // RegExp could be redefined
 
@@ -71,5 +72,3 @@ function g(a: string = null): void {}
 function h(a: string = undefined): void {}
 
 ```
-
-

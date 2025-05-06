@@ -4,6 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 enum ValidString {
   A = 'test',
   B = 'div' + 'ided',
@@ -65,5 +66,3 @@ enum ValidComputedRef {
 
 export {}
 ```
-
-

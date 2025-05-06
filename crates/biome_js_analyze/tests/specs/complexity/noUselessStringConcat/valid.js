@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const a = 1 + 1
 const a = 1 * '2'
 const a = 1 - 2

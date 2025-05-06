@@ -30,7 +30,7 @@ use crossbeam::channel::Sender;
 use papaya::{Compute, HashMap, HashSet, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use tokio::sync::watch;
-use tracing::{error, info, instrument, warn};
+use tracing::{info, instrument, warn};
 
 use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::{
@@ -549,19 +549,6 @@ impl WorkspaceServer {
             .unwrap_or_default()
     }
 
-    /// Updates the [ProjectLayout] for multiple `paths` at once.
-    pub(super) fn update_project_layout_for_paths(
-        &self,
-        signal_kind: WatcherSignalKind,
-        paths: &[BiomePath],
-    ) {
-        for path in paths {
-            if let Err(error) = self.update_project_layout(signal_kind, path) {
-                error!("Error while updating project layout: {error}");
-            }
-        }
-    }
-
     /// It accepts a list of ignore files. If the VCS integration is enabled, the files
     /// are read and the [Settings] are updated.
     ///
@@ -625,7 +612,7 @@ impl WorkspaceServer {
                 WatcherSignalKind::AddedOrChanged => {
                     let parsed = self.get_parse(path)?;
                     self.project_layout
-                        .insert_serialized_node_manifest(package_path, parsed);
+                        .insert_raw_node_manifest(package_path, parsed);
                 }
                 WatcherSignalKind::Removed => {
                     self.project_layout.remove_package(&package_path);

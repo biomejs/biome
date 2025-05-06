@@ -4,6 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 
 let i: I;
 interface I {}
@@ -22,5 +23,3 @@ namespace N {
 type X = typeof X; const X = 0;
 
 ```
-
-

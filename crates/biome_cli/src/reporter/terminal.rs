@@ -6,6 +6,7 @@ use biome_console::{Console, ConsoleExt, fmt, markup};
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::BiomePath;
+use camino::Utf8PathBuf;
 use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
@@ -15,6 +16,7 @@ pub(crate) struct ConsoleReporter {
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
     pub(crate) evaluated_paths: BTreeSet<BiomePath>,
+    pub(crate) working_directory: Option<Utf8PathBuf>,
     pub(crate) verbose: bool,
 }
 
@@ -23,7 +25,7 @@ impl Reporter for ConsoleReporter {
         visitor.report_diagnostics(&self.execution, self.diagnostics_payload, self.verbose)?;
         visitor.report_summary(&self.execution, self.summary, self.verbose)?;
         if self.verbose {
-            visitor.report_handled_paths(self.evaluated_paths)?;
+            visitor.report_handled_paths(self.evaluated_paths, self.working_directory)?;
         }
         Ok(())
     }
@@ -81,10 +83,26 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
         Ok(())
     }
 
-    fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
+    fn report_handled_paths(
+        &mut self,
+        evaluated_paths: BTreeSet<BiomePath>,
+        working_directory: Option<Utf8PathBuf>,
+    ) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
             advice: ListAdvice {
-                list: evaluated_paths.iter().map(|p| p.to_string()).collect(),
+                list: evaluated_paths
+                    .iter()
+                    .map(|p| {
+                        working_directory
+                            .as_ref()
+                            .and_then(|wd| {
+                                p.strip_prefix(wd.as_str())
+                                    .map(|path| path.to_string())
+                                    .ok()
+                            })
+                            .unwrap_or(p.to_string())
+                    })
+                    .collect(),
             },
         };
 

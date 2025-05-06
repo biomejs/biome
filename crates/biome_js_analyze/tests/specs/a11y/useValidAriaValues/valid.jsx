@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var a = <span role="checkbox" aria-checked={checked} ></span>;
 var a = <span role="checkbox" aria-checked="true" ></span>;
 var a = <span role="checkbox" aria-checked={true} ></span>;

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 class ValidNoPublic {
   protected name: string;
   protected x?: string;

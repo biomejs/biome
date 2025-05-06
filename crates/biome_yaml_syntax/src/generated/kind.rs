@@ -54,6 +54,7 @@ pub enum YamlSyntaxKind {
     YAML_FLOW_MAP_IMPLICIT_ENTRY,
     YAML_ALIAS_NODE,
     YAML_BLOCK_COLLECTION,
+    YAML_BLOCK_SCALAR,
     YAML_BLOCK_SEQUENCE,
     YAML_BLOCK_SEQUENCE_ENTRY_LIST,
     YAML_BLOCK_SEQUENCE_ENTRY,
@@ -72,7 +73,8 @@ pub enum YamlSyntaxKind {
     YAML_PLAIN_SCALAR,
     YAML_LITERAL_SCALAR,
     YAML_FOLDED_SCALAR,
-    YAML_PROPERTY_LIST,
+    YAML_PROPERTIES_ANCHOR_FIRST,
+    YAML_PROPERTIES_TAG_FIRST,
     YAML_ANCHOR_PROPERTY,
     YAML_TAG_PROPERTY,
     YAML_BOGUS,
@@ -122,7 +124,6 @@ impl YamlSyntaxKind {
                 | YAML_FLOW_MAP_ENTRY_LIST
                 | YAML_BLOCK_SEQUENCE_ENTRY_LIST
                 | YAML_BLOCK_MAP_ENTRY_LIST
-                | YAML_PROPERTY_LIST
         )
     }
     pub fn from_keyword(_ident: &str) -> Option<Self> {

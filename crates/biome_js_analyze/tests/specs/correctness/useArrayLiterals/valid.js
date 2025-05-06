@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 Array(500);
 
 Array(someOtherArray.length);

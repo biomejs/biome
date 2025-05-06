@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-04.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+function test(this: Foo) {
+  function test2(this: Bar) {}
+}
+
+```

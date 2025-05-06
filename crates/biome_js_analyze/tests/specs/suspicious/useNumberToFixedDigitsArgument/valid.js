@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 number.toFixed(0);
 number.toFixed(...[]);
 number.toFixed(2);

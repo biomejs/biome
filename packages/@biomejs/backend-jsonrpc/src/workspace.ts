@@ -1451,7 +1451,7 @@ export interface Correctness {
 	/**
 	 * Disallow missing key props in iterators/collection literals.
 	 */
-	useJsxKeyInIterable?: RuleConfiguration_for_Null;
+	useJsxKeyInIterable?: RuleConfiguration_for_UseJsxKeyInIterableOptions;
 	/**
 	 * Enforce "for" loop update clause moving the counter in the right direction.
 	 */
@@ -1641,6 +1641,10 @@ export interface Nursery {
 	 * Prevent duplicate polyfills from Polyfill.io.
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow useless backreferences in regular expression literals that always match an empty string.
+	 */
+	noUselessBackrefInRegex?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
@@ -2362,6 +2366,9 @@ export type RuleConfiguration_for_DeprecatedHooksOptions =
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
+export type RuleConfiguration_for_UseJsxKeyInIterableOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseJsxKeyInIterableOptions;
 export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
@@ -2575,6 +2582,16 @@ export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	 * Rule's options
 	 */
 	options: UseImportExtensionsOptions;
+}
+export interface RuleWithOptions_for_UseJsxKeyInIterableOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseJsxKeyInIterableOptions;
 }
 export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	/**
@@ -2921,6 +2938,12 @@ export interface UseImportExtensionsOptions {
 	 */
 	forceJsExtensions?: boolean;
 }
+export interface UseJsxKeyInIterableOptions {
+	/**
+	 * Set to `true` to check shorthand fragments (`<></>`)
+	 */
+	checkShorthandFragments?: boolean;
+}
 /**
  * Rule's options
  */
@@ -3190,7 +3213,7 @@ export interface ImportMatcher {
 	source?: SourcesMatcher;
 	type?: boolean;
 }
-export type SourceMatcher = PredefinedGroupMatcher | ImportSourceGlob;
+export type SourceMatcher = NegatablePredefinedSourceMatcher | ImportSourceGlob;
 /**
  * Supported cases.
  */
@@ -3241,7 +3264,21 @@ export type Kind =
 export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
 export type SourcesMatcher = SourceMatcher | SourceMatcher[];
-export type PredefinedGroupMatcher = string;
+export type NegatablePredefinedSourceMatcher =
+	| ":ALIAS:"
+	| ":BUN:"
+	| ":NODE:"
+	| ":PACKAGE:"
+	| ":PACKAGE_WITH_PROTOCOL:"
+	| ":PATH:"
+	| ":URL:"
+	| "!:ALIAS:"
+	| "!:BUN:"
+	| "!:NODE:"
+	| "!:PACKAGE:"
+	| "!:PACKAGE_WITH_PROTOCOL:"
+	| "!:PATH:"
+	| "!:URL:";
 /**
  * Glob to match against import sources.
  */
@@ -3461,6 +3498,7 @@ export type Category =
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
+	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessStringRaw"

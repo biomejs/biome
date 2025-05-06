@@ -2,7 +2,9 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
-## /src/index.ts
+# `/src/index.ts`
+
+## Source
 
 ```ts
 /**
@@ -52,7 +54,6 @@ export { ohNo as "oh\x0Ano" } from "./renamed-reexports";
  * Hello, namespace 2.
  */
 export * as renamed2 from "./renamed-reexports";
-
 ```
 
 ## Module Info
@@ -61,19 +62,19 @@ export * as renamed2 from "./renamed-reexports";
 Exports {
   "a" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(7)
+      Module(0) TypeId(7)
       Local name: a
     )
   }
   "b" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(8)
+      Module(0) TypeId(8)
       Local name: b
     )
   }
   "bar" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(1)
+      Module(0) TypeId(1)
       Local name: bar
       JsDoc(
         @package
@@ -82,19 +83,19 @@ Exports {
   }
   "baz" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(4)
+      Module(0) TypeId(4)
       Local name: baz
     )
   }
   "d" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(10)
+      Module(0) TypeId(10)
       Local name: d
     )
   }
   "default" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(23)
+      Module(0) TypeId(23)
       Local name: Component
       JsDoc(
         @public
@@ -104,13 +105,13 @@ Exports {
   }
   "e" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(11)
+      Module(0) TypeId(11)
       Local name: e
     )
   }
   "foo" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(0)
+      Module(0) TypeId(0)
       Local name: foo
       JsDoc(
         @returns {string}
@@ -120,19 +121,19 @@ Exports {
   "oh\nno" => {
     ExportReexport => Reexport(
       Specifier: "./renamed-reexports"
-      Resolved path: /src/renamed-reexports.ts
+      Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: ohNo
     )
   }
   "qux" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(5)
+      Module(0) TypeId(5)
       Local name: qux
     )
   }
   "quz" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(2)
+      Module(0) TypeId(2)
       Local name: quz
       JsDoc(
         @private
@@ -142,7 +143,7 @@ Exports {
   "renamed2" => {
     ExportReexport => Reexport(
       Specifier: "./renamed-reexports"
-      Resolved path: /src/renamed-reexports.ts
+      Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
       JsDoc(
         Hello, namespace 2.
@@ -158,7 +159,6 @@ Imports {
 ## Registered types
 
 ```
-
 Module TypeId(0) => sync Function "foo" {
   accepts: {
     params: []
@@ -187,16 +187,23 @@ Module TypeId(4) => async Function "baz" {
     params: []
     type_args: []
   }
-  returns: Module TypeId(3)
+  returns: Module(0) TypeId(3)
 }
 
 Module TypeId(5) => value: 1
 
-Module TypeId(6) => Module TypeId(20)
+Module TypeId(6) => Object {
+  prototype: No prototype
+  members: {TypeMembers(
+    required property "a": Module(0) TypeId(12)
+    required property "b": Module(0) TypeId(14)
+    required property "c": Module(0) TypeId(18)
+  )}
+}
 
 Module TypeId(7) => string
 
-Module TypeId(8) => instanceof Module TypeId(24)
+Module TypeId(8) => instanceof Module(0) TypeId(24)
 
 Module TypeId(9) => Tuple(
     [
@@ -227,21 +234,21 @@ Module TypeId(9) => Tuple(
     ],
 )
 
-Module TypeId(10) => Module TypeId(15)
+Module TypeId(10) => Module(0) TypeId(15)
 
-Module TypeId(11) => Module TypeId(17)
+Module TypeId(11) => Module(0) TypeId(17)
 
 Module TypeId(12) => string
 
 Module TypeId(13) => number
 
-Module TypeId(14) => instanceof Array<T = Module TypeId(13)>
+Module TypeId(14) => instanceof Array<T = Module(0) TypeId(13)>
 
 Module TypeId(15) => boolean
 
 Module TypeId(16) => undefined
 
-Module TypeId(17) => Module TypeId(15) | Module TypeId(16)
+Module TypeId(17) => Module(0) TypeId(15) | Module(0) TypeId(16)
 
 Module TypeId(18) => Tuple(
     [
@@ -275,18 +282,18 @@ Module TypeId(18) => Tuple(
 Module TypeId(19) => Object {
   prototype: No prototype
   members: {TypeMembers(
-    required property "a": Module TypeId(12)
-    required property "b": Module TypeId(14)
-    required property "c": Module TypeId(18)
+    required property "a": Module(0) TypeId(12)
+    required property "b": Module(0) TypeId(14)
+    required property "c": Module(0) TypeId(18)
   )}
 }
 
 Module TypeId(20) => Object {
   prototype: No prototype
   members: {TypeMembers(
-    required property "a": Module TypeId(12)
-    required property "b": Module TypeId(14)
-    required property "c": Module TypeId(18)
+    required property "a": Module(0) TypeId(12)
+    required property "b": Module(0) TypeId(14)
+    required property "c": Module(0) TypeId(18)
   )}
 }
 
@@ -295,7 +302,7 @@ Module TypeId(21) => sync Function "getObject" {
     params: []
     type_args: []
   }
-  returns: Module TypeId(20)
+  returns: Module(0) TypeId(20)
 }
 
 Module TypeId(22) => instanceof unresolved reference "JSX.Element"
@@ -305,21 +312,22 @@ Module TypeId(23) => sync Function "Component" {
     params: []
     type_args: []
   }
-  returns: Module TypeId(22)
+  returns: Module(0) TypeId(22)
 }
 
-Module TypeId(24) => instanceof Array<T = Module TypeId(13)>
+Module TypeId(24) => instanceof Array<T = Module(0) TypeId(13)>
 
 Module TypeId(25) => boolean
 
-Module TypeId(26) => Module TypeId(15) | Module TypeId(16)
-
+Module TypeId(26) => Module(0) TypeId(15) | Module(0) TypeId(16)
 ```
-## /src/renamed-reexports.ts
+
+# `/src/renamed-reexports.ts`
+
+## Source
 
 ```ts
 export function ohNo() {}
-
 ```
 
 ## Module Info
@@ -328,7 +336,7 @@ export function ohNo() {}
 Exports {
   "ohNo" => {
     ExportOwnExport => JsOwnExport(
-      Module TypeId(0)
+      Module(0) TypeId(0)
       Local name: ohNo
     )
   }
@@ -341,7 +349,6 @@ Imports {
 ## Registered types
 
 ```
-
 Module TypeId(0) => sync Function "ohNo" {
   accepts: {
     params: []
@@ -349,16 +356,17 @@ Module TypeId(0) => sync Function "ohNo" {
   }
   returns: unknown reference
 }
-
 ```
-## /src/reexports.ts
+
+# `/src/reexports.ts`
+
+## Source
 
 ```ts
 /**
  * Hello, namespace 1.
  */
 export * as renamed from "./renamed-reexports";
-
 ```
 
 ## Module Info
@@ -368,7 +376,7 @@ Exports {
   "renamed" => {
     ExportReexport => Reexport(
       Specifier: "./renamed-reexports"
-      Resolved path: /src/renamed-reexports.ts
+      Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
       JsDoc(
         Hello, namespace 1.

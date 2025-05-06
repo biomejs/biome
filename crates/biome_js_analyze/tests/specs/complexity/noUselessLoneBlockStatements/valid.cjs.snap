@@ -4,6 +4,7 @@ expression: valid.cjs
 ---
 # Input
 ```cjs
+/* should not generate diagnostics */
 while (foo) {
  bar();
 }
@@ -91,5 +92,3 @@ switch (foo) {
 }
 
 ```
-
-

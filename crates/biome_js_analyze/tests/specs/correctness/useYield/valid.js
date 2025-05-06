@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // Valid
 function foo() {
 	return 0;

@@ -1,11 +1,10 @@
 #![deny(clippy::use_self)]
 
-mod dir;
 mod fs;
 mod interner;
 mod path;
+mod utils;
 
-pub use dir::ensure_cache_dir;
 pub use fs::{
     AutoSearchResult, ConfigName, ErrorEntry, File, FileSystem, FileSystemDiagnostic,
     FileSystemExt, FsErrorKind, MemoryFileSystem, OpenOptions, OsFileSystem, PathKind, TemporaryFs,
@@ -13,3 +12,4 @@ pub use fs::{
 };
 pub use interner::{PathInterner, PathInternerSet};
 pub use path::BiomePath;
+pub use utils::*;

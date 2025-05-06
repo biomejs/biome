@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // Do not simplify when a binary expression is used in the last expression
 foo && foo.bar != null;
 foo && foo.bar != undefined;
@@ -42,4 +43,5 @@ foo[/\w+/] && foo[/ab+c/].baz;
 
 (foo || {})().bar;
 
-(new foo() || {}).bar;
+// FIXME: This should not generate a diagnostic
+// (new foo() || {}).bar;

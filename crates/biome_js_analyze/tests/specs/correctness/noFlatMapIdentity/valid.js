@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 array.flatMap((arr) => arr * 2);
 
 array.flatMap(arr => arr * 2);

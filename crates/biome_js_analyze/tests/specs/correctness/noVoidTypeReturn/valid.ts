@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 class A {
 	f() {
 		return undefined;

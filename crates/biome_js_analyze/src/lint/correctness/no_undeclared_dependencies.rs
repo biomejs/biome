@@ -195,7 +195,7 @@ pub struct NoUndeclaredDependenciesOptions {
 }
 
 pub struct RuleState {
-    package_name: String,
+    package_name: Box<str>,
     is_dev_dependency_available: bool,
     is_peer_dependency_available: bool,
     is_optional_dependency_available: bool,
@@ -255,7 +255,7 @@ impl Rule for NoUndeclaredDependencies {
         }
 
         Some(RuleState {
-            package_name: package_name.to_string(),
+            package_name: package_name.into(),
             is_dev_dependency_available,
             is_peer_dependency_available,
             is_optional_dependency_available,

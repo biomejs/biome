@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export namespace X {}
 
 export namespace PascalCase {}

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import { Children, cloneElement } from "react";
 
 something.forEach((element, index) => {

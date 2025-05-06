@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const path = require('lodash');
 
 import eslint from 'eslint';

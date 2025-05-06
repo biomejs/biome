@@ -19,7 +19,5 @@ array => instanceof unresolved reference "Array"<Global TypeId(7)>
 ## Registered types
 
 ```
-
 Global TypeId(7) => string
-
 ```

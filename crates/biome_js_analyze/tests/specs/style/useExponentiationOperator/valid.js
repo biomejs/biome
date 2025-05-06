@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // not Math.pow()
 Object.pow(a, b)
 Math.max(a, b)

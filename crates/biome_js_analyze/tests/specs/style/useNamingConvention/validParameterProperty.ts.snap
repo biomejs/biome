@@ -4,6 +4,7 @@ expression: validParameterProperty.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 export default class {
     constructor(
         readonly p: unknown,
@@ -13,5 +14,3 @@ export default class {
     ) {}
 }
 ```
-
-

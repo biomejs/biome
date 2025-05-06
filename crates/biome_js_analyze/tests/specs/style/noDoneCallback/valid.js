@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 test("something", () => {});
 test("something", async () => {});
 test("something", function () {});

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const Empty = "";
 export const E = Empty;
 

@@ -4,5 +4,6 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 declare module "node:assert" {}
 ```

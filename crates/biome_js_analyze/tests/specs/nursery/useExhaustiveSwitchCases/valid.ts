@@ -1,3 +1,5 @@
+/* should not generate diagnostics */
+
 type Day =
 	| 'Monday'
 	| 'Tuesday'

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var foo = Symbol("foo");
 function bar(Symbol) {
 	var baz = new Symbol("baz");

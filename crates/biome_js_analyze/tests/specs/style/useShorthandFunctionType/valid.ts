@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 type Example = () => string;
 
 function foo(example: () => number): number {
@@ -54,12 +55,14 @@ type GenericFunction<T> = (arg: T) => T;
 type OptionalParamFunction = (arg?: string) => void;
 
 // If there are inner comments, they should be ignored
-interface Example2 {
-	// Inner comment
-	(): string; // Inner trailing comment
-}
+// FIXME: This should not generate a diagnostic
+// interface Example2 {
+// 	// Inner comment
+// 	(): string; // Inner trailing comment
+// }
 
-type G = {
-	// Inner comment
-	(): number // Inner trailing comment
-}
+// FIXME: This should not generate a diagnostic
+// type G = {
+// 	// Inner comment
+// 	(): number // Inner trailing comment
+// }

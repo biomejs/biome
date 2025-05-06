@@ -4,7 +4,7 @@ use crate::execute::process_file::{
     DiffKind, FileResult, FileStatus, Message, SharedTraversalOptions,
 };
 use biome_analyze::RuleCategoriesBuilder;
-use biome_diagnostics::{DiagnosticExt, Error, category};
+use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
@@ -64,7 +64,15 @@ pub(crate) fn format_with_guard<'ctx>(
         diagnostics: diagnostics_result
             .diagnostics
             .into_iter()
-            .map(Error::from)
+            // Formatting is usually blocked by errors, so we want to print only diagnostics that
+            // Have error severity
+            .filter_map(|diagnostic| {
+                if diagnostic.severity() >= Severity::Error {
+                    Some(Error::from(diagnostic))
+                } else {
+                    None
+                }
+            })
             .collect(),
         skipped_diagnostics: diagnostics_result.skipped_diagnostics as u32,
     });

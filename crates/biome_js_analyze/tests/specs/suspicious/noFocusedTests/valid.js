@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 describe.skip("test", () => {});
 it.skip("test", () => {});
 test.skip("test", () => {});

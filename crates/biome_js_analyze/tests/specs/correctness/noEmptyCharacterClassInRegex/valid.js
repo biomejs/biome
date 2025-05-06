@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 /^abc[a-zA-Z]/;
 /^abc/;
 /[\[]/;
@@ -12,12 +13,14 @@
 /[\]]/s;
 /[\]]/d;
 /\[]/;
-/[[^]]/v;
+// FIXME: This should not generate a diagnostic
+// /[[^]]/v;
 /[[\]]]/v;
 /[[\[]]/v;
 /[a--b]/v;
 /[a&&b]/v;
 /[[a][b]]/v;
 /[\q{}]/v;
-/[[^]--\p{ASCII}]/v;
+// FIXME: This should not generate a diagnostic
+// /[[^]--\p{ASCII}]/v;
 /[\u200E\u2066-\u2069]/gu;

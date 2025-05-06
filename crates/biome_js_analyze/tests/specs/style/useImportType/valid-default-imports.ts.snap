@@ -4,6 +4,7 @@ expression: valid-default-imports.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 import A from "";
 export { A }
 const AA = A;
@@ -19,5 +20,3 @@ import type D from "";
 export type { D };
 
 ```
-
-

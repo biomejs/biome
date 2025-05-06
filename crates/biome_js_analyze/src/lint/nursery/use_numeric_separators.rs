@@ -73,6 +73,11 @@ impl Rule for UseNumericSeparators {
         let token = ctx.query().value_token().ok()?;
         let raw = token.text_trimmed();
 
+        // Skip check for short numeric literals where separators don't improve readability.
+        if raw.len() <= 3 {
+            return None;
+        }
+
         let expected = format_numeric_literal(raw);
 
         if raw == expected {

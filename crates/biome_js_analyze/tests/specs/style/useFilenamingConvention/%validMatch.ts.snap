@@ -4,5 +4,6 @@ expression: "%validMatch.ts"
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 export const C: number;
 ```

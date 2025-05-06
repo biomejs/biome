@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-invalid-void-type.test.ts
 function func(): void {}
 type NormalType = () => void;

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const foo = bar.trimStart();
 const foo = bar.trimEnd();
 bar.trimStart?.()

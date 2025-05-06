@@ -16,13 +16,12 @@ returnsPromise().then(() => {});
 ## Result
 
 ```
-Call Module TypeId(2)(Module TypeId(3))
+Call Module(0) TypeId(2)(Module(0) TypeId(3))
 ```
 
 ## Registered types
 
 ```
-
 Module TypeId(0) => sync Function "returnsPromise" {
   accepts: {
     params: []
@@ -31,9 +30,9 @@ Module TypeId(0) => sync Function "returnsPromise" {
   returns: Global TypeId(7)
 }
 
-Module TypeId(1) => Call Module TypeId(0)(No parameters)
+Module TypeId(1) => Call Module(0) TypeId(0)(No parameters)
 
-Module TypeId(2) => Module TypeId(1).then
+Module TypeId(2) => Module(0) TypeId(1).then
 
 Module TypeId(3) => sync Function {
   accepts: {
@@ -46,5 +45,4 @@ Module TypeId(3) => sync Function {
 Global TypeId(7) => instanceof Global TypeId(8)
 
 Global TypeId(8) => instanceof Promise<T = number>
-
 ```

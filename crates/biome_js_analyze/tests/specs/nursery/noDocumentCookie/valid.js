@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 document.cookie
 
 const foo = document.cookie;

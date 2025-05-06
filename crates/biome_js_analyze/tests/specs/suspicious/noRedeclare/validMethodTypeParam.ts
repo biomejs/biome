@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 interface I {
 	get<T>(f: T): T;
 	post<T>(g: T): T;

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import { memo } from 'react';
 
 const Component = () => <></>

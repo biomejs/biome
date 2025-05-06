@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 obj?.foo | bar
 obj?.foo & bar
 obj?.foo >> obj?.bar;

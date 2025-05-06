@@ -4,6 +4,7 @@ expression: validNamesapceExportType.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 namespace Ns {}
 export type { Ns }
 ```

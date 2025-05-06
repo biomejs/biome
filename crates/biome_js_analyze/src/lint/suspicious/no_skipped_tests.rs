@@ -38,7 +38,7 @@ declare_lint_rule! {
         name: "noSkippedTests",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintJest("no-disabled-tests")],
+        sources: &[RuleSource::EslintJest("no-disabled-tests"), RuleSource::EslintVitest("no-disabled-tests")],
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,
     }

@@ -4,6 +4,8 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
+
 type Day =
 	| 'Monday'
 	| 'Tuesday'

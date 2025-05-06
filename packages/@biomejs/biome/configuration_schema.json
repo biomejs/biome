@@ -1082,7 +1082,7 @@
 				"useJsxKeyInIterable": {
 					"description": "Disallow missing key props in iterators/collection literals.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UseJsxKeyInIterableConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2349,6 +2349,25 @@
 			},
 			"additionalProperties": false
 		},
+		"NegatablePredefinedSourceMatcher": {
+			"type": "string",
+			"enum": [
+				":ALIAS:",
+				":BUN:",
+				":NODE:",
+				":PACKAGE:",
+				":PACKAGE_WITH_PROTOCOL:",
+				":PATH:",
+				":URL:",
+				"!:ALIAS:",
+				"!:BUN:",
+				"!:NODE:",
+				"!:PACKAGE:",
+				"!:PACKAGE_WITH_PROTOCOL:",
+				"!:PATH:",
+				"!:URL:"
+			]
+		},
 		"NoBitwiseOperatorsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2921,6 +2940,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessBackrefInRegex": {
+					"description": "Disallow useless backreferences in regular expression literals that always match an empty string.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessEscapeInRegex": {
 					"description": "Disallow unnecessary escape sequence in regular expression literals.",
 					"anyOf": [
@@ -3396,7 +3422,6 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
-		"PredefinedGroupMatcher": { "type": "string" },
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -4052,6 +4077,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseJsxKeyInIterableOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseJsxKeyInIterableOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseSelfClosingElementsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -4346,7 +4386,7 @@
 		},
 		"SourceMatcher": {
 			"anyOf": [
-				{ "$ref": "#/definitions/PredefinedGroupMatcher" },
+				{ "$ref": "#/definitions/NegatablePredefinedSourceMatcher" },
 				{ "$ref": "#/definitions/ImportSourceGlob" }
 			]
 		},
@@ -5351,6 +5391,23 @@
 			"properties": {
 				"forceJsExtensions": {
 					"description": "If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseJsxKeyInIterableConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseJsxKeyInIterableOptions" }
+			]
+		},
+		"UseJsxKeyInIterableOptions": {
+			"type": "object",
+			"properties": {
+				"checkShorthandFragments": {
+					"description": "Set to `true` to check shorthand fragments (`<></>`)",
 					"default": false,
 					"type": "boolean"
 				}

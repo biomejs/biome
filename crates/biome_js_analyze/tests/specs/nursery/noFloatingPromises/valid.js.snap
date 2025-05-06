@@ -4,6 +4,7 @@ expression: valid.js
 ---
 # Input
 ```js
+/* should not generate diagnostics */
 async function returnsPromise() {
   return 'value';
 }

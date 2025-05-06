@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 enum ValidString {
   A = 'test',
   B = 'div' + 'ided',

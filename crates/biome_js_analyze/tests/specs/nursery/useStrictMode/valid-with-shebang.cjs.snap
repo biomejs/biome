@@ -5,5 +5,6 @@ expression: valid-with-shebang.cjs
 # Input
 ```cjs
 #!/usr/bin/env node
+/* should not generate diagnostics */
 
 ```

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var r = /[👍]/u;
 var r = /[\uD83D\uDC4D]/u;
 var r = /[\u{1F44D}]/u;

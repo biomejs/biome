@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-03.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export type ArrayInput<Func> = Func extends (arg0: Array<infer T>) => any
+  ? T[]
+  : Func extends (...args: infer T) => any
+    ? T
+    : never;
+    `,
+    `
+function foo() {
+  var Object = 0;
+}
+
+```

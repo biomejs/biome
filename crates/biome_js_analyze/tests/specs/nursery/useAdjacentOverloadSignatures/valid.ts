@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 declare namespace Foo {
   export function foo_declare(s: string): void;
   export function foo_declare(n: number): void;

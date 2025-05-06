@@ -11,10 +11,10 @@
     "node": ">20.0.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "8.29.1",
-    "@typescript-eslint/parser": "8.29.1",
+    "@typescript-eslint/eslint-plugin": "8.31.1",
+    "@typescript-eslint/parser": "8.31.1",
     "dprint": "0.49.1",
-    "eslint": "9.25.1",
+    "eslint": "9.26.0",
     "prettier": "3.5.3"
   }
 }

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 async function foo() { await bar; }
 async function foo() { for (var bar in await baz) { } }
 async function foo() { for (var bar of await baz) { } }

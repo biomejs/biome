@@ -4,6 +4,7 @@ expression: valid-modules.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 declare module '*.gif' {
 	const src: string
 }
@@ -21,5 +22,3 @@ declare module b {
 }
 
 ```
-
-

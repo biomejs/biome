@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 declare class A { constructor(options: any) }
 
 class B {

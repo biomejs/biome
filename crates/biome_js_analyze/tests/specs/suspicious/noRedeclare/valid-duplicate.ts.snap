@@ -4,6 +4,7 @@ expression: valid-duplicate.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 const obj = {
 	a: 1,
 	a: 2,
@@ -23,5 +24,3 @@ class A {
 }
 
 ```
-
-

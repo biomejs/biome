@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import Script from 'next/script';
 
 export function MyApp({ Component, pageProps }) {

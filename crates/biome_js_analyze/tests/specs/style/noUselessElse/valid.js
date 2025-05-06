@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function f(x) {
     if (x < 0) {
 

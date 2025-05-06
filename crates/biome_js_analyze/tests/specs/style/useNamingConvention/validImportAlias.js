@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import { X as X } from ""
 
 import { Y as CONSTANT_Y  } from ""

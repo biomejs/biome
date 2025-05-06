@@ -1,4 +1,4 @@
-// valid
+/* should not generate diagnostics */
 <div/>;
 <div></div>;
 <div><span></span></div>;

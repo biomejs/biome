@@ -46,7 +46,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintJest("no-focused-tests")],
+        sources: &[RuleSource::EslintJest("no-focused-tests"), RuleSource::EslintVitest("no-focused-tests")],
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,
         domains: &[RuleDomain::Test],

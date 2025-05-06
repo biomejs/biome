@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
 	<link
 		href="https://fonts.googleapis.com/css2?family=Krona+One&display=optional"

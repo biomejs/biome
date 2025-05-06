@@ -167,9 +167,9 @@ impl Format<FormatTypeContext> for Function {
                 write!(
                     f,
                     [dynamic_text(
-                        &std::format!("\"{}\"", name),
+                        &std::format!("\"{name}\""),
                         TextSize::default()
-                    ),]
+                    )]
                 )
             } else {
                 Ok(())
@@ -527,6 +527,16 @@ impl Format<FormatTypeContext> for TypeReference {
                 let id = resolved.id();
                 if level == TypeResolverLevel::Global && resolved.index() < NUM_PREDEFINED_TYPES {
                     write!(f, [text(global_type_name(id))])
+                } else if level == TypeResolverLevel::Module {
+                    let module_id = resolved.module_id().index();
+                    write!(
+                        f,
+                        [&format_args![
+                            dynamic_text(&std::format!("Module({module_id})"), TextSize::default()),
+                            space(),
+                            dynamic_text(&std::format!("{id:?}"), TextSize::default()),
+                        ]]
+                    )
                 } else {
                     write!(
                         f,
@@ -726,13 +736,8 @@ impl Format<FormatTypeContext> for ResolvedPath {
     ) -> FormatResult<()> {
         let value = self.deref();
         if let Ok(value) = value {
-            write!(
-                f,
-                [dynamic_text(
-                    value.as_str().replace('\\', "/").as_str(),
-                    TextSize::default()
-                )]
-            )?;
+            let quoted = std::format!("\"{}\"", value.as_str().replace('\\', "/"));
+            write!(f, [dynamic_text(&quoted, TextSize::default())])?;
         }
 
         Ok(())

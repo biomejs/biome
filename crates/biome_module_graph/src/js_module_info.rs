@@ -1,25 +1,24 @@
-mod ad_hoc_scope_resolver;
 mod binding;
 mod collector;
 mod scope;
+mod scoped_resolver;
 mod visitor;
 
 use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
-use biome_js_semantic::ScopeId;
-use biome_js_syntax::{AnyJsExpression, AnyJsImportLike};
+use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedPath, ResolvedTypeId, Type, TypeData,
-    TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedPath, ResolvedTypeId, ScopeId,
+    TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
-use biome_rowan::{AstNode, Text, TextRange, TokenText};
+use biome_rowan::{Text, TextRange, TokenText};
 
 use crate::{ModuleGraph, jsdoc_comment::JsdocComment};
 
-use ad_hoc_scope_resolver::AdHocScopeResolver;
 use binding::{BindingId, JsBindingData};
 use scope::{JsScope, JsScopeData};
 
+pub use scoped_resolver::ScopedResolver;
 pub(crate) use visitor::JsModuleVisitor;
 
 /// Information restricted to a single module in the [ModuleGraph].
@@ -68,24 +67,15 @@ impl JsModuleInfo {
         }
     }
 
-    /// Returns the resolved type of the given expression within this module.
-    pub fn resolved_type_for_expression(
-        &self,
-        expr: &AnyJsExpression,
-        module_graph: Arc<ModuleGraph>,
-    ) -> Type {
-        let scope = self.scope_for_range(expr.range());
-        let mut resolver =
-            AdHocScopeResolver::from_scope_in_module(scope, self.clone(), module_graph);
-        let ty = TypeData::from_any_js_expression(&mut resolver, expr);
-        resolver.run_inference();
-
-        let ty = ty.inferred(&mut resolver);
-        Type::from_data(Box::new(resolver), ty)
-    }
-
     /// Returns the scope to be used for the given `range`.
     pub fn scope_for_range(&self, range: TextRange) -> JsScope {
+        JsScope {
+            info: self.0.clone(),
+            id: self.scope_id_for_range(range),
+        }
+    }
+
+    pub fn scope_id_for_range(&self, range: TextRange) -> ScopeId {
         let start = range.start().into();
         let end = range.end().into();
         self.0
@@ -93,13 +83,9 @@ impl JsModuleInfo {
             .find(start, end)
             .filter(|interval| !(start < interval.start || end > interval.stop))
             .max_by_key(|interval| interval.val)
-            .map_or_else(
-                || self.global_scope(),
-                |interval| JsScope {
-                    info: self.0.clone(),
-                    id: ScopeId::new(interval.val.index()),
-                },
-            )
+            .map_or(ScopeId::GLOBAL, |interval| {
+                ScopeId::new(interval.val.index())
+            })
     }
 }
 
@@ -171,7 +157,7 @@ pub struct JsModuleInfoInner {
     pub(crate) types: Box<[TypeData]>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Exports(pub(crate) BTreeMap<Text, JsExport>);
 
 impl Deref for Exports {
@@ -182,7 +168,7 @@ impl Deref for Exports {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Imports(pub(crate) BTreeMap<Text, JsImport>);
 
 impl Deref for Imports {
@@ -232,7 +218,7 @@ impl TypeResolver for JsModuleInfoInner {
         match id.level() {
             TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
             TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(id.id())),
-            TypeResolverLevel::AdHoc | TypeResolverLevel::Project => None,
+            TypeResolverLevel::Scope | TypeResolverLevel::Import => None,
         }
     }
 
@@ -251,21 +237,24 @@ impl TypeResolver for JsModuleInfoInner {
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
         if qualifier.path.len() == 1 {
-            self.resolve_type_of(&qualifier.path[0])
-                .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
+            self.resolve_type_of(
+                &qualifier.path[0],
+                qualifier.scope_id.unwrap_or(ScopeId::GLOBAL),
+            )
+            .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
         } else {
             // TODO: Resolve nested qualifiers
             None
         }
     }
 
-    fn resolve_type_of(&self, identifier: &Text) -> Option<ResolvedTypeId> {
+    fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
         if let Some(export) = self.exports.get(identifier) {
             export
                 .as_own_export()
                 .and_then(|own_export| self.resolve_reference(&own_export.ty))
         } else {
-            GLOBAL_RESOLVER.resolve_type_of(identifier)
+            GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
         }
     }
 

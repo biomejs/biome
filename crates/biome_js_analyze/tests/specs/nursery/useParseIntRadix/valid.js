@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var num = parseInt("071", 10);
 
 var num = parseInt("071", 8);

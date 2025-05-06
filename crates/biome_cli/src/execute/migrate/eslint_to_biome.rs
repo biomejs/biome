@@ -387,7 +387,7 @@ mod tests {
     #[test]
     fn flat_config_single_config_object() {
         let flat_config = FlatConfigData(vec![FlatConfigObject {
-            files: vec!["*.js".into()],
+            files: vec!["*.js".into()].into(),
             ignores: vec!["*.test.js".into()],
             language_options: None,
             rules: Some(Rules(
@@ -414,13 +414,13 @@ mod tests {
     fn flat_config_multiple_config_object() {
         let flat_config = FlatConfigData(vec![
             FlatConfigObject {
-                files: vec![],
+                files: vec![].into(),
                 ignores: vec!["*.test.js".into()],
                 language_options: None,
                 rules: None,
             },
             FlatConfigObject {
-                files: vec![],
+                files: vec![].into(),
                 ignores: vec![],
                 language_options: None,
                 rules: Some(Rules(
@@ -430,13 +430,13 @@ mod tests {
                 )),
             },
             FlatConfigObject {
-                files: vec![],
+                files: vec![].into(),
                 ignores: vec!["*.spec.js".into()],
                 language_options: None,
                 rules: None,
             },
             FlatConfigObject {
-                files: vec!["*.ts".into()],
+                files: vec!["*.ts".into()].into(),
                 ignores: vec![],
                 language_options: None,
                 rules: Some(Rules(

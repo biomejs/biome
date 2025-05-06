@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 interface Foo {}
 class Bar implements Foo {}
 

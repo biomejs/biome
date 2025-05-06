@@ -1,33 +1,45 @@
 mod package_json;
 mod tsconfig_json;
-
+use crate::{LICENSE_LIST, Manifest, Package, PackageAnalyzeResult, ProjectAnalyzeDiagnostic};
+use biome_parser::AnyParse;
+use biome_rowan::Language;
 pub use package_json::{Dependencies, PackageJson, PackageType, Version};
 pub use tsconfig_json::TsConfigJson;
-
-use biome_rowan::Language;
-
-use crate::{LICENSE_LIST, Manifest, Package, PackageAnalyzeResult, ProjectAnalyzeDiagnostic};
 
 #[derive(Default, Debug, Clone)]
 /// A Node.js project.
 pub struct NodeJsPackage {
     /// The `package.json` manifest
     pub manifest: Option<PackageJson>,
+    /// The raw manifest
+    pub raw_manifest: Option<AnyParse>,
     /// Diagnostics emitted during the operations
     pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     /// The `tsconfig.json` manifest
-    pub tsconfig: TsConfigJson,
+    pub tsconfig: Option<TsConfigJson>,
 }
 
 impl NodeJsPackage {
     pub fn deserialize_tsconfig(&mut self, content: &ProjectLanguageRoot<TsConfigJson>) {
         let tsconfig = TsConfigJson::deserialize_manifest(content);
         let (tsconfig, deserialize_diagnostics) = tsconfig.consume();
-        self.tsconfig = tsconfig.unwrap_or_default();
+        self.tsconfig = tsconfig;
         self.diagnostics = deserialize_diagnostics
             .into_iter()
             .map(biome_diagnostics::serde::Diagnostic::new)
             .collect();
+    }
+
+    pub fn to_deserialized_manifest(&self) -> Option<PackageJson> {
+        self.raw_manifest
+            .as_ref()
+            .and_then(|root| {
+                let node = root.tree();
+                let deserialized = <Self as Package>::Manifest::deserialize_manifest(&node);
+                let (manifest, _) = deserialized.consume();
+                manifest
+            })
+            .or_else(|| self.manifest.clone())
     }
 }
 
@@ -44,6 +56,10 @@ impl Package for NodeJsPackage {
             .into_iter()
             .map(biome_diagnostics::serde::Diagnostic::new)
             .collect();
+    }
+
+    fn insert_raw_manifest(&mut self, json_root: &AnyParse) {
+        self.raw_manifest = Some(json_root.clone());
     }
 
     fn manifest(&self) -> Option<&Self::Manifest> {

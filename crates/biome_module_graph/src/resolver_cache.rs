@@ -92,11 +92,15 @@ impl<'a> ResolverCache<'a> {
     }
 
     fn path_kind(&self, path: &Utf8Path) -> Option<PathKind> {
+        // If the path is updated, prefer the real filesystem to get fresh data.
         if self.added_paths.contains(path) {
-            self.fs.path_kind(path).ok()
-        } else {
-            self.module_graph.path_kind(path)
+            return self.fs.path_kind(path).ok();
         }
+
+        // Otherwise, prefer the cached data, then fallback to the real filesystem.
+        self.module_graph
+            .path_kind(path)
+            .or_else(|| self.fs.path_kind(path).ok())
     }
 
     /// Returns the canonical path, resolving all symbolic links.

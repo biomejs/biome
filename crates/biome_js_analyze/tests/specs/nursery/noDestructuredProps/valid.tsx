@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let Component = (props) => <div />;
 
 let Component = (props) => <div />;

@@ -6,8 +6,6 @@ import React from "react";
 
 [<Hello />, xyz ? <Hello />: <Hello />, <Hello />];
 
-[<></>, <></>, <></>];
-
 data.map(x => <Hello>{x}</Hello>);
 
 data.map(x => <>{x}</>);
@@ -45,14 +43,6 @@ React.Children.map(c => React.cloneElement(c));
 });
 
 [].map((item) => {
-	return <><div /><div>{item}</div></>;
-});
-
-[].map((item) => {
-	return <>{item.condition ? <div /> : <div>foo</div>}</>;
-});
-
-[].map((item) => {
 	const x = 5;
 	const div = <div>{x}</div>;
 	return div;
@@ -63,3 +53,5 @@ React.Children.map(c => React.cloneElement(c));
 	const div = <div>{x}</div>;
 	return div;
 });
+
+data.map((item) => <React.Fragment><p>{item}</p></React.Fragment>)

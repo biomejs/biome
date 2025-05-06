@@ -4,6 +4,7 @@ expression: validtest.cjs
 ---
 # Input
 ```cjs
+/* should not generate diagnostics */
 function foo() {
 	var eval = "foo";
 	window[eval]("foo");
@@ -24,5 +25,3 @@ function foo(eval) {
 }
 
 ```
-
-

@@ -3,9 +3,10 @@ use std::fmt::Debug;
 use biome_rowan::Text;
 
 use crate::{
-    Class, DestructureField, Function, GenericTypeParameter, TypeData, TypeId, TypeImportQualifier,
-    TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier, TypeofDestructureExpression,
-    TypeofExpression, TypeofValue, Union, globals::GLOBAL_UNDEFINED_ID,
+    Class, DestructureField, Function, GenericTypeParameter, ScopeId, TypeData, TypeId,
+    TypeImportQualifier, TypeInstance, TypeMember, TypeReference, TypeReferenceQualifier,
+    TypeofDestructureExpression, TypeofExpression, TypeofValue, Union,
+    globals::GLOBAL_UNDEFINED_ID,
 };
 
 const NUM_MODULE_ID_BITS: i32 = 30;
@@ -24,12 +25,12 @@ impl Debug for ResolvedTypeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let id = self.1;
         match self.level() {
-            TypeResolverLevel::AdHoc => f.write_fmt(format_args!("AdHoc {id:?}")),
+            TypeResolverLevel::Scope => f.write_fmt(format_args!("AdHoc {id:?}")),
             TypeResolverLevel::Module => f.write_fmt(format_args!(
                 "Module({:?}) {id:?}",
                 self.module_id().index()
             )),
-            TypeResolverLevel::Project => f.write_fmt(format_args!("Project {id:?}")),
+            TypeResolverLevel::Import => f.write_fmt(format_args!("Import {id:?}")),
             TypeResolverLevel::Global => f.write_fmt(format_args!("Global {id:?}")),
         }
     }
@@ -53,6 +54,10 @@ impl ResolvedTypeId {
         matches!(self.level(), TypeResolverLevel::Global)
     }
 
+    pub const fn is_at_module_level(self) -> bool {
+        matches!(self.level(), TypeResolverLevel::Module)
+    }
+
     pub const fn level(self) -> TypeResolverLevel {
         TypeResolverLevel::from_u2(self.0 >> NUM_MODULE_ID_BITS)
     }
@@ -62,9 +67,13 @@ impl ResolvedTypeId {
     }
 
     pub const fn with_module_id(self, module_id: ModuleId) -> Self {
-        // Clear the bits of the old module ID, while preserving the resolver
-        // level, and OR with the bits from the new module ID.
-        Self((self.0 & LEVEL_MASK) | module_id.0, self.1)
+        if self.is_at_module_level() {
+            // Clear the bits of the old module ID, while preserving the resolver
+            // level, and OR with the bits from the new module ID.
+            Self((self.0 & LEVEL_MASK) | module_id.0, self.1)
+        } else {
+            self
+        }
     }
 }
 
@@ -93,9 +102,9 @@ impl ModuleId {
 /// another resolver that may be able to handle the level.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TypeResolverLevel {
-    /// Used for ad-hoc inference that is not cached except in the ad-hoc
-    /// resolver itself (which is discarded after use).
-    AdHoc,
+    /// Used for scope-level inference that is not cached except in the scoped
+    /// resolver.
+    Scope,
 
     /// Used for resolving types that exist within the same module as from which
     /// the resolution took place.
@@ -110,11 +119,14 @@ pub enum TypeResolverLevel {
     /// Used for resolving types that exist across modules within the project.
     ///
     /// Currently, we don't store resolved IDs with this level in the module
-    /// info. Instead, we use it to during a module's type collection to flag
+    /// info. Instead, we use it during a module's type collection to flag
     /// resolved types that require imports from other modules. Such resolved
     /// IDs then get converted to [`TypeReference::Import`] before storing
     /// them in the module info.
-    Project,
+    ///
+    /// **Important:** [`ResolvedTypeId`]s of this level store a `BindingId` in
+    ///                the field that is used for `TypeId`s normally.
+    Import,
 
     /// Used for language- and environment-level globals.
     Global,
@@ -127,11 +139,15 @@ impl TypeResolverLevel {
     /// Only the two least significant bits may be set in order to let the type
     /// fit into `ResolvedTypeId`. If more bits become necessary, we may need to
     /// rebalance the layout of `ResolvedTypeId`.
+    ///
+    /// Note: `from_u2` is not a typo. Even though `u2` isn't a real type, it's
+    ///       named like this to make you, dear reader, more aware of the size
+    ///       constraint ;)
     pub const fn from_u2(bits: u32) -> Self {
         match bits {
-            0 => Self::AdHoc,
+            0 => Self::Scope,
             1 => Self::Module,
-            2 => Self::Project,
+            2 => Self::Import,
             3 => Self::Global,
             _ => panic!("invalid bits passed to TypeResolverLevel"),
         }
@@ -266,8 +282,8 @@ pub trait TypeResolver {
     /// Resolves a type by its reference `qualifier`.
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId>;
 
-    /// Resolves the type of a value by its `identifier`.
-    fn resolve_type_of(&self, identifier: &Text) -> Option<ResolvedTypeId>;
+    /// Resolves the type of a value by its `identifier` in a specific scope.
+    fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId>;
 
     // #region Utilities for test inspection
 
@@ -415,7 +431,7 @@ pub trait Resolvable: Sized {
     /// function on all instances of [`TypeReference`].
     fn resolved_with_mapped_references(
         &self,
-        map: impl Copy + Fn(TypeReference) -> TypeReference,
+        map: impl Copy + Fn(TypeReference, &mut dyn TypeResolver) -> TypeReference,
         resolver: &mut dyn TypeResolver,
     ) -> Self;
 
@@ -427,10 +443,22 @@ pub trait Resolvable: Sized {
         resolver: &mut dyn TypeResolver,
     ) -> Self {
         self.resolved_with_mapped_references(
-            |reference| reference.with_module_id(module_id),
+            |reference, _| reference.with_module_id(module_id),
             resolver,
         )
     }
+
+    /// Returns the instance with all module-level references augmented with the
+    /// given `module_id`.
+    ///
+    /// Does not perform any resolving in the process.
+    fn with_module_id(self, module_id: ModuleId) -> Self;
+
+    /// Returns the instance with all scoped references augmented with the
+    /// given `scope_id`.
+    ///
+    /// Does not perform any resolving in the process.
+    fn with_scope_id(self, scope_id: ScopeId) -> Self;
 }
 
 impl Resolvable for TypeReference {
@@ -470,6 +498,7 @@ impl Resolvable for TypeReference {
                                 Self::Qualifier(TypeReferenceQualifier {
                                     path: qualifier.path.clone(),
                                     type_parameters: self.resolved_params(resolver),
+                                    scope_id: qualifier.scope_id,
                                 })
                             })
                     }
@@ -488,10 +517,26 @@ impl Resolvable for TypeReference {
 
     fn resolved_with_mapped_references(
         &self,
-        map: impl Copy + Fn(Self) -> Self,
+        map: impl Copy + Fn(Self, &mut dyn TypeResolver) -> Self,
         resolver: &mut dyn TypeResolver,
     ) -> Self {
-        map(self.resolved(resolver))
+        map(self.resolved(resolver), resolver)
+    }
+
+    fn with_module_id(self, module_id: ModuleId) -> Self {
+        match self {
+            Self::Resolved(resolved_type_id) => {
+                Self::Resolved(resolved_type_id.with_module_id(module_id))
+            }
+            other => other,
+        }
+    }
+
+    fn with_scope_id(self, scope_id: ScopeId) -> Self {
+        match self {
+            Self::Qualifier(qualifier) => Self::Qualifier(qualifier.with_scope_id(scope_id)),
+            other => other,
+        }
     }
 }
 
@@ -500,24 +545,53 @@ impl Resolvable for TypeofValue {
         let identifier = self.identifier.clone();
         let ty = if self.ty == TypeReference::Unknown {
             resolver
-                .resolve_type_of(&identifier)
+                .resolve_type_of(&identifier, self.scope_id.unwrap_or(ScopeId::GLOBAL))
                 .map_or(TypeReference::Unknown, TypeReference::Resolved)
         } else {
             self.ty.resolved(resolver)
         };
 
-        Self { identifier, ty }
+        Self {
+            identifier,
+            ty,
+            scope_id: self.scope_id,
+        }
     }
 
     fn resolved_with_mapped_references(
         &self,
-        map: impl Copy + Fn(TypeReference) -> TypeReference,
+        map: impl Copy + Fn(TypeReference, &mut dyn TypeResolver) -> TypeReference,
         resolver: &mut dyn TypeResolver,
     ) -> Self {
-        let Self { identifier, ty } = self.resolved(resolver);
+        let Self {
+            identifier,
+            ty,
+            scope_id,
+        } = self.resolved(resolver);
         Self {
             identifier,
-            ty: map(ty),
+            ty: map(ty, resolver),
+            scope_id,
+        }
+    }
+
+    fn with_module_id(self, module_id: ModuleId) -> Self {
+        let Self {
+            identifier,
+            ty,
+            scope_id,
+        } = self;
+        Self {
+            identifier,
+            ty: ty.with_module_id(module_id),
+            scope_id,
+        }
+    }
+
+    fn with_scope_id(self, scope_id: ScopeId) -> Self {
+        Self {
+            scope_id: Some(scope_id),
+            ..self
         }
     }
 }
@@ -531,10 +605,18 @@ macro_rules! derive_primitive_resolved {
 
             fn resolved_with_mapped_references(
                 &self,
-                _map: impl Copy + Fn(TypeReference) -> TypeReference,
+                _map: impl Copy + Fn(TypeReference, &mut dyn TypeResolver) -> TypeReference,
                 _resolver: &mut dyn TypeResolver,
             ) -> Self {
                 *self
+            }
+
+            fn with_module_id(self, _module_id: ModuleId) -> Self {
+                self
+            }
+
+            fn with_scope_id(self, _scope_id: ScopeId) -> Self {
+                self
             }
         })+
     };

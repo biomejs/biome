@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import { cloneElement } from "react";
 import React from "react";
 

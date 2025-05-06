@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
     <a href="foobar"></a>
     <a randomTag></a>

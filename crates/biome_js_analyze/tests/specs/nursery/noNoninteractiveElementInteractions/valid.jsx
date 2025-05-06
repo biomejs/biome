@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
     {/* Custom Components */}
     <TestComponent onClick={doFoo} />

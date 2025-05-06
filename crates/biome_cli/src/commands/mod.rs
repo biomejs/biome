@@ -634,15 +634,18 @@ pub(crate) fn validate_configuration_diagnostics(
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {
     let diagnostics = loaded_configuration.as_diagnostics_iter();
-    for diagnostic in diagnostics {
-        if diagnostic.tags().is_verbose() && verbose {
-            console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
-        } else {
-            console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
-        }
-    }
 
+    // We want to print the diagnostics only if there are errors. Other diagnostics such as
+    // information/warnings will be printed during the traversal
     if loaded_configuration.has_errors() {
+        for diagnostic in diagnostics {
+            if diagnostic.tags().is_verbose() && verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
+            }
+        }
+
         return Err(CliDiagnostic::workspace_error(
             BiomeDiagnostic::invalid_configuration(
                 "Biome exited because the configuration resulted in errors. Please fix them.",

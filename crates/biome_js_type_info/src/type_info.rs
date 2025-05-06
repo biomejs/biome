@@ -22,7 +22,7 @@ use crate::globals::{
     GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS, GLOBAL_UNKNOWN_ID, PROMISE_ID,
 };
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
-use crate::{GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeId, TypeResolver};
+use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeId, TypeResolver};
 
 const UNKNOWN: TypeData = TypeData::Unknown;
 
@@ -83,6 +83,10 @@ impl Type {
             resolver: Arc::from(resolver),
             id,
         }
+    }
+
+    pub fn from_id(resolver: Arc<dyn TypeResolver>, id: ResolvedTypeId) -> Self {
+        Self { resolver, id }
     }
 
     /// Returns this type's [`TypeId`].
@@ -1066,6 +1070,9 @@ pub struct TypeofValue {
 
     /// The resolved type.
     pub ty: TypeReference,
+
+    /// ID of the scope from which the value is being referenced.
+    pub scope_id: Option<ScopeId>,
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
@@ -1139,17 +1146,6 @@ impl TypeReference {
             _ => [].into(),
         }
     }
-
-    pub fn with_module_id(&self, module_id: ModuleId) -> Self {
-        match self {
-            Self::Qualifier(qualifier) => Self::Qualifier(qualifier.clone()),
-            Self::Resolved(resolved_type_id) => {
-                Self::Resolved(resolved_type_id.with_module_id(module_id))
-            }
-            Self::Import(import) => Self::Import(import.clone()),
-            Self::Unknown => Self::Unknown,
-        }
-    }
 }
 
 /// Qualifier for a type that should be imported from another module.
@@ -1221,6 +1217,9 @@ pub struct TypeReferenceQualifier {
 
     /// Generic type parameters specified in the reference.
     pub type_parameters: Box<[TypeReference]>,
+
+    /// ID of the scope from which the qualifier is being referenced.
+    pub scope_id: Option<ScopeId>,
 }
 
 impl TypeReferenceQualifier {
@@ -1254,11 +1253,47 @@ impl TypeReferenceQualifier {
         self.path.len() == 1 && self.path[0] == "Promise"
     }
 
+    pub fn with_scope_id(self, scope_id: ScopeId) -> Self {
+        Self {
+            scope_id: Some(scope_id),
+            ..self
+        }
+    }
+
     pub fn without_type_parameters(&self) -> Self {
         Self {
             path: self.path.clone(),
             type_parameters: [].into(),
+            scope_id: self.scope_id,
         }
+    }
+}
+
+// We use `NonZeroU32` to allow niche optimizations.
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct ScopeId(pub(crate) std::num::NonZeroU32);
+
+// We don't implement `From<usize> for ScopeId` and `From<ScopeId> for usize`
+// to ensure that the API consumers don't create `ScopeId`.
+impl ScopeId {
+    pub const GLOBAL: Self = Self::new(0);
+
+    pub const fn new(index: usize) -> Self {
+        // SAFETY: We don't handle files exceeding `u32::MAX` bytes.
+        // Thus, it isn't possible to exceed `u32::MAX` scopes.
+        //
+        // Adding 1 ensures that the value is never equal to 0.
+        // Instead of adding 1, we could XOR the value with `u32::MAX`.
+        // This is what the [nonmax](https://docs.rs/nonmax/latest/nonmax/) crate does.
+        // However, this doesn't preserve the order.
+        // It is why we opted for adding 1.
+        Self(unsafe { std::num::NonZeroU32::new_unchecked(index.unchecked_add(1) as u32) })
+    }
+
+    pub const fn index(self) -> usize {
+        // SAFETY: The internal representation ensures that the value is never equal to 0.
+        // Thus, it is safe to substract 1.
+        (unsafe { self.0.get().unchecked_sub(1) }) as usize
     }
 }
 

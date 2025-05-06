@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 Number.parseInt("1");
 
 Number.parseFloat("1.1");

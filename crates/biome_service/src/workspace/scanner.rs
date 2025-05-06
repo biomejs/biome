@@ -8,12 +8,10 @@
 //! In other words, the scanner is both the scanning logic in this module as
 //! well as the watcher to allow continuous scanning.
 
-use super::ServiceDataNotification;
 use super::server::WorkspaceServer;
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
-use crate::workspace_watcher::WatcherSignalKind;
 use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
@@ -124,10 +122,6 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
         }
     }));
 
-    let mut paths = configs;
-    paths.append(&mut manifests);
-    ctx.workspace
-        .update_project_layout_for_paths(WatcherSignalKind::AddedOrChanged, &paths);
     let result = ctx
         .workspace
         .update_project_ignore_files(ctx.project_key, &ignore_paths);
@@ -141,14 +135,6 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
             scope.handle(ctx_ref, path.to_path_buf());
         }
     }));
-
-    ctx.workspace
-        .update_module_graph(WatcherSignalKind::AddedOrChanged, &handleable_paths);
-
-    let _ = ctx
-        .workspace
-        .notification_tx
-        .send(ServiceDataNotification::Updated);
 
     start.elapsed()
 }
@@ -274,25 +260,24 @@ impl TraversalContext for ScanContext<'_> {
             return false;
         }
 
-        if path.is_dir() {
+        if path
+            .symlink_metadata()
+            .is_ok_and(|metadata| metadata.is_dir())
+        {
             return true;
         }
+
         if self.scan_kind.is_known_files() {
-            // we don't need to check files inside node_modules if we are in known files mode
-            if path.is_dependency() {
-                false
-            } else {
-                path.is_ignore() || path.is_config() || path.is_manifest()
-            }
+            (path.is_ignore() || path.is_config() || path.is_manifest()) && !path.is_dependency()
         } else if path.is_dependency() {
-            path.ends_with(".d.ts")
+            path.is_type_declaration()
         } else {
             DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
         }
     }
 
     fn handle_path(&self, path: BiomePath) {
-        open_file(self, &path)
+        open_file(self, &path);
     }
 
     fn store_path(&self, path: BiomePath) {
