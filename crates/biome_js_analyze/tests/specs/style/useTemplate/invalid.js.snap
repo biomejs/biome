@@ -113,7 +113,7 @@ const x = a + ("b") + c;
 ```
 invalid.js:1:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
   > 1 │ foo + 'baz';
       │ ^^^^^^^^^^^
@@ -133,7 +133,7 @@ invalid.js:1:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:3:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     1 │ foo + 'baz';
     2 │ 
@@ -157,7 +157,7 @@ invalid.js:3:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     3 │ 1 * 2 + 'foo';
     4 │ 
@@ -181,7 +181,7 @@ invalid.js:5:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:7:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     5 │ 1 + 2 + 3 + "px" + 4 + 5;
     6 │ 
@@ -205,7 +205,7 @@ invalid.js:7:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:9:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
      7 │ a + b + c + 'px' + d + e;
      8 │ 
@@ -229,7 +229,7 @@ invalid.js:9:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:11:2 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
      9 │ 1 + 'foo' + 2 + 'bar' + 'baz' + 3;
     10 │ 
@@ -253,7 +253,7 @@ invalid.js:11:2 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:13:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     11 │ (1 + 'foo') * 2;
     12 │ 
@@ -277,7 +277,7 @@ invalid.js:13:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:13:6 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     11 │ (1 + 'foo') * 2;
     12 │ 
@@ -301,7 +301,7 @@ invalid.js:13:6 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:15:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     13 │ 1 * (2 + 'foo') + 'bar';
     14 │ 
@@ -325,7 +325,7 @@ invalid.js:15:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:17:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     15 │ 'foo' + 1;
     16 │ 
@@ -349,7 +349,7 @@ invalid.js:17:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:19:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     17 │ 'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
     18 │ 
@@ -373,7 +373,7 @@ invalid.js:19:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:21:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     19 │ 'foo' + 1 + 2;
     20 │ 
@@ -397,7 +397,7 @@ invalid.js:21:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:23:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     21 │ 1 + '2' - 3;
     22 │ 
@@ -421,7 +421,7 @@ invalid.js:23:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:25:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     23 │ foo() + ' bar';
     24 │ 
@@ -445,7 +445,7 @@ invalid.js:25:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:27:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     25 │ foo() + '\n';
     26 │ 
@@ -469,7 +469,7 @@ invalid.js:27:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:29:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     27 │ 1 * /**leading*/'foo'    /**trailing */                   + 'bar';
     28 │ 
@@ -493,7 +493,7 @@ invalid.js:29:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:31:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     29 │ `foo` + 1;
     30 │ 
@@ -517,7 +517,7 @@ invalid.js:31:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:35:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     33 │ // strings including `${`
     34 │ 
@@ -541,7 +541,7 @@ invalid.js:35:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:37:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     35 │ '${foo.' + bar + '.baz}';
     36 │ 
@@ -565,7 +565,7 @@ invalid.js:37:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:39:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     37 │ 'foo: ${bar.' + baz + '.bat}';
     38 │ 
@@ -589,7 +589,7 @@ invalid.js:39:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:41:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     39 │ 'foo: `bar.' + baz + '.bat}';
     40 │ 
@@ -613,7 +613,7 @@ invalid.js:41:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:43:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     41 │ '${foo}: `bar.' + baz + '.bat}';
     42 │ 
@@ -637,7 +637,7 @@ invalid.js:43:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:45:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     43 │ 'foo: ${bar.' + baz + '.bat}';
     44 │ 
@@ -661,7 +661,7 @@ invalid.js:45:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:47:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     45 │ 'foo: `bar.' + baz + '.bat}';
     46 │ 
@@ -685,7 +685,7 @@ invalid.js:47:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:49:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     47 │ 'foo: \\${bar.' + baz + '.bat}';
     48 │ 
@@ -709,7 +709,7 @@ invalid.js:49:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:53:11 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     51 │ // parentheses
     52 │ 
@@ -733,7 +733,7 @@ invalid.js:53:11 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
 ```
 invalid.js:55:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     53 │ const x = a + ("b") + c;
     54 │ 
@@ -757,7 +757,7 @@ invalid.js:55:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:58:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     57 │ //a
   > 58 │ /*b*/ foo /*c*/ + /*d*/ 'baz' /*e*/ + /*f*/ 1 //g
@@ -780,7 +780,7 @@ invalid.js:58:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:62:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     60 │ // parentheses and type coercion
     61 │ 
@@ -804,7 +804,7 @@ invalid.js:62:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:64:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     62 │ "a" + (1 + 2); // `a${1 + 2}`
     63 │ 
@@ -828,7 +828,7 @@ invalid.js:64:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:66:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     64 │ (1 + 2) + "a"; // `${1 + 2}a`
     65 │ 
@@ -852,7 +852,7 @@ invalid.js:66:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:68:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     66 │ 1 + 2 + "a"; // `${1 + 2}a`
     67 │ 
@@ -876,7 +876,7 @@ invalid.js:68:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:70:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     68 │ (1 + 2) + ("a"); // `${1 + 2}a`
     69 │ 
@@ -900,7 +900,7 @@ invalid.js:70:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:72:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     70 │ "a" + 1 + 2; // `a${1}${2}`
     71 │ 
@@ -924,7 +924,7 @@ invalid.js:72:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:74:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     72 │ 1 + (2 + "a"); // `${1}${2}a`
     73 │ 
@@ -948,7 +948,7 @@ invalid.js:74:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:76:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     74 │ (1 + 2) + (3 + 4) + "a"; // `${(1 + 2) + (3 + 4)}a`
     75 │ 
@@ -972,7 +972,7 @@ invalid.js:76:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:78:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     76 │ (1 + 2) + ((3 + 4) + "a"); // `${1 + 2}${3 + 4}a`
     77 │ 
@@ -996,7 +996,7 @@ invalid.js:78:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:80:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     78 │ "a" + (1 + 2 + "b"); // `a${1 + 2}b`
     79 │ 
@@ -1020,7 +1020,7 @@ invalid.js:80:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:82:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     80 │ (1 + 2 + "a") + "b"; // `${1 + 2}ab`
     81 │ 
@@ -1044,7 +1044,7 @@ invalid.js:82:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:84:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     82 │ ("a" + 1 + 2) + "b"; // `a${1}${2}b`
     83 │ 
@@ -1068,7 +1068,7 @@ invalid.js:84:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:86:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     84 │ ("a" + 1) + (2 + "b"); // `a${1}${2}b`
     85 │ 
@@ -1092,7 +1092,7 @@ invalid.js:86:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:88:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     86 │ (1 + 2) + (3 + "a") + 4 + (5 + ("b" + 6)); // `${1 + 2}${3}a${4}${5}b${6}`
     87 │ 
@@ -1116,7 +1116,7 @@ invalid.js:88:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:90:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     88 │ "a" + 1 + (2 + (3 + 4)); // `a${1}${2 + (3 + 4)}`
     89 │ 
@@ -1140,7 +1140,7 @@ invalid.js:90:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:92:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     90 │ 1 + (2 + (3 + 4)) + "a"; // `${1·+·(2·+·(3·+·4))}a`
     91 │ 
@@ -1164,7 +1164,7 @@ invalid.js:92:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:94:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     92 │ 1 - 2 + "a"; // `${1 - 2}a`
     93 │ 
@@ -1188,7 +1188,7 @@ invalid.js:94:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:96:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     94 │ "a" + (1 - 2); // `a${1 - 2}`
     95 │ 
@@ -1212,7 +1212,7 @@ invalid.js:96:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:98:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
      96 │ (foo && bar) + "baz"; // `${foo && bar}baz`
      97 │ 
@@ -1236,7 +1236,7 @@ invalid.js:98:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:100:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
      98 │ "foo" + (bar && baz); // `foo${bar && baz}`
      99 │ 
@@ -1260,7 +1260,7 @@ invalid.js:100:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
 ```
 invalid.js:102:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Template literals are preferred over string concatenation.
+  i Template literals are preferred over string concatenation.
   
     100 │ (1 + foo && bar) + "baz"; // `${1 + foo && bar}baz`
     101 │ 

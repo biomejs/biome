@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `file.js`
 
@@ -84,6 +83,51 @@ file.js:3:1 suppressions/incorrect ━━━━━━━━━━━━━━━
 ```
 
 ```block
+file.js:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+  > 2 │ let foo = 2;
+      │     ^^^
+    3 │ /**
+    4 │ * biome-ignore-all lint/style/useConst: reason
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend foo with an underscore.
+  
+    1 1 │   
+    2   │ - let·foo·=·2;
+      2 │ + let·_foo·=·2;
+    3 3 │   /**
+    4 4 │   * biome-ignore-all lint/style/useConst: reason
+  
+
+```
+
+```block
+file.js:8:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    6 │ */
+    7 │ debugger
+  > 8 │ let bar = 33;
+      │     ^^^
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend bar with an underscore.
+  
+    6 6 │   */
+    7 7 │   debugger
+    8   │ - let·bar·=·33;
+      8 │ + let·_bar·=·33;
+  
+
+```
+
+```block
 file.js:7:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This is an unexpected use of the debugger statement.
@@ -111,5 +155,5 @@ file.js:7:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
-Found 2 warnings.
+Found 4 warnings.
 ```

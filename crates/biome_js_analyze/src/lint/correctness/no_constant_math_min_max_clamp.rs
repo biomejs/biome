@@ -4,6 +4,7 @@ use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsCallExpression,
@@ -39,6 +40,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Clippy("min_max")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

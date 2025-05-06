@@ -13,7 +13,7 @@ export default hoge(Fuga)
 ```
 invalid_hooked_component.jsx:1:7 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Components should be exported.
+  ! Components should be exported.
   
   > 1 │ const Fuga = () => <></>
       │       ^^^^

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -46,6 +45,21 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+test.js:1:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function is unused.
+  
+  > 1 │ function setName(name) {
+      │          ^^^^^^^
+    2 │  currentName = name;
+    3 │ }
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```block
 test.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:
@@ -62,4 +76,5 @@ test.js format ━━━━━━━━━━━━━━━━━━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
+Found 1 warning.
 ```

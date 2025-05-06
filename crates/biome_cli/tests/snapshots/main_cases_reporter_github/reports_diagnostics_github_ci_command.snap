@@ -52,6 +52,38 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+::warning title=lint/correctness/noUnusedImports,file=index.ts,line=1,endLine=1,col=8,endColumn=12::This import is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedImports,file=index.ts,line=2,endLine=2,col=10,endColumn=11::Several of these imports are unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedVariables,file=index.ts,line=8,endLine=8,col=5,endColumn=6::This variable is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedVariables,file=index.ts,line=9,endLine=9,col=7,endColumn=8::This variable is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedImports,file=main.ts,line=1,endLine=1,col=8,endColumn=12::This import is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedImports,file=main.ts,line=2,endLine=2,col=10,endColumn=11::Several of these imports are unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedVariables,file=main.ts,line=8,endLine=8,col=5,endColumn=6::This variable is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedVariables,file=main.ts,line=9,endLine=9,col=7,endColumn=8::This variable is unused.
+```
+
+```block
 ::error title=lint/suspicious/noDoubleEquals,file=index.ts,line=4,endLine=4,col=3,endColumn=5::Using == may be unsafe if you are relying on type coercion.
 ```
 

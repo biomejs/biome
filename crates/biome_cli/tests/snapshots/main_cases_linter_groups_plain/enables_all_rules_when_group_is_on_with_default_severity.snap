@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -39,6 +38,20 @@ test1.js:1:28 lint/style/noArguments ━━━━━━━━━━━━━━�
 ```
 
 ```block
+test1.js:1:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function is unused.
+  
+  > 1 │ function f() { console.log(arguments); }
+      │          ^
+    2 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 1 warning.
+Found 2 warnings.
 ```

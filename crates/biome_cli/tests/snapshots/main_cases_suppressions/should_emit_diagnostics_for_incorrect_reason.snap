@@ -61,6 +61,52 @@ file.ts:3:1 suppressions/incorrect ━━━━━━━━━━━━━━━
 ```
 
 ```block
+file.ts:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    1 │ // biome-ignore-all lint/style/useConst:
+  > 2 │ var foo = 2;
+      │     ^^^
+    3 │ // biome-ignore-all lint/style/useConst: <explanation>
+    4 │ var bar = 33;
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend foo with an underscore.
+  
+    1 1 │   // biome-ignore-all lint/style/useConst:
+    2   │ - var·foo·=·2;
+      2 │ + var·_foo·=·2;
+    3 3 │   // biome-ignore-all lint/style/useConst: <explanation>
+    4 4 │   var bar = 33;
+  
+
+```
+
+```block
+file.ts:4:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    2 │ var foo = 2;
+    3 │ // biome-ignore-all lint/style/useConst: <explanation>
+  > 4 │ var bar = 33;
+      │     ^^^
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend bar with an underscore.
+  
+    2 2 │   var foo = 2;
+    3 3 │   // biome-ignore-all lint/style/useConst: <explanation>
+    4   │ - var·bar·=·33;
+      4 │ + var·_bar·=·33;
+  
+
+```
+
+```block
 file.ts:1:24 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Reason is missing and can't be empty.
@@ -80,5 +126,5 @@ file.ts:1:24 suppressions/parse ━━━━━━━━━━━━━━━━
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
-Found 2 warnings.
+Found 4 warnings.
 ```

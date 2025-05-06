@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -35,7 +34,7 @@ throw new Error() || "literal";
 ```
 invalid.js:1:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
   > 1 │ throw undefined;
       │ ^^^^^^^^^^^^^^^^
@@ -50,7 +49,7 @@ invalid.js:1:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━
 ```
 invalid.js:2:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     1 │ throw undefined;
   > 2 │ throw "error";
@@ -66,7 +65,7 @@ invalid.js:2:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━
 ```
 invalid.js:3:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     1 │ throw undefined;
     2 │ throw "error";
@@ -83,7 +82,7 @@ invalid.js:3:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━
 ```
 invalid.js:4:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     2 │ throw "error";
     3 │ throw 0;
@@ -100,7 +99,7 @@ invalid.js:4:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━
 ```
 invalid.js:5:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     3 │ throw 0;
     4 │ throw false;
@@ -117,7 +116,7 @@ invalid.js:5:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━
 ```
 invalid.js:6:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     4 │ throw false;
     5 │ throw null;
@@ -134,7 +133,7 @@ invalid.js:6:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━
 ```
 invalid.js:7:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     5 │ throw null;
     6 │ throw {};
@@ -151,7 +150,7 @@ invalid.js:7:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━
 ```
 invalid.js:9:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
      7 │ throw "a" + "b";
      8 │ const a = "";
@@ -168,7 +167,7 @@ invalid.js:9:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━
 ```
 invalid.js:11:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
      9 │ throw a + "b";
     10 │ let foo;
@@ -185,7 +184,7 @@ invalid.js:11:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:12:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     10 │ let foo;
     11 │ throw (foo = "error");
@@ -202,7 +201,7 @@ invalid.js:12:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:13:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     11 │ throw (foo = "error");
     12 │ throw (new Error(), 1, 2, 3);
@@ -219,7 +218,7 @@ invalid.js:13:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:14:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     12 │ throw (new Error(), 1, 2, 3);
     13 │ throw "literal" && "not an Error";
@@ -236,7 +235,7 @@ invalid.js:14:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:15:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     13 │ throw "literal" && "not an Error";
     14 │ throw "literal" || new Error();
@@ -253,7 +252,7 @@ invalid.js:15:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:16:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     14 │ throw "literal" || new Error();
     15 │ throw new Error() && "literal";
@@ -270,7 +269,7 @@ invalid.js:16:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:17:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     15 │ throw new Error() && "literal";
     16 │ throw "literal" ?? new Error();
@@ -287,7 +286,7 @@ invalid.js:17:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:18:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     16 │ throw "literal" ?? new Error();
     17 │ throw foo ? "not an Error" : "literal";
@@ -304,7 +303,7 @@ invalid.js:18:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:19:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     17 │ throw foo ? "not an Error" : "literal";
     18 │ throw foo ? new Error() : "literal";
@@ -321,7 +320,7 @@ invalid.js:19:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:20:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     18 │ throw foo ? new Error() : "literal";
     19 │ throw foo ? "literal" : new Error();
@@ -338,7 +337,7 @@ invalid.js:20:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:23:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     22 │ // False positives while valid, not a good practice.
   > 23 │ throw "literal" && new Error();
@@ -353,7 +352,7 @@ invalid.js:23:1 lint/style/useThrowOnlyError ━━━━━━━━━━━�
 ```
 invalid.js:24:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Throwing non-Error values is not allowed.
+  ! Throwing non-Error values is not allowed.
   
     22 │ // False positives while valid, not a good practice.
     23 │ throw "literal" && new Error();

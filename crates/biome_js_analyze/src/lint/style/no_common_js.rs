@@ -59,7 +59,7 @@ declare_lint_rule! {
             RuleSource::EslintImport("no-commonjs"),
         ],
         recommended: false,
-        severity: Severity::Information,
+        severity: Severity::Warning,
     }
 }
 

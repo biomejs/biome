@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFunction.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -35,7 +34,7 @@ try { } catch (e) { }
 ```
 invalidFunction.ts:1:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function is unused.
+  ! This function is unused.
   
   > 1 │ function f1() { }
       │          ^^
@@ -50,7 +49,7 @@ invalidFunction.ts:1:10 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 invalidFunction.ts:5:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function is unused.
+  ! This function is unused.
   
     3 │ // recursive functions are never called,
     4 │ // so they are invalid
@@ -67,7 +66,7 @@ invalidFunction.ts:5:10 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 invalidFunction.ts:9:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function is unused.
+  ! This function is unused.
   
      7 │ }
      8 │ 
@@ -84,7 +83,7 @@ invalidFunction.ts:9:10 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 invalidFunction.ts:17:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     16 │ // f5 is not used
   > 17 │ const f5 = () => { };
@@ -109,7 +108,7 @@ invalidFunction.ts:17:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidFunction.ts:20:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     19 │ // f6 is recursive, but never called
   > 20 │ const f6 = () => { f6() };
@@ -134,7 +133,7 @@ invalidFunction.ts:20:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidFunction.ts:23:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     22 │ // e is not used
   > 23 │ try { } catch (e) { }

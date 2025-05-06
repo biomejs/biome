@@ -1472,7 +1472,7 @@ fn applies_organize_imports() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let config = r#"{ "assist": { "enabled": true } }"#;
+    let config = r#"{ "linter": { "enabled": false }, "assist": { "enabled": true } }"#;
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config.as_bytes());
 
@@ -1517,7 +1517,8 @@ fn applies_organize_imports_bug_4552() {
         "linter": {
             "enabled": true,
             "rules": {
-                    "recommended": true
+                "recommended": true,
+                "correctness": { "noUnusedImports": "off" }
             }
         }
     }"#;
@@ -1593,7 +1594,15 @@ import * as something from "../something";
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+        Args::from(
+            [
+                "check",
+                "--linter-enabled=false",
+                "--write",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1614,7 +1623,7 @@ fn dont_applies_organize_imports_for_ignored_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{ "assist": { "enabled": true, "includes": ["**", "!check.js"] } }"#;
+    let rome_json = r#"{ "assist": { "enabled": true, "includes": ["**", "!check.js"] }, "linter": { "enabled": false } }"#;
 
     let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
@@ -1776,6 +1785,7 @@ fn check_stdin_write_unsafe_successfully() {
         Args::from(
             [
                 "check",
+                "--linter-enabled=false",
                 "--assist-enabled=true",
                 "--write",
                 "--unsafe",

@@ -3,6 +3,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::JsxOpeningElement;
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
@@ -50,6 +51,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintNext("no-head-element")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: true,
+        severity: Severity::Warning,
         domains: &[RuleDomain::Next],
     }
 }

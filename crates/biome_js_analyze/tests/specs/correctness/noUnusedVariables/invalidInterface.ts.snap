@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidInterface.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -18,7 +17,7 @@ export {};
 ```
 invalidInterface.ts:1:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This interface is unused.
+  ! This interface is unused.
   
   > 1 │ interface I {
       │           ^

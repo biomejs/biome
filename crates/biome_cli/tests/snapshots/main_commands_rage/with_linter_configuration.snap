@@ -85,8 +85,10 @@ Linter:
     complexity/noUselessTernary
     complexity/noUselessThisAlias
     complexity/noUselessTypeConstraint
+    complexity/noUselessUndefinedInitialization
     complexity/noWith
     complexity/useArrowFunction
+    complexity/useDateNow
     complexity/useFlatMap
     complexity/useLiteralKeys
     complexity/useOptionalChain

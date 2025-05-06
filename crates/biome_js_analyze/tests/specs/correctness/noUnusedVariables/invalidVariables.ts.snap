@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidVariables.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -28,7 +27,7 @@ let m, n;
 ```
 invalidVariables.ts:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
   > 1 │ var a = 1;
       │     ^
@@ -50,7 +49,7 @@ invalidVariables.ts:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidVariables.ts:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     1 │ var a = 1;
   > 2 │ let b = 1;
@@ -74,7 +73,7 @@ invalidVariables.ts:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidVariables.ts:3:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     1 │ var a = 1;
     2 │ let b = 1;
@@ -100,7 +99,7 @@ invalidVariables.ts:3:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidVariables.ts:5:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     3 │ const c = 1;
     4 │ 
@@ -117,7 +116,7 @@ invalidVariables.ts:5:7 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 invalidVariables.ts:6:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     5 │ var { d } = { d: 1 };
   > 6 │ let { e } = { e: 1 };
@@ -133,7 +132,7 @@ invalidVariables.ts:6:7 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 invalidVariables.ts:7:9 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     5 │ var { d } = { d: 1 };
     6 │ let { e } = { e: 1 };
@@ -150,7 +149,7 @@ invalidVariables.ts:7:9 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 invalidVariables.ts:9:6 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
      7 │ const { f } = { f: 1 };
      8 │ 
@@ -176,7 +175,7 @@ invalidVariables.ts:9:6 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidVariables.ts:10:6 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
      9 │ var [g] = [1];
   > 10 │ let [h] = [1];
@@ -201,7 +200,7 @@ invalidVariables.ts:10:6 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidVariables.ts:11:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
      9 │ var [g] = [1];
     10 │ let [h] = [1];
@@ -227,7 +226,7 @@ invalidVariables.ts:11:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidVariables.ts:13:8 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     11 │ const [i] = [1];
     12 │ 
@@ -244,7 +243,7 @@ invalidVariables.ts:13:8 lint/correctness/noUnusedVariables ━━━━━━�
 ```
 invalidVariables.ts:14:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     13 │ var [{ j }] = [{ j: 1 }]
   > 14 │ var { k: [l] } = { k: [1] }·
@@ -269,7 +268,7 @@ invalidVariables.ts:14:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━
 ```
 invalidVariables.ts:16:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     14 │ var { k: [l] } = { k: [1] }·
     15 │ 
@@ -293,7 +292,7 @@ invalidVariables.ts:16:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidVariables.ts:16:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     14 │ var { k: [l] } = { k: [1] }·
     15 │ 

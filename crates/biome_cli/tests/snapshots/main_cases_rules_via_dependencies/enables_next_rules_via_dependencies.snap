@@ -50,6 +50,25 @@ test.jsx:6:13 lint/performance/noImgElement ━━━━━━━━━━━━
 ```
 
 ```block
+test.jsx:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+  > 1 │ import React from 'react';
+      │        ^^^^^
+    2 │ 
+    3 │ function IndexPage() {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused imports.
+  
+    1 │ import·React·from·'react';
+      │ --------------------------
+
+```
+
+```block
 Checked 2 files in <TIME>. No fixes applied.
-Found 1 warning.
+Found 2 warnings.
 ```

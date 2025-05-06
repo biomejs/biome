@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -94,7 +93,7 @@ globalThis.NaN - globalThis.Infinity;
 ```
 invalid.js:1:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
   > 1 │ const foo = { [NaN]: 1 };
       │                ^^^
@@ -116,7 +115,7 @@ invalid.js:1:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
 ```
 invalid.js:3:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     1 │ const foo = { [NaN]: 1 };
     2 │ 
@@ -142,7 +141,7 @@ invalid.js:3:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
 ```
 invalid.js:5:5 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     3 │ const foo = { [NaN]() {} };
     4 │ 
@@ -168,7 +167,7 @@ invalid.js:5:5 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:8:3 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
      7 │ class A {
    > 8 │ 	[NaN]() {}
@@ -193,7 +192,7 @@ invalid.js:8:3 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:11:10 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
      9 │ }
     10 │ 
@@ -219,7 +218,7 @@ invalid.js:11:10 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:13:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     11 │ foo = { [NaN]: 1 };
     12 │ 
@@ -245,7 +244,7 @@ invalid.js:13:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:15:20 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     13 │ const foo = Infinity;
     14 │ 
@@ -271,7 +270,7 @@ invalid.js:15:20 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:18:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     16 │ }
     17 │ 
@@ -297,7 +296,7 @@ invalid.js:18:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:22:25 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     20 │ const foo = { Infinity };
     21 │ 
@@ -323,7 +322,7 @@ invalid.js:22:25 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:24:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     22 │ const foo = { Infinity: Infinity };
     23 │ 
@@ -349,7 +348,7 @@ invalid.js:24:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:24:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     22 │ const foo = { Infinity: Infinity };
     23 │ 
@@ -375,7 +374,7 @@ invalid.js:24:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:26:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     24 │ const foo = { [Infinity]: -Infinity };
     25 │ 
@@ -401,7 +400,7 @@ invalid.js:26:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:26:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     24 │ const foo = { [Infinity]: -Infinity };
     25 │ 
@@ -427,7 +426,7 @@ invalid.js:26:28 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:28:26 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     26 │ const foo = { [-Infinity]: Infinity };
     27 │ 
@@ -453,7 +452,7 @@ invalid.js:28:26 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:30:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     28 │ const foo = { Infinity: -Infinity };
     29 │ 
@@ -479,7 +478,7 @@ invalid.js:30:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:32:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     30 │ const { foo = Infinity } = {};
     31 │ 
@@ -505,7 +504,7 @@ invalid.js:32:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:34:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     32 │ const { foo = -Infinity } = {};
     33 │ 
@@ -531,7 +530,7 @@ invalid.js:34:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:36:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     34 │ const foo = Infinity.toString();
     35 │ 
@@ -557,7 +556,7 @@ invalid.js:36:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:38:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     36 │ const foo = -Infinity.toString();
     37 │ 
@@ -583,7 +582,7 @@ invalid.js:38:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:40:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     38 │ const foo = (-Infinity).toString();
     39 │ 
@@ -609,7 +608,7 @@ invalid.js:40:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:42:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     40 │ const foo = +Infinity;
     41 │ 
@@ -635,7 +634,7 @@ invalid.js:42:15 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:44:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     42 │ const foo = +-Infinity;
     43 │ 
@@ -661,7 +660,7 @@ invalid.js:44:14 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:46:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     44 │ const foo = -Infinity;
     45 │ 
@@ -687,7 +686,7 @@ invalid.js:46:16 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:48:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     46 │ const foo = -(-Infinity);
     47 │ 
@@ -713,7 +712,7 @@ invalid.js:48:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:50:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     48 │ const foo = 1 - Infinity;
     49 │ 
@@ -739,7 +738,7 @@ invalid.js:50:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:52:64 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     50 │ const foo = 1 - -Infinity;
     51 │ 
@@ -765,7 +764,7 @@ invalid.js:52:64 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:54:65 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     52 │ const isPositiveZero = (value) => value === 0 && 1 / value === Infinity;
     53 │ 
@@ -791,7 +790,7 @@ invalid.js:54:65 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:56:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     54 │ const isNegativeZero = (value) => value === 0 && 1 / value === -Infinity;
     55 │ 
@@ -817,7 +816,7 @@ invalid.js:56:13 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:58:10 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     56 │ const { a = NaN } = {};
     57 │ 
@@ -843,7 +842,7 @@ invalid.js:58:10 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:58:20 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     56 │ const { a = NaN } = {};
     57 │ 
@@ -869,7 +868,7 @@ invalid.js:58:20 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:60:12 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     58 │ const { [NaN]: a = NaN } = {};
     59 │ 
@@ -895,7 +894,7 @@ invalid.js:60:12 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:62:20 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     60 │ const [a = NaN] = [];
     61 │ 
@@ -921,7 +920,7 @@ invalid.js:62:20 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:64:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     62 │ function foo({ a = NaN }) {}
     63 │ 
@@ -947,7 +946,7 @@ invalid.js:64:17 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:64:27 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     62 │ function foo({ a = NaN }) {}
     63 │ 
@@ -973,7 +972,7 @@ invalid.js:64:27 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:66:19 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     64 │ function foo({ [NaN]: a = NaN }) {}
     65 │ 
@@ -999,7 +998,7 @@ invalid.js:66:19 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:69:10 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NEGATIVE_INFINITY instead of the equivalent global.
+  i Use Number.NEGATIVE_INFINITY instead of the equivalent global.
   
     68 │ function foo() {
   > 69 │ 	return -Infinity;
@@ -1024,7 +1023,7 @@ invalid.js:69:10 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━�
 ```
 invalid.js:72:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.parseFloat instead of the equivalent global.
+  i Use Number.parseFloat instead of the equivalent global.
   
     70 │ }
     71 │ 
@@ -1050,7 +1049,7 @@ invalid.js:72:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
 ```
 invalid.js:77:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.parseFloat instead of the equivalent global.
+  i Use Number.parseFloat instead of the equivalent global.
   
     75 │ // global.parseFloat(foo);
     76 │ 
@@ -1076,7 +1075,7 @@ invalid.js:77:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
 ```
 invalid.js:82:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.NaN instead of the equivalent global.
+  i Use Number.NaN instead of the equivalent global.
   
     80 │ // self.parseFloat(foo);
     81 │ 
@@ -1100,7 +1099,7 @@ invalid.js:82:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
 ```
 invalid.js:82:18 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number.POSITIVE_INFINITY instead of the equivalent global.
+  i Use Number.POSITIVE_INFINITY instead of the equivalent global.
   
     80 │ // self.parseFloat(foo);
     81 │ 

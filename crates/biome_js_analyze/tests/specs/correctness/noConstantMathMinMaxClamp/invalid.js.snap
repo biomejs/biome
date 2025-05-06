@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -31,7 +30,7 @@ foo(Math.min(0, Math.max(100, x)));
 ```
 invalid.js:1:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
   > 1 │ Math.min(0, Math.max(100, x));
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -58,7 +57,7 @@ invalid.js:1:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━
 ```
 invalid.js:3:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
     1 │ Math.min(0, Math.max(100, x));
     2 │ 
@@ -91,7 +90,7 @@ invalid.js:3:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━
 ```
 invalid.js:5:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
     3 │ Math.max(100, Math.min(0, x));
     4 │ 
@@ -124,7 +123,7 @@ invalid.js:5:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━
 ```
 invalid.js:7:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
     5 │ Math.max(100, Math.min(x, 0));
     6 │ 
@@ -157,7 +156,7 @@ invalid.js:7:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━
 ```
 invalid.js:9:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
      7 │ window.Math.min(0, window.Math.max(100, x));
      8 │ 
@@ -190,7 +189,7 @@ invalid.js:9:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━
 ```
 invalid.js:11:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
      9 │ window.Math.min(0, Math.max(100, x));
     10 │ 
@@ -223,7 +222,7 @@ invalid.js:11:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━�
 ```
 invalid.js:13:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
     11 │ Math.min(0, window.Math.max(100, x));
     12 │ 
@@ -256,7 +255,7 @@ invalid.js:13:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━�
 ```
 invalid.js:15:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
     13 │ globalThis.Math.min(0, globalThis.Math.max(100, x));
     14 │ 
@@ -289,7 +288,7 @@ invalid.js:15:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━�
 ```
 invalid.js:17:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
     15 │ globalThis.Math.min(0, Math.max(100, x));
     16 │ 
@@ -322,7 +321,7 @@ invalid.js:17:1 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━�
 ```
 invalid.js:19:5 lint/correctness/noConstantMathMinMaxClamp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This Math.min/Math.max combination leads to a constant result.
+  × This Math.min/Math.max combination leads to a constant result.
   
     17 │ Math.min(0, globalThis.Math.max(100, x));
     18 │ 

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidType.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -12,7 +11,7 @@ type A = string;
 ```
 invalidType.ts:1:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This type alias is unused.
+  ! This type alias is unused.
   
   > 1 │ type A = string;
       │      ^

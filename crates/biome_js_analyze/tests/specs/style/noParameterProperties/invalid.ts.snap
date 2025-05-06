@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -38,7 +37,7 @@ export class Foo7 {
 ```
 invalid.ts:2:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a more explicit class property instead of a parameter property.
+  ! Use a more explicit class property instead of a parameter property.
   
     1 │ export class Foo1 {
   > 2 │   constructor(readonly name: string) {}
@@ -54,7 +53,7 @@ invalid.ts:2:15 lint/style/noParameterProperties ━━━━━━━━━━�
 ```
 invalid.ts:6:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a more explicit class property instead of a parameter property.
+  ! Use a more explicit class property instead of a parameter property.
   
     5 │ export class Foo2 {
   > 6 │   constructor(private name: string) {}
@@ -70,7 +69,7 @@ invalid.ts:6:15 lint/style/noParameterProperties ━━━━━━━━━━�
 ```
 invalid.ts:10:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a more explicit class property instead of a parameter property.
+  ! Use a more explicit class property instead of a parameter property.
   
      9 │ export class Foo3 {
   > 10 │   constructor(protected name: string) {}
@@ -86,7 +85,7 @@ invalid.ts:10:15 lint/style/noParameterProperties ━━━━━━━━━━
 ```
 invalid.ts:14:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a more explicit class property instead of a parameter property.
+  ! Use a more explicit class property instead of a parameter property.
   
     13 │ export class Foo4 {
   > 14 │   constructor(public name: string) {}
@@ -102,7 +101,7 @@ invalid.ts:14:15 lint/style/noParameterProperties ━━━━━━━━━━
 ```
 invalid.ts:18:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a more explicit class property instead of a parameter property.
+  ! Use a more explicit class property instead of a parameter property.
   
     17 │ export class Foo5 {
   > 18 │   constructor(private readonly name: string) {}
@@ -118,7 +117,7 @@ invalid.ts:18:15 lint/style/noParameterProperties ━━━━━━━━━━
 ```
 invalid.ts:22:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a more explicit class property instead of a parameter property.
+  ! Use a more explicit class property instead of a parameter property.
   
     21 │ export class Foo6 {
   > 22 │   constructor(protected readonly name: string) {}
@@ -134,7 +133,7 @@ invalid.ts:22:15 lint/style/noParameterProperties ━━━━━━━━━━
 ```
 invalid.ts:26:15 lint/style/noParameterProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a more explicit class property instead of a parameter property.
+  ! Use a more explicit class property instead of a parameter property.
   
     25 │ export class Foo7 {
   > 26 │   constructor(public readonly name: string) {}

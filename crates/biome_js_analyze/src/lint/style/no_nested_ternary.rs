@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsConditionalExpression};
 use biome_rowan::{AstNode, TextRange};
 
@@ -45,6 +46,7 @@ declare_lint_rule! {
         name: "noNestedTernary",
         language: "js",
         recommended: false,
+        severity: Severity::Information,
         sources: &[RuleSource::Eslint("no-nested-ternary")],
     }
 }

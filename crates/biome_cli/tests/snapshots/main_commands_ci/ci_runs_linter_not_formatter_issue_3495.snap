@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -22,5 +21,24 @@ let a = !b || !c
 # Emitted Messages
 
 ```block
+file.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+  > 1 │ let a = !b || !c
+      │     ^
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+  - let·a·=·!b·||·!c
+  + let·_a·=·!b·||·!c
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
 ```

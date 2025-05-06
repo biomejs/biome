@@ -17,5 +17,23 @@ function sommething(chalk: ChalkInstance) {
 # Emitted Messages
 
 ```block
+file.ts:5:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function is unused.
+  
+    3 │ import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+    4 │ 
+  > 5 │ function sommething(chalk: ChalkInstance) {
+      │          ^^^^^^^^^^
+    6 │   console.log(chalk.yellow('we do something here'));
+    7 │ }
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
 ```

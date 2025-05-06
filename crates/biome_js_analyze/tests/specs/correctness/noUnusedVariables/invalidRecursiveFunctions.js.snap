@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidRecursiveFunctions.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -23,7 +22,7 @@ const h = function() {
 ```
 invalidRecursiveFunctions.js:1:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function is unused.
+  ! This function is unused.
   
   > 1 │ function f() {
       │          ^
@@ -38,7 +37,7 @@ invalidRecursiveFunctions.js:1:10 lint/correctness/noUnusedVariables ━━━�
 ```
 invalidRecursiveFunctions.js:5:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     3 │ }
     4 │ 
@@ -66,7 +65,7 @@ invalidRecursiveFunctions.js:5:7 lint/correctness/noUnusedVariables  FIXABLE  �
 ```
 invalidRecursiveFunctions.js:9:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
      7 │ }
      8 │ 

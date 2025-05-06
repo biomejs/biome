@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -116,7 +115,7 @@ function f (x) {
 ```
 invalid.js:4:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     2 │     if (x < 0) {
     3 │         throw new RangeError();
@@ -145,7 +144,7 @@ invalid.js:4:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━
 ```
 invalid.js:13:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     11 │     if (x < 0) {
     12 │         throw new RangeError();
@@ -174,7 +173,7 @@ invalid.js:13:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:22:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     20 │     if (x < 0) {
     21 │         throw new RangeError();
@@ -193,7 +192,7 @@ invalid.js:22:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:28:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     26 │     if (x < 0)
     27 │         throw new RangeError();
@@ -214,7 +213,7 @@ invalid.js:28:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:35:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     33 │     if (x < 0) {
     34 │         throw new RangeError();
@@ -238,7 +237,7 @@ invalid.js:35:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:37:7 lint/style/noUselessElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     35 │     } else if (x === 0) {
     36 │         return 1;
@@ -256,7 +255,7 @@ invalid.js:37:7 lint/style/noUselessElse ━━━━━━━━━━━━━
 ```
 invalid.js:46:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     44 │         if (x < 0) {
     45 │             break;
@@ -285,7 +284,7 @@ invalid.js:46:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:57:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     55 │         if (x < 0) {
     56 │             break;
@@ -314,7 +313,7 @@ invalid.js:57:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:73:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     71 │                 return x;
     72 │         }
@@ -343,7 +342,7 @@ invalid.js:73:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:88:13 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
     86 │                 return x;
     87 │         }
@@ -376,7 +375,7 @@ invalid.js:88:13 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:101:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted because previous branches break early.
+  i This else clause can be omitted because previous branches break early.
   
      99 │     }
     100 │     // Some explanations

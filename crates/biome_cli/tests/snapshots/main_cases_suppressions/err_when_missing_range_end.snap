@@ -31,6 +31,48 @@ file.ts:2:1 suppressions/incorrect ━━━━━━━━━━━━━━━
 ```
 
 ```block
+file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    2 │ // biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+    3 │ import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+  > 4 │ import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+      │             ^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ function sommething(chalk: ChalkInstance) {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused imports.
+  
+    2 2 │   // biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
+    3 3 │   import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
+    4   │ - import·type·{·ChalkInstance2·}·from·"chalk2"·with·{·"resolution-mode":·"import"·};
+    5 4 │   
+    6 5 │   function sommething(chalk: ChalkInstance) {
+  
+
+```
+
+```block
+file.ts:6:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function is unused.
+  
+    4 │ import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+    5 │ 
+  > 6 │ function sommething(chalk: ChalkInstance) {
+      │          ^^^^^^^^^^
+    7 │   console.log(chalk.yellow('we do something here'));
+    8 │ }
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 1 warning.
+Found 3 warnings.
 ```

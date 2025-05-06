@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -59,6 +59,21 @@ file.js:2:1 lint/suspicious/noClassAssign ━━━━━━━━━━━━�
 ```
 
 ```block
+file.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This class is unused.
+  
+  > 1 │ class A {};
+      │       ^
+    2 │ A = 0;
+    3 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 1 warning.
+Found 2 warnings.
 ```

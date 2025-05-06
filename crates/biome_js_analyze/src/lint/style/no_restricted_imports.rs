@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsExpression,
     AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember, JsCallExpression,
@@ -323,6 +324,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-restricted-imports")
         ],
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 

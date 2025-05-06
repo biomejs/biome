@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
 use std::str::FromStr;
 
 declare_lint_rule! {
-    /// Disallow number literal object member names which are not base10 or uses underscore as separator
+    /// Disallow number literal object member names which are not base 10 or use underscore as separator.
     ///
     /// ## Examples
     ///
@@ -48,7 +48,7 @@ declare_lint_rule! {
         name: "useSimpleNumberKeys",
         language: "js",
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

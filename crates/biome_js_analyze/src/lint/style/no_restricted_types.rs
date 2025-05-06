@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::TsReferenceType;
 use biome_rowan::AstNode;
@@ -52,6 +53,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-restricted-types"),
         ],
         recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

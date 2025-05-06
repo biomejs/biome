@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `file.vue`
 
@@ -28,23 +28,12 @@ const slots = defineSlots<{
 <template></template>
 ```
 
-# Termination Message
-
-```block
-lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Some errors were emitted while running checks.
-  
-
-
-```
-
 # Emitted Messages
 
 ```block
 file.vue:17:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     16 │ const slots = defineSlots<{
   > 17 │ 		default(props: { msg: string }): any
@@ -58,6 +47,32 @@ file.vue:17:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━�
 ```
 
 ```block
+file.vue:16:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    14 │ })
+    15 │ 
+  > 16 │ const slots = defineSlots<{
+       │       ^^^^^
+    17 │ 		default(props: { msg: string }): any
+    18 │ }>()
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend slots with an underscore.
+  
+    13 13 │   })
+    14 14 │   
+    15    │ - const·slots·=·defineSlots<{
+       15 │ + const·_slots·=·defineSlots<{
+    16 16 │   		default(props: { msg: string }): any
+    17 17 │   }>()
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 1 error.
+Found 2 warnings.
 ```

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -57,7 +56,7 @@ describe("foo", () => {
 ```
 invalid.js:6:6 lint/complexity/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Excessive `describe()` nesting detected.
+  i Excessive `describe()` nesting detected.
   
      4 │ 			describe("qux", function () {
      5 │ 				describe("quxx", function () {
@@ -81,7 +80,7 @@ invalid.js:6:6 lint/complexity/noExcessiveNestedTestSuites ━━━━━━━
 ```
 invalid.js:24:6 lint/complexity/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Excessive `describe()` nesting detected.
+  i Excessive `describe()` nesting detected.
   
     22 │ 			describe("baz1", () => {
     23 │ 				describe("baz2", () => {
@@ -105,7 +104,7 @@ invalid.js:24:6 lint/complexity/noExcessiveNestedTestSuites ━━━━━━�
 ```
 invalid.js:30:6 lint/complexity/noExcessiveNestedTestSuites ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Excessive `describe()` nesting detected.
+  i Excessive `describe()` nesting detected.
   
     28 │ 					});
     29 │ 

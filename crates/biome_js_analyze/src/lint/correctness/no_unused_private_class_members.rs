@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, AnyJsName,
     JsAssignmentExpression, JsAssignmentOperator, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
@@ -64,7 +65,8 @@ declare_lint_rule! {
         name: "noUnusedPrivateClassMembers",
         language: "js",
         sources: &[RuleSource::Eslint("no-unused-private-class-members")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

@@ -19,8 +19,7 @@ expression: redactor(content)
 ## `index.ts`
 
 ```ts
-import { a, b, z } from "lodash";
-import { z } from "z";
+import { a, b } from "lodash";
 
 a == b;
 a == b;
@@ -44,8 +43,7 @@ let f;
 ## `main.ts`
 
 ```ts
-import { a, b, z } from "lodash";
-import { z } from "z";
+import { a, b } from "lodash";
 
 a == b;
 a == b;
@@ -164,20 +162,21 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Skipped 16 suggested fixes.
+Skipped 60 suggested fixes.
 If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
 
 ```
 
 ```block
 The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
-Diagnostics not shown: 40.
+Diagnostics not shown: 50.
 ```
 
 ```block
 Scanned project folder in <TIME>.
 Checked 3 files in <TIME>. Fixed 2 files.
-Found 45 errors.
+Found 43 errors.
+Found 12 warnings.
 ```
 
 ```block

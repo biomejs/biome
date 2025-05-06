@@ -12,7 +12,7 @@ createRoot(document.getElementById("root")).render(<App />);
 ```
 invalid_unexported_component.jsx:1:7 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexported components are not allowed.
+  ! Unexported components are not allowed.
   
   > 1 │ const App = () => {}
       │       ^^^

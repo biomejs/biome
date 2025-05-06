@@ -28,7 +28,7 @@ const identifier: InvalidUse = 'foo';
 ```
 invalidCustom.ts:2:19 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Only CustomType2 is allowed
+  ! Only CustomType2 is allowed
   
     1 │ type CustomType = unknown
   > 2 │ function fn2(arg: CustomType) {
@@ -50,7 +50,7 @@ invalidCustom.ts:2:19 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━�
 ```
 invalidCustom.ts:7:21 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Only CustomType2 is allowed
+  ! Only CustomType2 is allowed
   
   > 7 │ class Foo<T extends CustomType = String> extends Bar<CustomType> implements CustomType<Object> {
       │                     ^^^^^^^^^^
@@ -72,7 +72,7 @@ invalidCustom.ts:7:21 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━�
 ```
 invalidCustom.ts:7:54 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Only CustomType2 is allowed
+  ! Only CustomType2 is allowed
   
   > 7 │ class Foo<T extends CustomType = String> extends Bar<CustomType> implements CustomType<Object> {
       │                                                      ^^^^^^^^^^
@@ -94,7 +94,7 @@ invalidCustom.ts:7:54 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━�
 ```
 invalidCustom.ts:7:77 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Only CustomType2 is allowed
+  ! Only CustomType2 is allowed
   
   > 7 │ class Foo<T extends CustomType = String> extends Bar<CustomType> implements CustomType<Object> {
       │                                                                             ^^^^^^^^^^^^^^^^^^
@@ -116,7 +116,7 @@ invalidCustom.ts:7:77 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━�
 ```
 invalidCustom.ts:10:11 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Only CustomType2 is allowed
+  ! Only CustomType2 is allowed
   
      8 │   constructor(foo: String | Object) {}
      9 │ 
@@ -140,7 +140,7 @@ invalidCustom.ts:10:11 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━
 ```
 invalidCustom.ts:11:30 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Only CustomType2 is allowed
+  ! Only CustomType2 is allowed
   
     10 │   exit(): CustomType<String> {
   > 11 │     const foo: String = 1 as CustomType;
@@ -163,7 +163,7 @@ invalidCustom.ts:11:30 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━
 ```
 invalidCustom.ts:16:12 lint/style/noRestrictedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Replace Bar with Foo
+  ! Replace Bar with Foo
   
   > 16 │ const foo: Bar = 1;
        │            ^^^
@@ -176,7 +176,7 @@ invalidCustom.ts:16:12 lint/style/noRestrictedTypes ━━━━━━━━━�
 ```
 invalidCustom.ts:18:19 lint/style/noRestrictedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not use this type
+  ! Do not use this type
   
     16 │ const foo: Bar = 1;
     17 │ 

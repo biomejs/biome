@@ -98,7 +98,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-inferrable-types")],
         recommended: false,
-        severity: Severity::Warning,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }

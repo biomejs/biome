@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: unusedInferBogusConditional.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -12,7 +11,7 @@ export type ToPascalCase<S extends string> = S extends `${infer Prefix}` ? : ;
 ```
 unusedInferBogusConditional.ts:1:65 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
   > 1 │ export type ToPascalCase<S extends string> = S extends `${infer Prefix}` ? : ;
       │                                                                 ^^^^^^

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -46,23 +45,12 @@ describe("foo", () => {
     
 ```
 
-# Termination Message
-
-```block
-lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Some errors were emitted while running checks.
-  
-
-
-```
-
 # Emitted Messages
 
 ```block
 test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't focus the test.
+  ! Don't focus the test.
   
   > 1 │ describe.only("bar", () => {});
       │          ^^^^
@@ -81,5 +69,5 @@ test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━�
 
 ```block
 Checked 2 files in <TIME>. No fixes applied.
-Found 1 error.
+Found 1 warning.
 ```

@@ -7,6 +7,7 @@ use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, JsNewOrCallExpression, global_identifier, static_value::StaticValue,
 };
@@ -78,6 +79,7 @@ declare_lint_rule! {
             //RuleSource::Eslint("no-new-native-nonconstructor"),
         ],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

@@ -1987,8 +1987,6 @@ array.map((sentence) => sentence.split(" ")).flat();
         Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_not_disable_recommended_rules_for_a_group",

@@ -42,6 +42,74 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+test.jsx:4:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function is unused.
+  
+    2 │ import { useCallback } from "react";
+    3 │ 
+  > 4 │ function Component2() {
+      │          ^^^^^^^^^^
+    5 │     const [local,SetLocal] = useState(0);
+    6 │     const handle = useCallback(() => {
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+
+```
+
+```block
+test.jsx:5:18 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    4 │ function Component2() {
+  > 5 │     const [local,SetLocal] = useState(0);
+      │                  ^^^^^^^^
+    6 │     const handle = useCallback(() => {
+    7 │       console.log(local);
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend SetLocal with an underscore.
+  
+     3  3 │   
+     4  4 │   function Component2() {
+     5    │ - ····const·[local,SetLocal]·=·useState(0);
+        5 │ + ····const·[local,_SetLocal]·=·useState(0);
+     6  6 │       const handle = useCallback(() => {
+     7  7 │         console.log(local);
+  
+
+```
+
+```block
+test.jsx:6:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    4 │ function Component2() {
+    5 │     const [local,SetLocal] = useState(0);
+  > 6 │     const handle = useCallback(() => {
+      │           ^^^^^^
+    7 │       console.log(local);
+    8 │     }, [local, local]);
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend handle with an underscore.
+  
+     4  4 │   function Component2() {
+     5  5 │       const [local,SetLocal] = useState(0);
+     6    │ - ····const·handle·=·useCallback(()·=>·{
+        6 │ + ····const·_handle·=·useCallback(()·=>·{
+     7  7 │         console.log(local);
+     8  8 │       }, [local, local]);
+  
+
+```
+
+```block
 test.jsx:6:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: local
@@ -72,4 +140,5 @@ test.jsx:6:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━�
 ```block
 Checked 2 files in <TIME>. No fixes applied.
 Found 1 error.
+Found 3 warnings.
 ```

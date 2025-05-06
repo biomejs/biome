@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 103
 expression: issue_5620.js
 ---
 # Input
@@ -17,7 +16,7 @@ callFn(console.log);
 ```
 issue_5620.js:5:8 lint/suspicious/noConsole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't use console.
+  ! Don't use console.
   
     3 │ }
     4 │ 

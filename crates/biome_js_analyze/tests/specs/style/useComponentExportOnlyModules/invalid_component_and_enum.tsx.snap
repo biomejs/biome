@@ -17,7 +17,7 @@ export enum SampleEnum {
 ```
 invalid_component_and_enum.tsx:2:13 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Exporting a non-component with components is not allowed.
+  ! Exporting a non-component with components is not allowed.
   
     1 │ export const SampleComponent = () => <></>
   > 2 │ export enum SampleEnum {

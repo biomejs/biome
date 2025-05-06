@@ -2,6 +2,7 @@ use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsNewOrCallExpression, JsSyntaxKind, T, global_identifier,
@@ -51,7 +52,8 @@ declare_lint_rule! {
         name: "useArrayLiterals",
         language: "js",
         sources: &[RuleSource::Eslint("no-array-constructor"), RuleSource::EslintTypeScript("no-array-constructor")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

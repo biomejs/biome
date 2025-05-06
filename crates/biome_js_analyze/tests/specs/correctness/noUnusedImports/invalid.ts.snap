@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -39,7 +38,7 @@ import type { L as M, } from "mod"; // Import comment
 ```
 invalid.ts:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     1 │ // Header comment
   > 2 │ import type A from "mod";
@@ -63,7 +62,7 @@ invalid.ts:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.ts:5:18 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     4 │ // Header comment
   > 5 │ import type * as B from "mod"; // Import comment
@@ -90,7 +89,7 @@ invalid.ts:5:18 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.ts:8:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
      7 │ // Header comment
    > 8 │ import type { C } from "mod"; // Import comment
@@ -118,7 +117,7 @@ invalid.ts:8:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.ts:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These imports are unused.
+  ! These imports are unused.
   
     12 │ // Header comment
   > 13 │ import /*a*/ D /*b*/, /*c*/{ type E }/*d*/ from "mod"; // Import comment
@@ -150,7 +149,7 @@ invalid.ts:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
 ```
 invalid.ts:15:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These imports are unused.
+  ! These imports are unused.
   
     13 │ import /*a*/ D /*b*/, /*c*/{ type E }/*d*/ from "mod"; // Import comment
     14 │ 
@@ -178,7 +177,7 @@ invalid.ts:15:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
 ```
 invalid.ts:17:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     15 │ import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
     16 │ 
@@ -215,7 +214,7 @@ invalid.ts:17:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.ts:23:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     21 │ } from "mod";
     22 │ 
@@ -243,7 +242,7 @@ invalid.ts:23:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.ts:26:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     25 │ // Header comment
   > 26 │ import type { L as M, } from "mod"; // Import comment

@@ -14,7 +14,7 @@ export default memo(func)
 ```
 invalid_hooked_non_component.jsx:3:16 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━━━
 
-  i Exporting a non-component with components is not allowed.
+  ! Exporting a non-component with components is not allowed.
   
     1 │ export const Hoge = () => {}
     2 │ const func = () => {}

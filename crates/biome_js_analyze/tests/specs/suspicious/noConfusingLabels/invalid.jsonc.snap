@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
-snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -12,7 +11,7 @@ label: foo();
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ label: foo();
       │ ^^^^^
@@ -32,7 +31,7 @@ A: const foo = 0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ A: const foo = 0;
       │ ^
@@ -52,7 +51,7 @@ A: break A = 0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ A: break A = 0;
       │ ^
@@ -72,7 +71,7 @@ A: let foo = 0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ A: let foo = 0;
       │ ^
@@ -92,7 +91,7 @@ A: if (a) { if (foo()) { break A; } bar(); };
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ A: if (a) { if (foo()) { break A; } bar(); };
       │ ^
@@ -112,7 +111,7 @@ A: { if (foo()) { break A; } bar(); };
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ A: { if (foo()) { break A; } bar(); };
       │ ^
@@ -132,7 +131,7 @@ A: { if (foo()) { break A; } bar(); };
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ A: { if (foo()) { break A; } bar(); };
       │ ^
@@ -152,7 +151,7 @@ A: { if (foo()) { break A; } bar(); };
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ A: { if (foo()) { break A; } bar(); };
       │ ^
@@ -172,7 +171,7 @@ A: switch (a) { case 0: break A; default: break; };
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ A: switch (a) { case 0: break A; default: break; };
       │ ^
@@ -192,7 +191,7 @@ A: switch (a) { case 0: break A; default: break; };
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ A: switch (a) { case 0: break A; default: break; };
       │ ^
@@ -212,7 +211,7 @@ $: {}
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected label.
+  ! Unexpected label.
   
   > 1 │ $: {}
       │ ^

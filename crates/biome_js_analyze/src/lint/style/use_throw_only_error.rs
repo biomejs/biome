@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsLogicalExpression, JsObjectExpression, JsSyntaxKind,
     JsThrowStatement,
@@ -56,6 +57,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("no-throw-literal"), RuleSource::EslintTypeScript("only-throw-error")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 

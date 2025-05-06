@@ -25,5 +25,28 @@ var a = foo;
 # Emitted Messages
 
 ```block
+src/file.mjs:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    1 │ import { foo } from "foo";
+  > 2 │ var a = foo;
+      │     ^
+    3 │ 
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+    1 1 │   import { foo } from "foo";
+    2   │ - var·a·=·foo;
+      2 │ + var·_a·=·foo;
+    3 3 │   
+  
+
+```
+
+```block
 Checked 3 files in <TIME>. No fixes applied.
+Found 1 warning.
 ```

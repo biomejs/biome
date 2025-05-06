@@ -18,6 +18,7 @@ use biome_deserialize::{
     DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
 };
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
@@ -641,6 +642,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintTypeScript("naming-convention")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }

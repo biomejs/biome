@@ -3,6 +3,7 @@ use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions}
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
@@ -141,7 +142,8 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-unused-vars"),
             RuleSource::EslintUnusedImports("no-unused-vars")
         ],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

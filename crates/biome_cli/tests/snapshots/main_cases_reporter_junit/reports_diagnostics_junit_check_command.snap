@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `index.ts`
 
@@ -46,7 +45,47 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Biome" tests="14" failures="14" errors="16" time="<TIME>">
+<testsuites name="Biome" tests="22" failures="22" errors="16" time="<TIME>">
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedImports" line="1" column="8">
+            <failure message="This import is unused.">line 0, col 7, This import is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedImports" line="2" column="10">
+            <failure message="Several of these imports are unused.">line 1, col 9, Several of these imports are unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="8" column="5">
+            <failure message="This variable is unused.">line 7, col 4, This variable is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="9" column="7">
+            <failure message="This variable is unused.">line 8, col 6, This variable is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedImports" line="1" column="8">
+            <failure message="This import is unused.">line 0, col 7, This import is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedImports" line="2" column="10">
+            <failure message="Several of these imports are unused.">line 1, col 9, Several of these imports are unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="8" column="5">
+            <failure message="This variable is unused.">line 7, col 4, This variable is unused.</failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="main.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
+        <testcase name="org.biome.lint.correctness.noUnusedVariables" line="9" column="7">
+            <failure message="This variable is unused.">line 8, col 6, This variable is unused.</failure>
+        </testcase>
+    </testsuite>
     <testsuite name="index.ts" tests="1" disabled="0" errors="0" failures="1" package="org.biome">
         <testcase name="org.biome.assist.source.organizeImports" line="1" column="1">
             <failure message="The imports and exports are not sorted.">line 0, col 0, The imports and exports are not sorted.</failure>

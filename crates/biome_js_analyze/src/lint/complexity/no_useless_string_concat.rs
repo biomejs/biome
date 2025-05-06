@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     js_binary_expression, js_string_literal, js_string_literal_expression,
 };
@@ -66,6 +67,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-concat")],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

@@ -5,6 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize::DeserializationContext;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsIdentifierUsage, JsExportNamedSpecifier, binding_ext::AnyJsIdentifierBinding,
 };
@@ -146,6 +147,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintUnicorn("filename-case")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
+        severity: Severity::Information,
     }
 }
 

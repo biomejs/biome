@@ -13,7 +13,7 @@ export default class hoge {
 ```
 invalid_component_and_default_class.jsx:2:22 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━━━
 
-  i Exporting a non-component with components is not allowed.
+  ! Exporting a non-component with components is not allowed.
   
     1 │ export const SampleComponent = () => <></>
   > 2 │ export default class hoge {

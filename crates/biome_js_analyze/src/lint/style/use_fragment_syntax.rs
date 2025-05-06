@@ -4,6 +4,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     jsx_child_list, jsx_closing_fragment, jsx_fragment, jsx_opening_fragment,
 };
@@ -32,6 +33,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-fragments")],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

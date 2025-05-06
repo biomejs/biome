@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `file.vue`
 
@@ -29,6 +28,31 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+file.vue:5:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+    3 │ delete a.c;
+    4 │ 
+  > 5 │ var foo = "";
+      │     ^^^
+    6 │ </script>
+    7 │ <template></template>
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend foo with an underscore.
+  
+    2 2 │   delete a.c;
+    3 3 │   
+    4   │ - var·foo·=·"";
+      4 │ + var·_foo·=·"";
+    5 5 │   
+  
+
+```
+
+```block
 file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Using == may be unsafe if you are relying on type coercion.
@@ -51,4 +75,5 @@ file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
+Found 1 warning.
 ```

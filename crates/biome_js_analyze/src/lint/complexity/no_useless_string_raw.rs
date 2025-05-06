@@ -36,6 +36,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Information,
+        severity: Severity::Information,
     }
 }
 

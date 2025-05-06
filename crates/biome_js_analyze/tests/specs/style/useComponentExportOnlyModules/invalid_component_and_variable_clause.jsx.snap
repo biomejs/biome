@@ -15,7 +15,7 @@ export { foo, Bar, baz as qux }
 ```
 invalid_component_and_variable_clause.jsx:4:10 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━
 
-  i Exporting a non-component with components is not allowed.
+  ! Exporting a non-component with components is not allowed.
   
     2 │ const Bar = () => {};
     3 │ const baz = 4;
@@ -35,7 +35,7 @@ invalid_component_and_variable_clause.jsx:4:10 lint/style/useComponentExportOnly
 ```
 invalid_component_and_variable_clause.jsx:4:27 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━
 
-  i Exporting a non-component with components is not allowed.
+  ! Exporting a non-component with components is not allowed.
   
     2 │ const Bar = () => {};
     3 │ const baz = 4;

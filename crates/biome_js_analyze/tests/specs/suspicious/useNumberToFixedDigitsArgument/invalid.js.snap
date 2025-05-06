@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -18,7 +17,7 @@ const bigNumber = new BigNumber(1); const string3 = bigNumber.toFixed();
 ```
 invalid.js:1:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Specify the number of digits you want to appear after the decimal point.
+  ! Specify the number of digits you want to appear after the decimal point.
   
   > 1 │ const string1 = number.toFixed();
       │                               ^^
@@ -35,7 +34,7 @@ invalid.js:1:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━�
 ```
 invalid.js:2:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Specify the number of digits you want to appear after the decimal point.
+  ! Specify the number of digits you want to appear after the decimal point.
   
     1 │ const string1 = number.toFixed();
   > 2 │ const string2 = number.toFixed(/* comment */);
@@ -53,7 +52,7 @@ invalid.js:2:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━�
 ```
 invalid.js:3:18 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Specify the number of digits you want to appear after the decimal point.
+  ! Specify the number of digits you want to appear after the decimal point.
   
     1 │ const string1 = number.toFixed();
     2 │ const string2 = number.toFixed(/* comment */);
@@ -72,7 +71,7 @@ invalid.js:3:18 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━�
 ```
 invalid.js:6:70 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Specify the number of digits you want to appear after the decimal point.
+  ! Specify the number of digits you want to appear after the decimal point.
   
     5 │ // False positive cases
   > 6 │ const bigNumber = new BigNumber(1); const string3 = bigNumber.toFixed();

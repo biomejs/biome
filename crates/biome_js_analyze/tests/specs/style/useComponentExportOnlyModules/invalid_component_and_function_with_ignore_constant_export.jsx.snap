@@ -12,7 +12,7 @@ export const Bar = () => {}
 ```
 invalid_component_and_function_with_ignore_constant_export.jsx:1:14 lint/style/useComponentExportOnlyModules ━━━━━━━━━━
 
-  i Exporting a non-component with components is not allowed.
+  ! Exporting a non-component with components is not allowed.
   
   > 1 │ export const foo = () => {}
       │              ^^^

@@ -1,5 +1,6 @@
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::CanBeImportedExported;
 use biome_js_syntax::AnyJsImportSpecifier;
 use biome_rowan::AstNode;
@@ -47,6 +48,7 @@ declare_lint_rule! {
         name: "noExportedImports",
         language: "js",
         recommended: false,
+        severity: Severity::Information,
     }
 }
 

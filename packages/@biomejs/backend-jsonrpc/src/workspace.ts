@@ -1244,7 +1244,7 @@ export interface Complexity {
 	 */
 	useRegexLiterals?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow number literal object member names which are not base10 or uses underscore as separator
+	 * Disallow number literal object member names which are not base 10 or use underscore as separator.
 	 */
 	useSimpleNumberKeys?: RuleFixConfiguration_for_Null;
 	/**

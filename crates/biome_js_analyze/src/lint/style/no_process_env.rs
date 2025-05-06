@@ -1,5 +1,6 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsStaticMemberExpression, global_identifier};
 use biome_rowan::AstNode;
 
@@ -41,6 +42,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintN("no-process-env")],
         recommended: false,
+        severity: Severity::Information,
     }
 }
 

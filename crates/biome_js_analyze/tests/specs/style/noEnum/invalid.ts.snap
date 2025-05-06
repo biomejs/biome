@@ -14,7 +14,7 @@ enum MyEnum {
 ```
 invalid.ts:1:1 lint/style/noEnum ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't use enum
+  ! Don't use enum
   
   > 1 │ enum MyEnum {
       │ ^^^^^^^^^^^^^

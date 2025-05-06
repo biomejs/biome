@@ -4,6 +4,7 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::{MarkupBuf, markup};
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression,
@@ -77,6 +78,7 @@ declare_lint_rule! {
         name: "useAtIndex",
         language: "js",
         recommended: false,
+        severity: Severity::Information,
         sources: &[RuleSource::EslintUnicorn("prefer-at")],
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,

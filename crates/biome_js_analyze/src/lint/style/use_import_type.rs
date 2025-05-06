@@ -156,7 +156,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("consistent-type-imports")],
         source_kind: RuleSourceKind::Inspired,
-        recommended: false,
+        recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }

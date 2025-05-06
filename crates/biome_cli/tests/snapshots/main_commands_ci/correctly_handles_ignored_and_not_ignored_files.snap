@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -51,6 +50,24 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+/formatter-ignored/test.js:1:23 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable is unused.
+  
+  > 1 │ statement(    ) ; let a = !b || !c;
+      │                       ^
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+  - statement(····)·;·let·a·=·!b·||·!c;
+  + statement(····)·;·let·_a·=·!b·||·!c;
+  
+
+```
+
+```block
 /linter-ignored/test.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × File content differs from formatting output
@@ -65,4 +82,5 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 Checked 2 files in <TIME>. No fixes applied.
 Found 1 error.
+Found 1 warning.
 ```

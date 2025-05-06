@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidWithComments.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -29,7 +28,7 @@ Math // 0
 ```
 invalidWithComments.js:1:14 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
   > 1 │ /* comment */Math.pow(a, b)
       │              ^^^^^^^^^^^^^^
@@ -49,7 +48,7 @@ invalidWithComments.js:1:14 lint/style/useExponentiationOperator  FIXABLE  ━�
 ```
 invalidWithComments.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ /* comment */Math.pow(a, b)
   > 2 │ Math.pow(a, b)/* comment */;
@@ -71,7 +70,7 @@ invalidWithComments.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━
 ```
 invalidWithComments.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ /* comment */Math.pow(a, b)
     2 │ Math.pow(a, b)/* comment */;
@@ -95,7 +94,7 @@ invalidWithComments.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━━
 ```
 invalidWithComments.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     3 │ Math.pow(a, b)// comment
     4 │ 
@@ -119,7 +118,7 @@ invalidWithComments.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━
 ```
 invalidWithComments.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     5 │ Math.pow(/**/a/**/, /**/b/**/)
     6 │ 
@@ -142,7 +141,7 @@ invalidWithComments.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━
 ```
 invalidWithComments.js:10:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
   > 10 │ Math // 0
        │ ^^^^^^^^^

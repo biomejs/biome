@@ -11,6 +11,7 @@ use biome_analyze::{
     options::JsxRuntime,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_factory::make::{js_module, js_module_item_list};
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
@@ -93,7 +94,8 @@ declare_lint_rule! {
         name: "noUnusedImports",
         language: "js",
         sources: &[RuleSource::EslintUnusedImports("no-unused-imports")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

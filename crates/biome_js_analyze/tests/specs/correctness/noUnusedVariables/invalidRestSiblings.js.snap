@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidRestSiblings.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -21,7 +20,7 @@ console.log(remaining);
 ```
 invalidRestSiblings.js:3:9 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     1 │ // With ignoreRestSiblings: false, unused variables should be reported
     2 │ const car = { brand: "Tesla", year: 2019, countryCode: "US" };
@@ -40,7 +39,7 @@ invalidRestSiblings.js:3:9 lint/correctness/noUnusedVariables ━━━━━━
 ```
 invalidRestSiblings.js:3:16 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
     1 │ // With ignoreRestSiblings: false, unused variables should be reported
     2 │ const car = { brand: "Tesla", year: 2019, countryCode: "US" };
@@ -59,7 +58,7 @@ invalidRestSiblings.js:3:16 lint/correctness/noUnusedVariables ━━━━━�
 ```
 invalidRestSiblings.js:8:14 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
      6 │ // Renamed properties
      7 │ const data = { foo: 1, bar: 2, baz: 3 };
@@ -78,7 +77,7 @@ invalidRestSiblings.js:8:14 lint/correctness/noUnusedVariables ━━━━━�
 ```
 invalidRestSiblings.js:8:31 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable is unused.
+  ! This variable is unused.
   
      6 │ // Renamed properties
      7 │ const data = { foo: 1, bar: 2, baz: 3 };

@@ -45,7 +45,7 @@ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed'
 ```
 invalid.ts:1:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'bare-forbidden' through a side-effect import.
+  ! Do not import 'bare-forbidden' through a side-effect import.
   
   > 1 │ import 'bare-forbidden';
       │        ^^^^^^^^^^^^^^^^
@@ -58,7 +58,7 @@ invalid.ts:1:8 lint/style/noRestrictedImports ━━━━━━━━━━━�
 ```
 invalid.ts:2:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default-allowed' through a side-effect import.
+  ! Do not import 'default-allowed' through a side-effect import.
   
     1 │ import 'bare-forbidden';
   > 2 │ import 'default-allowed';
@@ -76,7 +76,7 @@ invalid.ts:2:8 lint/style/noRestrictedImports ━━━━━━━━━━━�
 ```
 invalid.ts:4:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'namespace-allowed' through a side-effect import.
+  ! Do not import 'namespace-allowed' through a side-effect import.
   
     2 │ import 'default-allowed';
     3 │ import 'default-forbidden';
@@ -95,7 +95,7 @@ invalid.ts:4:8 lint/style/noRestrictedImports ━━━━━━━━━━━�
 ```
 invalid.ts:6:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'member-allowed' through a side-effect import.
+  ! Do not import 'member-allowed' through a side-effect import.
   
     4 │ import 'namespace-allowed';
     5 │ import 'namespace-forbidden';
@@ -122,7 +122,7 @@ invalid.ts:6:8 lint/style/noRestrictedImports ━━━━━━━━━━━�
 ```
 invalid.ts:9:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import '*' from 'namespace-forbidden'.
+  ! Do not import '*' from 'namespace-forbidden'.
   
      7 │ import 'member-forbidden';
      8 │ 
@@ -137,7 +137,7 @@ invalid.ts:9:8 lint/style/noRestrictedImports ━━━━━━━━━━━�
 ```
 invalid.ts:10:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import '*' from 'default-allowed'.
+  ! Do not import '*' from 'default-allowed'.
   
      9 │ import * as n1 from 'namespace-forbidden';
   > 10 │ import * as n2 from 'default-allowed';
@@ -155,7 +155,7 @@ invalid.ts:10:8 lint/style/noRestrictedImports ━━━━━━━━━━━
 ```
 invalid.ts:11:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import '*' from 'member-allowed'.
+  ! Do not import '*' from 'member-allowed'.
   
      9 │ import * as n1 from 'namespace-forbidden';
     10 │ import * as n2 from 'default-allowed';
@@ -182,7 +182,7 @@ invalid.ts:11:8 lint/style/noRestrictedImports ━━━━━━━━━━━
 ```
 invalid.ts:12:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import '*' from 'bare-allowed'.
+  ! Do not import '*' from 'bare-allowed'.
   
     10 │ import * as n2 from 'default-allowed';
     11 │ import * as n3 from 'member-allowed';
@@ -201,7 +201,7 @@ invalid.ts:12:8 lint/style/noRestrictedImports ━━━━━━━━━━━
 ```
 invalid.ts:14:13 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'default-forbidden'.
+  ! Do not import 'default' from 'default-forbidden'.
   
     12 │ import * as n4 from 'bare-allowed';
     13 │ 
@@ -216,7 +216,7 @@ invalid.ts:14:13 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:15:13 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'member-allowed'.
+  ! Do not import 'default' from 'member-allowed'.
   
     14 │ import type d0 from 'default-forbidden';
   > 15 │ import type d1 from 'member-allowed';
@@ -242,7 +242,7 @@ invalid.ts:15:13 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:16:13 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'namespace-allowed'.
+  ! Do not import 'default' from 'namespace-allowed'.
   
     14 │ import type d0 from 'default-forbidden';
     15 │ import type d1 from 'member-allowed';
@@ -261,7 +261,7 @@ invalid.ts:16:13 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:17:13 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'bare-allowed'.
+  ! Do not import 'default' from 'bare-allowed'.
   
     15 │ import type d1 from 'member-allowed';
     16 │ import type d2 from 'namespace-allowed';
@@ -280,7 +280,7 @@ invalid.ts:17:13 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:19:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'default-forbidden'.
+  ! Do not import 'default' from 'default-forbidden'.
   
     17 │ import type d3 from 'bare-allowed';
     18 │ 
@@ -295,7 +295,7 @@ invalid.ts:19:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:20:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'member-allowed'.
+  ! Do not import 'default' from 'member-allowed'.
   
     19 │ import { type default as d4, type allowed1, type allowed2 as a2 } from 'default-forbidden';
   > 20 │ import { type default as d5, type allowed2, type allowed3 as a3 } from 'member-allowed';
@@ -321,7 +321,7 @@ invalid.ts:20:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:21:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'namespace-allowed'.
+  ! Do not import 'default' from 'namespace-allowed'.
   
     19 │ import { type default as d4, type allowed1, type allowed2 as a2 } from 'default-forbidden';
     20 │ import { type default as d5, type allowed2, type allowed3 as a3 } from 'member-allowed';
@@ -340,7 +340,7 @@ invalid.ts:21:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:21:35 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'allowed3' from 'namespace-allowed'.
+  ! Do not import 'allowed3' from 'namespace-allowed'.
   
     19 │ import { type default as d4, type allowed1, type allowed2 as a2 } from 'default-forbidden';
     20 │ import { type default as d5, type allowed2, type allowed3 as a3 } from 'member-allowed';
@@ -359,7 +359,7 @@ invalid.ts:21:35 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:22:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'bare-allowed'.
+  ! Do not import 'default' from 'bare-allowed'.
   
     20 │ import { type default as d5, type allowed2, type allowed3 as a3 } from 'member-allowed';
     21 │ import { type default as d6, type allowed3 } from 'namespace-allowed';
@@ -378,7 +378,7 @@ invalid.ts:22:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:22:35 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'allowed4' from 'bare-allowed'.
+  ! Do not import 'allowed4' from 'bare-allowed'.
   
     20 │ import { type default as d5, type allowed2, type allowed3 as a3 } from 'member-allowed';
     21 │ import { type default as d6, type allowed3 } from 'namespace-allowed';
@@ -397,7 +397,7 @@ invalid.ts:22:35 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:24:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'default-forbidden'.
+  ! Do not import 'default' from 'default-forbidden'.
   
     22 │ import { type default as d7, type allowed4 } from 'bare-allowed';
     23 │ 
@@ -412,7 +412,7 @@ invalid.ts:24:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:25:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'member-allowed'.
+  ! Do not import 'default' from 'member-allowed'.
   
     24 │ import type { default as d8, allowed5, allowed6 as a6 } from 'default-forbidden';
   > 25 │ import type { default as d9, allowed6, allowed7 as a7 } from 'member-allowed';
@@ -438,7 +438,7 @@ invalid.ts:25:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:26:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'namespace-allowed'.
+  ! Do not import 'default' from 'namespace-allowed'.
   
     24 │ import type { default as d8, allowed5, allowed6 as a6 } from 'default-forbidden';
     25 │ import type { default as d9, allowed6, allowed7 as a7 } from 'member-allowed';
@@ -457,7 +457,7 @@ invalid.ts:26:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:26:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'allowed7' from 'namespace-allowed'.
+  ! Do not import 'allowed7' from 'namespace-allowed'.
   
     24 │ import type { default as d8, allowed5, allowed6 as a6 } from 'default-forbidden';
     25 │ import type { default as d9, allowed6, allowed7 as a7 } from 'member-allowed';
@@ -476,7 +476,7 @@ invalid.ts:26:31 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:27:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'bare-allowed'.
+  ! Do not import 'default' from 'bare-allowed'.
   
     25 │ import type { default as d9, allowed6, allowed7 as a7 } from 'member-allowed';
     26 │ import type { default as d10, allowed7 } from 'namespace-allowed';
@@ -495,7 +495,7 @@ invalid.ts:27:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:27:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'allowed8' from 'bare-allowed'.
+  ! Do not import 'allowed8' from 'bare-allowed'.
   
     25 │ import type { default as d9, allowed6, allowed7 as a7 } from 'member-allowed';
     26 │ import type { default as d10, allowed7 } from 'namespace-allowed';
@@ -514,7 +514,7 @@ invalid.ts:27:31 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:29:36 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden1' from 'member-forbidden'.
+  ! Do not import 'forbidden1' from 'member-forbidden'.
   
     27 │ import type { default as d11, allowed8 } from 'bare-allowed';
     28 │ 
@@ -529,7 +529,7 @@ invalid.ts:29:36 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:29:53 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden2' from 'member-forbidden'.
+  ! Do not import 'forbidden2' from 'member-forbidden'.
   
     27 │ import type { default as d11, allowed8 } from 'bare-allowed';
     28 │ 
@@ -544,7 +544,7 @@ invalid.ts:29:53 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:30:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden2' from 'member-allowed'.
+  ! Do not import 'forbidden2' from 'member-allowed'.
   
     29 │ import { type default as d12, type forbidden1, type forbidden2 as f2 } from 'member-forbidden';
   > 30 │ import { type forbidden2, type forbidden3 as f3 } from 'member-allowed';
@@ -570,7 +570,7 @@ invalid.ts:30:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:30:32 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden3' from 'member-allowed'.
+  ! Do not import 'forbidden3' from 'member-allowed'.
   
     29 │ import { type default as d12, type forbidden1, type forbidden2 as f2 } from 'member-forbidden';
   > 30 │ import { type forbidden2, type forbidden3 as f3 } from 'member-allowed';
@@ -596,7 +596,7 @@ invalid.ts:30:32 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:31:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden3' from 'member-forbidden'.
+  ! Do not import 'forbidden3' from 'member-forbidden'.
   
     29 │ import { type default as d12, type forbidden1, type forbidden2 as f2 } from 'member-forbidden';
     30 │ import { type forbidden2, type forbidden3 as f3 } from 'member-allowed';
@@ -611,7 +611,7 @@ invalid.ts:31:31 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:31:43 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden4' from 'member-forbidden'.
+  ! Do not import 'forbidden4' from 'member-forbidden'.
   
     29 │ import { type default as d12, type forbidden1, type forbidden2 as f2 } from 'member-forbidden';
     30 │ import { type forbidden2, type forbidden3 as f3 } from 'member-allowed';
@@ -626,7 +626,7 @@ invalid.ts:31:43 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:32:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'member-allowed'.
+  ! Do not import 'default' from 'member-allowed'.
   
     30 │ import { type forbidden2, type forbidden3 as f3 } from 'member-allowed';
     31 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
@@ -653,7 +653,7 @@ invalid.ts:32:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:32:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden4' from 'member-allowed'.
+  ! Do not import 'forbidden4' from 'member-allowed'.
   
     30 │ import { type forbidden2, type forbidden3 as f3 } from 'member-allowed';
     31 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
@@ -680,7 +680,7 @@ invalid.ts:32:31 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:32:43 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden5' from 'member-allowed'.
+  ! Do not import 'forbidden5' from 'member-allowed'.
   
     30 │ import { type forbidden2, type forbidden3 as f3 } from 'member-allowed';
     31 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
@@ -707,7 +707,7 @@ invalid.ts:32:43 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:33:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'namespace-allowed'.
+  ! Do not import 'default' from 'namespace-allowed'.
   
     31 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
     32 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
@@ -726,7 +726,7 @@ invalid.ts:33:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:33:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden5' from 'namespace-allowed'.
+  ! Do not import 'forbidden5' from 'namespace-allowed'.
   
     31 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
     32 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
@@ -745,7 +745,7 @@ invalid.ts:33:31 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:33:43 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden6' from 'namespace-allowed'.
+  ! Do not import 'forbidden6' from 'namespace-allowed'.
   
     31 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
     32 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
@@ -764,7 +764,7 @@ invalid.ts:33:43 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:34:15 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'default' from 'bare-allowed'.
+  ! Do not import 'default' from 'bare-allowed'.
   
     32 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
     33 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
@@ -782,7 +782,7 @@ invalid.ts:34:15 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:34:31 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden6' from 'bare-allowed'.
+  ! Do not import 'forbidden6' from 'bare-allowed'.
   
     32 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
     33 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
@@ -800,7 +800,7 @@ invalid.ts:34:31 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:34:43 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not import 'forbidden7' from 'bare-allowed'.
+  ! Do not import 'forbidden7' from 'bare-allowed'.
   
     32 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
     33 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';

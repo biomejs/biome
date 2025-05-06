@@ -85,7 +85,7 @@ declare_lint_rule! {
         name: "noRedundantUseStrict",
         language: "js",
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

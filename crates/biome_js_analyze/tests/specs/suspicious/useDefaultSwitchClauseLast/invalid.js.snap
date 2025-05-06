@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -41,7 +40,7 @@ switch (foo) {
 ```
 invalid.js:2:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The default clause should be the last switch clause.
+  ! The default clause should be the last switch clause.
   
     1 │ switch (foo) {
   > 2 │ 	default:
@@ -70,7 +69,7 @@ invalid.js:2:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━�
 ```
 invalid.js:11:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The default clause should be the last switch clause.
+  ! The default clause should be the last switch clause.
   
      9 │ 	case 0:
     10 │ 		break;
@@ -100,7 +99,7 @@ invalid.js:11:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━
 ```
 invalid.js:18:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The default clause should be the last switch clause.
+  ! The default clause should be the last switch clause.
   
     17 │ switch (foo) {
   > 18 │ 	default:
@@ -129,7 +128,7 @@ invalid.js:18:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━
 ```
 invalid.js:27:2 lint/suspicious/useDefaultSwitchClauseLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The default clause should be the last switch clause.
+  ! The default clause should be the last switch clause.
   
     25 │ 	case 0:
     26 │ 		break;
