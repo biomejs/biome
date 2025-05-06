@@ -9,7 +9,7 @@ pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> 
         .env("NODE_NO_WARNINGS", "1")
         .arg("--eval")
         .arg(format!(
-            "{UNCYCLE_FUNCTION} import('{specifier}').then((c) => console.log(JSON.stringify(uncycle(c.default))))"
+            "{UNCYCLE_FUNCTION} import('{specifier}').then((c) => console.log(JSON.stringify(uncycle(c.default), null, 2)))"
         ))
         .output();
     match content_output {
