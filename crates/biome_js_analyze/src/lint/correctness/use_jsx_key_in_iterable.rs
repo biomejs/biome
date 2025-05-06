@@ -9,8 +9,8 @@ use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsStatement,
     AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayExpression, JsCallExpression,
-    JsFunctionBody, JsObjectExpression, JsReturnStatement, JsStatementList, JsxAttributeList,
-    JsxExpressionChild, JsxTagExpression,
+    JsFunctionBody, JsObjectExpression, JsStatementList, JsxAttributeList, JsxExpressionChild,
+    JsxTagExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 use serde::{Deserialize, Serialize};
