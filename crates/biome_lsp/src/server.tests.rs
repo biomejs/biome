@@ -3206,6 +3206,10 @@ export function bar() {
         "This import is part of a cycle."
     );
 
+    // On macOS, wait until the fsevents watcher sets up before receiving the first event.
+    #[cfg(target_os = "macos")]
+    std::thread::sleep(Duration::from_secs(1));
+
     clear_notifications!(factory.service_data_rx);
 
     // ARRANGE: Remove `bar.ts`.
@@ -3419,7 +3423,9 @@ export function bar() {
         "This import is part of a cycle."
     );
 
-    #[cfg(target_os = "windows")]
+    // On Windows, wait until the event has been delivered.
+    // On macOS, wait until the fsevents watcher sets up before receiving the first event.
+    #[cfg(any(target_os = "windows", target_os = "macos"))]
     std::thread::sleep(Duration::from_secs(1));
 
     clear_notifications!(factory.service_data_rx);
@@ -3459,6 +3465,7 @@ export function bar() {
     //         longer there.
     assert_eq!(result.diagnostics.len(), 0);
 
+    // On Windows, wait until the event has been delivered.
     #[cfg(target_os = "windows")]
     std::thread::sleep(Duration::from_secs(1));
 
