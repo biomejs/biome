@@ -33,3 +33,6 @@ export { type allowed3, type allowed4 as a4 } from 'namespace-forbidden';
 export type { default as d6, allowed5, allowed6 as a6 } from 'default-and-member-allowed';
 export type { default as d7, allowed6, allowed7 as a7 } from 'member-forbidden';
 export type { default as d8, allowed7, allowed8 as a8 } from 'namespace-forbidden';
+
+import foo from 'import-foo';
+import bar from 'import-foo/bar';

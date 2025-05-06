@@ -73,7 +73,11 @@
 									"allowed9"
 								]
 							}
-						}
+						},
+             "patterns": [{
+                 "group": ["import-foo/*", "!import-foo/bar"],
+                 "message": "import-foo is deprecated, except the modules in import-foo/bar."
+             }]
 					}
 				}
 			}

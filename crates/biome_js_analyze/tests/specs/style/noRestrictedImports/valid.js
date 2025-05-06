@@ -102,3 +102,6 @@ import { allowed2, allowed3 as a3 } from 'namespace-forbidden';
 const { allowed2, allowed3: a3, "allowed4": a4 } = await import('namespace-forbidden');
 import('namespace-forbidden').then(({ allowed2, allowed3: a3, "allowed4": a4 }) => { })
 import('namespace-forbidden').then(function ({ allowed2, allowed3: a3, "allowed4": a4 }) { })
+
+import foo from 'import-foo';
+import bar from 'import-foo/bar';

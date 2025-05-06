@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
 expression: invalid.js
 ---
 # Input
@@ -135,6 +136,8 @@ import { forbidden1 } from 'bare-allowed';
 const { forbidden2, forbidden3: f1, "forbidden4": f2 } = await import('bare-allowed');
 import('bare-allowed').then(({ forbidden2, forbidden3: f1, "forbidden4": f2 }) => { })
 import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+
+import foo from 'import-foo/foo';
 
 ```
 
@@ -2974,6 +2977,7 @@ invalid.js:131:41 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
         │                                         ^^^^^^^^^^
     132 │ 
+    133 │ import foo from 'import-foo/foo';
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -2992,6 +2996,7 @@ invalid.js:131:53 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
         │                                                     ^^^^^^^^^^
     132 │ 
+    133 │ import foo from 'import-foo/foo';
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -3010,10 +3015,25 @@ invalid.js:131:69 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
         │                                                                     ^^^^^^^^^^^^
     132 │ 
+    133 │ import foo from 'import-foo/foo';
   
   i Only the following imports from 'bare-allowed' are allowed:
   
   - Side-effect only import
+  
+
+```
+
+```
+invalid.js:133:17 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 'import-foo/foo' import is restricted by a pattern. import-foo is deprecated, except the modules in import-foo/bar.
+  
+    131 │ import('bare-allowed').then(function ({ forbidden2, forbidden3: f1, "forbidden4": f2 }) { })
+    132 │ 
+  > 133 │ import foo from 'import-foo/foo';
+        │                 ^^^^^^^^^^^^^^^^
+    134 │ 
   
 
 ```
