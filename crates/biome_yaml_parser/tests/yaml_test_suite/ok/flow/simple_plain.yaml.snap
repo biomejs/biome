@@ -1,0 +1,49 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+simple_plain
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowYamlNode {
+                properties: missing (optional),
+                content: YamlPlainScalar {
+                    value_token: PLAIN_LITERAL@0..12 "simple_plain" [] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..13
+  0: YAML_DOCUMENT_LIST@0..12
+    0: YAML_DOCUMENT@0..12
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_FLOW_YAML_NODE@0..12
+        0: (empty)
+        1: YAML_PLAIN_SCALAR@0..12
+          0: PLAIN_LITERAL@0..12 "simple_plain" [] []
+      4: (empty)
+  1: EOF@12..13 "" [Newline("\n")] []
+
+```

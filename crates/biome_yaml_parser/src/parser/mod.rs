@@ -15,6 +15,8 @@ use crate::{
 
 mod block;
 mod document;
+mod flow;
+mod parse_error;
 
 pub(crate) struct YamlParser<'source> {
     context: ParserContext<YamlSyntaxKind>,
@@ -31,7 +33,6 @@ impl<'source> YamlParser<'source> {
 
     /// Re-lexes the current token in the specified context. Returns the kind
     /// of the re-lexed token
-    #[expect(dead_code)]
     pub fn re_lex(&mut self, context: YamlLexContext) -> YamlSyntaxKind {
         self.source_mut().re_lex(context)
     }
