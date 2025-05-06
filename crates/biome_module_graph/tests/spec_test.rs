@@ -5,7 +5,7 @@ use std::sync::Arc;
 use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
-use biome_js_type_info::{Type, TypeResolver};
+use biome_js_type_info::{ScopeId, Type, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
