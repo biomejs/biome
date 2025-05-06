@@ -30,14 +30,10 @@ biome_json_analyze      = { workspace = true }
 biome_json_formatter    = { workspace = true }
 biome_json_parser       = { workspace = true }
 biome_json_syntax       = { workspace = true }
-biome_lsp               = { workspace = true }
-biome_markup            = { workspace = true }
 biome_parser            = { workspace = true }
 biome_rowan             = { workspace = true }
 biome_service           = { workspace = true }
-bpaf                    = { workspace = true }
 camino                  = { workspace = true }
-tokio                   = { workspace = true }
 
 ansi_rgb  = "0.2.0"
 criterion = { package = "codspeed-criterion-compat", version = "*" }

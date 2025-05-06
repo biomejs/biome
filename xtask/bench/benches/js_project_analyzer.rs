@@ -1,12 +1,10 @@
 use std::{env, hash::Hash, io::Write, process::Command, str::FromStr, time::Duration};
 
 use ansi_rgb::{Foreground, red};
-use biome_cli::{CliDiagnostic, CliSession, biome_command};
-use biome_console::{BufferConsole, ConsoleExt};
+use biome_cli::{BiomeCommand, CliDiagnostic, CliOptions, CliSession, LoggingLevel};
+use biome_console::BufferConsole;
 use biome_fs::OsFileSystem;
-use biome_markup::markup;
 use biome_service::{App, WorkspaceRef, workspace};
-use bpaf::{Args, ParseFailure};
 use camino::{Utf8Path, Utf8PathBuf};
 use xtask_bench::{BenchmarkId, Criterion, criterion_group, criterion_main, err_to_string};
 
@@ -205,19 +203,40 @@ fn run_lint_in_folder(folder_path: Utf8PathBuf) -> Result<(), CliDiagnostic> {
     let mut console = BufferConsole::default();
     let workspace = workspace::server(Box::new(OsFileSystem::new(folder_path)), None);
     let app = App::new(&mut console, WorkspaceRef::Owned(workspace));
-
-    let mut session = CliSession { app };
-    let command = biome_command().run_inner(Args::from(&["lint"]));
-    match command {
-        Ok(command) => session.run(command),
-        Err(failure) => {
-            if let ParseFailure::Stdout(help, _) = &failure {
-                let console = &mut session.app.console;
-                console.log(markup! {{help.to_string()}});
-                Ok(())
-            } else {
-                Err(CliDiagnostic::parse_error_bpaf(failure))
-            }
-        }
-    }
+    let session = CliSession { app };
+    session.run(BiomeCommand::Lint {
+        write: false,
+        unsafe_: false,
+        fix: false,
+        suppress: false,
+        suppression_reason: None,
+        linter_configuration: None,
+        vcs_configuration: None,
+        files_configuration: None,
+        javascript_linter: None,
+        json_linter: None,
+        css_linter: None,
+        graphql_linter: None,
+        cli_options: CliOptions {
+            colors: None,
+            use_server: false,
+            verbose: false,
+            config_path: None,
+            max_diagnostics: Default::default(),
+            skip_parse_errors: false,
+            no_errors_on_unmatched: false,
+            error_on_warnings: false,
+            reporter: Default::default(),
+            log_level: LoggingLevel::Info,
+            log_kind: Default::default(),
+            diagnostic_level: Default::default(),
+        },
+        only: Vec::new(),
+        skip: Vec::new(),
+        stdin_file_path: None,
+        staged: false,
+        changed: false,
+        since: None,
+        paths: vec![".".into()],
+    })
 }
