@@ -7,9 +7,10 @@ use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsxAttribute,
-    AnyJsxChild, JsArrayExpression, JsCallExpression, JsFunctionBody, JsObjectExpression,
-    JsxAttributeList, JsxExpressionChild, JsxTagExpression,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsStatement,
+    AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayExpression, JsCallExpression,
+    JsFunctionBody, JsObjectExpression, JsReturnStatement, JsStatementList, JsxAttributeList,
+    JsxExpressionChild, JsxTagExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 use serde::{Deserialize, Serialize};
@@ -242,40 +243,93 @@ fn handle_function_body(
             ))
         })
         .unwrap_or_default();
-    let ranges = return_statement.and_then(|ret| {
-        let returned_value = ret.argument()?;
+    let ranges = return_statement.as_ref().and_then(|ret| {
+        let returned_value = unwrap_parenthesis(ret.argument()?)?;
         handle_potential_react_component(returned_value, model, is_inside_jsx, options)
     });
     if ranges.is_none() && is_return_component {
         return vec![];
     }
 
-    node.statements()
+    handle_statements(&node.statements(), model, is_inside_jsx, options)
+}
+
+fn handle_statements(
+    statement_list: &JsStatementList,
+    model: &SemanticModel,
+    is_inside_jsx: bool,
+    options: &UseJsxKeyInIterableOptions,
+) -> Vec<TextRange> {
+    statement_list
         .iter()
-        .filter_map(|statement| {
-            if let Some(statement) = statement.as_js_variable_statement() {
-                let declaration = statement.declaration().ok()?;
-                Some(
-                    declaration
-                        .declarators()
-                        .iter()
-                        .filter_map(|declarator| {
-                            let decl = declarator.ok()?;
-                            let init = decl.initializer()?.expression().ok()?;
-                            handle_potential_react_component(init, model, is_inside_jsx, options)
-                        })
-                        .flatten()
-                        .collect(),
-                )
-            } else if let Some(statement) = statement.as_js_return_statement() {
-                let returned_value = statement.argument()?;
-                handle_potential_react_component(returned_value, model, is_inside_jsx, options)
-            } else {
-                None
-            }
-        })
+        .filter_map(|statement| handle_statement(&statement, model, is_inside_jsx, options))
         .flatten()
         .collect()
+}
+
+fn handle_statement(
+    node: &AnyJsStatement,
+    model: &SemanticModel,
+    is_inside_jsx: bool,
+    options: &UseJsxKeyInIterableOptions,
+) -> Option<Vec<TextRange>> {
+    match node {
+        AnyJsStatement::JsVariableStatement(js_variable_statement) => {
+            let declaration = js_variable_statement.declaration().ok()?;
+            Some(
+                declaration
+                    .declarators()
+                    .iter()
+                    .filter_map(|declarator| {
+                        let decl = declarator.ok()?;
+                        let init = decl.initializer()?.expression().ok()?;
+                        handle_potential_react_component(init, model, is_inside_jsx, options)
+                    })
+                    .flatten()
+                    .collect(),
+            )
+        }
+        AnyJsStatement::JsReturnStatement(js_return_statement) => {
+            let returned_value = js_return_statement.argument()?;
+            handle_potential_react_component(returned_value, model, is_inside_jsx, options)
+        }
+        AnyJsStatement::JsSwitchStatement(switch_statement) => {
+            let cases = switch_statement.cases();
+            let res = cases
+                .iter()
+                .flat_map(|case| {
+                    let cons = match case {
+                        AnyJsSwitchClause::JsCaseClause(c) => c.consequent(),
+                        AnyJsSwitchClause::JsDefaultClause(d) => d.consequent(),
+                    };
+                    handle_statements(&cons, model, is_inside_jsx, options)
+                })
+                .collect();
+            Some(res)
+        }
+        AnyJsStatement::JsIfStatement(i) => {
+            let consequent = i.consequent().ok()?;
+            let consequent_block = consequent.as_js_block_statement()?;
+            let mut ranges = handle_statements(
+                &consequent_block.statements(),
+                model,
+                is_inside_jsx,
+                options,
+            );
+            if let Some(else_clause) = i.else_clause() {
+                let else_block = else_clause.alternate().ok()?;
+                let else_block = else_block.as_js_block_statement()?;
+                ranges.extend(handle_statements(
+                    &else_block.statements(),
+                    model,
+                    is_inside_jsx,
+                    options,
+                ));
+            }
+            Some(ranges)
+        }
+        _ => None,
+    }
 }
 
 fn handle_potential_react_component(
