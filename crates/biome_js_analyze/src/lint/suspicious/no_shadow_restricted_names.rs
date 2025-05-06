@@ -46,7 +46,7 @@ declare_lint_rule! {
 }
 
 pub struct State {
-    shadowed_name: String,
+    shadowed_name: Box<str>,
 }
 
 impl Rule for NoShadowRestrictedNames {
@@ -62,7 +62,7 @@ impl Rule for NoShadowRestrictedNames {
 
         if ES_BUILTIN.contains(&name) {
             Some(State {
-                shadowed_name: name.to_string(),
+                shadowed_name: name.into(),
             })
         } else {
             None

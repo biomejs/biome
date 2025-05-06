@@ -1,5 +1,4 @@
-// valid
-<div />;
+/* should not generate diagnostics */<div />;
 <div>child</div>;
 <Component />;
 <Component>child</Component>;

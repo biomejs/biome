@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import A, { type B, type C } from "";
 export { A, type B, type C };
 

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export const camelCase = 4
 export const PascalCase = 4
 export const CONSTANT_NUMBER = -10

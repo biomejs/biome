@@ -199,7 +199,7 @@ pub struct NoPrivateImportsState {
     range: TextRange,
 
     /// The path where the visibility of the imported symbol is defined.
-    path: String,
+    path: Box<str>,
 
     /// The visibility of the offending symbol.
     visibility: Visibility,
@@ -315,7 +315,7 @@ fn get_restricted_imports_from_module_source(
     node: &JsModuleSource,
     options: &GetRestrictedImportOptions,
 ) -> SyntaxResult<Vec<NoPrivateImportsState>> {
-    let path = options.target_path.to_string();
+    let path: Box<str> = options.target_path.as_str().into();
 
     let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
         Some(AnyJsImportClause::JsImportCombinedClause(node)) => {

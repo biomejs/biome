@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // /* should not generate diagnostics */
 let x = "8"
 let x = "var \u8888"

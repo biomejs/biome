@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import * as foo from "foo"
 
 foo.bar

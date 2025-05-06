@@ -4,6 +4,7 @@ expression: valid-named-imports.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 // Empty import
 import {} from "";
 

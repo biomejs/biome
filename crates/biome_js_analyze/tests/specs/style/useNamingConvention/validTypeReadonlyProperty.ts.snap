@@ -4,6 +4,7 @@ expression: validTypeReadonlyProperty.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 export interface X {
     readonly A_CONSTANT: unknown
 
@@ -26,5 +27,3 @@ export interface X {
     readonly"@": unknown
 }
 ```
-
-

@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 class A {}
 class B {
 	a = class extends A {

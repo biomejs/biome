@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 {
 	let a;
 	a = 1;

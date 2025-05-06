@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 throw new Error();
 new Error();
 throw new TypeError();

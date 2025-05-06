@@ -4,6 +4,7 @@ expression: noChildrenPropValid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 import { cloneElement } from "react";
 import React from "react";
 
@@ -21,5 +22,3 @@ cloneElement('div', { children: <br /> });
 React.cloneElement('div', { children: <br /> });
 
 ```
-
-

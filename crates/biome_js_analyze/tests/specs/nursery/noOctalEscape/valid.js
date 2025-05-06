@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 /([abc]) \1/g;
 "\x51" /* \01 */;
 "foo \\251 bar";

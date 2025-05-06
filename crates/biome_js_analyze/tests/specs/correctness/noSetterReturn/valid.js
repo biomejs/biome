@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // early-return
 class A {
 	set foo(x) {

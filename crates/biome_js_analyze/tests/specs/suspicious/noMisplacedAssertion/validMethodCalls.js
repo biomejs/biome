@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 it.each([1, 2, 3])('test', (a, b, expected) => {
   expect(a + b).toBe(expected)
 })

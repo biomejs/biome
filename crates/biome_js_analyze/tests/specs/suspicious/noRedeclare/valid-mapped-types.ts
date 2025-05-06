@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // See https://github.com/biomejs/biome/issues/953
 type X = never;
 type Y = never;

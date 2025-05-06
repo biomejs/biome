@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // Type and value merging
 export type Order = -1 | 0 | 1;
 export const Order = {

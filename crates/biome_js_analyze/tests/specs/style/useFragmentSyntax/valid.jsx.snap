@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 import React, {Fragment} from "react";
 
 <div>
@@ -18,5 +19,3 @@ import React, {Fragment} from "react";
     </React.Fragment>
 </div>
 ```
-
-

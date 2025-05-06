@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export type X = {}
 
 export type PascalCase = {}

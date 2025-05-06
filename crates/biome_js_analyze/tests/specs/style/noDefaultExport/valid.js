@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export Default from "mod";
 export const CONSTANT = 'foo';
 export function f() {};

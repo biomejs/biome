@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 parseInt(1);
 parseInt(1, 3);
 Number.parseInt(1);

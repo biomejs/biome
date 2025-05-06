@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
-snapshot_kind: text
 ---
 # Input
 ```js
+/* should not generate diagnostics */
 Math.min(100, Math.max(0, x));
 
 Math.max(0, Math.min(100, x));

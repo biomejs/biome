@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <>
     <html lang="en"></html>
     <html lang={"en"}></html>
@@ -13,5 +14,3 @@ expression: valid.jsx
     <html lang="" {...props}></html>
 </>
 ```
-
-

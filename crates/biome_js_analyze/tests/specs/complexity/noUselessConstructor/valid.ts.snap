@@ -4,6 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 declare class A { constructor(options: any) }
 
 class B {
@@ -39,5 +40,3 @@ class H extends B {
 }
 
 ```
-
-

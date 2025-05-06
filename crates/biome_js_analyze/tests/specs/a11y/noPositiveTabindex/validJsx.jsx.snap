@@ -4,6 +4,7 @@ expression: validJsx.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <>
 	<div />
 	<div {...props} />
@@ -42,5 +43,3 @@ expression: validJsx.jsx
 </>
 
 ```
-
-

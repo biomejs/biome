@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // not the global Math
 function case1() {
 	let Math;

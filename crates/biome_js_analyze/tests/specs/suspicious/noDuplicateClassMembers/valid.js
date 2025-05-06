@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 class A { foo() {} bar() {} }
 class A { static foo() {} foo() {} }
 class A { get foo() {} set foo(value) {} }

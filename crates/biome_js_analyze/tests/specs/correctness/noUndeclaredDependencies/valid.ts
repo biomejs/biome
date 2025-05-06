@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import "./valid";
 import "react";
 import "@testing-library/react";

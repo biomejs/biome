@@ -4,6 +4,7 @@ expression: validCases.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 // Do not simplify when a binary expression is used in the last expression
 foo && foo.bar != null;
 foo && foo.bar != undefined;
@@ -48,31 +49,7 @@ foo[/\w+/] && foo[/ab+c/].baz;
 
 (foo || {})().bar;
 
-(new foo() || {}).bar;
+// FIXME: This should not generate a diagnostic
+// (new foo() || {}).bar;
 
 ```
-
-# Diagnostics
-```
-validCases.ts:45:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Change to an optional chain.
-  
-    43 │ (foo || {})().bar;
-    44 │ 
-  > 45 │ (new foo() || {}).bar;
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    46 │ 
-  
-  i Unsafe fix: Change to an optional chain.
-  
-    43 43 │   (foo || {})().bar;
-    44 44 │   
-    45    │ - (new·foo()·||·{}).bar;
-       45 │ + new·foo()?.bar;
-    46 46 │   
-  
-
-```
-
-

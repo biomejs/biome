@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 // Not length check
 if (foo.notLength) {}
 if (length) {}

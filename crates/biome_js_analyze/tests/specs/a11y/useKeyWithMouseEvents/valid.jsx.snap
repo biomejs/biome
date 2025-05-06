@@ -4,6 +4,7 @@ expression: valid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <div />;
 <div onFocus={() => {}} />;
 <div onMouseOver={() => {}} onFocus={() => {}} />;
@@ -29,5 +30,3 @@ expression: valid.jsx
 
 
 ```
-
-

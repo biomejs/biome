@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 class ValidExplicit {
   public constructor(public foo: string) {}
 }

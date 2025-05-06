@@ -4,7 +4,7 @@ expression: validCheckHtmlElementsFalse.tsx
 ---
 # Input
 ```tsx
-// valid
+/* should not generate diagnostics */
 <div/>;
 <div></div>;
 <div><span></span></div>;

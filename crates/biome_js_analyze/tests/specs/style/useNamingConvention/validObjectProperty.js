@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 export default {
     p: 0,
 

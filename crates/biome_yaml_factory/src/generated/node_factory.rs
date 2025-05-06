@@ -18,17 +18,31 @@ pub fn yaml_anchor_property(value_token: SyntaxToken) -> YamlAnchorProperty {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn yaml_block_collection(
-    properties: YamlPropertyList,
-    content: AnyYamlBlockContent,
-) -> YamlBlockCollection {
-    YamlBlockCollection::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_BLOCK_COLLECTION,
-        [
-            Some(SyntaxElement::Node(properties.into_syntax())),
-            Some(SyntaxElement::Node(content.into_syntax())),
-        ],
-    ))
+pub fn yaml_block_collection(content: AnyYamlBlockCollectionContent) -> YamlBlockCollectionBuilder {
+    YamlBlockCollectionBuilder {
+        content,
+        properties: None,
+    }
+}
+pub struct YamlBlockCollectionBuilder {
+    content: AnyYamlBlockCollectionContent,
+    properties: Option<AnyYamlPropertiesCombination>,
+}
+impl YamlBlockCollectionBuilder {
+    pub fn with_properties(mut self, properties: AnyYamlPropertiesCombination) -> Self {
+        self.properties = Some(properties);
+        self
+    }
+    pub fn build(self) -> YamlBlockCollection {
+        YamlBlockCollection::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_COLLECTION,
+            [
+                self.properties
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.content.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn yaml_block_map_explicit_entry(
     key: YamlBlockMapExplicitKey,
@@ -147,6 +161,32 @@ impl YamlBlockMappingBuilder {
         ))
     }
 }
+pub fn yaml_block_scalar(content: AnyYamlBlockScalarContent) -> YamlBlockScalarBuilder {
+    YamlBlockScalarBuilder {
+        content,
+        properties: None,
+    }
+}
+pub struct YamlBlockScalarBuilder {
+    content: AnyYamlBlockScalarContent,
+    properties: Option<AnyYamlPropertiesCombination>,
+}
+impl YamlBlockScalarBuilder {
+    pub fn with_properties(mut self, properties: AnyYamlPropertiesCombination) -> Self {
+        self.properties = Some(properties);
+        self
+    }
+    pub fn build(self) -> YamlBlockScalar {
+        YamlBlockScalar::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_SCALAR,
+            [
+                self.properties
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.content.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn yaml_block_sequence(entries: YamlBlockSequenceEntryList) -> YamlBlockSequenceBuilder {
     YamlBlockSequenceBuilder {
         entries,
@@ -259,17 +299,21 @@ pub fn yaml_double_quoted_scalar(value_token: SyntaxToken) -> YamlDoubleQuotedSc
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn yaml_flow_json_node(properties: YamlPropertyList) -> YamlFlowJsonNodeBuilder {
+pub fn yaml_flow_json_node() -> YamlFlowJsonNodeBuilder {
     YamlFlowJsonNodeBuilder {
-        properties,
+        properties: None,
         content: None,
     }
 }
 pub struct YamlFlowJsonNodeBuilder {
-    properties: YamlPropertyList,
+    properties: Option<AnyYamlPropertiesCombination>,
     content: Option<AnyYamlJsonContent>,
 }
 impl YamlFlowJsonNodeBuilder {
+    pub fn with_properties(mut self, properties: AnyYamlPropertiesCombination) -> Self {
+        self.properties = Some(properties);
+        self
+    }
     pub fn with_content(mut self, content: AnyYamlJsonContent) -> Self {
         self.content = Some(content);
         self
@@ -278,7 +322,8 @@ impl YamlFlowJsonNodeBuilder {
         YamlFlowJsonNode::unwrap_cast(SyntaxNode::new_detached(
             YamlSyntaxKind::YAML_FLOW_JSON_NODE,
             [
-                Some(SyntaxElement::Node(self.properties.into_syntax())),
+                self.properties
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.content
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
@@ -373,17 +418,21 @@ pub fn yaml_flow_sequence(
         ],
     ))
 }
-pub fn yaml_flow_yaml_node(properties: YamlPropertyList) -> YamlFlowYamlNodeBuilder {
+pub fn yaml_flow_yaml_node() -> YamlFlowYamlNodeBuilder {
     YamlFlowYamlNodeBuilder {
-        properties,
+        properties: None,
         content: None,
     }
 }
 pub struct YamlFlowYamlNodeBuilder {
-    properties: YamlPropertyList,
+    properties: Option<AnyYamlPropertiesCombination>,
     content: Option<YamlPlainScalar>,
 }
 impl YamlFlowYamlNodeBuilder {
+    pub fn with_properties(mut self, properties: AnyYamlPropertiesCombination) -> Self {
+        self.properties = Some(properties);
+        self
+    }
     pub fn with_content(mut self, content: YamlPlainScalar) -> Self {
         self.content = Some(content);
         self
@@ -392,7 +441,8 @@ impl YamlFlowYamlNodeBuilder {
         YamlFlowYamlNode::unwrap_cast(SyntaxNode::new_detached(
             YamlSyntaxKind::YAML_FLOW_YAML_NODE,
             [
-                Some(SyntaxElement::Node(self.properties.into_syntax())),
+                self.properties
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.content
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
@@ -417,11 +467,53 @@ pub fn yaml_plain_scalar(value_token: SyntaxToken) -> YamlPlainScalar {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn yaml_property_list(any_yaml_property: AnyYamlProperty) -> YamlPropertyList {
-    YamlPropertyList::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_PROPERTY_LIST,
-        [Some(SyntaxElement::Node(any_yaml_property.into_syntax()))],
-    ))
+pub fn yaml_properties_anchor_first(
+    anchor: YamlAnchorProperty,
+) -> YamlPropertiesAnchorFirstBuilder {
+    YamlPropertiesAnchorFirstBuilder { anchor, tag: None }
+}
+pub struct YamlPropertiesAnchorFirstBuilder {
+    anchor: YamlAnchorProperty,
+    tag: Option<YamlTagProperty>,
+}
+impl YamlPropertiesAnchorFirstBuilder {
+    pub fn with_tag(mut self, tag: YamlTagProperty) -> Self {
+        self.tag = Some(tag);
+        self
+    }
+    pub fn build(self) -> YamlPropertiesAnchorFirst {
+        YamlPropertiesAnchorFirst::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_PROPERTIES_ANCHOR_FIRST,
+            [
+                Some(SyntaxElement::Node(self.anchor.into_syntax())),
+                self.tag
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn yaml_properties_tag_first(tag: YamlTagProperty) -> YamlPropertiesTagFirstBuilder {
+    YamlPropertiesTagFirstBuilder { tag, anchor: None }
+}
+pub struct YamlPropertiesTagFirstBuilder {
+    tag: YamlTagProperty,
+    anchor: Option<YamlAnchorProperty>,
+}
+impl YamlPropertiesTagFirstBuilder {
+    pub fn with_anchor(mut self, anchor: YamlAnchorProperty) -> Self {
+        self.anchor = Some(anchor);
+        self
+    }
+    pub fn build(self) -> YamlPropertiesTagFirst {
+        YamlPropertiesTagFirst::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_PROPERTIES_TAG_FIRST,
+            [
+                Some(SyntaxElement::Node(self.tag.into_syntax())),
+                self.anchor
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn yaml_root(documents: YamlDocumentList, eof_token: SyntaxToken) -> YamlRoot {
     YamlRoot::unwrap_cast(SyntaxNode::new_detached(

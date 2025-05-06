@@ -4,6 +4,7 @@ expression: userDefinedValid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 function Fragment() {}
 let React = { Fragment };
 <>
@@ -12,5 +13,3 @@ let React = { Fragment };
 </>
 
 ```
-
-

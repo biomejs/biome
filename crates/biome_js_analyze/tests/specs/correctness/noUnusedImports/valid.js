@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import A from "mod";
 import * as B from "mod";
 import { C } from "mod";

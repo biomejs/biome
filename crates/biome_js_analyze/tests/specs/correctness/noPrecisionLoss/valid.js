@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var x = 1
 var x = 12345
 var x = 123.456

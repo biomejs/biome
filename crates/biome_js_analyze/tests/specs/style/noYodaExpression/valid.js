@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 if (value === "red") {}
 while (value === "red") {}
 if (value === value) {}

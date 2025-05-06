@@ -296,6 +296,8 @@ pub enum RuleSource {
     EslintRegexp(&'static str),
     /// Rules from [deno lint](https://github.com/denoland/deno_lint)
     DenoLint(&'static str),
+    /// Rules from [Eslint Plugin Vitest](https://github.com/vitest-dev/eslint-plugin-vitest)
+    EslintVitest(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -333,6 +335,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintNoSecrets(_) => write!(f, "eslint-plugin-no-secrets"),
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::DenoLint(_) => write!(f, "deno-lint"),
+            Self::EslintVitest(_) => write!(f, "@vitest/eslint-plugin"),
         }
     }
 }
@@ -387,7 +390,8 @@ impl RuleSource {
             | Self::EslintNoSecrets(rule_name)
             | Self::EslintRegexp(rule_name)
             | Self::Stylelint(rule_name)
-            | Self::DenoLint(rule_name) => rule_name,
+            | Self::DenoLint(rule_name)
+            | Self::EslintVitest(rule_name) => rule_name,
         }
     }
 
@@ -418,6 +422,7 @@ impl RuleSource {
             Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
             Self::EslintRegexp(rule_name) => format!("regexp/{rule_name}"),
             Self::DenoLint(rule_name) => format!("deno-lint/{rule_name}"),
+            Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
         }
     }
 
@@ -449,6 +454,7 @@ impl RuleSource {
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
+            Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rule/{rule_name}.md"),
         }
     }
 

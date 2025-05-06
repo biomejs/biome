@@ -4,6 +4,7 @@ expression: fromImportRenameValid.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 import AwesomeNoReact, { Fragment as AwesomeFragment } from "noReact";
 import AwesomeReact, { StrictMode as AwesomeStrictMode } from "react";
 
@@ -15,5 +16,3 @@ import AwesomeReact, { StrictMode as AwesomeStrictMode } from "react";
 </>
 
 ```
-
-

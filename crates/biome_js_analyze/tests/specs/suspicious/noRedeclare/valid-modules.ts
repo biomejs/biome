@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 declare module '*.gif' {
 	const src: string
 }

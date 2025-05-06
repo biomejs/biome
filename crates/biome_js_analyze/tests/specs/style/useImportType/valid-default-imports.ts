@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 import A from "";
 export { A }
 const AA = A;

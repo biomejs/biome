@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
   <div role="button"></div>
   <div role={role}></div>

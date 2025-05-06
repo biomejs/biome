@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 var a = <div />;
 var a = <div></div>;
 var a = <div aria="wee"></div>;

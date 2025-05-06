@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 let a = <img alt="foo" />;
 let a = <img alt="picture of me taking a photo of an image" aria-hidden />;
 let a = <img aria-hidden alt="photo of image" />;

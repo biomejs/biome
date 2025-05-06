@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 const bar = case1!.bar;
 
 function case2(bar: number | undefined) {

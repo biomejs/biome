@@ -4,6 +4,7 @@ expression: validNone.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 class ValidNone {
   constructor(foo: string) {}
 }

@@ -4,6 +4,7 @@ expression: validCustom.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 let a: String;
 
 let e: Object;

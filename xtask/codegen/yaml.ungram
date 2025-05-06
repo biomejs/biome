@@ -77,13 +77,13 @@ YamlAliasNode = value: 'alias_literal'
 // e.g {a: b, c: [d, {e: f}]}
 // https://yaml.org/spec/1.2.2/#rule-c-flow-json-node
 YamlFlowJsonNode =
-	properties: YamlPropertyList
+	properties: AnyYamlPropertiesCombination?
 	content: AnyYamlJsonContent?
 
 // Plain YAML node
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-yaml-node
 YamlFlowYamlNode =
-	properties: YamlPropertyList
+	properties: AnyYamlPropertiesCombination?
 	content: YamlPlainScalar?
 
 // Yaml in JSON style
@@ -145,18 +145,25 @@ AnyYamlFlowMapImplicitKey =
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
 AnyYamlBlockNode =
 	YamlBlockCollection
-	// https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
-	| YamlLiteralScalar
-	| YamlFoldedScalar
+	| YamlBlockScalar
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-collection
 YamlBlockCollection =
-	properties: YamlPropertyList
-	content: AnyYamlBlockContent
+	properties: AnyYamlPropertiesCombination?
+	content: AnyYamlBlockCollectionContent
 
-AnyYamlBlockContent =
+// https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
+YamlBlockScalar =
+	properties: AnyYamlPropertiesCombination?
+	content: AnyYamlBlockScalarContent
+
+AnyYamlBlockCollectionContent =
 	YamlBlockSequence
 	| YamlBlockMapping
+
+AnyYamlBlockScalarContent =
+	YamlLiteralScalar
+	| YamlFoldedScalar
 
 // a:
 //  - b
@@ -244,11 +251,17 @@ YamlBlockMapImplicitValue =
 	value: AnyYamlNode
 
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
-YamlPropertyList = AnyYamlProperty
+AnyYamlPropertiesCombination =
+	YamlPropertiesTagFirst
+	| YamlPropertiesAnchorFirst
 
-AnyYamlProperty =
-	YamlAnchorProperty
-	| YamlTagProperty
+YamlPropertiesTagFirst =
+	tag: YamlTagProperty
+	anchor: YamlAnchorProperty?
+
+YamlPropertiesAnchorFirst =
+	anchor: YamlAnchorProperty
+	tag: YamlTagProperty?
 
 // &abc
 // https://yaml.org/spec/1.2.2/#rule-c-ns-anchor-property

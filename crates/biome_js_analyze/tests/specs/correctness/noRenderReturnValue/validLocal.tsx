@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 function render() { }
 const ReactDOM = { render };
 

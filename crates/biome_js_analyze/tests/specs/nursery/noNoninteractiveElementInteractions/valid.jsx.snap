@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 <>
     {/* Custom Components */}
     <TestComponent onClick={doFoo} />

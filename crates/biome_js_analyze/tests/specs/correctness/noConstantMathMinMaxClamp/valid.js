@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 Math.min(100, Math.max(0, x));
 
 Math.max(0, Math.min(100, x));

@@ -3213,7 +3213,7 @@ export interface ImportMatcher {
 	source?: SourcesMatcher;
 	type?: boolean;
 }
-export type SourceMatcher = PredefinedGroupMatcher | ImportSourceGlob;
+export type SourceMatcher = NegatablePredefinedSourceMatcher | ImportSourceGlob;
 /**
  * Supported cases.
  */
@@ -3264,7 +3264,21 @@ export type Kind =
 export type Modifiers = RestrictedModifier[];
 export type Scope = "any" | "global";
 export type SourcesMatcher = SourceMatcher | SourceMatcher[];
-export type PredefinedGroupMatcher = string;
+export type NegatablePredefinedSourceMatcher =
+	| ":ALIAS:"
+	| ":BUN:"
+	| ":NODE:"
+	| ":PACKAGE:"
+	| ":PACKAGE_WITH_PROTOCOL:"
+	| ":PATH:"
+	| ":URL:"
+	| "!:ALIAS:"
+	| "!:BUN:"
+	| "!:NODE:"
+	| "!:PACKAGE:"
+	| "!:PACKAGE_WITH_PROTOCOL:"
+	| "!:PATH:"
+	| "!:URL:";
 /**
  * Glob to match against import sources.
  */

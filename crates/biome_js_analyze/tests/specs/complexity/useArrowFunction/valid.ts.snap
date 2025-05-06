@@ -4,6 +4,7 @@ expression: valid.ts
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 function functionDeclaration() {
     return 0;
 }
@@ -94,5 +95,3 @@ const usingNewTarget = function () {
 class ExtendsClause extends (function() {}) {}
 
 ```
-
-

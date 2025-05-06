@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 <>
     <div onClick={() => {}} onKeyUp={handleKeyUp} />
     <div onClick={() => {}} onKeyDown={handleKeyDown} />
