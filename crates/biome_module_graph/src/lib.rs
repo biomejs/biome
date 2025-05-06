@@ -9,7 +9,7 @@ mod resolver_cache;
 pub use biome_js_type_info::{ImportSymbol, ResolvedPath};
 
 pub use js_module_info::{
-    AdHocScopeResolver, JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport,
+    JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, ScopedResolver,
 };
 pub use jsdoc_comment::JsdocComment;
 pub use module_graph::{ModuleGraph, SUPPORTED_EXTENSIONS};

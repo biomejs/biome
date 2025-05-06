@@ -155,7 +155,7 @@ Module TypeId(2) => sync Function "returnPromiseResult" {
 ## Registered types
 
 ```
-AdHoc TypeId(0) => sync Function "returnPromiseResult" {
+Scope TypeId(0) => sync Function "returnPromiseResult" {
   accepts: {
     params: []
     type_args: []

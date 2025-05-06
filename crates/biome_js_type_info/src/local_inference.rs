@@ -220,6 +220,7 @@ impl TypeData {
         Self::instance_of(TypeReference::Qualifier(TypeReferenceQualifier {
             path: [Text::Static("Array")].into(),
             type_parameters: [ty].into(),
+            scope_id: None,
         }))
     }
 
@@ -951,6 +952,7 @@ impl TypeData {
         Self::instance_of(TypeReference::Qualifier(TypeReferenceQualifier {
             path: Box::new([Text::Static("Promise")]),
             type_parameters: Box::new([ty]),
+            scope_id: None,
         }))
     }
 
@@ -1455,6 +1457,7 @@ impl TypeMember {
                             TypeofValue {
                                 identifier: name,
                                 ty: TypeReference::Unknown,
+                                scope_id: None,
                             },
                         ))),
                         is_optional: false,
@@ -1600,6 +1603,7 @@ impl TypeReferenceQualifier {
                 Some(Self {
                     path: identifiers.into(),
                     type_parameters: [].into(),
+                    scope_id: None,
                 })
             }
         }
@@ -1609,6 +1613,7 @@ impl TypeReferenceQualifier {
         Self {
             path: Box::new([name]),
             type_parameters: [].into(),
+            scope_id: None,
         }
     }
 

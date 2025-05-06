@@ -1,7 +1,7 @@
 use std::{collections::VecDeque, iter::FusedIterator, sync::Arc};
 
-use biome_js_semantic::ScopeId;
 use biome_js_syntax::TextRange;
+use biome_js_type_info::ScopeId;
 use biome_rowan::TokenText;
 use rustc_hash::FxHashMap;
 
@@ -46,13 +46,13 @@ impl JsScope {
     }
 
     /// Returns all parents of this scope. Starting with the current
-    /// [Scope].
+    /// [JsScope].
     pub fn ancestors(&self) -> impl Iterator<Item = Self> + use<> {
         std::iter::successors(Some(self.clone()), |scope| scope.parent())
     }
 
-    /// Returns all descendents of this scope in breadth-first order. Starting with the current
-    /// [Scope].
+    /// Returns all descendents of this scope in breadth-first order. Starting
+    /// with the current [JsScope].
     pub fn descendents(&self) -> impl Iterator<Item = Self> + use<> {
         let mut q = VecDeque::new();
         q.push_back(self.id);
@@ -65,8 +65,6 @@ impl JsScope {
 
     /// Returns this scope parent.
     pub fn parent(&self) -> Option<Self> {
-        // id will always be a valid scope because
-        // it was created by [SemanticModel::scope] method.
         debug_assert!((self.id.index()) < self.info.scopes.len());
 
         let parent = self.info.scopes[self.id.index()].parent?;
@@ -76,8 +74,9 @@ impl JsScope {
         })
     }
 
-    /// Returns all bindings that were bound in this scope. It **does
-    /// not** returns bindings of parent scopes.
+    /// Returns all bindings that were bound in this scope.
+    ///
+    /// It **does not** return bindings of parent scopes.
     pub fn bindings(&self) -> ScopeBindingsIter {
         ScopeBindingsIter {
             info: self.info.clone(),
@@ -86,8 +85,9 @@ impl JsScope {
         }
     }
 
-    /// Returns a binding by its name, like it appears on code.  It **does
-    /// not** returns bindings of parent scopes.
+    /// Returns a binding by its name, like it appears on code.
+    ///
+    /// It **does not** return bindings of parent scopes.
     pub fn get_binding(&self, name: impl AsRef<str>) -> Option<JsBinding> {
         let data = &self.info.scopes[self.id.index()];
 
@@ -100,9 +100,10 @@ impl JsScope {
         })
     }
 
-    /// Checks if the current scope is one of the ancestor of "other". Given
-    /// that [Scope::ancestors] return "self" as the first scope,
-    /// this function returns true for:
+    /// Checks if the current scope is an ancestor of `other`.
+    ///
+    /// Given that [Self::ancestors()] returns `self` as the first scope,
+    /// the following snippet always returns `true`:
     ///
     /// ```rust,ignore
     /// assert!(scope.is_ancestor_of(scope));
@@ -116,7 +117,8 @@ impl JsScope {
     }
 }
 
-/// Iterate all descendents scopes of the specified scope in breadth-first order.
+/// Iterates all descendent scopes of the specified scope in breadth-first
+/// order.
 pub struct ScopeDescendentsIter {
     info: Arc<JsModuleInfoInner>,
     q: VecDeque<ScopeId>,
@@ -141,8 +143,9 @@ impl Iterator for ScopeDescendentsIter {
 
 impl FusedIterator for ScopeDescendentsIter {}
 
-/// Iterate all bindings that were bound in a given scope. It **does
-/// not** Returns bindings of parent scopes.
+/// Iterates all bindings that were bound in a given scope.
+///
+/// It **does not** return bindings of parent scopes.
 #[derive(Debug)]
 pub struct ScopeBindingsIter {
     info: Arc<JsModuleInfoInner>,
@@ -154,8 +157,6 @@ impl Iterator for ScopeBindingsIter {
     type Item = JsBinding;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // scope_id will always be a valid scope because
-        // it was created by [Scope::bindings] method.
         debug_assert!(self.scope_id.index() < self.info.scopes.len());
 
         let id = *self.info.scopes[self.scope_id.index()]
@@ -173,8 +174,6 @@ impl Iterator for ScopeBindingsIter {
 
 impl ExactSizeIterator for ScopeBindingsIter {
     fn len(&self) -> usize {
-        // scope_id will always be a valid scope because
-        // it was created by [Scope::bindings] method.
         debug_assert!(self.scope_id.index() < self.info.scopes.len());
 
         self.info.scopes[self.scope_id.index()].bindings.len()

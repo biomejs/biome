@@ -85,6 +85,10 @@ impl Type {
         }
     }
 
+    pub fn from_id(resolver: Arc<dyn TypeResolver>, id: ResolvedTypeId) -> Self {
+        Self { resolver, id }
+    }
+
     /// Returns this type's [`TypeId`].
     ///
     /// **Warning:** Type IDs can only be safely compared with other IDs from
@@ -1060,6 +1064,9 @@ pub struct TypeofValue {
 
     /// The resolved type.
     pub ty: TypeReference,
+
+    /// ID of the scope from which the value is being referenced.
+    pub scope_id: Option<ScopeId>,
 }
 
 #[derive(Clone, Debug, PartialEq, Resolvable)]
@@ -1204,6 +1211,9 @@ pub struct TypeReferenceQualifier {
 
     /// Generic type parameters specified in the reference.
     pub type_parameters: Box<[TypeReference]>,
+
+    /// ID of the scope from which the qualifier is being referenced.
+    pub scope_id: Option<ScopeId>,
 }
 
 impl TypeReferenceQualifier {
@@ -1237,11 +1247,47 @@ impl TypeReferenceQualifier {
         self.path.len() == 1 && self.path[0] == "Promise"
     }
 
+    pub fn with_scope_id(self, scope_id: ScopeId) -> Self {
+        Self {
+            scope_id: Some(scope_id),
+            ..self
+        }
+    }
+
     pub fn without_type_parameters(&self) -> Self {
         Self {
             path: self.path.clone(),
             type_parameters: [].into(),
+            scope_id: self.scope_id,
         }
+    }
+}
+
+// We use `NonZeroU32` to allow niche optimizations.
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct ScopeId(pub(crate) std::num::NonZeroU32);
+
+// We don't implement `From<usize> for ScopeId` and `From<ScopeId> for usize`
+// to ensure that the API consumers don't create `ScopeId`.
+impl ScopeId {
+    pub const GLOBAL: Self = Self::new(0);
+
+    pub const fn new(index: usize) -> Self {
+        // SAFETY: We don't handle files exceeding `u32::MAX` bytes.
+        // Thus, it isn't possible to exceed `u32::MAX` scopes.
+        //
+        // Adding 1 ensures that the value is never equal to 0.
+        // Instead of adding 1, we could XOR the value with `u32::MAX`.
+        // This is what the [nonmax](https://docs.rs/nonmax/latest/nonmax/) crate does.
+        // However, this doesn't preserve the order.
+        // It is why we opted for adding 1.
+        Self(unsafe { std::num::NonZeroU32::new_unchecked(index.unchecked_add(1) as u32) })
+    }
+
+    pub const fn index(self) -> usize {
+        // SAFETY: The internal representation ensures that the value is never equal to 0.
+        // Thus, it is safe to substract 1.
+        (unsafe { self.0.get().unchecked_sub(1) }) as usize
     }
 }
 
