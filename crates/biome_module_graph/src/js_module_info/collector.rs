@@ -14,13 +14,13 @@ use biome_js_type_info::{
     TypeData, TypeId, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeResolverLevel,
 };
+use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextSize, TokenText};
 use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
-use crate::{
-    js_module_info::binding::{JsBindingReference, JsBindingReferenceKind, JsDeclarationKind},
-    jsdoc_comment::JsdocComment,
+use crate::js_module_info::binding::{
+    JsBindingReference, JsBindingReferenceKind, JsDeclarationKind,
 };
 
 use super::{

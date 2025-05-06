@@ -1750,6 +1750,10 @@ export interface Nursery {
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_Null;
 	/**
+	 * Enforce JSDoc comment lines to start with a single asterisk, except for the first one.
+	 */
+	useSingleJsDocAsterisk?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
@@ -3524,6 +3528,7 @@ export type Category =
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useParseIntRadix"
+	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"

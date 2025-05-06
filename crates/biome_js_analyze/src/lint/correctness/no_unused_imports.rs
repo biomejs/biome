@@ -19,7 +19,7 @@ use biome_js_syntax::{
     AnyJsNamedImportSpecifier, AnyTsTypeMember, JsLanguage, JsNamedImportSpecifiers, JsSyntaxNode,
     T, TsEnumMember,
 };
-use biome_module_graph::jsdoc_comment::JsdocComment;
+use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language, NodeOrToken,
     SyntaxNode, TextRange, WalkEvent, declare_node_union,

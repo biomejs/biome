@@ -6,12 +6,13 @@ use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_js_type_info::{ScopeId, Type, TypeResolver};
+use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
+use biome_module_graph::JsExport;
 use biome_module_graph::{
     ImportSymbol, JsImport, JsReexport, ModuleGraph, ResolvedPath, ScopedResolver,
 };
-use biome_module_graph::{JsExport, JsdocComment};
 use biome_package::{Dependencies, PackageJson, Version};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
