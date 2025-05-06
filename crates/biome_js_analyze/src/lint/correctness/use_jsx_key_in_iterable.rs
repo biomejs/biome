@@ -295,7 +295,7 @@ fn handle_statement(
         }
         AnyJsStatement::JsSwitchStatement(switch_statement) => {
             let cases = switch_statement.cases();
-            let res = cases
+            let ranges = cases
                 .iter()
                 .flat_map(|case| {
                     let cons = match case {
@@ -305,7 +305,7 @@ fn handle_statement(
                     handle_statements(&cons, model, is_inside_jsx, options)
                 })
                 .collect();
-            Some(res)
+            Some(ranges)
         }
         AnyJsStatement::JsIfStatement(i) => {
             let consequent = i.consequent().ok()?;
@@ -317,10 +317,10 @@ fn handle_statement(
                 options,
             );
             if let Some(else_clause) = i.else_clause() {
-                let else_block = else_clause.alternate().ok()?;
-                let else_block = else_block.as_js_block_statement()?;
+                let alternate = else_clause.alternate().ok()?;
+                let alternate_block = alternate.as_js_block_statement()?;
                 ranges.extend(handle_statements(
-                    &else_block.statements(),
+                    &alternate_block.statements(),
                     model,
                     is_inside_jsx,
                     options,
