@@ -365,7 +365,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                 } => {
                     // we transform the file string into a path object so we can correctly strip
                     // the working directory without having leading slash in the file name
-                    let file_path = Utf8PathBuf::from(file_path);
+                    let file_path = Utf8Path::new(&file_path);
                     let file_path = self
                         .working_directory
                         .as_ref()
@@ -426,10 +426,13 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     new,
                     diff_kind,
                 } => {
-                    let file_name = self
+                    let file_path = Utf8Path::new(&file_name);
+                    let file_path = self
                         .working_directory
-                        .and_then(|wd| file_name.strip_prefix(wd.as_str()))
-                        .unwrap_or(file_name.as_str());
+                        .as_ref()
+                        .and_then(|wd| file_path.strip_prefix(wd.as_str()).ok())
+                        .map(|path| path.to_string())
+                        .unwrap_or(file_path.to_string());
                     // A diff is an error in CI mode and in format check mode
                     let is_error = self.execution.is_ci() || !self.execution.is_format_write();
                     if is_error {
@@ -454,7 +457,6 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             match diff_kind {
                                 DiffKind::Format => {
                                     let diag = CIFormatDiffDiagnostic {
-                                        file_name: file_name.to_string(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),
@@ -462,7 +464,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                     };
                                     diagnostics_to_print.push(
                                         diag.with_severity(severity)
-                                            .with_file_source_code(old.clone()),
+                                            .with_file_source_code(old.clone())
+                                            .with_file_path(file_path.to_string()),
                                     );
                                 }
                             };
@@ -470,7 +473,6 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             match diff_kind {
                                 DiffKind::Format => {
                                     let diag = FormatDiffDiagnostic {
-                                        file_name: file_name.to_string(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),
@@ -478,7 +480,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                     };
                                     diagnostics_to_print.push(
                                         diag.with_severity(severity)
-                                            .with_file_source_code(old.clone()),
+                                            .with_file_source_code(old.clone())
+                                            .with_file_path(file_path.to_string()),
                                     )
                                 }
                             };

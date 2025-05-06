@@ -5,18 +5,17 @@ mod license;
 mod node_js_package;
 
 pub use crate::diagnostics::{ProjectAnalyzeDiagnostic, ProjectDiagnostic};
+use biome_deserialize::{DeserializationDiagnostic, Deserialized};
+use biome_diagnostics::serde::Diagnostic;
+use biome_parser::AnyParse;
+use biome_parser::diagnostic::ParseDiagnostic;
+use biome_rowan::Language;
 pub use license::generated::*;
 pub use node_js_package::{
     Dependencies, NodeJsPackage, PackageJson, PackageType, TsConfigJson, Version,
 };
-
 use std::any::TypeId;
 use std::fmt::Debug;
-
-use biome_deserialize::{DeserializationDiagnostic, Deserialized};
-use biome_diagnostics::serde::Diagnostic;
-use biome_parser::diagnostic::ParseDiagnostic;
-use biome_rowan::Language;
 
 pub(crate) type LanguageRoot<L> = <L as Language>::Root;
 
@@ -36,6 +35,9 @@ pub trait Package {
 
     /// Inserts a manifest into the package, taking care of deserialization.
     fn insert_serialized_manifest(&mut self, root: &PackageRoot<Self>);
+
+    /// Inserts the raw (parse) manifest
+    fn insert_raw_manifest(&mut self, root: &AnyParse);
 
     fn manifest(&self) -> Option<&Self::Manifest> {
         None

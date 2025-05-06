@@ -12,8 +12,6 @@ use std::io;
     severity = Error
 )]
 pub(crate) struct CIFormatDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
     #[advice]
     pub(crate) diff: ContentDiffAdvice,
 }
@@ -25,8 +23,6 @@ pub(crate) struct CIFormatDiffDiagnostic {
     message = "Formatter would have printed the following content:"
 )]
 pub(crate) struct FormatDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
     #[advice]
     pub(crate) diff: ContentDiffAdvice,
 }
@@ -76,7 +72,7 @@ pub(crate) struct UnhandledDiagnostic;
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "parse", 
+    category = "parse",
     message = "Skipped file with syntax errors",
     severity = Information,
 )]

@@ -8,7 +8,7 @@ use biome_rowan::Text;
 
 use crate::{
     Class, GenericTypeParameter, MethodTypeMember, PropertyTypeMember, Resolvable, ResolvedTypeId,
-    TypeData, TypeId, TypeMember, TypeReference, TypeReferenceQualifier, TypeResolver,
+    ScopeId, TypeData, TypeId, TypeMember, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeResolverLevel,
 };
 
@@ -217,7 +217,7 @@ impl TypeResolver for GlobalsResolver {
         }
     }
 
-    fn resolve_type_of(&self, identifier: &Text) -> Option<ResolvedTypeId> {
+    fn resolve_type_of(&self, identifier: &Text, _scope_id: ScopeId) -> Option<ResolvedTypeId> {
         match identifier.text() {
             "globalThis" | "window" => Some(GLOBAL_GLOBAL_ID),
             _ => None,

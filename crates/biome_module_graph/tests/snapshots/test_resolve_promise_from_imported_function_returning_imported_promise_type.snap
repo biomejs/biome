@@ -135,7 +135,7 @@ Module TypeId(2) => sync Function "returnPromiseResult" {
 ## Registered types
 
 ```
-AdHoc TypeId(0) => sync Function "returnPromiseResult" {
+Scope TypeId(0) => sync Function "returnPromiseResult" {
   accepts: {
     params: []
     type_args: []
@@ -143,5 +143,5 @@ AdHoc TypeId(0) => sync Function "returnPromiseResult" {
   returns: Module(1) TypeId(1)
 }
 
-AdHoc TypeId(1) => instanceof Promise<T = Module(2) TypeId(3)>
+Scope TypeId(1) => instanceof Promise<T = Module(2) TypeId(3)>
 ```

@@ -1,6 +1,6 @@
 use biome_parser::lexer::BufferedLexer;
-use biome_parser::prelude::{ParseDiagnostic, TokenSource};
-use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
+use biome_parser::prelude::{BumpWithContext, ParseDiagnostic, TokenSource};
+use biome_parser::token_source::{TokenSourceCheckpoint, TokenSourceWithBufferedLexer, Trivia};
 use biome_rowan::TriviaPieceKind;
 use biome_yaml_syntax::YamlSyntaxKind::{self, EOF};
 
@@ -10,6 +10,8 @@ pub(crate) struct YamlTokenSource<'source> {
     lexer: BufferedLexer<YamlSyntaxKind, YamlLexer<'source>>,
     trivia_list: Vec<Trivia>,
 }
+
+pub(crate) type YamlTokenSourceCheckpoint = TokenSourceCheckpoint<YamlSyntaxKind>;
 
 impl<'source> YamlTokenSource<'source> {
     pub(crate) fn new(lexer: BufferedLexer<YamlSyntaxKind, YamlLexer<'source>>) -> Self {
@@ -52,6 +54,25 @@ impl<'source> YamlTokenSource<'source> {
             }
         }
     }
+
+    pub fn re_lex(&mut self, mode: YamlLexContext) -> YamlSyntaxKind {
+        self.lexer.re_lex(mode)
+    }
+
+    /// Creates a checkpoint to which it can later return using [Self::rewind].
+    pub fn checkpoint(&self) -> YamlTokenSourceCheckpoint {
+        YamlTokenSourceCheckpoint {
+            trivia_len: self.trivia_list.len() as u32,
+            lexer_checkpoint: self.lexer.checkpoint(),
+        }
+    }
+
+    /// Restores the token source to a previous state
+    pub fn rewind(&mut self, checkpoint: YamlTokenSourceCheckpoint) {
+        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
+        self.trivia_list.truncate(checkpoint.trivia_len as usize);
+        self.lexer.rewind(checkpoint.lexer_checkpoint);
+    }
 }
 
 impl TokenSource for YamlTokenSource<'_> {
@@ -74,9 +95,7 @@ impl TokenSource for YamlTokenSource<'_> {
     }
 
     fn bump(&mut self) {
-        if self.current() != EOF {
-            self.next_non_trivia_token(YamlLexContext::Regular, false)
-        }
+        self.bump_with_context(YamlLexContext::default());
     }
 
     fn skip_as_trivia(&mut self) {
@@ -99,5 +118,27 @@ impl TokenSource for YamlTokenSource<'_> {
 impl<'source> TokenSourceWithBufferedLexer<YamlLexer<'source>> for YamlTokenSource<'source> {
     fn lexer(&mut self) -> &mut BufferedLexer<YamlSyntaxKind, YamlLexer<'source>> {
         &mut self.lexer
+    }
+}
+
+impl BumpWithContext for YamlTokenSource<'_> {
+    type Context = YamlLexContext;
+
+    fn bump_with_context(&mut self, context: Self::Context) {
+        if self.current() != EOF {
+            self.next_non_trivia_token(context, false);
+        }
+    }
+
+    fn skip_as_trivia_with_context(&mut self, context: Self::Context) {
+        if self.current() != EOF {
+            self.trivia_list.push(Trivia::new(
+                TriviaPieceKind::Skipped,
+                self.current_range(),
+                false,
+            ));
+
+            self.next_non_trivia_token(context, true)
+        }
     }
 }

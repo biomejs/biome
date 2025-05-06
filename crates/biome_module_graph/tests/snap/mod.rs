@@ -4,7 +4,7 @@ use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 use biome_js_type_info::ResolvedPath;
-use biome_module_graph::{AdHocScopeResolver, ModuleGraph};
+use biome_module_graph::{ModuleGraph, ScopedResolver};
 use biome_rowan::AstNode;
 use biome_test_utils::dump_registered_types;
 use camino::Utf8PathBuf;
@@ -12,7 +12,7 @@ use camino::Utf8PathBuf;
 pub struct ModuleGraphSnapshot<'a> {
     module_graph: &'a ModuleGraph,
     fs: &'a MemoryFileSystem,
-    resolver: Option<&'a AdHocScopeResolver>,
+    resolver: Option<&'a ScopedResolver>,
 }
 
 impl<'a> ModuleGraphSnapshot<'a> {
@@ -24,7 +24,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
         }
     }
 
-    pub fn with_resolver(self, resolver: &'a AdHocScopeResolver) -> Self {
+    pub fn with_resolver(self, resolver: &'a ScopedResolver) -> Self {
         Self {
             resolver: Some(resolver),
             ..self
