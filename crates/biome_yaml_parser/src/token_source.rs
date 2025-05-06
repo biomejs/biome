@@ -1,5 +1,5 @@
 use biome_parser::lexer::BufferedLexer;
-use biome_parser::prelude::{ParseDiagnostic, TokenSource};
+use biome_parser::prelude::{BumpWithContext, ParseDiagnostic, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
 use biome_rowan::TriviaPieceKind;
 use biome_yaml_syntax::YamlSyntaxKind::{self, EOF};
@@ -74,9 +74,7 @@ impl TokenSource for YamlTokenSource<'_> {
     }
 
     fn bump(&mut self) {
-        if self.current() != EOF {
-            self.next_non_trivia_token(YamlLexContext::Regular, false)
-        }
+        self.bump_with_context(YamlLexContext::default());
     }
 
     fn skip_as_trivia(&mut self) {
@@ -99,5 +97,27 @@ impl TokenSource for YamlTokenSource<'_> {
 impl<'source> TokenSourceWithBufferedLexer<YamlLexer<'source>> for YamlTokenSource<'source> {
     fn lexer(&mut self) -> &mut BufferedLexer<YamlSyntaxKind, YamlLexer<'source>> {
         &mut self.lexer
+    }
+}
+
+impl BumpWithContext for YamlTokenSource<'_> {
+    type Context = YamlLexContext;
+
+    fn bump_with_context(&mut self, context: Self::Context) {
+        if self.current() != EOF {
+            self.next_non_trivia_token(context, false);
+        }
+    }
+
+    fn skip_as_trivia_with_context(&mut self, context: Self::Context) {
+        if self.current() != EOF {
+            self.trivia_list.push(Trivia::new(
+                TriviaPieceKind::Skipped,
+                self.current_range(),
+                false,
+            ));
+
+            self.next_non_trivia_token(context, true)
+        }
     }
 }
