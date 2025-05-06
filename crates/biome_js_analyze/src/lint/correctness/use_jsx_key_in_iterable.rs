@@ -243,8 +243,8 @@ fn handle_function_body(
             ))
         })
         .unwrap_or_default();
-    let ranges = return_statement.as_ref().and_then(|ret| {
-        let returned_value = unwrap_parenthesis(ret.argument()?)?;
+    let ranges = return_statement.and_then(|ret| {
+        let returned_value = ret.argument()?;
         handle_potential_react_component(returned_value, model, is_inside_jsx, options)
     });
     if ranges.is_none() && is_return_component {
