@@ -82,7 +82,7 @@ where
     type Services = TypedService;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, ScopeResolverBuilderVisitor::default);
+        analyzer.add_visitor(Phases::Syntax, ScopedResolverBuilderVisitor::default);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -96,11 +96,11 @@ where
 }
 
 #[derive(Default)]
-struct ScopeResolverBuilderVisitor {
+struct ScopedResolverBuilderVisitor {
     resolver: Option<Option<ScopedResolver>>,
 }
 
-impl Visitor for ScopeResolverBuilderVisitor {
+impl Visitor for ScopedResolverBuilderVisitor {
     type Language = JsLanguage;
 
     fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {

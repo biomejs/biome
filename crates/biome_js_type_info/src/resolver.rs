@@ -102,8 +102,8 @@ impl ModuleId {
 /// another resolver that may be able to handle the level.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TypeResolverLevel {
-    /// Used for ad-hoc inference that is not cached except in the scope
-    /// resolver (which is discarded after use).
+    /// Used for scope-level inference that is not cached except in the scoped
+    /// resolver.
     Scope,
 
     /// Used for resolving types that exist within the same module as from which
