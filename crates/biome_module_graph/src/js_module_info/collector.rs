@@ -3,15 +3,15 @@ use std::{
     sync::Arc,
 };
 
-use biome_js_semantic::{ScopeId, SemanticEvent, SemanticEventExtractor};
+use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsImportClause,
     JsFormalParameter, JsIdentifierBinding, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
     TsIdentifierBinding, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Resolvable, ResolvedTypeId, TypeData,
-    TypeId, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolver,
+    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, Resolvable, ResolvedTypeId, ScopeId,
+    TypeData, TypeId, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeResolverLevel,
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -173,7 +173,7 @@ impl JsModuleInfoCollector {
 
                 self.scopes.push(JsScopeData {
                     range,
-                    parent: parent_scope_id,
+                    parent: parent_scope_id.map(|id| ScopeId::new(id.index())),
                     children: Vec::new(),
                     bindings: Vec::new(),
                     bindings_by_name: FxHashMap::default(),
@@ -440,7 +440,7 @@ impl TypeResolver for JsModuleInfoCollector {
         match id.level() {
             TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
             TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(id.id())),
-            TypeResolverLevel::AdHoc | TypeResolverLevel::Import => None,
+            TypeResolverLevel::Scope | TypeResolverLevel::Import => None,
         }
     }
 
@@ -468,15 +468,18 @@ impl TypeResolver for JsModuleInfoCollector {
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
         if qualifier.path.len() == 1 {
-            self.resolve_type_of(&qualifier.path[0])
-                .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
+            self.resolve_type_of(
+                &qualifier.path[0],
+                qualifier.scope_id.unwrap_or(ScopeId::GLOBAL),
+            )
+            .or_else(|| GLOBAL_RESOLVER.resolve_qualifier(qualifier))
         } else {
             // TODO: Resolve nested qualifiers
             None
         }
     }
 
-    fn resolve_type_of(&self, identifier: &Text) -> Option<ResolvedTypeId> {
+    fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
         // We only care about the global scope, since that's where all exported
         // symbols reside.
         if let Some(binding_id) = self.scopes[0].bindings_by_name.get(identifier.text()) {
@@ -491,7 +494,7 @@ impl TypeResolver for JsModuleInfoCollector {
             };
         }
 
-        GLOBAL_RESOLVER.resolve_type_of(identifier)
+        GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
     }
 
     fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {

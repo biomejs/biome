@@ -11,7 +11,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
 use biome_module_graph::JsExport;
 use biome_module_graph::{
-    AdHocScopeResolver, ImportSymbol, JsImport, JsReexport, ModuleGraph, ResolvedPath,
+    ImportSymbol, JsImport, JsReexport, ModuleGraph, ResolvedPath, ScopedResolver,
 };
 use biome_package::{Dependencies, PackageJson, Version};
 use biome_project_layout::ProjectLayout;
@@ -579,9 +579,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let global_scope = index_module.global_scope();
-    let mut resolver =
-        AdHocScopeResolver::from_scope_in_module(global_scope, index_module, module_graph.clone());
+    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
     resolver.run_inference();
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
@@ -590,7 +588,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     );
 
     let resolved_id = resolver
-        .resolve_type_of(&Text::Static("promise"))
+        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
     let ty = resolver
         .get_by_resolved_id(resolved_id)
@@ -647,9 +645,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let index_module = module_graph
         .module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
-    let global_scope = index_module.global_scope();
-    let mut resolver =
-        AdHocScopeResolver::from_scope_in_module(global_scope, index_module, module_graph.clone());
+    let mut resolver = ScopedResolver::from_global_scope(index_module, module_graph.clone());
     resolver.run_inference();
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
@@ -658,7 +654,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     );
 
     let resolved_id = resolver
-        .resolve_type_of(&Text::Static("promise"))
+        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
     let ty = resolver
         .get_by_resolved_id(resolved_id)
