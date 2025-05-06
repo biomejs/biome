@@ -3,9 +3,7 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
     VisitorFinishContext,
 };
-use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, JsExpressionStatement, JsLanguage, JsSyntaxNode,
-};
+use biome_js_syntax::{AnyJsExpression, AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_js_type_info::Type;
 use biome_module_graph::{ModuleGraph, ScopedResolver};
 use biome_rowan::{AstNode, TextRange, WalkEvent};
@@ -120,9 +118,7 @@ impl Visitor for ScopedResolverBuilderVisitor {
 
         match event {
             WalkEvent::Enter(node) => {
-                if let Some(expr) =
-                    JsExpressionStatement::cast_ref(node).and_then(|node| node.expression().ok())
-                {
+                if let Some(expr) = AnyJsExpression::cast_ref(node) {
                     resolver.register_types_for_expression(&expr);
                 }
             }
