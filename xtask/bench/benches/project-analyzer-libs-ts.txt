@@ -1,1 +1,1 @@
-opentelemetry-js-2.0.0: https://github.com/open-telemetry/opentelemetry-js/archive/refs/tags/v2.0.0.tar.gz
+typescript-eslint-8.32.0: https://github.com/typescript-eslint/typescript-eslint/archive/refs/tags/v8.32.0.tar.gz

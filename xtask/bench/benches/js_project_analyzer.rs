@@ -59,7 +59,7 @@ fn bench_project_analyzer(criterion: &mut Criterion) {
         let test_case = match ProjectTestCase::try_from(lib, folder) {
             Ok(test_case) => test_case,
             Err(err) => {
-                println!("Error before running benchmark on {lib}: {err:?}");
+                println!("Error before running benchmark on {lib}: {err}");
                 continue;
             }
         };
@@ -150,6 +150,12 @@ impl ProjectTestCase {
                             .arg("install")
                             .current_dir(&folder_path)
                             .output()
+                    } else if folder_path.join("yarn.lock").is_file() {
+                        println!("[{folder}] - Running `yarn install` in [{folder_path}]");
+                        Command::new("yarn")
+                            .arg("install")
+                            .current_dir(&folder_path)
+                            .output()
                     } else {
                         println!("[{folder}] - Running `npm install` in [{folder_path}]");
                         Command::new("npm")
@@ -162,7 +168,7 @@ impl ProjectTestCase {
                     })?;
                     if !output.status.success() {
                         return Err(format!(
-                            "failed to install dependencies. exit code: {}\nstderr:\n{}\nstdout:\n{}",
+                            "failed to install dependencies. {}\nstderr:\n{}\nstdout:\n{}",
                             output.status,
                             String::from_utf8(output.stderr).expect("invalid utf-8 in stderr"),
                             String::from_utf8(output.stdout).expect("invalid utf-8 in stdout"),
