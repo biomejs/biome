@@ -106,26 +106,6 @@ data.map((x) => {
 	}
 })
 
-const MyComponent = () => {
-  const entries = [
-    { value: 'a', type: 'string' },
-    { value: 9, type: 'number' },
-    { value: 'c', type: 'string' },
-  ];
-  return (
-    <>
-      {entries.map((x) => {
-        switch (x.type) {
-          case 'string':
-            return <div>{x.value}</div>
-          case 'number':
-            return <div>{x.value}</div>
-        }
-      })}
-    </>
-  )
-}
-
 ```
 
 # Diagnostics
@@ -897,44 +877,6 @@ invalid.jsx:99:11 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
         │ 			       ^^^^^
     100 │ 	}
     101 │ })
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalid.jsx:114:20 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    112 │         switch (x.type) {
-    113 │           case 'string':
-  > 114 │             return <div>{x.value}</div>
-        │                    ^^^^^
-    115 │           case 'number':
-    116 │             return <div>{x.value}</div>
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
-invalid.jsx:116:20 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    114 │             return <div>{x.value}</div>
-    115 │           case 'number':
-  > 116 │             return <div>{x.value}</div>
-        │                    ^^^^^
-    117 │         }
-    118 │       })}
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
