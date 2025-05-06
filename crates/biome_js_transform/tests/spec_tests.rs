@@ -5,8 +5,9 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    assert_errors_are_absent, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
+    assert_errors_are_absent, assert_valid_snapshot_contains_no_diagnostic_comment,
+    assert_valid_snapshot_did_not_generate_diagnostics, create_analyzer_options,
+    diagnostic_to_string, has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
     write_transformation_snapshot,
 };
 
@@ -47,7 +48,10 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
-    let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
+
+    assert_valid_snapshot_contains_no_diagnostic_comment(input_file, &input_code);
+
+    let diagnostics_quantity = if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,
@@ -83,9 +87,11 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
 
-    if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
-        panic!("This test should not generate diagnostics");
-    }
+    assert_valid_snapshot_did_not_generate_diagnostics(
+        input_file,
+        &input_code,
+        diagnostics_quantity,
+    );
 }
 
 pub(crate) fn analyze_and_snap(

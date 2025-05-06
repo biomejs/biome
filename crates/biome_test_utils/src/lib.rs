@@ -19,6 +19,7 @@ use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
 use biome_service::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
+use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
@@ -507,4 +508,44 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
         last_token.token_text_trimmed().is_empty(),
         "the EOF token may not contain any data except trailing whitespace"
     );
+}
+
+/// Checks whether valid snapshot file contains
+/// `/* should not generate diagnostics */`" comment
+pub fn assert_valid_snapshot_contains_no_diagnostic_comment(
+    snapshot_path: &Utf8Path,
+    snapshot_code: &str,
+) {
+    let should_contain_comment = match snapshot_path.extension().unwrap_or_default() {
+        // Excluded files types which cannot contain comment in the source code
+        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" => false,
+        _ => {
+            let name = snapshot_path.file_name().unwrap().to_ascii_lowercase_cow();
+            // We can't know all the valid file names, but this should catch most common cases.
+            name.contains("valid") && !name.contains("invalid")
+        }
+    };
+
+    if should_contain_comment
+        && !snapshot_code.contains("/* should not generate diagnostics */")
+        && !snapshot_code.contains("/* should generate diagnostics */")
+    {
+        panic!(
+            "Valid test files should start with a comment \"/* should not generate diagnostics */\"\nIf it is intended you can add \"/* should generate diagnostics */\" instead.\nFile: {}",
+            snapshot_path
+        );
+    }
+}
+
+pub fn assert_valid_snapshot_did_not_generate_diagnostics(
+    snapshot_path: &Utf8Path,
+    snapshot_code: &str,
+    diagnostics_quantity: usize,
+) {
+    if diagnostics_quantity > 0 && snapshot_code.contains("/* should not generate diagnostics */") {
+        panic!(
+            "This test should not generate diagnostics\nFile: {}",
+            snapshot_path
+        );
+    }
 }

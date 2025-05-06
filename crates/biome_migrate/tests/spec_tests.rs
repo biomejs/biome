@@ -5,7 +5,8 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonLanguage;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    assert_errors_are_absent, code_fix_to_string, diagnostic_to_string,
+    assert_errors_are_absent, assert_valid_snapshot_contains_no_diagnostic_comment,
+    assert_valid_snapshot_did_not_generate_diagnostics, code_fix_to_string, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
     write_analyzer_snapshot,
 };
@@ -35,7 +36,9 @@ fn run_test(input: &'static str, _: &str, directory_path: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    let quantity_diagnostics = analyze_and_snap(
+    assert_valid_snapshot_contains_no_diagnostic_comment(input_file, &input_code);
+
+    let diagnostics_quantity = analyze_and_snap(
         &mut snapshot,
         &input_code,
         file_name,
@@ -50,9 +53,11 @@ fn run_test(input: &'static str, _: &str, directory_path: &str, _: &str) {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
 
-    if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
-        panic!("This test should not generate diagnostics");
-    }
+    assert_valid_snapshot_did_not_generate_diagnostics(
+        input_file,
+        &input_code,
+        diagnostics_quantity,
+    );
 }
 
 pub(crate) fn analyze_and_snap(

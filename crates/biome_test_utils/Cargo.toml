@@ -29,6 +29,7 @@ biome_package        = { workspace = true }
 biome_project_layout = { workspace = true }
 biome_rowan          = { workspace = true }
 biome_service        = { workspace = true }
+biome_string_case    = { workspace = true }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
 json_comments        = "0.2.2"
