@@ -155,8 +155,6 @@ impl Rule for UseExhaustiveSwitchCases {
             } {
                 let intersection_part = flatten_type(&intersection_part)?;
 
-                dbg!(&intersection_part);
-
                 if !matches!(
                     intersection_part.deref(),
                     TypeData::Literal(_) | TypeData::Null | TypeData::Undefined | TypeData::Symbol
@@ -168,8 +166,6 @@ impl Rule for UseExhaustiveSwitchCases {
                 missing_cases.push(intersection_part);
             }
         }
-
-        dbg!(&found_cases, &missing_cases);
 
         if missing_cases.is_empty() {
             return None;
@@ -278,7 +274,7 @@ impl Rule for UseExhaustiveSwitchCases {
 fn flatten_type(ty: &Type) -> Option<Type> {
     match ty.deref() {
         TypeData::InstanceOf(instance) => ty.resolve(&instance.ty),
-        TypeData::TypeofType(inner) => ty.resolve(&inner),
+        TypeData::TypeofType(inner) => ty.resolve(inner),
         _ => Some(ty.clone()),
     }
 }

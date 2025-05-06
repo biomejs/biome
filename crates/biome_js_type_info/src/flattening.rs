@@ -200,15 +200,15 @@ impl TypeData {
                         _ => self.clone(),
                     }
                 }
-                TypeofExpression::StaticMember(expr) => resolver
-                    .resolve_and_get(&expr.object)
-                    .cloned()
-                    .map(|type_data| {
-                        type_data
+                TypeofExpression::StaticMember(expr) => {
+                    let ty = resolver.resolve_and_get(&expr.object).cloned();
+                    match ty {
+                        Some(ty) => ty
                             .flattened(resolver)
-                            .flattened_static_member(&expr.member, resolver)
-                    })
-                    .unwrap_or_else(|| self.clone()),
+                            .flattened_static_member(&expr.member, resolver),
+                        _ => self.clone(),
+                    }
+                }
                 TypeofExpression::Super(expr) => match resolver.resolve_and_get(&expr.parent) {
                     Some(Self::Class(class)) => match class.extends.as_ref() {
                         Some(super_class) => {
@@ -234,6 +234,14 @@ impl TypeData {
     }
 
     fn flattened_static_member(&self, member_name: &Text, resolver: &mut dyn TypeResolver) -> Self {
+        if let Self::InstanceOf(instance) = self {
+            if let Some(ty @ (Self::Intersection(_) | Self::Union(_))) =
+                resolver.resolve_and_get(&instance.ty).cloned()
+            {
+                return ty.flattened_static_member(member_name, resolver);
+            }
+        };
+
         match self {
             Self::Intersection(intersection) => Self::Intersection(Box::new(Intersection(
                 intersection
@@ -241,28 +249,22 @@ impl TypeData {
                     .iter()
                     .filter_map(|ty| {
                         let ty = resolver.resolve_and_get(ty)?.clone();
-                        match ty.flattened_static_member(member_name, resolver) {
-                            Self::Reference(reference) => Some(reference.as_ref().clone()),
-                            _ => None,
-                        }
+                        let ty = ty.flattened_static_member(member_name, resolver);
+                        Some(resolver.reference_to_registered_data(ty))
                     })
                     .collect(),
-            )))
-            .into(),
+            ))),
             Self::Union(union) => Self::Union(Box::new(Union(
                 union
                     .types()
                     .iter()
                     .filter_map(|ty| {
                         let ty = resolver.resolve_and_get(ty)?.clone();
-                        match ty.flattened_static_member(member_name, resolver) {
-                            Self::Reference(reference) => Some(reference.as_ref().clone()),
-                            _ => None,
-                        }
+                        let ty = ty.flattened_static_member(member_name, resolver);
+                        Some(resolver.reference_to_registered_data(ty))
                     })
                     .collect(),
-            )))
-            .into(),
+            ))),
             Self::Class(_) => {
                 let member = self
                     .all_members(resolver)
