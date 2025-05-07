@@ -207,7 +207,7 @@ impl ProjectTestCase {
 
 fn run_lint_in_folder(folder_path: Utf8PathBuf) -> Result<(), CliDiagnostic> {
     let mut console = BufferConsole::default();
-    let workspace = workspace::server(Box::new(OsFileSystem::new(folder_path)), None);
+    let workspace = workspace::server(Box::new(OsFileSystem::new(folder_path.clone())), None);
     let app = App::new(&mut console, WorkspaceRef::Owned(workspace));
     let session = CliSession { app };
     session.run(BiomeCommand::Lint {
@@ -227,7 +227,7 @@ fn run_lint_in_folder(folder_path: Utf8PathBuf) -> Result<(), CliDiagnostic> {
             colors: None,
             use_server: false,
             verbose: false,
-            config_path: None,
+            config_path: Some(folder_path.join("biome.jsonc").into()),
             max_diagnostics: Default::default(),
             skip_parse_errors: false,
             no_errors_on_unmatched: false,
