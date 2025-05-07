@@ -612,7 +612,7 @@ impl WorkspaceServer {
                 WatcherSignalKind::AddedOrChanged => {
                     let parsed = self.get_parse(path)?;
                     self.project_layout
-                        .insert_raw_node_manifest(package_path, parsed);
+                        .insert_serialized_node_manifest(package_path, parsed);
                 }
                 WatcherSignalKind::Removed => {
                     self.project_layout.remove_package(&package_path);
