@@ -17,6 +17,8 @@ use crate::{JsExport, ModuleGraph};
 
 use super::JsModuleInfo;
 
+const MAX_IMPORT_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
+
 /// Type resolver that is able to resolve types from arbitrary scopes in a
 /// module.
 ///
@@ -178,11 +180,9 @@ impl ScopedResolver {
     ///
     /// Assumes full inference has already been performed.
     fn resolve_import_reference(&self, qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
-        const MAX_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
-
         let mut qualifier = Cow::Borrowed(qualifier);
 
-        for _ in 0..MAX_DEPTH {
+        for _ in 0..MAX_IMPORT_DEPTH {
             let module_id = self.find_module(&qualifier.resolved_path)?;
             let module = &self.modules[module_id.index()];
 
@@ -282,44 +282,52 @@ impl TypeResolver for ScopedResolver {
     }
 
     fn resolve_import(&mut self, qualifier: &TypeImportQualifier) -> Option<ResolvedTypeId> {
-        let module_id = self.register_module(qualifier.resolved_path.clone())?;
-        let module = &self.modules[module_id.index()];
+        let mut qualifier = Cow::Borrowed(qualifier);
 
-        let name = match &qualifier.symbol {
-            ImportSymbol::Default => "default",
-            ImportSymbol::Named(name) => name.text(),
-            ImportSymbol::All => {
-                // TODO: Register type for imported namespace.
-                return None;
-            }
-        };
+        for _ in 0..MAX_IMPORT_DEPTH {
+            let module_id = self.register_module(qualifier.resolved_path.clone())?;
+            let module = &self.modules[module_id.index()];
 
-        let export = match module.exports.get(name) {
-            Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
-            Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-                return Some(
-                    self.register_and_resolve(TypeData::reference(TypeImportQualifier {
+            let name = match &qualifier.symbol {
+                ImportSymbol::Default => "default",
+                ImportSymbol::Named(name) => name.text(),
+                ImportSymbol::All => {
+                    // TODO: Register type for imported namespace.
+                    return None;
+                }
+            };
+
+            let export = match module.exports.get(name) {
+                Some(JsExport::Own(export) | JsExport::OwnType(export)) => export,
+                Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                    qualifier = Cow::Owned(TypeImportQualifier {
                         symbol: reexport.import.symbol.clone(),
                         resolved_path: reexport.import.resolved_path.clone(),
-                    })),
-                );
-            }
-            None => {
-                // TODO: Follow blanket reexports.
-                return None;
-            }
-        };
+                    });
+                    continue;
+                }
+                None => {
+                    // TODO: Follow blanket reexports.
+                    return None;
+                }
+            };
 
-        match &export.ty {
-            TypeReference::Qualifier(_qualifier) => {
-                // If it wasn't resolved before exporting, we can't
-                // help it anymore.
-                None
-            }
-            TypeReference::Resolved(resolved) => Some(resolved.with_module_id(module_id)),
-            TypeReference::Import(import) => self.resolve_import(&import.clone()),
-            TypeReference::Unknown => None,
+            return match &export.ty {
+                TypeReference::Qualifier(_qualifier) => {
+                    // If it wasn't resolved before exporting, we can't
+                    // help it anymore.
+                    None
+                }
+                TypeReference::Resolved(resolved) => Some(resolved.with_module_id(module_id)),
+                TypeReference::Import(import) => {
+                    qualifier = Cow::Owned(import.clone());
+                    continue;
+                }
+                TypeReference::Unknown => None,
+            };
         }
+
+        None
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
