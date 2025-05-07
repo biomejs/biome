@@ -8,8 +8,9 @@ use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedPath, ResolvedTypeId, ScopeId,
-    TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedPath, ResolvedTypeData,
+    ResolvedTypeId, ScopeId, TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver,
+    TypeResolverLevel,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{Text, TextRange, TokenText};
@@ -215,10 +216,10 @@ impl TypeResolver for JsModuleInfoInner {
         &self.types[id.index()]
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
         match id.level() {
-            TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
-            TypeResolverLevel::Global => Some(GLOBAL_RESOLVER.get_by_id(id.id())),
+            TypeResolverLevel::Module => Some((id, self.get_by_id(id.id())).into()),
+            TypeResolverLevel::Global => Some((id, GLOBAL_RESOLVER.get_by_id(id.id())).into()),
             TypeResolverLevel::Scope | TypeResolverLevel::Import => None,
         }
     }

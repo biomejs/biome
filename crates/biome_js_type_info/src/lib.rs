@@ -3,6 +3,7 @@
 mod flattening;
 mod format_type_info;
 mod globals;
+mod helpers;
 mod local_inference;
 mod resolver;
 mod type_info;

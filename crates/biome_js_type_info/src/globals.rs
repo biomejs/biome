@@ -7,9 +7,9 @@ use std::sync::LazyLock;
 use biome_rowan::Text;
 
 use crate::{
-    Class, GenericTypeParameter, MethodTypeMember, PropertyTypeMember, Resolvable, ResolvedTypeId,
-    ScopeId, TypeData, TypeId, TypeMember, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel,
+    Class, GenericTypeParameter, MethodTypeMember, PropertyTypeMember, Resolvable,
+    ResolvedTypeData, ResolvedTypeId, ScopeId, TypeData, TypeId, TypeMember, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
 
 const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
@@ -179,8 +179,8 @@ impl TypeResolver for GlobalsResolver {
         &self.types[id.index()]
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData> {
-        (id.level() == GLOBAL_LEVEL).then(|| self.get_by_id(id.id()))
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+        (id.level() == GLOBAL_LEVEL).then(|| (id, self.get_by_id(id.id())).into())
     }
 
     fn register_type(&mut self, type_data: TypeData) -> TypeId {

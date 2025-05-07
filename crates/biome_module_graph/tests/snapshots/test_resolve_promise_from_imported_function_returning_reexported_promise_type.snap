@@ -150,16 +150,4 @@ Module TypeId(2) => sync Function "returnPromiseResult" {
 }
 ```
 
-# Ad-Hoc Type Resolver
-
-## Registered types
-
-```
-Scope TypeId(0) => sync Function "returnPromiseResult" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(1) TypeId(1)
-}
-```
+# Scoped Type Resolver

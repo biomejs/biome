@@ -95,7 +95,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
         }
 
         if let Some(resolver) = self.resolver {
-            content.push_str("\n# Ad-Hoc Type Resolver\n\n");
+            content.push_str("\n# Scoped Type Resolver\n\n");
             dump_registered_types(&mut content, resolver);
         }
 
