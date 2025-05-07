@@ -27,18 +27,23 @@ pub struct Suppression<'a> {
     /// an optional dynamic subcategory name +
     /// an optional category value
     pub categories: Vec<(&'a Category, Option<&'a str>, Option<&'a str>)>,
-    /// Reason for this suppression comment to exist
+    /// Reason for this suppression comments to exist
     pub reason: &'a str,
 
     /// What suppression is
     pub kind: SuppressionKind,
 
     range: TextRange,
+    reason_range: TextRange,
 }
 
 impl Suppression<'_> {
     pub fn range(&self) -> TextRange {
         self.range
+    }
+
+    pub fn reason_range(&self) -> TextRange {
+        self.reason_range
     }
 }
 
@@ -187,14 +192,7 @@ pub struct SuppressionDiagnostic {
 
 impl Diagnostic for SuppressionDiagnostic {
     fn severity(&self) -> Severity {
-        match self.message {
-            SuppressionDiagnosticKind::MissingColon => Severity::Error,
-            SuppressionDiagnosticKind::ParseCategory(_) => Severity::Error,
-            SuppressionDiagnosticKind::MissingCategory => Severity::Error,
-            SuppressionDiagnosticKind::MissingClosingParen => Severity::Error,
-            SuppressionDiagnosticKind::MissingReason => Severity::Warning,
-            SuppressionDiagnosticKind::PlaceholderReason => Severity::Warning,
-        }
+        Severity::Error
     }
 
     fn category(&self) -> Option<&'static Category> {
@@ -235,12 +233,6 @@ impl Diagnostic for SuppressionDiagnostic {
                     &"A reason is mandatory: try to explain why the suppression is needed.",
                 )?;
             }
-            SuppressionDiagnosticKind::PlaceholderReason => {
-                visitor.record_log(
-                    LogCategory::Info,
-                    &"A reason shouldn't have a <explanation> placeholder. Provide a valid reason instead.",
-                )?;
-            }
             SuppressionDiagnosticKind::MissingClosingParen => {}
         }
 
@@ -262,7 +254,6 @@ enum SuppressionDiagnosticKind {
     MissingCategory,
     MissingClosingParen,
     MissingReason,
-    PlaceholderReason,
 }
 
 impl std::fmt::Display for SuppressionDiagnosticKind {
@@ -298,18 +289,12 @@ impl std::fmt::Display for SuppressionDiagnosticKind {
                     "Incorrect suppression: missing reason. Example of suppression: // biome-ignore lint: false positive"
                 )
             }
-            Self::PlaceholderReason => {
-                write!(
-                    f,
-                    "A suppression shouldn't have a <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive"
-                )
-            }
         }
     }
 }
 
 impl biome_console::fmt::Display for SuppressionDiagnosticKind {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
             Self::MissingColon => write!(
                 fmt,
@@ -325,12 +310,6 @@ impl biome_console::fmt::Display for SuppressionDiagnosticKind {
                 write!(fmt, "Unexpected token, expected ')'.")
             }
             Self::MissingReason => write!(fmt, "Reason is missing and can't be empty."),
-            Self::PlaceholderReason => {
-                write!(
-                    fmt,
-                    "A suppression shouldn't have a <explanation> placeholder."
-                )
-            }
         }
     }
 }
@@ -409,11 +388,6 @@ fn parse_suppression_line(
             message: SuppressionDiagnosticKind::MissingReason,
             span: TextRange::at(range.start(), TextSize::of(line)),
         });
-    } else if reason == "<explanation>" {
-        return Err(SuppressionDiagnostic {
-            message: SuppressionDiagnosticKind::PlaceholderReason,
-            span: TextRange::at(offset_from(base, line), TextSize::of(line)),
-        });
     }
 
     Ok(Suppression {
@@ -421,6 +395,7 @@ fn parse_suppression_line(
         reason,
         kind,
         range,
+        reason_range: TextRange::at(offset_from(base, reason), range.end()),
     })
 }
 
@@ -1073,18 +1048,6 @@ mod tests_biome_ignore_toplevel {
             vec![Err(SuppressionDiagnostic {
                 message: SuppressionDiagnosticKind::MissingReason,
                 span: TextRange::new(TextSize::from(23), TextSize::from(23))
-            })],
-        );
-    }
-
-    #[test]
-    fn diagnostic_reason_placeholder() {
-        assert_eq!(
-            parse_suppression_comment("// biome-ignore-all format: <explanation>")
-                .collect::<Vec<_>>(),
-            vec![Err(SuppressionDiagnostic {
-                message: SuppressionDiagnosticKind::PlaceholderReason,
-                span: TextRange::new(TextSize::from(28), TextSize::from(41))
             })],
         );
     }

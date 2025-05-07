@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `check.js`
 
@@ -27,19 +26,15 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:3:52 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:3:51 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A suppression shouldn't have a <explanation> placeholder.
+  ! A suppression shouldn't have a <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
   
     2 │         debugger;
   > 3 │         // biome-ignore lint/performance/noDelete: <explanation>
-      │                                                    ^^^^^^^^^^^^^
+      │                                                   ^^^^^^^^^^^^^^
     4 │         delete obj.prop;
     5 │     
-  
-  i A reason shouldn't have a <explanation> placeholder. Provide a valid reason instead.
-  
-  i Example of suppression: // biome-ignore lint: reason
   
 
 ```
