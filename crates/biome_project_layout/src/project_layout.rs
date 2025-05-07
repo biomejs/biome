@@ -49,47 +49,13 @@ impl ProjectLayout {
         &self,
         path: &Utf8Path,
     ) -> Option<(Utf8PathBuf, PackageJson)> {
-        // Note I also tried an alternative approach where instead of iterating
-        // over all entries and finding the closest match, I would do repeated
-        // lookups like this:
-        //
-        // ```rs
-        // let packages = self.0.pin();
-        // path.ancestors().skip(1).find_map(|package_path| {
-        //     packages
-        //         .get(package_path)
-        //         .and_then(|data| data.node_package.as_ref())
-        //         .map(|node_package| (package_path.to_path_buf(), node_package.manifest.clone()))
-        // })
-        // ```
-        //
-        // Contrary to what I expected however, the below implementation
-        // appeared significantly faster (tested on the `unleash` repository).
-
-        let mut result: Option<(&Utf8PathBuf, &PackageJson)> = None;
-
         let packages = self.0.pin();
-        for (package_path, data) in packages.iter() {
-            let Some(node_manifest) = data
-                .node_package
-                .as_ref()
+        path.ancestors().find_map(|package_path| {
+            packages
+                .get(package_path)
+                .and_then(|data| data.node_package.as_ref())
                 .and_then(|node_package| node_package.manifest.as_ref())
-            else {
-                continue;
-            };
-
-            let is_closest_match = path.strip_prefix(package_path).is_ok()
-                && result.is_none_or(|(matched_package_path, _)| {
-                    package_path.as_str().len() > matched_package_path.as_str().len()
-                });
-
-            if is_closest_match {
-                result = Some((package_path, node_manifest));
-            }
-        }
-
-        result.map(|(package_path, package_json)| {
-            (package_path.join("package.json"), package_json.clone())
+                .map(|manifest| (package_path.join("package.json"), manifest.clone()))
         })
     }
 
