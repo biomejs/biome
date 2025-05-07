@@ -127,8 +127,7 @@ impl<'a> ResolverCache<'a> {
                                 self,
                             );
 
-                            let utf8_path = Utf8PathBuf::try_from(path.path().to_path_buf())
-                                .map_err(FromPathBufError::into_io_error)?;
+                            let utf8_path = path.to_utf8_path_buf();
                             if self.fs.path_is_symlink(&utf8_path) {
                                 let link = self.fs.read_link(&normalized.path)?;
                                 if link.is_absolute() {
@@ -383,6 +382,10 @@ impl CachedPathImpl {
 
     pub fn kind(&self) -> Option<PathKind> {
         self.kind
+    }
+
+    fn to_utf8_path_buf(&self) -> Utf8PathBuf {
+        self.path.to_path_buf()
     }
 }
 
