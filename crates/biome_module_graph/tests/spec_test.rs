@@ -592,7 +592,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     let ty = resolver
         .get_by_resolved_id(resolved_id)
         .expect("cannot find type data")
-        .clone();
+        .to_data();
     let _ty_string = format!("{ty:?}"); // for debugging
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
@@ -658,7 +658,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let ty = resolver
         .get_by_resolved_id(resolved_id)
         .expect("cannot find type data")
-        .clone();
+        .to_data();
     let _ty_string = format!("{ty:?}"); // for debugging
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging

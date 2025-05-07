@@ -176,8 +176,7 @@ impl TypeData {
                         Box::new([(
                             name,
                             resolver
-                                .destructuring_of(reference, DestructureField::Name(member_name))
-                                .clone(),
+                                .destructuring_of(reference, DestructureField::Name(member_name)),
                         )])
                     }),
                     AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
