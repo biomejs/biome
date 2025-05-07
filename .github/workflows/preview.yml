@@ -5,6 +5,9 @@ on:
     # This cron schedule runs the workflow at midnight (00:00) on Tuesdays and Saturdays.
     - cron: '0 0 * * 2,6'
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   version:
     name: Generate version
@@ -29,16 +32,10 @@ jobs:
           - os: depot-windows-2022
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
-          - os: depot-ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
-            code-target: linux-x64
-          - os: depot-ubuntu-22.04-arm
-            target: aarch64-unknown-linux-gnu
-            code-target: linux-arm64
-          - os: depot-ubuntu-22.04
+          - os: depot-ubuntu-24.04
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
-          - os: depot-ubuntu-22.04-arm
+          - os: depot-ubuntu-24.04-arm
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
           - os: depot-macos-14
@@ -63,33 +60,26 @@ jobs:
       - name: Install Rust toolchain
         run: rustup target add ${{ matrix.target }}
 
-      - name: Install arm64 toolchain
-        if: matrix.code-target == 'linux-arm64' || matrix.code-target == 'linux-arm64-musl'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-
       - name: Install musl toolchain
         if: matrix.code-target == 'linux-x64-musl' || matrix.code-target == 'linux-arm64-musl'
         run: |
           sudo apt-get update
           sudo apt-get install -y musl-tools
 
-      - name: Audit crates.io dependencies
-        if: matrix.code-target == 'linux-x64'
-        run: cargo audit
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@97a83ae1347bc407f550a16fb0694d6f446eec88 # v2.50.9
+        if: matrix.code-target == 'linux-x64-musl'
+        with:
+          tool: cargo-audit
 
-      - name: Set jemalloc page size for linux-arm64
-        if: matrix.code-target == 'linux-arm64'
-        run: |
-          echo "JEMALLOC_SYS_WITH_LG_PAGE=16" >> $GITHUB_ENV
+      - name: Audit crates.io dependencies
+        if: matrix.code-target == 'linux-x64-musl'
+        run: cargo audit
 
       # Build the CLI binary
       - name: Build binaries
         run: cargo build -p biome_cli --release --target ${{ matrix.target }}
         env:
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-gnu-gcc
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
           # Inline the version of the npm package in the CLI binary
@@ -103,6 +93,61 @@ jobs:
           cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
       - name: Copy CLI binary
         if: matrix.os != 'depot-windows-2022'
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
+
+      # Upload the CLI binary as a build artifact
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cli-${{ matrix.target }}
+          path: ./dist/biome-*
+          if-no-files-found: error
+
+  # Build GNU/Linux binaries in Docker, using Debian 11 (bullseye), to support older versions of glibc.
+  build-binaries-gnu:
+    needs: version
+    strategy:
+      matrix:
+        include:
+          - os: depot-ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            code-target: linux-x64
+          - os: depot-ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            code-target: linux-arm64
+
+    name: Package ${{ matrix.code-target }}
+    runs-on: ${{ matrix.os }}
+    container:
+      image: rust:1.85.1-bullseye
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+
+      - name: Set jemalloc page size for linux-arm64
+        if: matrix.code-target == 'linux-arm64'
+        run: |
+          echo "JEMALLOC_SYS_WITH_LG_PAGE=16" >> $GITHUB_ENV
+
+      # Build the CLI binary
+      - name: Build binaries
+        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
+        env:
+          # Strip all debug symbols from the resulting binaries
+          RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
+          # Inline the version of the npm package in the CLI binary
+          BIOME_VERSION: ${{ env.cli-version }}
+
+      # Copy the CLI binary and rename it to include the name of the target platform
+      - name: Copy CLI binary
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
@@ -148,6 +193,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs:
       - build-binaries
+      - build-binaries-gnu
       - build-wasm
     permissions:
       contents: write
