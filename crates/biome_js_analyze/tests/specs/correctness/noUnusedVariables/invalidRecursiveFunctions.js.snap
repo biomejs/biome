@@ -29,7 +29,7 @@ invalidRecursiveFunctions.js:1:10 lint/correctness/noUnusedVariables ━━━�
     2 │     f();
     3 │ }
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```
@@ -46,7 +46,7 @@ invalidRecursiveFunctions.js:5:7 lint/correctness/noUnusedVariables  FIXABLE  �
     6 │     g();
     7 │ }
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend g with an underscore.
   
@@ -74,7 +74,7 @@ invalidRecursiveFunctions.js:9:7 lint/correctness/noUnusedVariables  FIXABLE  �
     10 │     h();
     11 │ }
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend h with an underscore.
   

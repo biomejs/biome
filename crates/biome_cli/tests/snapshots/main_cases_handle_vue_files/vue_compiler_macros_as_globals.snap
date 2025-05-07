@@ -58,7 +58,7 @@ file.vue:16:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━
     17 │ 		default(props: { msg: string }): any
     18 │ }>()
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend slots with an underscore.
   

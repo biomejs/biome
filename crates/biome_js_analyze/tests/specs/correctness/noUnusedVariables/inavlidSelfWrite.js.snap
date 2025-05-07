@@ -30,7 +30,7 @@ inavlidSelfWrite.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
     2 │ 
     3 │ (a += 1);
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend a with an underscore.
   
@@ -58,7 +58,7 @@ inavlidSelfWrite.js:7:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
     8 │ ({d, e} = {d: 1, e: 2});
     9 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend d with an underscore.
   
@@ -85,7 +85,7 @@ inavlidSelfWrite.js:7:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
     8 │ ({d, e} = {d: 1, e: 2});
     9 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend e with an underscore.
   
@@ -113,7 +113,7 @@ inavlidSelfWrite.js:10:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
     11 │ for(f = 0;; f++) {}
     12 │ for(f = 0; cond; f++) {}
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend f with an underscore.
   

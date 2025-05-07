@@ -92,7 +92,7 @@ file.js:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
     3 │ /**
     4 │ * biome-ignore-all lint/style/useConst: reason
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend foo with an underscore.
   
@@ -115,7 +115,7 @@ file.js:8:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
   > 8 │ let bar = 33;
       │     ^^^
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend bar with an underscore.
   

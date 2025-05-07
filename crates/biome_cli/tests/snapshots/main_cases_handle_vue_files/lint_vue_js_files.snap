@@ -39,7 +39,7 @@ file.vue:5:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
     6 │ </script>
     7 │ <template></template>
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend foo with an underscore.
   

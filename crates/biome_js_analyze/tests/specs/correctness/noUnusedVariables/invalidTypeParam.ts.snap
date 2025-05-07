@@ -22,7 +22,7 @@ invalidTypeParam.ts:1:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
     2 │ export class C<T> {}
     3 │ export type Alias<T> = number
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend T with an underscore.
   
@@ -45,7 +45,7 @@ invalidTypeParam.ts:2:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
     3 │ export type Alias<T> = number
     4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend T with an underscore.
   
@@ -70,7 +70,7 @@ invalidTypeParam.ts:3:19 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
     4 │ export type Inferred<T> = T extends (infer I)[] ? number : never;
     5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend T with an underscore.
   
@@ -95,7 +95,7 @@ invalidTypeParam.ts:4:44 lint/correctness/noUnusedVariables ━━━━━━�
       │                                            ^
     5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```
@@ -110,7 +110,7 @@ invalidTypeParam.ts:5:62 lint/correctness/noUnusedVariables ━━━━━━�
   > 5 │ export type TestUnionType<T> = T extends (infer B)[] | infer B ? number : never;
       │                                                              ^
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```

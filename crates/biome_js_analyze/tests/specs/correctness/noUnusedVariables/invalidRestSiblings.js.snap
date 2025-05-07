@@ -29,7 +29,7 @@ invalidRestSiblings.js:3:9 lint/correctness/noUnusedVariables ━━━━━━
     4 │ console.log(other);
     5 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread.
   
@@ -48,7 +48,7 @@ invalidRestSiblings.js:3:16 lint/correctness/noUnusedVariables ━━━━━�
     4 │ console.log(other);
     5 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread.
   
@@ -67,7 +67,7 @@ invalidRestSiblings.js:8:14 lint/correctness/noUnusedVariables ━━━━━�
      9 │ console.log(remaining);
     10 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread.
   
@@ -86,7 +86,7 @@ invalidRestSiblings.js:8:31 lint/correctness/noUnusedVariables ━━━━━�
      9 │ console.log(remaining);
     10 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread.
   

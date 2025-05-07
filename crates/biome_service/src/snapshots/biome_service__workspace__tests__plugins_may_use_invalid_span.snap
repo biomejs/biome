@@ -19,7 +19,7 @@ expression: result.diagnostics
             advices: [
                 Log(
                     Info,
-                    "Unused variables usually are result of incomplete refactoring, typos and other source of bugs.",
+                    "Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.",
                 ),
                 Log(
                     Info,

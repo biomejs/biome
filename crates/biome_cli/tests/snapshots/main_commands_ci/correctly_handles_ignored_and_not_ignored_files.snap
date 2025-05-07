@@ -57,7 +57,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
   > 1 │ statement(    ) ; let a = !b || !c;
       │                       ^
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend a with an underscore.
   

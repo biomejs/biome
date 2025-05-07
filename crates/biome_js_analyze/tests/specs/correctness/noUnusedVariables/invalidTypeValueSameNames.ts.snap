@@ -25,7 +25,7 @@ invalidTypeValueSameNames.ts:2:6 lint/correctness/noUnusedVariables ━━━━
     3 │ export const a = 5;
     4 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```
@@ -42,7 +42,7 @@ invalidTypeValueSameNames.ts:5:10 lint/correctness/noUnusedVariables ━━━�
     6 │ export type f = () => {}
     7 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```

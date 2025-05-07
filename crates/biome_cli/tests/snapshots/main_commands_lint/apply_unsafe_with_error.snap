@@ -49,7 +49,7 @@ test1.js:3:10 lint/correctness/noUnusedVariables ━━━━━━━━━━�
       │          ^
     4 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```
@@ -81,7 +81,7 @@ test2.js:3:10 lint/correctness/noUnusedVariables ━━━━━━━━━━�
       │          ^
     4 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```

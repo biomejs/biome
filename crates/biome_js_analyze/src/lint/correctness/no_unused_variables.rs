@@ -347,7 +347,7 @@ impl Rule for NoUnusedVariables {
         );
 
         let mut diag = diag.note(
-            markup! {"Unused variables usually are result of incomplete refactoring, typos and other source of bugs."},
+            markup! {"Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."},
         );
 
         // Check if this binding is part of an object pattern with a rest element

@@ -68,7 +68,7 @@ file.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━
     2 │ A = 0;
     3 │ 
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```
