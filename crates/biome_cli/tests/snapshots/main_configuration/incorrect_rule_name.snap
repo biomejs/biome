@@ -158,6 +158,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
+  - useDeprecatedReason
   - useEnumInitializers
   - useExplicitLengthCheck
   - useExponentiationOperator

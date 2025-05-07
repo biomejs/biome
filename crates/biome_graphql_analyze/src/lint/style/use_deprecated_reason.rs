@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_graphql_syntax::GraphqlDirective;
 use biome_rowan::AstNode;
 
@@ -35,6 +36,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintGraphql("require-deprecation-reason")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: true,
+        severity: Severity::Warning,
     }
 }
 

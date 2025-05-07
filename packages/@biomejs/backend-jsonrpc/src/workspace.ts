@@ -1502,10 +1502,6 @@ export interface Nursery {
 	 */
 	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
 	/**
-	 * No duplicated fields in GraphQL operations.
-	 */
-	noDuplicateFields?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow duplicate properties within declaration blocks.
 	 */
 	noDuplicateProperties?: RuleConfiguration_for_Null;
@@ -1601,14 +1597,6 @@ export interface Nursery {
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
-	/**
-	 * Require specifying the reason argument when using @deprecated directive
-	 */
-	useDeprecatedReason?: RuleConfiguration_for_Null;
-	/**
-	 * Require switch-case statements to be exhaustive.
-	 */
-	useExhaustiveSwitchCases?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce types in functions, methods, variables, and parameters.
 	 */
@@ -1885,6 +1873,10 @@ export interface Style {
 	 */
 	useDefaultSwitchClause?: RuleConfiguration_for_Null;
 	/**
+	 * Require specifying the reason argument when using @deprecated directive
+	 */
+	useDeprecatedReason?: RuleConfiguration_for_Null;
+	/**
 	 * Require that each enum member value be explicitly initialized.
 	 */
 	useEnumInitializers?: RuleFixConfiguration_for_Null;
@@ -2061,6 +2053,10 @@ export interface Suspicious {
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
+	/**
+	 * No duplicated fields in GraphQL operations.
+	 */
+	noDuplicateFields?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate names within font families.
 	 */
@@ -3437,7 +3433,6 @@ export type Category =
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
-	| "lint/nursery/noDuplicateFields"
 	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noGlobalDirnameFilename"
@@ -3478,8 +3473,6 @@ export type Category =
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
-	| "lint/nursery/useDeprecatedReason"
-	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
@@ -3546,6 +3539,7 @@ export type Category =
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useDefaultSwitchClause"
+	| "lint/style/useDeprecatedReason"
 	| "lint/style/useEnumInitializers"
 	| "lint/style/useExplicitLengthCheck"
 	| "lint/style/useExponentiationOperator"
@@ -3591,6 +3585,7 @@ export type Category =
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
 	| "lint/suspicious/noDuplicateElseIf"
+	| "lint/suspicious/noDuplicateFields"
 	| "lint/suspicious/noDuplicateFontNames"
 	| "lint/suspicious/noDuplicateJsxProps"
 	| "lint/suspicious/noDuplicateObjectKeys"

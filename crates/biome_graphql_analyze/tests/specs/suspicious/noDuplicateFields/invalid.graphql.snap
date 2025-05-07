@@ -1,7 +1,6 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
 expression: invalid.graphql
-snapshot_kind: text
 ---
 # Input
 ```graphql
@@ -37,7 +36,7 @@ query test {
 
 # Diagnostics
 ```
-invalid.graphql:1:36 lint/nursery/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:1:36 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Variable `v` defined multiple times.
   
@@ -52,7 +51,7 @@ invalid.graphql:1:36 lint/nursery/noDuplicateFields ━━━━━━━━━�
 ```
 
 ```
-invalid.graphql:6:48 lint/nursery/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:6:48 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Argument `first` defined multiple times.
   
@@ -68,7 +67,7 @@ invalid.graphql:6:48 lint/nursery/noDuplicateFields ━━━━━━━━━�
 ```
 
 ```
-invalid.graphql:16:5 lint/nursery/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:16:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Field `name` defined multiple times.
   
@@ -85,7 +84,7 @@ invalid.graphql:16:5 lint/nursery/noDuplicateFields ━━━━━━━━━�
 ```
 
 ```
-invalid.graphql:25:5 lint/nursery/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:25:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Field `email` defined multiple times.
   

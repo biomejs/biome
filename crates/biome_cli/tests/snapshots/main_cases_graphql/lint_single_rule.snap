@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `file.graphql`
 
@@ -13,24 +12,16 @@ query {
 }
 ```
 
-# Emitted Messages
+# Termination Message
 
 ```block
-file.graphql:2:10 lint/nursery/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The directive `@deprecated` should have a `reason` argument.
-  
-    1 │ query {
-  > 2 │   member @deprecated {
-      │          ^^^^^^^^^^^
-    3 │ 		id
-    4 │ 	}
-  
-  i Add a `reason` argument to the directive.
+  × Failed to parse CLI arguments.
+    
+    Caused by:
+      couldn't parse `nursery/useDeprecatedReason`: This rule doesn't exist.
   
 
-```
 
-```block
-Checked 1 file in <TIME>. No fixes applied.
 ```

@@ -2695,13 +2695,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateFields": {
-					"description": "No duplicated fields in GraphQL operations.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateProperties": {
 					"description": "Disallow duplicate properties within declaration blocks.",
 					"anyOf": [
@@ -2866,20 +2859,6 @@
 						{
 							"$ref": "#/definitions/UseConsistentObjectDefinitionConfiguration"
 						},
-						{ "type": "null" }
-					]
-				},
-				"useDeprecatedReason": {
-					"description": "Require specifying the reason argument when using @deprecated directive",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useExhaustiveSwitchCases": {
-					"description": "Require switch-case statements to be exhaustive.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4507,6 +4486,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDeprecatedReason": {
+					"description": "Require specifying the reason argument when using @deprecated directive",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useEnumInitializers": {
 					"description": "Require that each enum member value be explicitly initialized.",
 					"anyOf": [
@@ -4830,6 +4816,13 @@
 				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateFields": {
+					"description": "No duplicated fields in GraphQL operations.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

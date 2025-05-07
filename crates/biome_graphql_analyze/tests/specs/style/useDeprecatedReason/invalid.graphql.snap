@@ -1,7 +1,6 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
 expression: invalid.graphql
-snapshot_kind: text
 ---
 # Input
 ```graphql
@@ -23,9 +22,9 @@ query {
 
 # Diagnostics
 ```
-invalid.graphql:2:10 lint/nursery/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:2:10 lint/style/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The directive `@deprecated` should have a `reason` argument.
+  ! The directive `@deprecated` should have a `reason` argument.
   
     1 │ query {
   > 2 │   member @deprecated {
@@ -39,9 +38,9 @@ invalid.graphql:2:10 lint/nursery/useDeprecatedReason ━━━━━━━━�
 ```
 
 ```
-invalid.graphql:8:10 lint/nursery/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:8:10 lint/style/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The directive `@deprecated` should have a `reason` argument.
+  ! The directive `@deprecated` should have a `reason` argument.
   
      7 │ query {
    > 8 │   member @deprecated()
@@ -55,9 +54,9 @@ invalid.graphql:8:10 lint/nursery/useDeprecatedReason ━━━━━━━━�
 ```
 
 ```
-invalid.graphql:12:10 lint/nursery/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:12:10 lint/style/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The directive `@deprecated` should have a `reason` argument.
+  ! The directive `@deprecated` should have a `reason` argument.
   
     11 │ query {
   > 12 │   member @deprecated(abc: 123)
