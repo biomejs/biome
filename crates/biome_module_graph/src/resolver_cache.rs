@@ -312,6 +312,8 @@ impl Cache for ResolverCache<'_> {
                     hash,
                     cached_path.path.clone(),
                     cached_path.parent.clone(),
+                    cached_path.is_node_modules,
+                    cached_path.inside_node_modules,
                     None,
                 )))
             } else {
@@ -320,10 +322,20 @@ impl Cache for ResolverCache<'_> {
         }
 
         let parent = path.parent().map(|p| self.value(p.as_std_path()));
+        let is_node_modules = path
+            .file_name()
+            .as_ref()
+            .is_some_and(|&name| name == "node_modules");
+        let inside_node_modules = is_node_modules
+            || parent
+                .as_ref()
+                .is_some_and(|parent| parent.inside_node_modules);
         let cached_path = CachedPath(Arc::new(CachedPathImpl::new(
             hash,
             path.to_path_buf().into_boxed_path(),
             parent,
+            is_node_modules,
+            inside_node_modules,
             self.path_kind(path),
         )));
         paths.insert(cached_path.clone());
@@ -331,17 +343,19 @@ impl Cache for ResolverCache<'_> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct CachedPath(Arc<CachedPathImpl>);
 
+#[derive(Debug)]
 pub(crate) struct CachedPathImpl {
     hash: u64,
     pub(crate) path: Box<Utf8Path>,
     parent: Option<CachedPath>,
+    is_node_modules: bool,
+    inside_node_modules: bool,
     kind: Option<PathKind>,
     canonicalized: OnceLock<Result<CachedPath, ResolveError>>,
     canonicalizing: AtomicU64,
-    node_modules: OnceLock<Option<CachedPath>>,
     package_json: OnceLock<Option<(CachedPath, Arc<PackageJson>)>>,
 }
 
@@ -350,16 +364,19 @@ impl CachedPathImpl {
         hash: u64,
         path: Box<Utf8Path>,
         parent: Option<CachedPath>,
+        is_node_modules: bool,
+        inside_node_modules: bool,
         meta: Option<PathKind>,
     ) -> Self {
         Self {
             hash,
             path,
             parent,
+            is_node_modules,
+            inside_node_modules,
             kind: meta,
             canonicalized: OnceLock::new(),
             canonicalizing: AtomicU64::new(0),
-            node_modules: OnceLock::new(),
             package_json: OnceLock::new(),
         }
     }
@@ -388,22 +405,6 @@ impl oxc_resolver::CachedPath for CachedPath {
 
     fn parent(&self) -> Option<&Self> {
         self.0.parent.as_ref()
-    }
-
-    fn module_directory<C: Cache<Cp = Self>>(
-        &self,
-        module_name: &str,
-        cache: &C,
-        ctx: &mut Ctx,
-    ) -> Option<Self> {
-        let cached_path = cache.value(&self.path().join(module_name));
-        cache.is_dir(&cached_path, ctx).then_some(cached_path)
-    }
-
-    fn cached_node_modules<C: Cache<Cp = Self>>(&self, cache: &C, ctx: &mut Ctx) -> Option<Self> {
-        self.node_modules
-            .get_or_init(|| self.module_directory("node_modules", cache, ctx))
-            .clone()
     }
 
     /// Find package.json of a path by traversing parent directories.
@@ -521,6 +522,14 @@ impl oxc_resolver::CachedPath for CachedPath {
     #[cfg(not(windows))]
     fn normalize_root<C: Cache<Cp = Self>>(&self, _cache: &C) -> Self {
         self.clone()
+    }
+
+    fn is_node_modules(&self) -> bool {
+        self.is_node_modules
+    }
+
+    fn inside_node_modules(&self) -> bool {
+        self.inside_node_modules
     }
 }
 
