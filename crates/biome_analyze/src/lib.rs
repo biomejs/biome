@@ -605,7 +605,7 @@ where
                     AnalyzerSuppressionDiagnostic::new(
                         category!("suppressions/incorrect"),
                         reason_range,
-                        "A suppression shouldn't have a <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive",
+                        "A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive",
                     )
                 });
                 (self.emit_signal)(&signal)?;

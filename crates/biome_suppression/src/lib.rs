@@ -27,7 +27,7 @@ pub struct Suppression<'a> {
     /// an optional dynamic subcategory name +
     /// an optional category value
     pub categories: Vec<(&'a Category, Option<&'a str>, Option<&'a str>)>,
-    /// Reason for this suppression comments to exist
+    /// Reason for this suppression comment to exist
     pub reason: &'a str,
 
     /// What suppression is
