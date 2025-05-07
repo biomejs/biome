@@ -610,7 +610,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     );
     fs.insert(
         "/src/reexport.ts".into(),
-        "export * from \"./promisedResult.ts\";\n",
+        "export { PromisedResult } from \"./promisedResult.ts\";\n",
     );
     fs.insert(
         "/src/returnPromiseResult.ts".into(),
@@ -663,7 +663,6 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     let _ty_string = format!("{ty:?}"); // for debugging
     let ty = ty.inferred(&mut resolver);
     let _ty_string = format!("{ty:?}"); // for debugging
-    let _ty = Type::from_data(Box::new(resolver), ty);
-    // FIXME: This assertion should hold, but one step at a time...
-    //assert!(ty.is_promise_instance());
+    let ty = Type::from_data(Box::new(resolver), ty);
+    assert!(ty.is_promise_instance());
 }
