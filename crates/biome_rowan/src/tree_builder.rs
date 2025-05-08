@@ -246,7 +246,7 @@ mod tests {
         let root = builder.finish_green();
 
         let first = root.children().next().unwrap();
-        let last = root.children().last().unwrap();
+        let last = root.children().next_back().unwrap();
 
         assert_eq!(first.element(), last.element());
         assert_same_elements(first.element(), last.element());
@@ -278,7 +278,7 @@ mod tests {
 
         let root = builder.finish_green();
         let first_condition = root.children().next().unwrap();
-        let last_condition = root.children().last().unwrap();
+        let last_condition = root.children().next_back().unwrap();
 
         assert_ne!(first_condition.element(), last_condition.element());
     }

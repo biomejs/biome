@@ -87,7 +87,7 @@ impl CliSnapshot {
 
         for (name, file_content) in &self.files {
             if !name.starts_with("biome.json") {
-                let extension = name.split('.').last().unwrap();
+                let extension = name.split('.').next_back().unwrap();
 
                 let redacted_name = redact_snapshot(name).unwrap_or(String::new().into());
                 let redacted_content =
