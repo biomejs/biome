@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: suppressions/inline-elements.html
+---
+# Input
+
+```html
+<span>1</span><!--biome-ignore format: prettier ignore--><span>2     3</span>
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```html
+<span>1</span><!--biome-ignore format: prettier ignore--><span>2     3</span>
+```
