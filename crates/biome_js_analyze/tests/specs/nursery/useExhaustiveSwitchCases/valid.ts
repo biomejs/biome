@@ -1,0 +1,168 @@
+/* should not generate diagnostics */
+
+type Day =
+	| 'Monday'
+	| 'Tuesday'
+	| 'Wednesday'
+	| 'Thursday'
+	| 'Friday'
+	| 'Saturday'
+	| 'Sunday';
+
+const day: Day = 'Monday' as Day;
+let result = 0;
+
+// All branches matched
+switch (day) {
+	case 'Monday': {
+		result = 1;
+		break;
+	}
+	case 'Tuesday': {
+		result = 2;
+		break;
+	}
+	case 'Wednesday': {
+		result = 3;
+		break;
+	}
+	case 'Thursday': {
+		result = 4;
+		break;
+	}
+	case 'Friday': {
+		result = 5;
+		break;
+	}
+	case 'Saturday': {
+		result = 6;
+		break;
+	}
+	case 'Sunday': {
+		result = 7;
+		break;
+	}
+}
+
+
+// Switch contains default clause.
+switch (day) {
+	case 'Monday': {
+		result = 1;
+		break;
+	}
+	default: {
+		result = 42;
+	}
+}
+
+type Num = 0 | 1 | 2;
+
+// Other primitive literals work too
+function test(value: Num): number {
+  switch (value) {
+    case 0:
+      return 0;
+    case 1:
+      return 1;
+    case 2:
+      return 2;
+  }
+}
+
+type Bool = true | false;
+
+function test2(value: Bool): number {
+	switch (value) {
+		case true:
+			return 1;
+		case false:
+			return 0;
+	}
+}
+
+type Mix = 0 | 1 | 'two' | 'three' | true;
+
+function test3(value: Mix): number {
+	switch (value) {
+		case 0:
+			return 0;
+		case 1:
+			return 1;
+		case 'two':
+			return 2;
+		case 'three':
+			return 3;
+		case true:
+			return 4;
+	}
+}
+
+type A = 'a';
+type B = 'b';
+type C = 'c';
+type Union = A | B | C;
+
+// Works with type references
+function test4(value: Union): number {
+	switch (value) {
+		case 'a':
+			return 1;
+		case 'b':
+			return 2;
+		case 'c':
+			return 3;
+	}
+}
+
+const A2 = 'a';
+const B2 = 1;
+const C2 = true;
+
+type Union2 = typeof A2 | typeof B2 | typeof C2;
+
+// Works with `typeof`
+function test5(value: Union2): number {
+	switch (value) {
+		case 'a':
+			return 1;
+		case 1:
+			return 2;
+		case true:
+			return 3;
+	}
+}
+
+type ObjectUnion = { a: 1 } | { b: 2 };
+
+// Object union types won't work either, unless it's a discriminated union
+function test6(value: ObjectUnion): number {
+	switch (value.a) {
+		case 1:
+			return 1;
+	}
+}
+
+declare const value: 'literal' & { _brand: true };
+switch (value) {
+	case 'literal':
+		break;
+}
+
+declare const value2: ('literal' & { _brand: true }) | 1;
+switch (value2) {
+	case 'literal':
+		break;
+	case 1:
+		break;
+}
+
+declare const value3: (1 & { _brand: true }) | 'literal' | null;
+switch (value3) {
+	case 'literal':
+		break;
+	case 1:
+		break;
+	case null:
+		break;
+}

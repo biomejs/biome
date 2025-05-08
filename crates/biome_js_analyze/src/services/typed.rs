@@ -4,11 +4,12 @@ use biome_analyze::{
     VisitorFinishContext,
 };
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, JsExpressionStatement, JsLanguage, JsSyntaxNode,
+    AnyJsExpression, AnyJsRoot, AnyJsSwitchClause, JsExpressionStatement, JsLanguage,
+    JsSwitchStatement, JsSyntaxNode,
 };
 use biome_js_type_info::Type;
 use biome_module_graph::{ModuleGraph, ScopedResolver};
-use biome_rowan::{AstNode, TextRange, WalkEvent};
+use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
 use camino::Utf8PathBuf;
 use std::sync::Arc;
 
@@ -120,10 +121,33 @@ impl Visitor for ScopedResolverBuilderVisitor {
 
         match event {
             WalkEvent::Enter(node) => {
+                // FIXME: Currently, we need to register types for an expression before resolving it
+                //        from a lint rule, to share the resolved types for performance. It should
+                //        be resolved and cached on-demand.
+
+                // This is used by the `noFloatingPromises` rule.
                 if let Some(expr) =
                     JsExpressionStatement::cast_ref(node).and_then(|node| node.expression().ok())
                 {
                     resolver.register_types_for_expression(&expr);
+                }
+
+                // This is used by the `useExhaustiveSwitch` rule.
+                if let Some(stmt) = JsSwitchStatement::cast_ref(node) {
+                    if let Ok(expr) = stmt.discriminant() {
+                        resolver.register_types_for_expression(&expr);
+                    }
+
+                    stmt.cases()
+                        .iter()
+                        .filter_map(|case| match case {
+                            AnyJsSwitchClause::JsCaseClause(case) => Some(case),
+                            _ => None,
+                        })
+                        .filter_map(|case| case.test().ok())
+                        .for_each(|expr| {
+                            resolver.register_types_for_expression(&expr);
+                        });
                 }
             }
             WalkEvent::Leave(_node) => {}

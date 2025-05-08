@@ -118,7 +118,7 @@ impl Type {
         }
     }
 
-    fn resolve(&self, ty: &TypeReference) -> Option<Self> {
+    pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
         self.resolver
             .resolve_reference(&self.id.apply_module_id_to_reference(ty))
             .map(|resolved_id| self.with_resolved_id(resolved_id))
@@ -412,6 +412,12 @@ impl GenericTypeParameter {
 /// The intersection between other types.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
 pub struct Intersection(pub(super) Box<[TypeReference]>);
+
+impl Intersection {
+    pub fn types(&self) -> &[TypeReference] {
+        &self.0
+    }
+}
 
 /// Literal value used as a type.
 #[derive(Clone, Debug, PartialEq, Resolvable)]
@@ -1050,6 +1056,10 @@ pub struct Union(pub(super) Box<[TypeReference]>);
 impl Union {
     pub fn contains(&self, ty: &TypeReference) -> bool {
         self.0.contains(ty)
+    }
+
+    pub fn types(&self) -> &[TypeReference] {
+        &self.0
     }
 
     pub fn with_type(&self, ty: TypeReference) -> Self {
