@@ -139,3 +139,13 @@ declare module "foo" {
 
 const x = { prop: () => {} }
 const x = { bar: { prop: () => {} } }
+
+const x = { dynamic: someFunc() }
+
+let x;
+let x = null;
+let x = undefined;
+
+const wrapped = {
+	foo: () => "untyped",
+};
