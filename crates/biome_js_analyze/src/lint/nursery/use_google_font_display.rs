@@ -90,7 +90,7 @@ impl Rule for UseGoogleFontDisplay {
 
         let display_param = href_text
             .split('?')
-            .last()?
+            .next_back()?
             .split('&')
             .find(|p| p.starts_with("display="));
         let range = initializer.range();

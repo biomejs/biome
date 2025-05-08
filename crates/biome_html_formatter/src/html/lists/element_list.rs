@@ -430,20 +430,16 @@ impl FormatHtmlElementList {
     /// [HtmlContent] and instead, formats the nodes itself.
     #[cfg(debug_assertions)]
     fn disarm_debug_assertions(&self, node: &HtmlElementList, f: &mut HtmlFormatter) {
-        use AnyHtmlElement::*;
         use biome_formatter::CstFormatContext;
 
         for child in node {
-            match child {
-                HtmlContent(text) => {
-                    f.state_mut().track_token(&text.value_token().unwrap());
+            if let AnyHtmlElement::HtmlContent(text) = child {
+                f.state_mut().track_token(&text.value_token().unwrap());
 
-                    // You can't suppress a text node
-                    f.context()
-                        .comments()
-                        .mark_suppression_checked(text.syntax());
-                }
-                _ => {}
+                // You can't suppress a text node
+                f.context()
+                    .comments()
+                    .mark_suppression_checked(text.syntax());
             }
         }
     }

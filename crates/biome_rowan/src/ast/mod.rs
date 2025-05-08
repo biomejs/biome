@@ -582,7 +582,7 @@ pub trait AstSeparatedList {
     }
 
     fn len(&self) -> usize {
-        (self.syntax_list().len() + 1) / 2
+        self.syntax_list().len().div_ceil(2)
     }
 
     fn trailing_separator(&self) -> Option<SyntaxToken<Self::Language>> {

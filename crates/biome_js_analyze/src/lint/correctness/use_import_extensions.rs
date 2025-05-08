@@ -240,7 +240,7 @@ fn get_extensionless_import(
         return None;
     }
 
-    let last_component = path_components.last().unwrap_or(first_component);
+    let last_component = path_components.next_back().unwrap_or(first_component);
 
     let has_query_or_hash =
         last_component.as_str().contains('?') || last_component.as_str().contains('#');

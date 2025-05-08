@@ -256,7 +256,7 @@ fn load_eslint_extends_config(
             //      - module_name: `eslint-plugin-unicorn`
             //      - config_name: `recommended`
             "plugin" => {
-                let Some(config_name) = rest.split('/').last() else {
+                let Some(config_name) = rest.split('/').next_back() else {
                     return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
                         reason: format!(
                             "The configuration {rest} cannot be resolved. Make sure that your ESLint configuration file is valid."
