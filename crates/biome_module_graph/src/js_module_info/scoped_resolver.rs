@@ -155,11 +155,8 @@ impl ScopedResolver {
         let mut i = 0;
         while i < self.modules.len() {
             let module = self.modules[i].clone();
-            let module_id = ModuleId::new(i);
-            for ty in &module.types {
-                // We don't care about the returned type here. Instead, we rely
-                // on the side-effect of registering the resolved imports.
-                let _ = ty.resolved_with_module_id(module_id, self);
+            for resolved_path in module.static_import_paths.values() {
+                self.register_module(resolved_path.clone());
             }
 
             i += 1;
