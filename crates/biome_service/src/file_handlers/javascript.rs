@@ -795,7 +795,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_enabled_rules(&rules)
             .with_project_layout(project_layout.clone())
             .finish();
-
     let filter = AnalysisFilter {
         categories: RuleCategoriesBuilder::default()
             .with_syntax()

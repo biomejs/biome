@@ -33,12 +33,12 @@ rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tokio                = { workspace = true, features = ["rt", "io-std"] }
-tower-lsp            = { version = "0.20.0" }
+tower-lsp-server     = { workspace = true }
 tracing              = { workspace = true, features = ["attributes"] }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
-tower = { version = "0.4.13", features = ["timeout"] }
+tower = { version = "0.5.2", features = ["timeout"] }
 
 [lints]
 workspace = true

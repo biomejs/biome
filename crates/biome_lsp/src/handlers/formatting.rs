@@ -12,7 +12,7 @@ use biome_service::workspace::{
 };
 use biome_service::{WorkspaceError, extension_error};
 use std::ops::Sub;
-use tower_lsp::lsp_types::*;
+use tower_lsp_server::lsp_types::*;
 
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) fn format(
@@ -115,8 +115,9 @@ pub(crate) fn format_range(
         let format_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
             .with_context(|| {
                 format!(
-                    "failed to convert range {:?} in document {url}",
-                    params.range.end
+                    "failed to convert range {:?} in document {}",
+                    params.range.end,
+                    url.as_str()
                 )
             })?;
         let content = session.workspace.get_file_content(GetFileContentParams {
@@ -198,7 +199,12 @@ pub(crate) fn format_on_type(
 
         let position_encoding = session.position_encoding();
         let offset = from_proto::offset(&doc.line_index, position, position_encoding)
-            .with_context(|| format!("failed to access position {position:?} in document {url}"))?;
+            .with_context(|| {
+                format!(
+                    "failed to access position {position:?} in document {}",
+                    url.as_str()
+                )
+            })?;
 
         let formatted = session.workspace.format_on_type(FormatOnTypeParams {
             project_key: doc.project_key,

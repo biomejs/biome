@@ -1,10 +1,10 @@
-use std::collections::HashMap;
-
+#![expect(clippy::mutable_key_type)]
 use crate::diagnostics::LspError;
 use crate::{session::Session, utils};
 use anyhow::{Context, Result};
 use biome_lsp_converters::from_proto;
-use tower_lsp::lsp_types::{RenameParams, WorkspaceEdit};
+use std::collections::HashMap;
+use tower_lsp_server::lsp_types::{RenameParams, WorkspaceEdit};
 
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) fn rename(
@@ -23,8 +23,9 @@ pub(crate) fn rename(
     )
     .with_context(|| {
         format!(
-            "failed to access position {:?} in document {url}",
-            params.text_document_position.position
+            "failed to access position {:?} in document {}",
+            params.text_document_position.position,
+            url.as_str()
         )
     })?;
 
