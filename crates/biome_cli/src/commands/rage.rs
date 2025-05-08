@@ -74,6 +74,7 @@ pub(crate) fn rage(
 struct WorkspaceRage<'a>(&'a dyn Workspace);
 
 impl Display for WorkspaceRage<'_> {
+    // test
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         let workspace = self.0;
 
