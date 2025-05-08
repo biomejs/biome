@@ -13,7 +13,7 @@ use biome_module_graph::JsExport;
 use biome_module_graph::{
     ImportSymbol, JsImport, JsReexport, ModuleGraph, ResolvedPath, ScopedResolver,
 };
-use biome_package::{Dependencies, PackageJson, Version};
+use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
 use biome_test_utils::get_added_paths;
@@ -57,10 +57,10 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
         "/".into(),
         PackageJson::new("frontend")
             .with_path("/package.json")
-            .with_version(Version::Literal("0.0.0".into()))
+            .with_version("0.0.0".into())
             .with_dependencies(Dependencies::from([(
                 "shared".into(),
-                Version::Literal("link:./node_modules/shared".into()),
+                "link:./node_modules/shared".into(),
             )])),
     );
 
@@ -69,7 +69,7 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
         PackageJson::new("shared")
             .with_path("/node_modules/shared/package.json")
             .with_exports(JsonString::from("./dist/index.js"))
-            .with_version(Version::Literal("0.0.1".into())),
+            .with_version("0.0.1".into()),
     );
 
     (fs, project_layout)
@@ -352,7 +352,7 @@ fn test_resolve_exports() {
         "/".into(),
         PackageJson::new("frontend")
             .with_path("/package.json")
-            .with_version(Version::Literal("0.0.0".into())),
+            .with_version("0.0.0".into()),
     );
 
     let added_paths = [

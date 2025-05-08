@@ -34,7 +34,7 @@ pub struct PackageJson {
     /// <https://nodejs.org/api/packages.html#type>
     pub r#type: Option<PackageType>,
 
-    pub version: Option<Version>,
+    pub version: Option<String>,
     pub description: Option<String>,
     pub dependencies: Dependencies,
     pub dev_dependencies: Dependencies,
@@ -83,7 +83,7 @@ impl PackageJson {
         }
     }
 
-    pub fn with_version(self, version: Version) -> Self {
+    pub fn with_version(self, version: String) -> Self {
         Self {
             version: Some(version),
             ..self
@@ -119,7 +119,9 @@ impl PackageJson {
             .chain(self.dev_dependencies.iter())
             .chain(self.peer_dependencies.iter());
         for (dependency_name, dependency_version) in iter {
-            if dependency_name == specifier && dependency_version.satisfies(range) {
+            if dependency_name == specifier
+                && Version::from(dependency_version.as_str()).satisfies(range)
+            {
                 return true;
             }
         }
@@ -264,10 +266,10 @@ impl Manifest for PackageJson {
 }
 
 #[derive(Debug, Default, Clone, biome_deserialize_macros::Deserializable)]
-pub struct Dependencies(FxHashMap<String, Version>);
+pub struct Dependencies(FxHashMap<String, String>);
 
-impl<const N: usize> From<[(String, Version); N]> for Dependencies {
-    fn from(dependencies: [(String, Version); N]) -> Self {
+impl<const N: usize> From<[(String, String); N]> for Dependencies {
+    fn from(dependencies: [(String, String); N]) -> Self {
         let mut map = FxHashMap::with_capacity_and_hasher(N, FxBuildHasher);
         for (dependency, version) in dependencies {
             map.insert(dependency, version);
@@ -277,7 +279,7 @@ impl<const N: usize> From<[(String, Version); N]> for Dependencies {
 }
 
 impl Deref for Dependencies {
-    type Target = FxHashMap<String, Version>;
+    type Target = FxHashMap<String, String>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -293,7 +295,7 @@ impl Dependencies {
         self.0.contains_key(specifier)
     }
 
-    pub fn add(&mut self, dependency: impl Into<String>, version: impl Into<Version>) {
+    pub fn add(&mut self, dependency: impl Into<String>, version: impl Into<String>) {
         self.0.insert(dependency.into(), version.into());
     }
 }

@@ -19,25 +19,23 @@ expression: tsconfig.valid.paths.json
 
 ## Data structure
 
-Some(
-    TsConfigJson {
-        root: false,
-        path: "",
-        extends: None,
-        compiler_options: CompilerOptions {
-            base_url: Some(
-                "src",
-            ),
-            paths: Some(
-                {
-                    "@/services": [
-                        "services",
-                        "vendor/services",
-                    ],
-                },
-            ),
-            paths_base: "",
-        },
-        references: [],
+TsConfigJson {
+    root: false,
+    path: "",
+    extends: None,
+    compiler_options: CompilerOptions {
+        base_url: Some(
+            "src",
+        ),
+        paths: Some(
+            {
+                "@/services": [
+                    "services",
+                    "vendor/services",
+                ],
+            },
+        ),
+        paths_base: "",
     },
-)
+    references: [],
+}

@@ -13,18 +13,16 @@ expression: tsconfig.valid.baseUrl.json
 
 ## Data structure
 
-Some(
-    TsConfigJson {
-        root: false,
-        path: "",
-        extends: None,
-        compiler_options: CompilerOptions {
-            base_url: Some(
-                "src",
-            ),
-            paths: None,
-            paths_base: "",
-        },
-        references: [],
+TsConfigJson {
+    root: false,
+    path: "",
+    extends: None,
+    compiler_options: CompilerOptions {
+        base_url: Some(
+            "src",
+        ),
+        paths: None,
+        paths_base: "",
     },
-)
+    references: [],
+}

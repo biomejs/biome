@@ -127,8 +127,7 @@ impl<'a> ResolverCache<'a> {
                                 self,
                             );
 
-                            let utf8_path = Utf8PathBuf::try_from(path.path().to_path_buf())
-                                .map_err(FromPathBufError::into_io_error)?;
+                            let utf8_path = path.to_utf8_path_buf();
                             if self.fs.path_is_symlink(&utf8_path) {
                                 let link = self.fs.read_link(&normalized.path)?;
                                 if link.is_absolute() {
@@ -192,11 +191,9 @@ impl Cache for ResolverCache<'_> {
         let result = path
             .package_json
             .get_or_try_init(|| {
-                let utf8_path = path.path().try_into().map_err(|_| {
-                    ResolveError::NotFound(path.path().to_string_lossy().to_string())
-                })?;
-                let Some((package_json_path, mut package_json)) =
-                    self.project_layout.get_node_manifest_for_path(utf8_path)
+                let Some(mut package_json) = self
+                    .project_layout
+                    .get_node_manifest_for_package(path.utf8_path())
                 else {
                     return Ok(None);
                 };
@@ -205,7 +202,7 @@ impl Cache for ResolverCache<'_> {
                         .try_into()
                         .map_err(FromPathBufError::into_io_error)?
                 } else {
-                    package_json_path
+                    path.utf8_path().join("package.json")
                 };
 
                 Ok(Some((path.clone(), Arc::new(package_json))))
@@ -383,6 +380,14 @@ impl CachedPathImpl {
 
     pub fn kind(&self) -> Option<PathKind> {
         self.kind
+    }
+
+    fn utf8_path(&self) -> &Utf8Path {
+        self.path.as_ref()
+    }
+
+    fn to_utf8_path_buf(&self) -> Utf8PathBuf {
+        self.path.to_path_buf()
     }
 }
 
