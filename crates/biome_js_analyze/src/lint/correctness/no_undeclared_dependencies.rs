@@ -286,7 +286,7 @@ impl Rule for NoUndeclaredDependencies {
                 .unwrap_or_default(),
         );
 
-        let manifest_path = package_path.strip_prefix(&cwd).unwrap_or(&package_path);
+        let manifest_path = package_path.strip_prefix(&cwd).unwrap_or(package_path);
 
         let diag = RuleDiagnostic::new(
             rule_category!(),
