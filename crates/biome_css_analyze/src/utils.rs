@@ -99,12 +99,12 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
         }
 
         match v {
-            AnyCssGenericComponentValue::CssGenericDelimiter(_) => continue,
+            AnyCssGenericComponentValue::CssGenericDelimiter(_) => {}
             AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
                 AnyCssValue::CssIdentifier(_) | AnyCssValue::CssString(_) => {
                     font_families.push(css_value)
                 }
-                _ => continue,
+                _ => {}
             },
         }
     }

@@ -169,7 +169,7 @@ fn format_numeric_literal(raw: &str) -> String {
 
     while let Some(b) = bytes.next() {
         match b {
-            b'_' => continue,
+            b'_' => {}
             b'0' if !prefix_parsed && !in_fraction => {
                 if let Some(&next) = bytes.peek() {
                     let opts = match next {

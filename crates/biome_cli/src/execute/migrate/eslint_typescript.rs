@@ -256,10 +256,7 @@ impl NamingConventionSelection {
             .unwrap_or_default();
         for selector in self.selector.iter() {
             match selector {
-                Selector::AutoAccessor => {
-                    // currently unsupported by Biome
-                    continue;
-                }
+                Selector::AutoAccessor => {} // currently unsupported by Biome
                 Selector::Class => {
                     result.push(use_naming_convention::Selector {
                         kind: use_naming_convention::Kind::Class,

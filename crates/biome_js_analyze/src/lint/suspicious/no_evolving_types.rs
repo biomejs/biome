@@ -95,7 +95,7 @@ impl Rule for NoEvolvingTypes {
                             return Some(variable);
                         }
                     }
-                    _ => continue,
+                    _ => {}
                 };
             }
         }

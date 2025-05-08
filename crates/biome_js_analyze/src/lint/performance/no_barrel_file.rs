@@ -83,7 +83,6 @@ impl Rule for NoBarrelFile {
                             return Some(export);
                         }
                     }
-                    continue;
                 }
             }
         }

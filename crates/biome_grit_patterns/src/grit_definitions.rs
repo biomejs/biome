@@ -35,7 +35,7 @@ pub fn compile_definitions(
     let mut functions = Vec::new();
     for definition in definitions {
         match definition? {
-            AnyGritDefinition::AnyGritPattern(_) => continue, // Handled separately.
+            AnyGritDefinition::AnyGritPattern(_) => {} // Handled separately.
             AnyGritDefinition::GritPatternDefinition(node) => {
                 patterns.push(PatternDefinitionCompiler::from_node(node, context)?);
             }
@@ -81,7 +81,7 @@ pub fn scan_definitions(
 
     for definition in definitions {
         match definition? {
-            AnyGritDefinition::AnyGritPattern(_) => continue, // Handled separately.
+            AnyGritDefinition::AnyGritPattern(_) => {} // Handled separately.
             AnyGritDefinition::GritPatternDefinition(node) => {
                 let name = node.name()?.to_trimmed_string();
                 let name = name.trim();

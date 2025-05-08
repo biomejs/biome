@@ -181,7 +181,7 @@ impl TextEditBuilder {
 
             for (lhs, rhs) in entry.iter().zip(value_bytes) {
                 match lhs.cmp(rhs) {
-                    Ordering::Equal => continue,
+                    Ordering::Equal => {}
                     ordering => return ordering,
                 }
             }

@@ -443,9 +443,7 @@ impl FormatHtmlElementList {
                         .comments()
                         .mark_suppression_checked(text.syntax());
                 }
-                _ => {
-                    continue;
-                }
+                _ => {}
             }
         }
     }

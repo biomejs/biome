@@ -318,21 +318,19 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
                 if let AnyJsCallArgument::AnyJsExpression(expr) = &first {
                     if let AnyJsExpression::JsArrayExpression(array) = expr {
                         for arr in array.elements().iter() {
-                            match arr.ok()? {
-                                AnyJsArrayElement::AnyJsExpression(
-                                    AnyJsExpression::JsArrayExpression(arg),
-                                ) => {
-                                    let key = arg.elements().first()?.ok()?;
-                                    if key.to_trimmed_string() == "\"then\""
-                                        || key.to_trimmed_string() == "`then`"
-                                    {
-                                        return Some(RuleState {
-                                            range: key.range(),
-                                            message: NoThenPropertyMessage::Object,
-                                        });
-                                    }
+                            if let AnyJsArrayElement::AnyJsExpression(
+                                AnyJsExpression::JsArrayExpression(arg),
+                            ) = arr.ok()?
+                            {
+                                let key = arg.elements().first()?.ok()?;
+                                if key.to_trimmed_string() == "\"then\""
+                                    || key.to_trimmed_string() == "`then`"
+                                {
+                                    return Some(RuleState {
+                                        range: key.range(),
+                                        message: NoThenPropertyMessage::Object,
+                                    });
                                 }
-                                _ => continue,
                             }
                         }
                     } else {

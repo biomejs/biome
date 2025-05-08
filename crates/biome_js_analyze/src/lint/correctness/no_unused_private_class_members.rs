@@ -149,7 +149,7 @@ fn traverse_members_usage(
                     }
                 }
             }
-            biome_rowan::WalkEvent::Leave(_) => continue,
+            biome_rowan::WalkEvent::Leave(_) => {}
         }
     }
 

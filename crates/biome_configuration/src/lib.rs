@@ -466,7 +466,7 @@ impl Ord for Version<'_> {
 
         for (a, b) in self_parts.iter().zip(other_parts.iter()) {
             match a.cmp(b) {
-                Ordering::Equal => continue,
+                Ordering::Equal => {}
                 non_eq => return non_eq,
             }
         }

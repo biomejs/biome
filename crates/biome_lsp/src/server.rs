@@ -336,7 +336,6 @@ impl LanguageServer for LSPServer {
                     error!(
                         "The Workspace root URI {file_path:?} could not be parsed as a filesystem path"
                     );
-                    continue;
                 }
             }
         }
