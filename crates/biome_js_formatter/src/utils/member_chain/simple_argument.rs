@@ -343,7 +343,7 @@ impl From<AnyJsCallArgument> for SimpleArgument {
 ///
 /// - all strings dont contain newlines
 /// - the expressions contained in the template are considered as `is_simple_call_argument`. Check
-///     [is_simple_call_argument].
+///   [is_simple_call_argument].
 pub fn is_simple_template_literal(
     template: &JsTemplateExpression,
     depth: u8,

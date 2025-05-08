@@ -77,7 +77,7 @@
 //! to apply a deterministic formatting.
 //! - first group will be the identifier
 //! - the rest of the groups will be  will start StaticMemberExpression followed by the rest of the nodes,
-//!     right before the end of the next StaticMemberExpression
+//!   right before the end of the next StaticMemberExpression
 //!
 //! The first group is special, because it holds the reference; it has its own heuristic.
 //! Inside the first group we store the first element of the flattened array, then:

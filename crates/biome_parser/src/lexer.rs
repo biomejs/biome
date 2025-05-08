@@ -377,9 +377,9 @@ pub struct BufferedLexer<Kind, Lex> {
     /// That's why the [BufferedLexer] stores the following information:
     /// * `current`: `let` (information about the `current` token from the consumer perspective)
     /// * `all_checkpoints`: [WHITESPACE, IDENT: 'a', WHITESPACE, EQ]. The checkpoints that have been lexed to
-    ///    answer the "non trivia lookahead 2" request but haven't been returned yet.
+    ///   answer the "non trivia lookahead 2" request but haven't been returned yet.
     /// * `non_trivia_checkpoints`: [IDENT: 'a', EQ]. The checkpoints that have been lexed to
-    ///    answer the "non trivia lookahead 2" request but haven't been returned yet.
+    ///   answer the "non trivia lookahead 2" request but haven't been returned yet.
     /// * [Lexer::current]: Points to `=`
     lookahead: Lookahead<Kind>,
 
