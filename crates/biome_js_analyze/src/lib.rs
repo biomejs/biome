@@ -152,7 +152,7 @@ where
     services.insert_service(options.file_path.clone());
     services.insert_service(
         project_layout
-            .get_node_manifest_for_path(options.file_path.as_ref())
+            .find_node_manifest_for_path(options.file_path.as_ref())
             .map(|(path, manifest)| (path, Arc::new(manifest))),
     );
     services.insert_service(project_layout);

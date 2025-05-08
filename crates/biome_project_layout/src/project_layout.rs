@@ -45,18 +45,35 @@ pub struct PackageData {
 impl ProjectLayout {
     /// Returns the `package.json` that should be used for the given `path`,
     /// together with the absolute path of the manifest file.
-    pub fn get_node_manifest_for_path(
+    ///
+    /// This function will look for the closest `package.json` file in the
+    /// ancestors of the given `path`, and returns the first one it finds.
+    pub fn find_node_manifest_for_path(
         &self,
         path: &Utf8Path,
     ) -> Option<(Utf8PathBuf, PackageJson)> {
         let packages = self.0.pin();
-        path.ancestors().find_map(|package_path| {
+        path.ancestors().skip(1).find_map(|package_path| {
             packages
                 .get(package_path)
                 .and_then(|data| data.node_package.as_ref())
                 .and_then(|node_package| node_package.manifest.as_ref())
                 .map(|manifest| (package_path.join("package.json"), manifest.clone()))
         })
+    }
+
+    /// Returns the `package.json` inside the given `package_path`.
+    ///
+    /// This function does not look for the closest `package.json` file in the
+    /// hierarchy, but only returns the one that is stored in the layout for
+    /// the given `package_path`.
+    pub fn get_node_manifest_for_package(&self, package_path: &Utf8Path) -> Option<PackageJson> {
+        self.0
+            .pin()
+            .get(package_path)
+            .and_then(|data| data.node_package.as_ref())
+            .and_then(|node_package| node_package.manifest.as_ref())
+            .cloned()
     }
 
     /// Inserts a `package.json` manifest for the package at the given `path`.
