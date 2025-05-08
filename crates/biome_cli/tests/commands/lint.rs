@@ -2898,11 +2898,10 @@ fn lint_only_rule_and_group() {
 fn lint_only_rule_ignore_suppression_comments() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let content = r#"
-        debugger;
-        // biome-ignore lint/performance/noDelete: <explanation>
-        delete obj.prop;
-    "#;
+    let content = r#"debugger;
+// biome-ignore lint/performance/noDelete: <explanation>
+delete obj.prop;
+"#;
 
     let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
