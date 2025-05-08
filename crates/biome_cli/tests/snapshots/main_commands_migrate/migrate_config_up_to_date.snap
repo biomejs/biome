@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -20,31 +19,24 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        1 │ + {·"linter":·{"enabled":·true·,
        2 │ + ····"rules":·{
        3 │ + ······"style":·{
-       4 │ + ········"useLiteralEnumMembers":·"error",
-       5 │ + ········"noCommaOperator":·"error",
-       6 │ + ········"useNodejsImportProtocol":·"error",
-       7 │ + ········"useAsConstAssertion":·"error",
-       8 │ + ········"useNumericLiterals":·"error",
-       9 │ + ········"useEnumInitializers":·"error",
-      10 │ + ········"useSelfClosingElements":·"error",
-      11 │ + ········"useConst":·"error",
-      12 │ + ········"useSingleVarDeclarator":·"error",
-      13 │ + ········"noUnusedTemplateLiteral":·"error",
-      14 │ + ········"useNumberNamespace":·"error",
-      15 │ + ········"noInferrableTypes":·"error",
-      16 │ + ········"useExponentiationOperator":·"error",
-      17 │ + ········"useTemplate":·"error",
-      18 │ + ········"noParameterAssign":·"error",
-      19 │ + ········"noNonNullAssertion":·"error",
-      20 │ + ········"useDefaultParameterLast":·"error",
-      21 │ + ········"noArguments":·"error",
-      22 │ + ········"useImportType":·"error",
-      23 │ + ········"useExportType":·"error",
-      24 │ + ········"noUselessElse":·"error",
-      25 │ + ········"useShorthandFunctionType":·"error"
-      26 │ + ······}
-      27 │ + ····}
-      28 │ + ··}·}
+       4 │ + ········"noCommaOperator":·"error",
+       5 │ + ········"useAsConstAssertion":·"error",
+       6 │ + ········"useNumericLiterals":·"error",
+       7 │ + ········"useEnumInitializers":·"error",
+       8 │ + ········"useSelfClosingElements":·"error",
+       9 │ + ········"useConst":·"error",
+      10 │ + ········"useSingleVarDeclarator":·"error",
+      11 │ + ········"noUnusedTemplateLiteral":·"error",
+      12 │ + ········"useTemplate":·"error",
+      13 │ + ········"useNumberNamespace":·"error",
+      14 │ + ········"noInferrableTypes":·"error",
+      15 │ + ········"noParameterAssign":·"error",
+      16 │ + ········"useDefaultParameterLast":·"error",
+      17 │ + ········"noUselessElse":·"error",
+      18 │ + ········"useShorthandFunctionType":·"error"
+      19 │ + ······}
+      20 │ + ····}
+      21 │ + ··}·}
   
 
 ```

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
 expression: invalid_with_level.json
-snapshot_kind: text
 ---
 # Input
 ```json
@@ -64,7 +63,7 @@ invalid_with_level.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━�
 ```
 invalid_with_level.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The rule noConsoleLog has been removed.
+  ! The rule useSingleCaseStatement has been removed.
   
      6 │           "level": "warn"
      7 │         },
@@ -88,7 +87,7 @@ invalid_with_level.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━�
 ```
 invalid_with_level.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The rule noConsoleLog has been removed.
+  ! The rule useShorthandArrayType has been removed.
   
      9 │           "level": "error"
     10 │         },
@@ -117,7 +116,7 @@ invalid_with_level.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━
 ```
 invalid_with_level.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The rule noConsoleLog has been removed.
+  ! The rule noNewSymbol has been removed.
   
     12 │           "level": "error"
     13 │         },
@@ -134,6 +133,30 @@ invalid_with_level.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━
        14 │ + ········"noInvalidBuiltinInstantiation":·{
     15 15 │             "level": "error"
     16 16 │           },
+  
+
+```
+
+```
+invalid_with_level.json:17:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noInvalidNewBuiltin has been removed.
+  
+    15 │           "level": "error"
+    16 │         },
+  > 17 │         "noInvalidNewBuiltin": {
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    18 │           "level": "error"
+    19 │         }
+  
+  i Safe fix: Use the rule noInvalidNewBuiltin instead.
+  
+    15 15 │             "level": "error"
+    16 16 │           },
+    17    │ - ········"noInvalidNewBuiltin":·{
+       17 │ + ········"noInvalidBuiltinInstantiation":·{
+    18 18 │             "level": "error"
+    19 19 │           }
   
 
 ```

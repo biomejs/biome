@@ -20,28 +20,17 @@ declare_migration! {
     }
 }
 
-const STYLE_RULES_THAT_WERE_ERROR: [&str; 22] = [
+const STYLE_RULES_THAT_WERE_ERROR: [&str; 11] = [
     "useNumberNamespace",
-    "noNonNullAssertion",
     "useAsConstAssertion",
     "noParameterAssign",
     "noInferrableTypes",
-    "useNodejsImportProtocol",
-    "useExportType",
     "useDefaultParameterLast",
     "noUnusedTemplateLiteral",
-    "useExponentiationOperator",
     "useEnumInitializers",
-    "useShorthandFunctionType",
-    "useLiteralEnumMembers",
     "noUselessElse",
-    "useNumericLiterals",
-    "noCommaOperator",
     "useConst",
-    "noArguments",
     "useSelfClosingElements",
-    "useImportType",
-    "useTemplate",
     "useSingleVarDeclarator",
 ];
 

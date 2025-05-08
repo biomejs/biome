@@ -1,7 +1,6 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
 expression: invalid.json
-snapshot_kind: text
 ---
 # Input
 ```json
@@ -54,7 +53,7 @@ invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
 ```
 invalid.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The rule noConsoleLog has been removed.
+  ! The rule useSingleCaseStatement has been removed.
   
     4 │       "suspicious": {
     5 │         "noConsoleLog": "error",
@@ -80,7 +79,7 @@ invalid.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
 ```
 invalid.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The rule noConsoleLog has been removed.
+  ! The rule useShorthandArrayType has been removed.
   
     5 │         "noConsoleLog": "error",
     6 │         "useSingleCaseStatement": "error",
@@ -109,7 +108,7 @@ invalid.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
 ```
 invalid.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The rule noConsoleLog has been removed.
+  ! The rule noNewSymbol has been removed.
   
      6 │         "useSingleCaseStatement": "error",
      7 │         "useShorthandArrayType": "error",
@@ -128,6 +127,32 @@ invalid.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
        10 │ + ········},
      9 11 │           "noInvalidNewBuiltin": "error"
     10 12 │         }
+  
+
+```
+
+```
+invalid.json:9:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noInvalidNewBuiltin has been removed.
+  
+     7 │         "useShorthandArrayType": "error",
+     8 │         "noNewSymbol": "error",
+   > 9 │         "noInvalidNewBuiltin": "error"
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    10 │       }
+    11 │     }
+  
+  i Safe fix: Use the rule noInvalidNewBuiltin instead.
+  
+     7  7 │           "useShorthandArrayType": "error",
+     8  8 │           "noNewSymbol": "error",
+     9    │ - ········"noInvalidNewBuiltin":·"error"
+        9 │ + ········"noInvalidBuiltinInstantiation":·{
+       10 │ + ··········"level":·"error"
+       11 │ + ········}
+    10 12 │         }
+    11 13 │       }
   
 
 ```

@@ -75,22 +75,33 @@ fn find_group_by_name(root: &JsonRoot, group_name: &str) -> Option<JsonMember> {
 #[rustfmt::skip]
 const RULES_TO_MIGRATE: &[(&str, (&str, &str))] = &[
     // CSS
+    ("noDescendingSpecificity", ("style", "noDescendingSpecificity")),
     ("noDuplicateAtImportRules", ("suspicious", "noDuplicateAtImportRules")),
+    ("noDuplicateCustomProperties", ("suspicious", "noDuplicateCustomProperties")),
     ("noDuplicateFontNames", ("suspicious", "noDuplicateFontNames")),
+    ("noDuplicateProperties", ("suspicious", "noDuplicateProperties")),
     ("noDuplicateSelectorsKeyframeBlock", ("suspicious", "noDuplicateSelectorsKeyframeBlock")),
     ("noEmptyBlock", ("suspicious", "noEmptyBlock")),
     ("noImportantInKeyframe", ("suspicious", "noImportantInKeyframe")),
     ("noInvalidDirectionInLinearGradient", ("correctness", "noInvalidDirectionInLinearGradient")),
     ("noInvalidPositionAtImportRule", ("correctness", "noInvalidPositionAtImportRule")),
     ("noIrregularWhitespace", ("suspicious", "noIrregularWhitespace")),
+    ("noMissingVarFunction", ("correctness", "noMissingVarFunction")),
     ("noShorthandPropertyOverrides", ("suspicious", "noShorthandPropertyOverrides")),
     ("noUnknownFunction", ("correctness", "noUnknownFunction")),
     ("noUnknownMediaFeatureName", ("correctness", "noUnknownMediaFeatureName")),
     ("noUnknownProperty", ("correctness", "noUnknownProperty")),
+    ("noUnknownPseudoClass", ("correctness", "noUnknownPseudoClass")),
+    ("noUnknownPseudoElement", ("correctness", "noUnknownPseudoElement")),
+    ("noUnknownTypeSelector", ("correctness", "noUnknownTypeSelector")),
     ("noUnknownUnit", ("correctness", "noUnknownUnit")),
     ("noUnmatchableAnbSelector", ("correctness", "noUnmatchableAnbSelector")),
+    ("noValueAtRule", ("style", "noValueAtRule")),
     ("useConsistentGridAreas", ("correctness", "noInvalidGridAreas")),
     ("useGenericFontNames", ("a11y", "useGenericFontNames")),
+    // GraphQL
+    ("useDeprecatedReason ", ("style", "useDeprecatedReason ")),
+    ("noDuplicatedFields ", ("suspicious", "noDuplicatedFields ")),
     // JS
     ("noBarrelFile", ("performance", "noBarrelFile")),
     ("noCommonJs", ("style", "noCommonJs")),

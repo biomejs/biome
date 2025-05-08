@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -44,9 +43,7 @@ snapshot_kind: text
           }
         },
         "noDefaultExport": "error",
-        "useLiteralEnumMembers": "error",
         "noCommaOperator": "error",
-        "useNodejsImportProtocol": "error",
         "useAsConstAssertion": "error",
         "useNumericLiterals": "error",
         "useEnumInitializers": "error",
@@ -54,16 +51,11 @@ snapshot_kind: text
         "useConst": "error",
         "useSingleVarDeclarator": "error",
         "noUnusedTemplateLiteral": "error",
+        "useTemplate": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-        "useExponentiationOperator": "error",
-        "useTemplate": "error",
         "noParameterAssign": "error",
-        "noNonNullAssertion": "error",
         "useDefaultParameterLast": "error",
-        "noArguments": "error",
-        "useImportType": "error",
-        "useExportType": "error",
         "noUselessElse": "error",
         "useShorthandFunctionType": "error"
       }
