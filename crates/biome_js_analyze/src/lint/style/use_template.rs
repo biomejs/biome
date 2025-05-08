@@ -50,7 +50,7 @@ declare_lint_rule! {
         name: "useTemplate",
         language: "js",
         sources: &[RuleSource::Eslint("prefer-template")],
-        recommended: false,
+        recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }

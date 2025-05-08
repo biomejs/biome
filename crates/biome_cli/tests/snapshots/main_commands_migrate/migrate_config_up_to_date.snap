@@ -19,24 +19,20 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        1 │ + {·"linter":·{"enabled":·true·,
        2 │ + ····"rules":·{
        3 │ + ······"style":·{
-       4 │ + ········"noCommaOperator":·"error",
+       4 │ + ········"noParameterAssign":·"error",
        5 │ + ········"useAsConstAssertion":·"error",
-       6 │ + ········"useNumericLiterals":·"error",
+       6 │ + ········"useDefaultParameterLast":·"error",
        7 │ + ········"useEnumInitializers":·"error",
        8 │ + ········"useSelfClosingElements":·"error",
        9 │ + ········"useConst":·"error",
       10 │ + ········"useSingleVarDeclarator":·"error",
       11 │ + ········"noUnusedTemplateLiteral":·"error",
-      12 │ + ········"useTemplate":·"error",
-      13 │ + ········"useNumberNamespace":·"error",
-      14 │ + ········"noInferrableTypes":·"error",
-      15 │ + ········"noParameterAssign":·"error",
-      16 │ + ········"useDefaultParameterLast":·"error",
-      17 │ + ········"noUselessElse":·"error",
-      18 │ + ········"useShorthandFunctionType":·"error"
-      19 │ + ······}
-      20 │ + ····}
-      21 │ + ··}·}
+      12 │ + ········"useNumberNamespace":·"error",
+      13 │ + ········"noInferrableTypes":·"error",
+      14 │ + ········"noUselessElse":·"error"
+      15 │ + ······}
+      16 │ + ····}
+      17 │ + ··}·}
   
 
 ```

@@ -4578,7 +4578,7 @@
 					]
 				},
 				"useSelfClosingElements": {
-					"description": "Prevent extra closing tags for components without children",
+					"description": "Prevent extra closing tags for components without children.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseSelfClosingElementsConfiguration" },
 						{ "type": "null" }

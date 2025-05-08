@@ -1925,7 +1925,7 @@ export interface Style {
 	 */
 	useNumericLiterals?: RuleFixConfiguration_for_Null;
 	/**
-	 * Prevent extra closing tags for components without children
+	 * Prevent extra closing tags for components without children.
 	 */
 	useSelfClosingElements?: RuleFixConfiguration_for_UseSelfClosingElementsOptions;
 	/**

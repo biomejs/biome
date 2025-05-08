@@ -66,18 +66,14 @@ expression: redactor(content)
         "noUnusedTemplateLiteral": "off",
         "noNonNullAssertion": "off",
         "noUselessElse": "off",
-        "noCommaOperator": "error",
         "useAsConstAssertion": "error",
-        "useNumericLiterals": "error",
+        "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
         "useSelfClosingElements": "error",
         "useConst": "error",
         "useSingleVarDeclarator": "error",
-        "useTemplate": "error",
         "useNumberNamespace": "error",
-        "noInferrableTypes": "error",
-        "useDefaultParameterLast": "error",
-        "useShorthandFunctionType": "error"
+        "noInferrableTypes": "error"
       }
     }
   }

@@ -39,20 +39,16 @@ expression: redactor(content)
       "style": {
         "noParameterAssign": "off",
         "useNodeAssertStrict": "error",
-        "noCommaOperator": "error",
         "useAsConstAssertion": "error",
-        "useNumericLiterals": "error",
+        "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
         "useSelfClosingElements": "error",
         "useConst": "error",
         "useSingleVarDeclarator": "error",
         "noUnusedTemplateLiteral": "error",
-        "useTemplate": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-        "useDefaultParameterLast": "error",
         "noUselessElse": "error",
-        "useShorthandFunctionType": "error",
         "noRestrictedImports": {
           "level": "error",
           "options": {

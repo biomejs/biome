@@ -43,21 +43,17 @@ expression: redactor(content)
           }
         },
         "noDefaultExport": "error",
-        "noCommaOperator": "error",
+        "noParameterAssign": "error",
         "useAsConstAssertion": "error",
-        "useNumericLiterals": "error",
+        "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
         "useSelfClosingElements": "error",
         "useConst": "error",
         "useSingleVarDeclarator": "error",
         "noUnusedTemplateLiteral": "error",
-        "useTemplate": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-        "noParameterAssign": "error",
-        "useDefaultParameterLast": "error",
-        "noUselessElse": "error",
-        "useShorthandFunctionType": "error"
+        "noUselessElse": "error"
       }
     }
   }
