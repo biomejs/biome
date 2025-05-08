@@ -53,18 +53,23 @@
       ]
     },
     {
-      "matchDepTypes": ["engines"],
+      "matchDepTypes": [
+        "engines"
+      ],
       "enabled": false
     }
   ],
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": ["(^|/)rust-toolchain\\.toml?$"],
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)rust-toolchain\\.toml?$/"
+      ],
       "matchStrings": [
         "channel\\s*=\\s*\"(?<currentValue>\\d+\\.\\d+(\\.\\d+)?)\""
       ],
       "depNameTemplate": "rust",
-      "lookupNameTemplate": "rust-lang/rust",
+      "packageNameTemplate": "rust-lang/rust",
       "datasourceTemplate": "github-tags"
     }
   ]
