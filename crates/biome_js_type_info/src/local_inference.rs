@@ -17,6 +17,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
+use crate::globals::GLOBAL_INSTANCEOF_PROMISE_ID;
 use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, CallSignatureTypeMember, Class, Constructor,
@@ -449,6 +450,9 @@ impl TypeData {
                 .name()
                 .map(|name| Self::from_js_reference_identifier(&name))
                 .unwrap_or_default(),
+            AnyJsExpression::JsImportCallExpression(_expr) => {
+                Self::reference(GLOBAL_INSTANCEOF_PROMISE_ID)
+            }
             AnyJsExpression::JsInstanceofExpression(_expr) => Self::Boolean,
             AnyJsExpression::JsNewExpression(expr) => {
                 Self::from_js_new_expression(resolver, expr).unwrap_or_default()
