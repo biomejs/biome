@@ -395,7 +395,7 @@ fn parse_suppression_line(
         reason,
         kind,
         range,
-        reason_range: TextRange::at(offset_from(base, reason), range.end()),
+        reason_range: TextRange::at(offset_from(base, reason), TextSize::of(reason)),
     })
 }
 
@@ -553,7 +553,7 @@ mod tests_biome_ignore_inline {
                 reason: "explanation1",
                 kind: SuppressionKind::Classic,
                 range: TextRange::new(TextSize::from(3), TextSize::from(15)),
-                reason_range: TextRange::new(TextSize::from(7), TextSize::from(22))
+                reason_range: TextRange::new(TextSize::from(8), TextSize::from(23))
             })],
         );
 

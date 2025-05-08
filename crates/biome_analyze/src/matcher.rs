@@ -366,7 +366,16 @@ mod tests {
             comment
                 .trim_start_matches("//")
                 .split(' ')
-                .map(|rule_str| AnalyzerSuppression::rule(RuleCategory::Lint, rule_str))
+                .map(|rule_str| {
+                    AnalyzerSuppression::rule(
+                        RuleCategory::Lint,
+                        rule_str,
+                        (
+                            "",
+                            TextRange::new(TextSize::of(rule_str), TextSize::of(rule_str)),
+                        ),
+                    )
+                })
                 .map(Ok)
                 .collect()
         }

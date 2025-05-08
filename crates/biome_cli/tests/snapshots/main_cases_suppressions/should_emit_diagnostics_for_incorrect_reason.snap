@@ -25,14 +25,14 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-file.ts:3:41 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.ts:3:42 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A suppression shouldn't have a <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
   
     1 │ // biome-ignore-all lint/style/useConst:
     2 │ var foo = 2;
   > 3 │ // biome-ignore-all lint/style/useConst: <explanation>
-      │                                         ^^^^^^^^^^^^^^
+      │                                          ^^^^^^^^^^^^^
     4 │ var bar = 33;
   
 

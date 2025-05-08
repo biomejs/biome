@@ -6,6 +6,7 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
+use std::ops::Sub;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -814,12 +815,13 @@ pub fn to_analyzer_suppressions(
     let reason = (
         suppression.reason,
         TextRange::new(
-            piece_range
-                .add_start(suppression.reason_range().end())
-                .start(),
-            piece_range
-                .add_start(suppression.reason_range().end())
-                .end(),
+            piece_range.end().sub(
+                suppression
+                    .reason_range()
+                    .end()
+                    .sub(suppression.reason_range().start()),
+            ),
+            piece_range.end(),
         ),
     );
     for (key, subcategory, value) in suppression.categories {
