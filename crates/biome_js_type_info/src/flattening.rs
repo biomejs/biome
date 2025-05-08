@@ -3,8 +3,9 @@ use std::collections::{BTreeMap, btree_map::Entry};
 use biome_rowan::Text;
 
 use crate::{
-    DestructureField, GenericTypeParameter, ResolvedTypeData, ResolvedTypeMember, TypeData,
-    TypeInstance, TypeMember, TypeReference, TypeResolver, TypeofExpression,
+    DestructureField, GenericTypeParameter, Intersection, ResolvedTypeData, ResolvedTypeMember,
+    TypeData, TypeInstance, TypeMember, TypeReference, TypeResolver, TypeofExpression,
+    TypeofStaticMemberExpression, Union,
 };
 
 impl TypeData {
@@ -256,6 +257,71 @@ impl TypeData {
                 }
                 TypeofExpression::StaticMember(expr) => {
                     if let Some(object) = resolver.resolve_and_get(&expr.object) {
+                        // FIXME: Flattening intersections and unions for members should be done in
+                        //        `TypeMemberIterator`.
+
+                        if let Self::InstanceOf(instance) = object.as_raw_data() {
+                            let object = resolver
+                                .resolve_and_get(&instance.ty)
+                                .map(|ty| ty.as_raw_data());
+
+                            if matches!(object, Some(Self::Intersection(_) | Self::Union(_))) {
+                                return Self::TypeofExpression(Box::new(
+                                    TypeofExpression::StaticMember(TypeofStaticMemberExpression {
+                                        object: instance.ty.clone(),
+                                        member: expr.member.clone(),
+                                    }),
+                                ))
+                                .flattened(resolver);
+                            }
+                        };
+
+                        if let Self::Intersection(intersection) = object.as_raw_data() {
+                            let types = intersection.types().to_vec();
+                            let types = types
+                                .into_iter()
+                                .map(|ty| {
+                                    // Resolve and flatten the type member for each variant.
+                                    let ty = Self::TypeofExpression(Box::new(
+                                        TypeofExpression::StaticMember(
+                                            TypeofStaticMemberExpression {
+                                                object: ty.clone(),
+                                                member: expr.member.clone(),
+                                            },
+                                        ),
+                                    ))
+                                    .flattened(resolver);
+
+                                    resolver.reference_to_registered_data(ty)
+                                })
+                                .collect();
+
+                            return Self::Intersection(Box::new(Intersection(types)));
+                        }
+
+                        if let Self::Union(union) = object.as_raw_data() {
+                            let types = union.types().to_vec();
+                            let types = types
+                                .into_iter()
+                                .map(|ty| {
+                                    // Resolve and flatten the type member for each variant.
+                                    let ty = Self::TypeofExpression(Box::new(
+                                        TypeofExpression::StaticMember(
+                                            TypeofStaticMemberExpression {
+                                                object: ty.clone(),
+                                                member: expr.member.clone(),
+                                            },
+                                        ),
+                                    ))
+                                    .flattened(resolver);
+
+                                    resolver.reference_to_registered_data(ty)
+                                })
+                                .collect();
+
+                            return Self::Union(Box::new(Union(types)));
+                        }
+
                         let is_class = matches!(object.as_raw_data(), Self::Class(_));
                         let member = object.all_members(resolver).find(|member| {
                             member.has_name(&expr.member)

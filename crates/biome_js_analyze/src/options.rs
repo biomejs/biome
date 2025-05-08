@@ -347,6 +347,7 @@ pub type UseEnumInitializers =
 pub type UseErrorMessage =
     <lint::suspicious::use_error_message::UseErrorMessage as biome_analyze::Rule>::Options;
 pub type UseExhaustiveDependencies = < lint :: correctness :: use_exhaustive_dependencies :: UseExhaustiveDependencies as biome_analyze :: Rule > :: Options ;
+pub type UseExhaustiveSwitchCases = < lint :: nursery :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCases as biome_analyze :: Rule > :: Options ;
 pub type UseExplicitLengthCheck = < lint :: style :: use_explicit_length_check :: UseExplicitLengthCheck as biome_analyze :: Rule > :: Options ;
 pub type UseExplicitType =
     <lint::nursery::use_explicit_type::UseExplicitType as biome_analyze::Rule>::Options;
