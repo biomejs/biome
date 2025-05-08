@@ -1458,7 +1458,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
 
         let package_json = self
             .path
-            .and_then(|path| self.project_layout.get_node_manifest_for_path(path))
+            .and_then(|path| self.project_layout.find_node_manifest_for_path(path))
             .map(|(_, manifest)| manifest);
 
         let mut lint = LintVisitor::new(

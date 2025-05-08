@@ -24,7 +24,6 @@ pub(crate) fn check_file<'ctx>(
         );
         return Ok(FileStatus::Ignored);
     }
-    let mut changed = false;
     let _ = tracing::info_span!("Check ", path =? workspace_file.path).entered();
 
     let mut categories = RuleCategoriesBuilder::default().with_syntax();
@@ -37,8 +36,17 @@ pub(crate) fn check_file<'ctx>(
 
     let analyzer_result =
         analyze_with_guard(ctx, &mut workspace_file, false, None, categories.build());
+
+    let mut changed = false;
+    // To reduce duplication of the same error on format and lint_and_assist
+    let mut skipped_parse_error = false;
+
     match analyzer_result {
         Ok(status) => {
+            if matches!(status, FileStatus::Ignored) && ctx.execution.should_skip_parse_errors() {
+                skipped_parse_error = true;
+            }
+
             if status.is_changed() {
                 changed = true
             }
@@ -56,22 +64,26 @@ pub(crate) fn check_file<'ctx>(
     }
 
     if file_features.supports_format() {
-        let format_result = format_with_guard(ctx, &mut workspace_file);
-        match format_result {
-            Ok(status) => {
-                if status.is_changed() {
-                    changed = true
-                }
-                if let FileStatus::Message(msg) = status {
-                    if msg.is_failure() {
-                        has_failures = true;
+        if ctx.execution.should_skip_parse_errors() && skipped_parse_error {
+            // Parse errors are already skipped during the analyze phase, so no need to do it here.
+        } else {
+            let format_result = format_with_guard(ctx, &mut workspace_file);
+            match format_result {
+                Ok(status) => {
+                    if status.is_changed() {
+                        changed = true
                     }
-                    ctx.push_message(msg);
+                    if let FileStatus::Message(msg) = status {
+                        if msg.is_failure() {
+                            has_failures = true;
+                        }
+                        ctx.push_message(msg);
+                    }
                 }
-            }
-            Err(err) => {
-                ctx.push_message(err);
-                has_failures = true;
+                Err(err) => {
+                    ctx.push_message(err);
+                    has_failures = true;
+                }
             }
         }
     }

@@ -62,6 +62,50 @@ React.Children.map(c => React.cloneElement(c));
 
 data.map((item) => <React.Fragment><p>{item}</p></React.Fragment>)
 
+data.map((x) => {
+	if (x.type === 'string') {
+		return <div>{x.value}</div> // no key
+	}
+	return <div>{x.value}</div> // no key
+})
+
+data.map((x) => {
+	if (x.type === 'string') {
+		return <div>{x.value}</div> // no key
+	}
+	return <div key={x.value}>{x.value}</div>
+})
+
+data.map((x) => {
+	if (x.type === 'string') {
+		return <div>{x.value}</div> // no key
+	} else {
+		return <div>{x.value}</div> // no key
+	}
+})
+
+data.map((x) => {
+	switch (x.type) {
+		case 'string':
+			return <div>{x.value}</div> // no key
+		case 'number':
+			return <div>{x.value}</div> // no key
+		default:
+			return <div key={x.value}>{x.value}</div>
+	}
+})
+
+data.map((x) => {
+	switch (x.type) {
+		case 'string':
+			return <div>{x.value}</div> // no key
+		case 'number':
+			return <div>{x.value}</div> // no key
+		default:
+			return <div>{x.value}</div> // no key
+	}
+})
+
 ```
 
 # Diagnostics
@@ -661,6 +705,178 @@ invalid.jsx:57:20 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
   > 57 │ data.map((item) => <React.Fragment><p>{item}</p></React.Fragment>)
        │                    ^^^^^^^^^^^^^^^^
     58 │ 
+    59 │ data.map((x) => {
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:61:10 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    59 │ data.map((x) => {
+    60 │ 	if (x.type === 'string') {
+  > 61 │ 		return <div>{x.value}</div> // no key
+       │ 		       ^^^^^
+    62 │ 	}
+    63 │ 	return <div>{x.value}</div> // no key
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:63:9 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    61 │ 		return <div>{x.value}</div> // no key
+    62 │ 	}
+  > 63 │ 	return <div>{x.value}</div> // no key
+       │ 	       ^^^^^
+    64 │ })
+    65 │ 
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:75:10 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    73 │ data.map((x) => {
+    74 │ 	if (x.type === 'string') {
+  > 75 │ 		return <div>{x.value}</div> // no key
+       │ 		       ^^^^^
+    76 │ 	} else {
+    77 │ 		return <div>{x.value}</div> // no key
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:77:10 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    75 │ 		return <div>{x.value}</div> // no key
+    76 │ 	} else {
+  > 77 │ 		return <div>{x.value}</div> // no key
+       │ 		       ^^^^^
+    78 │ 	}
+    79 │ })
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:84:11 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    82 │ 	switch (x.type) {
+    83 │ 		case 'string':
+  > 84 │ 			return <div>{x.value}</div> // no key
+       │ 			       ^^^^^
+    85 │ 		case 'number':
+    86 │ 			return <div>{x.value}</div> // no key
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:86:11 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    84 │ 			return <div>{x.value}</div> // no key
+    85 │ 		case 'number':
+  > 86 │ 			return <div>{x.value}</div> // no key
+       │ 			       ^^^^^
+    87 │ 		default:
+    88 │ 			return <div key={x.value}>{x.value}</div>
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:95:11 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    93 │ 	switch (x.type) {
+    94 │ 		case 'string':
+  > 95 │ 			return <div>{x.value}</div> // no key
+       │ 			       ^^^^^
+    96 │ 		case 'number':
+    97 │ 			return <div>{x.value}</div> // no key
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:97:11 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    95 │ 			return <div>{x.value}</div> // no key
+    96 │ 		case 'number':
+  > 97 │ 			return <div>{x.value}</div> // no key
+       │ 			       ^^^^^
+    98 │ 		default:
+    99 │ 			return <div>{x.value}</div> // no key
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:99:11 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+     97 │ 			return <div>{x.value}</div> // no key
+     98 │ 		default:
+   > 99 │ 			return <div>{x.value}</div> // no key
+        │ 			       ^^^^^
+    100 │ 	}
+    101 │ })
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   

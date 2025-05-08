@@ -3139,6 +3139,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSingleJsDocAsterisk": {
+					"description": "Enforce JSDoc comment lines to start with a single asterisk, except for the first one.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [

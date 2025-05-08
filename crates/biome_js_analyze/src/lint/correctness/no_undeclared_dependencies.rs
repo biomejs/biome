@@ -8,7 +8,7 @@ use biome_deserialize::{
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_rowan::AstNode;
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::{globals::is_node_builtin_module, services::manifest::Manifest};
 
@@ -280,7 +280,13 @@ impl Rule for NoUndeclaredDependencies {
             ));
         };
 
-        let manifest_path = package_path.clone();
+        let cwd = Utf8PathBuf::from(
+            std::env::current_dir()
+                .map(|cwd| cwd.to_string_lossy().to_string())
+                .unwrap_or_default(),
+        );
+
+        let manifest_path = package_path.strip_prefix(&cwd).unwrap_or(package_path);
 
         let diag = RuleDiagnostic::new(
             rule_category!(),

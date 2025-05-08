@@ -2898,11 +2898,10 @@ fn lint_only_rule_and_group() {
 fn lint_only_rule_ignore_suppression_comments() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let content = r#"
-        debugger;
-        // biome-ignore lint/performance/noDelete: <explanation>
-        delete obj.prop;
-    "#;
+    let content = r#"debugger;
+// biome-ignore lint/performance/noDelete: <explanation>
+delete obj.prop;
+"#;
 
     let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
@@ -3967,6 +3966,41 @@ var a = foo;
         module_path!(),
         "should_lint_module_in_commonjs_package",
         fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_skip_parse_errors() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let valid = Utf8Path::new("valid.js");
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(valid.into(), LINT_ERROR.as_bytes());
+    fs.insert(invalid.into(), PARSE_ERROR.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--skip-parse-errors",
+                valid.as_str(),
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_skip_parse_errors",
+        fs,
         console,
         result,
     ));

@@ -901,3 +901,39 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
         result,
     ));
 }
+
+#[test]
+fn ci_skip_parse_errors() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let valid = Utf8Path::new("valid.js");
+    let invalid = Utf8Path::new("invalid.js");
+
+    fs.insert(valid.into(), LINT_ERROR.as_bytes());
+    fs.insert(invalid.into(), PARSE_ERROR.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "ci",
+                "--skip-parse-errors",
+                valid.as_str(),
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "ci_skip_parse_errors",
+        fs,
+        console,
+        result,
+    ));
+}

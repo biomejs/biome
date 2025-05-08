@@ -80,3 +80,21 @@ React.Children.map(c => React.cloneElement(c, {key: c}));
 
 // is only checked when options.checkShorthandFragment is set
 data.map((x) => <>x</>)
+
+data.map((x) => {
+	if (x.type === 'string') {
+		return <div key={x.value}>{x.value}</div>
+	}
+	return <div key={x.value}>{x.value}</div>
+})
+
+data.map((x) => {
+	switch (x.type) {
+		case 'string':
+			return <div key={x.value}>{x.value}</div>
+		case 'number':
+			return <div key={x.value}>{x.value}</div>
+		default:
+			return <div key={x.value}>{x.value}</div>
+	}
+})

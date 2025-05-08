@@ -7,14 +7,20 @@ expression: content
 ## Source
 
 ```ts
-export * from "./promisedResult.ts";
+export { PromisedResult } from "./promisedResult.ts";
 ```
 
 ## Module Info
 
 ```
 Exports {
-  No exports
+  "PromisedResult" => {
+    ExportReexport => Reexport(
+      Specifier: "./promisedResult.ts"
+      Resolved path: "/src/promisedResult.ts"
+      Import Symbol: PromisedResult
+    )
+  }
 }
 Imports {
   No imports
@@ -57,7 +63,7 @@ Module TypeId(1) => Call Import Symbol: returnPromiseResult from "/src/returnPro
 )
 ```
 
-# `/src/promisedResult.ts` (Not imported by resolver)
+# `/src/promisedResult.ts` (Module 3)
 
 ## Source
 
@@ -150,16 +156,4 @@ Module TypeId(2) => sync Function "returnPromiseResult" {
 }
 ```
 
-# Ad-Hoc Type Resolver
-
-## Registered types
-
-```
-Scope TypeId(0) => sync Function "returnPromiseResult" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(1) TypeId(1)
-}
-```
+# Scoped Type Resolver

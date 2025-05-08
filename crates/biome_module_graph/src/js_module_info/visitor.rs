@@ -6,13 +6,13 @@ use biome_js_syntax::{
     JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, TypeData, TypeResolver};
+use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{ResolveError, ResolverGeneric};
 
 use crate::{
-    JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, jsdoc_comment::JsdocComment,
-    resolver_cache::ResolverCache,
+    JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, resolver_cache::ResolverCache,
 };
 
 use super::{ResolvedPath, collector::JsModuleInfoCollector};

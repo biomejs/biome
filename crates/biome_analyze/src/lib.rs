@@ -6,6 +6,7 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
+use std::ops::Sub;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -599,6 +600,18 @@ where
                 }
             };
 
+            let (reason_text, reason_range) = suppression.reason;
+            if reason_text == "<explanation>" {
+                let signal = DiagnosticSignal::new(|| {
+                    AnalyzerSuppressionDiagnostic::new(
+                        category!("suppressions/incorrect"),
+                        reason_range,
+                        "A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive",
+                    )
+                });
+                (self.emit_signal)(&signal)?;
+            }
+
             if !self.categories.contains(suppression.category) {
                 let signal = DiagnosticSignal::new(|| {
                     AnalyzerSuppressionDiagnostic::new(
@@ -692,6 +705,9 @@ pub struct AnalyzerSuppression<'a> {
 
     /// The category that this suppression applies to
     pub(crate) category: RuleCategory,
+
+    /// The reason contained in the diagnostic
+    pub(crate) reason: (&'a str, TextRange),
 }
 
 #[derive(Debug, Clone)]
@@ -718,38 +734,47 @@ impl From<&SuppressionKind> for AnalyzerSuppressionVariant {
 }
 
 impl<'a> AnalyzerSuppression<'a> {
-    pub fn everything(category: RuleCategory) -> Self {
+    pub fn everything(category: RuleCategory, reason: (&'a str, TextRange)) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::Everything(category),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
             category,
+            reason,
         }
     }
 
-    pub fn rule_instance(category: RuleCategory, rule: &'a str, instance: &'a str) -> Self {
+    pub fn rule_instance(
+        category: RuleCategory,
+        rule: &'a str,
+        instance: &'a str,
+        reason: (&'a str, TextRange),
+    ) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::RuleInstance(rule, instance),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
             category,
+            reason,
         }
     }
-    pub fn rule(category: RuleCategory, rule: &'a str) -> Self {
+    pub fn rule(category: RuleCategory, rule: &'a str, reason: (&'a str, TextRange)) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::Rule(rule),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
             category,
+            reason,
         }
     }
 
-    pub fn plugin(plugin_name: Option<&'a str>) -> Self {
+    pub fn plugin(plugin_name: Option<&'a str>, reason: (&'a str, TextRange)) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::Plugin(plugin_name),
             ignore_range: None,
             variant: AnalyzerSuppressionVariant::Line,
             category: RuleCategory::Lint,
+            reason,
         }
     }
 
@@ -777,7 +802,7 @@ pub enum AnalyzerSuppressionKind<'a> {
     Plugin(Option<&'a str>),
 }
 
-/// Takes a [Suppression] and returns a [AnalyzerSuppression]
+/// Takes a [Suppression] and returns an [AnalyzerSuppression]
 pub fn to_analyzer_suppressions(
     suppression: Suppression,
     piece_range: TextRange,
@@ -787,16 +812,29 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().start()).start(),
         piece_range.add_start(suppression.range().end()).start(),
     );
+    let reason = (
+        suppression.reason,
+        TextRange::new(
+            piece_range.end().sub(
+                suppression
+                    .reason_range()
+                    .end()
+                    .sub(suppression.reason_range().start()),
+            ),
+            piece_range.end(),
+        ),
+    );
     for (key, subcategory, value) in suppression.categories {
         // Don't allow skipping of syntax since we want explicit bypasses as an escape hatch only
         if key == category!("lint") || key == category!("assist") {
             if let Ok(category) = RuleCategory::from_str(key.name()) {
                 result.push(
-                    AnalyzerSuppression::everything(category).with_variant(&suppression.kind),
+                    AnalyzerSuppression::everything(category, reason)
+                        .with_variant(&suppression.kind),
                 );
             }
         } else if key == category!("lint/plugin") {
-            let suppression = AnalyzerSuppression::plugin(subcategory)
+            let suppression = AnalyzerSuppression::plugin(subcategory, reason)
                 .with_ignore_range(ignore_range)
                 .with_variant(&suppression.kind);
             result.push(suppression);
@@ -804,22 +842,22 @@ pub fn to_analyzer_suppressions(
             let category = key.name();
             if let Some(rule) = category.strip_prefix("lint/") {
                 let suppression = if let Some(instance) = value {
-                    AnalyzerSuppression::rule_instance(RuleCategory::Lint, rule, instance)
+                    AnalyzerSuppression::rule_instance(RuleCategory::Lint, rule, instance, reason)
                         .with_ignore_range(ignore_range)
                 } else {
-                    AnalyzerSuppression::rule(RuleCategory::Lint, rule)
+                    AnalyzerSuppression::rule(RuleCategory::Lint, rule, reason)
                         .with_ignore_range(ignore_range)
                 }
                 .with_variant(&suppression.kind);
                 result.push(suppression);
             } else if let Some(action) = category.strip_prefix("assist/") {
                 // action instances aren't supported yet
-                let suppression = AnalyzerSuppression::rule(RuleCategory::Action, action)
+                let suppression = AnalyzerSuppression::rule(RuleCategory::Action, action, reason)
                     .with_ignore_range(ignore_range)
                     .with_variant(&suppression.kind);
                 result.push(suppression);
             } else if let Some(rule) = category.strip_prefix("syntax/") {
-                let suppression = AnalyzerSuppression::rule(RuleCategory::Syntax, rule)
+                let suppression = AnalyzerSuppression::rule(RuleCategory::Syntax, rule, reason)
                     .with_ignore_range(ignore_range)
                     .with_variant(&suppression.kind);
                 result.push(suppression);

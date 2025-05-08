@@ -310,7 +310,7 @@ impl WorkspaceServer {
 
         if let DocumentFileSource::Js(js) = &mut source {
             if path.extension().is_some_and(|extension| extension == "js") {
-                let manifest = self.project_layout.get_node_manifest_for_path(&path);
+                let manifest = self.project_layout.find_node_manifest_for_path(&path);
                 if let Some((_, manifest)) = manifest {
                     if manifest.r#type == Some(PackageType::CommonJs) {
                         js.set_module_kind(ModuleKind::Script);
@@ -612,7 +612,7 @@ impl WorkspaceServer {
                 WatcherSignalKind::AddedOrChanged => {
                     let parsed = self.get_parse(path)?;
                     self.project_layout
-                        .insert_raw_node_manifest(package_path, parsed);
+                        .insert_serialized_node_manifest(package_path, parsed);
                 }
                 WatcherSignalKind::Removed => {
                     self.project_layout.remove_package(&package_path);

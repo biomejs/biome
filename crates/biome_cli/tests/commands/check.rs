@@ -2877,3 +2877,39 @@ fn html_enabled_by_arg_check() {
         result,
     ));
 }
+
+#[test]
+fn check_skip_parse_errors() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let valid = Utf8Path::new("valid.js");
+    let invalid = Utf8Path::new("invalid.js");
+
+    fs.insert(valid.into(), LINT_ERROR.as_bytes());
+    fs.insert(invalid.into(), PARSE_ERROR.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--skip-parse-errors",
+                valid.as_str(),
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_skip_parse_errors",
+        fs,
+        console,
+        result,
+    ));
+}

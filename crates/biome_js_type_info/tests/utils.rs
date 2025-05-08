@@ -8,8 +8,8 @@ use biome_js_syntax::{
     AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFileSource, JsFunctionDeclaration,
 };
 use biome_js_type_info::{
-    GlobalsResolver, NUM_PREDEFINED_TYPES, Resolvable, ResolvedTypeId, ScopeId, TypeData, TypeId,
-    TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    GlobalsResolver, NUM_PREDEFINED_TYPES, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
+    TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
 use biome_rowan::{AstNode, Text};
 use biome_test_utils::dump_registered_types;
@@ -145,16 +145,16 @@ impl TypeResolver for HardcodedSymbolResolver {
         &self.types[id.index()]
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
         match id.level() {
             TypeResolverLevel::Scope => {
                 panic!("Ad-hoc references unsupported by resolver")
             }
-            TypeResolverLevel::Module => Some(self.get_by_id(id.id())),
+            TypeResolverLevel::Module => Some((id, self.get_by_id(id.id())).into()),
             TypeResolverLevel::Import => {
                 panic!("Import references unsupported by resolver")
             }
-            TypeResolverLevel::Global => Some(self.globals.get_by_id(id.id())),
+            TypeResolverLevel::Global => Some((id, self.globals.get_by_id(id.id())).into()),
         }
     }
 

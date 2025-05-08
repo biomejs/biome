@@ -134,7 +134,7 @@ impl Visitor for ScopedResolverBuilderVisitor {
 
                 // This is used by the `useExhaustiveSwitch` rule.
                 if let Some(stmt) = JsSwitchStatement::cast_ref(node) {
-                    if let Some(expr) = stmt.discriminant().ok() {
+                    if let Ok(expr) = stmt.discriminant() {
                         resolver.register_types_for_expression(&expr);
                     }
 

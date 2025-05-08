@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::{borrow::Cow, fmt::Debug};
 
 use biome_rowan::Text;
 
@@ -19,78 +19,167 @@ const LEVEL_MASK: u32 = 0xc000_0000; // Upper 2 bits.
 /// module ID and the resolver level together in 4 bytes, making the struct as
 /// a whole still fit in 8 bytes without alignment issues.
 #[derive(Clone, Copy, Eq, PartialEq)]
-pub struct ResolvedTypeId(u32, TypeId);
+pub struct ResolvedTypeId(ResolverId, TypeId);
 
 impl Debug for ResolvedTypeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let id = self.1;
-        match self.level() {
-            TypeResolverLevel::Scope => f.write_fmt(format_args!("AdHoc {id:?}")),
-            TypeResolverLevel::Module => f.write_fmt(format_args!(
-                "Module({:?}) {id:?}",
-                self.module_id().index()
-            )),
-            TypeResolverLevel::Import => f.write_fmt(format_args!("Import {id:?}")),
-            TypeResolverLevel::Global => f.write_fmt(format_args!("Global {id:?}")),
-        }
+        f.write_fmt(format_args!("{:?} {:?}", self.0, self.1))
     }
 }
 
 impl ResolvedTypeId {
+    #[inline]
     pub const fn new(level: TypeResolverLevel, id: TypeId) -> Self {
-        let first = (level as u32) << NUM_MODULE_ID_BITS;
-        Self(first, id)
+        Self(ResolverId::from_level(level), id)
     }
 
+    /// Applies the module ID of `self` to `id`.
+    #[inline]
+    pub const fn apply_module_id(self, id: Self) -> Self {
+        self.0.apply_module_id(id)
+    }
+
+    /// Applies the module ID of `self` to `reference`.
+    #[inline]
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+        self.0.apply_module_id_to_reference(reference)
+    }
+
+    #[inline]
     pub const fn id(self) -> TypeId {
         self.1
     }
 
+    #[inline]
     pub const fn index(self) -> usize {
         self.1.index()
     }
 
+    #[inline]
     pub const fn is_global(self) -> bool {
         matches!(self.level(), TypeResolverLevel::Global)
     }
 
+    #[inline]
     pub const fn is_at_module_level(self) -> bool {
         matches!(self.level(), TypeResolverLevel::Module)
     }
 
+    #[inline]
     pub const fn level(self) -> TypeResolverLevel {
-        TypeResolverLevel::from_u2(self.0 >> NUM_MODULE_ID_BITS)
+        self.0.level()
     }
 
+    #[inline]
     pub const fn module_id(self) -> ModuleId {
-        ModuleId(self.0 & MODULE_ID_MASK)
+        self.0.module_id()
     }
 
+    #[inline]
     pub const fn with_module_id(self, module_id: ModuleId) -> Self {
-        if self.is_at_module_level() {
-            // Clear the bits of the old module ID, while preserving the resolver
-            // level, and OR with the bits from the new module ID.
-            Self((self.0 & LEVEL_MASK) | module_id.0, self.1)
-        } else {
-            self
+        Self(self.0.with_module_id(module_id), self.1)
+    }
+}
+
+/// Combines a [`TypeResolverLevel`] and [`ModuleId`] into a single field to
+/// uniquely identify where a resolver has resolved a specific type.
+///
+/// Combined with a [`TypeId`] this makes a [`ResolvedTypeId`].
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub struct ResolverId(u32);
+
+impl Debug for ResolverId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.level() {
+            TypeResolverLevel::Scope => f.write_fmt(format_args!("Scope")),
+            TypeResolverLevel::Module => {
+                f.write_fmt(format_args!("Module({:?})", self.module_id().index()))
+            }
+            TypeResolverLevel::Import => f.write_fmt(format_args!("Import")),
+            TypeResolverLevel::Global => f.write_fmt(format_args!("Global")),
         }
     }
 }
 
-/// Identifier that indicates which module a type is defined in.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct ModuleId(u32);
-
-impl ModuleId {
-    pub const fn new(index: usize) -> Self {
-        // Top two bits are reserved to fit in resolver level.
-        debug_assert!(index < MODULE_ID_MASK as usize);
-
-        Self(index as u32)
+impl ResolverId {
+    #[inline]
+    pub const fn from_level(level: TypeResolverLevel) -> Self {
+        Self((level as u32) << NUM_MODULE_ID_BITS)
     }
 
-    pub const fn index(self) -> usize {
-        self.0 as usize
+    #[inline]
+    pub const fn from_resolved(id: ResolvedTypeId) -> Self {
+        id.0
+    }
+
+    /// The scope level is closest to whichever resolver uses the
+    /// [`ResolverId`], and it won't attempt to apply any module ID, so
+    /// it's a safe default in many contexts.
+    #[inline]
+    pub const fn scope() -> Self {
+        Self::from_level(TypeResolverLevel::Scope)
+    }
+
+    /// Applies the module ID of `self` to the given `id`.
+    #[inline]
+    pub const fn apply_module_id(self, id: ResolvedTypeId) -> ResolvedTypeId {
+        match (self.level(), id.level()) {
+            (TypeResolverLevel::Module, TypeResolverLevel::Module) => {
+                id.with_module_id(self.module_id())
+            }
+            _ => id,
+        }
+    }
+
+    /// Applies the module ID of `self` to the given `data`.
+    #[inline]
+    pub fn apply_module_id_to_data(self, data: TypeData) -> TypeData {
+        match self.level() {
+            TypeResolverLevel::Module => data.with_module_id(self.module_id()),
+            _ => data,
+        }
+    }
+
+    /// Applies the module ID of `self` to the given `reference`.
+    #[inline]
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+        match reference {
+            TypeReference::Resolved(id) => {
+                Cow::Owned(TypeReference::Resolved(self.apply_module_id(*id)))
+            }
+            other => Cow::Borrowed(other),
+        }
+    }
+
+    #[inline]
+    pub const fn is_global(self) -> bool {
+        matches!(self.level(), TypeResolverLevel::Global)
+    }
+
+    #[inline]
+    pub const fn is_at_module_level(self) -> bool {
+        matches!(self.level(), TypeResolverLevel::Module)
+    }
+
+    #[inline]
+    pub const fn level(self) -> TypeResolverLevel {
+        TypeResolverLevel::from_u2(self.0 >> NUM_MODULE_ID_BITS)
+    }
+
+    #[inline]
+    pub const fn module_id(self) -> ModuleId {
+        ModuleId(self.0 & MODULE_ID_MASK)
+    }
+
+    #[inline]
+    pub const fn with_module_id(self, module_id: ModuleId) -> Self {
+        if self.is_at_module_level() {
+            // Clear the bits of the old module ID, while preserving the resolver
+            // level, and OR with the bits from the new module ID.
+            Self((self.0 & LEVEL_MASK) | module_id.0)
+        } else {
+            self
+        }
     }
 }
 
@@ -154,6 +243,168 @@ impl TypeResolverLevel {
     }
 }
 
+/// Identifier that indicates which module a type is defined in.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ModuleId(u32);
+
+impl ModuleId {
+    pub const fn new(index: usize) -> Self {
+        // Top two bits are reserved to fit in resolver level.
+        debug_assert!(index < MODULE_ID_MASK as usize);
+
+        Self(index as u32)
+    }
+
+    pub const fn index(self) -> usize {
+        self.0 as usize
+    }
+}
+
+/// [`TypeData`] reference combined with a [`ResolverId`] to preserve the
+/// context in which the data was resolved.
+///
+/// Whenever type data is returned by a resolver, it is common to want to
+/// resolve further references from that type data. In order to resolve such
+/// references accurately, the resolver needs to know the context in which the
+/// type data itself was found. The embedded [`ResolverId`] contains this
+/// information.
+///
+/// The [`TypeData`] reference can be converted into an owned [`TypeData`]
+/// instance using [`Self::to_data()`]. This will update all references to
+/// explicitly refer to the correct module ID.
+#[derive(Clone, Copy, Debug)]
+pub struct ResolvedTypeData<'a> {
+    id: ResolverId,
+    data: &'a TypeData,
+}
+
+impl<'a> From<(ResolvedTypeId, &'a TypeData)> for ResolvedTypeData<'a> {
+    #[inline]
+    fn from((id, data): (ResolvedTypeId, &'a TypeData)) -> Self {
+        (ResolverId::from_resolved(id), data).into()
+    }
+}
+
+impl<'a> From<(ResolverId, &'a TypeData)> for ResolvedTypeData<'a> {
+    #[inline]
+    fn from((id, data): (ResolverId, &'a TypeData)) -> Self {
+        Self { id, data }
+    }
+}
+
+impl<'a> ResolvedTypeData<'a> {
+    /// Applies the module ID from the embedded [`ResolverId`] to the given
+    /// `id`.
+    #[inline]
+    pub fn apply_module_id(self, id: ResolvedTypeId) -> ResolvedTypeId {
+        self.id.apply_module_id(id)
+    }
+
+    /// Applies the module ID from the embedded [`ResolverId`] to the given
+    /// `data`.
+    #[inline]
+    pub fn apply_module_id_to_data(self, data: TypeData) -> TypeData {
+        self.id.apply_module_id_to_data(data)
+    }
+
+    /// Applies the module ID from the embedded [`ResolverId`] to the given
+    /// `reference`.
+    #[inline]
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+        self.id.apply_module_id_to_reference(reference)
+    }
+
+    /// Returns a reference to the raw data.
+    ///
+    /// **Be careful:** If you intend to invoke the resolver on the data, it may
+    /// not be aware of the context in which the data was resolved, and further
+    /// references may be resolved from the wrong context. If you wish to call
+    /// the resolver on the data, use [`Self::to_data()`] instead.
+    pub fn as_raw_data(self) -> &'a TypeData {
+        self.data
+    }
+
+    #[inline]
+    pub fn resolver_id(self) -> ResolverId {
+        self.id
+    }
+
+    /// Converts the resolved data to owned [`TypeData`] with the module ID from
+    /// the [`ResolverId`] applied to all its references.
+    pub fn to_data(self) -> TypeData {
+        match self.id.level() {
+            TypeResolverLevel::Module => self.data.clone().with_module_id(self.id.module_id()),
+            _ => self.data.clone(),
+        }
+    }
+}
+
+/// [`TypeMember`] reference combined with a [`ResolverId`] to preserve the
+/// context in which the member was resolved.
+#[derive(Clone, Copy, Debug)]
+pub struct ResolvedTypeMember<'a> {
+    id: ResolverId,
+    member: &'a TypeMember,
+}
+
+impl<'a> From<(ResolverId, &'a TypeMember)> for ResolvedTypeMember<'a> {
+    #[inline]
+    fn from((id, member): (ResolverId, &'a TypeMember)) -> Self {
+        Self { id, member }
+    }
+}
+
+impl<'a> ResolvedTypeMember<'a> {
+    /// Applies the module ID from the embedded [`ResolverId`] to the given
+    /// `data`.
+    #[inline]
+    pub fn apply_module_id_to_data(self, data: TypeData) -> TypeData {
+        self.id.apply_module_id_to_data(data)
+    }
+
+    /// Applies the module ID from the embedded [`ResolverId`] to the given
+    /// `reference`.
+    #[inline]
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+        self.id.apply_module_id_to_reference(reference)
+    }
+
+    /// Returns a reference to the raw type member.
+    ///
+    /// **Be careful:** If you intend to invoke the resolver on the member's
+    /// data, it may not be aware of the context in which the member was
+    /// resolved, and further references may be resolved from the wrong context.
+    /// If you wish to call the resolver on the member's data, use
+    /// [`TypeResolver::type_from_member()`] or [`Self::to_member()`] instead.
+    pub fn as_raw_member(self) -> &'a TypeMember {
+        self.member
+    }
+
+    #[inline]
+    pub fn has_name(self, name: &str) -> bool {
+        self.member.has_name(name)
+    }
+
+    #[inline]
+    pub fn is_static(self) -> bool {
+        self.member.is_static()
+    }
+
+    #[inline]
+    pub fn name(self) -> Option<Text> {
+        self.member.name()
+    }
+
+    /// Converts the resolved type membmer to an owned [`TypeMember`] with the
+    /// module ID from the [`ResolverId`] applied to all its references.
+    pub fn to_member(self) -> TypeMember {
+        match self.id.level() {
+            TypeResolverLevel::Module => self.member.clone().with_module_id(self.id.module_id()),
+            _ => self.member.clone(),
+        }
+    }
+}
+
 /// Trait for implementing type resolution.
 ///
 /// In Biome, we define three levels of type inference:
@@ -181,7 +432,7 @@ pub trait TypeResolver {
     fn get_by_id(&self, id: TypeId) -> &TypeData;
 
     /// Returns type data by its resolved ID, if possible.
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<&TypeData>;
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData>;
 
     /// Returns the [`TypeReference`] to refer to a [`TypeId`] belonging to this
     /// resolver.
@@ -231,30 +482,17 @@ pub trait TypeResolver {
 
     /// Resolves a type reference and immediately returns the associated
     /// [`TypeData`] if found.
-    fn resolve_and_get(&self, ty: &TypeReference) -> Option<&TypeData> {
+    fn resolve_and_get(&self, ty: &TypeReference) -> Option<ResolvedTypeData> {
         match self
             .resolve_reference(ty)
             .and_then(|id| self.get_by_resolved_id(id))
         {
-            Some(TypeData::Reference(type_data)) => self.resolve_and_get(type_data),
-            other => other,
-        }
-    }
-
-    /// Same as [`TypeResolver::resolve_and_get()`], but applies the given
-    /// `module_id` during resolution.
-    fn resolve_and_get_with_module_id(
-        &self,
-        ty: &TypeReference,
-        module_id: ModuleId,
-    ) -> Option<&TypeData> {
-        match self
-            .resolve_reference(ty)
-            .and_then(|id| self.get_by_resolved_id(id.with_module_id(module_id)))
-        {
-            Some(TypeData::Reference(type_data)) => {
-                self.resolve_and_get_with_module_id(type_data, module_id)
-            }
+            Some(
+                ref resolved @ ResolvedTypeData {
+                    data: TypeData::Reference(reference),
+                    ..
+                },
+            ) => self.resolve_and_get(&resolved.apply_module_id_to_reference(reference)),
             other => other,
         }
     }
@@ -347,8 +585,8 @@ pub trait TypeResolver {
 
     fn register_type_from_member(
         &mut self,
-        object: &TypeData,
-        member: &TypeMember,
+        object: TypeData,
+        member: TypeMember,
     ) -> ResolvedTypeId {
         match member {
             TypeMember::CallSignature(member) => {
@@ -362,7 +600,7 @@ pub trait TypeResolver {
             }
             TypeMember::Constructor(member) => match &member.return_type {
                 Some(reference) => self.resolve_or_register(reference),
-                None => self.register_and_resolve(object.clone()),
+                None => self.register_and_resolve(object),
             },
             TypeMember::Method(member) => {
                 let id = self.register_type(TypeData::Function(Box::new(Function {
@@ -381,7 +619,7 @@ pub trait TypeResolver {
             }
             TypeMember::Property(member) => {
                 if member.is_optional {
-                    ResolvedTypeId::new(self.level(), self.optional(member.ty.clone()))
+                    ResolvedTypeId::new(self.level(), self.optional(member.ty))
                 } else {
                     self.resolve_or_register(&member.ty)
                 }
@@ -389,18 +627,10 @@ pub trait TypeResolver {
         }
     }
 
-    fn type_from_member(&mut self, object: &TypeData, member: &TypeMember) -> TypeData {
+    fn type_from_member(&mut self, object: TypeData, member: TypeMember) -> ResolvedTypeData {
         let resolved_id = self.register_type_from_member(object, member);
         self.get_by_resolved_id(resolved_id)
             .expect("resolved ID must be registered")
-            .clone()
-    }
-
-    fn type_reference_from_member(&mut self, object: &TypeData, member: &TypeMember) -> TypeData {
-        let resolved_id = self.register_type_from_member(object, member);
-        self.get_by_resolved_id(resolved_id)
-            .expect("resolved ID must be registered")
-            .clone()
     }
 
     fn undefined(&mut self) -> TypeId {
@@ -480,9 +710,11 @@ impl Resolvable for TypeReference {
                             })
                             .flatten()
                             .and_then(|resolved_id| {
-                                let parameters = resolver
+                                let resolved = resolver
                                     .get_by_resolved_id(resolved_id)
-                                    .and_then(TypeData::type_parameters)?;
+                                    .map(|data| data.to_data());
+                                let parameters =
+                                    resolved.as_ref().and_then(|data| data.type_parameters())?;
                                 let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
                                     TypeData::InstanceOf(Box::new(TypeInstance {
                                         ty: resolved_id.into(),

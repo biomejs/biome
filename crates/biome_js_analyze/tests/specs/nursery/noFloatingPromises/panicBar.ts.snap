@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: panicBar.ts
+---
+# Input
+```ts
+import type {Foo} from './panicFoo';
+
+let instance: Foo;
+
+// This call expression makes the `noFloatingPromises` rule work.
+instance.doSomething();
+
+```

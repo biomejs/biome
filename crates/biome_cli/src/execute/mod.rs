@@ -110,6 +110,9 @@ pub enum TraversalMode {
 
         /// Whether assist diagnostics should be promoted to error, and fail the CLI
         enforce_assist: bool,
+
+        /// It skips parse errors
+        skip_parse_errors: bool,
     },
     /// This mode is enabled when running the command `biome lint`
     Lint {
@@ -137,6 +140,9 @@ pub enum TraversalMode {
         suppress: bool,
         /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
         suppression_reason: Option<String>,
+
+        /// It skips parse errors
+        skip_parse_errors: bool,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
@@ -148,13 +154,15 @@ pub enum TraversalMode {
         vcs_targeted: VcsTargeted,
         /// Whether assist diagnostics should be promoted to error, and fail the CLI
         enforce_assist: bool,
+        /// It skips parse errors
+        skip_parse_errors: bool,
     },
     /// This mode is enabled when running the command `biome format`
     Format {
         /// Key of the project to format.
         project_key: ProjectKey,
-        /// It ignores parse errors
-        ignore_errors: bool,
+        /// It skips parse errors
+        skip_parse_errors: bool,
         /// It writes the new content on file
         write: bool,
         /// An optional tuple.
@@ -301,6 +309,7 @@ impl Execution {
         project_key: ProjectKey,
         vcs_targeted: VcsTargeted,
         enforce_assist: bool,
+        skip_parse_errors: bool,
     ) -> Self {
         // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
         let is_github = std::env::var("GITHUB_ACTIONS")
@@ -318,6 +327,7 @@ impl Execution {
                 },
                 vcs_targeted,
                 enforce_assist,
+                skip_parse_errors,
             },
             max_diagnostics: 20,
         }
@@ -474,7 +484,7 @@ impl Execution {
         Self {
             traversal_mode: TraversalMode::Format {
                 project_key,
-                ignore_errors: false,
+                skip_parse_errors: false,
                 write: false,
                 stdin: None,
                 vcs_targeted,
@@ -513,9 +523,20 @@ impl Execution {
     }
 
     #[instrument(level = "debug", skip(self), fields(result))]
-    pub(crate) fn should_ignore_errors(&self) -> bool {
+    pub(crate) fn should_skip_parse_errors(&self) -> bool {
         let result = match self.traversal_mode {
-            TraversalMode::Format { ignore_errors, .. } => ignore_errors,
+            TraversalMode::Format {
+                skip_parse_errors, ..
+            }
+            | TraversalMode::Check {
+                skip_parse_errors, ..
+            }
+            | TraversalMode::Lint {
+                skip_parse_errors, ..
+            }
+            | TraversalMode::CI {
+                skip_parse_errors, ..
+            } => skip_parse_errors,
 
             _ => false,
         };

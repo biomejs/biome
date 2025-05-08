@@ -145,6 +145,7 @@ impl CommandRunner for LintCommandPayload {
             vcs_targeted: (self.staged, self.changed).into(),
             suppress: self.suppress,
             suppression_reason: self.suppression_reason.clone(),
+            skip_parse_errors: cli_options.skip_parse_errors,
         })
         .set_report(cli_options))
     }

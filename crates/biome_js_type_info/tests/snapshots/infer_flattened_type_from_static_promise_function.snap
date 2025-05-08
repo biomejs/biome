@@ -18,7 +18,13 @@ instanceof Promise
 ## Registered types
 
 ```
-Global TypeId(7) => Global TypeId(9)
+Global TypeId(7) => sync Function "resolve" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise
+}
 
 Global TypeId(8) => value: value
 

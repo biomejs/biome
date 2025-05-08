@@ -18,11 +18,9 @@ use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::globals::{
-    GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS, GLOBAL_UNKNOWN_ID, PROMISE_ID,
-};
+use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_UNKNOWN_ID, PROMISE_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
-use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeId, TypeResolver};
+use crate::{GLOBAL_RESOLVER, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver};
 
 const UNKNOWN: TypeData = TypeData::Unknown;
 
@@ -70,9 +68,8 @@ impl Deref for Type {
     type Target = TypeData;
 
     fn deref(&self) -> &Self::Target {
-        self.resolver
-            .get_by_resolved_id(self.id)
-            .unwrap_or(&UNKNOWN)
+        self.resolved_data()
+            .map_or(&UNKNOWN, |resolved| resolved.as_raw_data())
     }
 }
 
@@ -104,8 +101,8 @@ impl Type {
 
     /// Returns whether this type is an instance of a `Promise`.
     pub fn is_promise_instance(&self) -> bool {
-        self.deref()
-            .is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID)
+        self.resolved_data()
+            .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
     }
 
     /// Returns whether the given type is known to reference a function that
@@ -123,8 +120,13 @@ impl Type {
 
     pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
         self.resolver
-            .resolve_reference(ty)
+            .resolve_reference(&self.id.apply_module_id_to_reference(ty))
             .map(|resolved_id| self.with_resolved_id(resolved_id))
+    }
+
+    #[inline]
+    fn resolved_data(&self) -> Option<ResolvedTypeData> {
+        self.resolver.get_by_resolved_id(self.id)
     }
 
     fn with_resolved_id(&self, id: ResolvedTypeId) -> Self {
@@ -224,24 +226,6 @@ pub enum TypeData {
 }
 
 impl TypeData {
-    /// Iterates all member fields, including those belonging to extended
-    /// classes or prototype objects.
-    ///
-    /// Note that members which are inherited and overridden may appear multiple
-    /// times, but the member that is closest to the current type is guaranteed
-    /// to come first.
-    pub fn all_members<'a>(
-        &'a self,
-        resolver: &'a dyn TypeResolver,
-    ) -> impl Iterator<Item = &'a TypeMember> {
-        TypeMemberIterator {
-            resolver,
-            seen_types: Vec::new(),
-            owner: TypeMemberOwner::from_type_data(self),
-            index: 0,
-        }
-    }
-
     pub fn as_class(&self) -> Option<&Class> {
         match self {
             Self::Class(class) => Some(class.as_ref()),
@@ -260,144 +244,10 @@ impl TypeData {
         Self::Boolean
     }
 
-    /// Returns the type of an array's elements, if this object is an instance of `Array`.
-    pub fn find_array_element_type<'a>(
-        &'a self,
-        resolver: &'a dyn TypeResolver,
-    ) -> Option<&'a Self> {
-        if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
-            self.find_type_parameter(resolver, "T")
-                .and_then(|reference| resolver.resolve_and_get(reference))
-        } else {
-            None
-        }
-    }
-
-    /// Returns the type of an element at a given index, if this object is an
-    /// array or a tuple.
-    pub fn find_element_type_at_index<'a>(
-        &'a self,
-        resolver: &'a mut dyn TypeResolver,
-        index: usize,
-    ) -> Option<&'a Self> {
-        match self {
-            Self::Tuple(tuple) => Some(tuple.get_ty(resolver, index)),
-            _ if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) => self
-                .find_type_parameter(resolver, "T")
-                .cloned()
-                .map(|reference| resolver.optional(reference))
-                .map(|id| resolver.get_by_id(id)),
-            _ => None,
-        }
-    }
-
-    /// Returns the promised type, if this object is an instance of `Promise`.
-    pub fn find_promise_type<'a>(&'a self, resolver: &'a dyn TypeResolver) -> Option<&'a Self> {
-        if self.is_instance_of(resolver, GLOBAL_PROMISE_ID) {
-            self.find_type_parameter(resolver, "T")
-                .and_then(|reference| resolver.resolve_and_get(reference))
-        } else {
-            None
-        }
-    }
-
-    /// Returns the type of elements from a given index, if this object is an
-    /// array or a tuple.
-    pub fn find_type_of_elements_from_index(
-        &self,
-        resolver: &mut dyn TypeResolver,
-        index: usize,
-    ) -> Option<Self> {
-        match self {
-            Self::Tuple(tuple) => Some(Self::Tuple(Box::new(tuple.slice_from(index)))),
-            _ if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) => {
-                match self.find_type_parameter(resolver, "T") {
-                    Some(elem_ty) => Some(Self::InstanceOf(Box::new(TypeInstance {
-                        ty: GLOBAL_ARRAY_ID.into(),
-                        type_parameters: Box::new([GenericTypeParameter {
-                            name: Text::Static("T"),
-                            ty: elem_ty.clone(),
-                        }]),
-                    }))),
-                    None => resolver.get_by_resolved_id(GLOBAL_ARRAY_ID).cloned(),
-                }
-            }
-            _ => None,
-        }
-    }
-
-    pub fn find_type_parameter<'a>(
-        &'a self,
-        resolver: &'a dyn TypeResolver,
-        parameter_name: &str,
-    ) -> Option<&'a TypeReference> {
-        let mut seen_types = Vec::new();
-        let mut current_object = Some(self);
-        while let Some(current) = current_object {
-            if let Some(argument) = current
-                .type_parameters()
-                .iter()
-                .flat_map(|params| params.iter())
-                .find(|param| param.name == parameter_name && param.ty.is_known())
-            {
-                return Some(&argument.ty);
-            }
-
-            let Some(next_object) = current
-                .prototype(resolver)
-                .and_then(|prototype| resolver.resolve_reference(prototype))
-            else {
-                break;
-            };
-
-            if seen_types.contains(&next_object) {
-                break;
-            }
-
-            seen_types.push(next_object);
-            current_object = resolver.get_by_resolved_id(next_object);
-        }
-
-        None
-    }
-
     /// Returns the type with inference up to the level supported by the given `resolver`.
     #[inline]
     pub fn inferred(&self, resolver: &mut dyn TypeResolver) -> Self {
         self.resolved(resolver).flattened(resolver)
-    }
-
-    /// Returns whether this object is an instance of the type with the given ID.
-    pub fn is_instance_of(&self, resolver: &dyn TypeResolver, id: ResolvedTypeId) -> bool {
-        let mut seen_types = Vec::new();
-        let mut current_object = Some(self);
-        while let Some(current) = current_object {
-            let Some(prototype) = current.prototype(resolver) else {
-                break;
-            };
-
-            let Some(next_id) = resolver.resolve_reference(prototype) else {
-                break;
-            };
-
-            if next_id == id {
-                return true;
-            }
-
-            if seen_types.contains(&next_id) {
-                break;
-            }
-
-            seen_types.push(next_id);
-            current_object = resolver.get_by_resolved_id(next_id);
-        }
-
-        false
-    }
-
-    /// Returns whether this type is an instance of a `Promise`.
-    pub fn is_promise_instance(&self, resolver: &dyn TypeResolver) -> bool {
-        self.is_instance_of(resolver, GLOBAL_PROMISE_ID)
     }
 
     /// Returns whether the given type has been inferred.
@@ -406,18 +256,6 @@ impl TypeData {
     /// including an unexplicit `unknown` keyword.
     pub fn is_inferred(&self) -> bool {
         !matches!(self, Self::Unknown)
-    }
-
-    /// Returns a reference to the type's prototype, if any.
-    pub fn prototype<'a>(&'a self, resolver: &'a dyn TypeResolver) -> Option<&'a TypeReference> {
-        match self {
-            Self::InstanceOf(instance_of) => Some(&instance_of.ty),
-            Self::Object(object) => object.prototype.as_ref(),
-            Self::Reference(reference) => resolver
-                .resolve_and_get(reference)
-                .and_then(|ty| ty.prototype(resolver)),
-            _ => None,
-        }
     }
 
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
@@ -645,7 +483,11 @@ impl Tuple {
     }
 
     /// Returns the type at the given index.
-    pub fn get_ty<'a>(&'a self, resolver: &'a mut dyn TypeResolver, index: usize) -> &'a TypeData {
+    pub fn get_ty<'a>(
+        &'a self,
+        resolver: &'a mut dyn TypeResolver,
+        index: usize,
+    ) -> ResolvedTypeData<'a> {
         let resolved_id = if let Some(elem_type) = self.0.get(index) {
             let ty = elem_type.ty.clone();
             let id = if elem_type.is_optional {
@@ -822,96 +664,6 @@ impl PropertyTypeMember {
     pub fn with_type(mut self, ty: TypeReference) -> Self {
         self.ty = ty;
         self
-    }
-}
-
-struct TypeMemberIterator<'a> {
-    resolver: &'a dyn TypeResolver,
-    seen_types: Vec<ResolvedTypeId>,
-    owner: Option<TypeMemberOwner<'a>>,
-    index: usize,
-}
-
-impl<'a> Iterator for TypeMemberIterator<'a> {
-    type Item = &'a TypeMember;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let next_reference = match &self.owner {
-            Some(TypeMemberOwner::Class(class)) => {
-                match (class.members.get(self.index), class.extends.as_ref()) {
-                    (Some(member), _) => {
-                        self.index += 1;
-                        return Some(member);
-                    }
-                    (None, Some(extends)) => extends,
-                    (None, None) => {
-                        self.owner = None;
-                        return None;
-                    }
-                }
-            }
-            Some(TypeMemberOwner::Global) => {
-                if let Some(member) = GLOBAL_TYPE_MEMBERS.get(self.index) {
-                    self.index += 1;
-                    return Some(member);
-                } else {
-                    self.owner = None;
-                    return None;
-                }
-            }
-            Some(TypeMemberOwner::InstanceOf(instance_of)) => &instance_of.ty,
-            Some(TypeMemberOwner::Object(object)) => {
-                match (object.members.get(self.index), object.prototype.as_ref()) {
-                    (Some(member), _) => {
-                        self.index += 1;
-                        return Some(member);
-                    }
-                    (None, Some(prototype)) => prototype,
-                    (None, None) => {
-                        self.owner = None;
-                        return None;
-                    }
-                }
-            }
-            None => return None,
-        };
-
-        let Some(next_resolved_id) = self.resolver.resolve_reference(next_reference) else {
-            self.owner = None;
-            return None;
-        };
-
-        if self.seen_types.contains(&next_resolved_id) {
-            self.owner = None;
-            return None;
-        }
-
-        self.seen_types.push(next_resolved_id);
-        self.owner = self
-            .resolver
-            .get_by_resolved_id(next_resolved_id)
-            .and_then(TypeMemberOwner::from_type_data);
-        self.index = 0;
-        self.next()
-    }
-}
-
-enum TypeMemberOwner<'a> {
-    Class(&'a Class),
-    Global,
-    InstanceOf(&'a TypeInstance),
-    Object(&'a Object),
-}
-
-impl<'a> TypeMemberOwner<'a> {
-    fn from_type_data(type_data: &'a TypeData) -> Option<Self> {
-        match type_data {
-            TypeData::Class(class) => Some(Self::Class(class)),
-            TypeData::Global => Some(Self::Global),
-            TypeData::InstanceOf(type_instance) => Some(Self::InstanceOf(type_instance)),
-            TypeData::Object(object) => Some(Self::Object(object)),
-            _ => None,
-        }
     }
 }
 
