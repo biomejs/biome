@@ -338,6 +338,8 @@ async function testDestructuringAndCallingReturnsPromiseFromRest({
 		.finally(() => {});
 }
 
+import("some-module").then(() => {});
+
 // TODO: Should throw a diagnostic through project-level resolution.
 returnPromiseResult();
 
@@ -1573,5 +1575,22 @@ invalid.ts:329:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
     329 │ → await·rest
         │   ++++++    
+
+```
+
+```
+invalid.ts:335:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    333 │ }
+    334 │ 
+  > 335 │ import("some-module").then(() => {});
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    336 │ 
+    337 │ // TODO: Should throw a diagnostic through project-level resolution.
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
 
 ```

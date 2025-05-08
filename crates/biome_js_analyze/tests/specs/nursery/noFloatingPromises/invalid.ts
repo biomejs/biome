@@ -332,5 +332,7 @@ async function testDestructuringAndCallingReturnsPromiseFromRest({
 		.finally(() => {});
 }
 
+import("some-module").then(() => {});
+
 // TODO: Should throw a diagnostic through project-level resolution.
 returnPromiseResult();
