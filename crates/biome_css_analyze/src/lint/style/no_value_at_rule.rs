@@ -1,6 +1,7 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::CssAtRule;
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -33,6 +34,7 @@ declare_lint_rule! {
         name: "noValueAtRule",
         language: "css",
         recommended: false,
+        severity: Severity::Information,
     }
 }
 

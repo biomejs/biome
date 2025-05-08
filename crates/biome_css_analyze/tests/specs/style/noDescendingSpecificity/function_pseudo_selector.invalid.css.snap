@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: function_pseudo_selector.invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -24,9 +23,9 @@ snapshot_kind: text
 
 # Diagnostics
 ```
-function_pseudo_selector.invalid.css:5:1 lint/nursery/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━
+function_pseudo_selector.invalid.css:5:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Descending specificity selector found. This selector specificity is (0, 0, 2)
+  ! Descending specificity selector found. This selector specificity is (0, 0, 2)
   
     3 │ }
     4 │ 
@@ -48,9 +47,9 @@ function_pseudo_selector.invalid.css:5:1 lint/nursery/noDescendingSpecificity �
 ```
 
 ```
-function_pseudo_selector.invalid.css:13:1 lint/nursery/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━
+function_pseudo_selector.invalid.css:13:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Descending specificity selector found. This selector specificity is (0, 0, 1)
+  ! Descending specificity selector found. This selector specificity is (0, 0, 1)
   
     11 │ }
     12 │ 

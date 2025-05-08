@@ -1325,6 +1325,10 @@ export interface Correctness {
 	 */
 	noInvalidUseBeforeDeclaration?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow missing var function for css variables.
+	 */
+	noMissingVarFunction?: RuleConfiguration_for_Null;
+	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration_for_Null;
@@ -1380,6 +1384,18 @@ export interface Correctness {
 	 * Disallow unknown properties.
 	 */
 	noUnknownProperty?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown pseudo-class selectors.
+	 */
+	noUnknownPseudoClass?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown pseudo-element selectors.
+	 */
+	noUnknownPseudoElement?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown type selectors.
+	 */
+	noUnknownTypeSelector?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown CSS units.
 	 */
@@ -1490,21 +1506,9 @@ export interface Nursery {
 	 */
 	noConstantBinaryExpression?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow a lower specificity selector from coming after a higher specificity selector.
-	 */
-	noDescendingSpecificity?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow destructuring props inside JSX components in Solid projects.
 	 */
 	noDestructuredProps?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow duplicate custom properties within declaration blocks.
-	 */
-	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow duplicate properties within declaration blocks.
-	 */
-	noDuplicateProperties?: RuleConfiguration_for_Null;
 	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
@@ -1521,10 +1525,6 @@ export interface Nursery {
 	 * Disallow the use of the !important style.
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow missing var function for css variables.
-	 */
-	noMissingVarFunction?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use event handlers on non-interactive elements.
 	 */
@@ -1554,18 +1554,6 @@ export interface Nursery {
 	 */
 	noUnknownAtRule?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow unknown pseudo-class selectors.
-	 */
-	noUnknownPseudoClass?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unknown pseudo-element selectors.
-	 */
-	noUnknownPseudoElement?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unknown type selectors.
-	 */
-	noUnknownTypeSelector?: RuleConfiguration_for_Null;
-	/**
 	 * Warn when importing non-existing exports.
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_Null;
@@ -1585,10 +1573,6 @@ export interface Nursery {
 	 * Disallow the use of useless undefined.
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow use of @value rule in css modules.
-	 */
-	noValueAtRule?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1729,6 +1713,10 @@ export interface Style {
 	 */
 	noDefaultExport?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow a lower specificity selector from coming after a higher specificity selector.
+	 */
+	noDescendingSpecificity?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
 	noDoneCallback?: RuleConfiguration_for_Null;
@@ -1812,6 +1800,10 @@ export interface Style {
 	 * Disallow else block when the if block breaks early.
 	 */
 	noUselessElse?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow use of @value rule in css modules.
+	 */
+	noValueAtRule?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of yoda expressions.
 	 */
@@ -2050,6 +2042,10 @@ export interface Suspicious {
 	 */
 	noDuplicateClassMembers?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate custom properties within declaration blocks.
+	 */
+	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
@@ -2073,6 +2069,10 @@ export interface Suspicious {
 	 * Disallow duplicate function parameter name.
 	 */
 	noDuplicateParameters?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate properties within declaration blocks.
+	 */
+	noDuplicateProperties?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
@@ -3385,6 +3385,7 @@ export type Category =
 	| "lint/correctness/noInvalidNewBuiltin"
 	| "lint/correctness/noInvalidPositionAtImportRule"
 	| "lint/correctness/noInvalidUseBeforeDeclaration"
+	| "lint/correctness/noMissingVarFunction"
 	| "lint/correctness/noNewSymbol"
 	| "lint/correctness/noNodejsModules"
 	| "lint/correctness/noNonoctalDecimalEscape"
@@ -3400,6 +3401,10 @@ export type Category =
 	| "lint/correctness/noUnknownFunction"
 	| "lint/correctness/noUnknownMediaFeatureName"
 	| "lint/correctness/noUnknownProperty"
+	| "lint/correctness/noUnknownPseudoClass"
+	| "lint/correctness/noUnknownPseudoClassSelector"
+	| "lint/correctness/noUnknownPseudoElement"
+	| "lint/correctness/noUnknownTypeSelector"
 	| "lint/correctness/noUnknownUnit"
 	| "lint/correctness/noUnmatchableAnbSelector"
 	| "lint/correctness/noUnreachable"
@@ -3428,12 +3433,9 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantBinaryExpression"
-	| "lint/nursery/noDescendingSpecificity"
 	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
-	| "lint/nursery/noDuplicateCustomProperties"
-	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noGlobalDirnameFilename"
 	| "lint/nursery/noImportCycles"
@@ -3443,7 +3445,6 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
-	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
@@ -3457,11 +3458,7 @@ export type Category =
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
-	| "lint/nursery/noUnknownPseudoClass"
-	| "lint/nursery/noUnknownPseudoClassSelector"
-	| "lint/nursery/noUnknownPseudoElement"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
-	| "lint/nursery/noUnknownTypeSelector"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnresolvedImports"
@@ -3470,7 +3467,6 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
-	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useExplicitFunctionReturnType"
@@ -3504,6 +3500,7 @@ export type Category =
 	| "lint/style/noCommaOperator"
 	| "lint/style/noCommonJs"
 	| "lint/style/noDefaultExport"
+	| "lint/style/noDescendingSpecificity"
 	| "lint/style/noDoneCallback"
 	| "lint/style/noEnum"
 	| "lint/style/noExportedImports"
@@ -3525,6 +3522,7 @@ export type Category =
 	| "lint/style/noSubstr"
 	| "lint/style/noUnusedTemplateLiteral"
 	| "lint/style/noUselessElse"
+	| "lint/style/noValueAtRule"
 	| "lint/style/noYodaExpression"
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useAtIndex"
@@ -3584,12 +3582,14 @@ export type Category =
 	| "lint/suspicious/noDuplicateAtImportRules"
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
+	| "lint/suspicious/noDuplicateCustomProperties"
 	| "lint/suspicious/noDuplicateElseIf"
 	| "lint/suspicious/noDuplicateFields"
 	| "lint/suspicious/noDuplicateFontNames"
 	| "lint/suspicious/noDuplicateJsxProps"
 	| "lint/suspicious/noDuplicateObjectKeys"
 	| "lint/suspicious/noDuplicateParameters"
+	| "lint/suspicious/noDuplicateProperties"
 	| "lint/suspicious/noDuplicateSelectorsKeyframeBlock"
 	| "lint/suspicious/noDuplicateTestHooks"
 	| "lint/suspicious/noEmptyBlock"

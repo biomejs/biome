@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.module.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -27,7 +26,7 @@ snapshot_kind: text
 
 # Diagnostics
 ```
-invalid.module.css:2:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.module.css:2:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of @value rule is disallowed
   
@@ -45,7 +44,7 @@ invalid.module.css:2:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 
 ```
-invalid.module.css:3:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.module.css:3:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of @value rule is disallowed
   
@@ -64,7 +63,7 @@ invalid.module.css:3:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 
 ```
-invalid.module.css:6:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.module.css:6:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of @value rule is disallowed
   
@@ -82,7 +81,7 @@ invalid.module.css:6:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 
 ```
-invalid.module.css:7:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.module.css:7:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of @value rule is disallowed
   
@@ -101,7 +100,7 @@ invalid.module.css:7:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 
 ```
-invalid.module.css:8:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.module.css:8:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of @value rule is disallowed
   
@@ -120,7 +119,7 @@ invalid.module.css:8:1 lint/nursery/noValueAtRule ━━━━━━━━━━
 ```
 
 ```
-invalid.module.css:11:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.module.css:11:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of @value rule is disallowed
   
@@ -138,7 +137,7 @@ invalid.module.css:11:1 lint/nursery/noValueAtRule ━━━━━━━━━�
 ```
 
 ```
-invalid.module.css:13:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.module.css:13:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of @value rule is disallowed
   
@@ -157,7 +156,7 @@ invalid.module.css:13:1 lint/nursery/noValueAtRule ━━━━━━━━━�
 ```
 
 ```
-invalid.module.css:15:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.module.css:15:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of @value rule is disallowed
   
@@ -176,7 +175,7 @@ invalid.module.css:15:1 lint/nursery/noValueAtRule ━━━━━━━━━�
 ```
 
 ```
-invalid.module.css:17:1 lint/nursery/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.module.css:17:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of @value rule is disallowed
   

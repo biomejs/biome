@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -18,7 +17,7 @@ a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom
 
 # Diagnostics
 ```
-invalid.css:1:27 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:27 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
@@ -40,7 +39,7 @@ invalid.css:1:27 lint/nursery/noDuplicateCustomProperties ━━━━━━━�
 ```
 
 ```
-invalid.css:2:40 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:40 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
@@ -64,7 +63,7 @@ invalid.css:2:40 lint/nursery/noDuplicateCustomProperties ━━━━━━━�
 ```
 
 ```
-invalid.css:3:62 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:62 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
@@ -90,7 +89,7 @@ invalid.css:3:62 lint/nursery/noDuplicateCustomProperties ━━━━━━━�
 ```
 
 ```
-invalid.css:4:69 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:69 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
@@ -116,7 +115,7 @@ invalid.css:4:69 lint/nursery/noDuplicateCustomProperties ━━━━━━━�
 ```
 
 ```
-invalid.css:5:66 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:66 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
@@ -142,7 +141,7 @@ invalid.css:5:66 lint/nursery/noDuplicateCustomProperties ━━━━━━━�
 ```
 
 ```
-invalid.css:6:70 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:70 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
@@ -168,7 +167,7 @@ invalid.css:6:70 lint/nursery/noDuplicateCustomProperties ━━━━━━━�
 ```
 
 ```
-invalid.css:7:104 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:7:104 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
@@ -194,7 +193,7 @@ invalid.css:7:104 lint/nursery/noDuplicateCustomProperties ━━━━━━━
 ```
 
 ```
-invalid.css:8:99 lint/nursery/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:99 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   

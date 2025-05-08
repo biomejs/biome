@@ -64,6 +64,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noInvalidGridAreas
   - noInvalidPositionAtImportRule
   - noInvalidUseBeforeDeclaration
+  - noMissingVarFunction
   - noNodejsModules
   - noNonoctalDecimalEscape
   - noPrecisionLoss
@@ -78,6 +79,9 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnknownFunction
   - noUnknownMediaFeatureName
   - noUnknownProperty
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
+  - noUnknownTypeSelector
   - noUnknownUnit
   - noUnmatchableAnbSelector
   - noUnreachable
@@ -123,6 +127,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noCommaOperator
   - noCommonJs
   - noDefaultExport
+  - noDescendingSpecificity
   - noDoneCallback
   - noEnum
   - noExportedImports
@@ -144,6 +149,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noSubstr
   - noUnusedTemplateLiteral
   - noUselessElse
+  - noValueAtRule
   - noYodaExpression
   - useAsConstAssertion
   - useAtIndex

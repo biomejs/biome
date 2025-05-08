@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -79,7 +78,7 @@ a {
 
 # Diagnostics
 ```
-invalid.css:4:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:12 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--foo' is used without the 'var()' function
   
@@ -96,7 +95,7 @@ invalid.css:4:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:10:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:10:12 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--bar' is used without the 'var()' function
   
@@ -113,7 +112,7 @@ invalid.css:10:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:18:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:18:12 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--baz' is used without the 'var()' function
   
@@ -130,7 +129,7 @@ invalid.css:18:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:26:30 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:26:30 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--aaaa' is used without the 'var()' function
   
@@ -147,7 +146,7 @@ invalid.css:26:30 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:34:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:34:12 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--bbbb' is used without the 'var()' function
   
@@ -164,7 +163,7 @@ invalid.css:34:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:42:18 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:42:18 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--cccc' is used without the 'var()' function
   
@@ -181,7 +180,7 @@ invalid.css:42:18 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:51:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:51:12 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--dddd' is used without the 'var()' function
   
@@ -198,7 +197,7 @@ invalid.css:51:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:52:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:52:12 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--eeee' is used without the 'var()' function
   
@@ -215,7 +214,7 @@ invalid.css:52:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:59:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:59:12 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--ffff' is used without the 'var()' function
   
@@ -232,7 +231,7 @@ invalid.css:59:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:60:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:60:12 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--gggg' is used without the 'var()' function
   
@@ -249,7 +248,7 @@ invalid.css:60:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:67:14 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:67:14 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × CSS variables '--foo' is used without the 'var()' function
   

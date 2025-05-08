@@ -65,7 +65,7 @@ a {
 ```
 noEmptyBlock.css:2:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     1 │ /* CssDeclarationOrRuleBlock */
   > 2 │ a {}
@@ -97,7 +97,7 @@ noEmptyBlock.css:2:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
 ```
 noEmptyBlock.css:3:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     1 │ /* CssDeclarationOrRuleBlock */
     2 │ a {}
@@ -131,7 +131,7 @@ noEmptyBlock.css:3:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
 ```
 noEmptyBlock.css:4:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     2 │ a {}
     3 │ a { }
@@ -168,7 +168,7 @@ noEmptyBlock.css:4:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
 ```
 noEmptyBlock.css:8:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
      6 │ }
      7 │ 
@@ -200,7 +200,7 @@ noEmptyBlock.css:8:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
 ```
 noEmptyBlock.css:9:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
      8 │ .b {}
    > 9 │ .b { }
@@ -231,7 +231,7 @@ noEmptyBlock.css:9:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
 ```
 noEmptyBlock.css:10:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
      8 │ .b {}
      9 │ .b { }
@@ -266,7 +266,7 @@ noEmptyBlock.css:10:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
 ```
 noEmptyBlock.css:15:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     14 │ /* CssRuleBlock */
   > 15 │ @media print {}
@@ -297,7 +297,7 @@ noEmptyBlock.css:15:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:16:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     14 │ /* CssRuleBlock */
     15 │ @media print {}
@@ -332,7 +332,7 @@ noEmptyBlock.css:16:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:19:18 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     18 │ }
   > 19 │ @media print { a {} }
@@ -363,7 +363,7 @@ noEmptyBlock.css:19:18 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:22:30 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     21 │ /* CssDeclarationBlock */
   > 22 │ @font-palette-values --ident {}
@@ -394,7 +394,7 @@ noEmptyBlock.css:22:30 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:23:12 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     21 │ /* CssDeclarationBlock */
     22 │ @font-palette-values --ident {}
@@ -426,7 +426,7 @@ noEmptyBlock.css:23:12 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:26:20 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     25 │ /* CssKeyframesBlock */
   > 26 │ @keyframes slidein {}
@@ -457,7 +457,7 @@ noEmptyBlock.css:26:20 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:28:10 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     26 │ @keyframes slidein {}
     27 │ @keyframes slidein {
@@ -493,7 +493,7 @@ noEmptyBlock.css:28:10 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:38:13 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     36 │ /* CssFontFeatureValuesBlock */
     37 │ @font-feature-values Font One {
@@ -530,7 +530,7 @@ noEmptyBlock.css:38:13 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:44:7 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     43 │ /* CssPageAtRuleBlock */
   > 44 │ @page {}
@@ -561,7 +561,7 @@ noEmptyBlock.css:44:7 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
 ```
 noEmptyBlock.css:45:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     43 │ /* CssPageAtRuleBlock */
     44 │ @page {}
@@ -594,7 +594,7 @@ noEmptyBlock.css:45:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:50:28 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     49 │ /* CssDeclarationOrAtRuleBlock */
   > 50 │ @page :left { @left-middle {} background: red; }
@@ -625,7 +625,7 @@ noEmptyBlock.css:50:28 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
 ```
 noEmptyBlock.css:52:16 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × An empty block isn't allowed.
+  ! An empty block isn't allowed.
   
     50 │ @page :left { @left-middle {} background: red; }
     51 │ @page {

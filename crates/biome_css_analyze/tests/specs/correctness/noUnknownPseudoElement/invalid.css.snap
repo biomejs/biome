@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -18,7 +17,7 @@ b > .foo::error { }
 
 # Diagnostics
 ```
-invalid.css:1:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown pseudo-elements: pseudo
   
@@ -40,7 +39,7 @@ invalid.css:1:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 
 ```
-invalid.css:2:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown pseudo-elements: Pseudo
   
@@ -63,7 +62,7 @@ invalid.css:2:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 
 ```
-invalid.css:3:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown pseudo-elements: pSeUdO
   
@@ -87,7 +86,7 @@ invalid.css:3:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 
 ```
-invalid.css:4:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown pseudo-elements: PSEUDO
   
@@ -111,7 +110,7 @@ invalid.css:4:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 
 ```
-invalid.css:5:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown pseudo-elements: element
   
@@ -135,7 +134,7 @@ invalid.css:5:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 
 ```
-invalid.css:6:10 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:10 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown pseudo-elements: element
   
@@ -159,7 +158,7 @@ invalid.css:6:10 lint/nursery/noUnknownPseudoElement ━━━━━━━━━
 ```
 
 ```
-invalid.css:8:11 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:11 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown pseudo-elements: error
   

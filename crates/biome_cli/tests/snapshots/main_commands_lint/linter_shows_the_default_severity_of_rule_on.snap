@@ -54,6 +54,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noCommaOperator
   - noCommonJs
   - noDefaultExport
+  - noDescendingSpecificity
   - noDoneCallback
   - noEnum
   - noExportedImports
@@ -75,6 +76,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noSubstr
   - noUnusedTemplateLiteral
   - noUselessElse
+  - noValueAtRule
   - noYodaExpression
   - useAsConstAssertion
   - useAtIndex

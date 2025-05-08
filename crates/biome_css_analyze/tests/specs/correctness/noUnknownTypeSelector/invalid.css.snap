@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -35,7 +34,7 @@ x-Foo {
 
 # Diagnostics
 ```
-invalid.css:1:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown type selector is not allowed.
   
@@ -52,7 +51,7 @@ invalid.css:1:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━�
 ```
 
 ```
-invalid.css:4:4 lint/nursery/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:4 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown type selector is not allowed.
   
@@ -71,7 +70,7 @@ invalid.css:4:4 lint/nursery/noUnknownTypeSelector ━━━━━━━━━�
 ```
 
 ```
-invalid.css:7:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:7:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown type selector is not allowed.
   
@@ -90,7 +89,7 @@ invalid.css:7:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━�
 ```
 
 ```
-invalid.css:10:6 lint/nursery/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:10:6 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown type selector is not allowed.
   
@@ -109,7 +108,7 @@ invalid.css:10:6 lint/nursery/noUnknownTypeSelector ━━━━━━━━━�
 ```
 
 ```
-invalid.css:13:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:13:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown type selector is not allowed.
   
@@ -128,7 +127,7 @@ invalid.css:13:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━�
 ```
 
 ```
-invalid.css:17:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:17:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown type selector is not allowed.
   
@@ -146,7 +145,7 @@ invalid.css:17:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━�
 ```
 
 ```
-invalid.css:20:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:20:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown type selector is not allowed.
   
@@ -165,7 +164,7 @@ invalid.css:20:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━�
 ```
 
 ```
-invalid.css:24:1 lint/nursery/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:24:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unknown type selector is not allowed.
   

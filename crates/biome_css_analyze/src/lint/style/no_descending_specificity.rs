@@ -14,8 +14,17 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Disallow a lower specificity selector from coming after a higher specificity selector.
     ///
-    /// This rule prohibits placing selectors with lower specificity after selectors with higher specificity.
-    /// By maintaining the order of the source and specificity as consistently as possible, it enhances readability.
+    /// Source order is important in CSS, and when two selectors have the same specificity, the one that occurs last will take priority.
+    /// However, the situation is different when one of the selectors has a higher specificity.
+    /// In that case, source order does not matter: the selector with higher specificity will win out even if it comes first.
+    ///
+    /// The clashes of these two mechanisms for prioritization, source order and specificity, can cause some confusion when reading stylesheets.
+    /// If a selector with higher specificity comes before the selector it overrides, we have to think harder to understand it, because it violates the source order expectation.
+    /// **Stylesheets are most legible when overriding selectors always come after the selectors they override.**
+    /// That way both mechanisms, source order and specificity, work together nicely.
+    ///
+    /// This rule enforces that practice as best it can, reporting fewer errors than it should.
+    /// It cannot catch every actual overriding selector, but it can catch certain common mistakes.
     ///
     /// ## Examples
     ///
@@ -77,7 +86,7 @@ declare_lint_rule! {
         name: "noDescendingSpecificity",
         language: "css",
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         sources: &[RuleSource::Stylelint("no-descending-specificity")],
     }
 }
