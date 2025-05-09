@@ -56,7 +56,7 @@ function introspectVariants(context: TailwindContext): Set<VariantSpec> {
 	const variantOffsets = context.offsets.variantOffsets;
 
 	// TODO: Handle isArbitrary like `has-[]` or `group-has-[]`
-	for (const { name, isArbitrary, values } of configVariants) {
+	for (const { name, values } of configVariants) {
 		const offset = variantOffsets.get(name);
 		if (!offset) continue;
 
