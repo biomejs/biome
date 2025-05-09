@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -39,6 +39,8 @@ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbid
 import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
 import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
 import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
+
+import foo from 'import-foo/foo';
 
 ```
 
@@ -772,6 +774,7 @@ invalid.ts:34:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
   > 34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
        │               ^^^^^^^
     35 │ 
+    36 │ import foo from 'import-foo/foo';
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -790,6 +793,7 @@ invalid.ts:34:31 lint/nursery/noRestrictedImports ━━━━━━━━━━
   > 34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
        │                               ^^^^^^^^^^
     35 │ 
+    36 │ import foo from 'import-foo/foo';
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -808,10 +812,25 @@ invalid.ts:34:43 lint/nursery/noRestrictedImports ━━━━━━━━━━
   > 34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
        │                                           ^^^^^^^^^^
     35 │ 
+    36 │ import foo from 'import-foo/foo';
   
   i Only the following imports from 'bare-allowed' are allowed:
   
   - Side-effect only import
+  
+
+```
+
+```
+invalid.ts:36:17 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 'import-foo/foo' import is restricted by a pattern. import-foo is deprecated, except the modules in import-foo/bar.
+  
+    34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
+    35 │ 
+  > 36 │ import foo from 'import-foo/foo';
+       │                 ^^^^^^^^^^^^^^^^
+    37 │ 
   
 
 ```
