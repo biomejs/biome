@@ -597,8 +597,12 @@ impl TraversalContext for TraversalOptions<'_, '_> {
         {
             return false;
         }
-        let path = biome_path.as_path();
-        if self.fs.path_is_dir(path) || self.fs.path_is_symlink(path) {
+
+        let path_kind = self.fs.symlink_path_kind(biome_path);
+        if path_kind
+            .as_ref()
+            .is_ok_and(|kind| kind.is_dir() || kind.is_symlink())
+        {
             // handle:
             // - directories
             // - symlinks
@@ -622,7 +626,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
         }
 
         // bail on fifo and socket files
-        if !self.fs.path_is_file(path) {
+        if path_kind.is_err() {
             Span::current().record("can_handle", false);
             return false;
         }

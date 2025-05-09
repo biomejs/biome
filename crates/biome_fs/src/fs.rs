@@ -105,11 +105,16 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
 
     /// Checks if the given path is a symlink
     fn path_is_symlink(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).is_ok_and(PathKind::is_symlink)
+        Self::symlink_path_kind(self, path).is_ok_and(PathKind::is_symlink)
     }
 
     /// Returns metadata about the path.
+    ///
+    /// This method follows symlinks.
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
+
+    /// Returns metadata about the path without following symlinks.
+    fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
     /// This method accepts a directory path (`search_dir`) and a file name `search_file`,
     ///
@@ -418,6 +423,10 @@ where
 
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
         T::path_kind(self, path)
+    }
+
+    fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
+        T::symlink_path_kind(self, path)
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {

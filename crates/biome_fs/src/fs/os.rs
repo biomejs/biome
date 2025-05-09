@@ -12,7 +12,7 @@ use oxc_resolver::{FsResolution, ResolveError, ResolveOptions, Resolver};
 use path_absolutize::Absolutize;
 use rayon::{Scope, scope};
 use std::env::temp_dir;
-use std::fs::FileType;
+use std::fs::{FileType, Metadata};
 use std::panic::AssertUnwindSafe;
 use std::process::Command;
 use std::{
@@ -102,29 +102,11 @@ impl FileSystem for OsFileSystem {
     }
 
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
-        match path.metadata() {
-            Ok(metadata) => {
-                let is_symlink = metadata.is_symlink();
-                if metadata.is_file() {
-                    Ok(PathKind::File { is_symlink })
-                } else if metadata.is_dir() {
-                    Ok(PathKind::Directory { is_symlink })
-                } else {
-                    Err(FileSystemDiagnostic {
-                        path: path.to_string(),
-                        severity: Severity::Error,
-                        error_kind: FsErrorKind::UnknownFileType,
-                        source: None,
-                    })
-                }
-            }
-            Err(error) => Err(FileSystemDiagnostic {
-                path: path.to_string(),
-                severity: Severity::Error,
-                error_kind: FsErrorKind::CantReadFile,
-                source: Some(Error::from(IoError::from(error))),
-            }),
-        }
+        path_kind_from_metadata(path.metadata(), path)
+    }
+
+    fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
+        path_kind_from_metadata(path.symlink_metadata(), path)
     }
 
     fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf> {
@@ -479,6 +461,35 @@ fn follow_symlink(
     };
 
     Ok((target_path, target_file_type))
+}
+
+fn path_kind_from_metadata(
+    metadata: io::Result<Metadata>,
+    path: &Utf8Path,
+) -> Result<PathKind, FileSystemDiagnostic> {
+    match metadata {
+        Ok(metadata) => {
+            let is_symlink = metadata.is_symlink();
+            if metadata.is_file() {
+                Ok(PathKind::File { is_symlink })
+            } else if metadata.is_dir() {
+                Ok(PathKind::Directory { is_symlink })
+            } else {
+                Err(FileSystemDiagnostic {
+                    path: path.to_string(),
+                    severity: Severity::Error,
+                    error_kind: FsErrorKind::UnknownFileType,
+                    source: None,
+                })
+            }
+        }
+        Err(error) => Err(FileSystemDiagnostic {
+            path: path.to_string(),
+            severity: Severity::Error,
+            error_kind: FsErrorKind::CantReadFile,
+            source: Some(Error::from(IoError::from(error))),
+        }),
+    }
 }
 
 impl From<FileType> for FsErrorKind {
