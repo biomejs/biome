@@ -61,7 +61,7 @@ declare_lint_rule! {
             RuleSource::Eslint("prefer-object-has-own")
         ],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

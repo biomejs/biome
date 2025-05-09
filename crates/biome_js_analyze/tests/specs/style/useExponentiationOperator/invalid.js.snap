@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -64,7 +63,7 @@ a+Math.pow(b, c)+d
 ```
 invalid.js:1:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
   > 1 │ Math.pow(a, b);
       │ ^^^^^^^^^^^^^^
@@ -84,7 +83,7 @@ invalid.js:1:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━
 ```
 invalid.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ Math.pow(a, b);
   > 2 │ (Math).pow(a, b);
@@ -106,7 +105,7 @@ invalid.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━
 ```
 invalid.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     4 │ // able to catch some workarounds
   > 5 │ Math[`pow`](a, b);
@@ -129,7 +128,7 @@ invalid.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━
 ```
 invalid.js:6:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     4 │ // able to catch some workarounds
     5 │ Math[`pow`](a, b);
@@ -153,7 +152,7 @@ invalid.js:6:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━
 ```
 invalid.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     5 │ Math[`pow`](a, b);
     6 │ (Math)['pow'](a, b);
@@ -177,7 +176,7 @@ invalid.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━
 ```
 invalid.js:8:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      6 │ (Math)['pow'](a, b);
      7 │ (Math)["pow"](a, b);
@@ -201,7 +200,7 @@ invalid.js:8:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━
 ```
 invalid.js:11:9 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     10 │ // non-expression parents that don't require parens
   > 11 │ var x = Math.pow(a, b);
@@ -224,7 +223,7 @@ invalid.js:11:9 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:12:4 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     10 │ // non-expression parents that don't require parens
     11 │ var x = Math.pow(a, b);
@@ -248,7 +247,7 @@ invalid.js:12:4 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:13:6 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     11 │ var x = Math.pow(a, b);
     12 │ if(Math.pow(a, b)){}
@@ -272,7 +271,7 @@ invalid.js:13:6 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:14:19 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     12 │ if(Math.pow(a, b)){}
     13 │ for(;Math.pow(a, b);){}
@@ -296,7 +295,7 @@ invalid.js:14:19 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:15:8 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     13 │ for(;Math.pow(a, b);){}
     14 │ switch(foo){ case Math.pow(a, b): break; }
@@ -320,7 +319,7 @@ invalid.js:15:8 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:16:25 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     14 │ switch(foo){ case Math.pow(a, b): break; }
     15 │ { foo: Math.pow(a, b) }
@@ -344,7 +343,7 @@ invalid.js:16:25 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:17:4 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     15 │ { foo: Math.pow(a, b) }
     16 │ function foo(bar, baz = Math.pow(a, b), quux){}
@@ -368,7 +367,7 @@ invalid.js:17:4 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:20:17 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     19 │ // non-expression parents that do require parens
   > 20 │ class C extends Math.pow(a, b) {}
@@ -391,7 +390,7 @@ invalid.js:20:17 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:23:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     22 │ // already parenthesised, shouldn't insert extra parens
   > 23 │ +(Math.pow(a, b))
@@ -414,7 +413,7 @@ invalid.js:23:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:24:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     22 │ // already parenthesised, shouldn't insert extra parens
     23 │ +(Math.pow(a, b))
@@ -438,7 +437,7 @@ invalid.js:24:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:25:17 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     23 │ +(Math.pow(a, b))
     24 │ (Math.pow(a, b)).toString()
@@ -462,7 +461,7 @@ invalid.js:25:17 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:26:18 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     24 │ (Math.pow(a, b)).toString()
     25 │ (class extends (Math.pow(a, b)) {})
@@ -486,7 +485,7 @@ invalid.js:26:18 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:29:6 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     28 │ // '**' is right-associative, that applies to both parent and child nodes
   > 29 │ a ** Math.pow(b, c);
@@ -509,7 +508,7 @@ invalid.js:29:6 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:30:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     28 │ // '**' is right-associative, that applies to both parent and child nodes
     29 │ a ** Math.pow(b, c);
@@ -533,7 +532,7 @@ invalid.js:30:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:31:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     29 │ a ** Math.pow(b, c);
     30 │ Math.pow(a, b) ** c;
@@ -557,7 +556,7 @@ invalid.js:31:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:32:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     30 │ Math.pow(a, b) ** c;
     31 │ Math.pow(a, b ** c);
@@ -581,7 +580,7 @@ invalid.js:32:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:33:6 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     31 │ Math.pow(a, b ** c);
     32 │ Math.pow(a ** b, c);
@@ -605,7 +604,7 @@ invalid.js:33:6 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:36:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     35 │ // doesn't remove already existing unnecessary parens around the whole expression
   > 36 │ (Math.pow(a, b));
@@ -628,7 +627,7 @@ invalid.js:36:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:37:8 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     35 │ // doesn't remove already existing unnecessary parens around the whole expression
     36 │ (Math.pow(a, b));
@@ -652,7 +651,7 @@ invalid.js:37:8 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:38:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     36 │ (Math.pow(a, b));
     37 │ foo + (Math.pow(a, b));
@@ -676,7 +675,7 @@ invalid.js:38:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:39:5 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     37 │ foo + (Math.pow(a, b));
     38 │ (Math.pow(a, b)) + foo;
@@ -700,7 +699,7 @@ invalid.js:39:5 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:42:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     41 │ // Optional chaining
   > 42 │ Math.pow?.(a, b)
@@ -723,7 +722,7 @@ invalid.js:42:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:43:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     41 │ // Optional chaining
     42 │ Math.pow?.(a, b)
@@ -747,7 +746,7 @@ invalid.js:43:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:44:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     42 │ Math.pow?.(a, b)
     43 │ Math?.pow(a, b)
@@ -771,7 +770,7 @@ invalid.js:44:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:45:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     43 │ Math?.pow(a, b)
     44 │ Math?.pow?.(a, b)
@@ -795,7 +794,7 @@ invalid.js:45:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:46:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     44 │ Math?.pow?.(a, b)
     45 │ ;(Math?.pow)(a, b)
@@ -819,7 +818,7 @@ invalid.js:46:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:49:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     48 │ // doesn't put extra parens
   > 49 │ Math.pow((a + b), (c + d))
@@ -842,7 +841,7 @@ invalid.js:49:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
 ```
 invalid.js:52:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     51 │ // tokens that can be adjacent
   > 52 │ a+Math.pow(b, c)+d

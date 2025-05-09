@@ -48,7 +48,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Clippy("approx_constant")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

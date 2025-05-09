@@ -1,12 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
 ```json
-{ "assist": { "enabled": true, "includes": ["**", "!check.js"] } }
+{
+  "assist": { "enabled": true, "includes": ["**", "!check.js"] },
+  "linter": { "enabled": false }
+}
 ```
 
 ## `check.js`

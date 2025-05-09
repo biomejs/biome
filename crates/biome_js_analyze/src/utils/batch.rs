@@ -55,7 +55,7 @@ pub trait JsBatchMutation {
 
     /// Adds a list of jsx elements replacing the given element.
     ///
-    /// If you want to replace an element with it's children, use [`Self::unwrap_jsx_element`].
+    /// If you want to replace an element with it's children, use [`Self::replace_jsx_element_with_own_children`].
     ///
     /// ### Example:
     ///

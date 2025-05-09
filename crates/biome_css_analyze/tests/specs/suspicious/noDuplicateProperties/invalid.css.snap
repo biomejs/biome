@@ -1,0 +1,456 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a {
+    color: pink;
+    color: orange;
+}
+
+a {
+    color: pink;
+    color: pink;
+    color: pink;
+}
+
+a {
+    color: pink;
+    color: pink;
+    color: orange;
+}
+
+a {
+    color: pink;
+    background: orange;
+    color: orange;
+}
+
+a {
+    color: pink;
+    background: orange;
+    background: pink;
+}
+
+a { color: pink; { &:hover { color: orange; color: black; } } }
+
+a { color: pink; @media { color: orange; color: black; } }
+
+@media { color: orange; .foo { color: black; color: white; } }
+
+a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+
+a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+
+a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+
+a { color: red !important; color: blue; }
+
+a { color: red !important; color: blue !important; }
+
+a {
+    @supports (color: pink) {
+        color: pink;
+        color: orange;
+    }
+}
+
+a {
+    @supports (color: pink) {
+        color: pink;
+        &:hover {
+            color: orange;
+            color: black;
+        }
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:3:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    1 │ a {
+    2 │     color: pink;
+  > 3 │     color: orange;
+      │     ^^^^^
+    4 │ }
+    5 │ 
+  
+  i color is already defined here.
+  
+    1 │ a {
+  > 2 │     color: pink;
+      │     ^^^^^
+    3 │     color: orange;
+    4 │ }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:8:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+     6 │ a {
+     7 │     color: pink;
+   > 8 │     color: pink;
+       │     ^^^^^
+     9 │     color: pink;
+    10 │ }
+  
+  i color is already defined here.
+  
+    6 │ a {
+  > 7 │     color: pink;
+      │     ^^^^^
+    8 │     color: pink;
+    9 │     color: pink;
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:14:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    12 │ a {
+    13 │     color: pink;
+  > 14 │     color: pink;
+       │     ^^^^^
+    15 │     color: orange;
+    16 │ }
+  
+  i color is already defined here.
+  
+    12 │ a {
+  > 13 │     color: pink;
+       │     ^^^^^
+    14 │     color: pink;
+    15 │     color: orange;
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:21:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    19 │     color: pink;
+    20 │     background: orange;
+  > 21 │     color: orange;
+       │     ^^^^^
+    22 │ }
+    23 │ 
+  
+  i color is already defined here.
+  
+    18 │ a {
+  > 19 │     color: pink;
+       │     ^^^^^
+    20 │     background: orange;
+    21 │     color: orange;
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:27:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    25 │     color: pink;
+    26 │     background: orange;
+  > 27 │     background: pink;
+       │     ^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i background is already defined here.
+  
+    24 │ a {
+    25 │     color: pink;
+  > 26 │     background: orange;
+       │     ^^^^^^^^^^
+    27 │     background: pink;
+    28 │ }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:30:45 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    28 │ }
+    29 │ 
+  > 30 │ a { color: pink; { &:hover { color: orange; color: black; } } }
+       │                                             ^^^^^
+    31 │ 
+    32 │ a { color: pink; @media { color: orange; color: black; } }
+  
+  i color is already defined here.
+  
+    28 │ }
+    29 │ 
+  > 30 │ a { color: pink; { &:hover { color: orange; color: black; } } }
+       │                              ^^^^^
+    31 │ 
+    32 │ a { color: pink; @media { color: orange; color: black; } }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:32:42 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    30 │ a { color: pink; { &:hover { color: orange; color: black; } } }
+    31 │ 
+  > 32 │ a { color: pink; @media { color: orange; color: black; } }
+       │                                          ^^^^^
+    33 │ 
+    34 │ @media { color: orange; .foo { color: black; color: white; } }
+  
+  i color is already defined here.
+  
+    30 │ a { color: pink; { &:hover { color: orange; color: black; } } }
+    31 │ 
+  > 32 │ a { color: pink; @media { color: orange; color: black; } }
+       │                           ^^^^^
+    33 │ 
+    34 │ @media { color: orange; .foo { color: black; color: white; } }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:34:46 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    32 │ a { color: pink; @media { color: orange; color: black; } }
+    33 │ 
+  > 34 │ @media { color: orange; .foo { color: black; color: white; } }
+       │                                              ^^^^^
+    35 │ 
+    36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+  
+  i color is already defined here.
+  
+    32 │ a { color: pink; @media { color: orange; color: black; } }
+    33 │ 
+  > 34 │ @media { color: orange; .foo { color: black; color: white; } }
+       │                                ^^^^^
+    35 │ 
+    36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:36:68 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    34 │ @media { color: orange; .foo { color: black; color: white; } }
+    35 │ 
+  > 36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+       │                                                                    ^^^^^
+    37 │ 
+    38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+  
+  i color is already defined here.
+  
+    34 │ @media { color: orange; .foo { color: black; color: white; } }
+    35 │ 
+  > 36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+       │                                                      ^^^^^
+    37 │ 
+    38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:38:63 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+    37 │ 
+  > 38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+       │                                                               ^^^^^
+    39 │ 
+    40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+  
+  i color is already defined here.
+  
+    36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+    37 │ 
+  > 38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+       │                                                 ^^^^^
+    39 │ 
+    40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:40:34 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+    39 │ 
+  > 40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+       │                                  ^^^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ a { color: red !important; color: blue; }
+  
+  i -webkit-border-radius is already defined here.
+  
+    38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+    39 │ 
+  > 40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ a { color: red !important; color: blue; }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:42:28 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+    41 │ 
+  > 42 │ a { color: red !important; color: blue; }
+       │                            ^^^^^
+    43 │ 
+    44 │ a { color: red !important; color: blue !important; }
+  
+  i color is already defined here.
+  
+    40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+    41 │ 
+  > 42 │ a { color: red !important; color: blue; }
+       │     ^^^^^
+    43 │ 
+    44 │ a { color: red !important; color: blue !important; }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:44:28 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    42 │ a { color: red !important; color: blue; }
+    43 │ 
+  > 44 │ a { color: red !important; color: blue !important; }
+       │                            ^^^^^
+    45 │ 
+    46 │ a {
+  
+  i color is already defined here.
+  
+    42 │ a { color: red !important; color: blue; }
+    43 │ 
+  > 44 │ a { color: red !important; color: blue !important; }
+       │     ^^^^^
+    45 │ 
+    46 │ a {
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:49:9 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    47 │     @supports (color: pink) {
+    48 │         color: pink;
+  > 49 │         color: orange;
+       │         ^^^^^
+    50 │     }
+    51 │ }
+  
+  i color is already defined here.
+  
+    46 │ a {
+    47 │     @supports (color: pink) {
+  > 48 │         color: pink;
+       │         ^^^^^
+    49 │         color: orange;
+    50 │     }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:58:13 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    56 │         &:hover {
+    57 │             color: orange;
+  > 58 │             color: black;
+       │             ^^^^^
+    59 │         }
+    60 │     }
+  
+  i color is already defined here.
+  
+    55 │         color: pink;
+    56 │         &:hover {
+  > 57 │             color: orange;
+       │             ^^^^^
+    58 │             color: black;
+    59 │         }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```

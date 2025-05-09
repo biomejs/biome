@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::{fmt::Display, markup};
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
@@ -146,6 +147,7 @@ declare_lint_rule! {
             RuleSource::EslintImportAccess("eslint-plugin-import-access")
         ],
         recommended: true,
+        severity: Severity::Warning,
         domains: &[RuleDomain::Project],
     }
 }

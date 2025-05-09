@@ -2,6 +2,7 @@ use crate::globals::is_node_builtin_module;
 use crate::services::manifest::Manifest;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, inner_string_text};
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
@@ -43,6 +44,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintImport("no-nodejs-modules")],
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 

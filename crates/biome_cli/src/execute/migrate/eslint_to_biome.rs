@@ -302,7 +302,7 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::TypeScriptExplicitMemberAccessibility(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
-                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    let group = rules.style.get_or_insert_with(Default::default);
                     if let SeverityOrGroup::Group(group) = group {
                         group.use_consistent_member_accessibility =
                             Some(biome_config::RuleConfiguration::WithOptions(

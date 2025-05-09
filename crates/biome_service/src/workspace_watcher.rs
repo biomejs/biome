@@ -19,7 +19,7 @@ pub enum WatcherInstruction {
     /// Resyncs a file after a file was closed by a client.
     ///
     /// This is done through an instruction instead of calling
-    /// [WorkspaceServer::open_file_by_scanner()] directly to ensure it is only
+    /// `WorkspaceServer::open_file_by_scanner()` directly to ensure it is only
     /// done if the watcher is active.
     ResyncFile(Utf8PathBuf),
 
@@ -55,7 +55,7 @@ pub enum WatcherSignalKind {
 /// Conceptually, it helps to think of the watcher as a helper to the scanner.
 /// The watcher watches the same directories as those scanned by the scanner, so
 /// the watcher is also instructed to watch folders that were scanned through
-/// [WorkspaceServer::scan_project_folder()].
+/// `WorkspaceServer::scan_project_folder()`.
 ///
 /// When watch events are received, they are handed back to the workspace. If
 /// this results in opening new documents, we say they were opened by the

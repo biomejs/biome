@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -47,7 +46,7 @@ export { /*before*/ foo as foo /*after*/ } from "foo";
 ```
 invalid.js:1:18 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
   > 1 │ let { /*before*/ foo: foo /*after*/ } = obj;
       │                  ^^^^^^^^
@@ -64,7 +63,7 @@ invalid.js:1:18 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
 ```
 invalid.js:3:10 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
     1 │ let { /*before*/ foo: foo /*after*/ } = obj;
     2 │ 
@@ -83,7 +82,7 @@ invalid.js:3:10 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
 ```
 invalid.js:5:7 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
     3 │ let { a, foo: foo } = obj;
     4 │ 
@@ -102,7 +101,7 @@ invalid.js:5:7 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
 ```
 invalid.js:8:9 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
      7 │ let {
    > 8 │ 	foo: { bar: bar },
@@ -120,7 +119,7 @@ invalid.js:8:9 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
 ```
 invalid.js:11:18 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
      9 │ } = obj;
     10 │ 
@@ -139,7 +138,7 @@ invalid.js:11:18 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
 ```
 invalid.js:14:14 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
     12 │ 	obj;
     13 │ 
@@ -158,7 +157,7 @@ invalid.js:14:14 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
 ```
 invalid.js:16:4 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
     14 │ function f({ foo: foo }) {}
     15 │ 
@@ -177,7 +176,7 @@ invalid.js:16:4 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━�
 ```
 invalid.js:18:21 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
     16 │ ({ foo: foo }) => {};
     17 │ 
@@ -196,7 +195,7 @@ invalid.js:18:21 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
 ```
 invalid.js:20:10 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
     18 │ import { /*before*/ foo as foo /*after*/ } from "foo";
     19 │ 
@@ -215,7 +214,7 @@ invalid.js:20:10 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
 ```
 invalid.js:22:21 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
     20 │ import { a as a } from "foo";
     21 │ 
@@ -234,7 +233,7 @@ invalid.js:22:21 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━
 ```
 invalid.js:24:21 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Useless rename.
+  i Useless rename.
   
     22 │ export { /*before*/ foo as foo /*after*/ };
     23 │ 

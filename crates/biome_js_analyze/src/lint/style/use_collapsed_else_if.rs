@@ -3,6 +3,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsStatement, JsBlockStatement, JsElseClause, JsIfStatement};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
@@ -88,6 +89,7 @@ declare_lint_rule! {
             RuleSource::Clippy("collapsible_else_if")
         ],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }

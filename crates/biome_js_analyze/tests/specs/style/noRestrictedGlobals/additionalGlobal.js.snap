@@ -12,7 +12,7 @@ console.log($);
 ```
 additionalGlobal.js:1:13 lint/style/noRestrictedGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not use the global variable $.
+  ! Do not use the global variable $.
   
   > 1 │ console.log($);
       │             ^

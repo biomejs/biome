@@ -1,0 +1,82 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"style": {
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"paths": {
+							"node:fs": "Importing from node:fs is forbidden",
+							"bare-forbidden": {
+								"importNames": [
+									""
+								]
+							},
+							"default-forbidden": {
+								"importNames": [
+									"default"
+								]
+							},
+							"namespace-forbidden": {
+								"importNames": [
+									"*"
+								]
+							},
+							"member-forbidden": {
+								"importNames": [
+									"forbidden1",
+									"forbidden2",
+									"forbidden3",
+									"forbidden4",
+									"forbidden5",
+									"forbidden6",
+									"forbidden7",
+									"forbidden8",
+									"forbidden9"
+								]
+							},
+							"bare-allowed": {
+								"allowImportNames": [
+									""
+								]
+							},
+							"default-and-member-allowed": {
+								"allowImportNames": [
+									"default",
+									"allowed1",
+									"allowed2",
+									"allowed3",
+									"allowed4",
+									"allowed5",
+									"allowed6",
+									"allowed7",
+									"allowed8",
+									"allowed9"
+								]
+							},
+							"namespace-allowed": {
+								"allowImportNames": [
+									"*"
+								]
+							},
+							"member-allowed": {
+								"allowImportNames": [
+									"allowed1",
+									"allowed2",
+									"allowed3",
+									"allowed4",
+									"allowed5",
+									"allowed6",
+									"allowed7",
+									"allowed8",
+									"allowed9"
+								]
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

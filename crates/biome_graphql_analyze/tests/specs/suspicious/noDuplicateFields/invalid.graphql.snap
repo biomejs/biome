@@ -1,0 +1,101 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+query test($v: String, $t: String, $v: String) {
+  id
+}
+
+query test {
+  users(first: 100, after: 10, filter: "test", first: 50) {
+    id
+  }
+}
+
+query test {
+  users {
+    id
+    name
+    email
+    name
+  }
+}
+
+query test {
+  users {
+    id
+    name
+    email
+    email: somethingElse
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:1:36 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Variable `v` defined multiple times.
+  
+  > 1 │ query test($v: String, $t: String, $v: String) {
+      │                                    ^^^^^^^^^^
+    2 │   id
+    3 │ }
+  
+  i Remove the duplicated variable.
+  
+
+```
+
+```
+invalid.graphql:6:48 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Argument `first` defined multiple times.
+  
+    5 │ query test {
+  > 6 │   users(first: 100, after: 10, filter: "test", first: 50) {
+      │                                                ^^^^^^^^^
+    7 │     id
+    8 │   }
+  
+  i Remove the duplicated argument.
+  
+
+```
+
+```
+invalid.graphql:16:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Field `name` defined multiple times.
+  
+    14 │     name
+    15 │     email
+  > 16 │     name
+       │     ^^^^
+    17 │   }
+    18 │ }
+  
+  i Remove the duplicated field.
+  
+
+```
+
+```
+invalid.graphql:25:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Field `email` defined multiple times.
+  
+    23 │     name
+    24 │     email
+  > 25 │     email: somethingElse
+       │     ^^^^^^^^^^^^^^^^^^^^
+    26 │   }
+    27 │ }
+  
+  i Remove the duplicated field.
+  
+
+```

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -47,7 +46,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 fix.js:3:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The call chain .map().flat() can be replaced with a single .flatMap() call.
+  i The call chain .map().flat() can be replaced with a single .flatMap() call.
   
     1 │ const array = ["split", "the text", "into words"];
     2 │ // next line should error because of the recommended rule
@@ -78,5 +77,5 @@ fix.js format ━━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
 ```

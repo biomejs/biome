@@ -67,7 +67,7 @@ function testTypeOnFunctionVariable() {
 ```
 issue_4677_jsdoc.js:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     5 │ import TypeOnClassMethodParam from "mod";
     6 │ import TypeOnClassConstructorParam from "mod";

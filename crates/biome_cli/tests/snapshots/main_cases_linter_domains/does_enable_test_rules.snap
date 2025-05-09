@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -52,7 +51,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't focus the test.
+  ! Don't focus the test.
   
   > 1 │ describe.only("bar", () => {});
       │          ^^^^
@@ -88,5 +87,6 @@ test2.js:4:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━
 
 ```block
 Checked 2 files in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
+Found 1 warning.
 ```

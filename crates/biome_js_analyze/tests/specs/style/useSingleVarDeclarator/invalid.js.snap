@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -32,7 +31,7 @@ while(true) var v = 0, u = 1;
 ```
 invalid.js:1:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Declare variables separately
+  i Declare variables separately
   
   > 1 │ var x, y
       │ ^^^^^^^^
@@ -53,7 +52,7 @@ invalid.js:1:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
 ```
 invalid.js:5:2 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Declare variables separately
+  i Declare variables separately
   
     3 │ function test() {
     4 │ 	// Comment
@@ -78,7 +77,7 @@ invalid.js:5:2 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
 ```
 invalid.js:8:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Declare variables separately
+  i Declare variables separately
   
      6 │ }
      7 │ 
@@ -109,7 +108,7 @@ invalid.js:8:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
 ```
 invalid.js:12:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Declare variables separately
+  i Declare variables separately
   
     10 │     y = 2
     11 │ 
@@ -139,7 +138,7 @@ invalid.js:12:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━�
 ```
 invalid.js:16:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Declare variables separately
+  i Declare variables separately
   
     14 │ 	b = 1;
     15 │ 
@@ -174,7 +173,7 @@ invalid.js:16:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━�
 ```
 invalid.js:20:13 lint/style/useSingleVarDeclarator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Declare variables separately
+  i Declare variables separately
   
     18 │ 	/*0*/d;
     19 │ 

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `file.graphql`
 
@@ -16,9 +15,9 @@ query {
 # Emitted Messages
 
 ```block
-file.graphql:2:10 lint/nursery/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.graphql:2:10 lint/style/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The directive `@deprecated` should have a `reason` argument.
+  ! The directive `@deprecated` should have a `reason` argument.
   
     1 │ query {
   > 2 │   member @deprecated {
@@ -33,4 +32,5 @@ file.graphql:2:10 lint/nursery/useDeprecatedReason ━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
 ```

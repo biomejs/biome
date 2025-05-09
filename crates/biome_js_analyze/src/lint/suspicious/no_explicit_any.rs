@@ -58,7 +58,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-explicit-any")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
     }
 }
 

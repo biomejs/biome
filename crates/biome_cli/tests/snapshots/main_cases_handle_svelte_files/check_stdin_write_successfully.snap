@@ -19,9 +19,6 @@ var foo: string = "";
 
 ```block
 <script context="module" lang="ts">
-import Button from "./components/Button.svelte";
-import { Form } from "./components/Form.svelte";
-
 debugger;
 statement();
 var foo: string = "";

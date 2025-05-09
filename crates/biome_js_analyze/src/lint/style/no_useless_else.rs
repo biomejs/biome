@@ -91,11 +91,11 @@ declare_lint_rule! {
         language: "js",
         sources: &[
             RuleSource::Eslint("no-else-return"),
-            RuleSource::Clippy("redundant_else 	"),
+            RuleSource::Clippy("redundant_else"),
         ],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
-        severity: Severity::Warning,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

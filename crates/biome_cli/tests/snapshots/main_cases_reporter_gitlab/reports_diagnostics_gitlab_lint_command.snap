@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `index.ts`
 
@@ -66,6 +65,198 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 [
+  {
+    "description": "This import is unused.",
+    "check_name": "lint/correctness/noUnusedImports",
+    "fingerprint": "12247285991248580551",
+    "severity": "major",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 1
+      }
+    }
+  },
+  {
+    "description": "Several of these imports are unused.",
+    "check_name": "lint/correctness/noUnusedImports",
+    "fingerprint": "15587197597897976171",
+    "severity": "major",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 2
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "11560602666260894730",
+    "severity": "major",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 14
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "3378636030374148952",
+    "severity": "major",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 15
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "1217643363874050521",
+    "severity": "major",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 16
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "4133571069805885280",
+    "severity": "major",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 17
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "5071171301459682706",
+    "severity": "major",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 18
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "228646201265839522",
+    "severity": "major",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 19
+      }
+    }
+  },
+  {
+    "description": "This import is unused.",
+    "check_name": "lint/correctness/noUnusedImports",
+    "fingerprint": "15775822807811823621",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 1
+      }
+    }
+  },
+  {
+    "description": "Several of these imports are unused.",
+    "check_name": "lint/correctness/noUnusedImports",
+    "fingerprint": "16065251496309878442",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 2
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "1113933937129958476",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 14
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "17581182407618726497",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 15
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "7876075472853952714",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 16
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "9844529903890075314",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 17
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "13391528371208812095",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 18
+      }
+    }
+  },
+  {
+    "description": "This variable is unused.",
+    "check_name": "lint/correctness/noUnusedVariables",
+    "fingerprint": "17201637410894263274",
+    "severity": "major",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 19
+      }
+    }
+  },
   {
     "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",

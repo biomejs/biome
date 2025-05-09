@@ -19,11 +19,8 @@ var foo: string = "";
 
 ```block
 ---
-import { something } from "file.astro";
-import { a } from "mod";
-
 statement();
-var foo: string = "";
+var _foo: string = "";
 ---
 <div></div>
 ```

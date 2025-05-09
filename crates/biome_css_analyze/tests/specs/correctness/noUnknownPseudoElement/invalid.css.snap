@@ -1,0 +1,181 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a::pseudo { }
+a::Pseudo { }
+a::pSeUdO { }
+a::PSEUDO { }
+a::element { }
+a:hover::element { }
+a,
+b > .foo::error { }
+
+```
+
+# Diagnostics
+```
+invalid.css:1:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-elements: pseudo
+  
+  > 1 │ a::pseudo { }
+      │    ^^^^^^
+    2 │ a::Pseudo { }
+    3 │ a::pSeUdO { }
+  
+  i See MDN web docs for more details.
+  
+  i Use a known pseudo-elements instead, such as:
+  
+  - after
+  - backdrop
+  - before
+  - etc.
+  
+
+```
+
+```
+invalid.css:2:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-elements: Pseudo
+  
+    1 │ a::pseudo { }
+  > 2 │ a::Pseudo { }
+      │    ^^^^^^
+    3 │ a::pSeUdO { }
+    4 │ a::PSEUDO { }
+  
+  i See MDN web docs for more details.
+  
+  i Use a known pseudo-elements instead, such as:
+  
+  - after
+  - backdrop
+  - before
+  - etc.
+  
+
+```
+
+```
+invalid.css:3:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-elements: pSeUdO
+  
+    1 │ a::pseudo { }
+    2 │ a::Pseudo { }
+  > 3 │ a::pSeUdO { }
+      │    ^^^^^^
+    4 │ a::PSEUDO { }
+    5 │ a::element { }
+  
+  i See MDN web docs for more details.
+  
+  i Use a known pseudo-elements instead, such as:
+  
+  - after
+  - backdrop
+  - before
+  - etc.
+  
+
+```
+
+```
+invalid.css:4:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-elements: PSEUDO
+  
+    2 │ a::Pseudo { }
+    3 │ a::pSeUdO { }
+  > 4 │ a::PSEUDO { }
+      │    ^^^^^^
+    5 │ a::element { }
+    6 │ a:hover::element { }
+  
+  i See MDN web docs for more details.
+  
+  i Use a known pseudo-elements instead, such as:
+  
+  - after
+  - backdrop
+  - before
+  - etc.
+  
+
+```
+
+```
+invalid.css:5:4 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-elements: element
+  
+    3 │ a::pSeUdO { }
+    4 │ a::PSEUDO { }
+  > 5 │ a::element { }
+      │    ^^^^^^^
+    6 │ a:hover::element { }
+    7 │ a,
+  
+  i See MDN web docs for more details.
+  
+  i Use a known pseudo-elements instead, such as:
+  
+  - after
+  - backdrop
+  - before
+  - etc.
+  
+
+```
+
+```
+invalid.css:6:10 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-elements: element
+  
+    4 │ a::PSEUDO { }
+    5 │ a::element { }
+  > 6 │ a:hover::element { }
+      │          ^^^^^^^
+    7 │ a,
+    8 │ b > .foo::error { }
+  
+  i See MDN web docs for more details.
+  
+  i Use a known pseudo-elements instead, such as:
+  
+  - after
+  - backdrop
+  - before
+  - etc.
+  
+
+```
+
+```
+invalid.css:8:11 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-elements: error
+  
+    6 │ a:hover::element { }
+    7 │ a,
+  > 8 │ b > .foo::error { }
+      │           ^^^^^
+    9 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Use a known pseudo-elements instead, such as:
+  
+  - after
+  - backdrop
+  - before
+  - etc.
+  
+
+```

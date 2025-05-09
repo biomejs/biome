@@ -6,6 +6,7 @@ use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -85,6 +86,7 @@ declare_lint_rule! {
             RuleSource::EslintImport("no-extraneous-dependencies"),
         ],
         recommended: false,
+        severity: Severity::Error,
         domains: &[RuleDomain::Project],
     }
 }

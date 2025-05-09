@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -18,7 +17,7 @@ snapshot_kind: text
 ```
 invalid.css:1:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected unknown at-rule: unknown-rule 
+  × Unexpected unknown at-rule: unknown-rule 
   
   > 1 │ @unknown-rule 'UTF-8';
       │  ^^^^^^^^^^^^
@@ -37,7 +36,7 @@ invalid.css:1:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:2:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected unknown at-rule: uNkNoWn 
+  × Unexpected unknown at-rule: uNkNoWn 
   
     1 │ @unknown-rule 'UTF-8';
   > 2 │ @uNkNoWn {}
@@ -57,7 +56,7 @@ invalid.css:2:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:3:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected unknown at-rule: UNKNOWN 
+  × Unexpected unknown at-rule: UNKNOWN 
   
     1 │ @unknown-rule 'UTF-8';
     2 │ @uNkNoWn {}
@@ -78,7 +77,7 @@ invalid.css:3:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:4:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected unknown at-rule: unknown-at-rule 
+  × Unexpected unknown at-rule: unknown-at-rule 
   
     2 │ @uNkNoWn {}
     3 │ @UNKNOWN {}
@@ -99,7 +98,7 @@ invalid.css:4:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:5:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected unknown at-rule: unknown 
+  × Unexpected unknown at-rule: unknown 
   
     3 │ @UNKNOWN {}
     4 │ @unknown-at-rule {}
@@ -120,7 +119,7 @@ invalid.css:5:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:5:13 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected unknown at-rule: unknown-at-rule 
+  × Unexpected unknown at-rule: unknown-at-rule 
   
     3 │ @UNKNOWN {}
     4 │ @unknown-at-rule {}
@@ -141,7 +140,7 @@ invalid.css:5:13 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:6:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected unknown at-rule: MY-other-at-rule 
+  × Unexpected unknown at-rule: MY-other-at-rule 
   
     4 │ @unknown-at-rule {}
     5 │ @unknown { @unknown-at-rule { font-size: 14px; } }
@@ -161,7 +160,7 @@ invalid.css:6:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:7:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected unknown at-rule: not-my-at-rule 
+  × Unexpected unknown at-rule: not-my-at-rule 
   
     5 │ @unknown { @unknown-at-rule { font-size: 14px; } }
     6 │ @MY-other-at-rule {}

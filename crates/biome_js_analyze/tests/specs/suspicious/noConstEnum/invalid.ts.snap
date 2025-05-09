@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -28,7 +27,7 @@ export enum Direction {
 ```
 invalid.ts:4:1 lint/suspicious/noConstEnum  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The enum declaration should not be const
+  ! The enum declaration should not be const
   
     2 │  * Doc
     3 │  */
@@ -64,7 +63,7 @@ invalid.ts:4:1 lint/suspicious/noConstEnum  FIXABLE  ━━━━━━━━━
 ```
 invalid.ts:9:20 lint/suspicious/noConstEnum  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The enum declaration should not be const
+  ! The enum declaration should not be const
   
      7 │ }
      8 │ 

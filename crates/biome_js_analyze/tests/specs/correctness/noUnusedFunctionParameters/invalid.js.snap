@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -45,7 +44,7 @@ function withArraySpread([a, ...rest]) {
 ```
 invalid.js:1:14 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
   > 1 │ function foo(myVar) {
       │              ^^^^^
@@ -67,7 +66,7 @@ invalid.js:1:14 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━�
 ```
 invalid.js:6:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
     5 │ const data = [[1, 1], [2, 4], [3, 9], [4, 16], [5, 25]];
   > 6 │ data.filter(([k, v]) => v > 10);
@@ -92,7 +91,7 @@ invalid.js:6:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━�
 ```
 invalid.js:8:33 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
      6 │ data.filter(([k, v]) => v > 10);
      7 │ 
@@ -109,7 +108,7 @@ invalid.js:8:33 lint/correctness/noUnusedFunctionParameters ━━━━━━�
 ```
 invalid.js:10:22 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
      8 │ [{ a: 1, b: 2, c: 3 }].map(({a, b, c}) => a + c);
      9 │ 
@@ -135,7 +134,7 @@ invalid.js:10:22 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━
 ```
 invalid.js:15:13 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
     14 │ // parameter a is not used
   > 15 │ {(function (a) { })}
@@ -160,7 +159,7 @@ invalid.js:15:13 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━
 ```
 invalid.js:16:14 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
     14 │ // parameter a is not used
     15 │ {(function (a) { })}
@@ -177,7 +176,7 @@ invalid.js:16:14 lint/correctness/noUnusedFunctionParameters ━━━━━━�
 ```
 invalid.js:17:14 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
     15 │ {(function (a) { })}
     16 │ {(function ({a}) { })}
@@ -203,7 +202,7 @@ invalid.js:17:14 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━
 ```
 invalid.js:18:12 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
     16 │ {(function ({a}) { })}
     17 │ {(function ([a]) { })}
@@ -229,7 +228,7 @@ invalid.js:18:12 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━
 ```
 invalid.js:23:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
     22 │ // parameter b is not used
   > 23 │ (function (a, b) {
@@ -254,7 +253,7 @@ invalid.js:23:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━
 ```
 invalid.js:27:28 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
     25 │ })
     26 │ 
@@ -271,7 +270,7 @@ invalid.js:27:28 lint/correctness/noUnusedFunctionParameters ━━━━━━�
 ```
 invalid.js:31:27 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This parameter is unused.
+  ! This parameter is unused.
   
     29 │ }
     30 │ 

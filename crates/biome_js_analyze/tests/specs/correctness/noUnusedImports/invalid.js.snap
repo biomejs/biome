@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -44,7 +43,7 @@ import {} from "mod"
 ```
 invalid.js:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     1 │ // Header comment
   > 2 │ import A from "mod";
@@ -68,7 +67,7 @@ invalid.js:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━�
 ```
 invalid.js:5:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     4 │ // Header comment
   > 5 │ import * as B from "mod"; // Import comment
@@ -95,7 +94,7 @@ invalid.js:5:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.js:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
      7 │ // Header comment
    > 8 │ import { C } from "mod"; // Import comment
@@ -123,7 +122,7 @@ invalid.js:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━�
 ```
 invalid.js:11:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These imports are unused.
+  ! These imports are unused.
   
     10 │ // Header comment
   > 11 │ import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
@@ -151,7 +150,7 @@ invalid.js:11:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
 ```
 invalid.js:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i These imports are unused.
+  ! These imports are unused.
   
     11 │ import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
     12 │ 
@@ -179,7 +178,7 @@ invalid.js:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
 ```
 invalid.js:15:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     13 │ import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
     14 │ 
@@ -216,7 +215,7 @@ invalid.js:15:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.js:21:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     19 │ } from "mod";
     20 │ 
@@ -244,7 +243,7 @@ invalid.js:21:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.js:24:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     23 │ // Header comment
   > 24 │ import { L as M, } from "mod"; // Import comment
@@ -272,7 +271,7 @@ invalid.js:24:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.js:28:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is unused.
+  ! This import is unused.
   
     26 │ // See https://github.com/biomejs/biome/issues/653
     27 │ import {a} from 'a'
@@ -297,7 +296,7 @@ invalid.js:28:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.js:32:9 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import is empty.
+  ! This import is empty.
   
     30 │ export const bb = a + b
     31 │ 

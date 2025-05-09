@@ -4,6 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsIdentifierBinding, JsImport};
 use biome_rowan::AstNode;
 
@@ -107,6 +108,7 @@ declare_lint_rule! {
         name: "noMisplacedAssertion",
         language: "js",
         recommended: false,
+        severity: Severity::Warning,
         sources: &[RuleSource::EslintJest("no-standalone-expect"), RuleSource::EslintVitest("no-standalone-expect")],
         source_kind: RuleSourceKind::Inspired,
     }

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -57,7 +56,7 @@ const curly2: {} = { a: 'string' };
 ```
 invalid.ts:1:8 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
   > 1 │ let a: String;
       │        ^^^^^^
@@ -79,7 +78,7 @@ invalid.ts:1:8 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:3:8 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Object' as a type.
+  ! Don't use 'Object' as a type.
   
     1 │ let a: String;
     2 │ 
@@ -96,7 +95,7 @@ invalid.ts:3:8 lint/complexity/noBannedTypes ━━━━━━━━━━━�
 ```
 invalid.ts:5:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
     3 │ let e: Object;
     4 │ 
@@ -122,7 +121,7 @@ invalid.ts:5:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:7:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
     5 │ let b: { c: String };
     6 │ 
@@ -148,7 +147,7 @@ invalid.ts:7:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:9:8 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
      7 │ function foo(a: String) {}
      8 │ 
@@ -174,7 +173,7 @@ invalid.ts:9:8 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:11:15 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
      9 │ 'a' as String;
     10 │ 
@@ -200,7 +199,7 @@ invalid.ts:11:15 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:11:35 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
      9 │ 'a' as String;
     10 │ 
@@ -226,7 +225,7 @@ invalid.ts:11:35 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:11:58 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Object' as a type.
+  ! Don't use 'Object' as a type.
   
      9 │ 'a' as String;
     10 │ 
@@ -243,7 +242,7 @@ invalid.ts:11:58 lint/complexity/noBannedTypes ━━━━━━━━━━━
 ```
 invalid.ts:12:20 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
     11 │ class Foo<T = String> extends Bar<String> implements Baz<Object> {
   > 12 │   constructor(foo: String | Object) {}
@@ -268,7 +267,7 @@ invalid.ts:12:20 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:12:29 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Object' as a type.
+  ! Don't use 'Object' as a type.
   
     11 │ class Foo<T = String> extends Bar<String> implements Baz<Object> {
   > 12 │   constructor(foo: String | Object) {}
@@ -284,7 +283,7 @@ invalid.ts:12:29 lint/complexity/noBannedTypes ━━━━━━━━━━━
 ```
 invalid.ts:14:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
     12 │   constructor(foo: String | Object) {}
     13 │ 
@@ -310,7 +309,7 @@ invalid.ts:14:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:15:16 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
     14 │   exit(): Array<String> {
   > 15 │     const foo: String = 1 as String;
@@ -335,7 +334,7 @@ invalid.ts:15:16 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:15:30 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
     14 │   exit(): Array<String> {
   > 15 │     const foo: String = 1 as String;
@@ -360,7 +359,7 @@ invalid.ts:15:30 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:19:20 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Boolean' as a type.
+  ! Don't use 'Boolean' as a type.
   
     17 │ }
     18 │ 
@@ -386,7 +385,7 @@ invalid.ts:19:20 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:21:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Boolean' as a type.
+  ! Don't use 'Boolean' as a type.
   
     19 │ let baz: [boolean, Boolean] = [true, false];
     20 │ 
@@ -412,7 +411,7 @@ invalid.ts:21:17 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:23:14 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use '{}' as a type.
+  ! Don't use '{}' as a type.
   
     21 │ let z = true as Boolean;
     22 │ 
@@ -429,7 +428,7 @@ invalid.ts:23:14 lint/complexity/noBannedTypes ━━━━━━━━━━━
 ```
 invalid.ts:25:9 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Function' as a type.
+  ! Don't use 'Function' as a type.
   
     23 │ type Props = {};
     24 │ 
@@ -446,7 +445,7 @@ invalid.ts:25:9 lint/complexity/noBannedTypes ━━━━━━━━━━━�
 ```
 invalid.ts:27:12 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'String' as a type.
+  ! Don't use 'String' as a type.
   
     25 │ let fn: Function = () => true
     26 │ 
@@ -472,7 +471,7 @@ invalid.ts:27:12 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:29:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Boolean' as a type.
+  ! Don't use 'Boolean' as a type.
   
     27 │ const str: String = 'foo';
     28 │ 
@@ -498,7 +497,7 @@ invalid.ts:29:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:31:12 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Number' as a type.
+  ! Don't use 'Number' as a type.
   
     29 │ const bool: Boolean = true;
     30 │ 
@@ -524,7 +523,7 @@ invalid.ts:31:12 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:33:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Symbol' as a type.
+  ! Don't use 'Symbol' as a type.
   
     31 │ const num: Number = 1;
     32 │ 
@@ -550,7 +549,7 @@ invalid.ts:33:13 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:35:15 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'BigInt' as a type.
+  ! Don't use 'BigInt' as a type.
   
     33 │ const symb: Symbol = Symbol('foo');
     34 │ 
@@ -576,7 +575,7 @@ invalid.ts:35:15 lint/complexity/noBannedTypes  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:37:17 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Object' as a type.
+  ! Don't use 'Object' as a type.
   
     35 │ const bigInt: BigInt = 1n;
     36 │ 
@@ -593,7 +592,7 @@ invalid.ts:37:17 lint/complexity/noBannedTypes ━━━━━━━━━━━
 ```
 invalid.ts:39:19 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use 'Object' as a type.
+  ! Don't use 'Object' as a type.
   
     37 │ const lowerObj: Object = {};
     38 │ 
@@ -610,7 +609,7 @@ invalid.ts:39:19 lint/complexity/noBannedTypes ━━━━━━━━━━━
 ```
 invalid.ts:41:15 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use '{}' as a type.
+  ! Don't use '{}' as a type.
   
     39 │ const capitalObj: Object = { a: 'string' };
     40 │ 
@@ -630,7 +629,7 @@ invalid.ts:41:15 lint/complexity/noBannedTypes ━━━━━━━━━━━
 ```
 invalid.ts:45:15 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use '{}' as a type.
+  ! Don't use '{}' as a type.
   
     43 │ } = 1;
     44 │ 

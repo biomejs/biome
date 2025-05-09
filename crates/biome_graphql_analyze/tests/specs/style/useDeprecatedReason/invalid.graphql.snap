@@ -1,0 +1,70 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+query {
+  member @deprecated {
+		id
+	}
+}
+
+query {
+  member @deprecated()
+}
+
+query {
+  member @deprecated(abc: 123)
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:10 lint/style/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The directive `@deprecated` should have a `reason` argument.
+  
+    1 │ query {
+  > 2 │   member @deprecated {
+      │          ^^^^^^^^^^^
+    3 │ 		id
+    4 │ 	}
+  
+  i Add a `reason` argument to the directive.
+  
+
+```
+
+```
+invalid.graphql:8:10 lint/style/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The directive `@deprecated` should have a `reason` argument.
+  
+     7 │ query {
+   > 8 │   member @deprecated()
+       │          ^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Add a `reason` argument to the directive.
+  
+
+```
+
+```
+invalid.graphql:12:10 lint/style/useDeprecatedReason ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The directive `@deprecated` should have a `reason` argument.
+  
+    11 │ query {
+  > 12 │   member @deprecated(abc: 123)
+       │          ^^^^^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Add a `reason` argument to the directive.
+  
+
+```
