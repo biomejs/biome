@@ -3,9 +3,9 @@ use std::collections::{BTreeMap, btree_map::Entry};
 use biome_rowan::Text;
 
 use crate::{
-    DestructureField, GenericTypeParameter, Intersection, ResolvedTypeData, ResolvedTypeMember,
-    TypeData, TypeInstance, TypeMember, TypeReference, TypeResolver, TypeofExpression,
-    TypeofStaticMemberExpression, Union,
+    DestructureField, GenericTypeParameter, ResolvedTypeData, ResolvedTypeMember, TypeData,
+    TypeInstance, TypeMember, TypeReference, TypeResolver, TypeofExpression,
+    TypeofStaticMemberExpression,
 };
 
 impl TypeData {
@@ -261,14 +261,19 @@ impl TypeData {
                         //        `TypeMemberIterator`.
 
                         if let Self::InstanceOf(instance) = object.as_raw_data() {
-                            let object = resolver
-                                .resolve_and_get(&instance.ty)
-                                .map(|ty| ty.as_raw_data());
-
-                            if matches!(object, Some(Self::Intersection(_) | Self::Union(_))) {
+                            let instance_ty = object.apply_module_id_to_reference(&instance.ty);
+                            if resolver
+                                .resolve_and_get(&instance_ty)
+                                .is_some_and(|object| {
+                                    matches!(
+                                        object.as_raw_data(),
+                                        Self::Intersection(_) | Self::Union(_)
+                                    )
+                                })
+                            {
                                 return Self::TypeofExpression(Box::new(
                                     TypeofExpression::StaticMember(TypeofStaticMemberExpression {
-                                        object: instance.ty.clone(),
+                                        object: instance_ty.into_owned(),
                                         member: expr.member.clone(),
                                     }),
                                 ))
@@ -277,7 +282,12 @@ impl TypeData {
                         };
 
                         if let Self::Intersection(intersection) = object.as_raw_data() {
-                            let types = intersection.types().to_vec();
+                            let types: Vec<_> = intersection
+                                .types()
+                                .iter()
+                                .map(|reference| object.apply_module_id_to_reference(reference))
+                                .map(|reference| reference.into_owned())
+                                .collect();
                             let types = types
                                 .into_iter()
                                 .map(|ty| {
@@ -285,7 +295,7 @@ impl TypeData {
                                     let ty = Self::TypeofExpression(Box::new(
                                         TypeofExpression::StaticMember(
                                             TypeofStaticMemberExpression {
-                                                object: ty.clone(),
+                                                object: ty,
                                                 member: expr.member.clone(),
                                             },
                                         ),
@@ -296,11 +306,16 @@ impl TypeData {
                                 })
                                 .collect();
 
-                            return Self::Intersection(Box::new(Intersection(types)));
+                            return Self::intersection_of(types);
                         }
 
                         if let Self::Union(union) = object.as_raw_data() {
-                            let types = union.types().to_vec();
+                            let types: Vec<_> = union
+                                .types()
+                                .iter()
+                                .map(|reference| object.apply_module_id_to_reference(reference))
+                                .map(|reference| reference.into_owned())
+                                .collect();
                             let types = types
                                 .into_iter()
                                 .map(|ty| {
@@ -308,7 +323,7 @@ impl TypeData {
                                     let ty = Self::TypeofExpression(Box::new(
                                         TypeofExpression::StaticMember(
                                             TypeofStaticMemberExpression {
-                                                object: ty.clone(),
+                                                object: ty,
                                                 member: expr.member.clone(),
                                             },
                                         ),
@@ -319,7 +334,7 @@ impl TypeData {
                                 })
                                 .collect();
 
-                            return Self::Union(Box::new(Union(types)));
+                            return Self::union_of(types);
                         }
 
                         let is_class = matches!(object.as_raw_data(), Self::Class(_));

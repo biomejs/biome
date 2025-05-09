@@ -22,11 +22,11 @@ use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, CallSignatureTypeMember, Class, Constructor,
     ConstructorTypeMember, DestructureField, Function, FunctionParameter, FunctionParameterBinding,
-    GenericTypeParameter, Intersection, Literal, MethodTypeMember, Object, PredicateReturnType,
+    GenericTypeParameter, Literal, MethodTypeMember, Object, PredicateReturnType,
     PropertyTypeMember, ReturnType, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember,
     TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
     TypeofCallExpression, TypeofExpression, TypeofNewExpression, TypeofStaticMemberExpression,
-    TypeofThisOrSuperExpression, TypeofValue, Union,
+    TypeofThisOrSuperExpression, TypeofValue,
 };
 
 impl TypeData {
@@ -580,13 +580,13 @@ impl TypeData {
                 // TODO: Handle `infer T` syntax.
                 Self::Unknown
             }
-            AnyTsType::TsIntersectionType(ty) => Self::Intersection(Box::new(Intersection(
+            AnyTsType::TsIntersectionType(ty) => Self::intersection_of(
                 ty.types()
                     .into_iter()
                     .filter_map(|ty| ty.ok())
                     .map(|ty| TypeReference::from_any_ts_type(resolver, &ty))
                     .collect(),
-            ))),
+            ),
             AnyTsType::TsMappedType(_) => {
                 // TODO: Handle mapped types (`type T<U> = { [K in keyof U]: V }`).
                 Self::Unknown
@@ -658,13 +658,13 @@ impl TypeData {
             },
             AnyTsType::TsTypeofType(ty) => Self::from_ts_typeof_type(resolver, ty),
             AnyTsType::TsUndefinedType(_) => Self::Undefined,
-            AnyTsType::TsUnionType(ty) => Self::Union(Box::new(Union(
+            AnyTsType::TsUnionType(ty) => Self::union_of(
                 ty.types()
                     .into_iter()
                     .filter_map(|ty| ty.ok())
                     .map(|ty| TypeReference::from_any_ts_type(resolver, &ty))
                     .collect(),
-            ))),
+            ),
             AnyTsType::TsUnknownType(_) => Self::UnknownKeyword,
             AnyTsType::TsVoidType(_) => Self::VoidKeyword,
         }
@@ -872,7 +872,7 @@ impl TypeData {
             Self::Undefined
         } else {
             id.name()
-                .map(|name| Self::Reference(Box::new(TypeReference::from_name(name))))
+                .map(|name| Self::reference(TypeReference::from_name(name)))
                 .unwrap_or_default()
         }
     }
