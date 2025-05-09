@@ -387,7 +387,6 @@ async fn wait_for_notification(
                 if check(&notification) {
                     return Some(notification);
                 }
-                continue;
             }
             None => break None,
         }

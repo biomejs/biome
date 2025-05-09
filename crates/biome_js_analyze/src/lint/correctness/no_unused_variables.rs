@@ -499,7 +499,6 @@ fn is_unused_expression(expr: &JsSyntaxNode) -> SyntaxResult<bool> {
             JsSyntaxKind::JS_EXPRESSION_STATEMENT => return Ok(true),
             JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
                 previous = parent.text_trimmed_range();
-                continue;
             }
             JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
                 let seq_expr = JsSequenceExpression::unwrap_cast(parent);
@@ -508,7 +507,6 @@ fn is_unused_expression(expr: &JsSyntaxNode) -> SyntaxResult<bool> {
                     return Ok(true);
                 }
                 previous = seq_expr.range();
-                continue;
             }
             JsSyntaxKind::JS_FOR_STATEMENT => {
                 let for_stmt = JsForStatement::unwrap_cast(parent);

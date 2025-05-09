@@ -992,7 +992,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                         break;
                     }
 
-                    continue;
+                    {};
                 }
             }
         }

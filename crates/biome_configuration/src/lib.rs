@@ -78,7 +78,7 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
 /// Limit the size of files to 1.0 MiB by default
 pub const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
     // SAFETY: This constant is initialized with a non-zero value
-    unsafe { NonZeroU64::new_unchecked(1024 * 1024) };
+    NonZeroU64::new(1024 * 1024).unwrap();
 
 /// The configuration that is contained inside the file `biome.json`
 #[derive(
@@ -466,7 +466,7 @@ impl Ord for Version<'_> {
 
         for (a, b) in self_parts.iter().zip(other_parts.iter()) {
             match a.cmp(b) {
-                Ordering::Equal => continue,
+                Ordering::Equal => {}
                 non_eq => return non_eq,
             }
         }

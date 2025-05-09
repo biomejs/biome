@@ -636,7 +636,7 @@ impl LogicalAndChain {
 
                     prev_branch = Some(branch);
                 }
-                LogicalAndChainOrdering::Equal => continue,
+                LogicalAndChainOrdering::Equal => {}
                 LogicalAndChainOrdering::Different => return None,
             }
         }

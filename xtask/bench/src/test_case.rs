@@ -22,11 +22,10 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
 impl TestCase {
     pub fn try_from(file_url: &str) -> Result<Self, String> {
         let url = url::Url::from_str(file_url).map_err(err_to_string)?;
-        let segments = url
+        let filename = url
             .path_segments()
-            .ok_or_else(|| "lib url has no segments".to_string())?;
-        let filename = segments
-            .last()
+            .ok_or_else(|| "lib url has no segments".to_string())?
+            .next_back()
             .ok_or_else(|| "lib url has no segments".to_string())
             // cache the file name to avoid to save files that have the same name, but they come from different repos
             .map(|filename| {

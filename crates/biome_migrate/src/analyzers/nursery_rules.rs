@@ -11,7 +11,7 @@ use biome_rowan::{
     AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind, WalkEvent,
 };
 use rustc_hash::FxHashMap;
-use std::iter::repeat;
+use std::iter::repeat_n;
 
 declare_migration! {
     pub(crate) NurseryRules {
@@ -169,7 +169,7 @@ impl Rule for NurseryRules {
                 //    "ruleB": "error",
                 //    "ruleC": "error"
                 // }
-                .flat_map(|(i, s)| repeat(s).take(if i == 0 { 2 } else { 1 }));
+                .flat_map(|(i, s)| repeat_n(s, if i == 0 { 2 } else { 1 }));
 
             for nursery_rule in nursery_group_object.json_member_list().iter().flatten() {
                 let optional_separator = separator_iterator.next();

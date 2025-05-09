@@ -232,7 +232,7 @@ impl CompletedMarker {
             _ => unreachable!(),
         }
         match events[finish_idx] {
-            ref mut slot @ Event::Finish { .. } => *slot = Event::tombstone(),
+            ref mut slot @ Event::Finish => *slot = Event::tombstone(),
             _ => unreachable!(),
         }
         Marker::new(self.start_pos, self.offset)

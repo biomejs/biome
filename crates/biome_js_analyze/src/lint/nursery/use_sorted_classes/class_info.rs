@@ -5,7 +5,7 @@
 //! - The total variants weight that results from the combination of all the variants.
 //! - The text of the class itself.
 //! - The arbitrary variants of the class.
-//!     It is generated according to the information contained in a `SortConfig`, which includes:
+//!   It is generated according to the information contained in a `SortConfig`, which includes:
 //! - The list of layers, in order.
 //! - The list of utilities, in order, for each layer.
 //! - The list of variants, in order of importance (which is used to compute the variants weight).

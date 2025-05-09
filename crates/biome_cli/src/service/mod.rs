@@ -72,11 +72,11 @@ type JsonRpcResult = Result<Box<RawValue>, TransportError>;
 /// This structs holds an instance of the `tokio` runtime, as well as the
 /// following fields:
 /// - `write_send` is a sender handle to the "write channel", an MPSC channel
-///     that's used to queue up requests to be sent to the server (for simplicity
-///     the requests are pushed to the channel as serialized byte buffers)
+///   that's used to queue up requests to be sent to the server (for simplicity
+///   the requests are pushed to the channel as serialized byte buffers)
 /// - `pending_requests` is handle to a shared hashmap where the keys are `u64`
-///     corresponding to request IDs, and the values are sender handles to oneshot
-///     channel instances that can be consumed to fulfill the associated request
+///   corresponding to request IDs, and the values are sender handles to oneshot
+///   channel instances that can be consumed to fulfill the associated request
 ///
 /// Creating a new `SocketTransport` instance requires providing a `tokio`
 /// runtime instance as well as the "read half" and "write half" of the socket
@@ -87,7 +87,7 @@ type JsonRpcResult = Result<Box<RawValue>, TransportError>;
 ///
 /// This concurrent handling of I/O is implemented useing two "background tasks":
 /// - the `write_task` pulls outgoing messages from the "write channel" and
-///     writes them to the "write half" of the socket
+///   writes them to the "write half" of the socket
 /// - the `read_task` reads incoming messages from the "read half" of the
 /// - the `read_task` reads incoming messages from the "read half" of the
 ///   socket, then looks up a request with an ID corresponding to the received

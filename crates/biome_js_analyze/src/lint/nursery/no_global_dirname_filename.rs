@@ -107,7 +107,7 @@ impl Rule for NoGlobalDirnameFilename {
                             let text = maybe_text(&token)?;
                             return Some((token, text));
                         }
-                        _ => continue,
+                        _ => {}
                     }
                 }
                 None
@@ -178,7 +178,7 @@ impl Rule for NoGlobalDirnameFilename {
                                 break;
                             };
                         }
-                        _ => continue,
+                        _ => {}
                     }
                 }
             }

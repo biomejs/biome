@@ -5,8 +5,8 @@
 //! - `sm:hover:px-2`: variant `sm`, variant `hover`, utility `px-2`.
 //! - `hover:[mask:circle]`: variant `hover`, utility `[mask:circle]` (arbitrary).
 //! - `[&:nth-child(3)]:px-2`: variant `[&:nth-child(3)]` (arbitrary), utility `px-2`.
-//!     The results of the lexer are then used to process classes into `ClassInfo` structs, which are, in
-//!     turn, used to sort the classes.
+//!   The results of the lexer are then used to process classes into `ClassInfo` structs, which are, in
+//!   turn, used to sort the classes.
 
 /// Splits a string into segments based on a list of indexes. The characters at the indexes are not
 /// included in the segments, as they are considered delimiters.

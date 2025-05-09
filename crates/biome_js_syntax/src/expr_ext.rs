@@ -2003,7 +2003,7 @@ impl JsCallExpression {
     /// we need to check its [callee] and its [arguments].
     ///
     /// 1. The [callee] must contain a name or a chain of names that belongs to the
-    ///     test frameworks, for example: `test()`, `test.only()`, etc.
+    ///    test frameworks, for example: `test()`, `test.only()`, etc.
     /// 2. The [arguments] should be at the least 2
     /// 3. The first argument has to be a string literal
     /// 4. The third argument, if present, has to be a number literal

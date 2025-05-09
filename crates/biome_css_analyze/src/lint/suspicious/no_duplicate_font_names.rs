@@ -139,7 +139,7 @@ impl Rule for NoDuplicateFontNames {
                     }
                     family_names.insert(normalized_font_name);
                 }
-                _ => continue,
+                _ => {}
             }
         }
         None
