@@ -10,8 +10,8 @@ All other lint rules had a default severity level set to `warn`.
 
 We have adjusted the default severity level of every rule, whether recommended or not, to better communicate the _severity_ that a diagnostic highlights.
 
-- Rules that report hard errors, highly likely erroneous code, dangerous code, or accessibility issues now have a default severity level of `error`.
-- Rules that report possibly erroneous code, or code that could be cleaner when rewrote another way now have a default severity level of `warn`.
+- Rules that report hard errors, likely erroneous code, dangerous code, or accessibility issues now have a default severity level of `error`.
+- Rules that report possibly erroneous codes, or code that could be cleaner if rewritten in another way now have a default severity level of `warn`.
 - Rules that reports stylistic suggestions now have a default severity level of `info`.
 
 You can use the CLI option `--diagnostic-level=error` to display only errors, or `--diagnostic-level=warning` to display both errors and warnings.

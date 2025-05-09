@@ -81,6 +81,90 @@ _Biome_ follows a naming convention according to what the rule does:
    > [!NOTE]
    > For example, the rule to mandating the use valid values for the HTML `lang` attribute is named `useValidLang`.
 
+We also try to ensure consistency in the naming of rules.
+Please feel free to refer to existing rules for inspiration when naming new ones.
+Here is a non-exhaustive list of common names:
+
+- `noConstant<Concept>`
+
+  These rules report a computation that is always evaluated to the same value.
+  For example `noConstantMathMinMaxClamp` report combination of `min` and `max` that always evaluate to a minimum or maximum.
+
+- `noDuplicate<Concept>`
+
+  These rules report a duplication that override a previous occurrence and is likely an error.
+  For example, `noDuplicateObjectKeys` reports a literal object containing two properties with the same name.
+
+- `noEmpty<Concept>`
+
+  These rules report empty codes, which could be the result of an oversight or could be improved by including a comment.
+  For example `noEmptyBlockStatements` reports empty block statements.
+
+- `noExcessive<Concept>`
+
+  These rules report codes that exceed some limits that are generally configurable.
+  For example `noExcessiveNestedTestSuites` reports code with nested test suites that exceed a configured threshold.
+
+- `noRedundant<Concept>`
+
+  These rules report codes that are redundant.
+  For example `noRedundantUseStrict` report `"use strict"` directive that are made redundant because of a parent `"use strict"` directive.
+
+- `noUnused<Concept>`
+
+  These rules report entities that are unused. It is usually the result of uncompleted refactorings.
+  For example `noUnusedVariables` reports variables that are not used.
+
+- `noUseless<Concept>`
+
+  These rules report codes which are unnecessary and could be removed or simplified without altering the program's behavior.
+  For example, `noUselessConstructor` reports constructors that are equivalent to the default constructor and can then be removed.
+
+- `noInvalid<Concept>` and `useValid<Concept>`
+
+  These rules report errors which are the result of mistyping and led to runtime errors.
+  Usually, we use `noInvalid<Concept>` for runtime errors and `useValid<Concept>` for code that always evaluate to a constant.
+  For example, `noInvalidConstructorSuper` reports errors in the use of `super()` in class constructors.
+  `useValidTypeof` reports uses of `typeof` that always evaluates to `false`.
+
+- `noUnknown<Concept>`
+
+  These rules report errors which are the result of mistyping and led to runtime errors or ignored code.
+  This naming convention is used for CSS rules.
+  For example, `noUnknownUnit` reports CSS units that are not standarized.
+
+- `noMisleading<Concept>`
+
+  These rules report codes that can be valid, but likely to mislead readers.
+  For example, `noMisleadingCharacterClass` reports character classes in non-Unicode regular expressions that use multiple code points.
+
+- `noRestricted<Concept>`
+
+  These rules report entities that the user wants to ban.
+  For example, `noRestrictedGlobals` allows to black lists some global variable names.
+
+- `noUndeclared<Concept>`
+
+  These rules report an entity that is not defined.
+  For example, `noUndeclaredVariables` reports variables that are not defined.
+
+- `noUnsafe<Concept>`
+
+  These rules report codes that can lead at runtime failures.
+  For example, `noUnsafeOptionalChaining` reports uses of optional chains in contexts where the `undefined` value is not allowed.
+
+- `useConsistent<Concept>`
+
+  These rules ensure consistency across the entire code base.
+  For example, `useConsistentArrayType` ensures that developers use either `Arra<T>` or `T[]`.
+
+- `useShorthand<Concept>`
+
+  These rules report syntax that can be rewritten using equivalent compact syntax.
+  For example `useShorthandAssign` promotes the use of combined assignment and operations.
+  Note that sometimes it is better to choose `useConsistent<Concept>` in order to offer choices to users.
+  You should choose `useShorthand<Concept>` if there is no doubt that the style is widely accepted as better.
+
 #### What a Rule should say to the User
 
 A rule should be informative to the user, and give as much explanation as possible.
@@ -122,11 +206,11 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    # $ just new-js-assistrule useMyRuleName
    # $ just new-json-assistrule useMyRuleName
    ```
+
    The script `just new-js-lintrule` script will generate a bunch of files for the _JavaScript_ language inside the `biome_js_analyze` crate.
    Among the other files, you'll find a file called `use_my_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
 
 2. Let's have a look at the generated code in  `use_my_rule_name.rs`:
-
 
    ```rust
    ...
@@ -156,7 +240,8 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 
      Use `()` if your rule does not have additional options.
 
-   - The **`Query`** type defines the entities for which your your rule's `UseMyRuleName::run` function will be invoked:
+   - The **`Query`** type defines the entities for which your rule's `UseMyRuleName::run` function will be invoked:
+
      ```rust
      type Query = Ast<JsIdentifierBinding>;
      ```
@@ -240,7 +325,6 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    }
    ```
 
-
 6. Optional: Implement the `action` function if your rule is able to provide a [code action](#code-actions):
 
    ```rust
@@ -279,7 +363,6 @@ That's it! Now, let's [test the rule](#testing-the-rule).
 ### Coding Tips for Rules
 
 Below, there are many tips and guidelines on how to create a lint rule using Biome infrastructure.
-
 
 #### `declare_lint_rule!` macro
 
@@ -376,7 +459,15 @@ impl Rule for ExampleRule {
 
 #### Rule severity
 
-The macro accepts a `severity` field, of type `biome_diagnostics::Severity`. By default, rules without `severity` will start with `Severity::Information`.
+Every diagnostic emitted by a rule has a severity set to `error`, `warn`, or `info`.
+The `declare_lint_rule!` macro accepts a `severity` field, of type `biome_diagnostics::Severity`.
+By default, rules without `severity` will start with `Severity::Information`.
+
+Here are some guidelines to choose a severity:
+
+- Rules with the `error` severity report hard errors, likely erroneous code, dangerous code, or accessibility issues.
+- Rules with the `warn` severity report possibly erroneous code, or code that could be cleaner if rewritten in another way.
+- Rules with the `info` severity report stylistic suggestions.
 
 If you want to change the default severity, you need to assign it:
 
