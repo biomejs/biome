@@ -1582,6 +1582,10 @@ export interface Nursery {
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
 	/**
+	 * Require switch-case statements to be exhaustive.
+	 */
+	useExhaustiveSwitchCases?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce types in functions, methods, variables, and parameters.
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
@@ -3469,6 +3473,7 @@ export type Category =
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
