@@ -30,7 +30,7 @@ describe("Biome WebAssembly lintContent", () => {
 			expect(categories).toMatchObject([
 				"lint/suspicious/noDebugger",
 				"lint/complexity/noAdjacentSpacesInRegex",
-				"lint/correctness/noUnusedVariables"
+				"lint/correctness/noUnusedVariables",
 			]);
 		});
 		it("should not fix the code", () => {
@@ -50,7 +50,7 @@ describe("Biome WebAssembly lintContent", () => {
 			const categories = result.diagnostics.map((d) => d.category);
 			expect(categories).toMatchObject([
 				"lint/suspicious/noDebugger",
-				"lint/correctness/noUnusedVariables"
+				"lint/correctness/noUnusedVariables",
 			]);
 		});
 		it("should fix the SafeFixes only", () => {
