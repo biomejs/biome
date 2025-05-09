@@ -14,7 +14,7 @@ use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{Language, SyntaxKind, SyntaxNode, SyntaxSlot};
+use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
@@ -510,42 +510,92 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
     );
 }
 
-/// Checks whether valid snapshot file contains
-/// `/* should not generate diagnostics */`" comment
-pub fn assert_valid_snapshot_contains_no_diagnostic_comment(
-    snapshot_path: &Utf8Path,
-    snapshot_code: &str,
+/// Asserts whether test files containing comments:
+/// - `should not generate diagnostics` emit no diagnostics
+/// - `should generate diagnostics` emit diagnostics
+///
+/// Additionally it checks that valid test files contain
+/// comment enforcing no diagnostics.
+///
+/// ## Examples
+///
+/// `valid.js` file
+/// ```js
+/// /** should not generate diagnostics */
+/// ```
+/// `valid.yml` file
+/// ```yaml
+/// # should not generate diagnostics
+/// ```
+///
+/// `in+valid.js` file
+/// ```js
+/// /** should generate diagnostics */
+/// ```
+///
+pub fn assert_diagnostics_expectation_comment<L: Language>(
+    file_path: &Utf8Path,
+    syntax: &SyntaxNode<L>,
+    diagnostics_quantity: usize,
 ) {
-    let should_contain_comment = match snapshot_path.extension().unwrap_or_default() {
+    let no_diagnostics_comment_text = "should not generate diagnostics";
+    let diagnostics_comment_text = "should generate diagnostics";
+
+    let is_valid_test_file = match file_path.extension().unwrap_or_default() {
         // Excluded files types which cannot contain comment in the source code
         "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" => false,
         _ => {
-            let name = snapshot_path.file_name().unwrap().to_ascii_lowercase_cow();
+            let name = file_path.file_name().unwrap().to_ascii_lowercase_cow();
             // We can't know all the valid file names, but this should catch most common cases.
             name.contains("valid") && !name.contains("invalid")
         }
     };
 
-    if should_contain_comment
-        && !snapshot_code.contains("/* should not generate diagnostics */")
-        && !snapshot_code.contains("/* should generate diagnostics */")
-    {
-        panic!(
-            "Valid test files should start with a comment \"/* should not generate diagnostics */\"\nIf it is intended you can add \"/* should generate diagnostics */\" instead.\nFile: {}",
-            snapshot_path
-        );
+    enum Diagnostics {
+        ShouldGenerateDiagnostics,
+        ShouldNotGenerateDiagnostics,
     }
-}
 
-pub fn assert_valid_snapshot_did_not_generate_diagnostics(
-    snapshot_path: &Utf8Path,
-    snapshot_code: &str,
-    diagnostics_quantity: usize,
-) {
-    if diagnostics_quantity > 0 && snapshot_code.contains("/* should not generate diagnostics */") {
-        panic!(
-            "This test should not generate diagnostics\nFile: {}",
-            snapshot_path
-        );
+    let diagnostic_comment = syntax.preorder_tokens(Direction::Next).find_map(|token| {
+        for piece in token.leading_trivia().pieces() {
+            if let Some(comment) = piece.as_comments() {
+                let text = comment.text();
+
+                if text.contains(no_diagnostics_comment_text) {
+                    return Some(Diagnostics::ShouldNotGenerateDiagnostics);
+                }
+
+                if text.contains(diagnostics_comment_text) {
+                    return Some(Diagnostics::ShouldGenerateDiagnostics);
+                }
+            }
+        }
+
+        None
+    });
+
+    let has_diagnostics = diagnostics_quantity > 0;
+    match diagnostic_comment {
+        Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
+            if has_diagnostics {
+                panic!(
+                    "This test should not generate diagnostics\nFile: {}",
+                    file_path
+                );
+            }
+        }
+        Some(Diagnostics::ShouldGenerateDiagnostics) => {
+            if !has_diagnostics {
+                panic!("This test should generate diagnostics\nFile: {}", file_path);
+            }
+        }
+        None => {
+            if is_valid_test_file {
+                panic!(
+                    "Valid test files should contain comment `{}`\nFile: {}",
+                    no_diagnostics_comment_text, file_path
+                );
+            }
+        }
     }
 }

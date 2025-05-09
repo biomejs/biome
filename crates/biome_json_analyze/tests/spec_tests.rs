@@ -4,11 +4,10 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    CheckActionType, assert_errors_are_absent,
-    assert_valid_snapshot_contains_no_diagnostic_comment,
-    assert_valid_snapshot_did_not_generate_diagnostics, code_fix_to_string,
-    create_analyzer_options, diagnostic_to_string, has_bogus_nodes_or_empty_slots, parse_test_path,
-    register_leak_checker, write_analyzer_snapshot,
+    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
+    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
+    write_analyzer_snapshot,
 };
 use camino::Utf8Path;
 use std::ops::Deref;
@@ -61,13 +60,11 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    assert_valid_snapshot_contains_no_diagnostic_comment(input_file, &input_code);
-
     let Ok(file_source) = input_file.try_into() else {
         return;
     };
 
-    let diagnostics_quantity = analyze_and_snap(
+    analyze_and_snap(
         &mut snapshot,
         &input_code,
         file_source,
@@ -84,12 +81,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
-
-    assert_valid_snapshot_did_not_generate_diagnostics(
-        input_file,
-        &input_code,
-        diagnostics_quantity,
-    );
 }
 
 fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
@@ -150,7 +141,7 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     action_type: CheckActionType,
     parser_options: JsonParserOptions,
-) -> usize {
+) {
     let parsed = parse_json(input_code, parser_options);
     let root = parsed.tree();
 
@@ -198,7 +189,7 @@ pub(crate) fn analyze_and_snap(
         langauge.as_str(),
     );
 
-    diagnostics.len()
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
 }
 
 fn check_code_action(

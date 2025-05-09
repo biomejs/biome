@@ -11,12 +11,11 @@ use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    CheckActionType, assert_errors_are_absent,
-    assert_valid_snapshot_contains_no_diagnostic_comment,
-    assert_valid_snapshot_did_not_generate_diagnostics, code_fix_to_string,
-    create_analyzer_options, diagnostic_to_string, has_bogus_nodes_or_empty_slots,
-    module_graph_for_test_file, parse_test_path, project_layout_with_node_manifest,
-    register_leak_checker, scripts_from_json, write_analyzer_snapshot,
+    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
+    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path,
+    project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
+    write_analyzer_snapshot,
 };
 use camino::Utf8Path;
 use std::ops::Deref;
@@ -97,9 +96,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    assert_valid_snapshot_contains_no_diagnostic_comment(input_file, &input_code);
-
-    let diagnostics_quantity = if let Some(scripts) = scripts_from_json(extension, &input_code) {
+    if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,
@@ -113,8 +110,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 &[],
             );
         }
-
-        0
     } else {
         let Ok(source_type) = input_file.try_into() else {
             return;
@@ -129,7 +124,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             CheckActionType::Lint,
             JsParserOptions::default(),
             &[],
-        )
+        );
     };
 
     insta::with_settings!({
@@ -138,12 +133,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
-
-    assert_valid_snapshot_did_not_generate_diagnostics(
-        input_file,
-        &input_code,
-        diagnostics_quantity,
-    );
 }
 
 #[expect(clippy::too_many_arguments)]
@@ -157,7 +146,7 @@ pub(crate) fn analyze_and_snap(
     check_action_type: CheckActionType,
     parser_options: JsParserOptions,
     plugins: AnalyzerPluginSlice,
-) -> usize {
+) {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
     let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
@@ -268,7 +257,7 @@ pub(crate) fn analyze_and_snap(
         *snapshot = snapshot.replace('\\', "/");
     }
 
-    diagnostics.len()
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
 }
 
 fn check_code_action(

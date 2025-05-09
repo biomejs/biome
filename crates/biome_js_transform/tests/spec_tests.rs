@@ -5,8 +5,7 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    assert_errors_are_absent, assert_valid_snapshot_contains_no_diagnostic_comment,
-    assert_valid_snapshot_did_not_generate_diagnostics, create_analyzer_options,
+    assert_diagnostics_expectation_comment, assert_errors_are_absent, create_analyzer_options,
     diagnostic_to_string, has_bogus_nodes_or_empty_slots, register_leak_checker, scripts_from_json,
     write_transformation_snapshot,
 };
@@ -49,9 +48,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    assert_valid_snapshot_contains_no_diagnostic_comment(input_file, &input_code);
-
-    let diagnostics_quantity = if let Some(scripts) = scripts_from_json(extension, &input_code) {
+    if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,
@@ -63,8 +60,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 JsParserOptions::default(),
             );
         }
-
-        0
     } else {
         let Ok(source_type) = input_file.try_into() else {
             return;
@@ -77,7 +72,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             JsParserOptions::default(),
-        )
+        );
     };
 
     insta::with_settings!({
@@ -86,12 +81,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
-
-    assert_valid_snapshot_did_not_generate_diagnostics(
-        input_file,
-        &input_code,
-        diagnostics_quantity,
-    );
 }
 
 pub(crate) fn analyze_and_snap(
@@ -102,7 +91,7 @@ pub(crate) fn analyze_and_snap(
     file_name: &str,
     input_file: &Utf8Path,
     parser_options: JsParserOptions,
-) -> usize {
+) {
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
@@ -140,7 +129,7 @@ pub(crate) fn analyze_and_snap(
         source_type.file_extension(),
     );
 
-    diagnostics.len()
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
 }
 
 fn check_transformation(

@@ -4,6 +4,6 @@ expression: valid.graphql
 ---
 # Input
 ```graphql
-/* should not generate diagnostics */
+# should not generate diagnostics
 // var a = 1;
 ```

@@ -4,7 +4,7 @@ use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    CheckActionType, assert_errors_are_absent, assert_valid_snapshot_did_not_generate_diagnostics,
+    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
@@ -49,10 +49,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    // FIXME: Enable this assertion once all valid snapshots contain no diagnostic comment
-    // assert_valid_snapshot_contains_no_diagnostic_comment(input_file, &input_code);
-
-    let diagnostics_quantity = if let Some(scripts) = scripts_from_json(extension, &input_code) {
+    if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
                 &mut snapshot,
@@ -64,8 +61,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 CheckActionType::Lint,
             );
         }
-
-        0
     } else {
         let Ok(source_type) = input_file.try_into() else {
             return;
@@ -78,7 +73,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             CheckActionType::Lint,
-        )
+        );
     };
 
     insta::with_settings!({
@@ -87,12 +82,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
-
-    assert_valid_snapshot_did_not_generate_diagnostics(
-        input_file,
-        &input_code,
-        diagnostics_quantity,
-    );
 }
 
 pub(crate) fn analyze_and_snap(
@@ -103,7 +92,7 @@ pub(crate) fn analyze_and_snap(
     file_name: &str,
     input_file: &Utf8Path,
     check_action_type: CheckActionType,
-) -> usize {
+) {
     let parsed = parse_graphql(input_code);
     let root = parsed.tree();
 
@@ -156,7 +145,7 @@ pub(crate) fn analyze_and_snap(
         "graphql",
     );
 
-    diagnostics.len()
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
 }
 
 fn check_code_action(
