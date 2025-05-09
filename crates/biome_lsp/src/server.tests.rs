@@ -48,9 +48,9 @@ use super::*;
 macro_rules! uri {
     ($path:literal) => {
         if cfg!(windows) {
-            lsp::Uri::from_str(concat!("/z%3A/workspace/", $path)).unwrap()
+            lsp::Uri::from_str(concat!("file:///z%3A/workspace/", $path)).unwrap()
         } else {
-            lsp::Uri::from_str(concat!("/workspace/", $path)).unwrap()
+            lsp::Uri::from_str(concat!("file:///workspace/", $path)).unwrap()
         }
     };
 }
@@ -64,6 +64,10 @@ macro_rules! clear_notifications {
             let _ = $channel.changed().await;
         }
     };
+}
+
+fn to_utf8_file_path_buf(uri: Uri) -> Utf8PathBuf {
+    Utf8PathBuf::from_path_buf(uri.to_file_path().unwrap().to_path_buf()).unwrap()
 }
 
 fn fixable_diagnostic(line: u32) -> Result<Diagnostic> {
@@ -1615,9 +1619,9 @@ async fn plugin_load_error_show_message() -> Result<()> {
 
     const INVALID_PLUGIN_CONTENT: &[u8] = br#"foo"#;
 
-    fs.insert(Utf8PathBuf::from_str(uri!("biome.json").as_str())?, config);
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
     fs.insert(
-        Utf8PathBuf::from_str(uri!("plugin").as_str())?,
+        to_utf8_file_path_buf(uri!("plugin")),
         INVALID_PLUGIN_CONTENT,
     );
 
@@ -1667,7 +1671,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
         }
     }"#;
 
-    fs.insert(Utf8PathBuf::from_str(uri!("biome.json").as_str())?, config);
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
     let factory = ServerFactory::new_with_fs(Box::new(fs));
     let (service, client) = factory.create().into_inner();
@@ -2087,7 +2091,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
     ]
 }"#;
 
-    fs.insert(Utf8PathBuf::from_str(uri!("biome.json").as_str())?, config);
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
     let factory = ServerFactory::new_with_fs(Box::new(fs));
     let (service, client) = factory.create().into_inner();
@@ -2581,7 +2585,7 @@ async fn does_not_format_ignored_files() -> Result<()> {
         }
     }"#;
 
-    fs.insert(Utf8PathBuf::from_str(uri!("biome.json").as_str())?, config);
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
     let factory = ServerFactory::new_with_fs(Box::new(fs));
     let (service, client) = factory.create().into_inner();
@@ -2896,7 +2900,7 @@ async fn pull_source_assist_action() -> Result<()> {
         }
     }"#;
 
-    fs.insert(Utf8PathBuf::from_str(uri!("biome.json").as_str())?, config);
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
 
     let factory = ServerFactory::new_with_fs(Box::new(fs));
     let (service, client) = factory.create().into_inner();
