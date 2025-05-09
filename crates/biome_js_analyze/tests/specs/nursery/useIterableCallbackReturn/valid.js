@@ -161,3 +161,9 @@ window.from([], () => {});
     }
 });
 [].toSorted((a, b) => a - b);
+
+// Async and generator callbacks
+[].map(async (a) => {});
+[].map(function* (a) {});
+[].map(async function (a) {});
+[].map(async function* (a) {});
