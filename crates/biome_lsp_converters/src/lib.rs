@@ -3,7 +3,7 @@
 #![deny(clippy::use_self)]
 
 use biome_rowan::TextSize;
-use tower_lsp::lsp_types::{ClientCapabilities, PositionEncodingKind};
+use tower_lsp_server::lsp_types::{ClientCapabilities, PositionEncodingKind};
 
 pub mod from_proto;
 pub mod line_index;
@@ -94,7 +94,7 @@ mod tests {
     use crate::to_proto::position;
     use crate::{LineCol, PositionEncoding, WideEncoding};
     use biome_rowan::TextSize;
-    use tower_lsp::lsp_types::Position;
+    use tower_lsp_server::lsp_types::Position;
 
     macro_rules! check_conversion {
         ($line_index:ident : $position:expr => $text_size:expr ) => {

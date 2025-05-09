@@ -7,12 +7,13 @@ use crate::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::{BitFlags, bitflags};
 use smallvec::SmallVec;
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::fs::read_to_string;
 use std::hash::Hash;
 use std::ops::DerefMut;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::{fs::File, io, io::Write, ops::Deref};
 
 /// The priority of the file
@@ -282,6 +283,14 @@ impl TryFrom<PathBuf> for BiomePath {
     type Error = PathBuf;
     fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
         let path = Utf8PathBuf::from_path_buf(value)?;
+        Ok(Self::new(path))
+    }
+}
+
+impl TryFrom<Cow<'_, Path>> for BiomePath {
+    type Error = PathBuf;
+    fn try_from(value: Cow<'_, Path>) -> Result<Self, Self::Error> {
+        let path = Utf8PathBuf::from_path_buf(value.as_ref().into())?;
         Ok(Self::new(path))
     }
 }

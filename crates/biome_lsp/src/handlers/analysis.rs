@@ -1,3 +1,4 @@
+#![expect(clippy::mutable_key_type)]
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
@@ -21,8 +22,8 @@ use biome_service::workspace::{
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Sub;
-use tower_lsp::lsp_types::{
-    self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse,
+use tower_lsp_server::lsp_types::{
+    self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse, Uri,
 };
 use tracing::{debug, info};
 
@@ -38,7 +39,13 @@ fn fix_all_kind() -> CodeActionKind {
 /// Queries the [`AnalysisServer`] for code actions of the file matching its path
 ///
 /// If the AnalysisServer has no matching file, results in error.
-#[tracing::instrument(level = "debug", skip_all, fields(uri = display(& params.text_document.uri), range = debug(params.range), only = debug(& params.context.only), diagnostics = debug(& params.context.diagnostics)), err)]
+#[tracing::instrument(level = "debug", skip_all,
+    fields(
+        uri = display(& params.text_document.uri.as_str()),
+        range = debug(params.range),
+        only = debug(& params.context.only),
+        diagnostics = debug(& params.context.diagnostics)
+    ), err)]
 pub(crate) fn code_actions(
     session: &Session,
     params: CodeActionParams,
@@ -107,8 +114,10 @@ pub(crate) fn code_actions(
     let cursor_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
         .with_context(|| {
             format!(
-                "failed to access range {:?} in document {url} {:?}",
-                params.range, &doc.line_index,
+                "failed to access range {:?} in document {} {:?}",
+                params.range,
+                url.as_str(),
+                &doc.line_index,
             )
         })?;
     let cursor_range = if let Some(offset) = offset {
@@ -258,10 +267,10 @@ pub(crate) fn code_actions(
 }
 
 /// Generate a "fix all" code action for the given document
-#[tracing::instrument(level = "debug", skip(session))]
+#[tracing::instrument(level = "debug", skip(session, url))]
 fn fix_all(
     session: &Session,
-    url: &lsp::Url,
+    url: &Uri,
     path: BiomePath,
     line_index: &LineIndex,
     diagnostics: &[lsp::Diagnostic],

@@ -25,9 +25,9 @@ use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::{Notify, watch};
 use tokio::task::spawn_blocking;
-use tower_lsp::jsonrpc::Result as LspResult;
-use tower_lsp::{ClientSocket, lsp_types::*};
-use tower_lsp::{LanguageServer, LspService, Server};
+use tower_lsp_server::jsonrpc::Result as LspResult;
+use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
+use tower_lsp_server::{LanguageServer, LspService, Server};
 use tracing::{error, info, warn};
 
 pub struct LSPServer {
@@ -224,7 +224,6 @@ impl LSPServer {
     }
 }
 
-#[tower_lsp::async_trait]
 impl LanguageServer for LSPServer {
     // The `root_path` field is deprecated, but we still read it so we can print a warning about it
     #[expect(deprecated)]
@@ -232,7 +231,6 @@ impl LanguageServer for LSPServer {
         level = "debug",
         skip_all,
         fields(
-            root_uri = params.root_uri.as_ref().map(display),
             capabilities = debug(&params.capabilities),
             client_info = params.client_info.as_ref().map(debug),
             root_path = params.root_path,
@@ -313,7 +311,7 @@ impl LanguageServer for LSPServer {
             .map(|change| change.uri.to_file_path());
         for file_path in file_paths {
             match file_path {
-                Ok(file_path) => {
+                Some(file_path) => {
                     let base_path = self.session.base_path();
                     if let Some(base_path) = base_path {
                         let possible_biome_json = file_path.strip_prefix(&base_path);
@@ -332,7 +330,7 @@ impl LanguageServer for LSPServer {
                         }
                     }
                 }
-                Err(_) => {
+                None => {
                     error!(
                         "The Workspace root URI {file_path:?} could not be parsed as a filesystem path"
                     );
