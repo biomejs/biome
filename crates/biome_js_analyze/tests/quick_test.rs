@@ -26,12 +26,9 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"import type {Foo} from './panicFoo';
+    const SOURCE: &str = r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
 
-let instance: Foo;
-
-// This call expression makes the `noFloatingPromises` rule work.
-instance.doSomething();
+returnPromiseResult();
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
@@ -39,16 +36,9 @@ instance.doSomething();
     let mut fs = TemporaryFs::new("quick_test");
     fs.create_file(FILENAME, SOURCE);
     fs.create_file(
-        "panicFoo.ts",
-        r#"// Removing this fixes the problem.
-import type elliptic from 'elliptic';
-
-export class Foo {
-  // Removing this also fixes the problem.
-  prop: string;
-
-  // Turning this into a method declaration also fixes the problem.
-  doSomething = (): void => {};
+        "returnPromiseResult.ts",
+        r#"export function returnPromiseResult(): Promise<{ result: true | false }> {
+  return new Promise(resolve => resolve({ result: true }));
 }
 "#,
     );
