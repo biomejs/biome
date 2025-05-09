@@ -1,5 +1,6 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsForInitializer, AnyJsObjectMember, AnyJsStatement,
@@ -55,6 +56,7 @@ declare_lint_rule! {
             RuleSource::EslintUnicorn("no-for-loop"),
         ],
         recommended: false,
+        severity: Severity::Information,
     }
 }
 

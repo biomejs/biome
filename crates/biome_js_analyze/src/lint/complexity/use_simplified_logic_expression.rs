@@ -1,6 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBooleanLiteralExpression, JsLogicalExpression,
@@ -50,6 +51,7 @@ declare_lint_rule! {
         name: "useSimplifiedLogicExpression",
         language: "js",
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

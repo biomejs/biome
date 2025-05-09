@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidParentsWithHigherPrecedence.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -33,7 +32,7 @@ obj[Math.pow(a, b)]
 ```
 invalidParentsWithHigherPrecedence.js:1:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
   > 1 │ + Math.pow(a, b);
       │   ^^^^^^^^^^^^^^
@@ -53,7 +52,7 @@ invalidParentsWithHigherPrecedence.js:1:3 lint/style/useExponentiationOperator  
 ```
 invalidParentsWithHigherPrecedence.js:2:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ + Math.pow(a, b);
   > 2 │ - Math.pow(a, b);
@@ -75,7 +74,7 @@ invalidParentsWithHigherPrecedence.js:2:3 lint/style/useExponentiationOperator  
 ```
 invalidParentsWithHigherPrecedence.js:3:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ + Math.pow(a, b);
     2 │ - Math.pow(a, b);
@@ -99,7 +98,7 @@ invalidParentsWithHigherPrecedence.js:3:3 lint/style/useExponentiationOperator  
 ```
 invalidParentsWithHigherPrecedence.js:4:8 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     2 │ - Math.pow(a, b);
     3 │ ! Math.pow(a, b);
@@ -123,7 +122,7 @@ invalidParentsWithHigherPrecedence.js:4:8 lint/style/useExponentiationOperator  
 ```
 invalidParentsWithHigherPrecedence.js:5:6 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     3 │ ! Math.pow(a, b);
     4 │ typeof Math.pow(a, b);
@@ -147,7 +146,7 @@ invalidParentsWithHigherPrecedence.js:5:6 lint/style/useExponentiationOperator  
 ```
 invalidParentsWithHigherPrecedence.js:6:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     4 │ typeof Math.pow(a, b);
     5 │ void Math.pow(a, b);
@@ -171,7 +170,7 @@ invalidParentsWithHigherPrecedence.js:6:1 lint/style/useExponentiationOperator  
 ```
 invalidParentsWithHigherPrecedence.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     5 │ void Math.pow(a, b);
     6 │ Math.pow(a, b) .toString();
@@ -195,7 +194,7 @@ invalidParentsWithHigherPrecedence.js:7:1 lint/style/useExponentiationOperator  
 ```
 invalidParentsWithHigherPrecedence.js:8:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      6 │ Math.pow(a, b) .toString();
      7 │ Math.pow(a, b) ();
@@ -219,7 +218,7 @@ invalidParentsWithHigherPrecedence.js:8:1 lint/style/useExponentiationOperator  
 ```
 invalidParentsWithHigherPrecedence.js:9:16 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      7 │ Math.pow(a, b) ();
      8 │ Math.pow(a, b) ``;
@@ -243,7 +242,7 @@ invalidParentsWithHigherPrecedence.js:9:16 lint/style/useExponentiationOperator 
 ```
 invalidParentsWithHigherPrecedence.js:12:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     11 │ // parents with a higher precedence, but the expression's role doesn't require parens
   > 12 │ f(Math.pow(a, b))
@@ -266,7 +265,7 @@ invalidParentsWithHigherPrecedence.js:12:3 lint/style/useExponentiationOperator 
 ```
 invalidParentsWithHigherPrecedence.js:13:8 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     11 │ // parents with a higher precedence, but the expression's role doesn't require parens
     12 │ f(Math.pow(a, b))
@@ -290,7 +289,7 @@ invalidParentsWithHigherPrecedence.js:13:8 lint/style/useExponentiationOperator 
 ```
 invalidParentsWithHigherPrecedence.js:14:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     12 │ f(Math.pow(a, b))
     13 │ f(foo, Math.pow(a, b))
@@ -314,7 +313,7 @@ invalidParentsWithHigherPrecedence.js:14:3 lint/style/useExponentiationOperator 
 ```
 invalidParentsWithHigherPrecedence.js:15:8 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     13 │ f(foo, Math.pow(a, b))
     14 │ f(Math.pow(a, b), foo)
@@ -338,7 +337,7 @@ invalidParentsWithHigherPrecedence.js:15:8 lint/style/useExponentiationOperator 
 ```
 invalidParentsWithHigherPrecedence.js:16:7 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     14 │ f(Math.pow(a, b), foo)
     15 │ f(foo, Math.pow(a, b), bar)
@@ -362,7 +361,7 @@ invalidParentsWithHigherPrecedence.js:16:7 lint/style/useExponentiationOperator 
 ```
 invalidParentsWithHigherPrecedence.js:17:12 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     15 │ f(foo, Math.pow(a, b), bar)
     16 │ new F(Math.pow(a, b))
@@ -386,7 +385,7 @@ invalidParentsWithHigherPrecedence.js:17:12 lint/style/useExponentiationOperator
 ```
 invalidParentsWithHigherPrecedence.js:18:7 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     16 │ new F(Math.pow(a, b))
     17 │ new F(foo, Math.pow(a, b))
@@ -410,7 +409,7 @@ invalidParentsWithHigherPrecedence.js:18:7 lint/style/useExponentiationOperator 
 ```
 invalidParentsWithHigherPrecedence.js:19:12 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     17 │ new F(foo, Math.pow(a, b))
     18 │ new F(Math.pow(a, b), foo)
@@ -434,7 +433,7 @@ invalidParentsWithHigherPrecedence.js:19:12 lint/style/useExponentiationOperator
 ```
 invalidParentsWithHigherPrecedence.js:20:5 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     18 │ new F(Math.pow(a, b), foo)
     19 │ new F(foo, Math.pow(a, b), bar)
@@ -458,7 +457,7 @@ invalidParentsWithHigherPrecedence.js:20:5 lint/style/useExponentiationOperator 
 ```
 invalidParentsWithHigherPrecedence.js:21:7 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     19 │ new F(foo, Math.pow(a, b), bar)
     20 │ obj[Math.pow(a, b)]

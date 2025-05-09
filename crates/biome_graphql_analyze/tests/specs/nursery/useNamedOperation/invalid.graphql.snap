@@ -1,7 +1,6 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
 expression: invalid.graphql
-snapshot_kind: text
 ---
 # Input
 ```graphql
@@ -15,7 +14,7 @@ subscription {}
 ```
 invalid.graphql:1:1 lint/nursery/useNamedOperation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Anonymous GraphQL operations are forbidden. Make sure to name your query.
+  × Anonymous GraphQL operations are forbidden. Make sure to name your query.
   
   > 1 │ query { human }
       │ ^^^^^
@@ -34,7 +33,7 @@ invalid.graphql:1:1 lint/nursery/useNamedOperation  FIXABLE  ━━━━━━�
 ```
 invalid.graphql:2:1 lint/nursery/useNamedOperation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Anonymous GraphQL operations are forbidden. Make sure to name your mutation.
+  × Anonymous GraphQL operations are forbidden. Make sure to name your mutation.
   
     1 │ query { human }
   > 2 │ mutation { ...Type }
@@ -54,7 +53,7 @@ invalid.graphql:2:1 lint/nursery/useNamedOperation  FIXABLE  ━━━━━━�
 ```
 invalid.graphql:3:1 lint/nursery/useNamedOperation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Anonymous GraphQL operations are forbidden. Make sure to name your subscription.
+  × Anonymous GraphQL operations are forbidden. Make sure to name your subscription.
   
     1 │ query { human }
     2 │ mutation { ...Type }

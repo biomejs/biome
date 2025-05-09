@@ -1,7 +1,6 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
 expression: with_existing_rules.json
-snapshot_kind: text
 ---
 # Input
 ```json
@@ -15,102 +14,6 @@ snapshot_kind: text
 ```
 
 # Diagnostics
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useLiteralEnumMembers isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"useLiteralEnumMembers":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useNodejsImportProtocol isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"useNodejsImportProtocol":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useSelfClosingElements isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"useSelfClosingElements":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
 ```
 with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -136,166 +39,6 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
        4 │ + ······"recommended":·true,
        5 │ + ······"style":·{
        6 │ + ········"noParameterAssign":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useShorthandFunctionType isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"useShorthandFunctionType":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noUselessElse isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"noUselessElse":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useExportType isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"useExportType":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useImportType isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"useImportType":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noArguments isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"noArguments":·"error"
        7 │ + ······}
     5  8 │       }
     6  9 │     }
@@ -338,7 +81,7 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
 ```
 with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useTemplate isn't recommended anymore.
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -359,7 +102,7 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
     4    │ - ······"recommended":·true
        4 │ + ······"recommended":·true,
        5 │ + ······"style":·{
-       6 │ + ········"useTemplate":·"error"
+       6 │ + ········"useSingleVarDeclarator":·"error"
        7 │ + ······}
     5  8 │       }
     6  9 │     }
@@ -370,7 +113,7 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
 ```
 with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule noNonNullAssertion isn't recommended anymore.
+  ! Biome style rule noUselessElse isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -391,39 +134,7 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
     4    │ - ······"recommended":·true
        4 │ + ······"recommended":·true,
        5 │ + ······"style":·{
-       6 │ + ········"noNonNullAssertion":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useExponentiationOperator isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"useExponentiationOperator":·"error"
+       6 │ + ········"noUselessElse":·"error"
        7 │ + ······}
     5  8 │       }
     6  9 │     }
@@ -498,102 +209,6 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
 ```
 with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"noUnusedTemplateLiteral":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"useSingleVarDeclarator":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useEnumInitializers isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "linter": {
-  > 3 │     "rules": {
-  > 4 │       "recommended": true
-  > 5 │     }
-  > 6 │   }
-  > 7 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    2  2 │     "linter": {
-    3  3 │       "rules": {
-    4    │ - ······"recommended":·true
-       4 │ + ······"recommended":·true,
-       5 │ + ······"style":·{
-       6 │ + ········"useEnumInitializers":·"error"
-       7 │ + ······}
-    5  8 │       }
-    6  9 │     }
-  
-
-```
-
-```
-with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   ! Biome style rule useConst isn't recommended anymore.
   
   > 1 │ {
@@ -626,7 +241,7 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
 ```
 with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useNumericLiterals isn't recommended anymore.
+  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -647,7 +262,7 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
     4    │ - ······"recommended":·true
        4 │ + ······"recommended":·true,
        5 │ + ······"style":·{
-       6 │ + ········"useNumericLiterals":·"error"
+       6 │ + ········"noUnusedTemplateLiteral":·"error"
        7 │ + ······}
     5  8 │       }
     6  9 │     }
@@ -658,7 +273,7 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
 ```
 with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule noCommaOperator isn't recommended anymore.
+  ! Biome style rule useSelfClosingElements isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -679,7 +294,7 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
     4    │ - ······"recommended":·true
        4 │ + ······"recommended":·true,
        5 │ + ······"style":·{
-       6 │ + ········"noCommaOperator":·"error"
+       6 │ + ········"useSelfClosingElements":·"error"
        7 │ + ······}
     5  8 │       }
     6  9 │     }
@@ -712,6 +327,38 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
        4 │ + ······"recommended":·true,
        5 │ + ······"style":·{
        6 │ + ········"useAsConstAssertion":·"error"
+       7 │ + ······}
+    5  8 │       }
+    6  9 │     }
+  
+
+```
+
+```
+with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useEnumInitializers isn't recommended anymore.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "linter": {
+  > 3 │     "rules": {
+  > 4 │       "recommended": true
+  > 5 │     }
+  > 6 │   }
+  > 7 │ }
+      │ ^
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    2  2 │     "linter": {
+    3  3 │       "rules": {
+    4    │ - ······"recommended":·true
+       4 │ + ······"recommended":·true,
+       5 │ + ······"style":·{
+       6 │ + ········"useEnumInitializers":·"error"
        7 │ + ······}
     5  8 │       }
     6  9 │     }

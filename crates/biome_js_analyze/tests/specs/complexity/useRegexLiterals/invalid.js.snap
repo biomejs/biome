@@ -27,7 +27,7 @@ b`);
 ```
 invalid.js:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     1 │ // https://github.com/biomejs/biome/issues/5487
   > 2 │ new RegExp("\/pattern$");
@@ -51,7 +51,7 @@ invalid.js:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 invalid.js:4:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     2 │ new RegExp("\/pattern$");
     3 │ 
@@ -77,7 +77,7 @@ invalid.js:4:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 invalid.js:7:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     6 │ // https://github.com/biomejs/biome/issues/5693#issuecomment-2816096167
   > 7 │ new RegExp(`a\*b`);
@@ -102,7 +102,7 @@ invalid.js:7:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 invalid.js:10:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
      9 │ // The backspace escape is not supported in regexes.
   > 10 │ new RegExp("\b");
@@ -127,7 +127,7 @@ invalid.js:10:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 invalid.js:12:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     10 │ new RegExp("\b");
     11 │ 
@@ -156,7 +156,7 @@ invalid.js:12:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 invalid.js:15:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     13 │ b");
     14 │ 

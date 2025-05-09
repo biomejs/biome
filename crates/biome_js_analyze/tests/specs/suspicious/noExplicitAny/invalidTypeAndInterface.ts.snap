@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeAndInterface.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -103,7 +102,7 @@ type Corge5 = new (...args: any) => void;
 ```
 invalidTypeAndInterface.ts:2:11 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     1 │ interface Greeter {
   > 2 │ 	message: any;
@@ -119,7 +118,7 @@ invalidTypeAndInterface.ts:2:11 lint/suspicious/noExplicitAny ━━━━━━
 ```
 invalidTypeAndInterface.ts:6:17 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     5 │ interface Greeter2 {
   > 6 │ 	message: Array<any>;
@@ -135,7 +134,7 @@ invalidTypeAndInterface.ts:6:17 lint/suspicious/noExplicitAny ━━━━━━
 ```
 invalidTypeAndInterface.ts:10:11 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
      9 │ interface Greeter3 {
   > 10 │ 	message: any[];
@@ -151,7 +150,7 @@ invalidTypeAndInterface.ts:10:11 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:14:23 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     13 │ interface Greeter4 {
   > 14 │ 	message: Array<Array<any>>;
@@ -167,7 +166,7 @@ invalidTypeAndInterface.ts:14:23 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:18:17 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     17 │ interface Greeter5 {
   > 18 │ 	message: Array<any[]>;
@@ -183,7 +182,7 @@ invalidTypeAndInterface.ts:18:17 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:21:28 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     19 │ }
     20 │ 
@@ -200,7 +199,7 @@ invalidTypeAndInterface.ts:21:28 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:23:35 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     21 │ interface Qux5 { (...args: any): void; }
     22 │ 
@@ -217,7 +216,7 @@ invalidTypeAndInterface.ts:23:35 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:25:32 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     23 │ interface Grault5 { new (...args: any): void; }
     24 │ 
@@ -234,7 +233,7 @@ invalidTypeAndInterface.ts:25:32 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:28:11 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     27 │ type obj = {
   > 28 │ 	message: any;
@@ -250,7 +249,7 @@ invalidTypeAndInterface.ts:28:11 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:32:17 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     31 │ type obj2 = {
   > 32 │ 	message: Array<any>;
@@ -266,7 +265,7 @@ invalidTypeAndInterface.ts:32:17 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:36:11 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     35 │ type obj3 = {
   > 36 │ 	message: any[];
@@ -282,7 +281,7 @@ invalidTypeAndInterface.ts:36:11 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:40:23 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     39 │ type obj4 = {
   > 40 │ 	message: Array<Array<any>>;
@@ -298,7 +297,7 @@ invalidTypeAndInterface.ts:40:23 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:44:17 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     43 │ type obj5 = {
   > 44 │ 	message: Array<any[]>;
@@ -314,7 +313,7 @@ invalidTypeAndInterface.ts:44:17 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:48:20 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     47 │ type obj6 = {
   > 48 │ 	message: string | any;
@@ -330,7 +329,7 @@ invalidTypeAndInterface.ts:48:20 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:52:26 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     51 │ type obj7 = {
   > 52 │ 	message: string | Array<any>;
@@ -346,7 +345,7 @@ invalidTypeAndInterface.ts:52:26 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:56:20 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     55 │ type obj8 = {
   > 56 │ 	message: string | any[];
@@ -362,7 +361,7 @@ invalidTypeAndInterface.ts:56:20 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:60:32 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     59 │ type obj9 = {
   > 60 │ 	message: string | Array<Array<any>>;
@@ -378,7 +377,7 @@ invalidTypeAndInterface.ts:60:32 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:64:26 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     63 │ type obj10 = {
   > 64 │ 	message: string | Array<any[]>;
@@ -394,7 +393,7 @@ invalidTypeAndInterface.ts:64:26 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:68:20 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     67 │ type obj11 = {
   > 68 │ 	message: string & any;
@@ -410,7 +409,7 @@ invalidTypeAndInterface.ts:68:20 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:72:26 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     71 │ type obj12 = {
   > 72 │ 	message: string & Array<any>;
@@ -426,7 +425,7 @@ invalidTypeAndInterface.ts:72:26 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:76:20 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     75 │ type obj13 = {
   > 76 │ 	message: string & any[];
@@ -442,7 +441,7 @@ invalidTypeAndInterface.ts:76:20 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:80:32 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     79 │ type obj14 = {
   > 80 │ 	message: string & Array<Array<any>>;
@@ -458,7 +457,7 @@ invalidTypeAndInterface.ts:80:32 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:84:26 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     83 │ type obj15 = {
   > 84 │ 	message: string & Array<any[]>;
@@ -474,7 +473,7 @@ invalidTypeAndInterface.ts:84:26 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:87:12 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     85 │ }
     86 │ 
@@ -491,7 +490,7 @@ invalidTypeAndInterface.ts:87:12 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:89:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     87 │ type Any = any;
     88 │ 
@@ -508,7 +507,7 @@ invalidTypeAndInterface.ts:89:24 lint/suspicious/noExplicitAny ━━━━━�
 ```
 invalidTypeAndInterface.ts:91:29 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     89 │ type Fred5 = (...args: any) => void;
     90 │ 

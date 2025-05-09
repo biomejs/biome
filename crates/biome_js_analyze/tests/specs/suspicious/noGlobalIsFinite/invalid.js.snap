@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -31,7 +30,7 @@ localIsNaN(isFinite);
 ```
 invalid.js:1:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
   > 1 │ isFinite({});
       │ ^^^^^^^^
@@ -53,7 +52,7 @@ invalid.js:1:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:3:2 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
     1 │ isFinite({});
     2 │ 
@@ -79,7 +78,7 @@ invalid.js:3:2 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:5:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
     3 │ (isFinite)({});
     4 │ 
@@ -105,7 +104,7 @@ invalid.js:5:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:7:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
     5 │ globalThis.isFinite({});
     6 │ 
@@ -131,7 +130,7 @@ invalid.js:7:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:9:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
      7 │ (globalThis).isFinite({});
      8 │ 
@@ -157,7 +156,7 @@ invalid.js:9:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:11:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
      9 │ globalThis.globalThis.window.isFinite({});
     10 │ 
@@ -183,7 +182,7 @@ invalid.js:11:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━
 ```
 invalid.js:13:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
     11 │ globalThis["isFinite"]({});
     12 │ 
@@ -204,7 +203,7 @@ invalid.js:13:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━
 ```
 invalid.js:16:5 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
     15 │ function localIsNaN(isFinite) {
   > 16 │     globalThis.isFinite({});
@@ -229,7 +228,7 @@ invalid.js:16:5 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━
 ```
 invalid.js:19:12 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
   
     17 │ }
     18 │ 

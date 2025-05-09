@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -31,7 +30,7 @@ localIsNaN(isNaN);
 ```
 invalid.js:1:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
   
   > 1 │ isNaN({});
       │ ^^^^^
@@ -53,7 +52,7 @@ invalid.js:1:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:3:2 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
   
     1 │ isNaN({});
     2 │ 
@@ -79,7 +78,7 @@ invalid.js:3:2 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:5:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
   
     3 │ (isNaN)({});
     4 │ 
@@ -105,7 +104,7 @@ invalid.js:5:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:7:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
   
     5 │ globalThis.isNaN({});
     6 │ 
@@ -131,7 +130,7 @@ invalid.js:7:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:9:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
   
      7 │ (globalThis).isNaN({});
      8 │ 
@@ -157,7 +156,7 @@ invalid.js:9:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:11:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
   
      9 │ globalThis.globalThis.window.isNaN({});
     10 │ 
@@ -183,7 +182,7 @@ invalid.js:11:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━
 ```
 invalid.js:13:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
   
     11 │ globalThis["isNaN"]({});
     12 │ 
@@ -204,7 +203,7 @@ invalid.js:13:1 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━
 ```
 invalid.js:16:5 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
   
     15 │ function localIsNaN(isNaN) {
   > 16 │     globalThis.isNaN({});
@@ -229,7 +228,7 @@ invalid.js:16:5 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━
 ```
 invalid.js:19:12 lint/suspicious/noGlobalIsNan  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
+  ! isNaN is unsafe. It attempts a type coercion. Use Number.isNaN instead.
   
     17 │ }
     18 │ 

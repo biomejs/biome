@@ -1,3 +1,4 @@
+use biome_diagnostics::Severity;
 use biome_module_graph::ResolvedPath;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
@@ -118,6 +119,7 @@ declare_lint_rule! {
         name: "useImportExtensions",
         language: "js",
         recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
         domains: &[RuleDomain::Project],
     }

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 103
 expression: allowlist.js
 ---
 # Input
@@ -21,7 +20,7 @@ console.assert(true, "ok");
 ```
 allowlist.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't use console.
+  ! Don't use console.
   
   > 1 │ console.log("invalid");
       │ ^^^^^^^^^^^
@@ -40,7 +39,7 @@ allowlist.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━
 ```
 allowlist.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't use console.
+  ! Don't use console.
   
     1 │ console.log("invalid");
   > 2 │ console['log']("invalid");
@@ -63,7 +62,7 @@ allowlist.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━
 ```
 allowlist.js:3:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't use console.
+  ! Don't use console.
   
     1 │ console.log("invalid");
     2 │ console['log']("invalid");

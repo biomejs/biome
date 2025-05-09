@@ -40,7 +40,7 @@ declare_lint_rule! {
             RuleSource::Clippy("map_flatten"),
         ],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }

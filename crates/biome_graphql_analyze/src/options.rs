@@ -4,9 +4,9 @@
 
 use crate::lint;
 pub type NoDuplicateFields =
-    <lint::nursery::no_duplicate_fields::NoDuplicateFields as biome_analyze::Rule>::Options;
+    <lint::suspicious::no_duplicate_fields::NoDuplicateFields as biome_analyze::Rule>::Options;
 pub type UseDeprecatedReason =
-    <lint::nursery::use_deprecated_reason::UseDeprecatedReason as biome_analyze::Rule>::Options;
+    <lint::style::use_deprecated_reason::UseDeprecatedReason as biome_analyze::Rule>::Options;
 pub type UseNamedOperation =
     <lint::nursery::use_named_operation::UseNamedOperation as biome_analyze::Rule>::Options;
 pub type UseNamingConvention =

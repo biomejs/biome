@@ -88,7 +88,7 @@ fn lint_single_rule() {
         Args::from(
             [
                 "lint",
-                "--only=nursery/useDeprecatedReason",
+                "--only=style/useDeprecatedReason",
                 file_path.as_str(),
             ]
             .as_slice(),

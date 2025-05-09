@@ -166,8 +166,6 @@ describe("foo", () => {
         Args::from(["lint", test1.as_str(), test2.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "enable_test_rules_via_overrides",
@@ -227,8 +225,6 @@ describe("foo", () => {
             .as_slice(),
         ),
     );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

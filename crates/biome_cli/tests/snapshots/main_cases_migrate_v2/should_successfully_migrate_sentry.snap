@@ -45,14 +45,7 @@ expression: redactor(content)
         "noUselessTypeConstraint": "error",
         "noExcessiveNestedTestSuites": "error"
       },
-      "nursery": {
-        "noRestrictedImports": {
-          "level": "warn",
-          "options": {
-            "paths": {}
-          }
-        }
-      },
+      "nursery": {},
       "performance": {
         "noBarrelFile": "error"
       },
@@ -92,7 +85,13 @@ expression: redactor(content)
         "useLiteralEnumMembers": "error",
         "useEnumInitializers": "error",
         "useAsConstAssertion": "error",
-        "useBlockStatements": "error"
+        "useBlockStatements": "error",
+        "noRestrictedImports": {
+          "level": "warn",
+          "options": {
+            "paths": {}
+          }
+        }
       }
     }
   },

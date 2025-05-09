@@ -36,7 +36,7 @@ import "./sub/component.svg.svelte?query=string&query2#hash";
 ```
 invalid.ts:1:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
   > 1 │ import "./sub/foo";
       │        ^^^^^^^^^^^
@@ -58,7 +58,7 @@ invalid.ts:1:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.ts:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     1 │ import "./sub/foo";
   > 2 │ import "./sub/bar/";
@@ -78,7 +78,7 @@ invalid.ts:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.ts:5:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     4 │ // Guaranteed resolve to 'index.js' file
   > 5 │ import './sub/bar/../'
@@ -103,7 +103,7 @@ invalid.ts:5:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.ts:6:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     4 │ // Guaranteed resolve to 'index.js' file
     5 │ import './sub/bar/../'
@@ -129,7 +129,7 @@ invalid.ts:6:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.ts:7:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     5 │ import './sub/bar/../'
     6 │ import './sub/bar/..'
@@ -155,7 +155,7 @@ invalid.ts:7:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.ts:8:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
      6 │ import './sub/bar/..'
      7 │ import './sub/.'
@@ -181,7 +181,7 @@ invalid.ts:8:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.ts:9:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
      7 │ import './sub/.'
      8 │ import './sub/./'
@@ -207,7 +207,7 @@ invalid.ts:9:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.ts:10:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
      8 │ import './sub/./'
      9 │ import './sub/'
@@ -233,7 +233,7 @@ invalid.ts:10:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.ts:12:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     10 │ import './sub'
     11 │ 
@@ -259,7 +259,7 @@ invalid.ts:12:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.ts:15:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     14 │ // Query and hash
   > 15 │ import './sub?worker'
@@ -275,7 +275,7 @@ invalid.ts:15:8 lint/correctness/useImportExtensions ━━━━━━━━━
 ```
 invalid.ts:16:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     14 │ // Query and hash
     15 │ import './sub?worker'
@@ -292,7 +292,7 @@ invalid.ts:16:8 lint/correctness/useImportExtensions ━━━━━━━━━
 ```
 invalid.ts:17:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     15 │ import './sub?worker'
     16 │ import './sub#hash'
@@ -309,7 +309,7 @@ invalid.ts:17:8 lint/correctness/useImportExtensions ━━━━━━━━━
 ```
 invalid.ts:20:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     19 │ // Dynamic imports
   > 20 │ import('./sub/foo')
@@ -334,7 +334,7 @@ invalid.ts:20:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.ts:21:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     19 │ // Dynamic imports
     20 │ import('./sub/foo')
@@ -360,7 +360,7 @@ invalid.ts:21:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.ts:22:9 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     20 │ import('./sub/foo')
     21 │ import( /** A **/'./sub/foo'/** B **/ )
@@ -386,7 +386,7 @@ invalid.ts:22:9 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.ts:24:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     22 │ require("./sub/foo")
     23 │ 
@@ -412,7 +412,7 @@ invalid.ts:24:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.ts:25:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     24 │ import "./sub/styles.css"
   > 25 │ import "./sub/component.svg.svelte";
@@ -435,7 +435,7 @@ invalid.ts:25:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.ts:26:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Add a file extension for relative imports.
+  ! Add a file extension for relative imports.
   
     24 │ import "./sub/styles.css"
     25 │ import "./sub/component.svg.svelte";

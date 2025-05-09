@@ -4,6 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{js_directive_list, js_function_body, js_statement_list, token};
 use biome_js_syntax::{
     AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement, T,
@@ -51,6 +52,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-console")],
         recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

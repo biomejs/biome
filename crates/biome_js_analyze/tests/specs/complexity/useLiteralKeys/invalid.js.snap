@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -59,7 +58,7 @@ a = {
 ```
 invalid.js:1:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
   > 1 │ a["b"];
       │   ^^^
@@ -79,7 +78,7 @@ invalid.js:1:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.js:2:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     1 │ a["b"];
   > 2 │ a.b["c"];
@@ -101,7 +100,7 @@ invalid.js:2:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.js:3:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     1 │ a["b"];
     2 │ a.b["c"];
@@ -125,7 +124,7 @@ invalid.js:3:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.js:3:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     1 │ a["b"];
     2 │ a.b["c"];
@@ -149,7 +148,7 @@ invalid.js:3:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:4:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     2 │ a.b["c"];
     3 │ a.b["c"].d.e["f"];
@@ -173,7 +172,7 @@ invalid.js:4:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.js:5:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     3 │ a.b["c"].d.e["f"];
     4 │ a.b[`c`];
@@ -197,7 +196,7 @@ invalid.js:5:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.js:6:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     4 │ a.b[`c`];
     5 │ a.b[c["d"]];
@@ -221,7 +220,7 @@ invalid.js:6:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.js:7:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     5 │ a.b[c["d"]];
     6 │ a["b"] = "something";
@@ -245,7 +244,7 @@ invalid.js:7:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.js:8:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
      6 │ a["b"] = "something";
      7 │ a.b["c"] = "something";
@@ -269,7 +268,7 @@ invalid.js:8:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.js:8:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
      6 │ a["b"] = "something";
      7 │ a.b["c"] = "something";
@@ -293,7 +292,7 @@ invalid.js:8:14 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:9:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
      7 │ a.b["c"] = "something";
      8 │ a.b["c"].d.e["f"] = "something";
@@ -317,7 +316,7 @@ invalid.js:9:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.js:10:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
      8 │ a.b["c"].d.e["f"] = "something";
      9 │ a.b[`c`] = "something";
@@ -341,7 +340,7 @@ invalid.js:10:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:12:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     10 │ a.b[c["d"]] = "something";
     11 │ a = {
@@ -365,7 +364,7 @@ invalid.js:12:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:15:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     13 │ };
     14 │ a = {
@@ -389,7 +388,7 @@ invalid.js:15:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:17:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     15 │ 	[`b`]: d
     16 │ };
@@ -413,7 +412,7 @@ invalid.js:17:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:18:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     16 │ };
     17 │ a.b[`$c`];
@@ -437,7 +436,7 @@ invalid.js:18:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:19:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     17 │ a.b[`$c`];
     18 │ a.b["_d"];
@@ -456,7 +455,7 @@ invalid.js:19:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:20:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     18 │ a.b["_d"];
     19 │ class C { ["a"] = 0 }
@@ -475,7 +474,7 @@ invalid.js:20:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:21:16 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     19 │ class C { ["a"] = 0 }
     20 │ class C { ["a"](){} }
@@ -494,7 +493,7 @@ invalid.js:21:16 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:22:16 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     20 │ class C { ["a"](){} }
     21 │ class C { get ["a"](){} }
@@ -513,7 +512,7 @@ invalid.js:22:16 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:24:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     22 │ class C { set ["a"](x){} }
     23 │ a = {
@@ -532,7 +531,7 @@ invalid.js:24:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:27:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     25 │ }
     26 │ a = {
@@ -556,7 +555,7 @@ invalid.js:27:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:30:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     28 │ }
     29 │ a = {
@@ -575,7 +574,7 @@ invalid.js:30:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:34:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     33 │ // optional chain
   > 34 │ a?.["b"]?.['c']?.d?.e?.["f"]
@@ -593,7 +592,7 @@ invalid.js:34:5 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:34:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     33 │ // optional chain
   > 34 │ a?.["b"]?.['c']?.d?.e?.["f"]
@@ -611,7 +610,7 @@ invalid.js:34:12 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:34:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified without the use of a string literal.
+  i The computed expression can be simplified without the use of a string literal.
   
     33 │ // optional chain
   > 34 │ a?.["b"]?.['c']?.d?.e?.["f"]
@@ -629,7 +628,7 @@ invalid.js:34:25 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:36:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     34 │ a?.["b"]?.['c']?.d?.e?.["f"]
     35 │ a = {
@@ -657,7 +656,7 @@ invalid.js:36:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:40:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     38 │ };
     39 │ a = {
@@ -685,7 +684,7 @@ invalid.js:40:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:44:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     42 │ };
     43 │ a = {
@@ -704,7 +703,7 @@ invalid.js:44:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.js:47:4 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     45 │ };
     46 │ a = {

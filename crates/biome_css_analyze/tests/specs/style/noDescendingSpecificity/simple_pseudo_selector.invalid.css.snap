@@ -1,0 +1,40 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: simple_pseudo_selector.invalid.css
+---
+# Input
+```css
+a:hover #b {
+    color: red;
+}
+
+a #b {
+    color: red;
+}
+
+```
+
+# Diagnostics
+```
+simple_pseudo_selector.invalid.css:5:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (1, 0, 1)
+  
+    3 │ }
+    4 │ 
+  > 5 │ a #b {
+      │ ^^^^
+    6 │     color: red;
+    7 │ }
+  
+  i This selector specificity is (1, 1, 1)
+  
+  > 1 │ a:hover #b {
+      │ ^^^^^^^^^^
+    2 │     color: red;
+    3 │ }
+  
+  i Descending specificity selector may not applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

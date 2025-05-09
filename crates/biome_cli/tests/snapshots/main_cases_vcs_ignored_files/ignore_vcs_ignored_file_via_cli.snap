@@ -22,23 +22,12 @@ array.map(sentence => sentence.split(' ')).flat();
 foo.call(); bar.call();
 ```
 
-# Termination Message
-
-```block
-lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Some errors were emitted while running checks.
-  
-
-
-```
-
 # Emitted Messages
 
 ```block
 file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The call chain .map().flat() can be replaced with a single .flatMap() call.
+  i The call chain .map().flat() can be replaced with a single .flatMap() call.
   
   > 1 │ array.map(sentence => sentence.split(' ')).flat();
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -53,5 +42,4 @@ file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 1 error.
 ```

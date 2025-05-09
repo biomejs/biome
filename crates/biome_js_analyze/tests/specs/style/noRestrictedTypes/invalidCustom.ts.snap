@@ -1,0 +1,187 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustom.ts
+---
+# Input
+```ts
+type CustomType = unknown
+function fn2(arg: CustomType) {
+  return arg;
+}
+
+
+class Foo<T extends CustomType = String> extends Bar<CustomType> implements CustomType<Object> {
+  constructor(foo: String | Object) {}
+
+  exit(): CustomType<String> {
+    const foo: String = 1 as CustomType;
+  }
+}
+
+
+const foo: Bar = 1;
+
+const identifier: InvalidUse = 'foo';
+```
+
+# Diagnostics
+```
+invalidCustom.ts:2:19 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Only CustomType2 is allowed
+  
+    1 │ type CustomType = unknown
+  > 2 │ function fn2(arg: CustomType) {
+      │                   ^^^^^^^^^^
+    3 │   return arg;
+    4 │ }
+  
+  i Safe fix: Use 'CustomType2' instead
+  
+     1  1 │   type CustomType = unknown
+     2    │ - function·fn2(arg:·CustomType)·{
+        2 │ + function·fn2(arg:·CustomType2)·{
+     3  3 │     return arg;
+     4  4 │   }
+  
+
+```
+
+```
+invalidCustom.ts:7:21 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Only CustomType2 is allowed
+  
+  > 7 │ class Foo<T extends CustomType = String> extends Bar<CustomType> implements CustomType<Object> {
+      │                     ^^^^^^^^^^
+    8 │   constructor(foo: String | Object) {}
+    9 │ 
+  
+  i Safe fix: Use 'CustomType2' instead
+  
+     5  5 │   
+     6  6 │   
+     7    │ - class·Foo<T·extends·CustomType·=·String>·extends·Bar<CustomType>·implements·CustomType<Object>·{
+        7 │ + class·Foo<T·extends·CustomType2·=·String>·extends·Bar<CustomType>·implements·CustomType<Object>·{
+     8  8 │     constructor(foo: String | Object) {}
+     9  9 │   
+  
+
+```
+
+```
+invalidCustom.ts:7:54 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Only CustomType2 is allowed
+  
+  > 7 │ class Foo<T extends CustomType = String> extends Bar<CustomType> implements CustomType<Object> {
+      │                                                      ^^^^^^^^^^
+    8 │   constructor(foo: String | Object) {}
+    9 │ 
+  
+  i Safe fix: Use 'CustomType2' instead
+  
+     5  5 │   
+     6  6 │   
+     7    │ - class·Foo<T·extends·CustomType·=·String>·extends·Bar<CustomType>·implements·CustomType<Object>·{
+        7 │ + class·Foo<T·extends·CustomType·=·String>·extends·Bar<CustomType2>·implements·CustomType<Object>·{
+     8  8 │     constructor(foo: String | Object) {}
+     9  9 │   
+  
+
+```
+
+```
+invalidCustom.ts:7:77 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Only CustomType2 is allowed
+  
+  > 7 │ class Foo<T extends CustomType = String> extends Bar<CustomType> implements CustomType<Object> {
+      │                                                                             ^^^^^^^^^^^^^^^^^^
+    8 │   constructor(foo: String | Object) {}
+    9 │ 
+  
+  i Safe fix: Use 'CustomType2' instead
+  
+     5  5 │   
+     6  6 │   
+     7    │ - class·Foo<T·extends·CustomType·=·String>·extends·Bar<CustomType>·implements·CustomType<Object>·{
+        7 │ + class·Foo<T·extends·CustomType·=·String>·extends·Bar<CustomType>·implements·CustomType2<Object>·{
+     8  8 │     constructor(foo: String | Object) {}
+     9  9 │   
+  
+
+```
+
+```
+invalidCustom.ts:10:11 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Only CustomType2 is allowed
+  
+     8 │   constructor(foo: String | Object) {}
+     9 │ 
+  > 10 │   exit(): CustomType<String> {
+       │           ^^^^^^^^^^^^^^^^^^
+    11 │     const foo: String = 1 as CustomType;
+    12 │   }
+  
+  i Safe fix: Use 'CustomType2' instead
+  
+     8  8 │     constructor(foo: String | Object) {}
+     9  9 │   
+    10    │ - ··exit():·CustomType<String>·{
+       10 │ + ··exit():·CustomType2<String>·{
+    11 11 │       const foo: String = 1 as CustomType;
+    12 12 │     }
+  
+
+```
+
+```
+invalidCustom.ts:11:30 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Only CustomType2 is allowed
+  
+    10 │   exit(): CustomType<String> {
+  > 11 │     const foo: String = 1 as CustomType;
+       │                              ^^^^^^^^^^
+    12 │   }
+    13 │ }
+  
+  i Safe fix: Use 'CustomType2' instead
+  
+     9  9 │   
+    10 10 │     exit(): CustomType<String> {
+    11    │ - ····const·foo:·String·=·1·as·CustomType;
+       11 │ + ····const·foo:·String·=·1·as·CustomType2;
+    12 12 │     }
+    13 13 │   }
+  
+
+```
+
+```
+invalidCustom.ts:16:12 lint/style/noRestrictedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace Bar with Foo
+  
+  > 16 │ const foo: Bar = 1;
+       │            ^^^
+    17 │ 
+    18 │ const identifier: InvalidUse = 'foo';
+  
+
+```
+
+```
+invalidCustom.ts:18:19 lint/style/noRestrictedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use this type
+  
+    16 │ const foo: Bar = 1;
+    17 │ 
+  > 18 │ const identifier: InvalidUse = 'foo';
+       │                   ^^^^^^^^^^
+  
+
+```

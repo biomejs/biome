@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::js_variable_declarator_list;
 use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
@@ -53,7 +54,8 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-undef-init")],
         fix_kind: FixKind::Safe,
-        recommended: false,
+        recommended: true,
+        severity: Severity::Information,
     }
 }
 

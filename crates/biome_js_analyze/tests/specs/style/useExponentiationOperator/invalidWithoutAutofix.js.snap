@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidWithoutAutofix.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -23,7 +22,7 @@ Math.pow(a, b, ...c)
 ```
 invalidWithoutAutofix.js:2:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ // shouldn't autofix if the call doesn't have exactly two arguments
   > 2 │ Math.pow()
@@ -37,7 +36,7 @@ invalidWithoutAutofix.js:2:1 lint/style/useExponentiationOperator ━━━━�
 ```
 invalidWithoutAutofix.js:3:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ // shouldn't autofix if the call doesn't have exactly two arguments
     2 │ Math.pow()
@@ -52,7 +51,7 @@ invalidWithoutAutofix.js:3:1 lint/style/useExponentiationOperator ━━━━�
 ```
 invalidWithoutAutofix.js:4:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     2 │ Math.pow()
     3 │ Math.pow(a)
@@ -67,7 +66,7 @@ invalidWithoutAutofix.js:4:1 lint/style/useExponentiationOperator ━━━━�
 ```
 invalidWithoutAutofix.js:5:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     3 │ Math.pow(a)
     4 │ Math.pow(a, b, c)
@@ -82,7 +81,7 @@ invalidWithoutAutofix.js:5:1 lint/style/useExponentiationOperator ━━━━�
 ```
 invalidWithoutAutofix.js:8:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      7 │ // shouldn't autofix if any of the arguments is spread
    > 8 │ Math.pow(...a)
@@ -96,7 +95,7 @@ invalidWithoutAutofix.js:8:1 lint/style/useExponentiationOperator ━━━━�
 ```
 invalidWithoutAutofix.js:9:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      7 │ // shouldn't autofix if any of the arguments is spread
      8 │ Math.pow(...a)
@@ -111,7 +110,7 @@ invalidWithoutAutofix.js:9:1 lint/style/useExponentiationOperator ━━━━�
 ```
 invalidWithoutAutofix.js:10:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      8 │ Math.pow(...a)
      9 │ Math.pow(...a, b)
@@ -126,7 +125,7 @@ invalidWithoutAutofix.js:10:1 lint/style/useExponentiationOperator ━━━━�
 ```
 invalidWithoutAutofix.js:11:1 lint/style/useExponentiationOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      9 │ Math.pow(...a, b)
     10 │ Math.pow(a, ...b)

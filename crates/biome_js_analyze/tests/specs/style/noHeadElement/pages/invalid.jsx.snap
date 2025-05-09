@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<head>
+  <title>Invalid</title>
+</head>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:1 lint/style/noHeadElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use <head> element.
+  
+  > 1 │ <head>
+      │ ^^^^^^
+    2 │   <title>Invalid</title>
+    3 │ </head>
+  
+  i Using the <head> element can cause unexpected behavior in a Next.js application. Use <Head /> from next/head instead.
+  
+
+```

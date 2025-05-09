@@ -76,7 +76,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("default-case-last")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
     }
 }
 

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImportedDeno.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -17,7 +16,7 @@ Deno.test("url test", () => {
 ```
 invalidImportedDeno.js:3:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The assertion isn't inside a it(), test() or Deno.test() function call.
+  ! The assertion isn't inside a it(), test() or Deno.test() function call.
   
     1 │ import {assertEquals} from "https://deno.land/std@0.220.0/assert/mod.ts";
     2 │ 

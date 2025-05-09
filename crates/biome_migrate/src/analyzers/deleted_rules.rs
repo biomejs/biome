@@ -22,6 +22,7 @@ declare_migration! {
 static REMOVED_RULES: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| {
     HashMap::from([
         ("noConsoleLog", "noConsole"),
+        ("noInvalidNewBuiltin", "noInvalidBuiltinInstantiation"),
         ("useSingleCaseStatement", "noSwitchDeclarations"),
         ("useShorthandArrayType", "useConsistentArrayType"),
         ("noNewSymbol", "noInvalidBuiltinInstantiation"),
@@ -77,7 +78,7 @@ impl Rule for DeletedRules {
             category!("migrate"),
             name.range(),
             markup! {
-                "The rule "<Emphasis>"noConsoleLog"</Emphasis>" has been removed."
+                "The rule "<Emphasis>{state.rule_name}</Emphasis>" has been removed."
             }
             .to_owned(),
         ))

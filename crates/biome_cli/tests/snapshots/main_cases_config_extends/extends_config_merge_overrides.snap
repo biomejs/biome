@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -55,7 +54,7 @@ test.js:1:17 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
   > 1 │ debugger; const a = 0;
       │                 ^
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend a with an underscore.
   

@@ -1,0 +1,42 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: nested.invalid.css
+---
+# Input
+```css
+a {
+    & > b {
+        color: red;
+    }
+}
+
+b {
+    color: red;
+}
+```
+
+# Diagnostics
+```
+nested.invalid.css:7:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 0, 1)
+  
+    5 │ }
+    6 │ 
+  > 7 │ b {
+      │ ^
+    8 │     color: red;
+    9 │ }
+  
+  i This selector specificity is (0, 0, 2)
+  
+    1 │ a {
+  > 2 │     & > b {
+      │     ^^^^^
+    3 │         color: red;
+    4 │     }
+  
+  i Descending specificity selector may not applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

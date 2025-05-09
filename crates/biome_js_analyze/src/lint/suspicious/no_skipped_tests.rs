@@ -3,6 +3,7 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::JsCallExpression;
 use biome_rowan::{BatchMutationExt, TextRange};
@@ -38,6 +39,7 @@ declare_lint_rule! {
         name: "noSkippedTests",
         language: "js",
         recommended: false,
+        severity: Severity::Warning,
         sources: &[RuleSource::EslintJest("no-disabled-tests"), RuleSource::EslintVitest("no-disabled-tests")],
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,

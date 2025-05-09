@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{CssUnknownBlockAtRule, CssUnknownValueAtRule};
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 
 declare_lint_rule! {
@@ -42,6 +43,7 @@ declare_lint_rule! {
         name: "noUnknownAtRule",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("at-rule-no-unknown")],
     }
 }

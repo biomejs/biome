@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, JsCallExpression, JsParameters,
     JsTemplateExpression,
@@ -48,6 +49,7 @@ declare_lint_rule! {
         name: "noDoneCallback",
         language: "js",
         recommended: false,
+        severity: Severity::Information,
         sources: &[RuleSource::EslintJest("no-done-callback"), RuleSource::EslintVitest("no-done-callback")],
     }
 }

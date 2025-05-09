@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -20,7 +19,7 @@ try {
 ```
 invalid.js:1:24 lint/suspicious/noCatchAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Reassigning a catch parameter is confusing.
+  ! Reassigning a catch parameter is confusing.
   
   > 1 │ try { } catch (e) { e; e = 10; }
       │                        ^
@@ -42,7 +41,7 @@ invalid.js:1:24 lint/suspicious/noCatchAssign ━━━━━━━━━━━�
 ```
 invalid.js:5:3 lint/suspicious/noCatchAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Reassigning a catch parameter is confusing.
+  ! Reassigning a catch parameter is confusing.
   
     4 │ } catch (error) {
   > 5 │   error = 100;
@@ -67,7 +66,7 @@ invalid.js:5:3 lint/suspicious/noCatchAssign ━━━━━━━━━━━�
 ```
 invalid.js:7:5 lint/suspicious/noCatchAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Reassigning a catch parameter is confusing.
+  ! Reassigning a catch parameter is confusing.
   
     5 │   error = 100;
     6 │   {

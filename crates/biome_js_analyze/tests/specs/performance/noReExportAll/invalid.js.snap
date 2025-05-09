@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -13,7 +12,7 @@ export * as foo from 'foo';
 ```
 invalid.js:1:8 lint/performance/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not use export all ( export * from ... ).
+  ! Do not use export all ( export * from ... ).
   
   > 1 │ export * from 'foo';
       │        ^^^^^^^^^^^^^
@@ -27,7 +26,7 @@ invalid.js:1:8 lint/performance/noReExportAll ━━━━━━━━━━━�
 ```
 invalid.js:2:8 lint/performance/noReExportAll ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Do not use export all ( export * from ... ).
+  ! Do not use export all ( export * from ... ).
   
     1 │ export * from 'foo';
   > 2 │ export * as foo from 'foo';

@@ -51,7 +51,7 @@ declare_lint_rule! {
         name: "noAccumulatingSpread",
         language: "js",
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
     }
 }
 

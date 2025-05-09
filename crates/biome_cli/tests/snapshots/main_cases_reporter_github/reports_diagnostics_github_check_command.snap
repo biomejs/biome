@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `index.ts`
 
@@ -43,6 +42,38 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 # Emitted Messages
+
+```block
+::warning title=lint/correctness/noUnusedImports,file=index.ts,line=1,endLine=1,col=8,endColumn=12::This import is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedImports,file=index.ts,line=2,endLine=2,col=10,endColumn=11::Several of these imports are unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedVariables,file=index.ts,line=8,endLine=8,col=5,endColumn=6::This variable is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedVariables,file=index.ts,line=9,endLine=9,col=7,endColumn=8::This variable is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedImports,file=main.ts,line=1,endLine=1,col=8,endColumn=12::This import is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedImports,file=main.ts,line=2,endLine=2,col=10,endColumn=11::Several of these imports are unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedVariables,file=main.ts,line=8,endLine=8,col=5,endColumn=6::This variable is unused.
+```
+
+```block
+::warning title=lint/correctness/noUnusedVariables,file=main.ts,line=9,endLine=9,col=7,endColumn=8::This variable is unused.
+```
 
 ```block
 ::error title=assist/source/organizeImports,file=index.ts,line=1,endLine=1,col=1,endColumn=21::The imports and exports are not sorted.

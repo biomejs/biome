@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use crate::JsRuleAction;
 
 declare_lint_rule! {
-    /// Prevent extra closing tags for components without children
+    /// Prevent extra closing tags for components without children.
     ///
     /// JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
     ///
@@ -90,7 +90,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
         recommended: false,
-        severity: Severity::Warning,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }

@@ -4,6 +4,7 @@ use biome_analyze::{
 };
 use biome_console::{Markup, MarkupBuf, markup};
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, T, TriviaPieceKind, TsReferenceType,
@@ -73,6 +74,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("array-type")],
         recommended: false,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

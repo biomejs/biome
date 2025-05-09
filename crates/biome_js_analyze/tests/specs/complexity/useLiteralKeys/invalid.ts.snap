@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -40,7 +39,7 @@ export enum E {
 ```
 invalid.ts:2:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     1 │ export interface I {
   > 2 │ 	["p1"]: number
@@ -58,7 +57,7 @@ invalid.ts:2:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:4:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     2 │ 	["p1"]: number
     3 │ 
@@ -77,7 +76,7 @@ invalid.ts:4:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:6:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     4 │ 	get ["p2"](): number
     5 │ 
@@ -96,7 +95,7 @@ invalid.ts:6:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:8:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
      6 │ 	set ["p2"](x: number)
      7 │ 
@@ -115,7 +114,7 @@ invalid.ts:8:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:10:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
      8 │ 	["m1"](): void
      9 │ 
@@ -134,7 +133,7 @@ invalid.ts:10:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:14:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     13 │ export type T = {
   > 14 │ 	["p1"]: number
@@ -152,7 +151,7 @@ invalid.ts:14:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:16:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     14 │ 	["p1"]: number
     15 │ 
@@ -171,7 +170,7 @@ invalid.ts:16:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:18:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     16 │ 	get ["p2"](): number
     17 │ 
@@ -190,7 +189,7 @@ invalid.ts:18:7 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:20:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     18 │ 	set ["p2"](x: number)
     19 │ 
@@ -209,7 +208,7 @@ invalid.ts:20:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:22:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     20 │ 	["m1"](): void
     21 │ 
@@ -228,7 +227,7 @@ invalid.ts:22:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:26:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     25 │ export enum E {
   > 26 │ 	["A"],
@@ -246,7 +245,7 @@ invalid.ts:26:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:27:3 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The computed expression can be simplified to a string literal.
+  i The computed expression can be simplified to a string literal.
   
     25 │ export enum E {
     26 │ 	["A"],

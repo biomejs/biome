@@ -1,0 +1,226 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+	<link href="https://fonts.googleapis.com/css2?family=Krona+One" />
+	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=fallback" />
+
+	<link href={"https://fonts.googleapis.com/css2?family=Krona+One"} />
+	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=auto"} />
+	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=block"} />
+	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=fallback"} />
+
+	<link href={`https://fonts.googleapis.com/css2?family=Krona+One`} />
+	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=auto`} />
+	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=block`} />
+	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=fallback`} />
+</>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:13 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link is missing the display parameter.
+  
+    1 │ <>
+  > 2 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One" />
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+    4 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:3:13 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended display value.
+  
+    1 │ <>
+    2 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One" />
+  > 3 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+    5 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=fallback" />
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:4:13 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended display value.
+  
+    2 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One" />
+    3 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+  > 4 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=fallback" />
+    6 │ 
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:5:13 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended display value.
+  
+    3 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+    4 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+  > 5 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=fallback" />
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One"} />
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:7:14 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link is missing the display parameter.
+  
+    5 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=fallback" />
+    6 │ 
+  > 7 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One"} />
+      │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=auto"} />
+    9 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=block"} />
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:8:14 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended display value.
+  
+     7 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One"} />
+   > 8 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=auto"} />
+       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=block"} />
+    10 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=fallback"} />
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:9:14 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended display value.
+  
+     7 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One"} />
+     8 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=auto"} />
+   > 9 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=block"} />
+       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=fallback"} />
+    11 │ 
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:10:14 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended display value.
+  
+     8 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=auto"} />
+     9 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=block"} />
+  > 10 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=fallback"} />
+       │ 	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One`} />
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:12:15 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link is missing the display parameter.
+  
+    10 │ 	<link href={"https://fonts.googleapis.com/css2?family=Krona+One&display=fallback"} />
+    11 │ 
+  > 12 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One`} />
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=auto`} />
+    14 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=block`} />
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:13:15 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended display value.
+  
+    12 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One`} />
+  > 13 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=auto`} />
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=block`} />
+    15 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=fallback`} />
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:14:15 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended display value.
+  
+    12 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One`} />
+    13 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=auto`} />
+  > 14 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=block`} />
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=fallback`} />
+    16 │ </>
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:15:15 lint/suspicious/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended display value.
+  
+    13 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=auto`} />
+    14 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=block`} />
+  > 15 │ 	<link href={`https://fonts.googleapis.com/css2?family=Krona+One&display=fallback`} />
+       │ 	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ </>
+    17 │ 
+  
+  i Use &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```

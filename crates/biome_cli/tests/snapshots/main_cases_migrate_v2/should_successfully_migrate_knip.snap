@@ -35,7 +35,20 @@ expression: redactor(content)
       "complexity": {
         "useLiteralKeys": "off"
       },
-      "nursery": {
+      "nursery": {},
+      "style": {
+        "noParameterAssign": "off",
+        "useNodeAssertStrict": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useConst": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error",
         "noRestrictedImports": {
           "level": "error",
           "options": {
@@ -45,30 +58,6 @@ expression: redactor(content)
             }
           }
         }
-      },
-      "style": {
-        "noParameterAssign": "off",
-        "useNodeAssertStrict": "error",
-        "useLiteralEnumMembers": "error",
-        "noCommaOperator": "error",
-        "useNodejsImportProtocol": "error",
-        "useAsConstAssertion": "error",
-        "useNumericLiterals": "error",
-        "useEnumInitializers": "error",
-        "useSelfClosingElements": "error",
-        "useConst": "error",
-        "useSingleVarDeclarator": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useNumberNamespace": "error",
-        "noInferrableTypes": "error",
-        "useExponentiationOperator": "error",
-        "useTemplate": "error",
-        "noNonNullAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "noArguments": "error",
-        "useExportType": "error",
-        "noUselessElse": "error",
-        "useShorthandFunctionType": "error"
       },
       "suspicious": {
         "noConsole": {

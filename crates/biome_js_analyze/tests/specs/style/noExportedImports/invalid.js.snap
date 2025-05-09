@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import { A } from "mod";
+export { A };
+
+import * as ns from "mod";
+export { ns };
+
+import D from "mod";
+export { D };
+```
+
+# Diagnostics
+```
+invalid.js:1:10 lint/style/noExportedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An import should not be exported. Use export from instead.
+  
+  > 1 │ import { A } from "mod";
+      │          ^
+    2 │ export { A };
+    3 │ 
+  
+  i export from makes it clearer that the intention is to re-export a variable.
+  
+
+```
+
+```
+invalid.js:4:8 lint/style/noExportedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An import should not be exported. Use export from instead.
+  
+    2 │ export { A };
+    3 │ 
+  > 4 │ import * as ns from "mod";
+      │        ^^^^^^^
+    5 │ export { ns };
+    6 │ 
+  
+  i export from makes it clearer that the intention is to re-export a variable.
+  
+
+```
+
+```
+invalid.js:7:8 lint/style/noExportedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An import should not be exported. Use export from instead.
+  
+    5 │ export { ns };
+    6 │ 
+  > 7 │ import D from "mod";
+      │        ^
+    8 │ export { D };
+  
+  i export from makes it clearer that the intention is to re-export a variable.
+  
+
+```

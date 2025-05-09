@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -91,7 +90,7 @@ export class FooBar {
 ```
 invalid.ts:1:23 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
   > 1 │ function fooEmptyTs() {}
       │                       ^^
@@ -106,7 +105,7 @@ invalid.ts:1:23 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.ts:3:26 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     1 │ function fooEmptyTs() {}
     2 │ 
@@ -123,7 +122,7 @@ invalid.ts:3:26 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.ts:8:24 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
      6 │   let a = 1;
      7 │ 
@@ -140,7 +139,7 @@ invalid.ts:8:24 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.ts:17:28 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     15 │   let a = 1;
     16 │ 
@@ -157,7 +156,7 @@ invalid.ts:17:28 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:23:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     22 │ const someVarTs: string = '';
   > 23 │ if (someVarTs) {
@@ -175,7 +174,7 @@ invalid.ts:23:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:26:19 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     24 │ }
     25 │ 
@@ -194,7 +193,7 @@ invalid.ts:26:19 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:29:1 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     27 │ }
     28 │ 
@@ -213,7 +212,7 @@ invalid.ts:29:1 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.ts:35:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     33 │ try {
     34 │     doSomething();
@@ -233,7 +232,7 @@ invalid.ts:35:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:37:11 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     35 │ } catch(ex) {
     36 │ 
@@ -253,7 +252,7 @@ invalid.ts:37:11 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:42:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     41 │ class FooEmptyStaticTs {
   > 42 │   static {}
@@ -269,7 +268,7 @@ invalid.ts:42:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.ts:45:21 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     43 │ }
     44 │ 
@@ -286,7 +285,7 @@ invalid.ts:45:21 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:48:25 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     47 │ const obTs = {}
   > 48 │ for (const key in obTs) {}
@@ -302,7 +301,7 @@ invalid.ts:48:25 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:51:25 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     50 │ const arTs = []
   > 51 │ for (const val of arTs) {}
@@ -318,7 +317,7 @@ invalid.ts:51:25 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:55:21 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     53 │ function fooWithInternalEmptyBlocksTs(){
     54 │   let someOtherVar: string = '';
@@ -335,7 +334,7 @@ invalid.ts:55:21 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:57:24 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     55 │   if (someOtherVar) {}
     56 │ 
@@ -354,7 +353,7 @@ invalid.ts:57:24 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:60:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     58 │   }
     59 │ 
@@ -373,7 +372,7 @@ invalid.ts:60:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.ts:65:15 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     63 │   try {
     64 │       doSomething();
@@ -393,7 +392,7 @@ invalid.ts:65:15 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:67:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     65 │   } catch(ex) {
     66 │ 
@@ -413,7 +412,7 @@ invalid.ts:67:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.ts:76:20 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     74 │     private foo: string,
     75 │   ) {

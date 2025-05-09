@@ -70,7 +70,7 @@ declare_lint_rule! {
     ///
     /// ```js
     /// let a;
-    /// a; // the variable is read before its assignement
+    /// a; // the variable is read before its assignment
     /// a = 0;
     /// ```
     pub UseConst {

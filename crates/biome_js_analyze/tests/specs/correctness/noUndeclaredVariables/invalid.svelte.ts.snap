@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.svelte.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -19,7 +18,7 @@ class Todo {
 ```
 invalid.svelte.ts:2:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The $unknown variable is undeclared.
+  × The $unknown variable is undeclared.
   
     1 │ class Todo {
   > 2 │     done = $unknown(false);
@@ -36,7 +35,7 @@ invalid.svelte.ts:2:12 lint/correctness/noUndeclaredVariables ━━━━━━
 ```
 invalid.svelte.ts:3:12 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The $unknown variable is undeclared.
+  × The $unknown variable is undeclared.
   
     1 │ class Todo {
     2 │     done = $unknown(false);

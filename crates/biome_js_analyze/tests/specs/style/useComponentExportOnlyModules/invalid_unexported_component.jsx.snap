@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_unexported_component.jsx
+---
+# Input
+```jsx
+const App = () => {}
+createRoot(document.getElementById("root")).render(<App />);
+```
+
+# Diagnostics
+```
+invalid_unexported_component.jsx:1:7 lint/style/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexported components are not allowed.
+  
+  > 1 │ const App = () => {}
+      │       ^^^
+    2 │ createRoot(document.getElementById("root")).render(<App />);
+  
+  i Fast Refresh only works when a file only exports components.
+  
+  i Consider separating component exports into a new file.
+  
+  i If it is not a component, it may not be following the variable naming conventions.
+  
+
+```

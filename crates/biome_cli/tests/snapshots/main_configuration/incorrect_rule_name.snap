@@ -62,10 +62,9 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noInvalidConstructorSuper
   - noInvalidDirectionInLinearGradient
   - noInvalidGridAreas
-  - noInvalidNewBuiltin
   - noInvalidPositionAtImportRule
   - noInvalidUseBeforeDeclaration
-  - noNewSymbol
+  - noMissingVarFunction
   - noNodejsModules
   - noNonoctalDecimalEscape
   - noPrecisionLoss
@@ -80,6 +79,9 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnknownFunction
   - noUnknownMediaFeatureName
   - noUnknownProperty
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
+  - noUnknownTypeSelector
   - noUnknownUnit
   - noUnmatchableAnbSelector
   - noUnreachable
@@ -123,29 +125,46 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - recommended
   - noArguments
   - noCommaOperator
+  - noCommonJs
   - noDefaultExport
+  - noDescendingSpecificity
   - noDoneCallback
+  - noEnum
+  - noExportedImports
+  - noHeadElement
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace
   - noNamespaceImport
   - noNegationElse
+  - noNestedTernary
   - noNonNullAssertion
   - noParameterAssign
   - noParameterProperties
+  - noProcessEnv
   - noRestrictedGlobals
+  - noRestrictedImports
+  - noRestrictedTypes
   - noShoutyConstants
+  - noSubstr
   - noUnusedTemplateLiteral
   - noUselessElse
+  - noValueAtRule
   - noYodaExpression
   - useAsConstAssertion
+  - useAtIndex
   - useBlockStatements
   - useCollapsedElseIf
+  - useCollapsedIf
+  - useComponentExportOnlyModules
   - useConsistentArrayType
   - useConsistentBuiltinInstantiation
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
+  - useDeprecatedReason
   - useEnumInitializers
   - useExplicitLengthCheck
   - useExponentiationOperator
@@ -161,14 +180,13 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useNumberNamespace
   - useNumericLiterals
   - useSelfClosingElements
-  - useShorthandArrayType
   - useShorthandAssign
   - useShorthandFunctionType
-  - useSingleCaseStatement
   - useSingleVarDeclarator
   - useTemplate
   - useThrowNewError
   - useThrowOnlyError
+  - useTrimStartEnd
   
 
 ```

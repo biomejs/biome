@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `check.js`
 
@@ -23,6 +22,46 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 # Emitted Messages
+
+```block
+check.js:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+  > 1 │ import { lorem, foom, bar } from "foo";
+      │        ^^^^^^^^^^^^^^^^^^^^
+    2 │ import * as something from "../something";
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused imports.
+  
+    1 │ import·{·lorem,·foom,·bar·}·from·"foo";
+      │ ---------------------------------------
+
+```
+
+```block
+check.js:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ import { lorem, foom, bar } from "foo";
+  > 2 │ import * as something from "../something";
+      │             ^^^^^^^^^
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused imports.
+  
+    1 1 │   import { lorem, foom, bar } from "foo";
+    2   │ - import·*·as·something·from·"../something";
+    3 2 │   
+  
+
+```
 
 ```block
 check.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -47,4 +86,5 @@ check.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
+Found 2 warnings.
 ```

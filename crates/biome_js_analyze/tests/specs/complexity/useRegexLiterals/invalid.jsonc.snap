@@ -11,7 +11,7 @@ new RegExp('');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('');
       │ ^^^^^^^^^^^^^^
@@ -35,7 +35,7 @@ RegExp('', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('', '');
       │ ^^^^^^^^^^^^^^
@@ -59,7 +59,7 @@ new RegExp(String.raw``);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String.raw``);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -83,7 +83,7 @@ new RegExp('abc');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('abc');
       │ ^^^^^^^^^^^^^^^^^
@@ -107,7 +107,7 @@ new RegExp((('abc')), ('g'));
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp((('abc')), ('g'));
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -131,7 +131,7 @@ RegExp('abc');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('abc');
       │ ^^^^^^^^^^^^^
@@ -155,7 +155,7 @@ new RegExp('abc', 'g');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('abc', 'g');
       │ ^^^^^^^^^^^^^^^^^^^^^^
@@ -179,7 +179,7 @@ RegExp('abc', 'g');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('abc', 'g');
       │ ^^^^^^^^^^^^^^^^^^
@@ -203,7 +203,7 @@ new RegExp(`abc`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(`abc`);
       │ ^^^^^^^^^^^^^^^^^
@@ -227,7 +227,7 @@ RegExp(`abc`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp(`abc`);
       │ ^^^^^^^^^^^^^
@@ -251,7 +251,7 @@ new RegExp(`abc`, `g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(`abc`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^
@@ -275,7 +275,7 @@ RegExp(`abc`, `g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp(`abc`, `g`);
       │ ^^^^^^^^^^^^^^^^^^
@@ -299,7 +299,7 @@ new RegExp(String.raw`abc`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String.raw`abc`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -324,7 +324,7 @@ abc`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String.raw`abc
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -352,7 +352,7 @@ abc`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String.raw`	abc
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -379,7 +379,7 @@ RegExp(String.raw`abc`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp(String.raw`abc`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^
@@ -403,7 +403,7 @@ new RegExp(String.raw`abc`, String.raw`g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String.raw`abc`, String.raw`g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -427,7 +427,7 @@ RegExp(String.raw`abc`, String.raw`g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp(String.raw`abc`, String.raw`g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -451,7 +451,7 @@ new RegExp(String['raw']`a`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String['raw']`a`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -475,7 +475,7 @@ new RegExp('a', `g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('a', `g`);
       │ ^^^^^^^^^^^^^^^^^^^^
@@ -499,7 +499,7 @@ RegExp(`a`, 'g');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp(`a`, 'g');
       │ ^^^^^^^^^^^^^^^^
@@ -523,7 +523,7 @@ RegExp(String.raw`a`, 'g');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp(String.raw`a`, 'g');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -547,7 +547,7 @@ new RegExp(String.raw`\d`, `g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String.raw`\d`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -571,7 +571,7 @@ new RegExp(String.raw`\\d`, `g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String.raw`\\d`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -595,7 +595,7 @@ new RegExp(String['raw']`\\d`, `g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String['raw']`\\d`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -619,7 +619,7 @@ new RegExp(String["raw"]`\\d`, `g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp(String["raw"]`\\d`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -643,7 +643,7 @@ RegExp('a', String.raw`g`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('a', String.raw`g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -667,7 +667,7 @@ new globalThis.RegExp('a');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new globalThis.RegExp('a');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -691,7 +691,7 @@ globalThis.RegExp('a');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ globalThis.RegExp('a');
       │ ^^^^^^^^^^^^^^^^^^^^^^
@@ -715,7 +715,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ (globalThis).RegExp('a');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -739,7 +739,7 @@ new RegExp((String?.raw)`a`);
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp((String?.raw)`a`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -763,7 +763,7 @@ RegExp('abc', 'u');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('abc', 'u');
       │ ^^^^^^^^^^^^^^^^^^
@@ -787,7 +787,7 @@ new RegExp('abc', 'd');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('abc', 'd');
       │ ^^^^^^^^^^^^^^^^^^^^^^
@@ -811,7 +811,7 @@ RegExp('abc', 'd');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('abc', 'd');
       │ ^^^^^^^^^^^^^^^^^^
@@ -835,7 +835,7 @@ RegExp('\\\\', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\\\\', '');
       │ ^^^^^^^^^^^^^^^^^^
@@ -859,7 +859,7 @@ RegExp('\n', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\n', '');
       │ ^^^^^^^^^^^^^^^^
@@ -883,7 +883,7 @@ RegExp('\n\n', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\n\n', '');
       │ ^^^^^^^^^^^^^^^^^^
@@ -907,7 +907,7 @@ RegExp('\t', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\t', '');
       │ ^^^^^^^^^^^^^^^^
@@ -931,7 +931,7 @@ RegExp('\t\t', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\t\t', '');
       │ ^^^^^^^^^^^^^^^^^^
@@ -955,7 +955,7 @@ RegExp('\r\n', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\r\n', '');
       │ ^^^^^^^^^^^^^^^^^^
@@ -979,7 +979,7 @@ RegExp('\u1234', 'g')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\u1234', 'g')
       │ ^^^^^^^^^^^^^^^^^^^^^
@@ -1003,7 +1003,7 @@ RegExp('\u{1234}', 'g')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\u{1234}', 'g')
       │ ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1027,7 +1027,7 @@ RegExp('\u{11111}', 'g')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\u{11111}', 'g')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1051,7 +1051,7 @@ RegExp('\v', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\v', '');
       │ ^^^^^^^^^^^^^^^^
@@ -1075,7 +1075,7 @@ RegExp('\v\v', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\v\v', '');
       │ ^^^^^^^^^^^^^^^^^^
@@ -1099,7 +1099,7 @@ RegExp('\f', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\f', '');
       │ ^^^^^^^^^^^^^^^^
@@ -1123,7 +1123,7 @@ RegExp('\f\f', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\f\f', '');
       │ ^^^^^^^^^^^^^^^^^^
@@ -1147,7 +1147,7 @@ RegExp('\\b', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\\b', '');
       │ ^^^^^^^^^^^^^^^^^
@@ -1171,7 +1171,7 @@ RegExp('\\b\\b', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\\b\\b', '');
       │ ^^^^^^^^^^^^^^^^^^^^
@@ -1195,7 +1195,7 @@ new RegExp('\\B\\b', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('\\B\\b', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1219,7 +1219,7 @@ RegExp('\\w', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\\w', '');
       │ ^^^^^^^^^^^^^^^^^
@@ -1243,7 +1243,7 @@ new globalThis.RegExp('\\W', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new globalThis.RegExp('\\W', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1267,7 +1267,7 @@ RegExp('\\s', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\\s', '');
       │ ^^^^^^^^^^^^^^^^^
@@ -1291,7 +1291,7 @@ new RegExp('\\S', '')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('\\S', '')
       │ ^^^^^^^^^^^^^^^^^^^^^
@@ -1315,7 +1315,7 @@ globalThis.RegExp('\\d', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ globalThis.RegExp('\\d', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1339,7 +1339,7 @@ globalThis.RegExp('\\D', '')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ globalThis.RegExp('\\D', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1363,7 +1363,7 @@ globalThis.RegExp('\\\\\\D', '')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ globalThis.RegExp('\\\\\\D', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1387,7 +1387,7 @@ new RegExp('\\D\\D', '')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('\\D\\D', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1411,7 +1411,7 @@ new globalThis.RegExp('\\0\\0', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new globalThis.RegExp('\\0\\0', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1435,7 +1435,7 @@ new RegExp('\\0\\0', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('\\0\\0', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1459,7 +1459,7 @@ new RegExp('\0\0', 'g');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('\0\0', 'g');
       │ ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1483,7 +1483,7 @@ RegExp('\\0\\0\\0', '')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\\0\\0\\0', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^
@@ -1507,7 +1507,7 @@ RegExp('\\78\\126\\5934', '')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp('\\78\\126\\5934', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1531,7 +1531,7 @@ new window['RegExp']('\\x56\\x78\\x45', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new window['RegExp']('\\x56\\x78\\x45', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1555,7 +1555,7 @@ new (window['RegExp'])('\\x56\\x78\\x45', '');
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new (window['RegExp'])('\\x56\\x78\\x45', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1579,7 +1579,7 @@ a in(RegExp('abc'))
 ```
 invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ a in(RegExp('abc'))
       │      ^^^^^^^^^^^^^
@@ -1603,7 +1603,7 @@ func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
 ```
 invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1621,7 +1621,7 @@ invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:43 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
       │                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1646,7 +1646,7 @@ x = y;
 ```
 invalid.jsonc:2:13 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     1 │ x = y;
   > 2 │             RegExp("foo").test(x) ? bar() : baz()
@@ -1672,7 +1672,7 @@ typeof RegExp("foo")
 ```
 invalid.jsonc:1:8 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ typeof RegExp("foo")
       │        ^^^^^^^^^^^^^
@@ -1696,7 +1696,7 @@ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
       │ ^^^^^^^^^^^^^
@@ -1714,7 +1714,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:26 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1732,7 +1732,7 @@ invalid.jsonc:1:26 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:69 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
       │                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1756,7 +1756,7 @@ invalid.jsonc:1:69 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:5 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ [   new RegExp(`someregular`)]
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1783,7 +1783,7 @@ const totallyValidatesEmails = new RegExp("\\S+@(\\S+\\.)+\\S+")
 ```
 invalid.jsonc:1:32 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ const totallyValidatesEmails = new RegExp("\\S+@(\\S+\\.)+\\S+")
       │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1811,7 +1811,7 @@ invalid.jsonc:1:32 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:2 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │  ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1829,7 +1829,7 @@ invalid.jsonc:1:2 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:31 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                               ^^^^^^^^^^^^^^^^^
@@ -1847,7 +1847,7 @@ invalid.jsonc:1:31 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:53 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                     ^^^^^^^^^^^^^^^^^^^^
@@ -1865,7 +1865,7 @@ invalid.jsonc:1:53 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:77 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                                             ^^^^^^^^^^^^^^^^
@@ -1883,7 +1883,7 @@ invalid.jsonc:1:77 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:96 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                                                                ^^^^^^^^^^^^^^^^^^^^
@@ -1901,7 +1901,7 @@ invalid.jsonc:1:96 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:122 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^
@@ -1919,7 +1919,7 @@ invalid.jsonc:1:122 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━�
 ```
 invalid.jsonc:1:151 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                                                                                                                       ^^^^^^^^^^^^^^^^^
@@ -1944,7 +1944,7 @@ invalid.jsonc:1:151 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━�
 ```
 invalid.jsonc:2:13 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     1 │ #!/usr/bin/sh
   > 2 │             RegExp("foo")
@@ -1970,7 +1970,7 @@ async function abc(){await new RegExp("foo")}
 ```
 invalid.jsonc:1:28 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ async function abc(){await new RegExp("foo")}
       │                            ^^^^^^^^^^^^^^^^^
@@ -1994,7 +1994,7 @@ function* abc(){yield new RegExp("foo")}
 ```
 invalid.jsonc:1:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ function* abc(){yield new RegExp("foo")}
       │                       ^^^^^^^^^^^^^^^^^
@@ -2018,7 +2018,7 @@ function* abc(){yield* new RegExp("foo")}
 ```
 invalid.jsonc:1:24 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ function* abc(){yield* new RegExp("foo")}
       │                        ^^^^^^^^^^^^^^^^^
@@ -2042,7 +2042,7 @@ console.log({ ...new RegExp('a') })
 ```
 invalid.jsonc:1:18 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ console.log({ ...new RegExp('a') })
       │                  ^^^^^^^^^^^^^^^
@@ -2066,7 +2066,7 @@ delete RegExp('a');
 ```
 invalid.jsonc:1:8 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ delete RegExp('a');
       │        ^^^^^^^^^^^
@@ -2090,7 +2090,7 @@ void RegExp('a');
 ```
 invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ void RegExp('a');
       │      ^^^^^^^^^^^
@@ -2114,7 +2114,7 @@ new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2132,7 +2132,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:36 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
       │                                    ^^^^^^^^^^^
@@ -2156,7 +2156,7 @@ new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2174,7 +2174,7 @@ invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:35 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
       │                                   ^^^^^^^^^^^
@@ -2198,7 +2198,7 @@ a in RegExp('abc')
 ```
 invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ a in RegExp('abc')
       │      ^^^^^^^^^^^^^
@@ -2224,7 +2224,7 @@ invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ == new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
@@ -2253,7 +2253,7 @@ invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ === new RegExp('cba');
       │                       ^^^^^^^^^^^^^^^^^
@@ -2282,7 +2282,7 @@ invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ != new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
@@ -2311,7 +2311,7 @@ invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ !== new RegExp('cba');
       │                       ^^^^^^^^^^^^^^^^^
@@ -2340,7 +2340,7 @@ invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ > new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -2369,7 +2369,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ < new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -2398,7 +2398,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ >= new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
@@ -2427,7 +2427,7 @@ invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ <= new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
@@ -2456,7 +2456,7 @@ invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ << new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
@@ -2485,7 +2485,7 @@ invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ >> new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
@@ -2514,7 +2514,7 @@ invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ >>> new RegExp('cba');
       │                       ^^^^^^^^^^^^^^^^^
@@ -2543,7 +2543,7 @@ invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ ^ new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -2572,7 +2572,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ & new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -2601,7 +2601,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             /abc/ | new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -2630,7 +2630,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             null ?? new RegExp('blah')
       │                     ^^^^^^^^^^^^^^^^^^
@@ -2659,7 +2659,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc *= new RegExp('blah')
       │                    ^^^^^^^^^^^^^^^^^^
@@ -2688,7 +2688,7 @@ invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:29 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             console.log({a: new RegExp('sup')})
       │                             ^^^^^^^^^^^^^^^^^
@@ -2717,7 +2717,7 @@ invalid.jsonc:2:29 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:32 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             console.log(() => {new RegExp('sup')})
       │                                ^^^^^^^^^^^^^^^^^
@@ -2746,7 +2746,7 @@ invalid.jsonc:2:32 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:29 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             function abc() {new RegExp('sup')}
       │                             ^^^^^^^^^^^^^^^^^
@@ -2775,7 +2775,7 @@ invalid.jsonc:2:29 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:36 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             function abc() {return new RegExp('sup')}
       │                                    ^^^^^^^^^^^^^^^^^
@@ -2804,7 +2804,7 @@ invalid.jsonc:2:36 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc <<= new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -2833,7 +2833,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc >>= new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -2862,7 +2862,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc >>>= new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
@@ -2891,7 +2891,7 @@ invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc ^= new RegExp('cba');
       │                    ^^^^^^^^^^^^^^^^^
@@ -2920,7 +2920,7 @@ invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc &= new RegExp('cba');
       │                    ^^^^^^^^^^^^^^^^^
@@ -2949,7 +2949,7 @@ invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc |= new RegExp('cba');
       │                    ^^^^^^^^^^^^^^^^^
@@ -2978,7 +2978,7 @@ invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc ??= new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -3007,7 +3007,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc &&= new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -3036,7 +3036,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc ||= new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
@@ -3065,7 +3065,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc **= new RegExp('blah')
       │                     ^^^^^^^^^^^^^^^^^^
@@ -3094,7 +3094,7 @@ invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc /= new RegExp('blah')
       │                    ^^^^^^^^^^^^^^^^^^
@@ -3123,7 +3123,7 @@ invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc += new RegExp('blah')
       │                    ^^^^^^^^^^^^^^^^^^
@@ -3152,7 +3152,7 @@ invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc -= new RegExp('blah')
       │                    ^^^^^^^^^^^^^^^^^^
@@ -3181,7 +3181,7 @@ invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             abc %= new RegExp('blah')
       │                    ^^^^^^^^^^^^^^^^^^
@@ -3210,7 +3210,7 @@ invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:2:19 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 2 │             () => new RegExp('blah')
       │                   ^^^^^^^^^^^^^^^^^^
@@ -3237,7 +3237,7 @@ a/RegExp("foo")in b
 ```
 invalid.jsonc:1:3 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ a/RegExp("foo")in b
       │   ^^^^^^^^^^^^^
@@ -3261,7 +3261,7 @@ a/RegExp("foo")instanceof b
 ```
 invalid.jsonc:1:3 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ a/RegExp("foo")instanceof b
       │   ^^^^^^^^^^^^^
@@ -3286,7 +3286,7 @@ while (true);
 ```
 invalid.jsonc:1:4 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ do RegExp("foo")
       │    ^^^^^^^^^^^^^
@@ -3313,7 +3313,7 @@ new RegExp('search')}
 ```
 invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     1 │ for(let i;i<5;i++) { break
   > 2 │ new RegExp('search')}
@@ -3340,7 +3340,7 @@ new RegExp('search')}
 ```
 invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     1 │ for(let i;i<5;i++) { continue
   > 2 │ new RegExp('search')}
@@ -3374,7 +3374,7 @@ invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:5:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     3 │                 case "possibility":
     4 │                     console.log('possibility matched')
@@ -3406,7 +3406,7 @@ throw new RegExp('abcdefg') // fail with a regular expression
 ```
 invalid.jsonc:1:7 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ throw new RegExp('abcdefg') // fail with a regular expression
       │       ^^^^^^^^^^^^^^^^^^^^^
@@ -3430,7 +3430,7 @@ for (value of new RegExp('something being searched')) { console.log(value) }
 ```
 invalid.jsonc:1:15 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ for (value of new RegExp('something being searched')) { console.log(value) }
       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3454,7 +3454,7 @@ invalid.jsonc:1:15 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:39 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ (async function(){for await (value of new RegExp('something being searched')) { console.log(value) }})()
       │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3478,7 +3478,7 @@ for (value in new RegExp('something being searched')) { console.log(value) }
 ```
 invalid.jsonc:1:15 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ for (value in new RegExp('something being searched')) { console.log(value) }
       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3502,7 +3502,7 @@ if (condition1 && condition2) new RegExp('avalue').test(str);
 ```
 invalid.jsonc:1:31 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ if (condition1 && condition2) new RegExp('avalue').test(str);
       │                               ^^^^^^^^^^^^^^^^^^^^
@@ -3527,7 +3527,7 @@ new RegExp('myReg')
 ```
 invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
     1 │ debugger
   > 2 │ new RegExp('myReg')
@@ -3553,7 +3553,7 @@ RegExp("\\\n")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp("\\\n")
       │ ^^^^^^^^^^^^^^
@@ -3577,7 +3577,7 @@ RegExp("\\\t")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp("\\\t")
       │ ^^^^^^^^^^^^^^
@@ -3601,7 +3601,7 @@ RegExp("\\\f")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp("\\\f")
       │ ^^^^^^^^^^^^^^
@@ -3625,7 +3625,7 @@ RegExp("\\\v")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp("\\\v")
       │ ^^^^^^^^^^^^^^
@@ -3649,7 +3649,7 @@ RegExp("\\\r")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ RegExp("\\\r")
       │ ^^^^^^^^^^^^^^
@@ -3673,7 +3673,7 @@ new RegExp("	")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("	")
       │ ^^^^^^^^^^^^^^^^
@@ -3697,7 +3697,7 @@ new RegExp("/")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("/")
       │ ^^^^^^^^^^^^^^^
@@ -3721,7 +3721,7 @@ new RegExp("\.")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("\.")
       │ ^^^^^^^^^^^^^^^^
@@ -3745,7 +3745,7 @@ new RegExp("\\.")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("\\.")
       │ ^^^^^^^^^^^^^^^^^
@@ -3769,7 +3769,7 @@ new RegExp("\\\n\\\n")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("\\\n\\\n")
       │ ^^^^^^^^^^^^^^^^^^^^^^
@@ -3793,7 +3793,7 @@ new RegExp("\\\n\\\f\\\n")
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("\\\n\\\f\\\n")
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3817,7 +3817,7 @@ new RegExp("\u000A\u000A");
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp("\u000A\u000A");
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3841,7 +3841,7 @@ new RegExp('mysafereg' /* comment explaining its safety */)
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('mysafereg' /* comment explaining its safety */)
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3865,7 +3865,7 @@ new RegExp('[[A--B]]', 'v')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('[[A--B]]', 'v')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3889,7 +3889,7 @@ new RegExp('[[A--B]]', 'v')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('[[A--B]]', 'v')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3913,7 +3913,7 @@ new RegExp('[[A&&&]]', 'v')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('[[A&&&]]', 'v')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3937,7 +3937,7 @@ new RegExp('://[^:/]*')
 ```
 invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use a regular expression literal instead of the RegExp constructor.
+  ! Use a regular expression literal instead of the RegExp constructor.
   
   > 1 │ new RegExp('://[^:/]*')
       │ ^^^^^^^^^^^^^^^^^^^^^^^

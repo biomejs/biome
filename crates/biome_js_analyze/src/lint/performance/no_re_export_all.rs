@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::JsExportFromClause;
 use biome_rowan::AstNode;
 
@@ -40,6 +41,7 @@ declare_lint_rule! {
         name: "noReExportAll",
         language: "js",
         recommended: false,
+        severity: Severity::Warning,
         sources: &[RuleSource::EslintBarrelFiles("avoid-re-export-all")],
         source_kind: RuleSourceKind::SameLogic,
     }

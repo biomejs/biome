@@ -64,7 +64,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-invalid-void-type")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

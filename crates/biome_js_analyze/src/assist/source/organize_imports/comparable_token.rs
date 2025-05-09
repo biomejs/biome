@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use biome_rowan::TokenText;
 use biome_string_case::StrLikeExtension;
 
-/// A [JsSyntaxToken] that is ordered according to the ASCII natural order.
+/// A [TokenText] that is ordered according to the ASCII natural order.
 #[derive(Clone, Debug)]
 pub struct ComparableToken(pub TokenText);
 impl From<TokenText> for ComparableToken {

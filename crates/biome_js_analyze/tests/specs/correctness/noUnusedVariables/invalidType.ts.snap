@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidType.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -12,12 +11,12 @@ type A = string;
 ```
 invalidType.ts:1:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This type alias is unused.
+  ! This type alias is unused.
   
   > 1 │ type A = string;
       │      ^
   
-  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidAdjacentTokens.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -31,7 +30,7 @@ Math.pow(a, b)**Math.pow(c, d)
 ```
 invalidAdjacentTokens.js:2:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ // tokens that cannot be adjacent
   > 2 │ a+Math.pow(++b, c);
@@ -53,7 +52,7 @@ invalidAdjacentTokens.js:2:3 lint/style/useExponentiationOperator  FIXABLE  ━�
 ```
 invalidAdjacentTokens.js:3:5 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     1 │ // tokens that cannot be adjacent
     2 │ a+Math.pow(++b, c);
@@ -77,7 +76,7 @@ invalidAdjacentTokens.js:3:5 lint/style/useExponentiationOperator  FIXABLE  ━�
 ```
 invalidAdjacentTokens.js:4:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     2 │ a+Math.pow(++b, c);
     3 │ (a)+(Math).pow((++b), c);
@@ -101,7 +100,7 @@ invalidAdjacentTokens.js:4:1 lint/style/useExponentiationOperator  FIXABLE  ━�
 ```
 invalidAdjacentTokens.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     3 │ (a)+(Math).pow((++b), c);
     4 │ Math.pow(a, b)in c
@@ -125,7 +124,7 @@ invalidAdjacentTokens.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━�
 ```
 invalidAdjacentTokens.js:6:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     4 │ Math.pow(a, b)in c
     5 │ Math.pow(a, (b))in (c)
@@ -149,7 +148,7 @@ invalidAdjacentTokens.js:6:3 lint/style/useExponentiationOperator  FIXABLE  ━�
 ```
 invalidAdjacentTokens.js:7:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     5 │ Math.pow(a, (b))in (c)
     6 │ a+Math.pow(++b, c)in d
@@ -173,7 +172,7 @@ invalidAdjacentTokens.js:7:3 lint/style/useExponentiationOperator  FIXABLE  ━�
 ```
 invalidAdjacentTokens.js:10:4 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
      9 │ // tokens that cannot be adjacent, but there is already space or something else between
   > 10 │ a+ Math.pow(++b, c) in d
@@ -196,7 +195,7 @@ invalidAdjacentTokens.js:10:4 lint/style/useExponentiationOperator  FIXABLE  ━
 ```
 invalidAdjacentTokens.js:12:4 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     10 │ a+ Math.pow(++b, c) in d
     11 │ // a+/**/Math.pow(++b, c)/**/in d // ignored because of comments
@@ -220,7 +219,7 @@ invalidAdjacentTokens.js:12:4 lint/style/useExponentiationOperator  FIXABLE  ━
 ```
 invalidAdjacentTokens.js:15:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     14 │ // tokens that cannot be adjacent, but the autofix inserts parens required for precedence
   > 15 │ +Math.pow(++a, b)
@@ -243,7 +242,7 @@ invalidAdjacentTokens.js:15:2 lint/style/useExponentiationOperator  FIXABLE  ━
 ```
 invalidAdjacentTokens.js:16:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     14 │ // tokens that cannot be adjacent, but the autofix inserts parens required for precedence
     15 │ +Math.pow(++a, b)
@@ -267,7 +266,7 @@ invalidAdjacentTokens.js:16:1 lint/style/useExponentiationOperator  FIXABLE  ━
 ```
 invalidAdjacentTokens.js:17:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     15 │ +Math.pow(++a, b)
     16 │ Math.pow(a, b + c)in d
@@ -291,7 +290,7 @@ invalidAdjacentTokens.js:17:1 lint/style/useExponentiationOperator  FIXABLE  ━
 ```
 invalidAdjacentTokens.js:17:18 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     15 │ +Math.pow(++a, b)
     16 │ Math.pow(a, b + c)in d
@@ -315,7 +314,7 @@ invalidAdjacentTokens.js:17:18 lint/style/useExponentiationOperator  FIXABLE  �
 ```
 invalidAdjacentTokens.js:18:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     16 │ Math.pow(a, b + c)in d
     17 │ Math.pow(a, b) + Math.pow(c, d)
@@ -339,7 +338,7 @@ invalidAdjacentTokens.js:18:1 lint/style/useExponentiationOperator  FIXABLE  ━
 ```
 invalidAdjacentTokens.js:18:10 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     16 │ Math.pow(a, b + c)in d
     17 │ Math.pow(a, b) + Math.pow(c, d)
@@ -363,7 +362,7 @@ invalidAdjacentTokens.js:18:10 lint/style/useExponentiationOperator  FIXABLE  �
 ```
 invalidAdjacentTokens.js:18:26 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     16 │ Math.pow(a, b + c)in d
     17 │ Math.pow(a, b) + Math.pow(c, d)
@@ -387,7 +386,7 @@ invalidAdjacentTokens.js:18:26 lint/style/useExponentiationOperator  FIXABLE  �
 ```
 invalidAdjacentTokens.js:19:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     17 │ Math.pow(a, b) + Math.pow(c, d)
     18 │ Math.pow(Math.pow(a, b), Math.pow(c, d))
@@ -409,7 +408,7 @@ invalidAdjacentTokens.js:19:1 lint/style/useExponentiationOperator  FIXABLE  ━
 ```
 invalidAdjacentTokens.js:19:17 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use the '**' operator instead of 'Math.pow'.
+  i Use the '**' operator instead of 'Math.pow'.
   
     17 │ Math.pow(a, b) + Math.pow(c, d)
     18 │ Math.pow(Math.pow(a, b), Math.pow(c, d))

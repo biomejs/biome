@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import * as foo from "foo"
+
+foo["bar"]
+foo[1]
+const key = "bar"
+foo[key]
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/performance/noDynamicNamespaceImportAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid accessing namespace imports dynamically, it can prevent efficient tree shaking and increase bundle size.
+  
+    1 │ import * as foo from "foo"
+    2 │ 
+  > 3 │ foo["bar"]
+      │ ^^^^^^^^^^
+    4 │ foo[1]
+    5 │ const key = "bar"
+  
+  i Prefer static property access or use named imports instead.
+  
+
+```
+
+```
+invalid.js:4:1 lint/performance/noDynamicNamespaceImportAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid accessing namespace imports dynamically, it can prevent efficient tree shaking and increase bundle size.
+  
+    3 │ foo["bar"]
+  > 4 │ foo[1]
+      │ ^^^^^^
+    5 │ const key = "bar"
+    6 │ foo[key]
+  
+  i Prefer static property access or use named imports instead.
+  
+
+```
+
+```
+invalid.js:6:1 lint/performance/noDynamicNamespaceImportAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid accessing namespace imports dynamically, it can prevent efficient tree shaking and increase bundle size.
+  
+    4 │ foo[1]
+    5 │ const key = "bar"
+  > 6 │ foo[key]
+      │ ^^^^^^^^
+  
+  i Prefer static property access or use named imports instead.
+  
+
+```
