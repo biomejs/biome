@@ -19,7 +19,7 @@ rustc-hash       = { workspace = true }
 tower-lsp-server = { workspace = true }
 
 [dev-dependencies]
-tower = { version = "0.4.13", features = ["timeout"] }
+tower = { workspace = true, features = ["timeout"] }
 
 [lints]
 workspace = true

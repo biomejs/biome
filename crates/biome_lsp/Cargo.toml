@@ -38,7 +38,7 @@ tracing              = { workspace = true, features = ["attributes"] }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
-tower = { version = "0.5.2", features = ["timeout"] }
+tower = { workspace = true, features = ["timeout"] }
 
 [lints]
 workspace = true
