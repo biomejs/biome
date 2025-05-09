@@ -487,12 +487,12 @@ pub trait TypeResolver {
             .resolve_reference(ty)
             .and_then(|id| self.get_by_resolved_id(id))
         {
-            Some(
-                ref resolved @ ResolvedTypeData {
-                    data: TypeData::Reference(reference),
-                    ..
-                },
-            ) => self.resolve_and_get(&resolved.apply_module_id_to_reference(reference)),
+            Some(ResolvedTypeData {
+                data: TypeData::Reference(reference),
+                id,
+            }) if reference.as_ref() != ty => {
+                self.resolve_and_get(&id.apply_module_id_to_reference(reference))
+            }
             other => other,
         }
     }
@@ -504,7 +504,7 @@ pub trait TypeResolver {
     fn resolve_or_register(&mut self, ty: &TypeReference) -> ResolvedTypeId {
         match self.resolve_reference(ty) {
             Some(resolved_id) => resolved_id,
-            None => self.register_and_resolve(TypeData::Reference(Box::new(ty.clone()))),
+            None => self.register_and_resolve(TypeData::reference(ty.clone())),
         }
     }
 
@@ -580,7 +580,10 @@ pub trait TypeResolver {
     }
 
     fn optional(&mut self, ty: TypeReference) -> TypeId {
-        self.union_of(ty, GLOBAL_UNDEFINED_ID.into())
+        self.register_type(TypeData::Union(Box::new(Union(Box::new([
+            ty,
+            GLOBAL_UNDEFINED_ID.into(),
+        ])))))
     }
 
     fn register_type_from_member(
@@ -635,10 +638,6 @@ pub trait TypeResolver {
 
     fn undefined(&mut self) -> TypeId {
         self.register_type(TypeData::Undefined)
-    }
-
-    fn union_of(&mut self, left: TypeReference, right: TypeReference) -> TypeId {
-        self.register_type(TypeData::Union(Box::new(Union(Box::new([left, right])))))
     }
 
     fn unknown(&mut self) -> TypeId {

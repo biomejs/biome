@@ -11,6 +11,7 @@
 
 pub mod literal;
 
+use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::{ops::Deref, str::FromStr, sync::Arc};
 
@@ -250,6 +251,20 @@ impl TypeData {
         self.resolved(resolver).flattened(resolver)
     }
 
+    /// Creates an intersection of type references.
+    ///
+    /// References are automatically deduplicated. If only a single type
+    /// remains, an instance of `Self::Reference` is returned instead of
+    /// `Self::Intersection`.
+    pub fn intersection_of(mut types: Vec<TypeReference>) -> Self {
+        types.dedup();
+        match types.len().cmp(&1) {
+            Ordering::Greater => Self::Intersection(Box::new(Intersection(types.into()))),
+            Ordering::Equal => Self::reference(types.remove(0)),
+            Ordering::Less => Self::Unknown,
+        }
+    }
+
     /// Returns whether the given type has been inferred.
     ///
     /// A type is considered inferred if it is anything except `Self::Unknown`,
@@ -268,6 +283,20 @@ impl TypeData {
             Self::Function(function) => Some(&function.type_parameters),
             Self::InstanceOf(instance) => Some(&instance.type_parameters),
             _ => None,
+        }
+    }
+
+    /// Creates a union of type references.
+    ///
+    /// References are automatically deduplicated. If only a single type
+    /// remains, an instance of `Self::Reference` is returned instead of
+    /// `Self::Union`.
+    pub fn union_of(mut types: Vec<TypeReference>) -> Self {
+        types.dedup();
+        match types.len().cmp(&1) {
+            Ordering::Greater => Self::Union(Box::new(Union(types.into()))),
+            Ordering::Equal => Self::reference(types.remove(0)),
+            Ordering::Less => Self::Unknown,
         }
     }
 
@@ -493,7 +522,7 @@ impl Tuple {
             let id = if elem_type.is_optional {
                 resolver.optional(ty)
             } else {
-                resolver.register_type(TypeData::Reference(Box::new(ty)))
+                resolver.register_type(TypeData::reference(ty))
             };
             ResolvedTypeId::new(resolver.level(), id)
         } else {

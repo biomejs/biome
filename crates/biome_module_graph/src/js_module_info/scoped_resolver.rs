@@ -247,7 +247,13 @@ impl TypeResolver for ScopedResolver {
             TypeResolverLevel::Scope => Some((id, self.get_by_id(id.id())).into()),
             TypeResolverLevel::Module => {
                 let module_id = id.module_id();
-                Some((id, &self.modules[module_id.index()].types[id.index()]).into())
+                let module = &self.modules[module_id.index()];
+                if let Some(ty) = module.types.get(id.index()) {
+                    Some((id, ty).into())
+                } else {
+                    debug_assert!(false, "Invalid type reference: {id:?}");
+                    None
+                }
             }
             TypeResolverLevel::Import => {
                 panic!("import IDs should not be exposed outside the module info collector")
