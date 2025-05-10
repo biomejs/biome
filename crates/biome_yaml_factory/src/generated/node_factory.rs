@@ -71,27 +71,57 @@ impl YamlBlockMapExplicitEntryBuilder {
 }
 pub fn yaml_block_map_explicit_key(
     question_mark_token: SyntaxToken,
-    key: AnyYamlIndentedBlock,
-) -> YamlBlockMapExplicitKey {
-    YamlBlockMapExplicitKey::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_KEY,
-        [
-            Some(SyntaxElement::Token(question_mark_token)),
-            Some(SyntaxElement::Node(key.into_syntax())),
-        ],
-    ))
+) -> YamlBlockMapExplicitKeyBuilder {
+    YamlBlockMapExplicitKeyBuilder {
+        question_mark_token,
+        key: None,
+    }
 }
-pub fn yaml_block_map_explicit_value(
+pub struct YamlBlockMapExplicitKeyBuilder {
+    question_mark_token: SyntaxToken,
+    key: Option<AnyYamlBlockIndented>,
+}
+impl YamlBlockMapExplicitKeyBuilder {
+    pub fn with_key(mut self, key: AnyYamlBlockIndented) -> Self {
+        self.key = Some(key);
+        self
+    }
+    pub fn build(self) -> YamlBlockMapExplicitKey {
+        YamlBlockMapExplicitKey::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_KEY,
+            [
+                Some(SyntaxElement::Token(self.question_mark_token)),
+                self.key
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn yaml_block_map_explicit_value(colon_token: SyntaxToken) -> YamlBlockMapExplicitValueBuilder {
+    YamlBlockMapExplicitValueBuilder {
+        colon_token,
+        value: None,
+    }
+}
+pub struct YamlBlockMapExplicitValueBuilder {
     colon_token: SyntaxToken,
-    value: AnyYamlIndentedBlock,
-) -> YamlBlockMapExplicitValue {
-    YamlBlockMapExplicitValue::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_VALUE,
-        [
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
+    value: Option<AnyYamlBlockIndented>,
+}
+impl YamlBlockMapExplicitValueBuilder {
+    pub fn with_value(mut self, value: AnyYamlBlockIndented) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> YamlBlockMapExplicitValue {
+        YamlBlockMapExplicitValue::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_VALUE,
+            [
+                Some(SyntaxElement::Token(self.colon_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn yaml_block_map_implicit_entry(
     value: YamlBlockMapImplicitValue,
@@ -219,17 +249,31 @@ impl YamlBlockSequenceBuilder {
         ))
     }
 }
-pub fn yaml_block_sequence_entry(
+pub fn yaml_block_sequence_entry(minus_token: SyntaxToken) -> YamlBlockSequenceEntryBuilder {
+    YamlBlockSequenceEntryBuilder {
+        minus_token,
+        value: None,
+    }
+}
+pub struct YamlBlockSequenceEntryBuilder {
     minus_token: SyntaxToken,
-    value: AnyYamlIndentedBlock,
-) -> YamlBlockSequenceEntry {
-    YamlBlockSequenceEntry::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY,
-        [
-            Some(SyntaxElement::Token(minus_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
+    value: Option<AnyYamlBlockIndented>,
+}
+impl YamlBlockSequenceEntryBuilder {
+    pub fn with_value(mut self, value: AnyYamlBlockIndented) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> YamlBlockSequenceEntry {
+        YamlBlockSequenceEntry::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY,
+            [
+                Some(SyntaxElement::Token(self.minus_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn yaml_compact_mapping(entries: YamlBlockSequenceEntryList) -> YamlCompactMapping {
     YamlCompactMapping::unwrap_cast(SyntaxNode::new_detached(

@@ -181,7 +181,7 @@ YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
 
 YamlBlockSequenceEntry =
 	'-'
-	value: AnyYamlIndentedBlock
+	value: AnyYamlBlockIndented?
 
 // a:
 //  b: c
@@ -213,16 +213,19 @@ YamlBlockMapExplicitEntry =
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
 YamlBlockMapExplicitKey =
 	'?'
-	key: AnyYamlIndentedBlock
+	key: AnyYamlBlockIndented?
 
 // : 10
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
 YamlBlockMapExplicitValue =
 	':'
-	value: AnyYamlIndentedBlock
+	value: AnyYamlBlockIndented?
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-indented
-AnyYamlIndentedBlock =
+// In the specification, this node can be completely empty.
+// Instead of modeling an empty node, we can just make this node optional
+// wherever we refer it.
+AnyYamlBlockIndented =
 	YamlCompactSequence
 	| YamlCompactMapping
 	| AnyYamlNode
