@@ -1278,14 +1278,14 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server(fs: Box<dyn FileSystem>, threads: Option<usize>) -> Box<dyn Workspace> {
+pub fn server(fs: Box<dyn FileSystem>, num_threads: Option<usize>) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     Box::new(WorkspaceServer::new(
         fs,
         watcher_tx,
         service_data_tx,
-        threads,
+        num_threads,
     ))
 }
 

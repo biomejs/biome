@@ -23,7 +23,7 @@ mod panic;
 mod reporter;
 mod service;
 
-use crate::cli_options::{CliOptions, ColorsArg};
+pub use crate::cli_options::{CliOptions, ColorsArg};
 use crate::commands::CommandRunner;
 use crate::commands::check::CheckCommandPayload;
 use crate::commands::ci::CiCommandPayload;

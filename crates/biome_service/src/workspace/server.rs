@@ -1466,13 +1466,13 @@ impl Workspace for WorkspaceServer {
 ///
 /// This is used to assign friendly debug names to the threads of the pool.
 #[cfg(not(target_family = "wasm"))]
-fn init_thread_pool(threads: Option<usize>) {
+fn init_thread_pool(num_threads: Option<usize>) {
     static INIT_ONCE: std::sync::Once = std::sync::Once::new();
     INIT_ONCE.call_once(|| {
         rayon::ThreadPoolBuilder::new()
             .thread_name(|index| format!("biome::workspace_worker_{index}"))
             // When zero is passed, rayon decides the number of threads
-            .num_threads(threads.unwrap_or(0))
+            .num_threads(num_threads.unwrap_or(0))
             .build_global()
             .expect("failed to initialize the global thread pool");
     });
