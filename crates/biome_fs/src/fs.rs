@@ -111,11 +111,18 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// Returns metadata about the path.
     ///
     /// This method follows symlinks.
+    ///
+    /// Errors if the path doesn't exist (including broken symlinks), isn't
+    /// accessible, or if the path points to neither a file or directory.
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
     /// Returns metadata about the path without following symlinks.
     ///
     /// In other words, it returns the kind of the symlink itself, if it is one.
+    /// If the path is an ordinary file or directory, it still returns its kind.
+    ///
+    /// Errors if the path doesn't exist, isn't accessible, or if the path is
+    /// not a file, directory, or symlink.
     fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
     /// This method accepts a directory path (`search_dir`) and a file name `search_file`,
