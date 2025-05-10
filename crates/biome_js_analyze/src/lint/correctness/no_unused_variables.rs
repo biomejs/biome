@@ -206,7 +206,8 @@ fn suggested_fix_if_unused(
         | AnyJsBindingDeclaration::TsEnumMember(_) => None,
 
         // Some parameters are ok to not be used
-        AnyJsBindingDeclaration::JsArrowFunctionExpression(_) => {
+        AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+        | AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
             suggestion_for_binding(binding)
         }
         AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
@@ -228,7 +229,6 @@ fn suggested_fix_if_unused(
         }
         node @ (AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::JsClassDeclaration(_)
-        | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)) => {
