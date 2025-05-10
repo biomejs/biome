@@ -4,6 +4,7 @@ expression: valid.module.css
 ---
 # Input
 ```css
+/* should not generate diagnostics */
 @import "./colors.module.css";
 :root {
     --main-color: red;

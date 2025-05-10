@@ -1,10 +1,10 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: valid.css
-snapshot_kind: text
 ---
 # Input
 ```css
+/* should not generate diagnostics */
 a { transform: translate(1px); }
 a { transform: TRANSLATE(1px); }
 a { transform: --custom-function(1px); }
