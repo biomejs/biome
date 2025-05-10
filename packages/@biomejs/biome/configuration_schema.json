@@ -2834,6 +2834,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentResponse": {
+					"description": "Use static Response methods instead of new Response() constructor when possible.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.",
 					"anyOf": [
