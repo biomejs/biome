@@ -91,7 +91,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// [Self::path_is_symlink()] and this method to return `true` for the same
     /// path.
     fn path_is_file(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).is_ok_and(|kind| matches!(kind, PathKind::File { .. }))
+        Self::path_kind(self, path).is_ok_and(PathKind::is_file)
     }
 
     /// Checks if the given path is a directory
@@ -100,7 +100,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// [Self::path_is_symlink()] and this method to return `true` for the same
     /// path.
     fn path_is_dir(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).is_ok_and(|kind| matches!(kind, PathKind::Directory { .. }))
+        Self::path_kind(self, path).is_ok_and(PathKind::is_dir)
     }
 
     /// Checks if the given path is a symlink
@@ -114,6 +114,8 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
     /// Returns metadata about the path without following symlinks.
+    ///
+    /// In other words, it returns the kind of the symlink itself, if it is one.
     fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
     /// This method accepts a directory path (`search_dir`) and a file name `search_file`,
