@@ -1,0 +1,27 @@
+/* No valid condition after `or` */
+@supports (display:flex) or {
+}
+
+/* No valid condition after `or missing {` */
+@supports (display:flex) or
+}
+
+/* 200px is not a valid condition start */
+@supports (display:flex) or -- name {
+}
+
+/* The final `or` is missing its sub-condition */
+@supports (display:flex) or (display:flex) or {
+}
+
+/* Missing parenthesis  */
+@supports (display:flex) or (display:flex {
+}
+
+/* There's an extra `or` that has no condition immediately following it. */
+@supports (display:flex) or or (display:flex) {
+}
+
+/* Invalid condition */
+@supports (display:flex) or -- name or (display:flex) {
+}

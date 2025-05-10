@@ -1,0 +1,279 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/*invalid query inside supports recovery at ')'*/
+@import url("narrow.css") supports( -- invalid  );
+
+/*invalid query inside supports recovery at any media query*/
+@import url("narrow.css") supports( -- invalid  screen and (max-width: 400px);
+
+/*invalid query inside supports recovery at ';'*/
+@import url("narrow.css") supports( -- invalid ;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..51 "@" [Comments("/*invalid query insid ..."), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    IMPORT_KW@51..58 "import" [] [Whitespace(" ")],
+                    CssUrlFunction {
+                        name: URL_KW@58..61 "url" [] [],
+                        l_paren_token: L_PAREN@61..62 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@62..74 "\"narrow.css\"" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@74..76 ")" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            SUPPORTS_KW@76..84 "supports" [] [],
+                            L_PAREN@84..86 "(" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    MINUS@86..87 "-" [] [],
+                                    MINUS@87..89 "-" [] [Whitespace(" ")],
+                                    IDENT@89..98 "invalid" [] [Whitespace("  ")],
+                                ],
+                            },
+                            R_PAREN@98..99 ")" [] [],
+                        ],
+                    },
+                    CssMediaQueryList [],
+                    SEMICOLON@99..100 ";" [] [],
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@100..165 "@" [Newline("\n"), Newline("\n"), Comments("/*invalid query insid ..."), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    IMPORT_KW@165..172 "import" [] [Whitespace(" ")],
+                    CssUrlFunction {
+                        name: URL_KW@172..175 "url" [] [],
+                        l_paren_token: L_PAREN@175..176 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@176..188 "\"narrow.css\"" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@188..190 ")" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            SUPPORTS_KW@190..198 "supports" [] [],
+                            L_PAREN@198..200 "(" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    MINUS@200..201 "-" [] [],
+                                    MINUS@201..203 "-" [] [Whitespace(" ")],
+                                    IDENT@203..212 "invalid" [] [Whitespace("  ")],
+                                    IDENT@212..219 "screen" [] [Whitespace(" ")],
+                                    AND_KW@219..223 "and" [] [Whitespace(" ")],
+                                    L_PAREN@223..224 "(" [] [],
+                                    IDENT@224..233 "max-width" [] [],
+                                    COLON@233..235 ":" [] [Whitespace(" ")],
+                                    CSS_DIMENSION_VALUE@235..238 "400" [] [],
+                                    PX_KW@238..240 "px" [] [],
+                                ],
+                            },
+                            R_PAREN@240..241 ")" [] [],
+                        ],
+                    },
+                    CssMediaQueryList [],
+                    SEMICOLON@241..242 ";" [] [],
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@242..295 "@" [Newline("\n"), Newline("\n"), Comments("/*invalid query insid ..."), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    IMPORT_KW@295..302 "import" [] [Whitespace(" ")],
+                    CssUrlFunction {
+                        name: URL_KW@302..305 "url" [] [],
+                        l_paren_token: L_PAREN@305..306 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@306..318 "\"narrow.css\"" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@318..320 ")" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            SUPPORTS_KW@320..328 "supports" [] [],
+                            L_PAREN@328..330 "(" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    MINUS@330..331 "-" [] [],
+                                    MINUS@331..333 "-" [] [Whitespace(" ")],
+                                    IDENT@333..341 "invalid" [] [Whitespace(" ")],
+                                ],
+                            },
+                        ],
+                    },
+                    CssMediaQueryList [],
+                    SEMICOLON@341..342 ";" [] [],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@342..343 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..343
+  0: (empty)
+  1: CSS_RULE_LIST@0..342
+    0: CSS_AT_RULE@0..100
+      0: AT@0..51 "@" [Comments("/*invalid query insid ..."), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@51..100
+        0: IMPORT_KW@51..58 "import" [] [Whitespace(" ")]
+        1: CSS_URL_FUNCTION@58..76
+          0: URL_KW@58..61 "url" [] []
+          1: L_PAREN@61..62 "(" [] []
+          2: CSS_STRING@62..74
+            0: CSS_STRING_LITERAL@62..74 "\"narrow.css\"" [] []
+          3: CSS_URL_MODIFIER_LIST@74..74
+          4: R_PAREN@74..76 ")" [] [Whitespace(" ")]
+        2: CSS_BOGUS@76..99
+          0: SUPPORTS_KW@76..84 "supports" [] []
+          1: L_PAREN@84..86 "(" [] [Whitespace(" ")]
+          2: CSS_BOGUS@86..98
+            0: MINUS@86..87 "-" [] []
+            1: MINUS@87..89 "-" [] [Whitespace(" ")]
+            2: IDENT@89..98 "invalid" [] [Whitespace("  ")]
+          3: R_PAREN@98..99 ")" [] []
+        3: CSS_MEDIA_QUERY_LIST@99..99
+        4: SEMICOLON@99..100 ";" [] []
+    1: CSS_AT_RULE@100..242
+      0: AT@100..165 "@" [Newline("\n"), Newline("\n"), Comments("/*invalid query insid ..."), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@165..242
+        0: IMPORT_KW@165..172 "import" [] [Whitespace(" ")]
+        1: CSS_URL_FUNCTION@172..190
+          0: URL_KW@172..175 "url" [] []
+          1: L_PAREN@175..176 "(" [] []
+          2: CSS_STRING@176..188
+            0: CSS_STRING_LITERAL@176..188 "\"narrow.css\"" [] []
+          3: CSS_URL_MODIFIER_LIST@188..188
+          4: R_PAREN@188..190 ")" [] [Whitespace(" ")]
+        2: CSS_BOGUS@190..241
+          0: SUPPORTS_KW@190..198 "supports" [] []
+          1: L_PAREN@198..200 "(" [] [Whitespace(" ")]
+          2: CSS_BOGUS@200..240
+            0: MINUS@200..201 "-" [] []
+            1: MINUS@201..203 "-" [] [Whitespace(" ")]
+            2: IDENT@203..212 "invalid" [] [Whitespace("  ")]
+            3: IDENT@212..219 "screen" [] [Whitespace(" ")]
+            4: AND_KW@219..223 "and" [] [Whitespace(" ")]
+            5: L_PAREN@223..224 "(" [] []
+            6: IDENT@224..233 "max-width" [] []
+            7: COLON@233..235 ":" [] [Whitespace(" ")]
+            8: CSS_DIMENSION_VALUE@235..238 "400" [] []
+            9: PX_KW@238..240 "px" [] []
+          3: R_PAREN@240..241 ")" [] []
+        3: CSS_MEDIA_QUERY_LIST@241..241
+        4: SEMICOLON@241..242 ";" [] []
+    2: CSS_AT_RULE@242..342
+      0: AT@242..295 "@" [Newline("\n"), Newline("\n"), Comments("/*invalid query insid ..."), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@295..342
+        0: IMPORT_KW@295..302 "import" [] [Whitespace(" ")]
+        1: CSS_URL_FUNCTION@302..320
+          0: URL_KW@302..305 "url" [] []
+          1: L_PAREN@305..306 "(" [] []
+          2: CSS_STRING@306..318
+            0: CSS_STRING_LITERAL@306..318 "\"narrow.css\"" [] []
+          3: CSS_URL_MODIFIER_LIST@318..318
+          4: R_PAREN@318..320 ")" [] [Whitespace(" ")]
+        2: CSS_BOGUS@320..341
+          0: SUPPORTS_KW@320..328 "supports" [] []
+          1: L_PAREN@328..330 "(" [] [Whitespace(" ")]
+          2: CSS_BOGUS@330..341
+            0: MINUS@330..331 "-" [] []
+            1: MINUS@331..333 "-" [] [Whitespace(" ")]
+            2: IDENT@333..341 "invalid" [] [Whitespace(" ")]
+        3: CSS_MEDIA_QUERY_LIST@341..341
+        4: SEMICOLON@341..342 ";" [] []
+  2: EOF@342..343 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_import_support_error.css:2:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ /*invalid query inside supports recovery at ')'*/
+  > 2 │ @import url("narrow.css") supports( -- invalid  );
+      │                                     ^^^^^^^^^^
+    3 │ 
+    4 │ /*invalid query inside supports recovery at any media query*/
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+at_rule_import_support_error.css:5:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    4 │ /*invalid query inside supports recovery at any media query*/
+  > 5 │ @import url("narrow.css") supports( -- invalid  screen and (max-width: 400px);
+      │                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ /*invalid query inside supports recovery at ';'*/
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+at_rule_import_support_error.css:8:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    7 │ /*invalid query inside supports recovery at ';'*/
+  > 8 │ @import url("narrow.css") supports( -- invalid ;
+      │                                     ^^^^^^^^^^
+    9 │ 
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+at_rule_import_support_error.css:8:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `;`
+  
+    7 │ /*invalid query inside supports recovery at ';'*/
+  > 8 │ @import url("narrow.css") supports( -- invalid ;
+      │                                                ^
+    9 │ 
+  
+  i Remove ;
+  
+```

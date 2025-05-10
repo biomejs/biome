@@ -60,6 +60,7 @@ CssBogusFontFamilyName = SyntaxElement*
 CssBogusCustomIdentifier = SyntaxElement*
 CssBogusKeyframesName = SyntaxElement*
 CssBogusUnicodeRangeValue = SyntaxElement*
+CssBogusSupportsCondition = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -1315,6 +1316,7 @@ AnyCssSupportsCondition =
 	| CssSupportsOrCondition
 	| CssSupportsAndCondition
 	| AnyCssSupportsInParens
+	| CssBogusSupportsCondition
 
 // @supports not (display: grid) {}
 //           ^^^^^^^^^^^^^^^^^^^
@@ -1352,7 +1354,6 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
-	| CssFunction
 	| AnyCssValue // general-enclosed
 
 // @supports (transition-property: color) or (not (animation-name: foo)) {}

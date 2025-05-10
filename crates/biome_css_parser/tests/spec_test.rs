@@ -180,10 +180,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-@container name style(not((color: red)) ) ) {
-background: red
+ @supports not (selector(:before) or not (not (selector(:before)))) {
 }
-
     "#;
 
     let root = parse_css(

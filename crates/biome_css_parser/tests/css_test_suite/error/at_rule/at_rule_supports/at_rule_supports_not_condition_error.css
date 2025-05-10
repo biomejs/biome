@@ -1,0 +1,55 @@
+/* missing parenthesised condition */
+@supports not {}
+
+/* missing “(” immediately after “not” */
+@supports not display: flex {}
+
+/* empty parentheses – nothing to negate */
+@supports not () {}
+
+/* malformed declaration: missing colon */
+@supports not (display flex) {}
+
+/* malformed selector feature: keyword “selector” must be followed by “(” */
+@supports not (selector div) {}
+
+/* unclosed parenthesis */
+@supports not (display: flex
+
+/* extra closing parenthesis */
+@supports not (display: flex)) {}
+
+/* trailing “and” with no right‑hand condition */
+@supports not (display: flex) and {}
+
+/* trailing “and” inside nested group */
+@supports not ((display: flex) and) {}
+
+/* second “not” where a parenthesis was expected */
+@supports not not (display: flex) {}
+
+/* 1.  Recover at “)” – inside the group we forget the colon */
+@supports not (display flex) and (display: grid) {
+/* this block must still parse */
+.after-paren { color: red; }
+}
+
+/* 2.  Recover at “and” – RHS of the operator is missing */
+@supports not (display: flex) and {
+	.after-and { color: green; }
+}
+
+/* 3.  Recover at “or” – malformed LHS, continue with RHS */
+@supports not (selector div) or (display: grid) {
+.after-or { color: blue; }
+}
+
+/* 4.  Recover at “{” – we hit the block start while still inside invalid parens */
+@supports not (display: flex invalid-stuff {
+	.inside-block { color: orange; }
+}
+
+@supports not (display: flex
+@media screen {
+	.after-newline { color: purple; }
+}

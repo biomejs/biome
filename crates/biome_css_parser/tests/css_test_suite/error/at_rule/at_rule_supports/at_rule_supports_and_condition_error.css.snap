@@ -1,0 +1,753 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/* No valid condition after `and` */
+@supports (display:flex) and {
+}
+
+/* No valid condition after `and missing {` */
+@supports (display:flex) and
+}
+
+/* 200px is not a valid condition start */
+@supports (display:flex) and -- name {
+}
+
+/* The final `and` is missing its sub-condition */
+@supports (display:flex) and (display:flex) and {
+}
+
+/* Missing parenthesis  */
+@supports (display:flex) and (display:flex {
+}
+
+
+/* There's an extra `and` that has no condition immediately following it. */
+@supports (display:flex) and and (display:flex) {
+}
+
+/* Invalid condition */
+@supports (display:flex) and -- name and (display:flex) {
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..38 "@" [Comments("/* No valid condition ..."), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@38..47 "supports" [] [Whitespace(" ")],
+                condition: CssSupportsAndCondition {
+                    left: CssSupportsFeatureDeclaration {
+                        l_paren_token: L_PAREN@47..48 "(" [] [],
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@48..55 "display" [] [],
+                                },
+                                colon_token: COLON@55..56 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@56..60 "flex" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@60..62 ")" [] [Whitespace(" ")],
+                    },
+                    and_token: AND_KW@62..66 "and" [] [Whitespace(" ")],
+                    right: missing (required),
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@66..67 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@67..69 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@69..119 "@" [Newline("\n"), Newline("\n"), Comments("/* No valid condition ..."), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@119..128 "supports" [] [Whitespace(" ")],
+                condition: CssSupportsAndCondition {
+                    left: CssSupportsFeatureDeclaration {
+                        l_paren_token: L_PAREN@128..129 "(" [] [],
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@129..136 "display" [] [],
+                                },
+                                colon_token: COLON@136..137 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@137..141 "flex" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@141..143 ")" [] [Whitespace(" ")],
+                    },
+                    and_token: AND_KW@143..146 "and" [] [],
+                    right: missing (required),
+                },
+                block: CssBogusBlock {
+                    items: [
+                        CssRuleList [],
+                        R_CURLY@146..148 "}" [Newline("\n")] [],
+                    ],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@148..194 "@" [Newline("\n"), Newline("\n"), Comments("/* 200px is not a val ..."), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@194..203 "supports" [] [Whitespace(" ")],
+                condition: CssBogusSupportsCondition {
+                    items: [
+                        CssSupportsFeatureDeclaration {
+                            l_paren_token: L_PAREN@203..204 "(" [] [],
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@204..211 "display" [] [],
+                                    },
+                                    colon_token: COLON@211..212 ":" [] [],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@212..216 "flex" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            r_paren_token: R_PAREN@216..218 ")" [] [Whitespace(" ")],
+                        },
+                        AND_KW@218..222 "and" [] [Whitespace(" ")],
+                        CssBogus {
+                            items: [
+                                MINUS@222..223 "-" [] [],
+                                MINUS@223..225 "-" [] [Whitespace(" ")],
+                                IDENT@225..230 "name" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@230..231 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@231..233 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@233..287 "@" [Newline("\n"), Newline("\n"), Comments("/* The final `and` is ..."), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@287..296 "supports" [] [Whitespace(" ")],
+                condition: CssSupportsAndCondition {
+                    left: CssSupportsFeatureDeclaration {
+                        l_paren_token: L_PAREN@296..297 "(" [] [],
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@297..304 "display" [] [],
+                                },
+                                colon_token: COLON@304..305 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@305..309 "flex" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@309..311 ")" [] [Whitespace(" ")],
+                    },
+                    and_token: AND_KW@311..315 "and" [] [Whitespace(" ")],
+                    right: CssSupportsAndCondition {
+                        left: CssSupportsFeatureDeclaration {
+                            l_paren_token: L_PAREN@315..316 "(" [] [],
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@316..323 "display" [] [],
+                                    },
+                                    colon_token: COLON@323..324 ":" [] [],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@324..328 "flex" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            r_paren_token: R_PAREN@328..330 ")" [] [Whitespace(" ")],
+                        },
+                        and_token: AND_KW@330..334 "and" [] [Whitespace(" ")],
+                        right: missing (required),
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@334..335 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@335..337 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@337..367 "@" [Newline("\n"), Newline("\n"), Comments("/* Missing parenthesi ..."), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@367..376 "supports" [] [Whitespace(" ")],
+                condition: CssSupportsAndCondition {
+                    left: CssSupportsFeatureDeclaration {
+                        l_paren_token: L_PAREN@376..377 "(" [] [],
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@377..384 "display" [] [],
+                                },
+                                colon_token: COLON@384..385 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@385..389 "flex" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@389..391 ")" [] [Whitespace(" ")],
+                    },
+                    and_token: AND_KW@391..395 "and" [] [Whitespace(" ")],
+                    right: CssSupportsFeatureDeclaration {
+                        l_paren_token: L_PAREN@395..396 "(" [] [],
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@396..403 "display" [] [],
+                                    },
+                                    COLON@403..404 ":" [] [],
+                                    CssBogus {
+                                        items: [
+                                            CssIdentifier {
+                                                value_token: IDENT@404..409 "flex" [] [Whitespace(" ")],
+                                            },
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    L_CURLY@409..410 "{" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: missing (required),
+                    },
+                },
+                block: CssBogusBlock {
+                    items: [
+                        CssRuleList [],
+                        R_CURLY@410..412 "}" [Newline("\n")] [],
+                    ],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@412..493 "@" [Newline("\n"), Newline("\n"), Newline("\n"), Comments("/* There's an extra ` ..."), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@493..502 "supports" [] [Whitespace(" ")],
+                condition: CssBogusSupportsCondition {
+                    items: [
+                        CssSupportsFeatureDeclaration {
+                            l_paren_token: L_PAREN@502..503 "(" [] [],
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@503..510 "display" [] [],
+                                    },
+                                    colon_token: COLON@510..511 ":" [] [],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@511..515 "flex" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            r_paren_token: R_PAREN@515..517 ")" [] [Whitespace(" ")],
+                        },
+                        AND_KW@517..521 "and" [] [Whitespace(" ")],
+                        CssBogusSupportsCondition {
+                            items: [
+                                CssBogus {
+                                    items: [],
+                                },
+                                AND_KW@521..525 "and" [] [Whitespace(" ")],
+                                CssSupportsFeatureDeclaration {
+                                    l_paren_token: L_PAREN@525..526 "(" [] [],
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@526..533 "display" [] [],
+                                            },
+                                            colon_token: COLON@533..534 ":" [] [],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@534..538 "flex" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    r_paren_token: R_PAREN@538..540 ")" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@540..541 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@541..543 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@543..570 "@" [Newline("\n"), Newline("\n"), Comments("/* Invalid condition */"), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@570..579 "supports" [] [Whitespace(" ")],
+                condition: CssBogusSupportsCondition {
+                    items: [
+                        CssSupportsFeatureDeclaration {
+                            l_paren_token: L_PAREN@579..580 "(" [] [],
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@580..587 "display" [] [],
+                                    },
+                                    colon_token: COLON@587..588 ":" [] [],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@588..592 "flex" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            r_paren_token: R_PAREN@592..594 ")" [] [Whitespace(" ")],
+                        },
+                        AND_KW@594..598 "and" [] [Whitespace(" ")],
+                        CssBogusSupportsCondition {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        MINUS@598..599 "-" [] [],
+                                        MINUS@599..601 "-" [] [Whitespace(" ")],
+                                        IDENT@601..606 "name" [] [Whitespace(" ")],
+                                    ],
+                                },
+                                AND_KW@606..610 "and" [] [Whitespace(" ")],
+                                CssSupportsFeatureDeclaration {
+                                    l_paren_token: L_PAREN@610..611 "(" [] [],
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@611..618 "display" [] [],
+                                            },
+                                            colon_token: COLON@618..619 ":" [] [],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@619..623 "flex" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    r_paren_token: R_PAREN@623..625 ")" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@625..626 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@626..628 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@628..629 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..629
+  0: (empty)
+  1: CSS_RULE_LIST@0..628
+    0: CSS_AT_RULE@0..69
+      0: AT@0..38 "@" [Comments("/* No valid condition ..."), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@38..69
+        0: SUPPORTS_KW@38..47 "supports" [] [Whitespace(" ")]
+        1: CSS_SUPPORTS_AND_CONDITION@47..66
+          0: CSS_SUPPORTS_FEATURE_DECLARATION@47..62
+            0: L_PAREN@47..48 "(" [] []
+            1: CSS_DECLARATION@48..60
+              0: CSS_GENERIC_PROPERTY@48..60
+                0: CSS_IDENTIFIER@48..55
+                  0: IDENT@48..55 "display" [] []
+                1: COLON@55..56 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@56..60
+                  0: CSS_IDENTIFIER@56..60
+                    0: IDENT@56..60 "flex" [] []
+              1: (empty)
+            2: R_PAREN@60..62 ")" [] [Whitespace(" ")]
+          1: AND_KW@62..66 "and" [] [Whitespace(" ")]
+          2: (empty)
+        2: CSS_RULE_BLOCK@66..69
+          0: L_CURLY@66..67 "{" [] []
+          1: CSS_RULE_LIST@67..67
+          2: R_CURLY@67..69 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@69..148
+      0: AT@69..119 "@" [Newline("\n"), Newline("\n"), Comments("/* No valid condition ..."), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@119..148
+        0: SUPPORTS_KW@119..128 "supports" [] [Whitespace(" ")]
+        1: CSS_SUPPORTS_AND_CONDITION@128..146
+          0: CSS_SUPPORTS_FEATURE_DECLARATION@128..143
+            0: L_PAREN@128..129 "(" [] []
+            1: CSS_DECLARATION@129..141
+              0: CSS_GENERIC_PROPERTY@129..141
+                0: CSS_IDENTIFIER@129..136
+                  0: IDENT@129..136 "display" [] []
+                1: COLON@136..137 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@137..141
+                  0: CSS_IDENTIFIER@137..141
+                    0: IDENT@137..141 "flex" [] []
+              1: (empty)
+            2: R_PAREN@141..143 ")" [] [Whitespace(" ")]
+          1: AND_KW@143..146 "and" [] []
+          2: (empty)
+        2: CSS_BOGUS_BLOCK@146..148
+          0: CSS_RULE_LIST@146..146
+          1: R_CURLY@146..148 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@148..233
+      0: AT@148..194 "@" [Newline("\n"), Newline("\n"), Comments("/* 200px is not a val ..."), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@194..233
+        0: SUPPORTS_KW@194..203 "supports" [] [Whitespace(" ")]
+        1: CSS_BOGUS_SUPPORTS_CONDITION@203..230
+          0: CSS_SUPPORTS_FEATURE_DECLARATION@203..218
+            0: L_PAREN@203..204 "(" [] []
+            1: CSS_DECLARATION@204..216
+              0: CSS_GENERIC_PROPERTY@204..216
+                0: CSS_IDENTIFIER@204..211
+                  0: IDENT@204..211 "display" [] []
+                1: COLON@211..212 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@212..216
+                  0: CSS_IDENTIFIER@212..216
+                    0: IDENT@212..216 "flex" [] []
+              1: (empty)
+            2: R_PAREN@216..218 ")" [] [Whitespace(" ")]
+          1: AND_KW@218..222 "and" [] [Whitespace(" ")]
+          2: CSS_BOGUS@222..230
+            0: MINUS@222..223 "-" [] []
+            1: MINUS@223..225 "-" [] [Whitespace(" ")]
+            2: IDENT@225..230 "name" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@230..233
+          0: L_CURLY@230..231 "{" [] []
+          1: CSS_RULE_LIST@231..231
+          2: R_CURLY@231..233 "}" [Newline("\n")] []
+    3: CSS_AT_RULE@233..337
+      0: AT@233..287 "@" [Newline("\n"), Newline("\n"), Comments("/* The final `and` is ..."), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@287..337
+        0: SUPPORTS_KW@287..296 "supports" [] [Whitespace(" ")]
+        1: CSS_SUPPORTS_AND_CONDITION@296..334
+          0: CSS_SUPPORTS_FEATURE_DECLARATION@296..311
+            0: L_PAREN@296..297 "(" [] []
+            1: CSS_DECLARATION@297..309
+              0: CSS_GENERIC_PROPERTY@297..309
+                0: CSS_IDENTIFIER@297..304
+                  0: IDENT@297..304 "display" [] []
+                1: COLON@304..305 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@305..309
+                  0: CSS_IDENTIFIER@305..309
+                    0: IDENT@305..309 "flex" [] []
+              1: (empty)
+            2: R_PAREN@309..311 ")" [] [Whitespace(" ")]
+          1: AND_KW@311..315 "and" [] [Whitespace(" ")]
+          2: CSS_SUPPORTS_AND_CONDITION@315..334
+            0: CSS_SUPPORTS_FEATURE_DECLARATION@315..330
+              0: L_PAREN@315..316 "(" [] []
+              1: CSS_DECLARATION@316..328
+                0: CSS_GENERIC_PROPERTY@316..328
+                  0: CSS_IDENTIFIER@316..323
+                    0: IDENT@316..323 "display" [] []
+                  1: COLON@323..324 ":" [] []
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@324..328
+                    0: CSS_IDENTIFIER@324..328
+                      0: IDENT@324..328 "flex" [] []
+                1: (empty)
+              2: R_PAREN@328..330 ")" [] [Whitespace(" ")]
+            1: AND_KW@330..334 "and" [] [Whitespace(" ")]
+            2: (empty)
+        2: CSS_RULE_BLOCK@334..337
+          0: L_CURLY@334..335 "{" [] []
+          1: CSS_RULE_LIST@335..335
+          2: R_CURLY@335..337 "}" [Newline("\n")] []
+    4: CSS_AT_RULE@337..412
+      0: AT@337..367 "@" [Newline("\n"), Newline("\n"), Comments("/* Missing parenthesi ..."), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@367..412
+        0: SUPPORTS_KW@367..376 "supports" [] [Whitespace(" ")]
+        1: CSS_SUPPORTS_AND_CONDITION@376..410
+          0: CSS_SUPPORTS_FEATURE_DECLARATION@376..391
+            0: L_PAREN@376..377 "(" [] []
+            1: CSS_DECLARATION@377..389
+              0: CSS_GENERIC_PROPERTY@377..389
+                0: CSS_IDENTIFIER@377..384
+                  0: IDENT@377..384 "display" [] []
+                1: COLON@384..385 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@385..389
+                  0: CSS_IDENTIFIER@385..389
+                    0: IDENT@385..389 "flex" [] []
+              1: (empty)
+            2: R_PAREN@389..391 ")" [] [Whitespace(" ")]
+          1: AND_KW@391..395 "and" [] [Whitespace(" ")]
+          2: CSS_SUPPORTS_FEATURE_DECLARATION@395..410
+            0: L_PAREN@395..396 "(" [] []
+            1: CSS_DECLARATION@396..410
+              0: CSS_BOGUS_PROPERTY@396..410
+                0: CSS_IDENTIFIER@396..403
+                  0: IDENT@396..403 "display" [] []
+                1: COLON@403..404 ":" [] []
+                2: CSS_BOGUS@404..410
+                  0: CSS_IDENTIFIER@404..409
+                    0: IDENT@404..409 "flex" [] [Whitespace(" ")]
+                  1: CSS_BOGUS_PROPERTY_VALUE@409..410
+                    0: L_CURLY@409..410 "{" [] []
+              1: (empty)
+            2: (empty)
+        2: CSS_BOGUS_BLOCK@410..412
+          0: CSS_RULE_LIST@410..410
+          1: R_CURLY@410..412 "}" [Newline("\n")] []
+    5: CSS_AT_RULE@412..543
+      0: AT@412..493 "@" [Newline("\n"), Newline("\n"), Newline("\n"), Comments("/* There's an extra ` ..."), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@493..543
+        0: SUPPORTS_KW@493..502 "supports" [] [Whitespace(" ")]
+        1: CSS_BOGUS_SUPPORTS_CONDITION@502..540
+          0: CSS_SUPPORTS_FEATURE_DECLARATION@502..517
+            0: L_PAREN@502..503 "(" [] []
+            1: CSS_DECLARATION@503..515
+              0: CSS_GENERIC_PROPERTY@503..515
+                0: CSS_IDENTIFIER@503..510
+                  0: IDENT@503..510 "display" [] []
+                1: COLON@510..511 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@511..515
+                  0: CSS_IDENTIFIER@511..515
+                    0: IDENT@511..515 "flex" [] []
+              1: (empty)
+            2: R_PAREN@515..517 ")" [] [Whitespace(" ")]
+          1: AND_KW@517..521 "and" [] [Whitespace(" ")]
+          2: CSS_BOGUS_SUPPORTS_CONDITION@521..540
+            0: CSS_BOGUS@521..521
+            1: AND_KW@521..525 "and" [] [Whitespace(" ")]
+            2: CSS_SUPPORTS_FEATURE_DECLARATION@525..540
+              0: L_PAREN@525..526 "(" [] []
+              1: CSS_DECLARATION@526..538
+                0: CSS_GENERIC_PROPERTY@526..538
+                  0: CSS_IDENTIFIER@526..533
+                    0: IDENT@526..533 "display" [] []
+                  1: COLON@533..534 ":" [] []
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@534..538
+                    0: CSS_IDENTIFIER@534..538
+                      0: IDENT@534..538 "flex" [] []
+                1: (empty)
+              2: R_PAREN@538..540 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@540..543
+          0: L_CURLY@540..541 "{" [] []
+          1: CSS_RULE_LIST@541..541
+          2: R_CURLY@541..543 "}" [Newline("\n")] []
+    6: CSS_AT_RULE@543..628
+      0: AT@543..570 "@" [Newline("\n"), Newline("\n"), Comments("/* Invalid condition */"), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@570..628
+        0: SUPPORTS_KW@570..579 "supports" [] [Whitespace(" ")]
+        1: CSS_BOGUS_SUPPORTS_CONDITION@579..625
+          0: CSS_SUPPORTS_FEATURE_DECLARATION@579..594
+            0: L_PAREN@579..580 "(" [] []
+            1: CSS_DECLARATION@580..592
+              0: CSS_GENERIC_PROPERTY@580..592
+                0: CSS_IDENTIFIER@580..587
+                  0: IDENT@580..587 "display" [] []
+                1: COLON@587..588 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@588..592
+                  0: CSS_IDENTIFIER@588..592
+                    0: IDENT@588..592 "flex" [] []
+              1: (empty)
+            2: R_PAREN@592..594 ")" [] [Whitespace(" ")]
+          1: AND_KW@594..598 "and" [] [Whitespace(" ")]
+          2: CSS_BOGUS_SUPPORTS_CONDITION@598..625
+            0: CSS_BOGUS@598..606
+              0: MINUS@598..599 "-" [] []
+              1: MINUS@599..601 "-" [] [Whitespace(" ")]
+              2: IDENT@601..606 "name" [] [Whitespace(" ")]
+            1: AND_KW@606..610 "and" [] [Whitespace(" ")]
+            2: CSS_SUPPORTS_FEATURE_DECLARATION@610..625
+              0: L_PAREN@610..611 "(" [] []
+              1: CSS_DECLARATION@611..623
+                0: CSS_GENERIC_PROPERTY@611..623
+                  0: CSS_IDENTIFIER@611..618
+                    0: IDENT@611..618 "display" [] []
+                  1: COLON@618..619 ":" [] []
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@619..623
+                    0: CSS_IDENTIFIER@619..623
+                      0: IDENT@619..623 "flex" [] []
+                1: (empty)
+              2: R_PAREN@623..625 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@625..628
+          0: L_CURLY@625..626 "{" [] []
+          1: CSS_RULE_LIST@626..626
+          2: R_CURLY@626..628 "}" [Newline("\n")] []
+  2: EOF@628..629 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_supports_and_condition_error.css:2:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ /* No valid condition after `and` */
+  > 2 │ @supports (display:flex) and {
+      │                              ^
+    3 │ }
+    4 │ 
+  
+  i Expected one of:
+  
+  - ( <supports-condition> ) 
+  - <supports-feature>
+  
+at_rule_supports_and_condition_error.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    5 │ /* No valid condition after `and missing {` */
+    6 │ @supports (display:flex) and
+  > 7 │ }
+      │ ^
+    8 │ 
+    9 │ /* 200px is not a valid condition start */
+  
+  i Expected one of:
+  
+  - ( <supports-condition> ) 
+  - <supports-feature>
+  
+at_rule_supports_and_condition_error.css:10:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     9 │ /* 200px is not a valid condition start */
+  > 10 │ @supports (display:flex) and -- name {
+       │                              ^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Expected one of:
+  
+  - ( <supports-condition> ) 
+  - <supports-feature>
+  
+at_rule_supports_and_condition_error.css:14:49 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    13 │ /* The final `and` is missing its sub-condition */
+  > 14 │ @supports (display:flex) and (display:flex) and {
+       │                                                 ^
+    15 │ }
+    16 │ 
+  
+  i Expected one of:
+  
+  - ( <supports-condition> ) 
+  - <supports-feature>
+  
+at_rule_supports_and_condition_error.css:18:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    17 │ /* Missing parenthesis  */
+  > 18 │ @supports (display:flex) and (display:flex {
+       │                                            ^
+    19 │ }
+    20 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+at_rule_supports_and_condition_error.css:19:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `}`
+  
+    17 │ /* Missing parenthesis  */
+    18 │ @supports (display:flex) and (display:flex {
+  > 19 │ }
+       │ ^
+    20 │ 
+  
+  i Remove }
+  
+at_rule_supports_and_condition_error.css:23:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    22 │ /* There's an extra `and` that has no condition immediately following it. */
+  > 23 │ @supports (display:flex) and and (display:flex) {
+       │                              ^^^
+    24 │ }
+    25 │ 
+  
+  i Expected one of:
+  
+  - ( <supports-condition> ) 
+  - <supports-feature>
+  
+at_rule_supports_and_condition_error.css:27:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    26 │ /* Invalid condition */
+  > 27 │ @supports (display:flex) and -- name and (display:flex) {
+       │                              ^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i Expected one of:
+  
+  - ( <supports-condition> ) 
+  - <supports-feature>
+  
+```

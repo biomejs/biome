@@ -226,3 +226,7 @@ pub(crate) fn expected_component_value(p: &CssParser, range: TextRange) -> Parse
     )
     .into_diagnostic(p)
 }
+
+pub(crate) fn expected_declaration(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("<declaration>", range, p)
+}

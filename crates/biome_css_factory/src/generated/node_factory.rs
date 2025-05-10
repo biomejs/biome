@@ -3038,6 +3038,16 @@ where
         slots,
     ))
 }
+pub fn css_bogus_supports_condition<I>(slots: I) -> CssBogusSupportsCondition
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusSupportsCondition::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_SUPPORTS_CONDITION,
+        slots,
+    ))
+}
 pub fn css_bogus_unicode_range_value<I>(slots: I) -> CssBogusUnicodeRangeValue
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,

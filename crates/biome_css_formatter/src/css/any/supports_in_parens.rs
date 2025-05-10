@@ -9,7 +9,6 @@ impl FormatRule<AnyCssSupportsInParens> for FormatAnyCssSupportsInParens {
     fn fmt(&self, node: &AnyCssSupportsInParens, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssSupportsInParens::AnyCssValue(node) => node.format().fmt(f),
-            AnyCssSupportsInParens::CssFunction(node) => node.format().fmt(f),
             AnyCssSupportsInParens::CssSupportsConditionInParens(node) => node.format().fmt(f),
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(node) => node.format().fmt(f),
             AnyCssSupportsInParens::CssSupportsFeatureSelector(node) => node.format().fmt(f),

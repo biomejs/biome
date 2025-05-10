@@ -3,6 +3,7 @@ mod color_profile;
 mod container;
 mod counter_style;
 mod document;
+mod error;
 mod feature;
 mod font_face;
 mod font_feature_values;

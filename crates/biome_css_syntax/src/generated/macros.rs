@@ -786,6 +786,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusSubSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_SUPPORTS_CONDITION => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusSupportsCondition::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE => {
                     let $pattern =
                         unsafe { $crate::CssBogusUnicodeRangeValue::new_unchecked(node) };

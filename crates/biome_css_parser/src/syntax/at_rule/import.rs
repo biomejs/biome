@@ -1,12 +1,14 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::layer::LayerNameList;
 use crate::syntax::at_rule::media::MediaQueryList;
+use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
 use crate::syntax::at_rule::supports::parse_any_supports_condition;
 use crate::syntax::value::url::{is_at_url_function, parse_url_function};
 use crate::syntax::{is_at_declaration, is_at_string, parse_declaration, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::T;
+use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
+use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
@@ -50,7 +52,9 @@ pub(crate) fn parse_import_at_rule(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if is_at_import_supports(p) {
-        parse_import_supports(p).ok(); // TODO handle error
+        // An optional supports condition, we don't have an error here
+        // is_at_import_supports validates the supports condition
+        parse_import_supports(p).ok();
     }
 
     MediaQueryList::new(T![;]).parse_list(p);
@@ -157,14 +161,37 @@ pub(crate) fn parse_import_supports(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![supports]);
-    p.bump(T!['(']);
+    p.expect(T!['(']);
 
     if is_at_declaration(p) {
-        parse_declaration(p).ok(); // TODO handle error
+        // is_at_declaration validates the declaration
+        // we don't have an error here
+        parse_declaration(p).ok();
     } else {
-        parse_any_supports_condition(p).ok(); // TODO handle error
+        parse_any_supports_condition(p)
+            .or_recover(
+                p,
+                &ImportSupportsConditionParseRecovery,
+                expected_any_supports_condition,
+            )
+            .ok();
     }
 
     p.expect(T![')']);
     Present(m.complete(p, CSS_IMPORT_SUPPORTS))
+}
+
+pub(crate) struct ImportSupportsConditionParseRecovery;
+
+impl ParseRecovery for ImportSupportsConditionParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        // Skips malformed or incomplete queries in parentheses until:
+        // 1) ')' (closing this query context)
+        // 2) ';' end of an import rule
+        p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()
+    }
 }
