@@ -827,7 +827,7 @@ pub(crate) trait CommandRunner: Sized {
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key,
             // When the user provides the path to the configuration, we can't use its directory because
-            // it might be outside the project, so we need to use
+            // it might be outside the project, so we need to use the current project directory.
             workspace_directory: if is_configuration_from_user {
                 Some(project_path.clone())
             } else {

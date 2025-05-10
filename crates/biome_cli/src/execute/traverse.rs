@@ -381,10 +381,14 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             self.warnings.fetch_add(1, Ordering::Relaxed);
                         }
 
+                        let should_print = self.should_print();
+
                         let diag = diag
                             .with_file_path(file_path.as_str())
                             .with_file_source_code(&content);
-                        diagnostics_to_print.push(diag)
+                        if should_print || self.execution.is_ci() {
+                            diagnostics_to_print.push(diag)
+                        }
                     }
                 }
                 Message::Diff {
@@ -437,7 +441,9 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                     .with_file_source_code(old.clone())
                                     .with_file_path(file_path.to_string())
                                 };
-                                diagnostics_to_print.push(diag);
+                                if should_print || self.execution.is_ci() {
+                                    diagnostics_to_print.push(diag);
+                                }
                             }
                         }
                     }
