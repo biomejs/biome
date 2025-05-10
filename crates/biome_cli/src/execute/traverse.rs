@@ -346,6 +346,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                         };
 
                         if let Some(path) = file_name {
+                            let path = self.to_relative_file_path(path);
                             err = err.with_file_path(path.as_str());
                         }
                     }
@@ -365,59 +366,25 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                 } => {
                     // we transform the file string into a path object so we can correctly strip
                     // the working directory without having leading slash in the file name
-                    let file_path = Utf8Path::new(&file_path);
-                    let file_path = self
-                        .working_directory
-                        .as_ref()
-                        .and_then(|wd| file_path.strip_prefix(wd.as_str()).ok())
-                        .map(|path| path.to_string())
-                        .unwrap_or(file_path.to_string());
-
+                    let file_path = self.to_relative_file_path(&file_path);
                     self.not_printed_diagnostics
                         .fetch_add(skipped_diagnostics, Ordering::Relaxed);
-
-                    // is CI mode we want to print all the diagnostics
-                    if self.execution.is_ci() {
-                        for diag in diagnostics {
-                            let severity = diag.severity();
-                            if self.should_skip_diagnostic(severity, diag.tags()) {
-                                continue;
-                            }
-
-                            if severity == Severity::Error {
-                                self.errors.fetch_add(1, Ordering::Relaxed);
-                            }
-                            if severity == Severity::Warning {
-                                self.warnings.fetch_add(1, Ordering::Relaxed);
-                            }
-
-                            let diag = diag
-                                .with_file_path(file_path.as_str())
-                                .with_file_source_code(&content);
-                            diagnostics_to_print.push(diag);
+                    for diag in diagnostics {
+                        let severity = diag.severity();
+                        if self.should_skip_diagnostic(severity, diag.tags()) {
+                            continue;
                         }
-                    } else {
-                        for diag in diagnostics {
-                            let severity = diag.severity();
-                            if self.should_skip_diagnostic(severity, diag.tags()) {
-                                continue;
-                            }
-                            if severity == Severity::Error {
-                                self.errors.fetch_add(1, Ordering::Relaxed);
-                            }
-                            if severity == Severity::Warning {
-                                self.warnings.fetch_add(1, Ordering::Relaxed);
-                            }
-
-                            let should_print = self.should_print();
-
-                            if should_print {
-                                let diag = diag
-                                    .with_file_path(file_path.as_str())
-                                    .with_file_source_code(&content);
-                                diagnostics_to_print.push(diag)
-                            }
+                        if severity == Severity::Error {
+                            self.errors.fetch_add(1, Ordering::Relaxed);
                         }
+                        if severity == Severity::Warning {
+                            self.warnings.fetch_add(1, Ordering::Relaxed);
+                        }
+
+                        let diag = diag
+                            .with_file_path(file_path.as_str())
+                            .with_file_source_code(&content);
+                        diagnostics_to_print.push(diag)
                     }
                 }
                 Message::Diff {
@@ -426,13 +393,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     new,
                     diff_kind,
                 } => {
-                    let file_path = Utf8Path::new(&file_name);
-                    let file_path = self
-                        .working_directory
-                        .as_ref()
-                        .and_then(|wd| file_path.strip_prefix(wd.as_str()).ok())
-                        .map(|path| path.to_string())
-                        .unwrap_or(file_path.to_string());
+                    let file_path = self.to_relative_file_path(&file_name);
                     // A diff is an error in CI mode and in format check mode
                     let is_error = self.execution.is_ci() || !self.execution.is_format_write();
                     if is_error {
@@ -453,44 +414,46 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     let should_print = self.should_print();
 
                     if should_print {
-                        if self.execution.is_ci() {
-                            match diff_kind {
-                                DiffKind::Format => {
-                                    let diag = CIFormatDiffDiagnostic {
+                        match diff_kind {
+                            DiffKind::Format => {
+                                let diag = if self.execution.is_ci() {
+                                    CIFormatDiffDiagnostic {
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),
                                         },
-                                    };
-                                    diagnostics_to_print.push(
-                                        diag.with_severity(severity)
-                                            .with_file_source_code(old.clone())
-                                            .with_file_path(file_path.to_string()),
-                                    );
-                                }
-                            };
-                        } else {
-                            match diff_kind {
-                                DiffKind::Format => {
-                                    let diag = FormatDiffDiagnostic {
+                                    }
+                                    .with_severity(severity)
+                                    .with_file_source_code(old.clone())
+                                    .with_file_path(file_path.to_string())
+                                } else {
+                                    FormatDiffDiagnostic {
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),
                                         },
-                                    };
-                                    diagnostics_to_print.push(
-                                        diag.with_severity(severity)
-                                            .with_file_source_code(old.clone())
-                                            .with_file_path(file_path.to_string()),
-                                    )
-                                }
-                            };
+                                    }
+                                    .with_severity(severity)
+                                    .with_file_source_code(old.clone())
+                                    .with_file_path(file_path.to_string())
+                                };
+                                diagnostics_to_print.push(diag);
+                            }
                         }
                     }
                 }
             }
         }
         diagnostics_to_print
+    }
+
+    fn to_relative_file_path<'a>(&self, path: &'a String) -> String {
+        let file_path = Utf8Path::new(&path);
+        self.working_directory
+            .as_ref()
+            .and_then(|wd| file_path.strip_prefix(wd.as_str()).ok())
+            .map(|path| path.to_string())
+            .unwrap_or(file_path.to_string())
     }
 }
 
@@ -589,7 +552,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
         self.push_message(error);
     }
 
-    #[instrument(level = "trace", skip(self, biome_path), fields(can_handle))]
+    #[instrument(level = "debug", skip(self, biome_path), fields(can_handle))]
     fn can_handle(&self, biome_path: &BiomePath) -> bool {
         if biome_path
             .file_name()

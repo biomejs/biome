@@ -794,8 +794,9 @@ pub(crate) trait CommandRunner: Sized {
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
     ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
-        let loaded_configuration =
-            load_configuration(fs, cli_options.as_configuration_path_hint())?;
+        let configuration_path_hint = cli_options.as_configuration_path_hint();
+        let is_configuration_from_user = configuration_path_hint.is_from_user();
+        let loaded_configuration = load_configuration(fs, configuration_path_hint)?;
         if self.should_validate_configuration_diagnostics() {
             validate_configuration_diagnostics(
                 &loaded_configuration,
@@ -825,7 +826,13 @@ pub(crate) trait CommandRunner: Sized {
 
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key,
-            workspace_directory: configuration_path.map(BiomePath::from),
+            // When the user provides the path to the configuration, we can't use its directory because
+            // it might be outside the project, so we need to use
+            workspace_directory: if is_configuration_from_user {
+                Some(project_path.clone())
+            } else {
+                configuration_path.map(BiomePath::from)
+            },
             configuration,
         })?;
         for diagnostic in &result.diagnostics {
@@ -838,7 +845,7 @@ pub(crate) trait CommandRunner: Sized {
 
         let result = workspace.scan_project_folder(ScanProjectFolderParams {
             project_key,
-            path: Some(project_path),
+            path: Some(project_path.clone()),
             watch: cli_options.use_server,
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
