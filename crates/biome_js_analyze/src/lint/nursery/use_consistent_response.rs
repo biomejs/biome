@@ -15,7 +15,7 @@ declare_lint_rule! {
     /// Use static `Response` methods instead of `new Response()` constructor when possible.
     ///
     /// `new Response(JSON.stringify({ value: 1 }))` can be simplified to [Response.json()](https://developer.mozilla.org/en-US/docs/Web/API/Response/json).
-    /// `new Response(null, { status: 301, headers: { location: 'https://example.com' } })` can be simplified to [Response.redirect()](https://developer.mozilla.org/en-US/docs/Web/API/Response/redirect_static#status).
+    /// `new Response(null, { status: 301, headers: { location: 'https://example.com' } })` can be simplified to [Response.redirect()](https://developer.mozilla.org/en-US/docs/Web/API/Response/redirect_static).
     ///
     /// These methods are more concise and emphasize the intent of the code better,
     /// however they are not a direct replacement when additional options such as extra headers are needed.
