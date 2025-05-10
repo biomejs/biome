@@ -54,12 +54,13 @@ impl<'src> YamlLexer<'src> {
         let start = self.text_position();
 
         let kind = match current {
-            b'#' => self.consume_comment(),
-            b'-' => self.consume_byte(T![-]),
             b':' => self.consume_byte(T![:]),
-            b'[' => self.consume_byte(T!['[']),
             b',' => self.consume_byte(T![,]),
+            b'[' => self.consume_byte(T!['[']),
             b']' => self.consume_byte(T![']']),
+            b'?' => self.consume_byte(T![?]),
+            b'-' => self.consume_byte(T![-]),
+            b'#' => self.consume_comment(),
             b'\'' => self.consume_single_quoted_literal(),
             b'"' => self.consume_double_quoted_literal(),
             b' ' | b'\n' => self.consume_newline_or_whitespaces(),

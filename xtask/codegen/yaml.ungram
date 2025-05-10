@@ -27,7 +27,8 @@
 SyntaxElement = SyntaxElement
 
 YamlBogus = SyntaxElement*
-YamlBogusNode = SyntaxElement*
+YamlBogusBlockNode = SyntaxElement*
+YamlBogusBlockMapEntry = SyntaxElement*
 
 // https://yaml.org/spec/1.2.2/#92-streams
 YamlRoot =
@@ -46,7 +47,7 @@ YamlDocument =
 	directives: YamlDirectiveList
 	// https://yaml.org/spec/1.2.2/#rule-c-directives-end
 	'---'?
-	node: AnyYamlNode
+	node: AnyYamlBlockNode?
 	// https://yaml.org/spec/1.2.2/#rule-c-document-end
 	'...'?
 
@@ -58,10 +59,15 @@ YamlDirectiveList = YamlDirective*
 YamlDirective = value: 'directive_literal'
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-node
-AnyYamlNode =
-	AnyYamlBlockNode
-	| AnyYamlFlowNode
-	| YamlBogusNode
+AnyYamlBlockNode =
+	AnyYamlBlockInBlockNode
+	| YamlFlowInBlockNode
+	| YamlBogusBlockNode
+
+// https://yaml.org/spec/1.2.2/#rule-s-l+flow-in-block
+YamlFlowInBlockNode =
+	flow: AnyYamlFlowNode
+	newline: 'NEWLINE'?
 
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-node
 AnyYamlFlowNode =
@@ -143,7 +149,7 @@ AnyYamlFlowMapImplicitKey =
 	| YamlFlowJsonNode
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
-AnyYamlBlockNode =
+AnyYamlBlockInBlockNode =
 	YamlBlockCollection
 	| YamlBlockScalar
 
@@ -190,7 +196,7 @@ YamlBlockSequenceEntry =
 // https://yaml.org/spec/1.2.2/#rule-l+block-mapping
 YamlBlockMapping =
 	// Indent block
-	'indent'
+	'indent'?
 	entries: YamlBlockMapEntryList
 	// Dedent block, that is, go back to parent block's scope
 	'dedent'?
@@ -201,6 +207,7 @@ YamlBlockMapEntryList = AnyYamlBlockMapEntry*
 AnyYamlBlockMapEntry =
 	YamlBlockMapExplicitEntry
 	| YamlBlockMapImplicitEntry
+	| YamlBogusBlockMapEntry
 
 // ? y
 // : 10
@@ -228,7 +235,7 @@ YamlBlockMapExplicitValue =
 AnyYamlBlockIndented =
 	YamlCompactSequence
 	| YamlCompactMapping
-	| AnyYamlNode
+	| AnyYamlBlockNode
 
 // https://yaml.org/spec/1.2.2/#rule-ns-l-compact-sequence
 YamlCompactSequence =
@@ -251,7 +258,7 @@ AnyYamlBlockMapImplicitKey =
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-implicit-value
 YamlBlockMapImplicitValue =
 	':'
-	value: AnyYamlNode
+	value: AnyYamlBlockNode
 
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
 AnyYamlPropertiesCombination =
