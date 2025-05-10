@@ -14,16 +14,17 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_analyze      = { workspace = true }
-biome_console      = { workspace = true }
-biome_diagnostics  = { workspace = true }
-biome_glob         = { workspace = true }
-biome_json_factory = { workspace = true }
-biome_json_syntax  = { workspace = true }
-biome_package      = { workspace = true }
-biome_rowan        = { workspace = true }
-camino             = { workspace = true }
-rustc-hash         = { workspace = true }
+biome_analyze       = { workspace = true }
+biome_configuration = { workspace = true }
+biome_console       = { workspace = true }
+biome_diagnostics   = { workspace = true }
+biome_glob          = { workspace = true }
+biome_json_factory  = { workspace = true }
+biome_json_syntax   = { workspace = true }
+biome_package       = { workspace = true }
+biome_rowan         = { workspace = true }
+camino              = { workspace = true }
+rustc-hash          = { workspace = true }
 
 [dev-dependencies]
 biome_json_factory   = { path = "../biome_json_factory" }

@@ -8,7 +8,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_string_case::Case;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use pulldown_cmark::{Event, Parser, Tag, TagEnd};
-use quote::quote;
+use quote::{format_ident, quote};
 use std::collections::BTreeMap;
 use std::path::Path;
 use xtask::*;
@@ -225,11 +225,17 @@ fn generate_for_groups(
     let mut group_strings = Vec::with_capacity(groups.len());
     let mut group_as_default_rules = Vec::with_capacity(groups.len());
     let mut group_as_disabled_rules = Vec::with_capacity(groups.len());
-    for (group, rules) in groups {
-        let group_pascal_ident = quote::format_ident!("{}", &Case::Pascal.convert(group));
-        let group_ident = quote::format_ident!("{}", group);
+    #[derive(Debug)]
+    struct RuleGroup {
+        group_name: &'static str,
+        rule_name: &'static str,
+    }
+    let mut rule_group_names: Vec<RuleGroup> = Vec::new();
+    for (group_name, rules) in groups {
+        let group_pascal_ident = quote::format_ident!("{}", &Case::Pascal.convert(group_name));
+        let group_ident = quote::format_ident!("{}", group_name);
 
-        let global_recommended = if group == "nursery" {
+        let global_recommended = if group_name == "nursery" {
             quote! { !self.is_recommended_false() && biome_flags::is_unstable() }
         } else {
             quote! { !self.is_recommended_false() }
@@ -255,9 +261,25 @@ fn generate_for_groups(
 
         group_pascal_idents.push(group_pascal_ident);
         group_idents.push(group_ident);
-        group_strings.push(Literal::string(group));
-        struct_groups.push(generate_group_struct(group, &rules, kind));
+        group_strings.push(Literal::string(group_name));
+        struct_groups.push(generate_group_struct(group_name, &rules, kind));
+        rule_group_names.extend(rules.iter().map(|(rule_name, _)| RuleGroup {
+            rule_name,
+            group_name,
+        }));
     }
+
+    rule_group_names.sort_unstable_by_key(|item| item.rule_name);
+    rule_group_names.dedup_by_key(|item| item.rule_name);
+    let rule_names: Vec<_> = rule_group_names.iter().map(|rg| rg.rule_name).collect();
+    let rule_group_idents: Vec<_> = rule_group_names
+        .iter()
+        .map(|rg| format_ident!("{}", Case::Pascal.convert(rg.group_name)))
+        .collect();
+    let rule_idents: Vec<_> = rule_group_names
+        .iter()
+        .map(|rg| format_ident!("{}", Case::Pascal.convert(rg.rule_name)))
+        .collect();
 
     let severity_fn = if kind == RuleCategory::Action {
         quote! {
@@ -371,6 +393,44 @@ fn generate_for_groups(
                     }
                 }
             }
+            impl std::fmt::Display for RuleGroup {
+                fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fmt.write_str(self.as_str())
+                }
+            }
+
+            #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize)]
+            #[cfg_attr(feature = "schema", derive(JsonSchema))]
+            #[serde(rename_all = "camelCase")]
+            pub enum ActionName {
+                #( #rule_idents, )*
+            }
+            impl ActionName {
+                pub const fn as_str(self) -> &'static str {
+                    match self {
+                        #( Self::#rule_idents => #rule_names, )*
+                    }
+                }
+                pub const fn group(self) -> RuleGroup {
+                    match self {
+                        #( Self::#rule_idents => RuleGroup::#rule_group_idents, )*
+                    }
+                }
+            }
+            impl std::str::FromStr for ActionName {
+                type Err = &'static str;
+                fn from_str(s: &str) -> Result<Self, Self::Err> {
+                    match s {
+                        #( #rule_names => Ok(Self::#rule_idents), )*
+                        _ => Err("This rule name doesn't exist.")
+                    }
+                }
+            }
+            impl std::fmt::Display for ActionName {
+                fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fmt.write_str(self.as_str())
+                }
+            }
 
             #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
@@ -470,6 +530,44 @@ fn generate_for_groups(
                         #( #group_pascal_idents::GROUP_NAME => Ok(Self::#group_pascal_idents), )*
                         _ => Err("This rule group doesn't exist.")
                     }
+                }
+            }
+            impl std::fmt::Display for RuleGroup {
+                fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fmt.write_str(self.as_str())
+                }
+            }
+
+            #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize)]
+            #[cfg_attr(feature = "schema", derive(JsonSchema))]
+            #[serde(rename_all = "camelCase")]
+            pub enum RuleName {
+                #( #rule_idents, )*
+            }
+            impl RuleName {
+                pub const fn as_str(self) -> &'static str {
+                    match self {
+                        #( Self::#rule_idents => #rule_names, )*
+                    }
+                }
+                pub const fn group(self) -> RuleGroup {
+                    match self {
+                        #( Self::#rule_idents => RuleGroup::#rule_group_idents, )*
+                    }
+                }
+            }
+            impl std::str::FromStr for RuleName {
+                type Err = &'static str;
+                fn from_str(s: &str) -> Result<Self, Self::Err> {
+                    match s {
+                        #( #rule_names => Ok(Self::#rule_idents), )*
+                        _ => Err("This rule name doesn't exist.")
+                    }
+                }
+            }
+            impl std::fmt::Display for RuleName {
+                fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    fmt.write_str(self.as_str())
                 }
             }
 

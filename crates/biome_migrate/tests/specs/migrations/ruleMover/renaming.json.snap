@@ -1,0 +1,71 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: renaming.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "complexity": {
+        "noMultipleSpacesInRegularExpressionLiterals": "on",
+        "noUnnecessaryContinue": "on"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+renaming.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been renamed to noAdjacentSpacesInRegex.
+  
+    3 │     "rules": {
+    4 │       "complexity": {
+  > 5 │         "noMultipleSpacesInRegularExpressionLiterals": "on",
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │         "noUnnecessaryContinue": "on"
+    7 │       }
+  
+  i Safe fix: Rename the rule.
+  
+     3  3 │       "rules": {
+     4  4 │         "complexity": {
+     5    │ - ········"noMultipleSpacesInRegularExpressionLiterals":·"on",
+        5 │ + ········"noAdjacentSpacesInRegex":·"on",
+     6  6 │           "noUnnecessaryContinue": "on"
+     7  7 │         }
+  
+
+```
+
+```
+renaming.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been moved to correctness/noUselessContinue.
+  
+    4 │       "complexity": {
+    5 │         "noMultipleSpacesInRegularExpressionLiterals": "on",
+  > 6 │         "noUnnecessaryContinue": "on"
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │       }
+    8 │     }
+  
+  i Safe fix: Move the rule.
+  
+     3  3 │       "rules": {
+     4  4 │         "complexity": {
+     5    │ - ········"noMultipleSpacesInRegularExpressionLiterals":·"on",
+     6    │ - ········"noUnnecessaryContinue":·"on"
+     7    │ - ······}
+        5 │ + ········"noMultipleSpacesInRegularExpressionLiterals":·"on"
+        6 │ + ······},
+        7 │ + ······"correctness":·{·"noUselessContinue":·"on"·}
+     8  8 │       }
+     9  9 │     }
+  
+
+```

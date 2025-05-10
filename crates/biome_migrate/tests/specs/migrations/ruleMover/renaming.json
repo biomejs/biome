@@ -1,7 +1,8 @@
 {
   "linter": {
     "rules": {
-      "correctness": {
+      "complexity": {
+        "noMultipleSpacesInRegularExpressionLiterals": "on",
         "noUnnecessaryContinue": "on"
       }
     }

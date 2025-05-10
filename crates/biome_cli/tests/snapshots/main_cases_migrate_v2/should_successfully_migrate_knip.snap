@@ -60,12 +60,7 @@ expression: redactor(content)
         }
       },
       "suspicious": {
-        "noConsole": {
-          "level": "error",
-          "options": {
-            "allow": ["log"]
-          }
-        },
+        "noConsole": { "level": "error", "options": { "allow": ["log"] } },
         "noExplicitAny": "off"
       }
     }
@@ -117,12 +112,7 @@ expression: redactor(content)
       "linter": {
         "rules": {
           "suspicious": {
-            "noConsole": {
-              "level": "off",
-              "options": {
-                "allow": ["log"]
-              }
-            }
+            "noConsole": { "level": "off", "options": { "allow": ["log"] } }
           }
         }
       }

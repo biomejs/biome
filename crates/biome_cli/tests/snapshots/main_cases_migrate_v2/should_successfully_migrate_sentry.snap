@@ -24,9 +24,7 @@ expression: redactor(content)
     "enabled": true,
     "rules": {
       "recommended": false,
-      "a11y": {
-        "noBlankTarget": "error"
-      },
+      "a11y": {},
       "correctness": {
         "noGlobalObjectCalls": "error",
         "noUnreachable": "error",
@@ -50,7 +48,8 @@ expression: redactor(content)
         "noBarrelFile": "error"
       },
       "security": {
-        "noDangerouslySetInnerHtmlWithChildren": "error"
+        "noDangerouslySetInnerHtmlWithChildren": "error",
+        "noBlankTarget": "error"
       },
       "suspicious": {
         "noDebugger": "error",
@@ -172,10 +171,10 @@ expression: redactor(content)
       "includes": ["**/src/sentry/templates/sentry/error-page-embed.js"],
       "linter": {
         "rules": {
+          "style": {},
           "suspicious": {
             "noVar": "off"
-          },
-          "style": {}
+          }
         }
       }
     },
