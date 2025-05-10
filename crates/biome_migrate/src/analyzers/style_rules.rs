@@ -10,7 +10,7 @@ use biome_json_factory::make::{
 use biome_json_syntax::{
     AnyJsonValue, JsonMember, JsonMemberList, JsonObjectValue, JsonRoot, JsonSyntaxToken, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, WalkEvent};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use rustc_hash::FxHashSet;
 
 declare_migration! {
@@ -48,55 +48,48 @@ impl Rule for StyleRules {
             nodes.insert(Box::from(rule));
         }
 
-        let events = node.syntax().preorder();
+        for node in node.syntax().descendants() {
+            let Some(node) = JsonMember::cast(node) else {
+                continue;
+            };
+            let node_text = node
+                .name()
+                .ok()
+                .and_then(|node| node.inner_string_text().ok());
 
-        for event in events {
-            match event {
-                WalkEvent::Enter(node) => {
-                    let Some(node) = JsonMember::cast(node) else {
-                        continue;
-                    };
-                    let node_text = node
-                        .name()
+            let Some(node_text) = node_text else {
+                continue;
+            };
+
+            if node_text == "recommended" {
+                let recommended_disabled = node
+                    .value()
+                    .ok()
+                    .and_then(|n| n.as_json_boolean_value().cloned())
+                    .and_then(|n| n.value_token().ok())
+                    .is_some_and(|n| n.text() == "false");
+                if recommended_disabled {
+                    return vec![];
+                }
+            }
+
+            if node_text == "style" {
+                let list = node
+                    .value()
+                    .ok()
+                    .and_then(|n| n.as_json_object_value().cloned())
+                    .map(|n| n.json_member_list());
+
+                let Some(list) = list else { continue };
+                for item in list {
+                    let member = item
                         .ok()
-                        .and_then(|node| node.inner_string_text().ok());
-
-                    let Some(node_text) = node_text else {
-                        continue;
-                    };
-
-                    if node_text == "recommended" {
-                        let recommended_disabled = node
-                            .value()
-                            .ok()
-                            .and_then(|n| n.as_json_boolean_value().cloned())
-                            .and_then(|n| n.value_token().ok())
-                            .is_some_and(|n| n.text() == "false");
-                        if recommended_disabled {
-                            return vec![];
-                        }
-                    }
-
-                    if node_text == "style" {
-                        let list = node
-                            .value()
-                            .ok()
-                            .and_then(|n| n.as_json_object_value().cloned())
-                            .map(|n| n.json_member_list());
-
-                        let Some(list) = list else { continue };
-                        for item in list {
-                            let member = item
-                                .ok()
-                                .and_then(|n| n.name().ok())
-                                .and_then(|n| n.inner_string_text().ok());
-                            if let Some(node_text) = member {
-                                nodes.remove(&Box::from(node_text.text()));
-                            }
-                        }
+                        .and_then(|n| n.name().ok())
+                        .and_then(|n| n.inner_string_text().ok());
+                    if let Some(node_text) = member {
+                        nodes.remove(&Box::from(node_text.text()));
                     }
                 }
-                WalkEvent::Leave(_) => {}
             }
         }
 

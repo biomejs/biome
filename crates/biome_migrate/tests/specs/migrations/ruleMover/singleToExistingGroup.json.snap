@@ -26,20 +26,21 @@ singleToExistingGroup.json:5:9 migrate  FIXABLE  ━━━━━━━━━━�
     3 │     "rules": {
     4 │       "nursery": {
   > 5 │         "noExcessiveNestedTestSuites": "error"
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │       },
     7 │       "complexity": {}
   
-  i Unsafe fix: Move the rule to the new stable group.
+  i Safe fix: Move the rule.
   
      3  3 │       "rules": {
      4  4 │         "nursery": {
      5    │ - ········"noExcessiveNestedTestSuites":·"error"
      6  5 │         },
      7    │ - ······"complexity":·{}
-        6 │ + ······"complexity":·{"noExcessiveNestedTestSuites":·"error"}
-     8  7 │       }
-     9  8 │     }
+        6 │ + ······"complexity":·{
+        7 │ + ········"noExcessiveNestedTestSuites":·"error"}
+     8  8 │       }
+     9  9 │     }
   
 
 ```
