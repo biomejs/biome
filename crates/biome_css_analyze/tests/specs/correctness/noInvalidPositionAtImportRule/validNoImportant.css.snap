@@ -4,6 +4,7 @@ expression: validNoImportant.css
 ---
 # Input
 ```css
+/* should not generate diagnostics */
 a {}
 
 ```

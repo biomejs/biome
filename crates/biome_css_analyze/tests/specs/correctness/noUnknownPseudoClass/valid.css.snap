@@ -4,6 +4,7 @@ expression: valid.css
 ---
 # Input
 ```css
+/* should not generate diagnostics */
 a:hover { }
 a:Hover { }
 a:hOvEr { }

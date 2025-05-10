@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 a { --custom-property: 1; }
 a { --custom-property: 1; --cUstOm-prOpErtY: 1; }
 a { --custom-property: 1; color: pink; --cUstOm-prOpErtY: 1 }

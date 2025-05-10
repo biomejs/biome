@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 a { grid-template-areas: "a a a"
                          "b b b"; }
 a { grid-template-areas: "a a a"
