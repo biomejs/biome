@@ -91,7 +91,11 @@ impl CliOptions {
     pub(crate) fn as_configuration_path_hint(&self) -> ConfigurationPathHint {
         match self.config_path.as_ref() {
             None => ConfigurationPathHint::default(),
-            Some(path) => ConfigurationPathHint::FromUser(Utf8PathBuf::from(path)),
+            Some(path) => {
+                let path = Utf8PathBuf::from(path);
+                let path = path.strip_prefix("./").unwrap_or(&path);
+                ConfigurationPathHint::FromUser(path.to_path_buf())
+            }
         }
     }
 }
