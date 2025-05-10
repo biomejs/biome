@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 103
+expression: valid.jsonc
+---
+# Input
+```cjs
+delete a[x];
+```
+
+# Input
+```cjs
+delete a['k' + 'ey'];
+```
+
+# Input
+```cjs
+delete a.b[x];
+```
+
+# Input
+```cjs
+delete x
+```
+
+# Input
+```cjs
+delete f()
+```
+
+# Input
+```cjs
+delete el.dataset.something
+```
+
+# Input
+```cjs
+delete process.env.NODE_ENV
+```
