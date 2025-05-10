@@ -88,6 +88,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlDoubleQuotedScalar::new_unchecked(node) };
                     $body
                 }
+                $crate::YamlSyntaxKind::YAML_FLOW_IN_BLOCK_NODE => {
+                    let $pattern = unsafe { $crate::YamlFlowInBlockNode::new_unchecked(node) };
+                    $body
+                }
                 $crate::YamlSyntaxKind::YAML_FLOW_JSON_NODE => {
                     let $pattern = unsafe { $crate::YamlFlowJsonNode::new_unchecked(node) };
                     $body
@@ -149,8 +153,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlBogus::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_BOGUS_NODE => {
-                    let $pattern = unsafe { $crate::YamlBogusNode::new_unchecked(node) };
+                $crate::YamlSyntaxKind::YAML_BOGUS_BLOCK_MAP_ENTRY => {
+                    let $pattern = unsafe { $crate::YamlBogusBlockMapEntry::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BOGUS_BLOCK_NODE => {
+                    let $pattern = unsafe { $crate::YamlBogusBlockNode::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_BLOCK_MAP_ENTRY_LIST => {

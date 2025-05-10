@@ -16,11 +16,13 @@ use crate::{
 mod block;
 mod document;
 mod flow;
+mod implicit;
 mod parse_error;
 
 pub(crate) struct YamlParser<'source> {
     context: ParserContext<YamlSyntaxKind>,
     source: YamlTokenSource<'source>,
+    indent_level: u32,
 }
 
 impl<'source> YamlParser<'source> {
@@ -28,6 +30,7 @@ impl<'source> YamlParser<'source> {
         Self {
             context: ParserContext::default(),
             source: YamlTokenSource::from_str(source),
+            indent_level: 0,
         }
     }
 
@@ -52,7 +55,6 @@ impl<'source> YamlParser<'source> {
         (events, diagnostics, trivia)
     }
 
-    #[expect(dead_code)]
     pub fn checkpoint(&self) -> YamlParserCheckpoint {
         YamlParserCheckpoint {
             context: self.context.checkpoint(),
@@ -63,7 +65,6 @@ impl<'source> YamlParser<'source> {
         }
     }
 
-    #[expect(dead_code)]
     pub fn rewind(&mut self, checkpoint: YamlParserCheckpoint) {
         let YamlParserCheckpoint { context, source } = checkpoint;
 

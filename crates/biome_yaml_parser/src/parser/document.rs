@@ -12,7 +12,7 @@ use biome_yaml_syntax::{
 
 use crate::lexer::YamlLexContext;
 
-use super::{YamlParser, flow::parse_any_flow_node, parse_error::expected_directive};
+use super::{YamlParser, block::parse_any_block_node, parse_error::expected_directive};
 
 #[derive(Default)]
 pub(crate) struct DocumentList;
@@ -43,8 +43,11 @@ impl ParseNodeList for DocumentList {
 fn parse_document(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
     p.eat(UNICODE_BOM);
+    p.eat(NEWLINE);
     DirectiveList.parse_list(p);
-    parse_any_flow_node(p, YamlLexContext::FlowOut);
+    p.eat(T![---]);
+    parse_any_block_node(p, YamlLexContext::BlockIn).ok();
+    p.eat(T![...]);
     m.complete(p, YAML_DOCUMENT)
 }
 
