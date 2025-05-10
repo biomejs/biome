@@ -463,34 +463,25 @@ impl WorkspaceServer {
     }
 
     /// Checks whether a file is ignored in the top-level config's
-    /// `files.ignore`/`files.include` or in the feature's `ignore`/`include`.
+    /// `files.includes` or in the feature's `includes`.
     #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
-        let ignored_by_features = {
-            let mut ignored = false;
-
-            for feature in features.iter() {
-                // a path is ignored if it's ignored by all features
-                ignored &= self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature)
-            }
-            ignored
-        };
-        // Never ignore Biome's config file regardless `include`/`ignore`
+        // Never ignore Biome's config file regardless of `includes`.
         let ignored = (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
-            // Apply top-level `include`/`ignore`
+            // Apply top-level `includes`
             (self.is_ignored_by_top_level_config(project_key, path) ||
-                // Apply feature-level `include`/`ignore`
-                ignored_by_features);
+                // Apply feature-level `includes`
+                (!features.is_empty() && features.iter().all(|feature| self
+                    .projects
+                    .is_ignored_by_feature_config(project_key, path, feature))));
 
         tracing::Span::current().record("ignored", ignored);
 
         ignored
     }
 
-    /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
+    /// Checks whether a file is ignored in the top-level `files.includes`.
     fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
         let Some(files_settings) = self.projects.get_files_settings(project_key) else {
             return false;

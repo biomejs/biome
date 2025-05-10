@@ -213,6 +213,10 @@ impl FileSystem for MemoryFileSystem {
         }
     }
 
+    fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
+        self.path_kind(path)
+    }
+
     fn get_changed_files(&self, _base: &str) -> io::Result<Vec<String>> {
         let cb_arc = self.on_get_changed_files.as_ref().unwrap().clone();
 

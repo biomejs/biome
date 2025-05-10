@@ -597,6 +597,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
         {
             return false;
         }
+
         let path = biome_path.as_path();
         if self.fs.path_is_dir(path) || self.fs.path_is_symlink(path) {
             // handle:

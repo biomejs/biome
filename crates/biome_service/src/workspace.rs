@@ -485,6 +485,10 @@ impl FeatureName {
     pub fn insert(&mut self, kind: FeatureKind) {
         self.0.insert(kind);
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 impl From<SmallVec<[FeatureKind; 6]>> for FeatureName {
