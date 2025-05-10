@@ -301,12 +301,12 @@ fn apply_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let expected = "let a = 4;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let test1 = Utf8Path::new("test1.js");
@@ -1831,7 +1831,7 @@ fn check_stdin_write_unsafe_successfully() {
         {message.content}
     });
 
-    assert_eq!(content, "function f() {var x=1; return{x}} class Foo {}");
+    assert_eq!(content, "function _f() {var x=1; return{x}} class Foo {}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3566,12 +3566,12 @@ fn fix_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let expected = "let a = 4;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
     let test1 = Utf8Path::new("test1.js");
     fs.insert(test1.into(), source.as_bytes());

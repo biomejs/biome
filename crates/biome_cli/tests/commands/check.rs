@@ -327,12 +327,12 @@ fn apply_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let expected = "let a = 4;
 console.log(a);
-function f() {\n\targuments;\n}
+function _f() {\n\targuments;\n}
 ";
 
     let test1 = Utf8Path::new("test1.js");
@@ -2619,12 +2619,12 @@ fn fix_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let expected = "let a = 4;
 console.log(a);
-function f() {\n\targuments;\n}
+function _f() {\n\targuments;\n}
 ";
 
     let test1 = Utf8Path::new("test1.js");
@@ -2764,12 +2764,12 @@ fn write_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let expected = "let a = 4;
 console.log(a);
-function f() {\n\targuments;\n}
+function _f() {\n\targuments;\n}
 ";
 
     let test1 = Utf8Path::new("test1.js");

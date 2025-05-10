@@ -35,7 +35,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-test.js:1:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function is unused.
   
@@ -45,6 +45,13 @@ test.js:1:10 lint/correctness/noUnusedVariables ━━━━━━━━━━�
     3 │ }
   
   i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend setName with an underscore.
+  
+    1   │ - function·setName(name)·{
+      1 │ + function·_setName(name)·{
+    2 2 │    currentName = name;
+    3 3 │   }
   
 
 ```
