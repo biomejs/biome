@@ -62,6 +62,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+
     let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
@@ -102,6 +103,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });
 
+    // FIXME: Use `assert_valid_snapshot_did_not_generate_diagnostics` once all valid snapshots contain
+    // the `/* should not generate diagnostics */` comment.
     if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
         panic!("This test should not generate diagnostics");
     }

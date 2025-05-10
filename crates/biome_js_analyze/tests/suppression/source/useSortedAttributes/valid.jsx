@@ -1,3 +1,4 @@
+/** should not generate diagnostics */
 <>
 	{/* biome-ignore assist/source/useSortedAttributes: test */}
 	<Hello
