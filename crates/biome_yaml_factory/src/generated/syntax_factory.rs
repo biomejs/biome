@@ -119,7 +119,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlIndentedBlock::can_cast(element.kind()) {
+                    if AnyYamlBlockIndented::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -145,7 +145,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlIndentedBlock::can_cast(element.kind()) {
+                    if AnyYamlBlockIndented::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -315,7 +315,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyYamlIndentedBlock::can_cast(element.kind()) {
+                    if AnyYamlBlockIndented::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
