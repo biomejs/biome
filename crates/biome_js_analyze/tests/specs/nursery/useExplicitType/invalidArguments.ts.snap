@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidArguments.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -73,6 +72,25 @@ invalidArguments.ts:5:28 lint/nursery/useExplicitType ━━━━━━━━�
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Replace any with unknown or a more specific type.
+  
+
+```
+
+```
+invalidArguments.ts:7:5 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    5 │ export var arrowFn = (arg: any): string => `test ${arg}`;
+    6 │ 
+  > 7 │ var foo = arr.map((i) => i * i);
+      │     ^^^
+    8 │ new Promise((resolve) => resolve(1));
+    9 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the variable.
   
 
 ```
