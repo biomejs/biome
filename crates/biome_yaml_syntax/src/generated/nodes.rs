@@ -307,13 +307,17 @@ impl YamlBlockMapImplicitValue {
         YamlBlockMapImplicitValueFields {
             colon_token: self.colon_token(),
             value: self.value(),
+            newline_token: self.newline_token(),
         }
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> SyntaxResult<AnyYamlBlockNode> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn value(&self) -> Option<AnyYamlBlockNode> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn newline_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for YamlBlockMapImplicitValue {
@@ -327,7 +331,8 @@ impl Serialize for YamlBlockMapImplicitValue {
 #[derive(Serialize)]
 pub struct YamlBlockMapImplicitValueFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyYamlBlockNode>,
+    pub value: Option<AnyYamlBlockNode>,
+    pub newline_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct YamlBlockMapping {
@@ -1954,7 +1959,11 @@ impl std::fmt::Debug for YamlBlockMapImplicitValue {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("value", &support::DebugOptionalElement(self.value()))
+                .field(
+                    "newline_token",
+                    &support::DebugOptionalElement(self.newline_token()),
+                )
                 .finish()
         } else {
             f.debug_struct("YamlBlockMapImplicitValue").finish()

@@ -10,6 +10,8 @@ use biome_yaml_syntax::{T, YamlSyntaxKind, YamlSyntaxKind::*};
 #[rustfmt::skip]
 mod tests;
 
+const MAX_IMPLICIT_KEY_LENGTH: i32 = 1024;
+
 pub(crate) struct YamlLexer<'src> {
     /// Source text
     source: &'src str,
@@ -98,17 +100,22 @@ impl<'src> YamlLexer<'src> {
             self.current_byte()
                 .is_some_and(|c| self.is_first_plain_char(c, context))
         );
+        let start = self.position();
         self.advance_char_unchecked();
+        let mut num_utf8_char = 1;
         while let Some(c) = self.current_byte() {
             // https://yaml.org/spec/1.2.2/#rule-ns-plain-char
             if is_plain_safe(c, context) && c != b':' && c != b'#' {
                 self.advance_char_unchecked();
+                num_utf8_char += 1;
             } else if is_non_space_char(c) && self.peek_byte().is_some_and(|c| c == b'#') {
                 self.advance_char_unchecked();
                 self.advance(1); // '#'
+                num_utf8_char += 2;
             } else if c == b':' && self.peek_byte().is_some_and(|c| is_plain_safe(c, context)) {
                 self.advance(1); // ':'
                 self.advance_char_unchecked();
+                num_utf8_char += 2;
             }
             // Yes plain token can contain spaces
             // For example:
@@ -116,9 +123,20 @@ impl<'src> YamlLexer<'src> {
             // Is a valid mapping
             else if is_space(c) {
                 self.advance(1);
+                num_utf8_char += 1;
             } else {
                 break;
             }
+        }
+        if matches!(context, YamlLexContext::BlockKey | YamlLexContext::FlowKey)
+            && num_utf8_char > MAX_IMPLICIT_KEY_LENGTH
+        {
+            self.push_diagnostic(ParseDiagnostic::new(
+                format!(
+                    "Implicit key shouldn't be longer than {MAX_IMPLICIT_KEY_LENGTH} characters"
+                ),
+                start..self.position(),
+            ));
         }
         PLAIN_LITERAL
     }
