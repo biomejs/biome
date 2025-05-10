@@ -9,6 +9,7 @@
 //! well as the watcher to allow continuous scanning.
 
 use super::server::WorkspaceServer;
+use super::{FeatureName, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
@@ -260,19 +261,39 @@ impl TraversalContext for ScanContext<'_> {
             return false;
         }
 
-        if path
-            .symlink_metadata()
-            .is_ok_and(|metadata| metadata.is_dir())
-        {
-            return true;
-        }
-
-        if self.scan_kind.is_known_files() {
-            (path.is_ignore() || path.is_config() || path.is_manifest()) && !path.is_dependency()
-        } else if path.is_dependency() {
-            path.is_manifest() || path.is_type_declaration()
-        } else {
-            DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
+        match self.workspace.fs().symlink_path_kind(path) {
+            Ok(path_kind) if path_kind.is_dir() => {
+                if self.scan_kind.is_project() && path.is_dependency() {
+                    // In project mode, the scanner always scans dependencies,
+                    // because they're a valuable source of type information.
+                    true
+                } else {
+                    !self
+                        .workspace
+                        .is_path_ignored(IsPathIgnoredParams {
+                            project_key: self.project_key,
+                            path: path.clone(),
+                            // The scanner only cares about the top-level
+                            // `files.includes`.
+                            features: FeatureName::empty(),
+                        })
+                        .unwrap_or_default()
+                }
+            }
+            Ok(path_kind) if path_kind.is_file() => {
+                if self.scan_kind.is_known_files() {
+                    (path.is_ignore() || path.is_config() || path.is_manifest())
+                        && !path.is_dependency()
+                } else if path.is_dependency() {
+                    path.is_manifest() || path.is_type_declaration()
+                } else {
+                    DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
+                }
+            }
+            _ => {
+                // bail on fifo and socket files
+                false
+            }
         }
     }
 
