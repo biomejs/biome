@@ -41,7 +41,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-fix.jsx:2:14 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fix.jsx:2:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function is unused.
   
@@ -51,6 +51,14 @@ fix.jsx:2:14 lint/correctness/noUnusedVariables ━━━━━━━━━━�
     4 │     }
   
   i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend SubmitButton with an underscore.
+  
+    1 1 │   
+    2   │ - ····function·SubmitButton()·{
+      2 │ + ····function·_SubmitButton()·{
+    3 3 │           return <button>Submit</button>;
+    4 4 │       }
   
 
 ```

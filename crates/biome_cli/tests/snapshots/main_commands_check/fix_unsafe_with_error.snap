@@ -7,7 +7,7 @@ expression: redactor(content)
 ```js
 let a = 4;
 console.log(a);
-function f() {
+function _f() {
 	arguments;
 }
 
@@ -18,7 +18,7 @@ function f() {
 ```js
 let a = 4;
 console.log(a);
-function f() {
+function _f() {
 	arguments;
 }
 
@@ -27,14 +27,14 @@ function f() {
 # Emitted Messages
 
 ```block
-test1.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test1.js:3:17 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
     1 │ let a = 4;
     2 │ console.log(a);
-  > 3 │ function f() { arguments; }
-      │                ^^^^^^^^^
+  > 3 │ function _f() { arguments; }
+      │                 ^^^^^^^^^
     4 │ 
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
@@ -43,54 +43,22 @@ test1.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━�
 ```
 
 ```block
-test1.js:3:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This function is unused.
-  
-    1 │ let a = 4;
-    2 │ console.log(a);
-  > 3 │ function f() { arguments; }
-      │          ^
-    4 │ 
-  
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
-  
-
-```
-
-```block
-test2.js:3:16 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test2.js:3:17 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
     1 │ let a = 4;
     2 │ console.log(a);
-  > 3 │ function f() { arguments; }
-      │                ^^^^^^^^^
+  > 3 │ function _f() { arguments; }
+      │                 ^^^^^^^^^
     4 │ 
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
-  
-
-```
-
-```block
-test2.js:3:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This function is unused.
-  
-    1 │ let a = 4;
-    2 │ console.log(a);
-  > 3 │ function f() { arguments; }
-      │          ^
-    4 │ 
-  
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
   
 
 ```
 
 ```block
 Checked 2 files in <TIME>. Fixed 2 files.
-Found 4 warnings.
+Found 2 warnings.
 ```

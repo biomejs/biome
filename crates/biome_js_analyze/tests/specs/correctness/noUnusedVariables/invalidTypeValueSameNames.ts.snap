@@ -31,7 +31,7 @@ invalidTypeValueSameNames.ts:2:6 lint/correctness/noUnusedVariables ━━━━
 ```
 
 ```
-invalidTypeValueSameNames.ts:5:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidTypeValueSameNames.ts:5:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! This function is unused.
   
@@ -43,6 +43,15 @@ invalidTypeValueSameNames.ts:5:10 lint/correctness/noUnusedVariables ━━━�
     7 │ 
   
   i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend f with an underscore.
+  
+    3 3 │   export const a = 5;
+    4 4 │   
+    5   │ - function·f()·{}
+      5 │ + function·_f()·{}
+    6 6 │   export type f = () => {}
+    7 7 │   
   
 
 ```

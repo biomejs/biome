@@ -45,7 +45,7 @@ function Component2() {
 # Emitted Messages
 
 ```block
-test.jsx:4:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test.jsx:4:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function is unused.
   
@@ -57,6 +57,15 @@ test.jsx:4:10 lint/correctness/noUnusedVariables ━━━━━━━━━━�
     6 │     const handle = useCallback(() => {
   
   i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend Component2 with an underscore.
+  
+     2  2 │   import { useCallback } from "react";
+     3  3 │   
+     4    │ - function·Component2()·{
+        4 │ + function·_Component2()·{
+     5  5 │       const [local,SetLocal] = useState(0);
+     6  6 │       const handle = useCallback(() => {
   
 
 ```

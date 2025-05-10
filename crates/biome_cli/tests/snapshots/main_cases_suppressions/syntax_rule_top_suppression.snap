@@ -43,7 +43,7 @@ file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━
 ```
 
 ```block
-file.ts:6:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.ts:6:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function is unused.
   
@@ -55,6 +55,15 @@ file.ts:6:10 lint/correctness/noUnusedVariables ━━━━━━━━━━�
     8 │ }
   
   i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend sommething with an underscore.
+  
+    4 4 │   import type { ChalkInstance2 } from "chalk2" with { "resolution-mode": "import" };
+    5 5 │   
+    6   │ - function·sommething(chalk:·ChalkInstance)·{
+      6 │ + function·_sommething(chalk:·ChalkInstance)·{
+    7 7 │     console.log(chalk.yellow('we do something here'));
+    8 8 │   }
   
 
 ```
