@@ -927,7 +927,7 @@ fn fs_error_infinite_symlink_expansion_to_files() {
             .flat_map(|msg| msg.content.0.iter())
             .any(|node| node.content.contains(
                 &symlink1_path
-                    .strip_prefix(&subdir1_path.as_path())
+                    .strip_prefix(subdir1_path.as_path())
                     .unwrap()
                     .to_string()
             ))
@@ -939,7 +939,7 @@ fn fs_error_infinite_symlink_expansion_to_files() {
             .flat_map(|msg| msg.content.0.iter())
             .any(|node| node.content.contains(
                 &symlink2_path
-                    .strip_prefix(&subdir2_path.as_path())
+                    .strip_prefix(subdir2_path.as_path())
                     .unwrap()
                     .to_string()
             ))

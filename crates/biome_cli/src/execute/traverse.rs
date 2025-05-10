@@ -453,7 +453,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
         diagnostics_to_print
     }
 
-    fn to_relative_file_path<'a>(&self, path: &'a String) -> String {
+    fn to_relative_file_path(&self, path: &str) -> String {
         let file_path = Utf8Path::new(&path);
         self.working_directory
             .as_ref()
