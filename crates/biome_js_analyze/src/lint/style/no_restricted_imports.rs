@@ -569,6 +569,69 @@ declare_lint_rule! {
     }
 }
 
+impl Rule for NoRestrictedImports {
+    type Query = Ast<AnyJsImportLike>;
+    type State = RestrictedImportMessage;
+    type Signals = Vec<Self::State>;
+    type Options = Box<RestrictedImportsOptions>;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+        if node.is_in_ts_module_declaration() {
+            return vec![];
+        }
+        let Some(module_name) = node.module_name_token() else {
+            return vec![];
+        };
+        let import_source_text = inner_string_text(&module_name);
+        let import_source = import_source_text.text();
+        let options = ctx.options();
+
+        if let Some(paths) = options.paths.get(import_source) {
+            let path_options: PathOptions = paths.clone().into();
+            path_options.check_import_restrictions(node, &module_name, import_source)
+        } else if let Some(patterns) = &options.patterns {
+            check_patterns_import_restrictions(node, patterns, &module_name, import_source)
+        } else {
+            return vec![];
+        }
+    }
+
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let RestrictedImportMessage {
+            import_source,
+            allowed_import_names,
+            location,
+            message,
+        } = state;
+
+        let mut rule_diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            location,
+            markup! {
+                {message}
+            },
+        );
+        if !allowed_import_names.is_empty() {
+            let mut sorted = allowed_import_names.to_vec();
+            sorted.sort();
+            let allowed_import_names = sorted.into_iter().map(|name| {
+                if &*name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
+                    "Side-effect only import".into()
+                } else {
+                    name
+                }
+            });
+
+            rule_diagnostic = rule_diagnostic.footer_list(
+                        markup! { "Only the following imports from "<Emphasis>"'"{import_source}"'"</Emphasis>" are allowed:" },
+                        allowed_import_names,
+                    );
+        }
+        Some(rule_diagnostic)
+    }
+}
+
 /// Options for the rule `noRestrictedImports`.
 #[derive(
     Clone,
@@ -1681,68 +1744,5 @@ impl RestrictedImportMessage {
             import_source: import_source.to_string(),
             allowed_import_names: [].into(),
         }
-    }
-}
-
-impl Rule for NoRestrictedImports {
-    type Query = Ast<AnyJsImportLike>;
-    type State = RestrictedImportMessage;
-    type Signals = Vec<Self::State>;
-    type Options = Box<RestrictedImportsOptions>;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        if node.is_in_ts_module_declaration() {
-            return vec![];
-        }
-        let Some(module_name) = node.module_name_token() else {
-            return vec![];
-        };
-        let import_source_text = inner_string_text(&module_name);
-        let import_source = import_source_text.text();
-        let options = ctx.options();
-
-        if let Some(paths) = options.paths.get(import_source) {
-            let path_options: PathOptions = paths.clone().into();
-            path_options.check_import_restrictions(node, &module_name, import_source)
-        } else if let Some(patterns) = &options.patterns {
-            check_patterns_import_restrictions(node, patterns, &module_name, import_source)
-        } else {
-            return vec![];
-        }
-    }
-
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let RestrictedImportMessage {
-            import_source,
-            allowed_import_names,
-            location,
-            message,
-        } = state;
-
-        let mut rule_diagnostic = RuleDiagnostic::new(
-            rule_category!(),
-            location,
-            markup! {
-                {message}
-            },
-        );
-        if !allowed_import_names.is_empty() {
-            let mut sorted = allowed_import_names.to_vec();
-            sorted.sort();
-            let allowed_import_names = sorted.into_iter().map(|name| {
-                if &*name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
-                    "Side-effect only import".into()
-                } else {
-                    name
-                }
-            });
-
-            rule_diagnostic = rule_diagnostic.footer_list(
-                        markup! { "Only the following imports from "<Emphasis>"'"{import_source}"'"</Emphasis>" are allowed:" },
-                        allowed_import_names,
-                    );
-        }
-        Some(rule_diagnostic)
     }
 }
