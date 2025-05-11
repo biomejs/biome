@@ -165,7 +165,7 @@ impl Rule for RuleMover {
         // If the group exists, then `new_group_range` will be the range of the group
         let new_group_name = state.new_rule.group().as_str();
         let (new_group_range, new_group_node) = if let Some(new_group) =
-            find_member(rules, new_group_name)
+            rules.find_member(new_group_name)
         {
             // The group exists, so we update it.
             let AnyJsonValue::JsonObjectValue(group_obj) = new_group.value().ok()? else {
@@ -179,7 +179,6 @@ impl Rule for RuleMover {
             let last_has_separator = new_elements.last().is_some_and(|(_, sep)| sep.is_some());
             // Add the new rule
             new_elements.push((rule_node, None));
-            // Reconstruct the list
             handle_trvia(
                 new_elements.iter_mut().map(|(a, b)| (a, b)),
                 last_has_separator,
@@ -319,18 +318,6 @@ pub struct State {
     /// Set if the rule is renamed.
     old_rule_name: Option<&'static str>,
     new_rule: RuleName,
-}
-
-fn find_member(object: &JsonObjectValue, name: &str) -> Option<JsonMember> {
-    for member in object.json_member_list().into_iter().flatten() {
-        let Ok(member_name) = member.name().and_then(|n| n.inner_string_text()) else {
-            continue;
-        };
-        if member_name == name {
-            return Some(member);
-        }
-    }
-    None
 }
 
 fn transform_value(value: AnyJsonValue, old_rule_name: &'static str) -> Option<AnyJsonValue> {
