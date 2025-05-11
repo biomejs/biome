@@ -25,7 +25,6 @@ fn parse_plain_scalar(p: &mut YamlParser, context: YamlLexContext) -> CompletedM
     m.complete(p, YAML_PLAIN_SCALAR)
 }
 
-#[expect(dead_code)]
 pub(crate) fn is_at_any_flow_node(p: &YamlParser) -> bool {
     is_at_flow_yaml_node(p)
 }
