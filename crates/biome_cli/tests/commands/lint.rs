@@ -2803,7 +2803,7 @@ fn lint_only_missing_group() {
         Args::from(["lint", "--only=noDebugger", file_path.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

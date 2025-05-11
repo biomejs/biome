@@ -72,6 +72,8 @@ impl Rule for RuleMover {
                 if let Ok(new_rule) = RuleName::from_str(rule_name) {
                     // TODO: remove the `useNamingConvention` exception,
                     // once we have promoted the GraphQL `useNamingConvention` rule
+                    //
+                    // See https://github.com/biomejs/biome/issues/6018
                     if new_rule.group() != current_group && rule_name != "useNamingConvention" {
                         result.push(State {
                             rule_node,
