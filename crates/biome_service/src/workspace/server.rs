@@ -1170,9 +1170,10 @@ impl Workspace for WorkspaceServer {
             };
 
         info!(
-            "Pulled {:?} diagnostic(s), skipped {:?} diagnostic(s)",
+            "Pulled {:?} diagnostic(s), skipped {:?} diagnostic(s) from {}",
             diagnostics.len(),
-            skipped_diagnostics
+            skipped_diagnostics,
+            path
         );
         Ok(PullDiagnosticsResult {
             diagnostics: diagnostics
