@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 134
 expression: invalid.ts
 ---
 # Input
@@ -822,9 +821,9 @@ invalid.ts:34:43 lint/style/noRestrictedImports ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:36:17 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:36:17 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 'import-foo/foo' import is restricted by a pattern. import-foo is deprecated, except the modules in import-foo/bar.
+  ! 'import-foo/foo' import is restricted by a pattern. import-foo is deprecated, except the modules in import-foo/bar.
   
     34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
     35 │ 
