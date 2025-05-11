@@ -54,8 +54,8 @@ expression: redactor(content)
         }
       },
       "suspicious": {
-        "noConsole": { "level": "error", "options": { "allow": ["log"] } },
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noConsole": { "level": "error", "options": { "allow": ["log"] } }
       }
     }
   },

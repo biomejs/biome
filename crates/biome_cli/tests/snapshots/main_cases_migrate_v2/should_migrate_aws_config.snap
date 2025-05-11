@@ -23,9 +23,9 @@ expression: redactor(content)
         "noForEach": "off"
       },
       "correctness": {
-        "noInvalidBuiltinInstantiation": "error",
         "noUndeclaredVariables": "error",
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "noInvalidBuiltinInstantiation": "error"
       },
       "style": {
         "noNamespace": "error",
