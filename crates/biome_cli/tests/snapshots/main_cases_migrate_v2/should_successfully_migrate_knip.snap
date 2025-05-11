@@ -17,13 +17,7 @@ expression: redactor(content)
       "!**/packages/docs/.astro"
     ]
   },
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
@@ -119,9 +113,7 @@ expression: redactor(content)
     },
     {
       "includes": ["**/packages/knip/fixtures/**"],
-      "organizeImports": {
-        "enabled": false
-      },
+      "assist": { "actions": { "source": { "organizeImports": "off" } } },
       "linter": {
         "rules": {
           "correctness": {

@@ -114,7 +114,7 @@ impl Rule for StyleRules {
         let root = ctx.root();
         let new_rule_member = json_member(
             json_member_name(
-                json_string_literal(rule_to_move.as_ref()).with_leading_trivia(vec![
+                json_string_literal(rule_to_move.as_ref()).with_leading_trivia([
                     (TriviaPieceKind::Newline, "\n"),
                     (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
                 ]),
@@ -122,7 +122,7 @@ impl Rule for StyleRules {
             token(T![:]),
             AnyJsonValue::JsonStringValue(json_string_value(
                 json_string_literal("error")
-                    .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+                    .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
             )),
         );
         let linter_member = get_linter_field(ctx.root());
@@ -205,44 +205,14 @@ fn find_member_by_name(member: &JsonMember, field_name: &str) -> Option<JsonMemb
         .value()
         .ok()?
         .as_json_object_value()?
-        .json_member_list()
-        .iter()
-        .flatten()
-        .find_map(|member| {
-            if member
-                .name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .is_some_and(|name| name.text() == field_name)
-            {
-                Some(member)
-            } else {
-                None
-            }
-        })
+        .find_member(field_name)
 }
 
 fn get_linter_field(root: JsonRoot) -> Option<JsonMember> {
     root.value()
         .ok()?
         .as_json_object_value()?
-        .json_member_list()
-        .iter()
-        .flatten()
-        .find_map(|member| {
-            if member
-                .name()
-                .ok()?
-                .inner_string_text()
-                .ok()
-                .is_some_and(|name| name.text() == "linter")
-            {
-                Some(member)
-            } else {
-                None
-            }
-        })
+        .find_member("linter")
 }
 
 fn create_member(text: &str, value: AnyJsonValue, level: usize) -> JsonMember {
@@ -258,9 +228,9 @@ fn create_member(text: &str, value: AnyJsonValue, level: usize) -> JsonMember {
 
 fn create_object(list: JsonMemberList, spaces: usize) -> JsonObjectValue {
     json_object_value(
-        token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+        token(T!['{']).with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
         list,
-        token(T!['}']).with_leading_trivia(vec![
+        token(T!['}']).with_leading_trivia([
             (TriviaPieceKind::Newline, "\n"),
             (TriviaPieceKind::Whitespace, " ".repeat(spaces).as_str()),
         ]),

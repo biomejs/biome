@@ -13,13 +13,7 @@ expression: redactor(content)
     "useIgnoreFile": true,
     "defaultBranch": "master"
   },
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "off"
-      }
-    }
-  },
+  "assist": { "actions": { "source": { "organizeImports": "off" } } },
   "linter": {
     "enabled": true,
     "rules": {
