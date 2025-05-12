@@ -94,7 +94,7 @@ impl Rule for UseDateNow {
             },
         ).note(
             markup! {
-                <Emphasis>"Date.now()"</Emphasis>" is more readable and also avoids unnecessary instantiation of "<Emphasis>"Date"</Emphasis>"object."
+                <Emphasis>"Date.now()"</Emphasis>" is more readable and also avoids unnecessary instantiation of "<Emphasis>"Date"</Emphasis>" object."
             }
             .to_owned(),
         ))
