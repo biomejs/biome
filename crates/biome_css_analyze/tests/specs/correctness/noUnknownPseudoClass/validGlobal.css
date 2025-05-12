@@ -1,0 +1,4 @@
+/* should not generate diagnostics */
+.meow :global(.global) {
+	color: blue;
+}

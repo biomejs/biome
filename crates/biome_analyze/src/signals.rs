@@ -368,6 +368,7 @@ where
             preferred_quote,
             preferred_jsx_quote,
             self.options.jsx_runtime(),
+            self.options.css_modules(),
         )
         .ok()?;
 
@@ -403,6 +404,7 @@ where
             self.options.preferred_quote(),
             self.options.preferred_jsx_quote(),
             self.options.jsx_runtime(),
+            self.options.css_modules(),
         )
         .ok();
         let mut actions = Vec::new();
@@ -466,6 +468,7 @@ where
             self.options.preferred_quote(),
             self.options.preferred_jsx_quote(),
             self.options.jsx_runtime(),
+            self.options.css_modules(),
         )
         .ok();
         if let Some(ctx) = ctx {
