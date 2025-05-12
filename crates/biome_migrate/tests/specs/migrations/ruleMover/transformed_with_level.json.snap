@@ -49,10 +49,27 @@ transformed_with_level.json:5:9 migrate  FIXABLE  ━━━━━━━━━━
      4  4 │         "suspicious": {
      5    │ - ········"noConsoleLog":·{
      6    │ - ··········"level":·"warn"
-     7    │ - ········},
-        5 │ + ········"noConsole":·{·"level":·"warn",·"options":·{·"allow":·["log"]·}·},
-     8  6 │           "useSingleCaseStatement": {
-     9  7 │             "level": "error"
+        5 │ + ········"useSingleCaseStatement":·{
+        6 │ + ··········"level":·"error"
+     7  7 │           },
+     8    │ - ········"useSingleCaseStatement":·{
+        8 │ + ········"useShorthandArrayType":·{
+     9  9 │             "level": "error"
+    10 10 │           },
+    11    │ - ········"useShorthandArrayType":·{
+       11 │ + ········"noNewSymbol":·{
+    12 12 │             "level": "error"
+    13 13 │           },
+    14    │ - ········"noNewSymbol":·{
+       14 │ + ········"noInvalidNewBuiltin":·{
+    15 15 │             "level": "error"
+    16 16 │           },
+    17    │ - ········"noInvalidNewBuiltin":·{
+    18    │ - ··········"level":·"error"
+    19    │ - ········}
+       17 │ + ········"noConsole":·{·"level":·"warn",·"options":·{·"allow":·["log"]·}·}
+    20 18 │         }
+    21 19 │       }
   
 
 ```
@@ -69,7 +86,7 @@ transformed_with_level.json:8:9 migrate  FIXABLE  ━━━━━━━━━━
      9 │           "level": "error"
     10 │         },
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move and rename the rule.
   
      6  6 │             "level": "warn"
      7  7 │           },
@@ -111,7 +128,7 @@ transformed_with_level.json:11:9 migrate  FIXABLE  ━━━━━━━━━�
     12 │           "level": "error"
     13 │         },
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move and rename the rule.
   
      9  9 │             "level": "error"
     10 10 │           },
@@ -148,7 +165,7 @@ transformed_with_level.json:14:9 migrate  FIXABLE  ━━━━━━━━━�
     15 │           "level": "error"
     16 │         },
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move and rename the rule.
   
     12 12 │             "level": "error"
     13 13 │           },
@@ -182,7 +199,7 @@ transformed_with_level.json:17:9 migrate  FIXABLE  ━━━━━━━━━�
     18 │           "level": "error"
     19 │         }
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move and rename the rule.
   
     14 14 │           "noNewSymbol": {
     15 15 │             "level": "error"

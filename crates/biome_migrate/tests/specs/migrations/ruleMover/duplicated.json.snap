@@ -1,0 +1,71 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: duplicated.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      
+      "correctness": {
+        "noInvalidNewBuiltin": "on",
+        "noInvalidBuiltinInstantiation": "on",
+        "noUselessContinue": "on"
+      },
+      "complexity": {
+        "noUnnecessaryContinue": "on"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+duplicated.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been renamed to noInvalidBuiltinInstantiation.
+  
+    5 │       "correctness": {
+  > 6 │         "noInvalidNewBuiltin": "on",
+      │         ^^^^^^^^^^^^^^^^^^^^^
+    7 │         "noInvalidBuiltinInstantiation": "on",
+    8 │         "noUselessContinue": "on"
+  
+  i Safe fix: Rename the rule.
+  
+     4  4 │         
+     5  5 │         "correctness": {
+     6    │ - ········"noInvalidNewBuiltin":·"on",
+     7    │ - ········"noInvalidBuiltinInstantiation":·"on",
+        6 │ + ········"noInvalidBuiltinInstantiation":·"on",
+     8  7 │           "noUselessContinue": "on"
+     9  8 │         },
+  
+
+```
+
+```
+duplicated.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been moved to correctness/noUselessContinue.
+  
+     9 │       },
+    10 │       "complexity": {
+  > 11 │         "noUnnecessaryContinue": "on"
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │       }
+    13 │     }
+  
+  i Safe fix: Move and rename the rule.
+  
+     9  9 │         },
+    10 10 │         "complexity": {
+    11    │ - ········"noUnnecessaryContinue":·"on"
+    12 11 │         }
+    13 12 │       }
+  
+
+```

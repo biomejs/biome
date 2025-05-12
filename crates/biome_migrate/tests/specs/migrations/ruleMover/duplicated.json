@@ -1,0 +1,15 @@
+{
+  "linter": {
+    "rules": {
+      
+      "correctness": {
+        "noInvalidNewBuiltin": "on",
+        "noInvalidBuiltinInstantiation": "on",
+        "noUselessContinue": "on"
+      },
+      "complexity": {
+        "noUnnecessaryContinue": "on"
+      }
+    }
+  }
+}
