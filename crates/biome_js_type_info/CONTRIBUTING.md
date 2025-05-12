@@ -213,7 +213,7 @@ which point it becomes a `TypeReference::Resolved` variant again.
 
 Today, results from our full inference cannot be cached for the same reason
 we've seen before: Such a cache would get stale the moment a module is replaced,
-and we don't wan't to have complex cache invalidation schemes.
+and we don't want to have complex cache invalidation schemes.
 
 Full inference is implemented in
 [scoped_resolver.rs](../biome_module_graph/src/js_module_info/scoped_resolver.rs).
