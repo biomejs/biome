@@ -70,7 +70,9 @@ impl Rule for RuleMover {
                 };
                 let rule_name = rule_name.text();
                 if let Ok(new_rule) = RuleName::from_str(rule_name) {
-                    if new_rule.group() != current_group {
+                    // TODO: remove the `useNamingConvention` exception,
+                    // once we have promoted the GraphQL `useNamingConvention` rule
+                    if new_rule.group() != current_group && rule_name != "useNamingConvention" {
                         result.push(State {
                             rule_node,
                             new_rule,
