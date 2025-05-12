@@ -60,7 +60,7 @@ In Biome, the most basic data structure for type information is a giant `enum`,
 called `TypeData`, defined in [type_info.rs](src/type_info.rs).
 
 This enum has many different variants in order to cover all the different kinds
-of types that are supported by TypeScript. But a few are specifically
+of types that TypeScript supports. But a few are specifically
 interesting to mention here:
 
 * `TypeData::Unknown` is important because our implementation of type inference
