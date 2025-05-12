@@ -49,9 +49,9 @@ modules were to copy each other's data.
 
 Some other tools use complex systems to track dependencies between modules, both
 explicit dependencies as well as implicit ones, so they can do very granular
-cache invalidation. With Biome we're trying radical simplicity instead: Just
+cache invalidation. With Biome we're trying radical simplicity instead: just
 make sure we don't have such dependencies between entries in our module graph.
-So far, that appears to be working well enough, but naturally it comes with its
+So far, that appears to be working well enough, but naturally, it comes with its
 own challenges.
 
 ## Type Data Structures
