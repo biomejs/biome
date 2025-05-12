@@ -107,7 +107,7 @@ choosing to use type references, they have other advantages too:
   have been registered, which in turn helps with debugging and test snapshots.
 * Not having to deal with recursive data structures made some of our algorithms
   easier to reason about as well. If we want to perform some action on every
-  type, we just run it on the vector instead of needing to traverse a graph
+  type, we just run it on the vector instead of traversing a graph
   while tracking which parts of the graph have already been visited.
 
 ## Type Resolution Phases
