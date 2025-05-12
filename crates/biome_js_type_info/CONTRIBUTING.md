@@ -24,8 +24,8 @@ performance as well, but they tend to do so by pushing responsibility to the
 client instead of rebuilding their bundles faster.
 
 For Biome, priorities are different: If a user changes file A, they want the
-diagnostics for file B to update in their IDE regardless of whether it has
-dependencies on file A or not. Updates need to happen near-instantaneously, and
+diagnostics for file B to update in their IDE, regardless of whether it has
+dependencies on file A. Updates need to happen near-instantaneously, and
 the IDE is not a client we can offload responsibility to.
 
 ## Module Graph
