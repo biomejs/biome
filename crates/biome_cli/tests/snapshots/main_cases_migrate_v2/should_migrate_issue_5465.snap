@@ -27,6 +27,12 @@ expression: redactor(content)
         "noVar": "error"
       },
       "style": {
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false
+          }
+        },
         "noDefaultExport": "error",
         "noParameterAssign": "error",
         "useAsConstAssertion": "error",
@@ -48,14 +54,6 @@ expression: redactor(content)
         "noUnsafeFinally": "error",
         "noSwitchDeclarations": "off",
         "noSelfAssign": "off"
-      },
-      "nursery": {
-        "useNamingConvention": {
-          "level": "error",
-          "options": {
-            "strictCase": false
-          }
-        }
       }
     }
   }
