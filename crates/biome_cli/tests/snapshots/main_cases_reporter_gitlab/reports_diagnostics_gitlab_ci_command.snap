@@ -56,7 +56,7 @@ let f;
 ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some errors were emitted while running checks.
-  
+
 
 
 ```
@@ -65,30 +65,6 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 [
-  {
-    "description": "The imports and exports are not sorted.",
-    "check_name": "assist/source/organizeImports",
-    "fingerprint": "4789482553704082688",
-    "severity": "minor",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 1
-      }
-    }
-  },
-  {
-    "description": "The imports and exports are not sorted.",
-    "check_name": "assist/source/organizeImports",
-    "fingerprint": "71463377061397589",
-    "severity": "minor",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 1
-      }
-    }
-  },
   {
     "description": "This import is unused.",
     "check_name": "lint/correctness/noUnusedImports",
@@ -278,6 +254,18 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
       "path": "main.ts",
       "lines": {
         "begin": 19
+      }
+    }
+  },
+  {
+    "description": "The imports and exports are not sorted.",
+    "check_name": "assist/source/organizeImports",
+    "fingerprint": "4789482553704082688",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 1
       }
     }
   },
@@ -518,6 +506,18 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
       "path": "index.ts",
       "lines": {
         "begin": 19
+      }
+    }
+  },
+  {
+    "description": "The imports and exports are not sorted.",
+    "check_name": "assist/source/organizeImports",
+    "fingerprint": "71463377061397589",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 1
       }
     }
   },
