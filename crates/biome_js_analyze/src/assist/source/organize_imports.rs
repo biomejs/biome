@@ -1155,6 +1155,32 @@ fn merge(
                         return Some(merged_item.into());
                     }
                 }
+                (
+                    AnyJsImportClause::JsImportDefaultClause(clause1),
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                )
+                | (
+                    AnyJsImportClause::JsImportNamedClause(clause2),
+                    AnyJsImportClause::JsImportDefaultClause(clause1),
+                ) => {
+                    let default_specifier = clause1.default_specifier().ok()?;
+                    let named_specifiers = clause2.named_specifiers().ok()?;
+                    let comma_token = make::token(T![,])
+                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let merged_clause = make::js_import_combined_clause(
+                        default_specifier.trim_trailing_trivia()?,
+                        comma_token,
+                        named_specifiers.into(),
+                        clause2.from_token().ok()?,
+                        clause2.source().ok()?,
+                    )
+                    .build();
+                    let merged_item = item2.clone().with_import_clause(merged_clause.into());
+                    let merged_item = merged_item
+                        .trim_leading_trivia()?
+                        .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?;
+                    return Some(merged_item.into());
+                }
                 _ => {}
             }
         }
