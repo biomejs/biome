@@ -64,7 +64,7 @@ impl ImportStatementKind {
             Self::Namespace => kinds.contains(Self::Default),
             Self::Default => kinds.intersects(Self::Namespace | Self::Named),
             Self::DefaultNamed => kinds.contains(Self::Named),
-            Self::Named => kinds.intersects(Self::DefaultNamed | Self::Named),
+            Self::Named => kinds.intersects(Self::DefaultNamed | Self::Named | Self::Default),
             Self::NamedType => kinds.contains(Self::NamedType),
             _ => false,
         }
