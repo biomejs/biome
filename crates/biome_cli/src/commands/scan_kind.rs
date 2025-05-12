@@ -14,13 +14,18 @@ use rustc_hash::FxHashSet;
 ///
 /// Rules:
 /// - CLI via `stdin` return [ScanKind::None]
+/// - `biome migrate` return [ScanKind:KnownFiles], so it can migrate all nested configuration files
 /// - `biome format` return [ScanKind::KnownFiles] if VCS is enabled, otherwise [ScanKind::None]
 /// - `biome lint`, `biome check` and `biome ci` may vary. It depends on whether the user has enabled rules that require the `RuleDomain::Project`.
 ///   If not, returns [ScanKind::KnownFiles] if VCS is enabled, otherwise [ScanKind::None]
 pub(crate) fn compute_scan_kind(execution: &Execution, configuration: &Configuration) -> ScanKind {
-    if execution.is_stdin() || execution.is_migrate() {
+    if execution.is_stdin() {
         return ScanKind::None;
     };
+
+    if execution.is_migrate() {
+        return ScanKind::KnownFiles;
+    }
 
     if execution.is_format() {
         // There's no need to scan further known files if the VCS isn't enabled

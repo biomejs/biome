@@ -892,6 +892,9 @@ pub struct ScanProjectFolderResult {
 
     /// Duration of the scan.
     pub duration: Duration,
+
+    /// A list of child configuration files found inside the project
+    pub configuration_files: Vec<BiomePath>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]

@@ -4,16 +4,16 @@ use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use biome_analyze::AnalysisFilter;
 use biome_configuration::Configuration;
-use biome_console::{ConsoleExt, markup};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::Merge;
 use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{PrintDiagnostic, category};
 use biome_fs::{BiomePath, OpenOptions};
 use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
 use biome_migrate::{ControlFlow, migrate_configuration};
 use biome_rowan::{AstNode, NodeCache};
+use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     ChangeFileParams, FileContent, FixAction, FormatFileParams, OpenFileParams,
@@ -37,8 +37,8 @@ pub(crate) struct MigratePayload<'a> {
     pub(crate) project_key: ProjectKey,
     pub(crate) write: bool,
     pub(crate) configuration_file_path: Utf8PathBuf,
-    pub(crate) verbose: bool,
     pub(crate) sub_command: Option<MigrateSubCommand>,
+    pub(crate) nested_configuration_files: Vec<BiomePath>,
 }
 
 pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> {
@@ -47,12 +47,78 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         project_key,
         write,
         configuration_file_path,
-        verbose,
         sub_command,
+        nested_configuration_files,
     } = migrate_payload;
-    let mut cache = NodeCache::default();
+    let workspace = &*session.app.workspace;
     let console = session.app.console;
-    let workspace = session.app.workspace;
+
+    let mut configuration_list = vec![configuration_file_path.into()];
+    configuration_list.extend(nested_configuration_files);
+    let mut needs_migration = false;
+    let mut migrated = false;
+    for configuration_file_path in configuration_list {
+        let migrate_file_payload = MigrateFile {
+            workspace,
+            console,
+            configuration_file_path,
+            project_key,
+            sub_command: sub_command.as_ref(),
+            write,
+        };
+
+        let result = migrate_file(migrate_file_payload)?;
+        if let MigrationFileResult::NeedsMigration = result {
+            needs_migration = true;
+        } else if let MigrationFileResult::Migrated = result {
+            migrated = true;
+        }
+    }
+
+    if needs_migration {
+        console.log(markup! {
+            <Info>"Run the command with the option "<Emphasis>"--write"</Emphasis>" to apply the changes."</Info>
+        })
+    } else if migrated {
+        console.log(markup! {
+            <Info>"Your configuration file(s) have been successfully migrated."</Info>
+        })
+    } else {
+        console.log(markup! {
+            <Info>"No changes to apply to the Biome configuration file."</Info>
+        });
+    }
+
+    Ok(())
+}
+
+struct MigrateFile<'a> {
+    pub(crate) workspace: &'a dyn Workspace,
+    pub(crate) console: &'a mut dyn Console,
+    pub(crate) project_key: ProjectKey,
+    pub(crate) write: bool,
+    pub(crate) configuration_file_path: BiomePath,
+    pub(crate) sub_command: Option<&'a MigrateSubCommand>,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum MigrationFileResult {
+    Migrated,
+    NeedsMigration,
+    NoMigrationNeeded,
+    HasErrors,
+}
+
+fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnostic> {
+    let MigrateFile {
+        workspace,
+        console,
+        project_key,
+        write,
+        configuration_file_path,
+        sub_command,
+    } = payload;
+    let mut cache = NodeCache::default();
     let fs = workspace.fs();
 
     let open_options = if write {
@@ -90,7 +156,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             let biome_config =
                 deserialize_from_json_ast::<Configuration>(&parsed.tree(), "").into_deserialized();
             let Some(mut biome_config) = biome_config else {
-                return Ok(());
+                return Ok(MigrationFileResult::HasErrors);
             };
             let old_biome_config = biome_config.clone();
             let prettier_biome_config = prettier_config.try_into().map_err(|err| {
@@ -118,6 +184,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 console.log(markup! {
                     <Info>"No changes to apply to the Biome configuration file."</Info>
                 });
+                Ok(MigrationFileResult::NoMigrationNeeded)
             } else {
                 let new_content = serde_json::to_string(&biome_config).map_err(|err| {
                     CliDiagnostic::MigrateError(MigrationDiagnostic {
@@ -139,6 +206,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     console.log(markup!{
                         <Info><Emphasis>{prettier_path}</Emphasis>" has been successfully migrated."</Info>
                     });
+                    Ok(MigrationFileResult::Migrated)
                 } else {
                     let file_name = configuration_file_path.to_string();
                     let diagnostic = MigrateDiffDiagnostic {
@@ -149,9 +217,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                         },
                     };
                     console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
-                    console.log(markup! {
-                        <Info>"Run the command with the option "<Emphasis>"--write"</Emphasis>" to apply the changes."</Info>
-                    })
+                    Ok(MigrationFileResult::NeedsMigration)
                 }
             }
         }
@@ -166,12 +232,12 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             let biome_config =
                 deserialize_from_json_ast::<Configuration>(&parsed.tree(), "").into_deserialized();
             let Some(mut biome_config) = biome_config else {
-                return Ok(());
+                return Ok(MigrationFileResult::HasErrors);
             };
             let (biome_eslint_config, results) =
                 eslint_config.into_biome_config(&eslint_to_biome::MigrationOptions {
-                    include_inspired,
-                    include_nursery,
+                    include_inspired: *include_inspired,
+                    include_nursery: *include_nursery,
                 });
             let old_biome_config = biome_config.clone();
             biome_config.merge_with(biome_eslint_config);
@@ -190,10 +256,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     });
                 }
             }
-            if biome_config == old_biome_config {
+            let result = if biome_config == old_biome_config {
                 console.log(markup! {
                     <Info>"No changes to apply to the Biome configuration file."</Info>
                 });
+                MigrationFileResult::NoMigrationNeeded
             } else {
                 let new_content = serde_json::to_string(&biome_config).map_err(|err| {
                     CliDiagnostic::MigrateError(MigrationDiagnostic {
@@ -215,6 +282,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     console.log(markup!{
                         <Info><Emphasis>{eslint_path}</Emphasis>" has been successfully migrated."</Info>
                     });
+                    MigrationFileResult::Migrated
                 } else {
                     let file_name = configuration_file_path.to_string();
                     let diagnostic = MigrateDiffDiagnostic {
@@ -225,19 +293,17 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                         },
                     };
                     console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
-                    console.log(markup! {
-                        <Info>"Run the command with the option "<Emphasis>"--write"</Emphasis>" to apply the changes."</Info>
-                    })
+                    MigrationFileResult::NeedsMigration
                 }
-            }
+            };
             if results.has_inspired_rules {
                 console.log(markup! {
                     <Info>"Run the command with the option "<Emphasis>"--include-inspired"</Emphasis>" to also migrate inspired rules."</Info>
-                })
+                });
             }
+            Ok(result)
         }
         None => {
-            let mut errors = 0;
             let mut tree = parsed.tree();
             let mut actions = Vec::new();
             loop {
@@ -246,10 +312,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     AnalysisFilter::default(),
                     configuration_file_path.as_path(),
                     |signal| {
-                        let current_diagnostic = signal.diagnostic();
-                        if current_diagnostic.is_some() {
-                            errors += 1;
-                        }
                         if let Some(action) = signal.actions().next() {
                             return ControlFlow::Break(action);
                         }
@@ -296,9 +358,10 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                         path: biome_path,
                     })?;
                     configuration_file.set_content(printed.as_code().as_bytes())?;
-                    console.log(markup!{
-                            <Info>"The configuration "<Emphasis>{{configuration_file_path.to_string()}}</Emphasis>" has been successfully migrated."</Info>
-                        })
+                    // console.log(markup!{
+                    //     <Info>"The configuration "<Emphasis>{{configuration_file_path.to_string()}}</Emphasis>" has been successfully migrated."</Info>
+                    // })
+                    Ok(MigrationFileResult::Migrated)
                 } else {
                     let file_name = configuration_file_path.to_string();
                     let diagnostic = MigrateDiffDiagnostic {
@@ -308,25 +371,17 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                             new: new_configuration_content,
                         },
                     };
-                    if diagnostic.tags().is_verbose() {
-                        if verbose {
-                            console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
-                        }
-                    } else {
-                        console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
-                    }
-                    console.log(markup! {
-                            <Info>"Run the command with the option "<Emphasis>"--write"</Emphasis>" to apply the changes."</Info>
-                        })
+                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+                    Ok(MigrationFileResult::NeedsMigration)
                 }
             } else {
                 console.log(markup! {
                     <Info>
                     "Your configuration file is up to date."
                     </Info>
-                })
+                });
+                Ok(MigrationFileResult::NoMigrationNeeded)
             }
         }
     }
-    Ok(())
 }

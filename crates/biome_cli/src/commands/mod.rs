@@ -777,8 +777,16 @@ pub(crate) trait CommandRunner: Sized {
             execution,
             paths,
             duration,
+            configuration_files,
         } = self.configure_workspace(fs, console, workspace, cli_options)?;
-        execute_mode(execution, session, cli_options, paths, duration)
+        execute_mode(
+            execution,
+            session,
+            cli_options,
+            paths,
+            duration,
+            configuration_files,
+        )
     }
 
     /// This function prepares the workspace with the following:
@@ -864,6 +872,7 @@ pub(crate) trait CommandRunner: Sized {
             execution,
             paths,
             duration: Some(result.duration),
+            configuration_files: result.configuration_files,
         })
     }
 
@@ -944,6 +953,8 @@ pub(crate) struct ConfiguredWorkspace {
     pub paths: Vec<OsString>,
     /// The duration of the scanning
     pub duration: Option<Duration>,
+    /// Configuration files found inside the project
+    pub configuration_files: Vec<BiomePath>,
 }
 
 pub trait LoadEditorConfig: CommandRunner {
