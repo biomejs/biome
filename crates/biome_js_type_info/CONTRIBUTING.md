@@ -239,7 +239,7 @@ we have _type resolvers_. There's a `TypeResolver` trait, defined in
   graph. But this data structure also implements `TypeResolver` so that our full
   inference can access the module's types too.
 * **`ScopedResolver`**. This is the one that is responsible for our actual full
-  inference. Its named as it is because it is the only resolver that can really
+  inference. It's named as it is because it is the only resolver that can really
   resolve things in any arbitrary scope. Compare this to the
   `JsModuleInfoCollector` which only cares about the global scope of a module,
   because at least so far that's all we need to determine types of exports
