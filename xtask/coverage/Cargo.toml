@@ -6,7 +6,7 @@ version = "0.0.0"
 
 [dependencies]
 ascii_table        = "4.0.6"
-backtrace          = "0.3.74"
+backtrace          = "0.3.75"
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
 biome_js_parser    = { workspace = true }
