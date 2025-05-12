@@ -148,8 +148,8 @@ useful:
 
 ```rs
 TypeData::TypeofExpression(TypeofExpression::Addition {
-    left: TypeReference::from(TypeReferenceQualifier::from_path("a")),
-    right: TypeReference::from(TypeReferenceQualifier::from_path("b"))
+    left: TypeReference::from(TypeReferenceQualifier::from_name("a")),
+    right: TypeReference::from(TypeReferenceQualifier::from_name("b"))
 })
 ```
 
@@ -265,8 +265,8 @@ interpreted as this:
 
 ```rs
 TypeData::TypeofExpression(TypeofExpression::Addition {
-    left: TypeReference::from(TypeReferenceQualifier::from_path("a")),
-    right: TypeReference::from(TypeReferenceQualifier::from_path("b"))
+    left: TypeReference::from(TypeReferenceQualifier::from_name("a")),
+    right: TypeReference::from(TypeReferenceQualifier::from_name("b"))
 })
 ```
 
