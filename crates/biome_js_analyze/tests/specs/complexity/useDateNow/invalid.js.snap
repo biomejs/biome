@@ -59,7 +59,7 @@ invalid.js:1:12 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     2 │ const ts1 = (new Date()).getTime();
     3 │ const ts2 = (new Date().getTime());
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -82,7 +82,7 @@ invalid.js:2:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     3 │ const ts2 = (new Date().getTime());
     4 │ const ts3 = new Date().valueOf();
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -107,7 +107,7 @@ invalid.js:3:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     4 │ const ts3 = new Date().valueOf();
     5 │ const ts4 = (new Date()).valueOf();
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -133,7 +133,7 @@ invalid.js:4:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     5 │ const ts4 = (new Date()).valueOf();
     6 │ const ts5 = (new Date().valueOf());
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -159,7 +159,7 @@ invalid.js:5:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     6 │ const ts5 = (new Date().valueOf());
     7 │ 
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -185,7 +185,7 @@ invalid.js:6:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     7 │ 
     8 │ // `Number()` and `BigInt()`
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -210,7 +210,7 @@ invalid.js:9:21 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     10 │ const tsBigInt = /* 1 */ BigInt(
     11 │ 	/* 2 */ new /* 3 */ Date(/* 4 */) /* 5 */
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -239,7 +239,7 @@ invalid.js:10:26 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     13 │ 
     14 │ // `BinaryExpression`
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -266,7 +266,7 @@ invalid.js:15:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     16 │ const bar = bar - new Date();
     17 │ const bar1 = new Date() * bar;
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -292,7 +292,7 @@ invalid.js:16:19 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     17 │ const bar1 = new Date() * bar;
     18 │ const ts11 = new Date() / 1;
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -318,7 +318,7 @@ invalid.js:17:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     18 │ const ts11 = new Date() / 1;
     19 │ const ts12 = new Date() % Infinity;
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -344,7 +344,7 @@ invalid.js:18:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     19 │ const ts12 = new Date() % Infinity;
     20 │ const ts13 = new Date() ** 1;
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -370,7 +370,7 @@ invalid.js:19:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     20 │ const ts13 = new Date() ** 1;
     21 │ const zero = new Date(/* 1 */) /* 2 */ /* 3 */ - /* 4 */ new Date();
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -396,7 +396,7 @@ invalid.js:20:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     21 │ const zero = new Date(/* 1 */) /* 2 */ /* 3 */ - /* 4 */ new Date();
     22 │ 
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -422,7 +422,7 @@ invalid.js:21:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     22 │ 
     23 │ // `AssignmentExpression`
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -448,7 +448,7 @@ invalid.js:21:58 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     22 │ 
     23 │ // `AssignmentExpression`
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -473,7 +473,7 @@ invalid.js:24:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     25 │ foo *= new Date();
     26 │ foo /= new Date();
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -499,7 +499,7 @@ invalid.js:25:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     26 │ foo /= new Date();
     27 │ foo %= new Date();
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -525,7 +525,7 @@ invalid.js:26:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     27 │ foo %= new Date();
     28 │ foo **= (new Date());
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -551,7 +551,7 @@ invalid.js:27:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     28 │ foo **= (new Date());
     29 │ 
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -576,7 +576,7 @@ invalid.js:28:9 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
        │         ^^^^^^^^^^^^
     29 │ 
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -601,7 +601,7 @@ invalid.js:32:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     33 │ const ts8 = -(/* 1 */ new Date());
     34 │ 
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -627,7 +627,7 @@ invalid.js:33:23 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     34 │ 
     35 │ function foo() {
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -652,7 +652,7 @@ invalid.js:36:9 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
     37 │ }
     38 │ function foo() {
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -678,7 +678,7 @@ invalid.js:39:10 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━�
     40 │ }
     41 │ await +new Date();
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -703,7 +703,7 @@ invalid.js:41:7 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
        │       ^^^^^^^^^^^
     42 │ typeof+new Date();
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
@@ -726,7 +726,7 @@ invalid.js:42:7 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━
   > 42 │ typeof+new Date();
        │       ^^^^^^^^^^^
   
-  i Date.now() is more readable and also avoids unnecessary instantiation of Dateobject.
+  i Date.now() is more readable and also avoids unnecessary instantiation of Date object.
   
   i Unsafe fix: Replace with Date.now().
   
