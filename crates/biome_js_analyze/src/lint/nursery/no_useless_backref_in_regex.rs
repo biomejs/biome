@@ -317,16 +317,26 @@ fn run(pattern: &[u8], flags: &[u8]) -> Option<BackRefIssue> {
                 match byte {
                     // `\N`
                     b'1'..=b'9' => {
-                        let mut backref_number = (byte - b'1' + 1) as u16;
+                        let mut backref_number = Some((byte - b'1' + 1) as u16);
                         let mut ref_end = ref_start + 2;
                         for (_, byte) in lookahead {
                             if !byte.is_ascii_digit() {
                                 break;
                             }
                             pattern_iter.next();
-                            backref_number = backref_number * 10 + (byte - b'0') as u16;
                             ref_end += 1;
+                            backref_number = backref_number
+                                .and_then(|n| n.checked_mul(10))
+                                .and_then(|n| n.checked_add((byte - b'0') as u16));
+                            if backref_number.is_none() {
+                                break;
+                            }
                         }
+                        let Some(backref_number) = backref_number else {
+                            // The number overflows. This cannot be a bakcref.
+                            // It is an escape sequence (probably an octal escape sequence).
+                            continue;
+                        };
                         // `backref_number` is 1-based. Subtract `1` to get a 0-based index.
                         let group = capturing_groups.get(backref_number as usize - 1);
                         if let Some(group) = group.filter(|group| !group.range.is_empty()) {

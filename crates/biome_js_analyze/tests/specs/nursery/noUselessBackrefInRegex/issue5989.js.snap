@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue5989.js
+---
+# Input
+```js
+/(\217483a\1)/;
+/\217483
+```
+
+# Diagnostics
+```
+issue5989.js:1:11 lint/nursery/noUselessBackrefInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This backreference is nested within the group to which it refers, making it always match an empty string.
+  
+  > 1 │ /(\217483a\1)/;
+      │           ^^
+    2 │ /\217483
+  
+  i The group starts here.
+  
+  > 1 │ /(\217483a\1)/;
+      │  ^^^^^^^^^^^^
+    2 │ /\217483
+  
+  i Remove the backreference or place it outside the group to which it refers.
+  
+
+```
