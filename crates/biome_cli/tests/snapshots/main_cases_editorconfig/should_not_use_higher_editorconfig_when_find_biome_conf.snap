@@ -1,8 +1,17 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
+## `foo/biome.json`
+
+```json
+{
+  "formatter": {
+    "lineWidth": 60
+  }
+}
+```
+
 ## `.editorconfig`
 
 ```editorconfig
@@ -10,18 +19,6 @@ snapshot_kind: text
 [*]
 indent_style = space
 indent_size = 2
-
-```
-
-## `foo/biome.json`
-
-```json
-
-{
-    "formatter": {
-        "lineWidth": 60
-    }
-}
 
 ```
 

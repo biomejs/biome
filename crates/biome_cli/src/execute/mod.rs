@@ -562,6 +562,7 @@ pub fn execute_mode(
     cli_options: &CliOptions,
     paths: Vec<OsString>,
     scanner_duration: Option<Duration>,
+    nested_configuration_files: Vec<BiomePath>,
 ) -> Result<(), CliDiagnostic> {
     // If a custom reporter was provided, let's lift the limit so users can see all of them
     execution.max_diagnostics = if cli_options.reporter.is_default() {
@@ -587,8 +588,8 @@ pub fn execute_mode(
             project_key,
             write,
             configuration_file_path,
-            verbose: cli_options.verbose,
             sub_command,
+            nested_configuration_files,
         };
         return migrate::run(payload);
     }

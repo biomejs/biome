@@ -826,6 +826,7 @@ impl Workspace for WorkspaceServer {
             return Ok(ScanProjectFolderResult {
                 diagnostics: Vec::new(),
                 duration: Duration::from_millis(0),
+                configuration_files: vec![],
             });
         }
 
@@ -840,6 +841,7 @@ impl Workspace for WorkspaceServer {
             return Ok(ScanProjectFolderResult {
                 diagnostics: Vec::new(),
                 duration: Duration::from_millis(0),
+                configuration_files: vec![],
             });
         }
 
@@ -856,6 +858,7 @@ impl Workspace for WorkspaceServer {
         Ok(ScanProjectFolderResult {
             diagnostics: result.diagnostics,
             duration: result.duration,
+            configuration_files: result.configuration_files,
         })
     }
 

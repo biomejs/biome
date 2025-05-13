@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `/test/biome.json`
 
@@ -13,7 +13,6 @@ expression: content
     "indentWidth": 6
   }
 }
-
 ```
 
 ## `file.js`
