@@ -1,10 +1,13 @@
 use crate::Reporter;
 use crate::execute::{Execution, TraversalMode};
-use crate::reporter::{DiagnosticsPayload, ReporterVisitor, TraversalSummary};
+use crate::reporter::{
+    DiagnosticsPayload, EvaluatedPathsDiagnostic, FixedPathsDiagnostic, ReporterVisitor,
+    TraversalSummary,
+};
 use biome_console::fmt::Formatter;
 use biome_console::{Console, ConsoleExt, fmt, markup};
+use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::advice::ListAdvice;
-use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::BiomePath;
 use camino::Utf8PathBuf;
 use std::collections::BTreeSet;
@@ -29,28 +32,6 @@ impl Reporter for ConsoleReporter {
         }
         Ok(())
     }
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    tags(VERBOSE),
-    severity = Information,
-    message = "Files processed:"
-)]
-struct EvaluatedPathsDiagnostic {
-    #[advice]
-    advice: ListAdvice<String>,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    tags(VERBOSE),
-    severity = Information,
-    message = "Files fixed:"
-)]
-struct FixedPathsDiagnostic {
-    #[advice]
-    advice: ListAdvice<String>,
 }
 
 pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
