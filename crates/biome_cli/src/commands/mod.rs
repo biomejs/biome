@@ -336,7 +336,7 @@ pub enum BiomeCommand {
     /// Files won't be modified, the command is a read-only operation.
     #[bpaf(command)]
     Ci {
-        /// Allow enabling or disable the formatter check.
+        /// Allow enabling or disabling the formatter check.
         #[bpaf(long("formatter-enabled"), argument("true|false"), optional)]
         formatter_enabled: Option<FormatterEnabled>,
         /// Allow enabling or disable the linter check.
