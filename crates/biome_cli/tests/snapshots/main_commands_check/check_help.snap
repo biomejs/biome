@@ -218,10 +218,10 @@ Available positional items:
     PATH                      Single file, single path or list of paths
 
 Available options:
-        --write               Apply  safe fixes, formatting and import sorting
+        --write               Apply safe fixes, formatting and import sorting
         --unsafe              Apply unsafe fixes. Should be used with `--write` or `--fix`
         --fix                 Alias for `--write`, writes safe fixes, formatting and import sorting
-        --formatter-enabled=<true|false>  Allow enabling or disable the formatter check.
+        --formatter-enabled=<true|false>  Allow enabling or disabling the formatter check.
         --linter-enabled=<true|false>  Allow enabling or disable the linter check.
         --assist-enabled=<true|false>  Allow enabling or disable the assist.
         --enforce-assist=<true|false>  Allows enforcing assist, and make the CLI fail if some
