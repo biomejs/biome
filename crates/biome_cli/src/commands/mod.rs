@@ -122,7 +122,7 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Allow enabling or disable the formatter check.
+        /// Allow enabling or disabling the formatter check.
         #[bpaf(
             long("formatter-enabled"),
             argument("true|false"),
