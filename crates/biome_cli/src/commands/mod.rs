@@ -110,7 +110,7 @@ pub enum BiomeCommand {
     /// Runs formatter, linter and import sorting to the requested files.
     #[bpaf(command)]
     Check {
-        /// Apply  safe fixes, formatting and import sorting
+        /// Apply safe fixes, formatting and import sorting
         #[bpaf(long("write"), switch)]
         write: bool,
 
