@@ -78,7 +78,7 @@ impl Rule for NoUnknownPseudoElement {
                 should_not_trigger(ident.name().ok()?.text())
             }
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => {
-                should_not_trigger(selector.to_trimmed_text().text())
+                should_not_trigger(selector.name().ok()?.to_trimmed_text().text())
             }
             AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
                 should_not_trigger(ident.name().ok()?.to_trimmed_text().text())
@@ -117,6 +117,7 @@ impl Rule for NoUnknownPseudoElement {
 
 /// It doesn't trigger the rule if the pseudo-element name isn't a vendor prefix or is a pseudo-element
 fn should_not_trigger(pseudo_element_name: &str) -> bool {
+    dbg!(&pseudo_element_name);
     !vender_prefix(pseudo_element_name).is_empty()
         || is_pseudo_elements(pseudo_element_name.to_ascii_lowercase_cow().as_ref())
 }
