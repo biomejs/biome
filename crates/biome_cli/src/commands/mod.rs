@@ -134,7 +134,7 @@ pub enum BiomeCommand {
         #[bpaf(long("linter-enabled"), argument("true|false"), optional, hide_usage)]
         linter_enabled: Option<LinterEnabled>,
 
-        /// Allow enabling or disable the assist.
+        /// Allow enabling or disabling the assist.
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
         assist_enabled: Option<AssistEnabled>,
 
