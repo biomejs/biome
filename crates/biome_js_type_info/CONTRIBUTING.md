@@ -57,7 +57,7 @@ own challenges.
 ## Type Data Structures
 
 In Biome, the most basic data structure for type information is a giant `enum`,
-called `TypeData`, defined in [type_info.rs](src/type_info.rs).
+called `TypeData`, defined in [`type_info.rs`](src/type_info.rs).
 
 This enum has many different variants in order to cover all the different kinds
 of types that TypeScript supports. But a few are specifically
@@ -157,7 +157,7 @@ Local inference doesn't do any type resolution yet, it only creates type
 references. So in most cases we won't know a concrete type yet, but it still
 provides a useful starting point for later inference.
 
-Local inference is implemented in [local_inference.rs](src/local_inference.rs).
+Local inference is implemented in [`local_inference.rs`](src/local_inference.rs).
 
 ### Module-Level ("Thin") Inference
 
@@ -202,7 +202,7 @@ But ultimately, if not even a global declaration was found, then we're at a loss
 and fall back to `TypeReference::Unknown`.
 
 Thin inference is implemented in
-[js_module_info/collector.rs](../biome_module_graph/src/js_module_info/collector.rs).
+[`js_module_info/collector.rs`](../biome_module_graph/src/js_module_info/collector.rs).
 
 ## Full Inference
 
@@ -216,21 +216,21 @@ we've seen before: Such a cache would get stale the moment a module is replaced,
 and we don't want to have complex cache invalidation schemes.
 
 Full inference is implemented in
-[scoped_resolver.rs](../biome_module_graph/src/js_module_info/scoped_resolver.rs).
+[`scoped_resolver.rs`](../biome_module_graph/src/js_module_info/scoped_resolver.rs).
 
 ## Type Resolvers
 
 The thing about having all these type references all over the place is that you
 need to perform explicit type resolution to follow these references. That's why
 we have _type resolvers_. There's a `TypeResolver` trait, defined in
-[resolver.rs](src/resolver.rs). As of today, we have 6 implementations of it:
+[`resolver.rs`](src/resolver.rs). As of today, we have 6 implementations of it:
 
 * **`HardcodedSymbolResolver`**. This one is purely for test purposes.
 * **`GlobalsResolver`**. This is the one that is responsible for resolving
   globals such as `Promise` and `Array`. The way we do this is still rather
   primitive with hardcoded, predefined symbols. At some point we probably should
   be able to use TypeScript's own global `.d.ts` files, such as
-  [es2023.array.d.ts](https://github.com/microsoft/TypeScript/blob/main/src/lib/es2023.array.d.ts),
+  [`es2023.array.d.ts`](https://github.com/microsoft/TypeScript/blob/main/src/lib/es2023.array.d.ts),
   directly.
 * **`JsModuleInfoCollector`**. This one is responsible for collecting
   information about a module, and for performing our module-level inference.
@@ -285,7 +285,7 @@ both `left` and `right` resolve to `TypeData::Number`, the entire expression can
 be _flattened_ to `TypeData::Number`, because that's the result of adding two
 numbers. And in most other cases it will become `TypeData::String` instead.
 
-Flattening is implemented in [flattening.rs](src/flattening.rs).
+Flattening is implemented in [`flattening.rs`](src/flattening.rs).
 
 ## `ResolvedTypeData`
 

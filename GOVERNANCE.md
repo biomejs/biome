@@ -199,7 +199,7 @@ We have a reasonably liberal approach to code review and merging. We value quick
 - If there are comments or suggestions after a PR is merged after the fact, allow yourself time to address them in a follow-up PR. If you don't respond in a reasonable timeframe, then create an issue to track.
 - Ensure that the PR summary is detailed, listing steps you took to verify the rationale and relevant issues and people involved in any prior discussion.
 - Ensure that PRs contain adequate tests and code comments for a future contributor to derive intent and modify your code safely.
-- You are welcome to the repos for your WIP branches. If you don't use your own fork, prepend the name of the branch with your github handle, e.g. `<handle>/experiment-code` Branches that have more than four months of inactivity will be pruned.
+- You are welcome to the repos for your WIP branches. If you don't use your own fork, prepend the name of the branch with your GitHub handle, e.g. `<handle>/experiment-code` Branches that have more than four months of inactivity will be pruned.
 - If you add a new feature, ensure it has been discussed or approved on GitHub or Discord.
 - If necessary, identify potential owners for PR review and approval.
 - All code must go through Pull Requests (PR) and pass status checks before being merged. If a PR is merged that breaks `main` due to the branch not being up-to-date, then it should either be reverted or a quick fix merged as a separate PR.

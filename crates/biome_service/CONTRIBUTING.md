@@ -17,16 +17,16 @@ Note that there are two implementations of the `Workspace` trait:
 
 ## Watcher
 
-The state inside our workspace is kept in sync with the file system using the
+The state inside our workspace is kept in sync with the filesystem using the
 [`WorkspaceWatcher`](src/workspace_watcher.rs). The watcher is only active in
 daemon mode and not used by the CLI.
 
 ### Debugging
 
 Debugging the watcher can be tricky, because you need to run the daemon,
-interact with the file system, and observe the daemon's state somehow.
+interact with the filesystem, and observe the daemon's state somehow.
 
-Debugging is possible with the VS Code extension or Zed extension,  but for an easier experience,
+Debugging is possible with the VS Code extension or Zed extension, but for an easier experience,
 you can use these CLI commands:
 
 1. Start the daemon using `cargo run --bin=biome -- start`. Note there won't be
