@@ -572,7 +572,7 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
         return false;
     };
 
-    ts_ref.to_trimmed_string() == "const"
+    ts_ref.to_trimmed_text().text() == "const"
 }
 
 /// Checks if a function is allowed within specific expression contexts.

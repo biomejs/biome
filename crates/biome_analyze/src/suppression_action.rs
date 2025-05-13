@@ -16,7 +16,7 @@ pub trait SuppressionAction {
             suppression_reason,
         } = payload;
 
-        // retrieve the most suited, most left token where the diagnostics was emitted
+        // retrieve the most suited, leftest token where the diagnostics was emitted
         let original_token = self.get_token_from_offset(token_offset, diagnostic_text_range);
 
         // considering that our suppression system works via lines, we need to look for the first newline,
