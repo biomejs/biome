@@ -1,14 +1,16 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 437
 expression: redactor(content)
 ---
 # Emitted Messages
 
 ```block
-Runs formatter, linter and import sorting to the requested files.
+Command to use in CI environments. Runs formatter, linter and import sorting to the requested files.
+Files won't be modified, the command is a read-only operation.
 
-Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--enforce-assist=<true|false>] [
---staged] [--changed] [--since=REF] [PATH]...
+Usage: ci [--formatter-enabled=<true|false>] [--linter-enabled=<true|false>] [--assist-enabled=
+<true|false>] [--enforce-assist=<true|false>] [--changed] [--since=REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -218,30 +220,19 @@ Available positional items:
     PATH                      Single file, single path or list of paths
 
 Available options:
-        --write               Apply safe fixes, formatting and import sorting
-        --unsafe              Apply unsafe fixes. Should be used with `--write` or `--fix`
-        --fix                 Alias for `--write`, writes safe fixes, formatting and import sorting
         --formatter-enabled=<true|false>  Allow enabling or disabling the formatter check.
-        --linter-enabled=<true|false>  Allow enabling or disabling the linter check.
-        --assist-enabled=<true|false>  Allow enabling or disable the assist.
+        --linter-enabled=<true|false>  Allow enabling or disable the linter check.
+        --assist-enabled=<true|false>  Allow enabling or disabling the assist.
         --enforce-assist=<true|false>  Allows enforcing assist, and make the CLI fail if some
                               actions aren't applied. Defaults to `true`.
-        --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
-                              print the output to `stdout`.
-                              The file doesn't need to exist on disk, what matters is the extension
-                              of the file. Based on the extension, Biome knows how to check the
-                              code.
-                              Example: ```shell echo 'let a;' | biome check
-                              --stdin-file-path=file.js --write ```
-        --staged              When set to true, only the files that have been staged (the ones
-                              prepared to be committed) will be linted. This option should be used
-                              when working locally.
         --changed             When set to true, only the files that have been changed compared to
-                              your `defaultBranch` configuration will be linted. This option should
-                              be used in CI environments.
+                              your `defaultBranch` configuration will be linted.
         --since=REF           Use this to specify the base branch to compare against when you're
                               using the --changed flag and the `defaultBranch` is not set in your
-                              `biome.json`
+                              biome.json
+        --threads=NUMBER      The number of threads to use. This is useful when running the CLI in
+                              environments with limited resource, for example CI.
+                              [env:BIOME_THREADS: N/A]
     -h, --help                Prints help information
 
 ```

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 437
 expression: redactor(content)
 ---
 # Emitted Messages
@@ -223,7 +224,7 @@ Available options:
         --fix                 Alias for `--write`, writes safe fixes, formatting and import sorting
         --formatter-enabled=<true|false>  Allow enabling or disabling the formatter check.
         --linter-enabled=<true|false>  Allow enabling or disabling the linter check.
-        --assist-enabled=<true|false>  Allow enabling or disable the assist.
+        --assist-enabled=<true|false>  Allow enabling or disabling the assist.
         --enforce-assist=<true|false>  Allows enforcing assist, and make the CLI fail if some
                               actions aren't applied. Defaults to `true`.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and

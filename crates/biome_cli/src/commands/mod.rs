@@ -110,11 +110,11 @@ pub enum BiomeCommand {
     /// Runs formatter, linter and import sorting to the requested files.
     #[bpaf(command)]
     Check {
-        /// Writes safe fixes, formatting and import sorting
+        /// Apply safe fixes, formatting and import sorting
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
+        /// Apply unsafe fixes. Should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
 
@@ -122,7 +122,7 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Allow to enable or disable the formatter check.
+        /// Allow enabling or disabling the formatter check.
         #[bpaf(
             long("formatter-enabled"),
             argument("true|false"),
@@ -130,15 +130,15 @@ pub enum BiomeCommand {
             hide_usage
         )]
         formatter_enabled: Option<FormatterEnabled>,
-        /// Allow to enable or disable the linter check.
+        /// Allow enabling or disabling the linter check.
         #[bpaf(long("linter-enabled"), argument("true|false"), optional, hide_usage)]
         linter_enabled: Option<LinterEnabled>,
 
-        /// Allow to enable or disable the assist.
+        /// Allow enabling or disabling the assist.
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
         assist_enabled: Option<AssistEnabled>,
 
-        /// Allows to enforce assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
+        /// Allows enforcing assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
         #[bpaf(long("enforce-assist"), argument("true|false"), fallback(true))]
         enforce_assist: bool,
 
@@ -150,7 +150,10 @@ pub enum BiomeCommand {
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to check the code.
         ///
-        /// Example: `echo 'let a;' | biome check --stdin-file-path=file.js`
+        /// Example:
+        /// ```shell
+        /// echo 'let a;' | biome check --stdin-file-path=file.js --write
+        /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
@@ -180,7 +183,7 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
+        /// Apply unsafe fixes. Should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
 
@@ -188,7 +191,7 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Fixes lint rule violations with a comment a suppression instead of using a rule code action (fix)
+        /// Fixes lint rule violations with comment suppressions instead of using a rule code action (fix)
         #[bpaf(long("suppress"))]
         suppress: bool,
 
@@ -239,7 +242,10 @@ pub enum BiomeCommand {
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to lint the code.
         ///
-        /// Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
+        /// Example:
+        /// ```shell
+        /// echo 'let a;' | biome lint --stdin-file-path=file.js --write
+        /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
         /// When set to true, only the files that have been staged (the ones prepared to be committed)
@@ -288,18 +294,21 @@ pub enum BiomeCommand {
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to format the code.
         ///
-        /// Example: `echo 'let a;' | biome format --stdin-file-path=file.js`
+        /// Example:
+        /// ```shell
+        /// echo 'let a;' | biome format --stdin-file-path=file.js --write
+        /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Writes formatted files to file system.
+        /// Writes formatted files to a file system.
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Alias of `--write`, writes formatted files to file system.
+        /// Alias of `--write`, writes formatted files to a file system.
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
@@ -314,7 +323,7 @@ pub enum BiomeCommand {
         changed: bool,
 
         /// Use this to specify the base branch to compare against when you're using the --changed
-        /// flag and the `defaultBranch` is not set in your biome.json
+        /// flag, and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
@@ -327,19 +336,19 @@ pub enum BiomeCommand {
     /// Files won't be modified, the command is a read-only operation.
     #[bpaf(command)]
     Ci {
-        /// Allow to enable or disable the formatter check.
+        /// Allow enabling or disabling the formatter check.
         #[bpaf(long("formatter-enabled"), argument("true|false"), optional)]
         formatter_enabled: Option<FormatterEnabled>,
-        /// Allow to enable or disable the linter check.
+        /// Allow enabling or disable the linter check.
         #[bpaf(long("linter-enabled"), argument("true|false"), optional)]
         linter_enabled: Option<LinterEnabled>,
 
-        /// Allow to enable or disable the assist.
+        /// Allow enabling or disabling the assist.
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
         assist_enabled: Option<AssistEnabled>,
 
-        /// Allows to enforce assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
-        #[bpaf(long("enforce-assist"), switch, fallback(true))]
+        /// Allows enforcing assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
+        #[bpaf(long("enforce-assist"), argument("true|false"), fallback(true))]
         enforce_assist: bool,
 
         #[bpaf(external(configuration), hide_usage, optional)]
@@ -453,7 +462,10 @@ pub enum BiomeCommand {
         /// extension of the file. Based on the extension, Biome knows how to
         /// parse the code.
         ///
-        /// Example: `echo 'let a;' | biome search '`let $var`' --stdin-file-path=file.js`
+        /// Example:
+        /// ```shell
+        /// echo 'let a;' | biome search '`let $var`' --stdin-file-path=file.js
+        /// ```
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
 
@@ -463,7 +475,7 @@ pub enum BiomeCommand {
         /// target, so we currently do not support writing queries that apply
         /// to multiple languages at once.
         ///
-        /// If none given, the default language is JavaScript.
+        /// When none, the default language is JavaScript.
         #[bpaf(long("language"), short('l'))]
         language: Option<GritTargetLanguage>,
 
@@ -502,7 +514,7 @@ pub enum BiomeCommand {
 
     #[bpaf(command("__run_server"), hide)]
     RunServer {
-        /// Allows to change the prefix applied to the file name of the logs.
+        /// Allows changing the prefix applied to the file name of the logs.
         #[bpaf(
             env("BIOME_LOG_PREFIX_NAME"),
             long("log-prefix-name"),
@@ -512,7 +524,7 @@ pub enum BiomeCommand {
             display_fallback
         )]
         log_prefix_name: String,
-        /// Allows to change the folder where logs are stored.
+        /// Allows changing the folder where logs are stored.
         #[bpaf(
             env("BIOME_LOG_PATH"),
             long("log-path"),
