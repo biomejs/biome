@@ -1,4 +1,4 @@
-use biome_package::{NodeJsPackage, Package, PackageJson};
+use biome_package::{NodeJsPackage, Package, PackageJson, TsConfigJson};
 use biome_parser::AnyParse;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -31,12 +31,6 @@ pub struct ProjectLayout(HashMap<Utf8PathBuf, PackageData, FxBuildHasher>);
 /// a JSR package, or simply a directory with its own nested `biome.json`.
 #[derive(Debug, Default)]
 pub struct PackageData {
-    // The settings of the package.
-    //
-    // Usually inferred from a configuration file, e.g. `biome.json`.
-    // TODO: Uncomment this.
-    // Probably best done when Ema has finished with https://github.com/biomejs/biome/pull/4845
-    // settings: Settings,
     /// Optional Node.js-specific package information, if relevant for the
     /// package.
     node_package: Option<NodeJsPackage>,
@@ -62,6 +56,25 @@ impl ProjectLayout {
         })
     }
 
+    /// Returns the `tsconfig.json` that should be used for the given `path`,
+    /// together with the absolute path of the manifest file.
+    ///
+    /// This function will look for the closest `tsconfig.json` file in the
+    /// ancestors of the given `path`, and returns the first one it finds.
+    pub fn find_tsconfig_json_for_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<(Utf8PathBuf, TsConfigJson)> {
+        let packages = self.0.pin();
+        path.ancestors().skip(1).find_map(|package_path| {
+            packages
+                .get(package_path)
+                .and_then(|data| data.node_package.as_ref())
+                .and_then(|node_package| node_package.tsconfig.as_ref())
+                .map(|manifest| (package_path.join("tsconfig.json"), manifest.clone()))
+        })
+    }
+
     /// Returns the `package.json` inside the given `package_path`.
     ///
     /// This function does not look for the closest `package.json` file in the
@@ -73,6 +86,20 @@ impl ProjectLayout {
             .get(package_path)
             .and_then(|data| data.node_package.as_ref())
             .and_then(|node_package| node_package.manifest.as_ref())
+            .cloned()
+    }
+
+    /// Returns the `tsconfig.json` inside the given `package_path`.
+    ///
+    /// This function does not look for the closest `tsconfig.json` file in the
+    /// hierarchy, but only returns the one that is stored in the layout for
+    /// the given `package_path`.
+    pub fn get_tsconfig_json_for_package(&self, package_path: &Utf8Path) -> Option<TsConfigJson> {
+        self.0
+            .pin()
+            .get(package_path)
+            .and_then(|data| data.node_package.as_ref())
+            .and_then(|node_package| node_package.tsconfig.as_ref())
             .cloned()
     }
 

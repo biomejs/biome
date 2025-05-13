@@ -1,7 +1,4 @@
-use std::{
-    path::{Path, PathBuf},
-    sync::Arc,
-};
+use std::{hash::BuildHasherDefault, sync::Arc};
 
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::{
@@ -11,10 +8,12 @@ use biome_deserialize::{
 use biome_deserialize::{DeserializableType, Deserialized};
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Error;
+use biome_fs::normalize_path;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::{CompilerOptionsPathsMap, PathUtil, TsConfig, TsconfigReferences};
+use indexmap::IndexMap;
+use rustc_hash::FxHasher;
 
 #[derive(Clone, Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
@@ -43,78 +42,20 @@ impl Manifest for TsConfigJson {
     fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self> {
         deserialize_from_json_ast::<Self>(root, "")
     }
-}
 
-#[expect(refining_impl_trait)]
-impl TsConfig for TsConfigJson {
-    type Co = CompilerOptions;
-
-    fn root(&self) -> bool {
-        self.root
-    }
-
-    fn path(&self) -> &Path {
-        self.path.as_std_path()
-    }
-
-    fn directory(&self) -> &Path {
-        debug_assert!(self.path.file_name().is_some());
-        self.path.parent().unwrap().as_std_path()
-    }
-
-    fn compiler_options(&self) -> &Self::Co {
-        &self.compiler_options
-    }
-
-    fn compiler_options_mut(&mut self) -> &mut Self::Co {
-        &mut self.compiler_options
-    }
-
-    fn extends(&self) -> impl Iterator<Item = &str> {
-        let specifiers = match &self.extends {
-            Some(ExtendsField::Single(specifier)) => {
-                vec![specifier.as_str()]
+    fn read_manifest(fs: &dyn biome_fs::FileSystem, path: &Utf8Path) -> Deserialized<Self> {
+        match fs.read_file_from_path(path) {
+            Ok(content) => {
+                let (manifest, errors) = Self::parse(true, path, &content);
+                Deserialized::new(Some(manifest), errors)
             }
-            Some(ExtendsField::Multiple(specifiers)) => {
-                specifiers.iter().map(String::as_str).collect()
-            }
-            None => Vec::new(),
-        };
-        specifiers.into_iter()
-    }
-
-    fn load_references(&mut self, references: &TsconfigReferences) -> bool {
-        match references {
-            TsconfigReferences::Disabled => {
-                self.references.drain(..);
-            }
-            TsconfigReferences::Auto => {}
-            TsconfigReferences::Paths(paths) => {
-                self.references = paths
-                    .iter()
-                    .filter_map(|path| path.clone().try_into().ok())
-                    .map(|path| ProjectReference {
-                        path,
-                        tsconfig: None,
-                    })
-                    .collect();
-            }
+            Err(error) => Deserialized::new(None, vec![Error::from(error)]),
         }
-
-        !self.references.is_empty()
-    }
-
-    fn references(&self) -> impl Iterator<Item = &ProjectReference> {
-        self.references.iter()
-    }
-
-    fn references_mut(&mut self) -> impl Iterator<Item = &mut ProjectReference> {
-        self.references.iter_mut()
     }
 }
 
 impl TsConfigJson {
-    pub fn parse(root: bool, path: &Utf8Path, json: &mut str) -> (Self, Vec<Error>) {
+    pub fn parse(root: bool, path: &Utf8Path, json: &str) -> (Self, Vec<Error>) {
         let (tsconfig, diagnostics) = deserialize_from_json_str(
             json,
             JsonParserOptions::default()
@@ -127,16 +68,16 @@ impl TsConfigJson {
         let mut tsconfig: Self = tsconfig.unwrap_or_default();
         tsconfig.root = root;
         tsconfig.path = path.to_path_buf();
-        let directory = tsconfig.directory().to_path_buf();
+        let directory = path.parent().unwrap();
         if let Some(base_url) = tsconfig.compiler_options.base_url {
-            tsconfig.compiler_options.base_url = directory.normalize_with(base_url).try_into().ok();
+            tsconfig.compiler_options.base_url = Some(normalize_path(&directory.join(base_url)));
         }
         if tsconfig.compiler_options.paths.is_some() {
-            tsconfig.compiler_options.paths_base =
-                tsconfig.compiler_options.base_url.as_ref().map_or_else(
-                    || directory.try_into().expect("Non UTF-8 character in path"),
-                    Clone::clone,
-                );
+            tsconfig.compiler_options.paths_base = tsconfig
+                .compiler_options
+                .base_url
+                .as_ref()
+                .map_or_else(|| directory.to_path_buf(), Clone::clone);
         }
         (tsconfig, diagnostics)
     }
@@ -154,35 +95,7 @@ pub struct CompilerOptions {
     paths_base: Utf8PathBuf,
 }
 
-impl oxc_resolver::CompilerOptions for CompilerOptions {
-    fn base_url(&self) -> Option<&Path> {
-        self.base_url.as_deref().map(Utf8Path::as_std_path)
-    }
-
-    fn set_base_url(&mut self, base_url: PathBuf) {
-        self.base_url = base_url.try_into().ok();
-    }
-
-    fn paths(&self) -> Option<&CompilerOptionsPathsMap> {
-        self.paths.as_ref()
-    }
-
-    fn paths_mut(&mut self) -> Option<&mut CompilerOptionsPathsMap> {
-        self.paths.as_mut()
-    }
-
-    fn set_paths(&mut self, paths: Option<CompilerOptionsPathsMap>) {
-        self.paths = paths;
-    }
-
-    fn paths_base(&self) -> &Path {
-        self.paths_base.as_std_path()
-    }
-
-    fn set_paths_base(&mut self, paths_base: PathBuf) {
-        self.paths_base = paths_base.try_into().expect("non UTF-8 character in path");
-    }
-}
+pub type CompilerOptionsPathsMap = IndexMap<String, Vec<String>, BuildHasherDefault<FxHasher>>;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ExtendsField {
@@ -210,20 +123,4 @@ pub struct ProjectReference {
 
     #[deserializable(skip)]
     pub tsconfig: Option<Arc<TsConfigJson>>,
-}
-
-impl oxc_resolver::ProjectReference for ProjectReference {
-    type Tc = TsConfigJson;
-
-    fn path(&self) -> &Path {
-        self.path.as_std_path()
-    }
-
-    fn tsconfig(&self) -> Option<Arc<Self::Tc>> {
-        self.tsconfig.clone()
-    }
-
-    fn set_tsconfig(&mut self, tsconfig: Arc<Self::Tc>) {
-        self.tsconfig.replace(tsconfig);
-    }
 }

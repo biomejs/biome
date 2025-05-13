@@ -44,6 +44,7 @@ biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_lsp                = { workspace = true }
 biome_migrate            = { workspace = true }
+biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_service            = { workspace = true }
 biome_text_edit          = { workspace = true }

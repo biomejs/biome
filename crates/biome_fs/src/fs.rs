@@ -4,7 +4,6 @@ use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::{OsFileSystem, TemporaryFs};
-use oxc_resolver::{FsResolution, ResolveError};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
@@ -55,15 +54,6 @@ impl PathKind {
         match self {
             Self::File { is_symlink } => is_symlink,
             Self::Directory { is_symlink } => is_symlink,
-        }
-    }
-}
-
-impl From<PathKind> for oxc_resolver::FileMetadata {
-    fn from(kind: PathKind) -> Self {
-        match kind {
-            PathKind::File { is_symlink } => Self::new(true, false, is_symlink),
-            PathKind::Directory { is_symlink } => Self::new(false, true, is_symlink),
         }
     }
 }
@@ -125,13 +115,15 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// not a file, directory, or symlink.
     fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
-    /// This method accepts a directory path (`search_dir`) and a file name `search_file`,
+    /// This method accepts a directory path (`search_dir`) and a slice of file
+    /// names (`search_files`),
     ///
-    /// It looks for `search_file` starting from the given `search_dir`, and then it starts
-    /// navigating upwards the parent directories until it finds a file that matches `search_file` or
-    /// there aren't any more parent folders.
+    /// It looks for `search_files` in the given `search_dir`, and if they're
+    /// not there, it starts navigating upwards to parent directories until it
+    /// finds a file that matches one of the `search_files` in one of those, or
+    /// until there aren't any more parent folders, whichever comes first.
     ///
-    /// If no file is found, the method returns `None`
+    /// If no file is found, the method returns `None`.
     fn auto_search_files(
         &self,
         search_dir: &Utf8Path,
@@ -234,12 +226,6 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
 
     fn get_staged_files(&self) -> io::Result<Vec<String>>;
-
-    fn resolve_configuration(
-        &self,
-        specifier: &str,
-        path: &Utf8Path,
-    ) -> Result<FsResolution, ResolveError>;
 }
 
 /// Result of the auto search
@@ -448,14 +434,6 @@ where
 
     fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf> {
         T::read_link(self, path)
-    }
-
-    fn resolve_configuration(
-        &self,
-        specifier: &str,
-        path: &Utf8Path,
-    ) -> Result<FsResolution, ResolveError> {
-        T::resolve_configuration(self, specifier, path)
     }
 }
 

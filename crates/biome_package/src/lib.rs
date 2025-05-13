@@ -5,6 +5,8 @@ mod license;
 mod node_js_package;
 
 pub use crate::diagnostics::{ProjectAnalyzeDiagnostic, ProjectDiagnostic};
+use biome_fs::FileSystem;
+use camino::Utf8Path;
 pub use license::generated::*;
 pub use node_js_package::{
     Dependencies, NodeJsPackage, PackageJson, PackageType, TsConfigJson, Version,
@@ -26,8 +28,11 @@ pub(crate) type PackageRoot<P> =
 pub trait Manifest: Debug + Sized {
     type Language: Language;
 
-    /// It loads the manifest of the package. It accepts the path where the manifest should be
+    /// Loads the manifest of the package from the root node.
     fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self>;
+
+    /// Reads the manifest from the given `path`.
+    fn read_manifest(fs: &dyn FileSystem, path: &Utf8Path) -> Deserialized<Self>;
 }
 
 /// An internal representation of a package.

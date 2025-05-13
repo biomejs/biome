@@ -16,8 +16,8 @@ use std::fmt::Debug;
 use std::{ops::Deref, str::FromStr, sync::Arc};
 
 use biome_js_type_info_macros::Resolvable;
+use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
-use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::globals::{GLOBAL_PROMISE_ID, GLOBAL_UNKNOWN_ID, PROMISE_ID};
 use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
@@ -937,33 +937,6 @@ pub struct TypeImportQualifier {
 
     /// Resolved path of the module to import the type from.
     pub resolved_path: ResolvedPath,
-}
-
-/// Reference-counted resolved path wrapped in a [Result] that contains a string
-/// message if resolution failed.
-#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct ResolvedPath(Arc<Result<Utf8PathBuf, String>>);
-
-impl Deref for ResolvedPath {
-    type Target = Result<Utf8PathBuf, String>;
-
-    fn deref(&self) -> &Self::Target {
-        self.0.as_ref()
-    }
-}
-
-impl ResolvedPath {
-    pub fn new(resolved_path: Result<Utf8PathBuf, String>) -> Self {
-        Self(Arc::new(resolved_path))
-    }
-
-    pub fn as_path(&self) -> Option<&Utf8Path> {
-        self.as_deref().ok()
-    }
-
-    pub fn from_path(path: impl Into<Utf8PathBuf>) -> Self {
-        Self::new(Ok(path.into()))
-    }
 }
 
 #[derive(Clone, Debug, PartialEq)]

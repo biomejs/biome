@@ -2,10 +2,9 @@ use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, CallSignatureTypeMember, Class, DestructureField, Function,
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Literal,
-    MethodTypeMember, NUM_PREDEFINED_TYPES, Object, ObjectLiteral, PropertyTypeMember,
-    ResolvedPath, ReturnType, Type, TypeData, TypeImportQualifier, TypeInstance, TypeMember,
-    TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofAwaitExpression,
-    TypeofExpression, Union,
+    MethodTypeMember, NUM_PREDEFINED_TYPES, Object, ObjectLiteral, PropertyTypeMember, ReturnType,
+    Type, TypeData, TypeImportQualifier, TypeInstance, TypeMember, TypeReference,
+    TypeReferenceQualifier, TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -14,6 +13,7 @@ use biome_formatter::{
 };
 use biome_formatter::{format_args, write};
 use biome_js_syntax::TextSize;
+use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 use std::fmt::Debug;
 use std::ops::Deref;

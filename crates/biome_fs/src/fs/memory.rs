@@ -1,6 +1,5 @@
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::{FsResolution, ResolveError};
 use parking_lot::{Mutex, RawMutex, RwLock, lock_api::ArcMutexGuard};
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
@@ -209,7 +208,22 @@ impl FileSystem for MemoryFileSystem {
         let files = self.files.0.read();
         match files.get(path) {
             Some(_) => Ok(PathKind::File { is_symlink: false }),
-            None => Ok(PathKind::Directory { is_symlink: false }),
+            None => {
+                // The memory filesystem doesn't store directories, so we apply
+                // a hueristic: If the path has an extension, we assume it was
+                // intended to be a file that doesn't exist. And otherwise we
+                // assume it's a directory.
+                if path.extension().is_some() {
+                    Err(FileSystemDiagnostic {
+                        severity: Severity::Error,
+                        path: path.to_string(),
+                        error_kind: FsErrorKind::CantReadFile,
+                        source: None,
+                    })
+                } else {
+                    Ok(PathKind::Directory { is_symlink: false })
+                }
+            }
         }
     }
 
@@ -242,14 +256,6 @@ impl FileSystem for MemoryFileSystem {
             io::ErrorKind::Unsupported,
             "memory FS doesn't support symlinks",
         ))
-    }
-
-    fn resolve_configuration(
-        &self,
-        _specifier: &str,
-        _path: &Utf8Path,
-    ) -> Result<FsResolution, ResolveError> {
-        todo!()
     }
 }
 

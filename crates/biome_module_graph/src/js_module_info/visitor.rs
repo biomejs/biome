@@ -7,12 +7,13 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{ImportSymbol, TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
+use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
-use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::{ResolveError, ResolverGeneric};
+use camino::Utf8Path;
 
 use crate::{
-    JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, resolver_cache::ResolverCache,
+    JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, SUPPORTED_EXTENSIONS,
+    module_graph::ModuleGraphFsProxy,
 };
 
 use super::{ResolvedPath, collector::JsModuleInfoCollector};
@@ -20,19 +21,15 @@ use super::{ResolvedPath, collector::JsModuleInfoCollector};
 pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
     directory: &'a Utf8Path,
-    resolver: &'a ResolverGeneric<ResolverCache<'a>>,
+    fs_proxy: &'a ModuleGraphFsProxy<'a>,
 }
 
 impl<'a> JsModuleVisitor<'a> {
-    pub fn new(
-        root: AnyJsRoot,
-        directory: &'a Utf8Path,
-        resolver: &'a ResolverGeneric<ResolverCache<'a>>,
-    ) -> Self {
+    pub fn new(root: AnyJsRoot, directory: &'a Utf8Path, fs_proxy: &'a ModuleGraphFsProxy) -> Self {
         Self {
             root,
             directory,
-            resolver,
+            fs_proxy,
         }
     }
 
@@ -404,14 +401,13 @@ impl<'a> JsModuleVisitor<'a> {
     }
 
     fn resolved_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
-        let resolved_path = self
-            .resolver
-            .resolve(self.directory, specifier)
-            .and_then(|resolution| {
-                Utf8PathBuf::from_path_buf(resolution.into_path_buf())
-                    .map_err(|path| ResolveError::NotFound(path.to_string_lossy().to_string()))
-            })
-            .map_err(|error| error.to_string());
+        let options = ResolveOptions {
+            default_files: &["index"],
+            extensions: SUPPORTED_EXTENSIONS,
+            resolve_node_builtins: true,
+            ..Default::default()
+        };
+        let resolved_path = resolve(specifier, self.directory, self.fs_proxy, &options);
         ResolvedPath::new(resolved_path)
     }
 }

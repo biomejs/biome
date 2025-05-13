@@ -14,7 +14,7 @@ use biome_diagnostics::{
     Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
 };
 use biome_formatter::Printed;
-use biome_fs::{BiomePath, ConfigName, FileSystem};
+use biome_fs::{BiomePath, ConfigName};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_js_syntax::ModuleKind;
 use biome_json_parser::JsonParserOptions;
@@ -24,6 +24,7 @@ use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
+use biome_resolver::FsWithResolverProxy;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
@@ -106,7 +107,7 @@ pub struct WorkspaceServer {
     pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
 
     /// File system implementation.
-    pub(super) fs: Box<dyn FileSystem>,
+    pub(super) fs: Box<dyn FsWithResolverProxy>,
 
     /// Channel sender for instructions to the [crate::WorkspaceWatcher].
     watcher_tx: Sender<WatcherInstruction>,
@@ -129,7 +130,7 @@ impl RefUnwindSafe for WorkspaceServer {}
 impl WorkspaceServer {
     /// Creates a new [Workspace].
     pub fn new(
-        fs: Box<dyn FileSystem>,
+        fs: Box<dyn FsWithResolverProxy>,
         watcher_tx: Sender<WatcherInstruction>,
         notification_tx: watch::Sender<ServiceDataNotification>,
         threads: Option<usize>,
@@ -670,7 +671,7 @@ impl WorkspaceServer {
 }
 
 impl Workspace for WorkspaceServer {
-    fn fs(&self) -> &dyn FileSystem {
+    fn fs(&self) -> &dyn FsWithResolverProxy {
         self.fs.as_ref()
     }
 
