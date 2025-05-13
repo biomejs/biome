@@ -130,7 +130,7 @@ pub enum BiomeCommand {
             hide_usage
         )]
         formatter_enabled: Option<FormatterEnabled>,
-        /// Allow enabling or disable the linter check.
+        /// Allow enabling or disabling the linter check.
         #[bpaf(long("linter-enabled"), argument("true|false"), optional, hide_usage)]
         linter_enabled: Option<LinterEnabled>,
 
