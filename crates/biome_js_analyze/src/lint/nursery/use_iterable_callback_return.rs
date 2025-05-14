@@ -76,7 +76,7 @@ declare_lint_rule! {
     /// });
     /// ```
     pub UseIterableCallbackReturn {
-        version: "next",
+        version: "2.0.0",
         name: "useIterableCallbackReturn",
         language: "js",
         sources: &[RuleSource::Eslint("array-callback-return")],

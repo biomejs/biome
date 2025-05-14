@@ -73,7 +73,7 @@ declare_source_rule! {
     /// }
     /// ```
     pub UseSortedKeys {
-        version: "next",
+        version: "2.0.0",
         name: "useSortedKeys",
         language: "js",
         recommended: false,

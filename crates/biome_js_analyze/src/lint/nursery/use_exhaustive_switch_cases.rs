@@ -90,7 +90,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExhaustiveSwitchCases {
-        version: "next",
+        version: "2.0.0",
         name: "useExhaustiveSwitchCases",
         language: "js",
         recommended: true,

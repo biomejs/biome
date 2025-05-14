@@ -140,7 +140,7 @@ declare_lint_rule! {
     /// import { subPrivateVariable } from "../index.js";
     /// ```
     pub NoPrivateImports {
-        version: "next",
+        version: "2.0.0",
         name: "noPrivateImports",
         language: "js",
         sources: &[

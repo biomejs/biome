@@ -85,7 +85,7 @@ declare_source_rule! {
     /// ```
     ///
     pub UseSortedProperties {
-        version: "next",
+        version: "2.0.0",
         name: "useSortedProperties",
         language: "css",
         recommended: false,

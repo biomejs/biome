@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseForComponent {
-        version: "next",
+        version: "2.0.0",
         name: "useForComponent",
         language: "js",
         domains: &[RuleDomain::Solid],

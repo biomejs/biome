@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub NoUnknownAtRule {
-        version: "next",
+        version: "2.0.0",
         name: "noUnknownAtRule",
         language: "css",
         recommended: true,

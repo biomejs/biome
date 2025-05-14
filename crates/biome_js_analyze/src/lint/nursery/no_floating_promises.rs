@@ -157,7 +157,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoFloatingPromises {
-        version: "next",
+        version: "2.0.0",
         name: "noFloatingPromises",
         language: "ts",
         recommended: true,

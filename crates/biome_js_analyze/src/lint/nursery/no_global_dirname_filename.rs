@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoGlobalDirnameFilename {
-        version: "next",
+        version: "2.0.0",
         name: "noGlobalDirnameFilename",
         language: "js",
         recommended: false,

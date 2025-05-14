@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoProcessGlobal {
-        version: "next",
+        version: "2.0.0",
         name: "noProcessGlobal",
         language: "js",
         sources: &[RuleSource::DenoLint("no-process-global")],

@@ -81,7 +81,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessBackrefInRegex {
-        version: "next",
+        version: "2.0.0",
         name: "noUselessBackrefInRegex",
         language: "js",
         sources: &[
