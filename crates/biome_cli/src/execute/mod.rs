@@ -644,6 +644,8 @@ pub fn execute_mode(
                     diagnostics_payload,
                     execution: execution.clone(),
                     verbose: cli_options.verbose,
+                    working_directory: fs.working_directory().clone(),
+                    evaluated_paths,
                 };
                 reporter.write(&mut SummaryReporterVisitor(console))?;
             } else {
