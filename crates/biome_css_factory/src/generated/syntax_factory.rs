@@ -36,6 +36,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_SCOPE_RANGE
             | CSS_BOGUS_SELECTOR
             | CSS_BOGUS_SUB_SELECTOR
+            | CSS_BOGUS_SUPPORTS_CONDITION
             | CSS_BOGUS_UNICODE_RANGE_VALUE
             | CSS_BOGUS_URL_MODIFIER
             | CSS_UNKNOWN_AT_RULE_COMPONENT_LIST
