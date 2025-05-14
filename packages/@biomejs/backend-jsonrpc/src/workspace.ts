@@ -2977,6 +2977,9 @@ export interface NoSecretsOptions {
 	entropyThreshold?: number;
 }
 export interface UseAdjacentGetterSetterOptions {
+	/**
+	 * Specifies the expected ordering of getters and setters.
+	 */
 	order?: Order;
 }
 export interface UseConsistentObjectDefinitionOptions {

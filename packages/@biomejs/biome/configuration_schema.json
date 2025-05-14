@@ -2956,8 +2956,23 @@
 			"additionalProperties": false
 		},
 		"Order": {
-			"type": "string",
-			"enum": ["anyOrder", "getBeforeSet", "setBeforeGet"]
+			"oneOf": [
+				{
+					"description": "Property accessors can be in any order.",
+					"type": "string",
+					"enum": ["anyOrder"]
+				},
+				{
+					"description": "Getter should come before setter.",
+					"type": "string",
+					"enum": ["getBeforeSet"]
+				},
+				{
+					"description": "Setter should come before getter.",
+					"type": "string",
+					"enum": ["setBeforeGet"]
+				}
+			]
 		},
 		"OverrideAssistConfiguration": {
 			"type": "object",
@@ -5327,6 +5342,7 @@
 			"type": "object",
 			"properties": {
 				"order": {
+					"description": "Specifies the expected ordering of getters and setters.",
 					"default": "anyOrder",
 					"allOf": [{ "$ref": "#/definitions/Order" }]
 				}

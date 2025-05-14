@@ -88,7 +88,7 @@ declare_lint_rule! {
 
 impl Rule for UseAdjacentGetterSetter {
     type Query = Ast<AnySetter>;
-    type State = RuleState;
+    type State = MatchingPropertyAccessors;
     type Signals = Option<Self::State>;
     type Options = UseAdjacentGetterSetterOptions;
 
@@ -102,46 +102,30 @@ impl Rule for UseAdjacentGetterSetter {
             .abs_diff(accessors.setter.position)
             == 1;
 
-        match ctx.options().order {
-            Order::AnyOrder => {
-                if !is_adjacent {
-                    return Some(RuleState {
-                        problem_kind: ProblemKind::NotAdjacent,
-                        accessors,
-                    });
-                }
-            }
-            Order::GetBeforeSet => {
-                if !is_adjacent || accessors.getter.position > accessors.setter.position {
-                    return Some(RuleState {
-                        problem_kind: ProblemKind::GetterBeforeSetter,
-                        accessors,
-                    });
-                }
-            }
-            Order::SetBeforeGet => {
-                if !is_adjacent || accessors.getter.position < accessors.setter.position {
-                    return Some(RuleState {
-                        problem_kind: ProblemKind::SetterBeforeGetter,
-                        accessors,
-                    });
-                }
-            }
+        if !is_adjacent {
+            return Some(accessors);
         }
+
+        if ctx.options().order == Order::GetBeforeSet
+            && accessors.getter.position > accessors.setter.position
+        {
+            return Some(accessors);
+        }
+
+        if ctx.options().order == Order::SetBeforeGet
+            && accessors.getter.position < accessors.setter.position
+        {
+            return Some(accessors);
+        }
+
         None
     }
 
-    fn diagnostic(
-        _ctx: &RuleContext<Self>,
-        RuleState {
-            problem_kind,
-            accessors,
-        }: &Self::State,
-    ) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, accessors: &Self::State) -> Option<RuleDiagnostic> {
         let getter_name = accessors.getter.property_accessor.name().ok()?;
         let setter_name = accessors.setter.property_accessor.name().ok()?;
-        match problem_kind {
-            ProblemKind::NotAdjacent => Some(
+        match ctx.options().order {
+            Order::AnyOrder => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     getter_name.range(),
@@ -156,7 +140,7 @@ impl Rule for UseAdjacentGetterSetter {
                     },
                 ),
             ),
-            ProblemKind::SetterBeforeGetter => Some(
+            Order::GetBeforeSet => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     getter_name.range(),
@@ -171,7 +155,7 @@ impl Rule for UseAdjacentGetterSetter {
                     },
                 ),
             ),
-            ProblemKind::GetterBeforeSetter => Some(
+            Order::SetBeforeGet => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     getter_name.range(),
@@ -188,23 +172,6 @@ impl Rule for UseAdjacentGetterSetter {
             ),
         }
     }
-}
-
-pub struct RuleState {
-    /// The problematic property accessors pair (getter and setter).
-    accessors: MatchingPropertyAccessors,
-    /// The kind of problem found.
-    problem_kind: ProblemKind,
-}
-
-/// The kind of problem found in the property accessors.
-pub enum ProblemKind {
-    /// The getter and setter are not adjacent, but should be.
-    NotAdjacent,
-    /// The setter is defined before the getter, but should be after.
-    SetterBeforeGetter,
-    /// The getter is defined before the setter, but should be after.
-    GetterBeforeSetter,
 }
 
 /// A helper function to get the property accessors pair for a given setter.
@@ -476,10 +443,8 @@ impl IsNameEqual for AnyPropertyAccessorName {
     }
 }
 
-/// This trait abstracts the logic of getting a static name / user readable name
-/// from a property accessor.
+/// This trait abstracts the logic of getting a static name from a property accessor.
 /// We can only get a static name from `JsLiteralMemberName` and `JsComputedMemberName` (if static).
-/// User readable name can be obtained from any type.
 trait AsStaticName {
     fn as_static_name(&self) -> Option<StaticValue>;
 }
@@ -592,6 +557,7 @@ impl AnySetter {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseAdjacentGetterSetterOptions {
+    /// Specifies the expected ordering of getters and setters.
     pub order: Order,
 }
 
@@ -599,8 +565,11 @@ pub struct UseAdjacentGetterSetterOptions {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum Order {
+    /// Property accessors can be in any order.
     #[default]
     AnyOrder,
+    /// Getter should come before setter.
     GetBeforeSet,
+    /// Setter should come before getter.
     SetBeforeGet,
 }
