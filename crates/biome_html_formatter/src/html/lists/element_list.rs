@@ -220,6 +220,7 @@ impl FormatHtmlElementList {
                 }
 
                 HtmlChild::Comment(comment) => {
+                    dbg!(comment);
                     let memoized = comment.memoized();
                     flat.write(&memoized, f);
                     multiline.write_content(&memoized, f);

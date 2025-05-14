@@ -1,5 +1,5 @@
 use crate::{prelude::*, utils::metadata::is_element_whitespace_sensitive};
-use biome_formatter::{FormatRuleWithOptions, write};
+use biome_formatter::{write, FormatRuleWithOptions};
 use biome_html_syntax::{HtmlClosingElement, HtmlClosingElementFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlClosingElement {
@@ -37,6 +37,15 @@ impl FormatNodeRule<HtmlClosingElement> for FormatHtmlClosingElement {
 
         let name = name?;
         let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &name);
+
+        // If there is a comment attached to this closing tag, we need to preserve at least 1 newline if one precedes the comment.
+        if node.syntax().has_leading_comments() {
+            if let Ok(l_angle_token) = &l_angle_token {
+                if dbg!(l_angle_token.has_leading_newline()) {
+                    // write!(f, [empty_line()])?;
+                }
+            }
+        }
 
         // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
         if !self.tag_borrowed {
