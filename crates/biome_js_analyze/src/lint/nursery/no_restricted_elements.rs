@@ -71,7 +71,7 @@ declare_lint_rule! {
     /// <TextField />
     /// ```
     pub NoRestrictedElements {
-        version: "next",
+        version: "2.0.0",
         name: "noRestrictedElements",
         language: "jsx",
         sources: &[

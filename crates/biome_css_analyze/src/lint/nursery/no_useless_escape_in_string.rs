@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessEscapeInString {
-        version: "next",
+        version: "2.0.0",
         name: "noUselessEscapeInString",
         language: "css",
         recommended: true,

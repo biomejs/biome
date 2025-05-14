@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// import { foo } from "./foo.js";
     /// ```
     pub NoUnresolvedImports {
-        version: "next",
+        version: "2.0.0",
         name: "noUnresolvedImports",
         language: "js",
         sources: &[

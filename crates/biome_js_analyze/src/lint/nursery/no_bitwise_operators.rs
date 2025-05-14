@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoBitwiseOperators {
-        version: "next",
+        version: "2.0.0",
         name: "noBitwiseOperators",
         language: "js",
         sources: &[

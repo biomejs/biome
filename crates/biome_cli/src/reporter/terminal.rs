@@ -92,7 +92,16 @@ impl ReporterVisitor for ConsoleReporterVisitor<'_> {
                 list: evaluated_paths
                     .iter()
                     .filter(|p| p.was_written())
-                    .map(|p| p.to_string())
+                    .map(|p| {
+                        working_directory
+                            .as_ref()
+                            .and_then(|wd| {
+                                p.strip_prefix(wd.as_str())
+                                    .map(|path| path.to_string())
+                                    .ok()
+                            })
+                            .unwrap_or(p.to_string())
+                    })
                     .collect(),
             },
         };
