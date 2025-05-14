@@ -358,6 +358,12 @@ pub struct OverrideAssistSettings {
     pub actions: Option<Actions>,
 }
 
+/// Files settings for the entire workspace
+#[derive(Clone, Debug, Default)]
+pub struct OverrideFilesSettings {
+    pub max_size: Option<MaxSize>,
+}
+
 /// Static map of language names to language-specific settings
 #[derive(Clone, Debug, Default)]
 pub struct LanguageListSettings {
@@ -1222,6 +1228,8 @@ pub struct OverrideSettingPattern {
     pub assist: OverrideAssistSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
+    /// Files specific settings
+    pub files: OverrideFilesSettings,
 }
 
 impl OverrideSettingPattern {
@@ -1523,6 +1531,9 @@ pub fn to_override_settings(
             linter,
             assist,
             languages,
+            files: OverrideFilesSettings {
+                max_size: pattern.files.unwrap().max_size,
+            },
         };
 
         override_settings.patterns.push(pattern_setting);

@@ -13,6 +13,7 @@ use biome_formatter::{
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
+use crate::max_size::MaxSize;
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -63,6 +64,10 @@ pub struct OverridePattern {
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<OverrideAssistConfiguration>,
+
+    /// File size limit in bytes
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub files: Option<OverrideFilesConfiguration>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -184,6 +189,14 @@ pub struct OverrideLinterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(pure(Default::default()), optional, hide)]
     pub domains: Option<RuleDomains>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct OverrideFilesConfiguration {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_size: Option<MaxSize>,
 }
 
 #[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]

@@ -1,3 +1,4 @@
+use std::num::NonZeroU64;
 use crate::settings::{LanguageSettings, ServiceLanguage, Settings};
 use crate::workspace::DocumentFileSource;
 use biome_analyze::RuleFilter;
@@ -6,13 +7,14 @@ use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::{
     Configuration, JsConfiguration, LinterConfiguration, OverrideGlobs,
     OverrideLinterConfiguration, OverridePattern, Overrides, RuleConfiguration,
-    RulePlainConfiguration, Rules,
+    RulePlainConfiguration, Rules, OverrideFilesConfiguration
 };
 use biome_fs::BiomePath;
 use biome_js_syntax::JsLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 use std::str::FromStr;
+use biome_configuration::max_size::MaxSize;
 
 #[test]
 fn correctly_passes_jsx_runtime() {
@@ -127,5 +129,30 @@ fn merge_override_linter_group_rule() {
     assert_eq!(
         disabled_rules,
         FxHashSet::from_iter([RuleFilter::Rule("nursery", "useExplicitType")])
+    );
+}
+
+
+#[test]
+fn merge_override_files_max_size_rule() {
+    let configuration = Configuration {
+        overrides: Some(Overrides(vec![OverridePattern {
+            files: Some(OverrideFilesConfiguration {
+                max_size: Some(MaxSize(NonZeroU64::new(1024).unwrap())),
+            }),
+            ..OverridePattern::default()
+        }])),
+        ..Default::default()
+    };
+
+    let mut settings = Settings::default();
+
+    settings
+        .merge_with_configuration(configuration, None)
+        .expect("valid configuration");
+
+    assert_eq!(
+        settings.override_settings.patterns[0].files.max_size,
+        Some(MaxSize(NonZeroU64::new(1024).unwrap()))
     );
 }
