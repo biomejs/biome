@@ -217,8 +217,8 @@ impl Rule for NoUselessFragments {
                             JsSyntaxKind::JSX_TEXT => {
                                 // We need to whitespaces and newlines from the original string.
                                 // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
-                                let original_text = child.to_trimmed_string();
-                                let child_text = original_text.trim();
+                                let original_text = child.to_trimmed_text();
+                                let child_text = original_text.text().trim();
 
                                 if (in_jsx_expr || in_js_logical_expr)
                                     && contains_html_character_references(child_text)

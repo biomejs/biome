@@ -267,8 +267,8 @@ fn process_js_assignment_expr(node: &JsAssignmentExpression) -> Option<RuleState
     match node.left().ok()? {
         AnyJsAssignmentPattern::AnyJsAssignment(assignment) => match assignment {
             AnyJsAssignment::JsComputedMemberAssignment(c) => {
-                if c.member().ok()?.to_trimmed_string() == "\"then\""
-                    || c.member().ok()?.to_trimmed_string() == "`then`"
+                if c.member().ok()?.to_trimmed_text().text() == "\"then\""
+                    || c.member().ok()?.to_trimmed_text().text() == "`then`"
                 {
                     return Some(RuleState {
                         range: node.left().ok()?.range(),
@@ -277,7 +277,7 @@ fn process_js_assignment_expr(node: &JsAssignmentExpression) -> Option<RuleState
                 }
             }
             AnyJsAssignment::JsStaticMemberAssignment(m) => {
-                if m.member().ok()?.to_trimmed_string() == "then" {
+                if m.member().ok()?.to_trimmed_text().text() == "then" {
                     return Some(RuleState {
                         range: node.left().ok()?.range(),
                         message: NoThenPropertyMessage::Object,
@@ -301,8 +301,8 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
                 return None;
             }
 
-            let callee = m.object().ok()?.to_trimmed_string();
-            let member = m.member().ok()?.to_trimmed_string();
+            let callee = m.object().ok()?.to_trimmed_text();
+            let member = m.member().ok()?.to_trimmed_text();
 
             let args = node.arguments().ok()?.args();
             let first = args.iter().next()?.ok()?;
@@ -311,7 +311,7 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
             // ex)
             //   Object.fromEntries([["then", 1]])
             //   Object.fromEntries([['foo', 'foo'], ['then', 32],['bar', 'bar']]);
-            if callee == "Object" && member == "fromEntries" {
+            if callee.text() == "Object" && member.text() == "fromEntries" {
                 if args.len() != 1 {
                     return None;
                 }
@@ -323,8 +323,8 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
                             ) = arr.ok()?
                             {
                                 let key = arg.elements().first()?.ok()?;
-                                if key.to_trimmed_string() == "\"then\""
-                                    || key.to_trimmed_string() == "`then`"
+                                if key.to_trimmed_text().text() == "\"then\""
+                                    || key.to_trimmed_text().text() == "`then`"
                                 {
                                     return Some(RuleState {
                                         range: key.range(),
@@ -348,8 +348,8 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
                     return None;
                 }
                 let second = args.iter().nth(1)?.ok()?;
-                if second.to_trimmed_string() == "\"then\""
-                    || second.to_trimmed_string() == "`then`"
+                if second.to_trimmed_text().text() == "\"then\""
+                    || second.to_trimmed_text().text() == "`then`"
                 {
                     return Some(RuleState {
                         range: second.range(),
@@ -378,7 +378,7 @@ fn process_js_export_named_clause(node: &JsExport) -> Option<RuleState> {
                         }
                     }
                     AnyJsExportNamedSpecifier::JsExportNamedSpecifier(name) => {
-                        if name.exported_name().ok()?.to_trimmed_string() == "then" {
+                        if name.exported_name().ok()?.syntax().text_trimmed() == "then" {
                             return Some(RuleState {
                                 range: name.exported_name().ok()?.range(),
                                 message: NoThenPropertyMessage::Export,
@@ -394,7 +394,7 @@ fn process_js_export_named_clause(node: &JsExport) -> Option<RuleState> {
             let decls = node.declaration().ok()?;
             for d in decls.declarators().iter() {
                 let id = d.ok()?.id().ok()?;
-                if id.to_trimmed_string() == "then" {
+                if id.syntax().text_trimmed() == "then" {
                     return Some(RuleState {
                         range: id.range(),
                         message: NoThenPropertyMessage::Object,
