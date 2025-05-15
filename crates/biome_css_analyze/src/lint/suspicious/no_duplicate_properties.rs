@@ -1,11 +1,10 @@
-use std::collections::hash_map::Entry;
-
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleList;
+use biome_css_syntax::{CssDeclarationOrRuleList, CssKeyframesAtRule};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
+use std::collections::hash_map::Entry;
 
 use crate::services::semantic::Semantic;
 
@@ -46,7 +45,7 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateProperties {
     type Query = Semantic<CssDeclarationOrRuleList>;
-    type State = (TextRange, (TextRange, String));
+    type State = (TextRange, (TextRange, Box<str>));
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -69,9 +68,18 @@ impl Rule for NoDuplicateProperties {
                 continue;
             }
 
+            // We skip this declaration if it's inside a keyframes block.
+            if prop
+                .syntax()
+                .ancestors()
+                .any(|node| CssKeyframesAtRule::can_cast(node.kind()))
+            {
+                continue;
+            }
+
             match seen.entry(prop_name.clone().into()) {
                 Entry::Occupied(entry) => {
-                    return Some((*entry.get(), (prop_range, prop_name.to_string())));
+                    return Some((*entry.get(), (prop_range, prop_name.into())));
                 }
                 Entry::Vacant(entry) => {
                     entry.insert(prop_range);
