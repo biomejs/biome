@@ -22,7 +22,7 @@ pub enum SemanticEvent {
         specificity: Specificity,
     },
     PropertyDeclaration {
-        node: CssSyntaxNode,
+        node: CssDeclaration,
         property: CssProperty,
         value: CssPropertyInitialValue,
     },
@@ -107,7 +107,7 @@ impl SemanticEventExtractor {
                                 return;
                             };
                             self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                                node: node.clone(),
+                                node: declaration,
                                 property: property_name.into(),
                                 value: CssPropertyInitialValue::from(property_value),
                             });
@@ -128,7 +128,7 @@ impl SemanticEventExtractor {
                             };
 
                             self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                                node: node.clone(),
+                                node: declaration,
                                 property,
                                 value,
                             });
