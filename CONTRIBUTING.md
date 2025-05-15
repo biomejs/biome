@@ -482,7 +482,6 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
 - [Naoki Ikeguchi @siketyan](https://github.com/siketyan)
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
-- [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)
 
 ### Maintainers team
 
