@@ -47,7 +47,7 @@ impl Display for ResolveError {
             Self::InvalidPackageSpecifier => f.write_str("invalid package name"),
             Self::ManifestNotFound => f.write_str("no package.json manifest found"),
             Self::NodeBuiltIn => f.write_str("resolved to a Node.js built-in"),
-            Self::NotFound => f.write_str("not found"),
+            Self::NotFound => f.write_str("module not found"),
         }
     }
 }

@@ -111,7 +111,7 @@ impl ModuleGraph {
         }
     }
 
-    pub(crate) fn get_or_insert_path_info(
+    pub fn get_or_insert_path_info(
         &self,
         path: &Utf8Path,
         fs: &dyn FsWithResolverProxy,

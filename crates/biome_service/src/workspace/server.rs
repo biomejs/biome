@@ -282,7 +282,14 @@ impl WorkspaceServer {
         &self,
         params: OpenFileParams,
     ) -> Result<(), WorkspaceError> {
-        self.open_file_internal(true, params)
+        match self
+            .module_graph
+            .get_or_insert_path_info(&params.path, self.fs.as_ref())
+        {
+            Some(path_info) if path_info.is_symlink() => Ok(()),
+            Some(_) => self.open_file_internal(true, params),
+            None => Err(WorkspaceError::cant_read_file(params.path.to_string())),
+        }
     }
 
     #[tracing::instrument(level = "debug", skip(self, params), fields(

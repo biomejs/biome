@@ -208,22 +208,15 @@ impl FileSystem for MemoryFileSystem {
         let files = self.files.0.read();
         match files.get(path) {
             Some(_) => Ok(PathKind::File { is_symlink: false }),
-            None => {
-                // The memory filesystem doesn't store directories, so we apply
-                // a hueristic: If the path has an extension, we assume it was
-                // intended to be a file that doesn't exist. And otherwise we
-                // assume it's a directory.
-                if path.extension().is_some() {
-                    Err(FileSystemDiagnostic {
-                        severity: Severity::Error,
-                        path: path.to_string(),
-                        error_kind: FsErrorKind::CantReadFile,
-                        source: None,
-                    })
-                } else {
-                    Ok(PathKind::Directory { is_symlink: false })
-                }
+            None if files.iter().any(|file_path| file_path.0.starts_with(path)) => {
+                Ok(PathKind::Directory { is_symlink: false })
             }
+            None => Err(FileSystemDiagnostic {
+                severity: Severity::Error,
+                path: path.to_string(),
+                error_kind: FsErrorKind::CantReadFile,
+                source: None,
+            }),
         }
     }
 

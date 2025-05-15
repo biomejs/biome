@@ -4,7 +4,7 @@ mod constants;
 mod errors;
 mod resolver_fs_proxy;
 
-use std::{borrow::Cow, ops::Deref, sync::Arc};
+use std::{ops::Deref, sync::Arc};
 
 use biome_fs::normalize_path;
 use biome_json_value::{JsonObject, JsonValue};
@@ -26,6 +26,8 @@ pub fn resolve(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
+    let specifier = strip_query_and_fragment(specifier);
+
     if options.resolve_node_builtins
         && (specifier.starts_with("node:") || NODE_BUILT_INS.contains(&specifier))
     {
@@ -36,7 +38,7 @@ pub fn resolve(
         return resolve_absolute_path(Utf8PathBuf::from(specifier), fs, options);
     }
 
-    if specifier.starts_with("./") || specifier.starts_with("../") {
+    if specifier == "." || specifier.starts_with("./") || specifier.starts_with("../") {
         return resolve_relative_path(specifier, base_dir, fs, options);
     }
 
@@ -56,22 +58,29 @@ fn resolve_absolute_path(
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
     let path = normalize_owned_path(path);
-    match resolve_path_info(&path, fs) {
-        Ok((ResolvedPathInfo::Directory, realpath)) => resolve_directory(&realpath, fs, options),
-        Ok((ResolvedPathInfo::File, realpath)) => Ok(realpath.into_owned()),
-        Err(ResolveError::NotFound) => {
-            for extension in options.extensions {
-                let path_with_extension = Utf8PathBuf::from(format!("{path}.{extension}"));
-                match resolve_path_info(&path_with_extension, fs)? {
-                    (ResolvedPathInfo::Directory, _) => {
-                        // Adding an extension yielded a directory? No, thanks.
-                    }
-                    (ResolvedPathInfo::File, _) => return Ok(path_with_extension),
-                }
-            }
 
-            Err(ResolveError::NotFound)
+    let try_extensions_with_fallback_error = |error: ResolveError| {
+        for extension in options.extensions {
+            let path_with_extension = Utf8PathBuf::from(format!("{path}.{extension}"));
+            match resolve_path_info(path_with_extension, fs) {
+                Ok((ResolvedPathInfo::Directory, _)) => {
+                    // Adding an extension yielded a directory? No, thanks.
+                }
+                Ok((ResolvedPathInfo::File, realpath)) => return Ok(realpath),
+                Err(ResolveError::NotFound) => { /* continue */ }
+                Err(error) => return Err(error),
+            }
         }
+
+        Err(error)
+    };
+
+    match resolve_path_info(path.clone(), fs) {
+        Ok((ResolvedPathInfo::Directory, realpath)) => {
+            resolve_directory(&realpath, fs, options).or_else(try_extensions_with_fallback_error)
+        }
+        Ok((ResolvedPathInfo::File, realpath)) => Ok(realpath),
+        Err(ResolveError::NotFound) => try_extensions_with_fallback_error(ResolveError::NotFound),
         Err(other) => Err(other),
     }
 }
@@ -93,12 +102,12 @@ fn resolve_directory(
     for default_file in options.default_files {
         for extension in options.extensions {
             let default_file_path = dir_path.join(format!("{default_file}.{extension}"));
-            match resolve_path_info(&default_file_path, fs) {
+            match resolve_path_info(default_file_path, fs) {
                 Ok((ResolvedPathInfo::Directory, _)) => {
                     // An index file that's a directory?
                     // Not going to fall for that...
                 }
-                Ok((ResolvedPathInfo::File, _)) => return Ok(default_file_path),
+                Ok((ResolvedPathInfo::File, realpath)) => return Ok(realpath),
                 Err(_) => { /* try the next one */ }
             }
         }
@@ -307,13 +316,13 @@ fn resolve_dependency(
 
     for dir in base_dir.ancestors() {
         let package_path = Utf8PathBuf::from(format!("{dir}/node_modules/{package_name}"));
-        let package_json_path = match fs.path_info(&package_path) {
-            Ok(PathInfo::Directory) => package_path.join("package.json"),
-            Ok(PathInfo::Symlink { normalized_target }) => normalized_target.join("package.json"),
+        let package_path = match fs.path_info(&package_path) {
+            Ok(PathInfo::Directory) => package_path,
+            Ok(PathInfo::Symlink { normalized_target }) => normalized_target,
             _ => continue,
         };
 
-        if let Ok(package_json) = fs.read_package_json(&package_json_path) {
+        if let Ok(package_json) = fs.read_package_json(&package_path.join("package.json")) {
             if package_json.get_value_by_path(&["exports"]).is_some() {
                 return resolve_export(subpath, &package_path, &package_json, fs, options);
             }
@@ -346,17 +355,18 @@ enum ResolvedPathInfo {
     File,
 }
 
-/// Resolves teh
-fn resolve_path_info<'a>(
-    path: &'a Utf8PathBuf,
+/// Resolves the given `path` to a tuple of [`ResolvedPathInfo`] and the real
+/// path being pointed to.
+fn resolve_path_info(
+    path: Utf8PathBuf,
     fs: &dyn ResolverFsProxy,
-) -> Result<(ResolvedPathInfo, Cow<'a, Utf8PathBuf>), ResolveError> {
-    match fs.path_info(path)? {
-        PathInfo::Directory => Ok((ResolvedPathInfo::Directory, Cow::Borrowed(path))),
-        PathInfo::File => Ok((ResolvedPathInfo::File, Cow::Borrowed(path))),
+) -> Result<(ResolvedPathInfo, Utf8PathBuf), ResolveError> {
+    match fs.path_info(&path)? {
+        PathInfo::Directory => Ok((ResolvedPathInfo::Directory, path)),
+        PathInfo::File => Ok((ResolvedPathInfo::File, path)),
         PathInfo::Symlink { normalized_target } => match fs.path_info(&normalized_target)? {
-            PathInfo::Directory => Ok((ResolvedPathInfo::Directory, Cow::Owned(normalized_target))),
-            PathInfo::File => Ok((ResolvedPathInfo::File, Cow::Owned(normalized_target))),
+            PathInfo::Directory => Ok((ResolvedPathInfo::Directory, normalized_target)),
+            PathInfo::File => Ok((ResolvedPathInfo::File, normalized_target)),
             PathInfo::Symlink { .. } => Err(ResolveError::BrokenSymlink),
         },
     }
@@ -412,6 +422,18 @@ fn parse_package_specifier(specifier: &str) -> Result<(&str, &str), ResolveError
     let package_subpath =
         separator_index.map_or("", |separator_index| &specifier[separator_index + 1..]);
     Ok((package_name, package_subpath))
+}
+
+fn strip_query_and_fragment(specifier: &str) -> &str {
+    let index = specifier
+        .as_bytes()
+        .iter()
+        .skip(1)
+        .position(|b| *b == b'?' || *b == b'#');
+    match index {
+        Some(index) => &specifier[..index + 1],
+        None => specifier,
+    }
 }
 
 /// Options to pass to the resolver.

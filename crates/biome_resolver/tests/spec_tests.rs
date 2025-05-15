@@ -35,6 +35,32 @@ fn test_resolve_relative_path() {
 
     assert_eq!(
         resolve(
+            "./bar?query",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                extensions: &["js"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/bar.js")))
+    );
+
+    assert_eq!(
+        resolve(
+            "./bar#hash",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                extensions: &["js"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/bar.js")))
+    );
+
+    assert_eq!(
+        resolve(
             "./folder/qux.ts",
             &base_dir,
             &fs,
@@ -44,6 +70,20 @@ fn test_resolve_relative_path() {
             }
         ),
         Ok(Utf8PathBuf::from(format!("{base_dir}/folder/qux.ts")))
+    );
+
+    assert_eq!(
+        resolve(
+            ".",
+            &base_dir.join("folder"),
+            &fs,
+            &ResolveOptions {
+                default_files: &["linked_foo"],
+                extensions: &["js"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/foo.js")))
     );
 
     assert_eq!(

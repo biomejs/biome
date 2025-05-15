@@ -9,7 +9,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_json_value::{JsonObject, JsonValue};
 use biome_text_size::TextRange;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8Path;
 use node_semver::{Range, SemverError};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::catch_unwind;
@@ -18,13 +18,6 @@ use std::{ops::Deref, str::FromStr};
 /// Deserialized `package.json`.
 #[derive(Debug, Default, Clone)]
 pub struct PackageJson {
-    /// Path to `package.json`. Contains the `package.json` filename.
-    pub path: Utf8PathBuf,
-
-    /// Canonicalized version of [Self::path], where all symbolic links are
-    /// resolved.
-    pub canonicalized_path: Utf8PathBuf,
-
     /// The "name" field defines your package's name.
     /// The "name" field can be used in addition to the "exports" field to self-reference a package using its name.
     ///
@@ -55,33 +48,6 @@ impl PackageJson {
             name: Some(name.into()),
             r#type: Some(PackageType::Module),
             ..Default::default()
-        }
-    }
-
-    /// Returns [self] with both `path` and `canonicalized_path` set to the
-    /// given `path`.
-    ///
-    /// Use [Self::with_path_and_canonicalized_path()] if you want to set a
-    /// different canonicalized path.
-    pub fn with_path(self, path: impl Into<Utf8PathBuf>) -> Self {
-        let path: Utf8PathBuf = path.into();
-        Self {
-            path: path.clone(),
-            canonicalized_path: path,
-            ..self
-        }
-    }
-
-    /// Returns [self] with updated `path` and `canonicalized_path`.
-    pub fn with_path_and_canonicalized_path(
-        self,
-        path: impl Into<Utf8PathBuf>,
-        canonicalized_path: impl Into<Utf8PathBuf>,
-    ) -> Self {
-        Self {
-            path: path.into(),
-            canonicalized_path: canonicalized_path.into(),
-            ..self
         }
     }
 

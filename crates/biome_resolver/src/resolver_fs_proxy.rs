@@ -17,6 +17,12 @@ pub enum PathInfo {
     },
 }
 
+impl PathInfo {
+    pub const fn is_symlink(&self) -> bool {
+        matches!(self, Self::Symlink { .. })
+    }
+}
+
 /// A proxy for handling requests to the filesystem.
 ///
 /// The proxy only implements a very specific subset of FS functionality in such

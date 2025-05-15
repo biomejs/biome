@@ -34,7 +34,7 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
   × Failed to resolve the configuration from formatTYPO.json
     
     Caused by:
-      Could not resolve formatTYPO.json: not found
+      Could not resolve formatTYPO.json: module not found
   
   Verbose advice
   
