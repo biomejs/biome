@@ -373,11 +373,21 @@ fn resolve_path_info(
 }
 
 fn normalize_owned_path(path: Utf8PathBuf) -> Utf8PathBuf {
-    if path.as_str().contains("/.") || path.as_str().contains("..") {
-        normalize_path(&path)
-    } else {
-        path
+    let string = path.as_str();
+    if string.len() < 3 {
+        return path;
     }
+
+    let mut prev = string.chars().next().unwrap();
+    for byte in string.chars().skip(1) {
+        if byte == '.' && (prev == '.' || prev == std::path::MAIN_SEPARATOR) {
+            return normalize_path(&path);
+        }
+
+        prev = byte;
+    }
+
+    path
 }
 
 fn normalize_subpath(subpath: &str) -> &str {
