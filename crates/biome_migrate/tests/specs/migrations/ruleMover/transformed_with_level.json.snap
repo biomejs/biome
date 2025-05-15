@@ -34,7 +34,7 @@ expression: transformed_with_level.json
 ```
 transformed_with_level.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been renamed to noConsole.
+  ! This lint rule has been renamed to noConsole.
   
     3 │     "rules": {
     4 │       "suspicious": {
@@ -43,7 +43,7 @@ transformed_with_level.json:5:9 migrate  FIXABLE  ━━━━━━━━━━
     6 │           "level": "warn"
     7 │         },
   
-  i Safe fix: Rename the rule.
+  i Safe fix: Rename the lint rule.
   
      3  3 │       "rules": {
      4  4 │         "suspicious": {
@@ -77,7 +77,7 @@ transformed_with_level.json:5:9 migrate  FIXABLE  ━━━━━━━━━━
 ```
 transformed_with_level.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to correctness/noSwitchDeclarations.
+  ! This lint rule has been moved to correctness/noSwitchDeclarations.
   
      6 │           "level": "warn"
      7 │         },
@@ -86,7 +86,7 @@ transformed_with_level.json:8:9 migrate  FIXABLE  ━━━━━━━━━━
      9 │           "level": "error"
     10 │         },
   
-  i Safe fix: Move and rename the rule.
+  i Safe fix: Move and rename the lint rule.
   
      6  6 │             "level": "warn"
      7  7 │           },
@@ -119,7 +119,7 @@ transformed_with_level.json:8:9 migrate  FIXABLE  ━━━━━━━━━━
 ```
 transformed_with_level.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to style/useConsistentArrayType.
+  ! This lint rule has been moved to style/useConsistentArrayType.
   
      9 │           "level": "error"
     10 │         },
@@ -128,7 +128,7 @@ transformed_with_level.json:11:9 migrate  FIXABLE  ━━━━━━━━━�
     12 │           "level": "error"
     13 │         },
   
-  i Safe fix: Move and rename the rule.
+  i Safe fix: Move and rename the lint rule.
   
      9  9 │             "level": "error"
     10 10 │           },
@@ -156,7 +156,7 @@ transformed_with_level.json:11:9 migrate  FIXABLE  ━━━━━━━━━�
 ```
 transformed_with_level.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to correctness/noInvalidBuiltinInstantiation.
+  ! This lint rule has been moved to correctness/noInvalidBuiltinInstantiation.
   
     12 │           "level": "error"
     13 │         },
@@ -165,7 +165,7 @@ transformed_with_level.json:14:9 migrate  FIXABLE  ━━━━━━━━━�
     15 │           "level": "error"
     16 │         },
   
-  i Safe fix: Move and rename the rule.
+  i Safe fix: Move and rename the lint rule.
   
     12 12 │             "level": "error"
     13 13 │           },
@@ -190,7 +190,7 @@ transformed_with_level.json:14:9 migrate  FIXABLE  ━━━━━━━━━�
 ```
 transformed_with_level.json:17:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to correctness/noInvalidBuiltinInstantiation.
+  ! This lint rule has been moved to correctness/noInvalidBuiltinInstantiation.
   
     15 │           "level": "error"
     16 │         },
@@ -199,7 +199,7 @@ transformed_with_level.json:17:9 migrate  FIXABLE  ━━━━━━━━━�
     18 │           "level": "error"
     19 │         }
   
-  i Safe fix: Move and rename the rule.
+  i Safe fix: Move and rename the lint rule.
   
     14 14 │           "noNewSymbol": {
     15 15 │             "level": "error"

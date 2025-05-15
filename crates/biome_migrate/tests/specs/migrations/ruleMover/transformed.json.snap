@@ -24,7 +24,7 @@ expression: transformed.json
 ```
 transformed.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been renamed to noConsole.
+  ! This lint rule has been renamed to noConsole.
   
     3 │     "rules": {
     4 │       "suspicious": {
@@ -33,7 +33,7 @@ transformed.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
     6 │         "useSingleCaseStatement": "error",
     7 │         "useShorthandArrayType": "error",
   
-  i Safe fix: Rename the rule.
+  i Safe fix: Rename the lint rule.
   
      3  3 │       "rules": {
      4  4 │         "suspicious": {
@@ -56,7 +56,7 @@ transformed.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
 ```
 transformed.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to correctness/noSwitchDeclarations.
+  ! This lint rule has been moved to correctness/noSwitchDeclarations.
   
     4 │       "suspicious": {
     5 │         "noConsoleLog": "error",
@@ -65,7 +65,7 @@ transformed.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
     7 │         "useShorthandArrayType": "error",
     8 │         "noNewSymbol": "error",
   
-  i Safe fix: Move and rename the rule.
+  i Safe fix: Move and rename the lint rule.
   
      4  4 │         "suspicious": {
      5  5 │           "noConsoleLog": "error",
@@ -88,7 +88,7 @@ transformed.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
 ```
 transformed.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to style/useConsistentArrayType.
+  ! This lint rule has been moved to style/useConsistentArrayType.
   
     5 │         "noConsoleLog": "error",
     6 │         "useSingleCaseStatement": "error",
@@ -97,7 +97,7 @@ transformed.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
     8 │         "noNewSymbol": "error",
     9 │         "noInvalidNewBuiltin": "error"
   
-  i Safe fix: Move and rename the rule.
+  i Safe fix: Move and rename the lint rule.
   
      5  5 │           "noConsoleLog": "error",
      6  6 │           "useSingleCaseStatement": "error",
@@ -118,7 +118,7 @@ transformed.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
 ```
 transformed.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to correctness/noInvalidBuiltinInstantiation.
+  ! This lint rule has been moved to correctness/noInvalidBuiltinInstantiation.
   
      6 │         "useSingleCaseStatement": "error",
      7 │         "useShorthandArrayType": "error",
@@ -127,7 +127,7 @@ transformed.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
      9 │         "noInvalidNewBuiltin": "error"
     10 │       }
   
-  i Safe fix: Move and rename the rule.
+  i Safe fix: Move and rename the lint rule.
   
      6  6 │           "useSingleCaseStatement": "error",
      7  7 │           "useShorthandArrayType": "error",
@@ -146,7 +146,7 @@ transformed.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
 ```
 transformed.json:9:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to correctness/noInvalidBuiltinInstantiation.
+  ! This lint rule has been moved to correctness/noInvalidBuiltinInstantiation.
   
      7 │         "useShorthandArrayType": "error",
      8 │         "noNewSymbol": "error",
@@ -155,7 +155,7 @@ transformed.json:9:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
     10 │       }
     11 │     }
   
-  i Safe fix: Move and rename the rule.
+  i Safe fix: Move and rename the lint rule.
   
      6  6 │           "useSingleCaseStatement": "error",
      7  7 │           "useShorthandArrayType": "error",
