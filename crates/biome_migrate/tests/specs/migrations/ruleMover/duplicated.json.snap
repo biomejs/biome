@@ -26,7 +26,7 @@ expression: duplicated.json
 ```
 duplicated.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been renamed to noInvalidBuiltinInstantiation.
+  ! This lint rule has been renamed to noInvalidBuiltinInstantiation.
   
     5 │       "correctness": {
   > 6 │         "noInvalidNewBuiltin": "on",
@@ -34,7 +34,7 @@ duplicated.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━
     7 │         "noInvalidBuiltinInstantiation": "on",
     8 │         "noUselessContinue": "on"
   
-  i Safe fix: Rename the rule.
+  i Safe fix: Rename the lint rule.
   
      4  4 │         
      5  5 │         "correctness": {
@@ -50,7 +50,7 @@ duplicated.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━
 ```
 duplicated.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to correctness/noUselessContinue.
+  ! This lint rule has been moved to correctness/noUselessContinue.
   
      9 │       },
     10 │       "complexity": {
@@ -59,7 +59,7 @@ duplicated.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
     12 │       }
     13 │     }
   
-  i Safe fix: Move and rename the rule.
+  i Safe fix: Move and rename the lint rule.
   
      9  9 │         },
     10 10 │         "complexity": {

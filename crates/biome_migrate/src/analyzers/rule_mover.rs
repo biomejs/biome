@@ -1,7 +1,10 @@
 use std::str::FromStr;
 
 use biome_analyze::{Ast, FixKind, QueryMatch, Rule, RuleDiagnostic, context::RuleContext};
-use biome_configuration::analyzer::{RuleGroup, RuleName};
+use biome_configuration::analyzer::{
+    RuleGroup, RuleName,
+    assist::{self, ActionName},
+};
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make;
@@ -21,7 +24,7 @@ declare_migration! {
     }
 }
 
-/// Rules that have been renamed.
+/// Linter rules that have been renamed.
 /// The first element of every pair is the old name of the rule.
 #[rustfmt::skip]
 const RULE_RENAMINGS: &[(&str, RuleName)] = &[
@@ -34,6 +37,11 @@ const RULE_RENAMINGS: &[(&str, RuleName)] = &[
     ("useSingleCaseStatement", RuleName::NoSwitchDeclarations),
 ];
 
+/// Assist actions that have been renamed.
+/// The first element of every pair is the old name of the action.
+#[rustfmt::skip]
+const ACTION_RENAMINGS: &[(&str, ActionName)] = &[];
+
 impl Rule for RuleMover {
     type Query = Ast<JsonMember>;
     type State = State;
@@ -42,11 +50,12 @@ impl Rule for RuleMover {
 
     fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node
-            .name()
-            .and_then(|name| name.inner_string_text())
-            .is_ok_and(|name| name.text() != "rules")
-        {
+        let member_name = node.name().and_then(|name| name.inner_string_text());
+        let is_linter_rules = member_name
+            .as_ref()
+            .is_ok_and(|name| name.text() == "rules");
+        let is_assist_actions = member_name.is_ok_and(|name| name.text() == "actions");
+        if !is_linter_rules && !is_assist_actions {
             return Box::default();
         }
         let Ok(AnyJsonValue::JsonObjectValue(rules)) = node.value() else {
@@ -60,39 +69,75 @@ impl Rule for RuleMover {
             let Ok(group_name) = group_elt.name().and_then(|name| name.inner_string_text()) else {
                 continue;
             };
-            let Ok(current_group) = RuleGroup::from_str(group_name.text()) else {
-                continue;
-            };
-            for rule_node in group_rules.json_member_list().into_iter().flatten() {
-                let Ok(rule_name) = rule_node.name().and_then(|name| name.inner_string_text())
-                else {
+            if is_linter_rules {
+                let Ok(current_group) = RuleGroup::from_str(group_name.text()) else {
                     continue;
                 };
-                let rule_name = rule_name.text();
-                if let Ok(new_rule) = RuleName::from_str(rule_name) {
-                    // TODO: remove the `useNamingConvention` exception,
-                    // once we have promoted the GraphQL `useNamingConvention` rule
-                    //
-                    // See https://github.com/biomejs/biome/issues/6018
-                    if new_rule.group() != current_group && rule_name != "useNamingConvention" {
+                for rule_node in group_rules.json_member_list().into_iter().flatten() {
+                    let Ok(rule_name) = rule_node.name().and_then(|name| name.inner_string_text())
+                    else {
+                        continue;
+                    };
+                    let rule_name = rule_name.text();
+                    if let Ok(new_rule) = RuleName::from_str(rule_name) {
+                        // TODO: remove the `useNamingConvention` exception,
+                        // once we have promoted the GraphQL `useNamingConvention` rule
+                        //
+                        // See https://github.com/biomejs/biome/issues/6018
+                        if new_rule.group() != current_group && rule_name != "useNamingConvention" {
+                            result.push(State {
+                                rule_node,
+                                new_rule_name: AnyRule::Lint(new_rule),
+                                old_group_name: Some(AnyGroup::Lint(current_group)),
+                                old_rule_name: None,
+                            });
+                        }
+                    } else if let Some((old_rule_name, new_rule)) = RULE_RENAMINGS
+                        .iter()
+                        .find(|(old_name, _)| old_name == &rule_name)
+                        .copied()
+                    {
                         result.push(State {
                             rule_node,
-                            new_rule,
-                            old_group: Some(current_group),
-                            old_rule_name: None,
+                            new_rule_name: AnyRule::Lint(new_rule),
+                            old_group_name: (new_rule.group() != current_group)
+                                .then_some(AnyGroup::Lint(current_group)),
+                            old_rule_name: Some(old_rule_name),
                         });
                     }
-                } else if let Some((old_rule_name, new_rule)) = RULE_RENAMINGS
-                    .iter()
-                    .find(|(old_name, _)| old_name == &rule_name)
-                    .copied()
-                {
-                    result.push(State {
-                        rule_node,
-                        new_rule,
-                        old_group: (new_rule.group() != current_group).then_some(current_group),
-                        old_rule_name: Some(old_rule_name),
-                    });
+                }
+            } else {
+                let Ok(current_group) = assist::RuleGroup::from_str(group_name.text()) else {
+                    continue;
+                };
+                for rule_node in group_rules.json_member_list().into_iter().flatten() {
+                    let Ok(rule_name) = rule_node.name().and_then(|name| name.inner_string_text())
+                    else {
+                        continue;
+                    };
+                    let rule_name = rule_name.text();
+                    if let Ok(new_rule) = ActionName::from_str(rule_name) {
+                        if new_rule.group() != current_group {
+                            result.push(State {
+                                rule_node,
+                                new_rule_name: AnyRule::Assist(new_rule),
+                                old_group_name: Some(AnyGroup::Assist(current_group)),
+                                old_rule_name: None,
+                            });
+                        }
+                    } else if let Some((old_rule_name, new_rule)) = ACTION_RENAMINGS
+                        .iter()
+                        .find(|(old_name, _)| old_name == &rule_name)
+                        .copied()
+                    {
+                        result.push(State {
+                            rule_node,
+                            new_rule_name: AnyRule::Assist(new_rule),
+                            old_group_name: (new_rule.group() != current_group)
+                                .then_some(AnyGroup::Assist(current_group)),
+                            old_rule_name: Some(old_rule_name),
+                        });
+                    }
                 }
             }
         }
@@ -100,21 +145,25 @@ impl Rule for RuleMover {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let rule_name = state.new_rule.as_str();
-        let new_group = state.new_rule.group();
-        let new_group_name = new_group.as_str();
-        let msg = if let Some(old_group) = state.old_group {
-            let action = if old_group == RuleGroup::Nursery {
+        let rule_kind = if matches!(state.new_rule_name, AnyRule::Lint(_)) {
+            "lint rule"
+        } else {
+            "assist action"
+        };
+        let new_rule_name = state.new_rule_name.as_str();
+        let msg = if let Some(old_group) = state.old_group_name {
+            let action = if old_group.as_str() == RuleGroup::Nursery.as_str() {
                 "promoted"
-            } else if new_group == RuleGroup::Nursery {
+            } else if state.new_rule_name.group().as_str() == RuleGroup::Nursery.as_str() {
                 "unpromoted"
             } else {
                 "moved"
             };
-            markup! { "This rule has been "{action}" to "<Emphasis>{new_group_name}"/"{rule_name}</Emphasis>"." }
+            let new_group_name = state.new_rule_name.group().as_str();
+            markup! { "This "{rule_kind}" has been "{action}" to "<Emphasis>{new_group_name}"/"{new_rule_name}</Emphasis>"." }
                 .to_owned()
         } else {
-            markup! { "This rule has been renamed to "<Emphasis>{rule_name}</Emphasis>"." }
+            markup! { "This "{rule_kind}" has been renamed to "<Emphasis>{new_rule_name}</Emphasis>"." }
                 .to_owned()
         };
         Some(
@@ -137,9 +186,9 @@ impl Rule for RuleMover {
         // If the rule is moved or renamed
         let rule_node = state.rule_node.clone();
         // Rename the rule
+        let new_rule_name = state.new_rule_name.as_str();
         let new_rule_node = if let Some(old_rule_name) = state.old_rule_name {
-            let new_name =
-                make::json_member_name(make::json_string_literal(state.new_rule.as_str()));
+            let new_name = make::json_member_name(make::json_string_literal(new_rule_name));
             let new_rule_node = rule_node.with_name(new_name);
             if let Some(value) = new_rule_node
                 .value()
@@ -156,7 +205,7 @@ impl Rule for RuleMover {
 
         // Update or create the group where the rule is moved to
         // If the group exists, then `new_group_range` will be the range of the group
-        let new_group_name = state.new_rule.group().as_str();
+        let new_group_name = state.new_rule_name.group().as_str();
         let (new_group_range, new_group_node) = if let Some(new_group) =
             rules.find_member(new_group_name)
         {
@@ -166,7 +215,6 @@ impl Rule for RuleMover {
             };
             let old_list = group_obj.json_member_list();
             let mut new_elements = Vec::with_capacity(old_list.len() + 1);
-            let new_rule_name = state.new_rule.as_str();
             let mut last_has_separator = false;
             let mut is_rule_migrated = false;
             for elt in old_list.elements() {
@@ -316,29 +364,72 @@ impl Rule for RuleMover {
         let new_rules_nodes = new_rules_elements.into_iter().map(|(node, _)| node);
         let new_rules_list = make::json_member_list(new_rules_nodes, new_rules_separators);
 
+        let rule_kind = if matches!(state.new_rule_name, AnyRule::Lint(_)) {
+            "lint rule"
+        } else {
+            "assist action"
+        };
+        let action_to_perform = if state.old_group_name.is_none() {
+            "Rename"
+        } else if state.old_rule_name.is_none() {
+            "Move"
+        } else {
+            "Move and rename"
+        };
         mutation.replace_node(old_rules_list, new_rules_list);
         Some(MigrationAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            if state.old_group.is_none() {
-                "Rename the rule."
-            } else if state.old_rule_name.is_none() {
-                "Move the rule."
-            } else {
-                "Move and rename the rule."
+            markup! {
+                {action_to_perform}" the "{rule_kind}"."
             },
             mutation,
         ))
     }
 }
 
-pub struct State {
+pub(crate) struct State {
     rule_node: JsonMember,
     /// Set if the rule is moved to a new group.
-    old_group: Option<RuleGroup>,
+    old_group_name: Option<AnyGroup>,
     /// Set if the rule is renamed.
     old_rule_name: Option<&'static str>,
-    new_rule: RuleName,
+    new_rule_name: AnyRule,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) enum AnyGroup {
+    Lint(RuleGroup),
+    Assist(assist::RuleGroup),
+}
+impl AnyGroup {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Lint(group) => group.as_str(),
+            Self::Assist(group) => group.as_str(),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) enum AnyRule {
+    Lint(RuleName),
+    Assist(ActionName),
+}
+impl AnyRule {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Lint(rule) => rule.as_str(),
+            Self::Assist(rule) => rule.as_str(),
+        }
+    }
+
+    fn group(self) -> AnyGroup {
+        match self {
+            Self::Lint(rule) => AnyGroup::Lint(rule.group()),
+            Self::Assist(rule) => AnyGroup::Assist(rule.group()),
+        }
+    }
 }
 
 fn transform_value(value: AnyJsonValue, old_rule_name: &'static str) -> Option<AnyJsonValue> {
