@@ -146,12 +146,25 @@ impl Projects {
     }
 
     /// Returns the maximum file size setting for the given project.
-    pub fn get_max_file_size(&self, project_key: ProjectKey) -> usize {
+    pub fn get_max_file_size(&self, project_key: ProjectKey, file_path: &Utf8Path) -> usize {
         let limit = self
             .0
             .pin()
             .get(&project_key)
-            .and_then(|data| data.settings.files.max_size)
+            .and_then(|data| {
+                data.settings
+                    .override_settings
+                    .patterns
+                    .first()
+                    .and_then(|pattern| {
+                        if pattern.is_file_included(file_path) {
+                            pattern.files.max_size
+                        } else {
+                            None
+                        }
+                    })
+                    .or(data.settings.files.max_size)
+            })
             .unwrap_or_default();
 
         usize::from(limit)
