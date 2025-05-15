@@ -177,22 +177,26 @@ fn parse_block_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
     }
     let m = p.start();
     parse_block_map_explicit_key(p);
-    parse_block_map_explicit_value(p);
+    // Value can be omitted in an explicit entry
+    parse_block_map_explicit_value(p).ok();
     Present(m.complete(p, YAML_BLOCK_MAP_EXPLICIT_ENTRY))
 }
 
 fn parse_block_map_explicit_key(p: &mut YamlParser) -> CompletedMarker {
     let m = p.start();
-    p.bump(QUESTION);
+    p.bump(T![?]);
     parse_block_indented(p).ok();
     m.complete(p, YAML_BLOCK_MAP_EXPLICIT_KEY)
 }
 
-fn parse_block_map_explicit_value(p: &mut YamlParser) -> CompletedMarker {
+fn parse_block_map_explicit_value(p: &mut YamlParser) -> ParsedSyntax {
+    if !p.at(T![:]) {
+        return Absent;
+    }
     let m = p.start();
-    p.expect(COLON);
+    p.bump(T![:]);
     parse_block_indented(p).ok();
-    m.complete(p, YAML_BLOCK_MAP_EXPLICIT_VALUE)
+    Present(m.complete(p, YAML_BLOCK_MAP_EXPLICIT_VALUE))
 }
 
 fn parse_block_indented(p: &mut YamlParser) -> ParsedSyntax {
@@ -225,7 +229,7 @@ fn parse_block_map_implicit_value(p: &mut YamlParser) -> CompletedMarker {
 }
 
 fn is_at_explicit_mapping_key(p: &mut YamlParser) -> bool {
-    p.at(QUESTION)
+    p.at(T![?])
 }
 
 fn maybe_at_implicit_mapping_key(p: &YamlParser) -> bool {
