@@ -2825,6 +2825,13 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"useAdjacentGetterSetter": {
+					"description": "Enforce that getters and setters for the same property are adjacent in class and object definitions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentObjectDefinition": {
 					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
 					"anyOf": [

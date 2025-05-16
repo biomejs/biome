@@ -1588,6 +1588,10 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
+	 * Enforce that getters and setters for the same property are adjacent in class and object definitions.
+	 */
+	useAdjacentGetterSetter?: RuleConfiguration_for_Null;
+	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
@@ -3481,6 +3485,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useExhaustiveSwitchCases"

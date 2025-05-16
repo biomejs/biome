@@ -302,6 +302,7 @@ pub type NoYodaExpression =
     <lint::style::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
 pub type OrganizeImports =
     <assist::source::organize_imports::OrganizeImports as biome_analyze::Rule>::Options;
+pub type UseAdjacentGetterSetter = < lint :: nursery :: use_adjacent_getter_setter :: UseAdjacentGetterSetter as biome_analyze :: Rule > :: Options ;
 pub type UseAdjacentOverloadSignatures = < lint :: suspicious :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures as biome_analyze :: Rule > :: Options ;
 pub type UseAltText = <lint::a11y::use_alt_text::UseAltText as biome_analyze::Rule>::Options;
 pub type UseAnchorContent =
