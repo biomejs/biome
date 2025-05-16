@@ -146,6 +146,9 @@ impl YamlSyntaxKind {
             BACKTICK => "`",
             AT => "@",
             EOF => "EOF",
+            NEWLINE => "NEWLINE",
+            INDENT => "indent",
+            DEDENT => "dedent",
             _ => return None,
         };
         Some(tok)

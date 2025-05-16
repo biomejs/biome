@@ -168,3 +168,72 @@ fn lex_incorrect_flow_key() {
         PLAIN_LITERAL:3,
     );
 }
+
+#[test]
+fn lex_indent_in_flow() {
+    assert_lex!(
+        YamlLexContext::FlowIn,
+        r#"1,
+    2, 3, 5,
+        [8, 9],
+    10"#,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        INDENT:5,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        WHITESPACE:1,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        WHITESPACE:1,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        INDENT:9,
+        L_BRACK:1,
+        PLAIN_LITERAL:1,
+        COMMA:1,
+        WHITESPACE:1,
+        PLAIN_LITERAL:1,
+        R_BRACK:1,
+        COMMA:1,
+        INDENT:5,
+        PLAIN_LITERAL:2,
+    );
+}
+
+#[test]
+fn lex_indent_in_block_sequence() {
+    assert_lex!(
+        YamlLexContext::BlockIn,
+        r#"
+-
+    -
+    -
+        -
+        -
+    -
+        -
+            -
+-"#,
+        NEWLINE:1,
+        DASH:1,
+        INDENT:5,
+        DASH:1,
+        NEWLINE:5,
+        DASH:1,
+        INDENT:9,
+        DASH:1,
+        NEWLINE:9,
+        DASH:1,
+        DEDENT:5,
+        DASH:1,
+        INDENT:9,
+        DASH:1,
+        INDENT:13,
+        DASH:1,
+        DEDENT:1,
+        DEDENT:0,
+        DEDENT:0,
+        DASH:1,
+    );
+}

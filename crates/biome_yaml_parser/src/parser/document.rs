@@ -10,6 +10,8 @@ use biome_yaml_syntax::{
     YamlSyntaxKind::{self, *},
 };
 
+use crate::lexer::YamlLexContext;
+
 use super::{YamlParser, block::parse_any_block_node, parse_error::expected_directive};
 
 #[derive(Default)]
