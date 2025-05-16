@@ -2841,6 +2841,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExplicitTestAssertions": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExplicitType": {
 					"description": "Enforce types in functions, methods, variables, and parameters.",
 					"anyOf": [
