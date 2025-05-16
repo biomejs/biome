@@ -163,9 +163,9 @@ const BUILTIN_NODE_MODULES: &[&str] = &[
 /// Returns `true` if `name` is a built-in Node.js module.
 ///
 /// ```
-/// use biome_js_analyze::globals::module::node::is_builtin_module;
+/// use biome_resolver::is_builtin_node_module;
 ///
-/// assert!(is_builtin_module(&"fs"));
+/// assert!(is_builtin_node_module(&"fs"));
 /// ```
 pub fn is_builtin_node_module(name: &str) -> bool {
     BUILTIN_NODE_MODULES.binary_search(&name).is_ok()
