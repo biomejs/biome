@@ -765,6 +765,10 @@ export interface OverridePattern {
 	 */
 	css?: CssConfiguration;
 	/**
+	 * Specific configuration for the filesystem
+	 */
+	files?: OverrideFilesConfiguration;
+	/**
 	 * Specific configuration for the Json language
 	 */
 	formatter?: OverrideFormatterConfiguration;
@@ -888,6 +892,12 @@ export interface OverrideAssistConfiguration {
 	 * if `false`, it disables the feature and the assist won't be executed. `true` by default
 	 */
 	enabled?: Bool;
+}
+export interface OverrideFilesConfiguration {
+	/**
+	 * File size limit in bytes
+	 */
+	maxSize?: MaxSize;
 }
 export interface OverrideFormatterConfiguration {
 	/**

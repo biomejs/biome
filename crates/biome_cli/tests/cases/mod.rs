@@ -19,6 +19,7 @@ mod linter_groups_plain;
 mod migrate_v2;
 mod overrides_formatter;
 mod overrides_linter;
+mod overrides_max_file_size;
 mod overrides_organize_imports;
 mod protected_files;
 mod reporter_github;

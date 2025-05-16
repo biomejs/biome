@@ -327,7 +327,7 @@ impl WorkspaceServer {
         let mut index = self.insert_source(source);
 
         let size = content.len();
-        let limit = self.projects.get_max_file_size(project_key);
+        let limit = self.projects.get_max_file_size(project_key, path.as_path());
 
         let syntax = if size > limit {
             Some(Err(FileTooLarge { size, limit }))
@@ -684,7 +684,9 @@ impl Workspace for WorkspaceServer {
         };
 
         let file_size = document.content.len();
-        let limit = self.projects.get_max_file_size(params.project_key);
+        let limit = self
+            .projects
+            .get_max_file_size(params.project_key, params.path.as_path());
         Ok(CheckFileSizeResult { file_size, limit })
     }
 
