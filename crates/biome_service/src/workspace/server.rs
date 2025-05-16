@@ -43,7 +43,7 @@ use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
     IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
 };
-use crate::workspace_watcher::WatcherSignalKind;
+use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
 use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
 
 use super::document::Document;
@@ -277,11 +277,39 @@ impl WorkspaceServer {
     }
 
     /// Opens the file and marks it as opened by the scanner.
-    pub(super) fn open_file_by_scanner(
+    pub(super) fn open_file_during_initial_scan(
         &self,
-        params: OpenFileParams,
+        project_key: ProjectKey,
+        path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError> {
-        self.open_file_internal(true, params)
+        self.open_file_internal(
+            OpenFileReason::InitialScan,
+            OpenFileParams {
+                project_key,
+                path: path.into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            },
+        )
+    }
+
+    /// Opens the file and marks it as opened by the scanner.
+    pub(super) fn open_file_by_watcher(
+        &self,
+        project_key: ProjectKey,
+        path: impl Into<BiomePath>,
+    ) -> Result<(), WorkspaceError> {
+        self.open_file_internal(
+            OpenFileReason::WatcherUpdate,
+            OpenFileParams {
+                project_key,
+                path: path.into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            },
+        )
     }
 
     #[tracing::instrument(level = "debug", skip(self, params), fields(
@@ -290,7 +318,7 @@ impl WorkspaceServer {
     ))]
     fn open_file_internal(
         &self,
-        opened_by_scanner: bool,
+        reason: OpenFileReason,
         params: OpenFileParams,
     ) -> Result<(), WorkspaceError> {
         let OpenFileParams {
@@ -351,6 +379,8 @@ impl WorkspaceServer {
             Some(Ok(parsed.any_parse))
         };
 
+        let opened_by_scanner = reason.is_opened_by_scanner();
+
         let documents = self.documents.pin();
         documents.compute(path.clone(), |current| {
             match current {
@@ -408,7 +438,7 @@ impl WorkspaceServer {
             }
         });
 
-        self.update_service_data(WatcherSignalKind::AddedOrChanged, &path)
+        self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path)
     }
 
     /// Retrieves the parser result for a given file.
@@ -600,7 +630,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match signal_kind {
-                WatcherSignalKind::AddedOrChanged => {
+                WatcherSignalKind::AddedOrChanged(_) => {
                     let parsed = self.get_parse(path)?;
                     self.project_layout
                         .insert_serialized_node_manifest(package_path, parsed);
@@ -619,7 +649,7 @@ impl WorkspaceServer {
     pub(super) fn update_module_graph(&self, signal_kind: WatcherSignalKind, paths: &[BiomePath]) {
         let no_paths: &[BiomePath] = &[];
         let (added_or_changed_paths, removed_paths) = match signal_kind {
-            WatcherSignalKind::AddedOrChanged => {
+            WatcherSignalKind::AddedOrChanged(_) => {
                 let documents = self.documents.pin();
                 let mut added_or_changed_paths = Vec::with_capacity(paths.len());
                 for path in paths {
@@ -663,7 +693,14 @@ impl WorkspaceServer {
 
         self.update_module_graph(signal_kind, &[path]);
 
-        let _ = self.notification_tx.send(ServiceDataNotification::Updated);
+        match signal_kind {
+            WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan) => {
+                // We'll send a single signal at the end of the scan.
+            }
+            _ => {
+                let _ = self.notification_tx.send(ServiceDataNotification::Updated);
+            }
+        }
 
         Ok(())
     }
@@ -788,7 +825,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        self.open_file_internal(false, params)
+        self.open_file_internal(OpenFileReason::ClientRequest, params)
     }
 
     fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
@@ -816,14 +853,11 @@ impl Workspace for WorkspaceServer {
         if params.scan_kind.is_none() {
             let manifest = path.join("package.json");
             if self.fs.path_exists(&manifest) {
-                self.open_file_by_scanner(OpenFileParams {
-                    project_key: params.project_key,
-                    path: BiomePath::from(manifest.clone()),
-                    content: FileContent::FromServer,
-                    document_file_source: None,
-                    persist_node_cache: false,
-                })?;
-                self.update_project_layout(WatcherSignalKind::AddedOrChanged, &manifest)?;
+                self.open_file_during_initial_scan(params.project_key, manifest.clone())?;
+                self.update_project_layout(
+                    WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan),
+                    &manifest,
+                )?;
             }
             return Ok(ScanProjectFolderResult {
                 diagnostics: Vec::new(),
@@ -856,6 +890,8 @@ impl Workspace for WorkspaceServer {
         }
 
         let result = self.scan(params.project_key, &path, params.scan_kind)?;
+
+        let _ = self.notification_tx.send(ServiceDataNotification::Updated);
 
         Ok(ScanProjectFolderResult {
             diagnostics: result.diagnostics,
@@ -1060,7 +1096,10 @@ impl Workspace for WorkspaceServer {
             .insert(path.clone().into(), document)
             .ok_or_else(WorkspaceError::not_found)?;
 
-        self.update_service_data(WatcherSignalKind::AddedOrChanged, &path)
+        self.update_service_data(
+            WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
+            &path,
+        )
     }
 
     /// Closes a file that is opened in the workspace.

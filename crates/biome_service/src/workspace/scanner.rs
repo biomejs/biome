@@ -12,7 +12,7 @@ use super::server::WorkspaceServer;
 use super::{FeatureName, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
-use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
+use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
@@ -320,13 +320,8 @@ impl TraversalContext for ScanContext<'_> {
 /// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file(ctx: &ScanContext, path: &BiomePath) {
     match catch_unwind(move || {
-        ctx.workspace.open_file_by_scanner(OpenFileParams {
-            project_key: ctx.project_key,
-            path: path.clone(),
-            content: FileContent::FromServer,
-            document_file_source: None,
-            persist_node_cache: false,
-        })
+        ctx.workspace
+            .open_file_during_initial_scan(ctx.project_key, path.clone())
     }) {
         Ok(Ok(())) => {}
         Ok(Err(err)) => {
