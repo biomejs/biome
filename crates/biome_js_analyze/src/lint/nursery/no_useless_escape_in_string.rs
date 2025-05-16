@@ -174,6 +174,10 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
                         }
                     }
                     _ => {
+                        // In template literals, \${ is a valid escape for producing a literal ${
+                        if quote == b'`' && c == b'$' && (matches!(it.next(), Some((_, b'{')))) {
+                            return None;
+                        }
                         // The quote can be escaped
                         if c != quote {
                             return Some(i);

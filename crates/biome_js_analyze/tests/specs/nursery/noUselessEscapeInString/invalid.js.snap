@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -9,7 +10,9 @@ var s = {
     '\"': "\'",
     "abc\defg": ` test ${1} \a` /*after*/,
     // A test with unicode characters that take more than one byte
-    key: "😀\😀"
+    key: "😀\😀",
+    // https://github.com/biomejs/biome/issues/6039
+    templateLiterals: `\$x`
 };
 
 ```
@@ -107,18 +110,18 @@ invalid.js:4:10 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━�
   > 4 │     "abc\defg": ` test ${1} \a` /*after*/,
       │          ^
     5 │     // A test with unicode characters that take more than one byte
-    6 │     key: "😀\😀"
+    6 │     key: "😀\😀",
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
   i Safe fix: Unescape the character.
   
-    2 2 │       '\a': /*before*/ "\a" /*after*/,
-    3 3 │       '\"': "\'",
-    4   │ - ····"abc\defg":·`·test·${1}·\a`·/*after*/,
-      4 │ + ····"abcdefg":·`·test·${1}·\a`·/*after*/,
-    5 5 │       // A test with unicode characters that take more than one byte
-    6 6 │       key: "😀\😀"
+     2  2 │       '\a': /*before*/ "\a" /*after*/,
+     3  3 │       '\"': "\'",
+     4    │ - ····"abc\defg":·`·test·${1}·\a`·/*after*/,
+        4 │ + ····"abcdefg":·`·test·${1}·\a`·/*after*/,
+     5  5 │       // A test with unicode characters that take more than one byte
+     6  6 │       key: "😀\😀",
   
 
 ```
@@ -133,7 +136,7 @@ invalid.js:4:30 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━�
   > 4 │     "abc\defg": ` test ${1} \a` /*after*/,
       │                              ^
     5 │     // A test with unicode characters that take more than one byte
-    6 │     key: "😀\😀"
+    6 │     key: "😀\😀",
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
@@ -151,16 +154,37 @@ invalid.js:6:13 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━�
   
     4 │     "abc\defg": ` test ${1} \a` /*after*/,
     5 │     // A test with unicode characters that take more than one byte
-  > 6 │     key: "😀\😀"
+  > 6 │     key: "😀\😀",
       │              ^^
-    7 │ };
-    8 │ 
+    7 │     // https://github.com/biomejs/biome/issues/6039
+    8 │     templateLiterals: `\$x`
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
   i Safe fix: Unescape the character.
   
-    6 │ ····key:·"😀\😀"
-      │             -   
+    6 │ ····key:·"😀\😀",
+      │             -    
+
+```
+
+```
+invalid.js:8:25 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+     6 │     key: "😀\😀",
+     7 │     // https://github.com/biomejs/biome/issues/6039
+   > 8 │     templateLiterals: `\$x`
+       │                         ^
+     9 │ };
+    10 │ 
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    8 │ ····templateLiterals:·`\$x`
+      │                        -   
 
 ```
