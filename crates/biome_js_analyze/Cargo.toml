@@ -28,6 +28,7 @@ biome_jsdoc_comment      = { workspace = true }
 biome_module_graph       = { workspace = true }
 biome_package            = { workspace = true }
 biome_project_layout     = { workspace = true }
+biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }

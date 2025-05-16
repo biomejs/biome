@@ -1,7 +1,7 @@
 /// Sorted array of Node builtin modules
 ///
 /// Source: <https://github.com/inspect-js/is-core-module/blob/8317b311856a61935d7257ad5f31f9b0cfd13b5f/core.json#L1-L158>
-pub const BUILTIN_MODULES: &[&str] = &[
+const BUILTIN_NODE_MODULES: &[&str] = &[
     "_debug_agent",
     "_debugger",
     "_http_agent",
@@ -160,20 +160,20 @@ pub const BUILTIN_MODULES: &[&str] = &[
     "zlib",
 ];
 
-/// Returns `true` if `name` is a Node builtin module.
+/// Returns `true` if `name` is a built-in Node.js module.
 ///
 /// ```
-/// use biome_js_analyze::globals::module::node::is_builtin_module;
+/// use biome_resolver::is_builtin_node_module;
 ///
-/// assert!(is_builtin_module(&"fs"));
+/// assert!(is_builtin_node_module(&"fs"));
 /// ```
-pub fn is_builtin_module(name: &str) -> bool {
-    BUILTIN_MODULES.binary_search(&name).is_ok()
+pub fn is_builtin_node_module(name: &str) -> bool {
+    BUILTIN_NODE_MODULES.binary_search(&name).is_ok()
 }
 
 #[test]
 fn test_order() {
-    for items in BUILTIN_MODULES.windows(2) {
+    for items in BUILTIN_NODE_MODULES.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

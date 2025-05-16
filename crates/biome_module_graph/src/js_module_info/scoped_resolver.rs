@@ -6,10 +6,11 @@ use std::{
 
 use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ModuleId, Resolvable, ResolvedPath,
-    ResolvedTypeData, ResolvedTypeId, ScopeId, Type, TypeData, TypeId, TypeImportQualifier,
-    TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ModuleId, Resolvable, ResolvedTypeData,
+    ResolvedTypeId, ScopeId, Type, TypeData, TypeId, TypeImportQualifier, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
+use biome_resolver::ResolvedPath;
 use biome_rowan::{AstNode, Text};
 use rustc_hash::FxHashMap;
 

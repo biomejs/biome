@@ -8,10 +8,11 @@ use biome_deserialize::{
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
+use biome_resolver::is_builtin_node_module;
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::{globals::is_node_builtin_module, services::manifest::Manifest};
+use crate::services::manifest::Manifest;
 
 declare_lint_rule! {
     /// Disallow the use of dependencies that aren't specified in the `package.json`.
@@ -236,7 +237,7 @@ impl Rule for NoUndeclaredDependencies {
             // See https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name
             || ctx.name() == Some(package_name)
             // ignore Node.js builtin modules
-            || is_node_builtin_module(package_name)
+            || is_builtin_node_module(package_name)
             // Ignore `bun` import
             || package_name == "bun"
         {

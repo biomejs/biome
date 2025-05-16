@@ -1,44 +1,38 @@
 //! Implementation of the [FileSystem] and related traits for the underlying OS filesystem
-use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
+
+use std::env::temp_dir;
+use std::fs::{FileType, Metadata};
+use std::process::Command;
+use std::{
+    env, fs,
+    io::{self, Read, Seek, Write},
+    mem,
+};
+
+use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
+use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
+use path_absolutize::Absolutize;
+use rayon::{Scope, scope};
+use tracing::instrument;
+
+use crate::expand_symbolic_link;
 use crate::fs::OpenOptions;
-use crate::normalize_path;
 use crate::{
     BiomePath, FileSystem, MemoryFileSystem,
     fs::{TraversalContext, TraversalScope},
 };
-use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
-use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
-use oxc_resolver::{FsResolution, ResolveError, ResolveOptions, Resolver};
-use path_absolutize::Absolutize;
-use rayon::{Scope, scope};
-use std::env::temp_dir;
-use std::fs::{FileType, Metadata};
-use std::panic::AssertUnwindSafe;
-use std::process::Command;
-use std::{
-    env, fs,
-    io::{self, ErrorKind as IoErrorKind, Read, Seek, Write},
-    mem,
-};
-use tracing::instrument;
 
-const MAX_SYMLINK_DEPTH: u8 = 3;
+use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 
 /// Implementation of [FileSystem] that directly calls through to the underlying OS
 pub struct OsFileSystem {
     pub working_directory: Option<Utf8PathBuf>,
-    pub configuration_resolver: AssertUnwindSafe<Resolver>,
 }
 
 impl OsFileSystem {
     pub fn new(working_directory: Utf8PathBuf) -> Self {
         Self {
             working_directory: Some(working_directory),
-            configuration_resolver: AssertUnwindSafe(Resolver::new(ResolveOptions {
-                condition_names: vec!["node".to_string(), "import".to_string()],
-                extensions: vec![".json".to_string(), ".jsonc".to_string()],
-                ..ResolveOptions::default()
-            })),
         }
     }
 }
@@ -48,14 +42,7 @@ impl Default for OsFileSystem {
         let working_directory = env::current_dir()
             .map(|p| Utf8PathBuf::from_path_buf(p).expect("To be a UTF-8 path"))
             .ok();
-        Self {
-            working_directory,
-            configuration_resolver: AssertUnwindSafe(Resolver::new(ResolveOptions {
-                condition_names: vec!["node".to_string(), "import".to_string()],
-                extensions: vec![".json".to_string(), ".jsonc".to_string()],
-                ..ResolveOptions::default()
-            })),
-        }
+        Self { working_directory }
     }
 }
 
@@ -111,14 +98,6 @@ impl FileSystem for OsFileSystem {
 
     fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf> {
         path.read_link_utf8()
-    }
-
-    fn resolve_configuration(
-        &self,
-        specifier: &str,
-        path: &Utf8Path,
-    ) -> Result<FsResolution, ResolveError> {
-        self.configuration_resolver.resolve(path, specifier)
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
@@ -310,8 +289,13 @@ fn handle_any_file<'scope>(
         if !ctx.can_handle(&BiomePath::new(path.clone())) {
             return;
         }
-        let Ok((target_path, target_file_type)) = expand_symbolic_link(path.clone(), ctx) else {
-            return;
+
+        let (target_path, target_file_type) = match expand_symbolic_link(&path) {
+            Ok((target_path, target_file_type)) => (target_path, target_file_type),
+            Err(error) => {
+                ctx.push_diagnostic(error);
+                return;
+            }
         };
 
         if !ctx.interner().intern_path(target_path.clone()) {
@@ -383,86 +367,6 @@ fn handle_any_file<'scope>(
     }));
 }
 
-/// Indicates a symbolic link could not be expanded.
-///
-/// Has no fields, since the diagnostics are already generated inside
-/// [follow_symbolic_link()] and the caller doesn't need to do anything except
-/// an early return.
-struct SymlinkExpansionError;
-
-/// Expands symlinks by recursively following them up to [MAX_SYMLINK_DEPTH].
-///
-/// ## Returns
-///
-/// Returns a tuple where the first argument is the target path being pointed to
-/// and the second argument is the target file type.
-fn expand_symbolic_link(
-    mut path: Utf8PathBuf,
-    ctx: &dyn TraversalContext,
-) -> Result<(Utf8PathBuf, FileType), SymlinkExpansionError> {
-    let mut symlink_depth = 0;
-    loop {
-        symlink_depth += 1;
-        if symlink_depth > MAX_SYMLINK_DEPTH {
-            let path = path.to_string();
-            ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
-                path: path.clone(),
-                error_kind: FsErrorKind::DeeplyNestedSymlinkExpansion,
-                severity: Severity::Warning,
-                source: None,
-            }));
-            return Err(SymlinkExpansionError);
-        }
-
-        let (target_path, target_file_type) = follow_symlink(&path, ctx)?;
-
-        if target_file_type.is_symlink() {
-            path = target_path;
-            continue;
-        }
-
-        return Ok((target_path, target_file_type));
-    }
-}
-
-fn follow_symlink(
-    path: &Utf8Path,
-    ctx: &dyn TraversalContext,
-) -> Result<(Utf8PathBuf, FileType), SymlinkExpansionError> {
-    tracing::info!("Translating symlink: {path:?}");
-
-    let target_path = path.read_link_utf8().map_err(|err| {
-        ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
-        SymlinkExpansionError
-    })?;
-
-    // Make sure relative symlinks are resolved:
-    let target_path = path
-        .parent()
-        .map(|parent_dir| normalize_path(&parent_dir.join(&target_path)))
-        .unwrap_or(target_path);
-
-    let target_file_type = match fs::symlink_metadata(&target_path) {
-        Ok(meta) => meta.file_type(),
-        Err(err) => {
-            if err.kind() == IoErrorKind::NotFound {
-                let path = path.to_string();
-                ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
-                    path: path.clone(),
-                    error_kind: FsErrorKind::DereferencedSymlink,
-                    severity: Severity::Warning,
-                    source: Some(Error::from(IoError::from(err))),
-                }));
-            } else {
-                ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
-            }
-            return Err(SymlinkExpansionError);
-        }
-    };
-
-    Ok((target_path, target_file_type))
-}
-
 fn path_kind_from_metadata(
     metadata: io::Result<Metadata>,
     path: &Utf8Path,
@@ -470,10 +374,10 @@ fn path_kind_from_metadata(
     match metadata {
         Ok(metadata) => {
             let is_symlink = metadata.is_symlink();
-            if metadata.is_file() {
-                Ok(PathKind::File { is_symlink })
-            } else if metadata.is_dir() {
+            if metadata.is_dir() {
                 Ok(PathKind::Directory { is_symlink })
+            } else if metadata.is_file() || is_symlink {
+                Ok(PathKind::File { is_symlink })
             } else {
                 Err(FileSystemDiagnostic {
                     path: path.to_string(),

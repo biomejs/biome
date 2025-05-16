@@ -1,11 +1,12 @@
 use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Diagnostic, Error, MessageAndDescription};
 use biome_fs::FileSystemDiagnostic;
 use biome_grit_patterns::CompileError;
+use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::SyntaxError;
+use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
@@ -62,15 +63,16 @@ impl From<SyntaxError> for PluginDiagnostic {
 }
 
 impl PluginDiagnostic {
-    pub fn cant_resolve(path: impl Display, source: Option<ResolveError>) -> Self {
+    pub fn cant_resolve(path: Utf8PathBuf, kind: Option<ResolveError>) -> Self {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(
                 markup! {
-                   "Failed to resolve the plugin manifest from "<Emphasis>{path}</Emphasis>
+                   "Failed to resolve the plugin manifest from "
+                   <Emphasis>{path.to_string()}</Emphasis>
                 }
                 .to_owned(),
             ),
-            source: source.map(Error::from),
+            source: kind.map(|kind| ResolveErrorDiagnostic::new(kind, path).into()),
         })
     }
 

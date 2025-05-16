@@ -2,10 +2,10 @@ use crate::editorconfig::EditorConfigErrorKind;
 use biome_console::fmt::Display;
 use biome_console::{MarkupBuf, markup};
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
+use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::{SyntaxError, TextRange};
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
@@ -135,18 +135,6 @@ impl BiomeDiagnostic {
     pub fn non_root_configuration(path: &Utf8Path) -> Self {
         Self::NonRootConfiguration(NonRootConfiguration {
             path: path.to_string(),
-        })
-    }
-
-    pub fn cant_resolve(path: impl Display, source: oxc_resolver::ResolveError) -> Self {
-        Self::CantResolve(CantResolve {
-            message: MessageAndDescription::from(
-                markup! {
-                   "Failed to resolve the configuration from "{{path}}
-                }
-                .to_owned(),
-            ),
-            source: Some(Error::from(ResolveError::from(source))),
         })
     }
 }
@@ -308,6 +296,32 @@ pub struct CantResolve {
     #[serde(skip)]
     #[source]
     source: Option<Error>,
+
+    #[verbose_advice]
+    verbose_advice: ConfigurationAdvices,
+}
+
+impl CantResolve {
+    pub fn new(path: Utf8PathBuf, source: ResolveError) -> Self {
+        Self {
+            message: MessageAndDescription::from(
+                markup! {
+                   "Failed to resolve the configuration from "
+                   <Emphasis>{path.to_string()}</Emphasis>
+                }
+                .to_owned(),
+            ),
+            source: Some(Error::from(ResolveErrorDiagnostic::new(source, path))),
+            verbose_advice: ConfigurationAdvices::default(),
+        }
+    }
+
+    pub fn with_verbose_advice(mut self, messsage: impl Display) -> Self {
+        self.verbose_advice
+            .messages
+            .push(markup! {{messsage}}.to_owned());
+        self
+    }
 }
 
 #[derive(Debug, Diagnostic, Deserialize, Serialize)]

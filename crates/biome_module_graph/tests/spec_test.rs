@@ -56,7 +56,6 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
     project_layout.insert_node_manifest(
         "/".into(),
         PackageJson::new("frontend")
-            .with_path("/package.json")
             .with_version("0.0.0".into())
             .with_dependencies(Dependencies::from([(
                 "shared".into(),
@@ -67,7 +66,6 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
     project_layout.insert_node_manifest(
         "/node_modules/shared".into(),
         PackageJson::new("shared")
-            .with_path("/node_modules/shared/package.json")
             .with_exports(JsonString::from("./dist/index.js"))
             .with_version("0.0.1".into()),
     );
@@ -156,7 +154,6 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         )
         .into_deserialized()
         .expect("package.json must parse")
-        .with_path(path)
     });
 
     project_layout.insert_node_manifest(format!("{fixtures_path}/shared").into(), {
@@ -169,7 +166,6 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         )
         .into_deserialized()
         .expect("package.json must parse")
-        .with_path(path)
     });
 
     project_layout.insert_node_manifest(
@@ -186,7 +182,6 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
             )
             .into_deserialized()
             .expect("package.json must parse")
-            .with_path_and_canonicalized_path(path, format!("{fixtures_path}/shared/package.json"))
         },
     );
 
@@ -350,9 +345,7 @@ fn test_resolve_exports() {
     let project_layout = ProjectLayout::default();
     project_layout.insert_node_manifest(
         "/".into(),
-        PackageJson::new("frontend")
-            .with_path("/package.json")
-            .with_version("0.0.0".into()),
+        PackageJson::new("frontend").with_version("0.0.0".into()),
     );
 
     let added_paths = [
