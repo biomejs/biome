@@ -1580,7 +1580,7 @@ export interface Nursery {
 	/**
 	 * Enforce that getters and setters for the same property are adjacent in class and object definitions.
 	 */
-	useAdjacentGetterSetter?: RuleConfiguration_for_UseAdjacentGetterSetterOptions;
+	useAdjacentGetterSetter?: RuleConfiguration_for_Null;
 	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
@@ -2373,9 +2373,6 @@ export type RuleConfiguration_for_NoRestrictedElementsOptions =
 export type RuleConfiguration_for_NoSecretsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoSecretsOptions;
-export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
@@ -2627,16 +2624,6 @@ export interface RuleWithOptions_for_NoSecretsOptions {
 	 * Rule's options
 	 */
 	options: NoSecretsOptions;
-}
-export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseAdjacentGetterSetterOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	/**
@@ -2976,12 +2963,6 @@ export interface NoSecretsOptions {
 	 */
 	entropyThreshold?: number;
 }
-export interface UseAdjacentGetterSetterOptions {
-	/**
-	 * Specifies the expected ordering of getters and setters.
-	 */
-	order?: Order;
-}
 export interface UseConsistentObjectDefinitionOptions {
 	/**
 	 * The preferred syntax to enforce.
@@ -3151,7 +3132,6 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	stableResult?: StableHookResult;
 }
 export type CustomRestrictedElements = Record<string, string>;
-export type Order = "anyOrder" | "getBeforeSet" | "setBeforeGet";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;

@@ -2828,7 +2828,7 @@
 				"useAdjacentGetterSetter": {
 					"description": "Enforce that getters and setters for the same property are adjacent in class and object definitions.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseAdjacentGetterSetterConfiguration" },
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2954,25 +2954,6 @@
 				}
 			},
 			"additionalProperties": false
-		},
-		"Order": {
-			"oneOf": [
-				{
-					"description": "Property accessors can be in any order.",
-					"type": "string",
-					"enum": ["anyOrder"]
-				},
-				{
-					"description": "Getter should come before setter.",
-					"type": "string",
-					"enum": ["getBeforeSet"]
-				},
-				{
-					"description": "Setter should come before getter.",
-					"type": "string",
-					"enum": ["setBeforeGet"]
-				}
-			]
 		},
 		"OverrideAssistConfiguration": {
 			"type": "object",
@@ -3786,21 +3767,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UndeclaredVariablesOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseAdjacentGetterSetterOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseAdjacentGetterSetterOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -5331,23 +5297,6 @@
 					"type": "boolean"
 				}
 			}
-		},
-		"UseAdjacentGetterSetterConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseAdjacentGetterSetterOptions" }
-			]
-		},
-		"UseAdjacentGetterSetterOptions": {
-			"type": "object",
-			"properties": {
-				"order": {
-					"description": "Specifies the expected ordering of getters and setters.",
-					"default": "anyOrder",
-					"allOf": [{ "$ref": "#/definitions/Order" }]
-				}
-			},
-			"additionalProperties": false
 		},
 		"UseComponentExportOnlyModulesConfiguration": {
 			"anyOf": [

@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 assertion_line: 134
-expression: invalid-get-before-set.ts
+expression: invalid.ts
 ---
 # Input
 ```ts
@@ -54,7 +54,7 @@ declare module 'module' {
 
 # Diagnostics
 ```
-invalid-get-before-set.ts:2:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   
@@ -77,7 +77,7 @@ invalid-get-before-set.ts:2:9 lint/nursery/useAdjacentGetterSetter ━━━━�
 ```
 
 ```
-invalid-get-before-set.ts:6:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:6:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   
@@ -101,7 +101,7 @@ invalid-get-before-set.ts:6:9 lint/nursery/useAdjacentGetterSetter ━━━━�
 ```
 
 ```
-invalid-get-before-set.ts:13:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   
@@ -124,7 +124,7 @@ invalid-get-before-set.ts:13:9 lint/nursery/useAdjacentGetterSetter ━━━━
 ```
 
 ```
-invalid-get-before-set.ts:17:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:17:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   
@@ -148,7 +148,7 @@ invalid-get-before-set.ts:17:9 lint/nursery/useAdjacentGetterSetter ━━━━
 ```
 
 ```
-invalid-get-before-set.ts:26:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:26:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   
@@ -172,7 +172,7 @@ invalid-get-before-set.ts:26:9 lint/nursery/useAdjacentGetterSetter ━━━━
 ```
 
 ```
-invalid-get-before-set.ts:27:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:27:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   
@@ -195,7 +195,7 @@ invalid-get-before-set.ts:27:9 lint/nursery/useAdjacentGetterSetter ━━━━
 ```
 
 ```
-invalid-get-before-set.ts:33:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:33:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   
@@ -219,7 +219,7 @@ invalid-get-before-set.ts:33:9 lint/nursery/useAdjacentGetterSetter ━━━━
 ```
 
 ```
-invalid-get-before-set.ts:34:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:34:9 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   
@@ -242,7 +242,7 @@ invalid-get-before-set.ts:34:9 lint/nursery/useAdjacentGetterSetter ━━━━
 ```
 
 ```
-invalid-get-before-set.ts:40:13 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:40:13 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   
@@ -266,7 +266,7 @@ invalid-get-before-set.ts:40:13 lint/nursery/useAdjacentGetterSetter ━━━�
 ```
 
 ```
-invalid-get-before-set.ts:42:13 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:42:13 lint/nursery/useAdjacentGetterSetter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Getter should be defined right before the setter.
   

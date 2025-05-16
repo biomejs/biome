@@ -2,7 +2,6 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::static_value::StaticValue;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsObjectMember, AnyJsObjectMemberName,
@@ -13,32 +12,13 @@ use biome_js_syntax::{
     TsSetterSignatureTypeMember, TsTypeMemberList,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
-use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
     /// Enforce that getters and setters for the same property are adjacent in class and object definitions.
     ///
     /// When defining a property in a class or object, it's common to have both a getter and a setter.
-    /// This rule enforces that accessors for the same property are adjacent to each other, making the code
-    /// more maintainable and easier to read. Additionally, this rule can enforce a specific order of the
-    /// accessor pair.
-    ///
-    /// ## Options
-    ///
-    /// Use the options to specify the ordering of the accessors.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "order": "getBeforeSet"
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// `order`: Specifies the expected ordering of getters and setters:
-    ///   - `"anyOrder"` (default): Accessors for the same property must be adjacent, but can be in any order
-    ///   - `"getBeforeSet"`: Getter must come before setter
-    ///   - `"setBeforeGet"`: Setter must come before getter
+    /// This rule enforces that getter is defined right before the setter,
+    /// making the code more maintainable and easier to read.
     ///
     /// ## Examples
     ///
@@ -46,7 +26,7 @@ declare_lint_rule! {
     ///
     /// Name getter and setter are not adjacent:
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js,expect_diagnostic
     /// class User {
     ///   get name() { return this._name; }
     ///   constructor() {}
@@ -54,9 +34,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// Getter should go before the setter when configured with order "getBeforeSet":
+    /// Getter should go before the setter.
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js,expect_diagnostic
     /// const user = {
     ///   set name(value) { this._name = value; },
     ///   get name() { return this._name; }
@@ -65,7 +45,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js,use_options
+    /// ```js
     /// class User {
     ///   get name() { return this._name; }
     ///   set name(value) { this._name = value; }
@@ -90,7 +70,7 @@ impl Rule for UseAdjacentGetterSetter {
     type Query = Ast<AnySetter>;
     type State = MatchingPropertyAccessors;
     type Signals = Option<Self::State>;
-    type Options = UseAdjacentGetterSetterOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -102,75 +82,31 @@ impl Rule for UseAdjacentGetterSetter {
             .abs_diff(accessors.setter.position)
             == 1;
 
-        if !is_adjacent {
-            return Some(accessors);
+        if !is_adjacent || accessors.getter.position > accessors.setter.position {
+            Some(accessors)
+        } else {
+            None
         }
-
-        if ctx.options().order == Order::GetBeforeSet
-            && accessors.getter.position > accessors.setter.position
-        {
-            return Some(accessors);
-        }
-
-        if ctx.options().order == Order::SetBeforeGet
-            && accessors.getter.position < accessors.setter.position
-        {
-            return Some(accessors);
-        }
-
-        None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, accessors: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, accessors: &Self::State) -> Option<RuleDiagnostic> {
         let getter_name = accessors.getter.property_accessor.name().ok()?;
         let setter_name = accessors.setter.property_accessor.name().ok()?;
-        match ctx.options().order {
-            Order::AnyOrder => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    getter_name.range(),
-                    markup! {
-                        "Getter and setter should be defined next to each other."
-                    },
-                )
-                .detail(
-                    setter_name.range(),
-                    markup! {
-                        "Move this setter next to the getter."
-                    },
-                ),
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                getter_name.range(),
+                markup! {
+                    "Getter should be defined right before the setter."
+                },
+            )
+            .detail(
+                setter_name.range(),
+                markup! {
+                    "Move this setter after the getter."
+                },
             ),
-            Order::GetBeforeSet => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    getter_name.range(),
-                    markup! {
-                        "Getter should be defined right before the setter."
-                    },
-                )
-                .detail(
-                    setter_name.range(),
-                    markup! {
-                        "Move this setter after the getter."
-                    },
-                ),
-            ),
-            Order::SetBeforeGet => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    getter_name.range(),
-                    markup! {
-                        "Getter should be defined right after the setter."
-                    },
-                )
-                .detail(
-                    setter_name.range(),
-                    markup! {
-                        "Move this setter before the getter."
-                    },
-                ),
-            ),
-        }
+        )
     }
 }
 
@@ -551,25 +487,4 @@ impl AnySetter {
             ),
         }
     }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseAdjacentGetterSetterOptions {
-    /// Specifies the expected ordering of getters and setters.
-    pub order: Order,
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum Order {
-    /// Property accessors can be in any order.
-    #[default]
-    AnyOrder,
-    /// Getter should come before setter.
-    GetBeforeSet,
-    /// Setter should come before getter.
-    SetBeforeGet,
 }
