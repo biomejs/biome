@@ -874,7 +874,7 @@ impl WorkspaceSettingsHandle {
     }
 
     /// Resolve the formatting context for the given language
-    #[instrument(level = "debug", skip(file_source))]
+    #[instrument(level = "debug", skip(self, file_source))]
     pub fn format_options<L>(
         &self,
         path: &BiomePath,
