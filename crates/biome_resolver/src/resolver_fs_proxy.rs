@@ -10,10 +10,10 @@ pub enum PathInfo {
     Directory,
     File,
     Symlink {
-        /// The normalized target of the symlink.
+        /// The canonicalized target of the symlink.
         ///
         /// Accessing this target is guaranteed to not return another symlink.
-        normalized_target: Utf8PathBuf,
+        canonicalized_target: Utf8PathBuf,
     },
 }
 
@@ -95,7 +95,9 @@ impl<Fs: FileSystem> ResolverFsProxy for Fs {
         match self.symlink_path_kind(path) {
             Ok(PathKind::Directory { .. }) => Ok(PathInfo::Directory),
             Ok(PathKind::File { is_symlink }) if is_symlink => match expand_symbolic_link(path) {
-                Ok((normalized_target, _)) => Ok(PathInfo::Symlink { normalized_target }),
+                Ok((normalized_target, _)) => Ok(PathInfo::Symlink {
+                    canonicalized_target: normalized_target,
+                }),
                 Err(_error) => Err(ResolveError::BrokenSymlink),
             },
             Ok(PathKind::File { .. }) => Ok(PathInfo::File),

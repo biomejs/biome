@@ -1,7 +1,7 @@
 #![deny(clippy::use_self)]
 
-mod constants;
 mod errors;
+mod node_builtins;
 mod resolver_fs_proxy;
 
 use std::{ops::Deref, sync::Arc};
@@ -10,9 +10,9 @@ use biome_fs::normalize_path;
 use biome_json_value::{JsonObject, JsonValue};
 use biome_package::{PackageJson, TsConfigJson};
 use camino::{Utf8Path, Utf8PathBuf};
-use constants::NODE_BUILT_INS;
 
 pub use errors::*;
+pub use node_builtins::is_builtin_node_module;
 pub use resolver_fs_proxy::*;
 
 /// Resolves the given `specifier` from the given `base_dir`.
@@ -20,6 +20,12 @@ pub use resolver_fs_proxy::*;
 /// The `base_dir` is used for resolving relative specifiers, such as
 /// `"./dep.ts"`, but also for automatic discovery of relevant `package.json`
 /// and `tsconfig.json` files.
+///
+/// For reference, here is an overview of the Node.js resolution algorithm:
+///   https://nodejs.org/api/modules.html#all-together
+///
+/// A more detailed version of the spec can be found here:
+///   https://nodejs.org/api/esm.html#resolution-algorithm
 pub fn resolve(
     specifier: &str,
     base_dir: &Utf8Path,
@@ -28,9 +34,7 @@ pub fn resolve(
 ) -> Result<Utf8PathBuf, ResolveError> {
     let specifier = strip_query_and_fragment(specifier);
 
-    if options.resolve_node_builtins
-        && (specifier.starts_with("node:") || NODE_BUILT_INS.contains(&specifier))
-    {
+    if options.resolve_node_builtins && is_builtin_node_module(specifier) {
         return Err(ResolveError::NodeBuiltIn);
     }
 
@@ -52,12 +56,15 @@ pub fn resolve(
     resolve_module(specifier, base_dir, fs, options)
 }
 
+/// Resolves the given absolute `path`.
+///
+/// Absolute paths are those starting with `/` or a Windows prefix/root.
 fn resolve_absolute_path(
     path: Utf8PathBuf,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    let path = normalize_owned_path(path);
+    let path = normalize_owned_absolute_path(path);
 
     let try_extensions_with_fallback_error = |error: ResolveError| {
         for extension in options.extensions {
@@ -85,6 +92,9 @@ fn resolve_absolute_path(
     }
 }
 
+/// Resolves the given relative `path`.
+///
+/// `path` may have a `./` or `../` prefix, but this is not required.
 fn resolve_relative_path(
     path: &str,
     base_dir: &Utf8Path,
@@ -94,6 +104,10 @@ fn resolve_relative_path(
     resolve_absolute_path(base_dir.join(path), fs, options)
 }
 
+/// Resolve the directory `dir_path`.
+///
+/// Directories can only be resolved if [`ResolveOptions::default_files`] and
+/// [`ResolveOptions::extensions`] are both specified.
 fn resolve_directory(
     dir_path: &Utf8Path,
     fs: &dyn ResolverFsProxy,
@@ -116,6 +130,7 @@ fn resolve_directory(
     Err(ResolveError::DirectoryWithoutDefault)
 }
 
+/// Resolve the given module `specifier`.
 fn resolve_module(
     specifier: &str,
     base_dir: &Utf8Path,
@@ -149,6 +164,10 @@ fn resolve_module(
     }
 }
 
+/// Uses the given `package_json` to resolve the given module `specifier`.
+///
+/// The `package.json` allows us to perform alias lookups as well as
+/// self-lookups (using the package's own `exports` for resolving internally).
 fn resolve_module_with_package_json(
     specifier: &str,
     base_dir: &Utf8Path,
@@ -181,6 +200,9 @@ fn resolve_module_with_package_json(
     resolve_dependency(specifier, base_dir, fs, options)
 }
 
+/// Resolves the given alias `specifier`.
+///
+/// The `specifier` must start with `#`.
 fn resolve_import_alias(
     specifier: &str,
     package_dir: &Utf8Path,
@@ -198,6 +220,8 @@ fn resolve_import_alias(
     resolve_target_mapping(specifier, imports, package_dir, fs, options)
 }
 
+/// Resolves the given `subpath` inside the given `package_dir` using the
+/// `exports` from the given `package_json`.
 fn resolve_export(
     subpath: &str,
     package_dir: &Utf8Path,
@@ -228,6 +252,19 @@ fn resolve_export(
     }
 }
 
+/// Resolves the given `subpath` inside the given `package_dir` by looking it up
+/// in the given `mapping`.
+///
+/// `mapping` must be taken from either `imports` or `exports` key in a
+/// `package.json` file.
+///
+/// Keys in these mappings may contain globs with a single `*` character. If
+/// present, the target value should also have a `*` character and the matching
+/// characters are used as a literal replacement in the target value.
+///
+/// This function only implements the functionality that is common between
+/// `imports` or `exports`. [`resolve_export()`] contains additional logic that
+/// is specific to the `exports` map.
 fn resolve_target_mapping(
     subpath: &str,
     mapping: &JsonObject,
@@ -257,6 +294,11 @@ fn resolve_target_mapping(
     Err(ResolveError::NotFound)
 }
 
+/// Resolves the given `target` string from a target mapping.
+///
+/// When a target is found in the `imports` or `exports` mapping, it can point
+/// to either a relative path or a dependency. If it's a relative path,
+/// `package_dir` is used to resolve it.
 fn resolve_target_string(
     target: &str,
     package_dir: &Utf8Path,
@@ -271,6 +313,15 @@ fn resolve_target_string(
     }
 }
 
+/// Resolves the given `target` value.
+///
+/// Target values can be either a string to resolve, or an object with condition
+/// names that need to be matched against the
+/// [`ResolveOptions::condition_names`]. Matches values are resolved recursively
+/// to allow nested condition objects.
+///
+/// If a `glob_replacement` is given, it is used as a replacement for the `*`
+/// character in a string target.
 fn resolve_target_value(
     target: &JsonValue,
     glob_replacement: Option<&str>,
@@ -306,6 +357,13 @@ fn resolve_target_value(
     }
 }
 
+/// Resolves a dependency `specifier` by searching for `node_modules/`
+/// directories from `base_dir` upwards.
+///
+/// If the `node_modules` subdirectory matching the package name from the
+/// `specifier` contains a `package.json`, its `exports` and `main` fields can
+/// be used for further resolution. Without a `package.json` file, only the
+/// subpath from the `specifier` (if any) can be used for resolution.
 fn resolve_dependency(
     specifier: &str,
     base_dir: &Utf8Path,
@@ -318,7 +376,9 @@ fn resolve_dependency(
         let package_path = Utf8PathBuf::from(format!("{dir}/node_modules/{package_name}"));
         let package_path = match fs.path_info(&package_path) {
             Ok(PathInfo::Directory) => package_path,
-            Ok(PathInfo::Symlink { normalized_target }) => normalized_target,
+            Ok(PathInfo::Symlink {
+                canonicalized_target: normalized_target,
+            }) => normalized_target,
             _ => continue,
         };
 
@@ -364,7 +424,9 @@ fn resolve_path_info(
     match fs.path_info(&path)? {
         PathInfo::Directory => Ok((ResolvedPathInfo::Directory, path)),
         PathInfo::File => Ok((ResolvedPathInfo::File, path)),
-        PathInfo::Symlink { normalized_target } => match fs.path_info(&normalized_target)? {
+        PathInfo::Symlink {
+            canonicalized_target: normalized_target,
+        } => match fs.path_info(&normalized_target)? {
             PathInfo::Directory => Ok((ResolvedPathInfo::Directory, normalized_target)),
             PathInfo::File => Ok((ResolvedPathInfo::File, normalized_target)),
             PathInfo::Symlink { .. } => Err(ResolveError::BrokenSymlink),
@@ -372,13 +434,13 @@ fn resolve_path_info(
     }
 }
 
-fn normalize_owned_path(path: Utf8PathBuf) -> Utf8PathBuf {
+fn normalize_owned_absolute_path(path: Utf8PathBuf) -> Utf8PathBuf {
     let string = path.as_str();
     if string.len() < 3 {
-        return path;
+        return path; // An absolute path this short cannot be normalized anyway.
     }
 
-    let mut prev = string.chars().next().unwrap();
+    let mut prev = string.chars().next().unwrap(); // SAFETY: We check the length above.
     for byte in string.chars().skip(1) {
         if byte == '.' && (prev == '.' || prev == std::path::MAIN_SEPARATOR) {
             return normalize_path(&path);
@@ -452,6 +514,10 @@ pub struct ResolveOptions<'a> {
     /// If `true`, specifiers are assumed to be relative paths. Resolving them
     /// as a package will still be attempted if resolving as a relative path
     /// fails.
+    ///
+    /// For example, this makes `foo` resolve to `./foo.js` (assuming the `js`
+    /// extension is also specified). Biome uses this in the `extends` field of
+    /// its configuration file to allow the prefix to be optional.
     pub assume_relative: bool,
 
     /// Condition names to accept for the `exports` and `imports` fields.

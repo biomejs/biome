@@ -55,7 +55,7 @@ impl Manifest for TsConfigJson {
 }
 
 impl TsConfigJson {
-    pub fn parse(root: bool, path: &Utf8Path, json: &str) -> (Self, Vec<Error>) {
+    fn parse(root: bool, path: &Utf8Path, json: &str) -> (Self, Vec<Error>) {
         let (tsconfig, diagnostics) = deserialize_from_json_str(
             json,
             JsonParserOptions::default()
@@ -68,16 +68,17 @@ impl TsConfigJson {
         let mut tsconfig: Self = tsconfig.unwrap_or_default();
         tsconfig.root = root;
         tsconfig.path = path.to_path_buf();
-        let directory = path.parent().unwrap();
+        let directory = path.parent();
         if let Some(base_url) = tsconfig.compiler_options.base_url {
-            tsconfig.compiler_options.base_url = Some(normalize_path(&directory.join(base_url)));
+            tsconfig.compiler_options.base_url =
+                directory.map(|dir| normalize_path(&dir.join(base_url)));
         }
         if tsconfig.compiler_options.paths.is_some() {
-            tsconfig.compiler_options.paths_base = tsconfig
-                .compiler_options
-                .base_url
-                .as_ref()
-                .map_or_else(|| directory.to_path_buf(), Clone::clone);
+            tsconfig.compiler_options.paths_base =
+                tsconfig.compiler_options.base_url.as_ref().map_or_else(
+                    || directory.map_or_else(Default::default, Utf8Path::to_path_buf),
+                    Clone::clone,
+                );
         }
         (tsconfig, diagnostics)
     }
