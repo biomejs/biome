@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use append_only_vec::AppendOnlyVec;
-use biome_analyze::AnalyzerPluginVec;
+use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_deserialize::Deserialized;
@@ -1195,7 +1195,11 @@ impl Workspace for WorkspaceServer {
                     suppression_reason: None,
                     enabled_rules,
                     pull_code_actions,
-                    plugins: self.get_analyzer_plugins_for_project(project_key),
+                    plugins: if categories.contains(RuleCategory::Lint) {
+                        self.get_analyzer_plugins_for_project(project_key)
+                    } else {
+                        Vec::new()
+                    },
                 });
 
                 (
@@ -1277,7 +1281,7 @@ impl Workspace for WorkspaceServer {
             skip,
             suppression_reason: None,
             enabled_rules,
-            plugins: self.get_analyzer_plugins_for_project(project_key),
+            plugins: Vec::new(),
         }))
     }
 
@@ -1419,7 +1423,11 @@ impl Workspace for WorkspaceServer {
             rule_categories,
             suppression_reason,
             enabled_rules,
-            plugins: self.get_analyzer_plugins_for_project(project_key),
+            plugins: if rule_categories.contains(RuleCategory::Lint) {
+                self.get_analyzer_plugins_for_project(project_key)
+            } else {
+                Vec::new()
+            },
         })
     }
 
