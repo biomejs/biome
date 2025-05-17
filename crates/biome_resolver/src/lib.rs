@@ -373,7 +373,12 @@ fn resolve_dependency(
     let (package_name, subpath) = parse_package_specifier(specifier)?;
 
     for dir in base_dir.ancestors() {
-        let package_path = Utf8PathBuf::from(format!("{dir}/node_modules/{package_name}"));
+        let package_path = {
+            let mut p = dir.to_path_buf();
+            p.push("node_modules");
+            p.push(package_name);
+            p
+        };
         let package_path = match fs.path_info(&package_path) {
             Ok(PathInfo::Directory) => package_path,
             Ok(PathInfo::Symlink {
