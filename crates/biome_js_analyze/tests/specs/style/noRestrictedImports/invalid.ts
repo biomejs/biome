@@ -32,3 +32,5 @@ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbid
 import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
 import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
 import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
+
+import foo from 'import-foo/foo';

@@ -3015,7 +3015,11 @@ export interface RestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: Record<string, CustomRestrictedImport>;
+	paths: Record<string, Paths>;
+	/**
+	 * A list of gitignore-style patterns or regular expressions that should trigger the rule.
+	 */
+	patterns?: Patterns[];
 }
 export interface NoRestrictedTypesOptions {
 	types?: Record<string, CustomRestrictedType>;
@@ -3143,7 +3147,8 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type CustomRestrictedElements = Record<string, string>;
 export type ObjectPropertySyntax = "explicit" | "shorthand";
-export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type Paths = string | PathOptions;
+export type Patterns = string | PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
 export type Accessibility = "noPublic" | "explicit" | "none";
@@ -3169,7 +3174,7 @@ export interface Convention {
 }
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[];
-export interface CustomRestrictedImportOptions {
+export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
 	 */
@@ -3183,6 +3188,179 @@ export interface CustomRestrictedImportOptions {
 	 */
 	message: string;
 }
+export type PatternOptions =
+	| {
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * An array of gitignore-style patterns. Cannot be used with regex.
+			 */
+			group: string[];
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+	  }
+	| {
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * An array of gitignore-style patterns. Cannot be used with regex.
+			 */
+			group: string[];
+			/**
+			 * An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.
+			 */
+			importNames: string[];
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+	  }
+	| {
+			/**
+			 * An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern.
+			 */
+			allowImportNames: string[];
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * An array of gitignore-style patterns. Cannot be used with regex.
+			 */
+			group: string[];
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+	  }
+	| {
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * An array of gitignore-style patterns. Cannot be used with regex.
+			 */
+			group: string[];
+			/**
+			 * A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.
+			 */
+			importNamePattern: string;
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+	  }
+	| {
+			/**
+			 * A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.
+			 */
+			allowImportNamePattern: string;
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * An array of gitignore-style patterns. Cannot be used with regex.
+			 */
+			group: string[];
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+	  }
+	| {
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+			/**
+			 * A regular expression pattern string. Cannot be used with group.
+			 */
+			regex: string;
+	  }
+	| {
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.
+			 */
+			importNames: string[];
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+			/**
+			 * A regular expression pattern string. Cannot be used with group.
+			 */
+			regex: string;
+	  }
+	| {
+			/**
+			 * An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern.
+			 */
+			allowImportNames: string[];
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+			/**
+			 * A regular expression pattern string. Cannot be used with group.
+			 */
+			regex: string;
+	  }
+	| {
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.
+			 */
+			importNamePattern: string;
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+			/**
+			 * A regular expression pattern string. Cannot be used with group.
+			 */
+			regex: string;
+	  }
+	| {
+			/**
+			 * A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.
+			 */
+			allowImportNamePattern: string;
+			/**
+			 * Whether the patterns are case-sensitive. Defaults to `false`.
+			 */
+			caseSensitive: boolean;
+			/**
+			 * A custom message for diagnostics related to this pattern.
+			 */
+			message: string;
+			/**
+			 * A regular expression pattern string. Cannot be used with group.
+			 */
+			regex: string;
+	  };
 export interface CustomRestrictedTypeOptions {
 	message?: string;
 	use?: string;
