@@ -1,34 +1,23 @@
-use std::ops::{Deref, Range};
+use std::ops::Range;
 
 use crate::{
     JsRuleAction,
     lint::correctness::no_unused_variables::is_unused,
     services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
-    utils::{
-        rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
-        restricted_regex::RestrictedRegex,
-    },
+    utils::rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
 };
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize::{
-    DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
-};
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsMethodModifier, AnyJsObjectMember, AnyJsPropertyModifier,
-    AnyJsVariableDeclaration, AnyTsIndexSignatureModifier, AnyTsMethodSignatureModifier,
-    AnyTsPropertyParameterModifier, AnyTsPropertySignatureModifier, AnyTsTypeMember, JsFileSource,
-    JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList,
-    JsModuleItemList, JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind,
-    JsSyntaxToken, JsVariableDeclarator, JsVariableKind, TsAccessibilityModifier,
-    TsDeclarationModule, TsIdentifierBinding, TsIndexSignatureModifierList,
-    TsLiteralEnumMemberName, TsMethodSignatureModifierList, TsPropertySignatureModifierList,
+    AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
+    JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsModuleItemList,
+    JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind,
+    Modifier, TsDeclarationModule, TsIdentifierBinding, TsLiteralEnumMemberName,
     TsTypeParameterName,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
@@ -41,10 +30,9 @@ use enumflags2::BitFlags;
 use smallvec::SmallVec;
 
 use biome_rule_options::use_naming_convention::{
-    Formats, Kind, Modifier, Modifiers, Scope, Selector,
+    Convention, Formats, Kind, RestrictedModifier, RestrictedModifiers, Scope, Selector,
+    UseNamingConventionOptions,
 };
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
 
 declare_lint_rule! {
     /// Enforce naming conventions for everything across a codebase.
@@ -657,7 +645,7 @@ impl Rule for UseNamingConvention {
     type Query = Semantic<AnyIdentifierBindingLike>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = NamingConventionOptions;
+    type Options = UseNamingConventionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -1010,82 +998,6 @@ fn renamable(
     }
 }
 
-/// Rule's options.
-#[derive(Debug, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NamingConventionOptions {
-    /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
-    /// This does not affect other [Case].
-    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
-    pub strict_case: bool,
-
-    /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
-    pub require_ascii: bool,
-
-    /// Custom conventions.
-    #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
-    pub conventions: Box<[Convention]>,
-}
-impl Default for NamingConventionOptions {
-    fn default() -> Self {
-        Self {
-            strict_case: true,
-            require_ascii: true,
-            conventions: Vec::new().into_boxed_slice(),
-        }
-    }
-}
-
-const fn enabled() -> bool {
-    true
-}
-fn is_default<T: Default + Eq>(value: &T) -> bool {
-    value == &T::default()
-}
-
-#[derive(
-    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
-)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(deny_unknown_fields)]
-#[deserializable(with_validator)]
-pub struct Convention {
-    /// Declarations concerned by this convention
-    #[serde(default, skip_serializing_if = "is_default")]
-    pub selector: Selector,
-
-    /// Regular expression to enforce
-    #[serde(default, rename = "match", skip_serializing_if = "Option::is_none")]
-    pub matching: Option<RestrictedRegex>,
-
-    /// String cases to enforce
-    #[serde(default, skip_serializing_if = "is_default")]
-    pub formats: Formats,
-}
-
-impl DeserializableValidator for Convention {
-    fn validate(
-        &mut self,
-        ctx: &mut impl DeserializationContext,
-        _name: &str,
-        range: biome_rowan::TextRange,
-    ) -> bool {
-        if self.formats.is_empty() && self.matching.is_none() {
-            ctx.report(
-                DeserializationDiagnostic::new(
-                    "At least one field among `formats` and `match` must be set.",
-                )
-                .with_range(range),
-            );
-            false
-        } else {
-            true
-        }
-    }
-}
-
 fn selector_from_name(js_name: &AnyIdentifierBindingLike) -> Option<Selector> {
     match js_name {
         AnyIdentifierBindingLike::JsIdentifierBinding(binding) => {
@@ -1130,54 +1042,35 @@ fn selector_from_name(js_name: &AnyIdentifierBindingLike) -> Option<Selector> {
 }
 
 fn selector_from_class_member(member: &AnyJsClassMember) -> Option<Selector> {
-    let Selector {
-        kind,
-        modifiers,
-        scope,
-    } = match member {
+    let modifiers: BitFlags<Modifier> = match member {
         AnyJsClassMember::JsBogusMember(_)
         | AnyJsClassMember::JsMetavariable(_)
         | AnyJsClassMember::JsConstructorClassMember(_)
         | AnyJsClassMember::TsConstructorSignatureClassMember(_)
         | AnyJsClassMember::JsEmptyClassMember(_)
         | AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => return None,
-        AnyJsClassMember::TsIndexSignatureClassMember(getter) => {
-            Selector::with_modifiers(Kind::IndexParameter, getter.modifiers())
+        AnyJsClassMember::TsIndexSignatureClassMember(member) => (&member.modifiers()).into(),
+        AnyJsClassMember::JsGetterClassMember(getter) => (&getter.modifiers()).into(),
+        AnyJsClassMember::TsGetterSignatureClassMember(member) => (&member.modifiers()).into(),
+        AnyJsClassMember::JsMethodClassMember(member) => (&member.modifiers()).into(),
+        AnyJsClassMember::TsMethodSignatureClassMember(member) => (&member.modifiers()).into(),
+        AnyJsClassMember::JsPropertyClassMember(member) => (&member.modifiers()).into(),
+        AnyJsClassMember::TsPropertySignatureClassMember(member) => (&member.modifiers()).into(),
+        AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => {
+            (&member.modifiers()).into()
         }
-        AnyJsClassMember::JsGetterClassMember(getter) => {
-            Selector::with_modifiers(Kind::ClassGetter, getter.modifiers())
-        }
-        AnyJsClassMember::TsGetterSignatureClassMember(getter) => {
-            Selector::with_modifiers(Kind::ClassGetter, getter.modifiers())
-        }
-        AnyJsClassMember::JsMethodClassMember(method) => {
-            Selector::with_modifiers(Kind::ClassMethod, method.modifiers())
-        }
-        AnyJsClassMember::TsMethodSignatureClassMember(method) => {
-            Selector::with_modifiers(Kind::ClassMethod, method.modifiers())
-        }
-        AnyJsClassMember::JsPropertyClassMember(property) => {
-            Selector::with_modifiers(Kind::ClassProperty, property.modifiers())
-        }
-        AnyJsClassMember::TsPropertySignatureClassMember(property) => {
-            Selector::with_modifiers(Kind::ClassProperty, property.modifiers())
-        }
-        AnyJsClassMember::TsInitializedPropertySignatureClassMember(property) => {
-            Selector::with_modifiers(Kind::ClassProperty, property.modifiers())
-        }
-        AnyJsClassMember::JsSetterClassMember(setter) => {
-            Selector::with_modifiers(Kind::ClassSetter, setter.modifiers())
-        }
-        AnyJsClassMember::TsSetterSignatureClassMember(setter) => {
-            Selector::with_modifiers(Kind::ClassSetter, setter.modifiers())
-        }
+        AnyJsClassMember::JsSetterClassMember(member) => (&member.modifiers()).into(),
+        AnyJsClassMember::TsSetterSignatureClassMember(member) => (&member.modifiers()).into(),
     };
-    // Ignore explicitly overridden members
-    (!modifiers.contains(Modifier::Override)).then_some(Selector {
-        kind,
-        modifiers,
-        scope,
-    })
+    if modifiers.contains(Modifier::Override) {
+        // Ignore explicitly overridden members
+        None
+    } else {
+        Some(Selector::with_modifiers(
+            Kind::ClassSetter,
+            to_restricted_modifiers(modifiers),
+        ))
+    }
 }
 
 fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<Selector> {
@@ -1227,9 +1120,9 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
                 Some(Selector {
                     kind: Kind::Class,
                     modifiers: if class.abstract_token().is_some() {
-                        Modifier::Abstract.into()
+                        RestrictedModifier::Abstract.into()
                     } else {
-                        Modifiers::default()
+                        RestrictedModifiers::default()
                     },
                     scope: scope_from_declaration(decl)?,
                 })
@@ -1238,9 +1131,9 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
                 Some(Selector {
                     kind: Kind::Class,
                     modifiers: if class.abstract_token().is_some() {
-                        Modifier::Abstract.into()
+                        RestrictedModifier::Abstract.into()
                     } else {
-                        Modifiers::default()
+                        RestrictedModifiers::default()
                     },
                     scope: scope_from_declaration(decl)?,
                 })
@@ -1307,7 +1200,7 @@ fn selector_from_type_member(member: &AnyTsTypeMember) -> Option<Selector> {
         | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => None,
         AnyTsTypeMember::TsIndexSignatureTypeMember(property) => {
             Some(if property.readonly_token().is_some() {
-                Selector::with_modifiers(Kind::IndexParameter, Modifier::Readonly)
+                Selector::with_modifiers(Kind::IndexParameter, RestrictedModifier::Readonly)
             } else {
                 Kind::IndexParameter.into()
             })
@@ -1316,7 +1209,7 @@ fn selector_from_type_member(member: &AnyTsTypeMember) -> Option<Selector> {
         AnyTsTypeMember::TsMethodSignatureTypeMember(_) => Some(Kind::TypeMethod.into()),
         AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
             Some(if property.readonly_token().is_some() {
-                Selector::with_modifiers(Kind::TypeProperty, Modifier::Readonly)
+                Selector::with_modifiers(Kind::TypeProperty, RestrictedModifier::Readonly)
             } else {
                 Kind::TypeProperty.into()
             })
@@ -1330,40 +1223,42 @@ fn selector_from_type_member(member: &AnyTsTypeMember) -> Option<Selector> {
 fn default_convention(selector: Selector) -> Convention {
     let kind = selector.kind;
     match kind {
-        Kind::TypeProperty if selector.modifiers.contains(Modifier::Readonly) => Convention {
-            selector: Selector::with_modifiers(selector.kind, Modifier::Readonly),
-            matching: None,
-            formats: Formats(Case::Camel | Case::Constant),
-        },
+        Kind::TypeProperty if selector.modifiers.contains(RestrictedModifier::Readonly) => {
+            Convention {
+                selector: Selector::with_modifiers(selector.kind, RestrictedModifier::Readonly),
+                matching: None,
+                formats: (Case::Camel | Case::Constant).into(),
+            }
+        }
         Kind::TypeGetter => Convention {
             selector: kind.into(),
             matching: None,
-            formats: Formats(Case::Camel | Case::Constant),
+            formats: (Case::Camel | Case::Constant).into(),
         },
         Kind::Function if Scope::Global.contains(selector.scope) => Convention {
             selector: Selector::with_scope(kind, Scope::Global),
             matching: None,
-            formats: Formats(Case::Camel | Case::Pascal | Case::Upper),
+            formats: (Case::Camel | Case::Pascal | Case::Upper).into(),
         },
         Kind::Variable | Kind::Const | Kind::Var if Scope::Global.contains(selector.scope) => {
             Convention {
                 selector: Selector::with_scope(kind, Scope::Global),
                 matching: None,
-                formats: Formats(Case::Camel | Case::Pascal | Case::Constant),
+                formats: (Case::Camel | Case::Pascal | Case::Constant).into(),
             }
         }
         Kind::Any | Kind::ExportAlias | Kind::ImportAlias => Convention {
             selector: kind.into(),
             matching: None,
-            formats: Formats(Case::Camel | Case::Pascal | Case::Constant),
+            formats: (Case::Camel | Case::Pascal | Case::Constant).into(),
         },
         Kind::ClassProperty | Kind::ClassGetter
-            if selector.modifiers.contains(Modifier::Static) =>
+            if selector.modifiers.contains(RestrictedModifier::Static) =>
         {
             Convention {
-                selector: Selector::with_modifiers(kind, Modifier::Static),
+                selector: Selector::with_modifiers(kind, RestrictedModifier::Static),
                 matching: None,
-                formats: Formats(Case::Camel | Case::Constant),
+                formats: (Case::Camel | Case::Constant).into(),
             }
         }
         Kind::CatchParameter
@@ -1385,7 +1280,7 @@ fn default_convention(selector: Selector) -> Convention {
         | Kind::Using => Convention {
             selector: kind.into(),
             matching: None,
-            formats: Formats(Case::Camel.into()),
+            formats: (Cases::from(Case::Camel)).into(),
         },
         Kind::TypeLike
         | Kind::Class
@@ -1395,17 +1290,17 @@ fn default_convention(selector: Selector) -> Convention {
         | Kind::TypeParameter => Convention {
             selector: kind.into(),
             matching: None,
-            formats: Formats(Case::Pascal.into()),
+            formats: Cases::from(Case::Pascal).into(),
         },
         Kind::EnumMember => Convention {
             selector: kind.into(),
             matching: None,
-            formats: Formats(Case::Pascal.into()),
+            formats: Cases::from(Case::Pascal).into(),
         },
         Kind::Variable | Kind::Const | Kind::Var | Kind::Let => Convention {
             selector: kind.into(),
             matching: None,
-            formats: Formats(Case::Camel | Case::Pascal),
+            formats: (Case::Camel | Case::Pascal).into(),
         },
         Kind::Function
         | Kind::ExportNamespace
@@ -1415,175 +1310,9 @@ fn default_convention(selector: Selector) -> Convention {
         | Kind::FunctionParameter => Convention {
             selector: kind.into(),
             matching: None,
-            formats: Formats(Case::Camel | Case::Pascal),
+            formats: (Case::Camel | Case::Pascal).into(),
         },
     }
-}
-
-#[derive(Debug, Deserializable, Copy, Clone, serde::Deserialize, serde::Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase")]
-#[repr(u16)]
-pub enum RestrictedModifier {
-    Abstract = Modifier::Abstract as u16,
-    Private = Modifier::Private as u16,
-    Protected = Modifier::Protected as u16,
-    Readonly = Modifier::Readonly as u16,
-    Static = Modifier::Static as u16,
-}
-
-impl From<RestrictedModifier> for Modifier {
-    fn from(modifier: RestrictedModifier) -> Self {
-        match modifier {
-            RestrictedModifier::Abstract => Self::Abstract,
-            RestrictedModifier::Private => Self::Private,
-            RestrictedModifier::Protected => Self::Protected,
-            RestrictedModifier::Readonly => Self::Readonly,
-            RestrictedModifier::Static => Self::Static,
-        }
-    }
-}
-impl From<Modifier> for RestrictedModifier {
-    fn from(modifier: Modifier) -> Self {
-        match modifier {
-            Modifier::Abstract => Self::Abstract,
-            Modifier::Private => Self::Private,
-            Modifier::Protected => Self::Protected,
-            Modifier::Readonly => Self::Readonly,
-            Modifier::Static => Self::Static,
-            _ => unreachable!("Unsupported case"),
-        }
-    }
-}
-impl From<RestrictedModifier> for BitFlags<Modifier> {
-    fn from(modifier: RestrictedModifier) -> Self {
-        Modifier::from(modifier).into()
-    }
-}
-
-fn modifier_from_index_signature_modifier(modifier: &AnyTsIndexSignatureModifier) -> Modifier {
-    match modifier {
-        AnyTsIndexSignatureModifier::JsStaticModifier(_) => Modifier::Static,
-        AnyTsIndexSignatureModifier::TsReadonlyModifier(_) => Modifier::Readonly,
-    }
-}
-
-fn from_js_method_modifier(modifier: &AnyJsMethodModifier) -> Modifier {
-    match modifier {
-        AnyJsMethodModifier::JsDecorator(_) => Modifier::Decorator,
-        AnyJsMethodModifier::JsStaticModifier(_) => Modifier::Static,
-        AnyJsMethodModifier::TsAccessibilityModifier(accessibility) => accessibility.into(),
-        AnyJsMethodModifier::TsOverrideModifier(_) => Modifier::Override,
-    }
-}
-fn modifier_from_method_signature_modifier(modifier: &AnyTsMethodSignatureModifier) -> Modifier {
-    match modifier {
-        AnyTsMethodSignatureModifier::JsDecorator(_) => Modifier::Decorator,
-        AnyTsMethodSignatureModifier::JsStaticModifier(_) => Modifier::Static,
-        AnyTsMethodSignatureModifier::TsAbstractModifier(_) => Modifier::Abstract,
-        AnyTsMethodSignatureModifier::TsAccessibilityModifier(accessibility) => {
-            accessibility.into()
-        }
-        AnyTsMethodSignatureModifier::TsOverrideModifier(_) => Modifier::Override,
-    }
-}
-
-fn modifier_from_property_modifier(modifier: &AnyJsPropertyModifier) -> Modifier {
-    match modifier {
-        AnyJsPropertyModifier::JsDecorator(_) => Modifier::Decorator,
-        AnyJsPropertyModifier::JsStaticModifier(_) => Modifier::Static,
-        AnyJsPropertyModifier::JsAccessorModifier(_) => Modifier::Accessor,
-        AnyJsPropertyModifier::TsAccessibilityModifier(accessibility) => accessibility.into(),
-        AnyJsPropertyModifier::TsOverrideModifier(_) => Modifier::Override,
-        AnyJsPropertyModifier::TsReadonlyModifier(_) => Modifier::Readonly,
-    }
-}
-
-fn modifier_from_property_parameter_modifier(
-    modifier: &AnyTsPropertyParameterModifier,
-) -> Modifier {
-    match modifier {
-        AnyTsPropertyParameterModifier::TsAccessibilityModifier(accessibility) => {
-            accessibility.into()
-        }
-        AnyTsPropertyParameterModifier::TsOverrideModifier(_) => Modifier::Override,
-        AnyTsPropertyParameterModifier::TsReadonlyModifier(_) => Modifier::Readonly,
-    }
-}
-
-fn modifier_from_property_signature_modifier(
-    modifier: &AnyTsPropertySignatureModifier,
-) -> Modifier {
-    match modifier {
-        AnyTsPropertySignatureModifier::JsDecorator(_) => Modifier::Decorator,
-        AnyTsPropertySignatureModifier::TsAccessibilityModifier(accessibility) => {
-            accessibility.into()
-        }
-        AnyTsPropertySignatureModifier::TsDeclareModifier(_) => Modifier::Declare,
-        AnyTsPropertySignatureModifier::JsStaticModifier(_) => Modifier::Static,
-        AnyTsPropertySignatureModifier::JsAccessorModifier(_) => Modifier::Accessor,
-        AnyTsPropertySignatureModifier::TsAbstractModifier(_) => Modifier::Abstract,
-        AnyTsPropertySignatureModifier::TsOverrideModifier(_) => Modifier::Override,
-        AnyTsPropertySignatureModifier::TsReadonlyModifier(_) => Modifier::Readonly,
-    }
-}
-
-fn modifier_from_accessibility_modifier(value: &TsAccessibilityModifier) -> Modifier {
-    if let Ok(modifier_token) = value.modifier_token() {
-        match modifier_token.kind() {
-            JsSyntaxKind::PRIVATE_KW => Modifier::Private,
-            JsSyntaxKind::PROTECTED_KW => Modifier::Protected,
-            JsSyntaxKind::PUBLIC_KW => Modifier::Public,
-            _ => Modifier::BogusAccessibility,
-        }
-    } else {
-        Modifier::BogusAccessibility
-    }
-}
-
-fn modifiers_from_method_modifier_list(
-    value: &JsMethodModifierList,
-) -> enumflags2::BitFlags<Modifier> {
-    value
-        .into_iter()
-        .map(|m| from_js_method_modifier(&m))
-        .fold(enumflags2::BitFlags::empty(), |acc, m| acc | m)
-}
-
-fn modifiers_from_property_modifier_list(
-    value: &JsPropertyModifierList,
-) -> enumflags2::BitFlags<Modifier> {
-    value
-        .into_iter()
-        .map(|m| modifier_from_property_modifier(&m))
-        .fold(enumflags2::BitFlags::empty(), |acc, m| acc | m)
-}
-
-fn modifiers_from_index_signature_modifier_list(
-    value: &TsIndexSignatureModifierList,
-) -> enumflags2::BitFlags<Modifier> {
-    value
-        .into_iter()
-        .map(|m| modifier_from_index_signature_modifier(&m))
-        .fold(enumflags2::BitFlags::empty(), |acc, m| acc | m)
-}
-
-fn modifiers_from_property_signature_modifier_list(
-    value: &TsPropertySignatureModifierList,
-) -> enumflags2::BitFlags<Modifier> {
-    value
-        .into_iter()
-        .map(|m| modifier_from_property_signature_modifier(&m))
-        .fold(enumflags2::BitFlags::empty(), |acc, m| acc | m)
-}
-
-fn modifiers_from_method_signature_modifier_list(
-    value: &TsMethodSignatureModifierList,
-) -> enumflags2::BitFlags<Modifier> {
-    value
-        .into_iter()
-        .map(|m| modifier_from_method_signature_modifier(&m))
-        .fold(enumflags2::BitFlags::empty(), |acc, m| acc | m)
 }
 
 /// Returns the scope of `node` or `None` if the scope cannot be determined or
@@ -1605,11 +1334,7 @@ fn scope_from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
     }
 }
 
-fn contains_scope(this_scope: Scope, other: Scope) -> bool {
-    matches!(this_scope, Scope::Any) || this_scope == other
-}
-
-/// trim underscores and dollar signs from `name` and returns the lengtj of the trimmed prefix.
+/// trim underscores and dollar signs from `name` and returns the length of the trimmed prefix.
 fn trim_underscore_dollar(name: &str) -> (usize, &str) {
     let prefix_len = name
         .bytes()
@@ -1623,4 +1348,23 @@ fn trim_underscore_dollar(name: &str) -> (usize, &str) {
         .count();
     let name = &name[..(name.len() - suffix_len)];
     (prefix_len, name)
+}
+
+fn to_restricted_modifiers(bitflag: enumflags2::BitFlags<Modifier>) -> RestrictedModifiers {
+    bitflag
+        .into_iter()
+        .filter_map(|modifier| match modifier {
+            Modifier::Private => Some(RestrictedModifier::Private),
+            Modifier::Protected => Some(RestrictedModifier::Private),
+            Modifier::Static => Some(RestrictedModifier::Static),
+            Modifier::Abstract => Some(RestrictedModifier::Abstract),
+            Modifier::Readonly => Some(RestrictedModifier::Readonly),
+            Modifier::Decorator
+            | Modifier::BogusAccessibility
+            | Modifier::Public
+            | Modifier::Declare
+            | Modifier::Override
+            | Modifier::Accessor => None,
+        })
+        .collect()
 }

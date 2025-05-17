@@ -5,7 +5,6 @@ use biome_deserialize::{
 use biome_deserialize_macros::Deserializable;
 use biome_string_case::{Case, Cases};
 use enumflags2::BitFlags;
-use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 use std::ops::Deref;
 
@@ -13,7 +12,7 @@ use std::ops::Deref;
 #[derive(Debug, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NamingConventionOptions {
+pub struct UseNamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
     #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
@@ -27,7 +26,7 @@ pub struct NamingConventionOptions {
     #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
     pub conventions: Box<[Convention]>,
 }
-impl Default for NamingConventionOptions {
+impl Default for UseNamingConventionOptions {
     fn default() -> Self {
         Self {
             strict_case: true,
@@ -98,7 +97,7 @@ pub struct Selector {
 
     /// Modifiers used on the declaration
     #[serde(default, skip_serializing_if = "is_default")]
-    pub modifiers: Modifiers,
+    pub modifiers: RestrictedModifiers,
 
     /// Scope of the declaration
     #[serde(default, skip_serializing_if = "is_default")]
@@ -107,8 +106,8 @@ pub struct Selector {
 
 #[derive(Copy, Clone, Debug)]
 pub enum InvalidSelector {
-    IncompatibleModifiers(Modifier, Modifier),
-    UnsupportedModifiers(Kind, Modifier),
+    IncompatibleModifiers(RestrictedModifier, RestrictedModifier),
+    UnsupportedModifiers(Kind, RestrictedModifier),
     UnsupportedScope(Kind, Scope),
 }
 impl std::error::Error for InvalidSelector {}
@@ -142,21 +141,21 @@ impl std::fmt::Display for InvalidSelector {
 impl Selector {
     /// Returns an error if the current selector is not valid.
     pub fn check(self) -> Result<(), InvalidSelector> {
-        if self.modifiers.contains(Modifier::Abstract) {
+        if self.modifiers.contains(RestrictedModifier::Abstract) {
             if self.kind != Kind::Class && !Kind::ClassMember.contains(self.kind) {
                 return Err(InvalidSelector::UnsupportedModifiers(
                     self.kind,
-                    Modifier::Abstract,
+                    RestrictedModifier::Abstract,
                 ));
             }
-            if self.modifiers.contains(Modifier::Static) {
+            if self.modifiers.contains(RestrictedModifier::Static) {
                 return Err(InvalidSelector::IncompatibleModifiers(
-                    Modifier::Abstract,
-                    Modifier::Static,
+                    RestrictedModifier::Abstract,
+                    RestrictedModifier::Static,
                 ));
             }
         }
-        if self.modifiers.contains(Modifier::Readonly)
+        if self.modifiers.contains(RestrictedModifier::Readonly)
             && !matches!(
                 self.kind,
                 Kind::ClassProperty | Kind::IndexParameter | Kind::TypeProperty
@@ -164,31 +163,33 @@ impl Selector {
         {
             return Err(InvalidSelector::UnsupportedModifiers(
                 self.kind,
-                Modifier::Readonly,
+                RestrictedModifier::Readonly,
             ));
         }
-        if self.modifiers.intersects(Modifier::CLASS_MEMBER_ONLY)
+        if self
+            .modifiers
+            .intersects(RestrictedModifier::CLASS_MEMBER_ONLY)
             && !Kind::ClassMember.contains(self.kind)
         {
-            let modifiers = self.modifiers.0 & Modifier::CLASS_MEMBER_ONLY;
+            let modifiers = self.modifiers.0 & RestrictedModifier::CLASS_MEMBER_ONLY;
             if let Some(modifier) = modifiers.iter().next() {
                 return Err(InvalidSelector::UnsupportedModifiers(self.kind, modifier));
             }
         }
         // The rule doesn't allow `Modifier::Public`.
         // So we only need to check for `Modifier::Private`/`Modifier::Protected` incompatibility.
-        let accessibility = Modifier::Private | Modifier::Protected;
+        let accessibility = RestrictedModifier::Private | RestrictedModifier::Protected;
         if *self.modifiers & accessibility == accessibility {
             return Err(InvalidSelector::IncompatibleModifiers(
-                Modifier::Private,
-                Modifier::Protected,
+                RestrictedModifier::Private,
+                RestrictedModifier::Protected,
             ));
         }
-        let abstarct_or_static = Modifier::Abstract | Modifier::Static;
+        let abstarct_or_static = RestrictedModifier::Abstract | RestrictedModifier::Static;
         if *self.modifiers & abstarct_or_static == abstarct_or_static {
             return Err(InvalidSelector::IncompatibleModifiers(
-                Modifier::Abstract,
-                Modifier::Static,
+                RestrictedModifier::Abstract,
+                RestrictedModifier::Static,
             ));
         }
         if self.scope == Scope::Global
@@ -201,7 +202,7 @@ impl Selector {
         Ok(())
     }
 
-    pub fn with_modifiers(kind: Kind, modifiers: impl Into<Modifiers>) -> Self {
+    pub fn with_modifiers(kind: Kind, modifiers: impl Into<RestrictedModifiers>) -> Self {
         Self {
             kind,
             modifiers: modifiers.into(),
@@ -243,7 +244,7 @@ impl From<Kind> for Selector {
     fn from(kind: Kind) -> Self {
         Self {
             kind,
-            modifiers: Modifiers::default(),
+            modifiers: RestrictedModifiers::default(),
             scope: Scope::Any,
         }
     }
@@ -444,33 +445,50 @@ impl std::fmt::Display for Kind {
     serde::Deserialize,
     serde::Serialize,
 )]
-#[serde(from = "SmallVec<[Modifier; 11]>", into = "SmallVec<[Modifier; 11]>")]
-pub struct Modifiers(BitFlags<Modifier>);
+#[serde(
+    from = "SmallVec<[RestrictedModifier; 4]>",
+    into = "SmallVec<[RestrictedModifier; 4]>"
+)]
+pub struct RestrictedModifiers(BitFlags<RestrictedModifier>);
 
-impl Deref for Modifiers {
-    type Target = BitFlags<Modifier>;
+impl Deref for RestrictedModifiers {
+    type Target = BitFlags<RestrictedModifier>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
-impl From<Modifier> for Modifiers {
-    fn from(value: Modifier) -> Self {
-        Modifiers(value.into())
+impl From<RestrictedModifier> for RestrictedModifiers {
+    fn from(value: RestrictedModifier) -> Self {
+        RestrictedModifiers(value.into())
     }
 }
-
+impl From<RestrictedModifiers> for SmallVec<[RestrictedModifier; 4]> {
+    fn from(value: RestrictedModifiers) -> Self {
+        value.into_iter().collect()
+    }
+}
+impl From<SmallVec<[RestrictedModifier; 4]>> for RestrictedModifiers {
+    fn from(values: SmallVec<[RestrictedModifier; 4]>) -> Self {
+        Self::from_iter(values)
+    }
+}
+impl FromIterator<RestrictedModifier> for RestrictedModifiers {
+    fn from_iter<T: IntoIterator<Item = RestrictedModifier>>(values: T) -> Self {
+        Self(values.into_iter().fold(BitFlags::empty(), |acc, m| acc | m))
+    }
+}
 #[cfg(feature = "schema")]
-impl schemars::JsonSchema for Modifiers {
+impl schemars::JsonSchema for RestrictedModifiers {
     fn schema_name() -> String {
         "Modifiers".to_string()
     }
 
     fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<Modifier>>::json_schema(generator)
+        <std::collections::HashSet<RestrictedModifier>>::json_schema(generator)
     }
 }
 
-impl std::fmt::Display for Modifiers {
+impl std::fmt::Display for RestrictedModifiers {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for value in self.0.iter() {
             write!(f, "{value} ")?;
@@ -500,7 +518,7 @@ pub enum Scope {
 }
 
 impl Scope {
-    fn contains(self, scope: Self) -> bool {
+    pub fn contains(self, scope: Self) -> bool {
         matches!(self, Self::Any) || self == scope
     }
 }
@@ -585,6 +603,11 @@ impl Deref for Formats {
         &self.0
     }
 }
+impl From<Cases> for Formats {
+    fn from(value: Cases) -> Self {
+        Self(value)
+    }
+}
 impl From<SmallVec<[Format; 4]>> for Formats {
     fn from(values: SmallVec<[Format; 4]>) -> Self {
         Self::from_iter(values)
@@ -614,73 +637,37 @@ impl schemars::JsonSchema for Formats {
     }
 }
 
-/// Helpful data structure to make the order of modifiers predictable inside the formatter
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Eq,
-    PartialEq,
-    PartialOrd,
-    Ord,
-    Deserializable,
-    serde::Deserialize,
-    serde::Serialize,
-)]
+#[derive(Debug, Deserializable, Copy, Clone, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 #[enumflags2::bitflags]
-#[repr(u16)]
-pub enum Modifier {
-    // modifiers must be sorted by precedence.
-    Decorator = 1 << 0,
-    BogusAccessibility = 1 << 1,
-    Private = 1 << 2,
-    Protected = 1 << 3,
-    Public = 1 << 4,
-    Declare = 1 << 5,
-    Static = 1 << 6,
-    Abstract = 1 << 7,
-    Override = 1 << 8,
-    Readonly = 1 << 9,
-    Accessor = 1 << 10,
+#[repr(u8)]
+pub enum RestrictedModifier {
+    Abstract = 1 << 0,
+    Private = 1 << 1,
+    Protected = 1 << 2,
+    Readonly = 1 << 3,
+    Static = 1 << 4,
 }
-
-impl Modifier {
+impl RestrictedModifier {
     pub const ACCESSIBILITY: BitFlags<Self> = BitFlags::<Self>::from_bits_truncate_c(
-        Self::BogusAccessibility as u16
-            | Self::Private as u16
-            | Self::Protected as u16
-            | Self::Public as u16,
+        Self::Private as u8 | Self::Protected as u8,
         BitFlags::CONST_TOKEN,
     );
-    pub const CLASS_MEMBER_ONLY: BitFlags<Self> =
-        Self::ACCESSIBILITY.union_c(BitFlags::<Self>::from_bits_truncate_c(
-            Self::Static as u16 | Self::Override as u16 | Self::Accessor as u16,
-            BitFlags::CONST_TOKEN,
-        ));
-    pub const CLASS_TYPE_PROPERTY: BitFlags<Self> = BitFlags::<Self>::from_bits_truncate_c(
-        Self::Readonly as u16 | Self::Accessor as u16,
-        BitFlags::CONST_TOKEN,
+    pub const CLASS_MEMBER_ONLY: BitFlags<Self> = Self::ACCESSIBILITY.union_c(
+        BitFlags::<Self>::from_bits_truncate_c(Self::Static as u8, BitFlags::CONST_TOKEN),
     );
+    pub const CLASS_TYPE_PROPERTY: BitFlags<Self> =
+        BitFlags::<Self>::from_bits_truncate_c(Self::Readonly as u8, BitFlags::CONST_TOKEN);
 }
-
-impl std::fmt::Display for Modifier {
+impl std::fmt::Display for RestrictedModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::Decorator => "decorator",
-                Self::BogusAccessibility => "accessibility",
-                Self::Private => "private",
-                Self::Protected => "protected",
-                Self::Public => "public",
-                Self::Declare => "declare",
-                Self::Static => "static",
-                Self::Abstract => "abstract",
-                Self::Override => "override",
-                Self::Readonly => "readonly",
-                Self::Accessor => "accessor",
-            }
-        )
+        f.write_str(match self {
+            Self::Abstract => "abstract",
+            Self::Private => "private",
+            Self::Protected => "protected",
+            Self::Readonly => "readonly",
+            Self::Static => "static",
+        })
     }
 }
