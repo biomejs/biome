@@ -121,7 +121,6 @@ biome_graphql_analyze        = { version = "0.0.1", path = "./crates/biome_graph
 biome_graphql_factory        = { version = "0.1.0", path = "./crates/biome_graphql_factory" }
 biome_graphql_formatter      = { version = "0.1.0", path = "./crates/biome_graphql_formatter" }
 biome_graphql_parser         = { version = "0.1.0", path = "./crates/biome_graphql_parser" }
-biome_graphql_semantic       = { version = "0.0.0", path = "./crates/biome_graphql_semantic" }
 biome_graphql_syntax         = { version = "0.1.0", path = "./crates/biome_graphql_syntax" }
 biome_grit_factory           = { version = "0.5.7", path = "./crates/biome_grit_factory" }
 biome_grit_formatter         = { version = "0.0.0", path = "./crates/biome_grit_formatter" }
@@ -150,7 +149,6 @@ biome_json_value             = { version = "0.1.0", path = "./crates/biome_json_
 biome_line_index             = { version = "0.1.0", path = "./crates/biome_line_index" }
 biome_lsp_converters         = { version = "0.1.0", path = "./crates/biome_lsp_converters" }
 biome_markdown_factory       = { version = "0.0.1", path = "./crates/biome_markdown_factory" }
-biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markdown_parser" }
 biome_markdown_syntax        = { version = "0.0.1", path = "./crates/biome_markdown_syntax" }
 biome_module_graph           = { version = "0.0.1", path = "./crates/biome_module_graph" }
 biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugin_loader" }
@@ -158,7 +156,6 @@ biome_project_layout         = { version = "0.0.1", path = "./crates/biome_proje
 biome_resolver               = { version = "0.1.0", path = "./crates/biome_resolver" }
 biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
-biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
 biome_yaml_syntax            = { version = "0.0.1", path = "./crates/biome_yaml_syntax" }
 
 biome_markup        = { version = "0.5.7", path = "./crates/biome_markup" }
@@ -230,18 +227,6 @@ unicode-bom          = "2.0.3"
 unicode-width        = "0.1.12"
 ureq                 = "3.0.12"
 url                  = "2.5.4"
-
-[profile.dev.package.biome_wasm]
-debug     = true
-opt-level = "s"
-
-[profile.test.package.biome_wasm]
-debug     = true
-opt-level = "s"
-
-[profile.release.package.biome_wasm]
-debug     = false
-opt-level = 3
 
 #[patch.crates-io]
 #grit-pattern-matcher = { path = "../gritql/crates/grit-pattern-matcher" }

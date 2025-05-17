@@ -18,8 +18,8 @@ use biome_js_syntax::{
     JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator, inner_string_text,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
-use fancy_regex::RegexBuilder;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
+use regex::RegexBuilder;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
@@ -397,8 +397,8 @@ declare_lint_rule! {
     /// {
     ///     "options": {
     ///        "patterns": [{
-    ///             "regex": "import-foo/(?!bar)",
-    ///             "message": "import-foo is deprecated, except the modules in import-foo/bar."
+    ///             "regex": "^import-foo/\\d{4}-\\d{2}-\\d{2}$",
+    ///             "message": "import-foo/ + particular date format is deprecated."
     ///         }]
     ///     }
     /// }
@@ -407,13 +407,13 @@ declare_lint_rule! {
     /// #### Invalid
     ///
     /// ```js,expect_diagnostic,use_options
-    /// import { Foo } from 'import-foo/foo';
+    /// import { foo } from 'import-foo/2025-05-17';
     /// ```
     ///
     /// #### Valid
     ///
     /// ```js,use_options
-    /// import { Bar } from 'import-foo/bar';
+    /// import { foo } from 'import-foo/foo';
     /// ```
     ///
     /// ### `caseSensitive`
@@ -942,7 +942,7 @@ impl PatternOptions {
             let re = RegexBuilder::new(import_name_pattern.as_ref())
                 .build()
                 .unwrap();
-            if re.is_match(imported_name).unwrap_or(false) {
+            if re.is_match(imported_name) {
                 Restriction::forbidden(Cause::ImportNames)
             } else {
                 Restriction::allowed(Cause::ImportNames)
@@ -954,7 +954,6 @@ impl PatternOptions {
                 .build()
                 .unwrap()
                 .is_match(imported_name)
-                .unwrap_or(false)
             {
                 Restriction::allowed(Cause::AllowImportNames)
             } else {
@@ -1238,8 +1237,7 @@ fn match_pattern_options(import_source: &str, pattern_options: &PatternOptions) 
             .case_insensitive(!pattern_options.case_sensitive)
             .build()
             .unwrap()
-            .is_match(import_source)
-            .unwrap_or(false);
+            .is_match(import_source);
     }
     false
 }
