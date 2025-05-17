@@ -1042,32 +1042,50 @@ fn selector_from_name(js_name: &AnyIdentifierBindingLike) -> Option<Selector> {
 }
 
 fn selector_from_class_member(member: &AnyJsClassMember) -> Option<Selector> {
-    let modifiers: BitFlags<Modifier> = match member {
+    let (kind, modifiers): (_, BitFlags<_>) = match member {
         AnyJsClassMember::JsBogusMember(_)
         | AnyJsClassMember::JsMetavariable(_)
         | AnyJsClassMember::JsConstructorClassMember(_)
         | AnyJsClassMember::TsConstructorSignatureClassMember(_)
         | AnyJsClassMember::JsEmptyClassMember(_)
         | AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => return None,
-        AnyJsClassMember::TsIndexSignatureClassMember(member) => (&member.modifiers()).into(),
-        AnyJsClassMember::JsGetterClassMember(getter) => (&getter.modifiers()).into(),
-        AnyJsClassMember::TsGetterSignatureClassMember(member) => (&member.modifiers()).into(),
-        AnyJsClassMember::JsMethodClassMember(member) => (&member.modifiers()).into(),
-        AnyJsClassMember::TsMethodSignatureClassMember(member) => (&member.modifiers()).into(),
-        AnyJsClassMember::JsPropertyClassMember(member) => (&member.modifiers()).into(),
-        AnyJsClassMember::TsPropertySignatureClassMember(member) => (&member.modifiers()).into(),
-        AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => {
-            (&member.modifiers()).into()
+        AnyJsClassMember::TsIndexSignatureClassMember(member) => {
+            (Kind::ClassProperty, (&member.modifiers()).into())
         }
-        AnyJsClassMember::JsSetterClassMember(member) => (&member.modifiers()).into(),
-        AnyJsClassMember::TsSetterSignatureClassMember(member) => (&member.modifiers()).into(),
+        AnyJsClassMember::JsGetterClassMember(getter) => {
+            (Kind::ClassGetter, (&getter.modifiers()).into())
+        }
+        AnyJsClassMember::TsGetterSignatureClassMember(member) => {
+            (Kind::ClassGetter, (&member.modifiers()).into())
+        }
+        AnyJsClassMember::JsMethodClassMember(member) => {
+            (Kind::ClassMethod, (&member.modifiers()).into())
+        }
+        AnyJsClassMember::TsMethodSignatureClassMember(member) => {
+            (Kind::ClassMethod, (&member.modifiers()).into())
+        }
+        AnyJsClassMember::JsPropertyClassMember(member) => {
+            (Kind::ClassProperty, (&member.modifiers()).into())
+        }
+        AnyJsClassMember::TsPropertySignatureClassMember(member) => {
+            (Kind::ClassProperty, (&member.modifiers()).into())
+        }
+        AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => {
+            (Kind::ClassProperty, (&member.modifiers()).into())
+        }
+        AnyJsClassMember::JsSetterClassMember(member) => {
+            (Kind::ClassSetter, (&member.modifiers()).into())
+        }
+        AnyJsClassMember::TsSetterSignatureClassMember(member) => {
+            (Kind::ClassSetter, (&member.modifiers()).into())
+        }
     };
     if modifiers.contains(Modifier::Override) {
         // Ignore explicitly overridden members
         None
     } else {
         Some(Selector::with_modifiers(
-            Kind::ClassSetter,
+            kind,
             to_restricted_modifiers(modifiers),
         ))
     }
@@ -1355,7 +1373,7 @@ fn to_restricted_modifiers(bitflag: enumflags2::BitFlags<Modifier>) -> Restricte
         .into_iter()
         .filter_map(|modifier| match modifier {
             Modifier::Private => Some(RestrictedModifier::Private),
-            Modifier::Protected => Some(RestrictedModifier::Private),
+            Modifier::Protected => Some(RestrictedModifier::Protected),
             Modifier::Static => Some(RestrictedModifier::Static),
             Modifier::Abstract => Some(RestrictedModifier::Abstract),
             Modifier::Readonly => Some(RestrictedModifier::Readonly),
