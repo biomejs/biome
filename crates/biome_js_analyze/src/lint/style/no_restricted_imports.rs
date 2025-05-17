@@ -880,89 +880,33 @@ impl Deserializable for Paths {
     PartialEq,
     Serialize,
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct PatternOptions {
-    /// An array of gitignore-style patterns.
-    /// Cannot be used with regex.
     #[serde(skip_serializing_if = "Option::is_none")]
     group: Option<Box<[Box<str>]>>,
 
-    /// A regular expression pattern string.
-    /// Cannot be used with group.
     #[serde(skip_serializing_if = "Option::is_none")]
     regex: Option<Box<str>>,
 
-    /// A custom message for diagnostics related to this pattern.
     #[serde(skip_serializing_if = "Option::is_none")]
     message: Option<Box<str>>,
 
-    /// Whether the patterns in `group` or `regex` are case-sensitive. Defaults to `false`.
     case_sensitive: bool,
 
-    /// An array of specific import names to forbid within the matched modules.
-    /// Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.
     #[serde(skip_serializing_if = "Option::is_none")]
     import_names: Option<Box<[Box<str>]>>,
 
-    /// An array of specific import names to allow within the matched modules.
-    /// Cannot be used with importNames, importNamePattern and allowImportNamePattern.
     #[serde(skip_serializing_if = "Option::is_none")]
     allow_import_names: Option<Box<[Box<str>]>>,
 
-    /// A regex pattern for import names to forbid within the matched modules.
-    /// Cannot be used with importNames, allowImportNames and allowImportNamePattern.
     #[serde(skip_serializing_if = "Option::is_none")]
     import_name_pattern: Option<Box<str>>,
 
-    /// A regex pattern for import names to allow within the matched modules.
-    /// Cannot be used with importNames, importNamePattern and allowImportNames.
     #[serde(skip_serializing_if = "Option::is_none")]
     allow_import_name_pattern: Option<Box<str>>,
 }
 
 impl PatternOptions {
-    // Ensure that mutually exclusive keys are not used together.
-    fn validate_combination(&self) -> Result<(), &'static str> {
-        if self.group.is_some() && self.regex.is_some() {
-            return Err("`group` and `regex` cannot be used in combination.");
-        }
-
-        let import_names = self.import_names.as_ref().is_some_and(|v| !v.is_empty());
-        let allow_import_names = self
-            .allow_import_names
-            .as_ref()
-            .is_some_and(|v| !v.is_empty());
-        let import_name_pattern = self.import_name_pattern.as_ref().is_some();
-        let allow_import_name_pattern = self.allow_import_name_pattern.as_ref().is_some();
-
-        if import_names && (import_name_pattern || allow_import_names || allow_import_name_pattern)
-        {
-            return Err(
-                "`importNames` cannot be used with `import_name_pattern`, `allowImportNames` and `allowImportNamePattern`.",
-            );
-        }
-        if allow_import_names && (import_names || import_name_pattern || allow_import_name_pattern)
-        {
-            return Err(
-                "`allowImportNames` cannot be used with `importNames`, `importNamePattern` and `allowImportNamePattern`.",
-            );
-        }
-        if import_name_pattern && (import_names || allow_import_names || allow_import_name_pattern)
-        {
-            return Err(
-                "`importNamePattern` cannot be used with `import_names`, `allowImportNames` and `allowImportNamePattern`.",
-            );
-        }
-        if allow_import_name_pattern && (allow_import_names || import_names || import_name_pattern)
-        {
-            return Err(
-                "`allowImportNamePattern` cannot be used with `importNames`, `importNamePattern` and `allowImportNames`.",
-            );
-        }
-        Ok(())
-    }
-
     fn has_import_name_constraints(&self) -> bool {
         self.import_names.as_ref().is_some_and(|v| !v.is_empty())
             || self
@@ -1030,12 +974,9 @@ impl PatternOptions {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum Patterns {
-    /// A simple gitignore-style pattern string.
     Simple(Box<str>),
-    /// Additional options to configure the message and allowed/disallowed import names and modules.
     WithOptions(PatternOptions),
 }
 
@@ -1050,6 +991,187 @@ impl Deserializable for Patterns {
         } else {
             biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::WithOptions)
         }
+    }
+}
+
+#[cfg(feature = "schemars")]
+impl schemars::JsonSchema for Patterns {
+    fn schema_name() -> String {
+        "Patterns".into()
+    }
+
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        use schemars::schema::*;
+
+        let simple = Schema::Object(SchemaObject {
+            instance_type: Some(InstanceType::String.into()),
+            metadata: Some(Box::new(Metadata {
+                description: Some("A simple gitignore-style pattern string.".into()),
+                ..Default::default()
+            })),
+            ..Default::default()
+        });
+
+        let mut with_options = generator.subschema_for::<PatternOptions>();
+        // add description
+        if let schemars::schema::Schema::Object(mut obj) = with_options {
+            obj.metadata = Some(Box::new(schemars::schema::Metadata {
+            description: Some(
+                "Additional options to configure the message and allowed/disallowed import names and modules."
+                    .into(),
+            ),
+            ..Default::default()
+        }));
+            with_options = schemars::schema::Schema::Object(obj);
+        }
+
+        Schema::Object(SchemaObject {
+            subschemas: Some(Box::new(SubschemaValidation {
+                one_of: Some(vec![simple, with_options]),
+                ..Default::default()
+            })),
+            ..Default::default()
+        })
+    }
+}
+
+#[cfg(feature = "schemars")]
+impl schemars::JsonSchema for PatternOptions {
+    fn schema_name() -> String {
+        "PatternOptions".into()
+    }
+
+    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        use schemars::Map;
+        use schemars::schema::*;
+
+        fn string_schema(desc: &str) -> Schema {
+            Schema::Object(SchemaObject {
+                instance_type: Some(InstanceType::String.into()),
+                metadata: Some(Box::new(Metadata {
+                    description: Some(desc.into()),
+                    ..Default::default()
+                })),
+                ..Default::default()
+            })
+        }
+        fn array_string_schema(desc: &str) -> Schema {
+            Schema::Object(SchemaObject {
+                instance_type: Some(InstanceType::Array.into()),
+                array: Some(Box::new(ArrayValidation {
+                    items: Some(SingleOrVec::Single(Box::new(Schema::Object(
+                        SchemaObject {
+                            instance_type: Some(InstanceType::String.into()),
+                            ..Default::default()
+                        },
+                    )))),
+                    min_items: Some(1),
+                    ..Default::default()
+                })),
+                metadata: Some(Box::new(Metadata {
+                    description: Some(desc.into()),
+                    ..Default::default()
+                })),
+                ..Default::default()
+            })
+        }
+
+        fn base_props() -> Map<String, Schema> {
+            let mut m = Map::new();
+            m.insert(
+                "message".into(),
+                string_schema("A custom message for diagnostics related to this pattern."),
+            );
+            m.insert(
+                "caseSensitive".into(),
+                Schema::Object(SchemaObject {
+                    instance_type: Some(InstanceType::Boolean.into()),
+                    metadata: Some(Box::new(Metadata {
+                        description: Some(
+                            "Whether the patterns are case-sensitive. Defaults to `false`.".into(),
+                        ),
+                        ..Default::default()
+                    })),
+                    ..Default::default()
+                }),
+            );
+            m
+        }
+
+        let mut variants = Vec::<Schema>::new();
+        let group_variants = ["group", "regex"];
+        let import_variants = [
+            "",
+            "importNames",
+            "allowImportNames",
+            "importNamePattern",
+            "allowImportNamePattern",
+        ];
+        for &g in &group_variants {
+            for &i in &import_variants {
+                let mut props = base_props();
+
+                if g == "group" {
+                    props.insert(
+                        "group".into(),
+                        array_string_schema(
+                            "An array of gitignore-style patterns. Cannot be used with regex.",
+                        ),
+                    );
+                } else if g == "regex" {
+                    props.insert(
+                        "regex".into(),
+                        string_schema(
+                            "A regular expression pattern string. Cannot be used with group.",
+                        ),
+                    );
+                }
+
+                match i {
+                    "importNames" => {
+                        props.insert("importNames".into(), array_string_schema("An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern."));
+                    }
+                    "allowImportNames" => {
+                        props.insert("allowImportNames".into(), array_string_schema("An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern."));
+                    }
+                    "importNamePattern" => {
+                        props.insert("importNamePattern".into(), string_schema("A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern."));
+                    }
+                    "allowImportNamePattern" => {
+                        props.insert("allowImportNamePattern".into(), string_schema("A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames."));
+                    }
+                    _ => {}
+                }
+
+                let mut obj = ObjectValidation {
+                    properties: props,
+                    additional_properties: Some(Box::new(Schema::Bool(false))),
+                    ..Default::default()
+                };
+                if g == "group" {
+                    obj.required.insert("group".into());
+                } else if g == "regex" {
+                    obj.required.insert("regex".into());
+                }
+                if !i.is_empty() {
+                    obj.required.insert(i.into());
+                }
+
+                variants.push(Schema::Object(SchemaObject {
+                    instance_type: Some(InstanceType::Object.into()),
+                    object: Some(Box::new(obj)),
+                    ..Default::default()
+                }));
+            }
+        }
+
+        Schema::Object(SchemaObject {
+            subschemas: Some(Box::new(SubschemaValidation {
+                one_of: Some(variants),
+                ..Default::default()
+            })),
+            ..Default::default()
+        })
     }
 }
 
@@ -1068,10 +1190,6 @@ fn check_patterns_import_restrictions(
                 builder_for_simple.add_line(None, glob).unwrap();
             }
             Patterns::WithOptions(pattern_options) => {
-                if let Err(err) = pattern_options.validate_combination() {
-                    panic!("invalid pattern entry: {err}");
-                }
-
                 if match_pattern_options(import_source, pattern_options) {
                     last_matched_options = Some(pattern_options);
                 }
