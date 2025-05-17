@@ -2825,6 +2825,13 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"useAdjacentGetterSetter": {
+					"description": "Enforce that getters and setters for the same property are adjacent in class and object definitions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentObjectDefinition": {
 					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
 					"anyOf": [
@@ -2962,6 +2969,16 @@
 			},
 			"additionalProperties": false
 		},
+		"OverrideFilesConfiguration": {
+			"type": "object",
+			"properties": {
+				"maxSize": {
+					"description": "File size limit in bytes",
+					"anyOf": [{ "$ref": "#/definitions/MaxSize" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"OverrideFormatterConfiguration": {
 			"type": "object",
 			"properties": {
@@ -3056,6 +3073,13 @@
 					"description": "Specific configuration for the CSS language",
 					"anyOf": [
 						{ "$ref": "#/definitions/CssConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"files": {
+					"description": "Specific configuration for the filesystem",
+					"anyOf": [
+						{ "$ref": "#/definitions/OverrideFilesConfiguration" },
 						{ "type": "null" }
 					]
 				},

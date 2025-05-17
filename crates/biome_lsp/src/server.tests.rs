@@ -794,6 +794,72 @@ async fn document_no_extension() -> Result<()> {
 }
 
 #[tokio::test]
+async fn document_range_formatting() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: uri!("document.js"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: String::from("doNotFormatHere()\nformatHere()\ndoNotFormatHere()\n"),
+                },
+            },
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/rangeFormatting",
+            "formatting",
+            DocumentRangeFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range::new(Position::new(1, 0), Position::new(2, 0)),
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert_eq!(
+        res.context("formatting did not return an edit list")?,
+        vec![TextEdit::new(
+            Range::new(Position::new(1, 12), Position::new(1, 12)),
+            ";".to_string()
+        )]
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_diagnostics() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();

@@ -23,7 +23,7 @@ expression: middleToExistingGroup.json
 ```
 middleToExistingGroup.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been promoted to complexity/noExcessiveNestedTestSuites.
+  ! This lint rule has been promoted to complexity/noExcessiveNestedTestSuites.
   
     4 │       "nursery": {
     5 │         "nuseryRuleAlways": "error",
@@ -32,7 +32,7 @@ middleToExistingGroup.json:6:9 migrate  FIXABLE  ━━━━━━━━━━�
     7 │         "nuseryRuleForever": "error"
     8 │       },
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move the lint rule.
   
      4  4 │         "nursery": {
      5  5 │           "nuseryRuleAlways": "error",

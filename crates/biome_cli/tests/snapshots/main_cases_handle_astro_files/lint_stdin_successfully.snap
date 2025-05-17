@@ -17,7 +17,7 @@ export { a };
 ```block
 stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The contents aren't fixed. Use the `--fix` flag to fix them.
+  × The contents aren't fixed. Use the `--write` flag to fix them.
   
 
 

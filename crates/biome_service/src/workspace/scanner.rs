@@ -12,7 +12,7 @@ use super::server::WorkspaceServer;
 use super::{FeatureName, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
-use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
+use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
@@ -32,6 +32,9 @@ pub(crate) struct ScanResult {
 
     /// Duration of the full scan.
     pub duration: Duration,
+
+    /// List of additional configuration files found inside the project (it doesn't contain the current one)
+    pub configuration_files: Vec<BiomePath>,
 }
 
 impl WorkspaceServer {
@@ -49,7 +52,7 @@ impl WorkspaceServer {
 
         let collector = DiagnosticsCollector::new();
 
-        let (duration, diagnostics) = thread::scope(|scope| {
+        let (duration, diagnostics, configuration_files) = thread::scope(|scope| {
             let handler = thread::Builder::new()
                 .name("biome::scanner".to_string())
                 .spawn_scoped(scope, || collector.run(diagnostics_receiver))
@@ -57,7 +60,7 @@ impl WorkspaceServer {
 
             // The traversal context is scoped to ensure all the channels it
             // contains are properly closed once scanning finishes.
-            let duration = scan_folder(
+            let (duration, configuration_files) = scan_folder(
                 folder,
                 ScanContext {
                     workspace: self,
@@ -72,12 +75,13 @@ impl WorkspaceServer {
             // Wait for the collector thread to finish.
             let diagnostics = handler.join().unwrap();
 
-            (duration, diagnostics)
+            (duration, diagnostics, configuration_files)
         });
 
         Ok(ScanResult {
             diagnostics,
             duration,
+            configuration_files,
         })
     }
 }
@@ -86,7 +90,7 @@ impl WorkspaceServer {
 ///
 /// Returns the duration of the process and the evaluated paths.
 #[instrument(level = "debug", skip(ctx))]
-fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
+fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>) {
     let start = Instant::now();
     let fs = ctx.workspace.fs();
     let ctx_ref = &ctx;
@@ -137,7 +141,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
         }
     }));
 
-    start.elapsed()
+    (start.elapsed(), configs)
 }
 
 struct DiagnosticsCollector {
@@ -316,13 +320,8 @@ impl TraversalContext for ScanContext<'_> {
 /// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file(ctx: &ScanContext, path: &BiomePath) {
     match catch_unwind(move || {
-        ctx.workspace.open_file_by_scanner(OpenFileParams {
-            project_key: ctx.project_key,
-            path: path.clone(),
-            content: FileContent::FromServer,
-            document_file_source: None,
-            persist_node_cache: false,
-        })
+        ctx.workspace
+            .open_file_during_initial_scan(ctx.project_key, path.clone())
     }) {
         Ok(Ok(())) => {}
         Ok(Err(err)) => {

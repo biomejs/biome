@@ -509,7 +509,7 @@ impl Diagnostic for StdinDiagnostic {
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         match self {
             Self::NotFormatted => {
-                fmt.write_str("The contents aren't fixed. Use the `--fix` flag to fix them.")
+                fmt.write_str("The contents aren't fixed. Use the `--write` flag to fix them.")
             },
             Self::NoExtension => {
                 fmt.write_markup(markup!{

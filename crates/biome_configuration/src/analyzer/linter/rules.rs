@@ -67,6 +67,1330 @@ impl std::str::FromStr for RuleGroup {
         }
     }
 }
+impl std::fmt::Display for RuleGroup {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.write_str(self.as_str())
+    }
+}
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserializable,
+    Eq,
+    Hash,
+    Merge,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde :: Deserialize,
+    serde :: Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum RuleName {
+    NoAccessKey,
+    NoAccumulatingSpread,
+    NoAdjacentSpacesInRegex,
+    NoApproximativeNumericConstant,
+    NoArguments,
+    NoAriaHiddenOnFocusable,
+    NoAriaUnsupportedElements,
+    NoArrayIndexKey,
+    NoAssignInExpressions,
+    NoAsyncPromiseExecutor,
+    NoAutofocus,
+    NoAwaitInLoop,
+    NoBannedTypes,
+    NoBarrelFile,
+    NoBitwiseOperators,
+    NoBlankTarget,
+    NoCatchAssign,
+    NoChildrenProp,
+    NoClassAssign,
+    NoCommaOperator,
+    NoCommentText,
+    NoCommonJs,
+    NoCompareNegZero,
+    NoConfusingLabels,
+    NoConfusingVoidType,
+    NoConsole,
+    NoConstAssign,
+    NoConstEnum,
+    NoConstantBinaryExpression,
+    NoConstantCondition,
+    NoConstantMathMinMaxClamp,
+    NoConstructorReturn,
+    NoControlCharactersInRegex,
+    NoDangerouslySetInnerHtml,
+    NoDangerouslySetInnerHtmlWithChildren,
+    NoDebugger,
+    NoDefaultExport,
+    NoDelete,
+    NoDescendingSpecificity,
+    NoDestructuredProps,
+    NoDistractingElements,
+    NoDocumentCookie,
+    NoDocumentImportInPage,
+    NoDoneCallback,
+    NoDoubleEquals,
+    NoDuplicateAtImportRules,
+    NoDuplicateCase,
+    NoDuplicateClassMembers,
+    NoDuplicateCustomProperties,
+    NoDuplicateElseIf,
+    NoDuplicateFields,
+    NoDuplicateFontNames,
+    NoDuplicateJsxProps,
+    NoDuplicateObjectKeys,
+    NoDuplicateParameters,
+    NoDuplicateProperties,
+    NoDuplicateSelectorsKeyframeBlock,
+    NoDuplicateTestHooks,
+    NoDynamicNamespaceImportAccess,
+    NoEmptyBlock,
+    NoEmptyBlockStatements,
+    NoEmptyCharacterClassInRegex,
+    NoEmptyInterface,
+    NoEmptyPattern,
+    NoEmptyTypeParameters,
+    NoEnum,
+    NoEvolvingTypes,
+    NoExcessiveCognitiveComplexity,
+    NoExcessiveNestedTestSuites,
+    NoExplicitAny,
+    NoExportedImports,
+    NoExportsInTest,
+    NoExtraBooleanCast,
+    NoExtraNonNullAssertion,
+    NoFallthroughSwitchClause,
+    NoFlatMapIdentity,
+    NoFloatingPromises,
+    NoFocusedTests,
+    NoForEach,
+    NoFunctionAssign,
+    NoGlobalAssign,
+    NoGlobalDirnameFilename,
+    NoGlobalEval,
+    NoGlobalIsFinite,
+    NoGlobalIsNan,
+    NoGlobalObjectCalls,
+    NoHeadElement,
+    NoHeadImportInDocument,
+    NoHeaderScope,
+    NoImgElement,
+    NoImplicitAnyLet,
+    NoImplicitBoolean,
+    NoImportAssign,
+    NoImportCycles,
+    NoImportantInKeyframe,
+    NoImportantStyles,
+    NoInferrableTypes,
+    NoInnerDeclarations,
+    NoInteractiveElementToNoninteractiveRole,
+    NoInvalidBuiltinInstantiation,
+    NoInvalidConstructorSuper,
+    NoInvalidDirectionInLinearGradient,
+    NoInvalidGridAreas,
+    NoInvalidPositionAtImportRule,
+    NoInvalidUseBeforeDeclaration,
+    NoIrregularWhitespace,
+    NoLabelVar,
+    NoLabelWithoutControl,
+    NoMisleadingCharacterClass,
+    NoMisleadingInstantiator,
+    NoMisplacedAssertion,
+    NoMisrefactoredShorthandAssign,
+    NoMissingVarFunction,
+    NoNamespace,
+    NoNamespaceImport,
+    NoNegationElse,
+    NoNestedTernary,
+    NoNodejsModules,
+    NoNonNullAssertion,
+    NoNoninteractiveElementInteractions,
+    NoNoninteractiveElementToInteractiveRole,
+    NoNoninteractiveTabindex,
+    NoNonoctalDecimalEscape,
+    NoOctalEscape,
+    NoParameterAssign,
+    NoParameterProperties,
+    NoPositiveTabindex,
+    NoPrecisionLoss,
+    NoPrivateImports,
+    NoProcessEnv,
+    NoProcessGlobal,
+    NoPrototypeBuiltins,
+    NoReExportAll,
+    NoReactSpecificProps,
+    NoRedeclare,
+    NoRedundantAlt,
+    NoRedundantRoles,
+    NoRedundantUseStrict,
+    NoRenderReturnValue,
+    NoRestrictedElements,
+    NoRestrictedGlobals,
+    NoRestrictedImports,
+    NoRestrictedTypes,
+    NoSecrets,
+    NoSelfAssign,
+    NoSelfCompare,
+    NoSetterReturn,
+    NoShadow,
+    NoShadowRestrictedNames,
+    NoShorthandPropertyOverrides,
+    NoShoutyConstants,
+    NoSkippedTests,
+    NoSparseArray,
+    NoStaticElementInteractions,
+    NoStaticOnlyClass,
+    NoStringCaseMismatch,
+    NoSubstr,
+    NoSuspiciousSemicolonInJsx,
+    NoSvgWithoutTitle,
+    NoSwitchDeclarations,
+    NoTemplateCurlyInString,
+    NoThenProperty,
+    NoThisInStatic,
+    NoTsIgnore,
+    NoUndeclaredDependencies,
+    NoUndeclaredVariables,
+    NoUnknownAtRule,
+    NoUnknownFunction,
+    NoUnknownMediaFeatureName,
+    NoUnknownProperty,
+    NoUnknownPseudoClass,
+    NoUnknownPseudoElement,
+    NoUnknownTypeSelector,
+    NoUnknownUnit,
+    NoUnmatchableAnbSelector,
+    NoUnreachable,
+    NoUnreachableSuper,
+    NoUnresolvedImports,
+    NoUnsafeDeclarationMerging,
+    NoUnsafeFinally,
+    NoUnsafeNegation,
+    NoUnsafeOptionalChaining,
+    NoUnusedFunctionParameters,
+    NoUnusedImports,
+    NoUnusedLabels,
+    NoUnusedPrivateClassMembers,
+    NoUnusedTemplateLiteral,
+    NoUnusedVariables,
+    NoUnwantedPolyfillio,
+    NoUselessBackrefInRegex,
+    NoUselessCatch,
+    NoUselessConstructor,
+    NoUselessContinue,
+    NoUselessElse,
+    NoUselessEmptyExport,
+    NoUselessEscapeInRegex,
+    NoUselessEscapeInString,
+    NoUselessFragments,
+    NoUselessLabel,
+    NoUselessLoneBlockStatements,
+    NoUselessRename,
+    NoUselessStringConcat,
+    NoUselessStringRaw,
+    NoUselessSwitchCase,
+    NoUselessTernary,
+    NoUselessThisAlias,
+    NoUselessTypeConstraint,
+    NoUselessUndefined,
+    NoUselessUndefinedInitialization,
+    NoValueAtRule,
+    NoVar,
+    NoVoid,
+    NoVoidElementsWithChildren,
+    NoVoidTypeReturn,
+    NoWith,
+    NoYodaExpression,
+    UseAdjacentGetterSetter,
+    UseAdjacentOverloadSignatures,
+    UseAltText,
+    UseAnchorContent,
+    UseAriaActivedescendantWithTabindex,
+    UseAriaPropsForRole,
+    UseAriaPropsSupportedByRole,
+    UseArrayLiterals,
+    UseArrowFunction,
+    UseAsConstAssertion,
+    UseAtIndex,
+    UseAwait,
+    UseBlockStatements,
+    UseButtonType,
+    UseCollapsedElseIf,
+    UseCollapsedIf,
+    UseComponentExportOnlyModules,
+    UseConsistentArrayType,
+    UseConsistentBuiltinInstantiation,
+    UseConsistentCurlyBraces,
+    UseConsistentMemberAccessibility,
+    UseConsistentObjectDefinition,
+    UseConst,
+    UseDateNow,
+    UseDefaultParameterLast,
+    UseDefaultSwitchClause,
+    UseDefaultSwitchClauseLast,
+    UseDeprecatedReason,
+    UseEnumInitializers,
+    UseErrorMessage,
+    UseExhaustiveDependencies,
+    UseExhaustiveSwitchCases,
+    UseExplicitLengthCheck,
+    UseExplicitType,
+    UseExponentiationOperator,
+    UseExportType,
+    UseExportsLast,
+    UseFilenamingConvention,
+    UseFlatMap,
+    UseFocusableInteractive,
+    UseForComponent,
+    UseForOf,
+    UseFragmentSyntax,
+    UseGenericFontNames,
+    UseGetterReturn,
+    UseGoogleFontDisplay,
+    UseGoogleFontPreconnect,
+    UseGuardForIn,
+    UseHeadingContent,
+    UseHookAtTopLevel,
+    UseHtmlLang,
+    UseIframeTitle,
+    UseImportExtensions,
+    UseImportType,
+    UseIsArray,
+    UseIsNan,
+    UseIterableCallbackReturn,
+    UseJsxKeyInIterable,
+    UseKeyWithClickEvents,
+    UseKeyWithMouseEvents,
+    UseLiteralEnumMembers,
+    UseLiteralKeys,
+    UseMediaCaption,
+    UseNamedOperation,
+    UseNamespaceKeyword,
+    UseNamingConvention,
+    UseNodeAssertStrict,
+    UseNodejsImportProtocol,
+    UseNumberNamespace,
+    UseNumberToFixedDigitsArgument,
+    UseNumericLiterals,
+    UseNumericSeparators,
+    UseOptionalChain,
+    UseParseIntRadix,
+    UseRegexLiterals,
+    UseSelfClosingElements,
+    UseSemanticElements,
+    UseShorthandAssign,
+    UseShorthandFunctionType,
+    UseSimpleNumberKeys,
+    UseSimplifiedLogicExpression,
+    UseSingleJsDocAsterisk,
+    UseSingleVarDeclarator,
+    UseSortedClasses,
+    UseStrictMode,
+    UseSymbolDescription,
+    UseTemplate,
+    UseThrowNewError,
+    UseThrowOnlyError,
+    UseTopLevelRegex,
+    UseTrimStartEnd,
+    UseValidAnchor,
+    UseValidAriaProps,
+    UseValidAriaRole,
+    UseValidAriaValues,
+    UseValidAutocomplete,
+    UseValidForDirection,
+    UseValidLang,
+    UseValidTypeof,
+    UseWhile,
+    UseYield,
+}
+impl RuleName {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::NoAccessKey => "noAccessKey",
+            Self::NoAccumulatingSpread => "noAccumulatingSpread",
+            Self::NoAdjacentSpacesInRegex => "noAdjacentSpacesInRegex",
+            Self::NoApproximativeNumericConstant => "noApproximativeNumericConstant",
+            Self::NoArguments => "noArguments",
+            Self::NoAriaHiddenOnFocusable => "noAriaHiddenOnFocusable",
+            Self::NoAriaUnsupportedElements => "noAriaUnsupportedElements",
+            Self::NoArrayIndexKey => "noArrayIndexKey",
+            Self::NoAssignInExpressions => "noAssignInExpressions",
+            Self::NoAsyncPromiseExecutor => "noAsyncPromiseExecutor",
+            Self::NoAutofocus => "noAutofocus",
+            Self::NoAwaitInLoop => "noAwaitInLoop",
+            Self::NoBannedTypes => "noBannedTypes",
+            Self::NoBarrelFile => "noBarrelFile",
+            Self::NoBitwiseOperators => "noBitwiseOperators",
+            Self::NoBlankTarget => "noBlankTarget",
+            Self::NoCatchAssign => "noCatchAssign",
+            Self::NoChildrenProp => "noChildrenProp",
+            Self::NoClassAssign => "noClassAssign",
+            Self::NoCommaOperator => "noCommaOperator",
+            Self::NoCommentText => "noCommentText",
+            Self::NoCommonJs => "noCommonJs",
+            Self::NoCompareNegZero => "noCompareNegZero",
+            Self::NoConfusingLabels => "noConfusingLabels",
+            Self::NoConfusingVoidType => "noConfusingVoidType",
+            Self::NoConsole => "noConsole",
+            Self::NoConstAssign => "noConstAssign",
+            Self::NoConstEnum => "noConstEnum",
+            Self::NoConstantBinaryExpression => "noConstantBinaryExpression",
+            Self::NoConstantCondition => "noConstantCondition",
+            Self::NoConstantMathMinMaxClamp => "noConstantMathMinMaxClamp",
+            Self::NoConstructorReturn => "noConstructorReturn",
+            Self::NoControlCharactersInRegex => "noControlCharactersInRegex",
+            Self::NoDangerouslySetInnerHtml => "noDangerouslySetInnerHtml",
+            Self::NoDangerouslySetInnerHtmlWithChildren => "noDangerouslySetInnerHtmlWithChildren",
+            Self::NoDebugger => "noDebugger",
+            Self::NoDefaultExport => "noDefaultExport",
+            Self::NoDelete => "noDelete",
+            Self::NoDescendingSpecificity => "noDescendingSpecificity",
+            Self::NoDestructuredProps => "noDestructuredProps",
+            Self::NoDistractingElements => "noDistractingElements",
+            Self::NoDocumentCookie => "noDocumentCookie",
+            Self::NoDocumentImportInPage => "noDocumentImportInPage",
+            Self::NoDoneCallback => "noDoneCallback",
+            Self::NoDoubleEquals => "noDoubleEquals",
+            Self::NoDuplicateAtImportRules => "noDuplicateAtImportRules",
+            Self::NoDuplicateCase => "noDuplicateCase",
+            Self::NoDuplicateClassMembers => "noDuplicateClassMembers",
+            Self::NoDuplicateCustomProperties => "noDuplicateCustomProperties",
+            Self::NoDuplicateElseIf => "noDuplicateElseIf",
+            Self::NoDuplicateFields => "noDuplicateFields",
+            Self::NoDuplicateFontNames => "noDuplicateFontNames",
+            Self::NoDuplicateJsxProps => "noDuplicateJsxProps",
+            Self::NoDuplicateObjectKeys => "noDuplicateObjectKeys",
+            Self::NoDuplicateParameters => "noDuplicateParameters",
+            Self::NoDuplicateProperties => "noDuplicateProperties",
+            Self::NoDuplicateSelectorsKeyframeBlock => "noDuplicateSelectorsKeyframeBlock",
+            Self::NoDuplicateTestHooks => "noDuplicateTestHooks",
+            Self::NoDynamicNamespaceImportAccess => "noDynamicNamespaceImportAccess",
+            Self::NoEmptyBlock => "noEmptyBlock",
+            Self::NoEmptyBlockStatements => "noEmptyBlockStatements",
+            Self::NoEmptyCharacterClassInRegex => "noEmptyCharacterClassInRegex",
+            Self::NoEmptyInterface => "noEmptyInterface",
+            Self::NoEmptyPattern => "noEmptyPattern",
+            Self::NoEmptyTypeParameters => "noEmptyTypeParameters",
+            Self::NoEnum => "noEnum",
+            Self::NoEvolvingTypes => "noEvolvingTypes",
+            Self::NoExcessiveCognitiveComplexity => "noExcessiveCognitiveComplexity",
+            Self::NoExcessiveNestedTestSuites => "noExcessiveNestedTestSuites",
+            Self::NoExplicitAny => "noExplicitAny",
+            Self::NoExportedImports => "noExportedImports",
+            Self::NoExportsInTest => "noExportsInTest",
+            Self::NoExtraBooleanCast => "noExtraBooleanCast",
+            Self::NoExtraNonNullAssertion => "noExtraNonNullAssertion",
+            Self::NoFallthroughSwitchClause => "noFallthroughSwitchClause",
+            Self::NoFlatMapIdentity => "noFlatMapIdentity",
+            Self::NoFloatingPromises => "noFloatingPromises",
+            Self::NoFocusedTests => "noFocusedTests",
+            Self::NoForEach => "noForEach",
+            Self::NoFunctionAssign => "noFunctionAssign",
+            Self::NoGlobalAssign => "noGlobalAssign",
+            Self::NoGlobalDirnameFilename => "noGlobalDirnameFilename",
+            Self::NoGlobalEval => "noGlobalEval",
+            Self::NoGlobalIsFinite => "noGlobalIsFinite",
+            Self::NoGlobalIsNan => "noGlobalIsNan",
+            Self::NoGlobalObjectCalls => "noGlobalObjectCalls",
+            Self::NoHeadElement => "noHeadElement",
+            Self::NoHeadImportInDocument => "noHeadImportInDocument",
+            Self::NoHeaderScope => "noHeaderScope",
+            Self::NoImgElement => "noImgElement",
+            Self::NoImplicitAnyLet => "noImplicitAnyLet",
+            Self::NoImplicitBoolean => "noImplicitBoolean",
+            Self::NoImportAssign => "noImportAssign",
+            Self::NoImportCycles => "noImportCycles",
+            Self::NoImportantInKeyframe => "noImportantInKeyframe",
+            Self::NoImportantStyles => "noImportantStyles",
+            Self::NoInferrableTypes => "noInferrableTypes",
+            Self::NoInnerDeclarations => "noInnerDeclarations",
+            Self::NoInteractiveElementToNoninteractiveRole => {
+                "noInteractiveElementToNoninteractiveRole"
+            }
+            Self::NoInvalidBuiltinInstantiation => "noInvalidBuiltinInstantiation",
+            Self::NoInvalidConstructorSuper => "noInvalidConstructorSuper",
+            Self::NoInvalidDirectionInLinearGradient => "noInvalidDirectionInLinearGradient",
+            Self::NoInvalidGridAreas => "noInvalidGridAreas",
+            Self::NoInvalidPositionAtImportRule => "noInvalidPositionAtImportRule",
+            Self::NoInvalidUseBeforeDeclaration => "noInvalidUseBeforeDeclaration",
+            Self::NoIrregularWhitespace => "noIrregularWhitespace",
+            Self::NoLabelVar => "noLabelVar",
+            Self::NoLabelWithoutControl => "noLabelWithoutControl",
+            Self::NoMisleadingCharacterClass => "noMisleadingCharacterClass",
+            Self::NoMisleadingInstantiator => "noMisleadingInstantiator",
+            Self::NoMisplacedAssertion => "noMisplacedAssertion",
+            Self::NoMisrefactoredShorthandAssign => "noMisrefactoredShorthandAssign",
+            Self::NoMissingVarFunction => "noMissingVarFunction",
+            Self::NoNamespace => "noNamespace",
+            Self::NoNamespaceImport => "noNamespaceImport",
+            Self::NoNegationElse => "noNegationElse",
+            Self::NoNestedTernary => "noNestedTernary",
+            Self::NoNodejsModules => "noNodejsModules",
+            Self::NoNonNullAssertion => "noNonNullAssertion",
+            Self::NoNoninteractiveElementInteractions => "noNoninteractiveElementInteractions",
+            Self::NoNoninteractiveElementToInteractiveRole => {
+                "noNoninteractiveElementToInteractiveRole"
+            }
+            Self::NoNoninteractiveTabindex => "noNoninteractiveTabindex",
+            Self::NoNonoctalDecimalEscape => "noNonoctalDecimalEscape",
+            Self::NoOctalEscape => "noOctalEscape",
+            Self::NoParameterAssign => "noParameterAssign",
+            Self::NoParameterProperties => "noParameterProperties",
+            Self::NoPositiveTabindex => "noPositiveTabindex",
+            Self::NoPrecisionLoss => "noPrecisionLoss",
+            Self::NoPrivateImports => "noPrivateImports",
+            Self::NoProcessEnv => "noProcessEnv",
+            Self::NoProcessGlobal => "noProcessGlobal",
+            Self::NoPrototypeBuiltins => "noPrototypeBuiltins",
+            Self::NoReExportAll => "noReExportAll",
+            Self::NoReactSpecificProps => "noReactSpecificProps",
+            Self::NoRedeclare => "noRedeclare",
+            Self::NoRedundantAlt => "noRedundantAlt",
+            Self::NoRedundantRoles => "noRedundantRoles",
+            Self::NoRedundantUseStrict => "noRedundantUseStrict",
+            Self::NoRenderReturnValue => "noRenderReturnValue",
+            Self::NoRestrictedElements => "noRestrictedElements",
+            Self::NoRestrictedGlobals => "noRestrictedGlobals",
+            Self::NoRestrictedImports => "noRestrictedImports",
+            Self::NoRestrictedTypes => "noRestrictedTypes",
+            Self::NoSecrets => "noSecrets",
+            Self::NoSelfAssign => "noSelfAssign",
+            Self::NoSelfCompare => "noSelfCompare",
+            Self::NoSetterReturn => "noSetterReturn",
+            Self::NoShadow => "noShadow",
+            Self::NoShadowRestrictedNames => "noShadowRestrictedNames",
+            Self::NoShorthandPropertyOverrides => "noShorthandPropertyOverrides",
+            Self::NoShoutyConstants => "noShoutyConstants",
+            Self::NoSkippedTests => "noSkippedTests",
+            Self::NoSparseArray => "noSparseArray",
+            Self::NoStaticElementInteractions => "noStaticElementInteractions",
+            Self::NoStaticOnlyClass => "noStaticOnlyClass",
+            Self::NoStringCaseMismatch => "noStringCaseMismatch",
+            Self::NoSubstr => "noSubstr",
+            Self::NoSuspiciousSemicolonInJsx => "noSuspiciousSemicolonInJsx",
+            Self::NoSvgWithoutTitle => "noSvgWithoutTitle",
+            Self::NoSwitchDeclarations => "noSwitchDeclarations",
+            Self::NoTemplateCurlyInString => "noTemplateCurlyInString",
+            Self::NoThenProperty => "noThenProperty",
+            Self::NoThisInStatic => "noThisInStatic",
+            Self::NoTsIgnore => "noTsIgnore",
+            Self::NoUndeclaredDependencies => "noUndeclaredDependencies",
+            Self::NoUndeclaredVariables => "noUndeclaredVariables",
+            Self::NoUnknownAtRule => "noUnknownAtRule",
+            Self::NoUnknownFunction => "noUnknownFunction",
+            Self::NoUnknownMediaFeatureName => "noUnknownMediaFeatureName",
+            Self::NoUnknownProperty => "noUnknownProperty",
+            Self::NoUnknownPseudoClass => "noUnknownPseudoClass",
+            Self::NoUnknownPseudoElement => "noUnknownPseudoElement",
+            Self::NoUnknownTypeSelector => "noUnknownTypeSelector",
+            Self::NoUnknownUnit => "noUnknownUnit",
+            Self::NoUnmatchableAnbSelector => "noUnmatchableAnbSelector",
+            Self::NoUnreachable => "noUnreachable",
+            Self::NoUnreachableSuper => "noUnreachableSuper",
+            Self::NoUnresolvedImports => "noUnresolvedImports",
+            Self::NoUnsafeDeclarationMerging => "noUnsafeDeclarationMerging",
+            Self::NoUnsafeFinally => "noUnsafeFinally",
+            Self::NoUnsafeNegation => "noUnsafeNegation",
+            Self::NoUnsafeOptionalChaining => "noUnsafeOptionalChaining",
+            Self::NoUnusedFunctionParameters => "noUnusedFunctionParameters",
+            Self::NoUnusedImports => "noUnusedImports",
+            Self::NoUnusedLabels => "noUnusedLabels",
+            Self::NoUnusedPrivateClassMembers => "noUnusedPrivateClassMembers",
+            Self::NoUnusedTemplateLiteral => "noUnusedTemplateLiteral",
+            Self::NoUnusedVariables => "noUnusedVariables",
+            Self::NoUnwantedPolyfillio => "noUnwantedPolyfillio",
+            Self::NoUselessBackrefInRegex => "noUselessBackrefInRegex",
+            Self::NoUselessCatch => "noUselessCatch",
+            Self::NoUselessConstructor => "noUselessConstructor",
+            Self::NoUselessContinue => "noUselessContinue",
+            Self::NoUselessElse => "noUselessElse",
+            Self::NoUselessEmptyExport => "noUselessEmptyExport",
+            Self::NoUselessEscapeInRegex => "noUselessEscapeInRegex",
+            Self::NoUselessEscapeInString => "noUselessEscapeInString",
+            Self::NoUselessFragments => "noUselessFragments",
+            Self::NoUselessLabel => "noUselessLabel",
+            Self::NoUselessLoneBlockStatements => "noUselessLoneBlockStatements",
+            Self::NoUselessRename => "noUselessRename",
+            Self::NoUselessStringConcat => "noUselessStringConcat",
+            Self::NoUselessStringRaw => "noUselessStringRaw",
+            Self::NoUselessSwitchCase => "noUselessSwitchCase",
+            Self::NoUselessTernary => "noUselessTernary",
+            Self::NoUselessThisAlias => "noUselessThisAlias",
+            Self::NoUselessTypeConstraint => "noUselessTypeConstraint",
+            Self::NoUselessUndefined => "noUselessUndefined",
+            Self::NoUselessUndefinedInitialization => "noUselessUndefinedInitialization",
+            Self::NoValueAtRule => "noValueAtRule",
+            Self::NoVar => "noVar",
+            Self::NoVoid => "noVoid",
+            Self::NoVoidElementsWithChildren => "noVoidElementsWithChildren",
+            Self::NoVoidTypeReturn => "noVoidTypeReturn",
+            Self::NoWith => "noWith",
+            Self::NoYodaExpression => "noYodaExpression",
+            Self::UseAdjacentGetterSetter => "useAdjacentGetterSetter",
+            Self::UseAdjacentOverloadSignatures => "useAdjacentOverloadSignatures",
+            Self::UseAltText => "useAltText",
+            Self::UseAnchorContent => "useAnchorContent",
+            Self::UseAriaActivedescendantWithTabindex => "useAriaActivedescendantWithTabindex",
+            Self::UseAriaPropsForRole => "useAriaPropsForRole",
+            Self::UseAriaPropsSupportedByRole => "useAriaPropsSupportedByRole",
+            Self::UseArrayLiterals => "useArrayLiterals",
+            Self::UseArrowFunction => "useArrowFunction",
+            Self::UseAsConstAssertion => "useAsConstAssertion",
+            Self::UseAtIndex => "useAtIndex",
+            Self::UseAwait => "useAwait",
+            Self::UseBlockStatements => "useBlockStatements",
+            Self::UseButtonType => "useButtonType",
+            Self::UseCollapsedElseIf => "useCollapsedElseIf",
+            Self::UseCollapsedIf => "useCollapsedIf",
+            Self::UseComponentExportOnlyModules => "useComponentExportOnlyModules",
+            Self::UseConsistentArrayType => "useConsistentArrayType",
+            Self::UseConsistentBuiltinInstantiation => "useConsistentBuiltinInstantiation",
+            Self::UseConsistentCurlyBraces => "useConsistentCurlyBraces",
+            Self::UseConsistentMemberAccessibility => "useConsistentMemberAccessibility",
+            Self::UseConsistentObjectDefinition => "useConsistentObjectDefinition",
+            Self::UseConst => "useConst",
+            Self::UseDateNow => "useDateNow",
+            Self::UseDefaultParameterLast => "useDefaultParameterLast",
+            Self::UseDefaultSwitchClause => "useDefaultSwitchClause",
+            Self::UseDefaultSwitchClauseLast => "useDefaultSwitchClauseLast",
+            Self::UseDeprecatedReason => "useDeprecatedReason",
+            Self::UseEnumInitializers => "useEnumInitializers",
+            Self::UseErrorMessage => "useErrorMessage",
+            Self::UseExhaustiveDependencies => "useExhaustiveDependencies",
+            Self::UseExhaustiveSwitchCases => "useExhaustiveSwitchCases",
+            Self::UseExplicitLengthCheck => "useExplicitLengthCheck",
+            Self::UseExplicitType => "useExplicitType",
+            Self::UseExponentiationOperator => "useExponentiationOperator",
+            Self::UseExportType => "useExportType",
+            Self::UseExportsLast => "useExportsLast",
+            Self::UseFilenamingConvention => "useFilenamingConvention",
+            Self::UseFlatMap => "useFlatMap",
+            Self::UseFocusableInteractive => "useFocusableInteractive",
+            Self::UseForComponent => "useForComponent",
+            Self::UseForOf => "useForOf",
+            Self::UseFragmentSyntax => "useFragmentSyntax",
+            Self::UseGenericFontNames => "useGenericFontNames",
+            Self::UseGetterReturn => "useGetterReturn",
+            Self::UseGoogleFontDisplay => "useGoogleFontDisplay",
+            Self::UseGoogleFontPreconnect => "useGoogleFontPreconnect",
+            Self::UseGuardForIn => "useGuardForIn",
+            Self::UseHeadingContent => "useHeadingContent",
+            Self::UseHookAtTopLevel => "useHookAtTopLevel",
+            Self::UseHtmlLang => "useHtmlLang",
+            Self::UseIframeTitle => "useIframeTitle",
+            Self::UseImportExtensions => "useImportExtensions",
+            Self::UseImportType => "useImportType",
+            Self::UseIsArray => "useIsArray",
+            Self::UseIsNan => "useIsNan",
+            Self::UseIterableCallbackReturn => "useIterableCallbackReturn",
+            Self::UseJsxKeyInIterable => "useJsxKeyInIterable",
+            Self::UseKeyWithClickEvents => "useKeyWithClickEvents",
+            Self::UseKeyWithMouseEvents => "useKeyWithMouseEvents",
+            Self::UseLiteralEnumMembers => "useLiteralEnumMembers",
+            Self::UseLiteralKeys => "useLiteralKeys",
+            Self::UseMediaCaption => "useMediaCaption",
+            Self::UseNamedOperation => "useNamedOperation",
+            Self::UseNamespaceKeyword => "useNamespaceKeyword",
+            Self::UseNamingConvention => "useNamingConvention",
+            Self::UseNodeAssertStrict => "useNodeAssertStrict",
+            Self::UseNodejsImportProtocol => "useNodejsImportProtocol",
+            Self::UseNumberNamespace => "useNumberNamespace",
+            Self::UseNumberToFixedDigitsArgument => "useNumberToFixedDigitsArgument",
+            Self::UseNumericLiterals => "useNumericLiterals",
+            Self::UseNumericSeparators => "useNumericSeparators",
+            Self::UseOptionalChain => "useOptionalChain",
+            Self::UseParseIntRadix => "useParseIntRadix",
+            Self::UseRegexLiterals => "useRegexLiterals",
+            Self::UseSelfClosingElements => "useSelfClosingElements",
+            Self::UseSemanticElements => "useSemanticElements",
+            Self::UseShorthandAssign => "useShorthandAssign",
+            Self::UseShorthandFunctionType => "useShorthandFunctionType",
+            Self::UseSimpleNumberKeys => "useSimpleNumberKeys",
+            Self::UseSimplifiedLogicExpression => "useSimplifiedLogicExpression",
+            Self::UseSingleJsDocAsterisk => "useSingleJsDocAsterisk",
+            Self::UseSingleVarDeclarator => "useSingleVarDeclarator",
+            Self::UseSortedClasses => "useSortedClasses",
+            Self::UseStrictMode => "useStrictMode",
+            Self::UseSymbolDescription => "useSymbolDescription",
+            Self::UseTemplate => "useTemplate",
+            Self::UseThrowNewError => "useThrowNewError",
+            Self::UseThrowOnlyError => "useThrowOnlyError",
+            Self::UseTopLevelRegex => "useTopLevelRegex",
+            Self::UseTrimStartEnd => "useTrimStartEnd",
+            Self::UseValidAnchor => "useValidAnchor",
+            Self::UseValidAriaProps => "useValidAriaProps",
+            Self::UseValidAriaRole => "useValidAriaRole",
+            Self::UseValidAriaValues => "useValidAriaValues",
+            Self::UseValidAutocomplete => "useValidAutocomplete",
+            Self::UseValidForDirection => "useValidForDirection",
+            Self::UseValidLang => "useValidLang",
+            Self::UseValidTypeof => "useValidTypeof",
+            Self::UseWhile => "useWhile",
+            Self::UseYield => "useYield",
+        }
+    }
+    pub const fn group(self) -> RuleGroup {
+        match self {
+            Self::NoAccessKey => RuleGroup::A11y,
+            Self::NoAccumulatingSpread => RuleGroup::Performance,
+            Self::NoAdjacentSpacesInRegex => RuleGroup::Complexity,
+            Self::NoApproximativeNumericConstant => RuleGroup::Suspicious,
+            Self::NoArguments => RuleGroup::Style,
+            Self::NoAriaHiddenOnFocusable => RuleGroup::A11y,
+            Self::NoAriaUnsupportedElements => RuleGroup::A11y,
+            Self::NoArrayIndexKey => RuleGroup::Suspicious,
+            Self::NoAssignInExpressions => RuleGroup::Suspicious,
+            Self::NoAsyncPromiseExecutor => RuleGroup::Suspicious,
+            Self::NoAutofocus => RuleGroup::A11y,
+            Self::NoAwaitInLoop => RuleGroup::Nursery,
+            Self::NoBannedTypes => RuleGroup::Complexity,
+            Self::NoBarrelFile => RuleGroup::Performance,
+            Self::NoBitwiseOperators => RuleGroup::Nursery,
+            Self::NoBlankTarget => RuleGroup::Security,
+            Self::NoCatchAssign => RuleGroup::Suspicious,
+            Self::NoChildrenProp => RuleGroup::Correctness,
+            Self::NoClassAssign => RuleGroup::Suspicious,
+            Self::NoCommaOperator => RuleGroup::Style,
+            Self::NoCommentText => RuleGroup::Suspicious,
+            Self::NoCommonJs => RuleGroup::Style,
+            Self::NoCompareNegZero => RuleGroup::Suspicious,
+            Self::NoConfusingLabels => RuleGroup::Suspicious,
+            Self::NoConfusingVoidType => RuleGroup::Suspicious,
+            Self::NoConsole => RuleGroup::Suspicious,
+            Self::NoConstAssign => RuleGroup::Correctness,
+            Self::NoConstEnum => RuleGroup::Suspicious,
+            Self::NoConstantBinaryExpression => RuleGroup::Nursery,
+            Self::NoConstantCondition => RuleGroup::Correctness,
+            Self::NoConstantMathMinMaxClamp => RuleGroup::Correctness,
+            Self::NoConstructorReturn => RuleGroup::Correctness,
+            Self::NoControlCharactersInRegex => RuleGroup::Suspicious,
+            Self::NoDangerouslySetInnerHtml => RuleGroup::Security,
+            Self::NoDangerouslySetInnerHtmlWithChildren => RuleGroup::Security,
+            Self::NoDebugger => RuleGroup::Suspicious,
+            Self::NoDefaultExport => RuleGroup::Style,
+            Self::NoDelete => RuleGroup::Performance,
+            Self::NoDescendingSpecificity => RuleGroup::Style,
+            Self::NoDestructuredProps => RuleGroup::Nursery,
+            Self::NoDistractingElements => RuleGroup::A11y,
+            Self::NoDocumentCookie => RuleGroup::Suspicious,
+            Self::NoDocumentImportInPage => RuleGroup::Suspicious,
+            Self::NoDoneCallback => RuleGroup::Style,
+            Self::NoDoubleEquals => RuleGroup::Suspicious,
+            Self::NoDuplicateAtImportRules => RuleGroup::Suspicious,
+            Self::NoDuplicateCase => RuleGroup::Suspicious,
+            Self::NoDuplicateClassMembers => RuleGroup::Suspicious,
+            Self::NoDuplicateCustomProperties => RuleGroup::Suspicious,
+            Self::NoDuplicateElseIf => RuleGroup::Suspicious,
+            Self::NoDuplicateFields => RuleGroup::Suspicious,
+            Self::NoDuplicateFontNames => RuleGroup::Suspicious,
+            Self::NoDuplicateJsxProps => RuleGroup::Suspicious,
+            Self::NoDuplicateObjectKeys => RuleGroup::Suspicious,
+            Self::NoDuplicateParameters => RuleGroup::Suspicious,
+            Self::NoDuplicateProperties => RuleGroup::Suspicious,
+            Self::NoDuplicateSelectorsKeyframeBlock => RuleGroup::Suspicious,
+            Self::NoDuplicateTestHooks => RuleGroup::Suspicious,
+            Self::NoDynamicNamespaceImportAccess => RuleGroup::Performance,
+            Self::NoEmptyBlock => RuleGroup::Suspicious,
+            Self::NoEmptyBlockStatements => RuleGroup::Suspicious,
+            Self::NoEmptyCharacterClassInRegex => RuleGroup::Correctness,
+            Self::NoEmptyInterface => RuleGroup::Suspicious,
+            Self::NoEmptyPattern => RuleGroup::Correctness,
+            Self::NoEmptyTypeParameters => RuleGroup::Complexity,
+            Self::NoEnum => RuleGroup::Style,
+            Self::NoEvolvingTypes => RuleGroup::Suspicious,
+            Self::NoExcessiveCognitiveComplexity => RuleGroup::Complexity,
+            Self::NoExcessiveNestedTestSuites => RuleGroup::Complexity,
+            Self::NoExplicitAny => RuleGroup::Suspicious,
+            Self::NoExportedImports => RuleGroup::Style,
+            Self::NoExportsInTest => RuleGroup::Suspicious,
+            Self::NoExtraBooleanCast => RuleGroup::Complexity,
+            Self::NoExtraNonNullAssertion => RuleGroup::Suspicious,
+            Self::NoFallthroughSwitchClause => RuleGroup::Suspicious,
+            Self::NoFlatMapIdentity => RuleGroup::Correctness,
+            Self::NoFloatingPromises => RuleGroup::Nursery,
+            Self::NoFocusedTests => RuleGroup::Suspicious,
+            Self::NoForEach => RuleGroup::Complexity,
+            Self::NoFunctionAssign => RuleGroup::Suspicious,
+            Self::NoGlobalAssign => RuleGroup::Suspicious,
+            Self::NoGlobalDirnameFilename => RuleGroup::Nursery,
+            Self::NoGlobalEval => RuleGroup::Security,
+            Self::NoGlobalIsFinite => RuleGroup::Suspicious,
+            Self::NoGlobalIsNan => RuleGroup::Suspicious,
+            Self::NoGlobalObjectCalls => RuleGroup::Correctness,
+            Self::NoHeadElement => RuleGroup::Style,
+            Self::NoHeadImportInDocument => RuleGroup::Suspicious,
+            Self::NoHeaderScope => RuleGroup::A11y,
+            Self::NoImgElement => RuleGroup::Performance,
+            Self::NoImplicitAnyLet => RuleGroup::Suspicious,
+            Self::NoImplicitBoolean => RuleGroup::Style,
+            Self::NoImportAssign => RuleGroup::Suspicious,
+            Self::NoImportCycles => RuleGroup::Nursery,
+            Self::NoImportantInKeyframe => RuleGroup::Suspicious,
+            Self::NoImportantStyles => RuleGroup::Nursery,
+            Self::NoInferrableTypes => RuleGroup::Style,
+            Self::NoInnerDeclarations => RuleGroup::Correctness,
+            Self::NoInteractiveElementToNoninteractiveRole => RuleGroup::A11y,
+            Self::NoInvalidBuiltinInstantiation => RuleGroup::Correctness,
+            Self::NoInvalidConstructorSuper => RuleGroup::Correctness,
+            Self::NoInvalidDirectionInLinearGradient => RuleGroup::Correctness,
+            Self::NoInvalidGridAreas => RuleGroup::Correctness,
+            Self::NoInvalidPositionAtImportRule => RuleGroup::Correctness,
+            Self::NoInvalidUseBeforeDeclaration => RuleGroup::Correctness,
+            Self::NoIrregularWhitespace => RuleGroup::Suspicious,
+            Self::NoLabelVar => RuleGroup::Suspicious,
+            Self::NoLabelWithoutControl => RuleGroup::A11y,
+            Self::NoMisleadingCharacterClass => RuleGroup::Suspicious,
+            Self::NoMisleadingInstantiator => RuleGroup::Suspicious,
+            Self::NoMisplacedAssertion => RuleGroup::Suspicious,
+            Self::NoMisrefactoredShorthandAssign => RuleGroup::Suspicious,
+            Self::NoMissingVarFunction => RuleGroup::Correctness,
+            Self::NoNamespace => RuleGroup::Style,
+            Self::NoNamespaceImport => RuleGroup::Style,
+            Self::NoNegationElse => RuleGroup::Style,
+            Self::NoNestedTernary => RuleGroup::Style,
+            Self::NoNodejsModules => RuleGroup::Correctness,
+            Self::NoNonNullAssertion => RuleGroup::Style,
+            Self::NoNoninteractiveElementInteractions => RuleGroup::Nursery,
+            Self::NoNoninteractiveElementToInteractiveRole => RuleGroup::A11y,
+            Self::NoNoninteractiveTabindex => RuleGroup::A11y,
+            Self::NoNonoctalDecimalEscape => RuleGroup::Correctness,
+            Self::NoOctalEscape => RuleGroup::Suspicious,
+            Self::NoParameterAssign => RuleGroup::Style,
+            Self::NoParameterProperties => RuleGroup::Style,
+            Self::NoPositiveTabindex => RuleGroup::A11y,
+            Self::NoPrecisionLoss => RuleGroup::Correctness,
+            Self::NoPrivateImports => RuleGroup::Correctness,
+            Self::NoProcessEnv => RuleGroup::Style,
+            Self::NoProcessGlobal => RuleGroup::Nursery,
+            Self::NoPrototypeBuiltins => RuleGroup::Suspicious,
+            Self::NoReExportAll => RuleGroup::Performance,
+            Self::NoReactSpecificProps => RuleGroup::Suspicious,
+            Self::NoRedeclare => RuleGroup::Suspicious,
+            Self::NoRedundantAlt => RuleGroup::A11y,
+            Self::NoRedundantRoles => RuleGroup::A11y,
+            Self::NoRedundantUseStrict => RuleGroup::Suspicious,
+            Self::NoRenderReturnValue => RuleGroup::Correctness,
+            Self::NoRestrictedElements => RuleGroup::Nursery,
+            Self::NoRestrictedGlobals => RuleGroup::Style,
+            Self::NoRestrictedImports => RuleGroup::Style,
+            Self::NoRestrictedTypes => RuleGroup::Style,
+            Self::NoSecrets => RuleGroup::Nursery,
+            Self::NoSelfAssign => RuleGroup::Correctness,
+            Self::NoSelfCompare => RuleGroup::Suspicious,
+            Self::NoSetterReturn => RuleGroup::Correctness,
+            Self::NoShadow => RuleGroup::Nursery,
+            Self::NoShadowRestrictedNames => RuleGroup::Suspicious,
+            Self::NoShorthandPropertyOverrides => RuleGroup::Suspicious,
+            Self::NoShoutyConstants => RuleGroup::Style,
+            Self::NoSkippedTests => RuleGroup::Suspicious,
+            Self::NoSparseArray => RuleGroup::Suspicious,
+            Self::NoStaticElementInteractions => RuleGroup::A11y,
+            Self::NoStaticOnlyClass => RuleGroup::Complexity,
+            Self::NoStringCaseMismatch => RuleGroup::Correctness,
+            Self::NoSubstr => RuleGroup::Style,
+            Self::NoSuspiciousSemicolonInJsx => RuleGroup::Suspicious,
+            Self::NoSvgWithoutTitle => RuleGroup::A11y,
+            Self::NoSwitchDeclarations => RuleGroup::Correctness,
+            Self::NoTemplateCurlyInString => RuleGroup::Suspicious,
+            Self::NoThenProperty => RuleGroup::Suspicious,
+            Self::NoThisInStatic => RuleGroup::Complexity,
+            Self::NoTsIgnore => RuleGroup::Nursery,
+            Self::NoUndeclaredDependencies => RuleGroup::Correctness,
+            Self::NoUndeclaredVariables => RuleGroup::Correctness,
+            Self::NoUnknownAtRule => RuleGroup::Nursery,
+            Self::NoUnknownFunction => RuleGroup::Correctness,
+            Self::NoUnknownMediaFeatureName => RuleGroup::Correctness,
+            Self::NoUnknownProperty => RuleGroup::Correctness,
+            Self::NoUnknownPseudoClass => RuleGroup::Correctness,
+            Self::NoUnknownPseudoElement => RuleGroup::Correctness,
+            Self::NoUnknownTypeSelector => RuleGroup::Correctness,
+            Self::NoUnknownUnit => RuleGroup::Correctness,
+            Self::NoUnmatchableAnbSelector => RuleGroup::Correctness,
+            Self::NoUnreachable => RuleGroup::Correctness,
+            Self::NoUnreachableSuper => RuleGroup::Correctness,
+            Self::NoUnresolvedImports => RuleGroup::Nursery,
+            Self::NoUnsafeDeclarationMerging => RuleGroup::Suspicious,
+            Self::NoUnsafeFinally => RuleGroup::Correctness,
+            Self::NoUnsafeNegation => RuleGroup::Suspicious,
+            Self::NoUnsafeOptionalChaining => RuleGroup::Correctness,
+            Self::NoUnusedFunctionParameters => RuleGroup::Correctness,
+            Self::NoUnusedImports => RuleGroup::Correctness,
+            Self::NoUnusedLabels => RuleGroup::Correctness,
+            Self::NoUnusedPrivateClassMembers => RuleGroup::Correctness,
+            Self::NoUnusedTemplateLiteral => RuleGroup::Style,
+            Self::NoUnusedVariables => RuleGroup::Correctness,
+            Self::NoUnwantedPolyfillio => RuleGroup::Nursery,
+            Self::NoUselessBackrefInRegex => RuleGroup::Nursery,
+            Self::NoUselessCatch => RuleGroup::Complexity,
+            Self::NoUselessConstructor => RuleGroup::Complexity,
+            Self::NoUselessContinue => RuleGroup::Correctness,
+            Self::NoUselessElse => RuleGroup::Style,
+            Self::NoUselessEmptyExport => RuleGroup::Complexity,
+            Self::NoUselessEscapeInRegex => RuleGroup::Complexity,
+            Self::NoUselessEscapeInString => RuleGroup::Nursery,
+            Self::NoUselessFragments => RuleGroup::Complexity,
+            Self::NoUselessLabel => RuleGroup::Complexity,
+            Self::NoUselessLoneBlockStatements => RuleGroup::Complexity,
+            Self::NoUselessRename => RuleGroup::Complexity,
+            Self::NoUselessStringConcat => RuleGroup::Complexity,
+            Self::NoUselessStringRaw => RuleGroup::Complexity,
+            Self::NoUselessSwitchCase => RuleGroup::Complexity,
+            Self::NoUselessTernary => RuleGroup::Complexity,
+            Self::NoUselessThisAlias => RuleGroup::Complexity,
+            Self::NoUselessTypeConstraint => RuleGroup::Complexity,
+            Self::NoUselessUndefined => RuleGroup::Nursery,
+            Self::NoUselessUndefinedInitialization => RuleGroup::Complexity,
+            Self::NoValueAtRule => RuleGroup::Style,
+            Self::NoVar => RuleGroup::Suspicious,
+            Self::NoVoid => RuleGroup::Complexity,
+            Self::NoVoidElementsWithChildren => RuleGroup::Correctness,
+            Self::NoVoidTypeReturn => RuleGroup::Correctness,
+            Self::NoWith => RuleGroup::Complexity,
+            Self::NoYodaExpression => RuleGroup::Style,
+            Self::UseAdjacentGetterSetter => RuleGroup::Nursery,
+            Self::UseAdjacentOverloadSignatures => RuleGroup::Suspicious,
+            Self::UseAltText => RuleGroup::A11y,
+            Self::UseAnchorContent => RuleGroup::A11y,
+            Self::UseAriaActivedescendantWithTabindex => RuleGroup::A11y,
+            Self::UseAriaPropsForRole => RuleGroup::A11y,
+            Self::UseAriaPropsSupportedByRole => RuleGroup::A11y,
+            Self::UseArrayLiterals => RuleGroup::Correctness,
+            Self::UseArrowFunction => RuleGroup::Complexity,
+            Self::UseAsConstAssertion => RuleGroup::Style,
+            Self::UseAtIndex => RuleGroup::Style,
+            Self::UseAwait => RuleGroup::Suspicious,
+            Self::UseBlockStatements => RuleGroup::Style,
+            Self::UseButtonType => RuleGroup::A11y,
+            Self::UseCollapsedElseIf => RuleGroup::Style,
+            Self::UseCollapsedIf => RuleGroup::Style,
+            Self::UseComponentExportOnlyModules => RuleGroup::Style,
+            Self::UseConsistentArrayType => RuleGroup::Style,
+            Self::UseConsistentBuiltinInstantiation => RuleGroup::Style,
+            Self::UseConsistentCurlyBraces => RuleGroup::Style,
+            Self::UseConsistentMemberAccessibility => RuleGroup::Style,
+            Self::UseConsistentObjectDefinition => RuleGroup::Nursery,
+            Self::UseConst => RuleGroup::Style,
+            Self::UseDateNow => RuleGroup::Complexity,
+            Self::UseDefaultParameterLast => RuleGroup::Style,
+            Self::UseDefaultSwitchClause => RuleGroup::Style,
+            Self::UseDefaultSwitchClauseLast => RuleGroup::Suspicious,
+            Self::UseDeprecatedReason => RuleGroup::Style,
+            Self::UseEnumInitializers => RuleGroup::Style,
+            Self::UseErrorMessage => RuleGroup::Suspicious,
+            Self::UseExhaustiveDependencies => RuleGroup::Correctness,
+            Self::UseExhaustiveSwitchCases => RuleGroup::Nursery,
+            Self::UseExplicitLengthCheck => RuleGroup::Style,
+            Self::UseExplicitType => RuleGroup::Nursery,
+            Self::UseExponentiationOperator => RuleGroup::Style,
+            Self::UseExportType => RuleGroup::Style,
+            Self::UseExportsLast => RuleGroup::Nursery,
+            Self::UseFilenamingConvention => RuleGroup::Style,
+            Self::UseFlatMap => RuleGroup::Complexity,
+            Self::UseFocusableInteractive => RuleGroup::A11y,
+            Self::UseForComponent => RuleGroup::Nursery,
+            Self::UseForOf => RuleGroup::Style,
+            Self::UseFragmentSyntax => RuleGroup::Style,
+            Self::UseGenericFontNames => RuleGroup::A11y,
+            Self::UseGetterReturn => RuleGroup::Suspicious,
+            Self::UseGoogleFontDisplay => RuleGroup::Suspicious,
+            Self::UseGoogleFontPreconnect => RuleGroup::Nursery,
+            Self::UseGuardForIn => RuleGroup::Suspicious,
+            Self::UseHeadingContent => RuleGroup::A11y,
+            Self::UseHookAtTopLevel => RuleGroup::Correctness,
+            Self::UseHtmlLang => RuleGroup::A11y,
+            Self::UseIframeTitle => RuleGroup::A11y,
+            Self::UseImportExtensions => RuleGroup::Correctness,
+            Self::UseImportType => RuleGroup::Style,
+            Self::UseIsArray => RuleGroup::Suspicious,
+            Self::UseIsNan => RuleGroup::Correctness,
+            Self::UseIterableCallbackReturn => RuleGroup::Nursery,
+            Self::UseJsxKeyInIterable => RuleGroup::Correctness,
+            Self::UseKeyWithClickEvents => RuleGroup::A11y,
+            Self::UseKeyWithMouseEvents => RuleGroup::A11y,
+            Self::UseLiteralEnumMembers => RuleGroup::Style,
+            Self::UseLiteralKeys => RuleGroup::Complexity,
+            Self::UseMediaCaption => RuleGroup::A11y,
+            Self::UseNamedOperation => RuleGroup::Nursery,
+            Self::UseNamespaceKeyword => RuleGroup::Suspicious,
+            Self::UseNamingConvention => RuleGroup::Style,
+            Self::UseNodeAssertStrict => RuleGroup::Style,
+            Self::UseNodejsImportProtocol => RuleGroup::Style,
+            Self::UseNumberNamespace => RuleGroup::Style,
+            Self::UseNumberToFixedDigitsArgument => RuleGroup::Suspicious,
+            Self::UseNumericLiterals => RuleGroup::Style,
+            Self::UseNumericSeparators => RuleGroup::Nursery,
+            Self::UseOptionalChain => RuleGroup::Complexity,
+            Self::UseParseIntRadix => RuleGroup::Nursery,
+            Self::UseRegexLiterals => RuleGroup::Complexity,
+            Self::UseSelfClosingElements => RuleGroup::Style,
+            Self::UseSemanticElements => RuleGroup::A11y,
+            Self::UseShorthandAssign => RuleGroup::Style,
+            Self::UseShorthandFunctionType => RuleGroup::Style,
+            Self::UseSimpleNumberKeys => RuleGroup::Complexity,
+            Self::UseSimplifiedLogicExpression => RuleGroup::Complexity,
+            Self::UseSingleJsDocAsterisk => RuleGroup::Nursery,
+            Self::UseSingleVarDeclarator => RuleGroup::Style,
+            Self::UseSortedClasses => RuleGroup::Nursery,
+            Self::UseStrictMode => RuleGroup::Suspicious,
+            Self::UseSymbolDescription => RuleGroup::Nursery,
+            Self::UseTemplate => RuleGroup::Style,
+            Self::UseThrowNewError => RuleGroup::Style,
+            Self::UseThrowOnlyError => RuleGroup::Style,
+            Self::UseTopLevelRegex => RuleGroup::Performance,
+            Self::UseTrimStartEnd => RuleGroup::Style,
+            Self::UseValidAnchor => RuleGroup::A11y,
+            Self::UseValidAriaProps => RuleGroup::A11y,
+            Self::UseValidAriaRole => RuleGroup::A11y,
+            Self::UseValidAriaValues => RuleGroup::A11y,
+            Self::UseValidAutocomplete => RuleGroup::A11y,
+            Self::UseValidForDirection => RuleGroup::Correctness,
+            Self::UseValidLang => RuleGroup::A11y,
+            Self::UseValidTypeof => RuleGroup::Suspicious,
+            Self::UseWhile => RuleGroup::Complexity,
+            Self::UseYield => RuleGroup::Correctness,
+        }
+    }
+}
+impl std::str::FromStr for RuleName {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "noAccessKey" => Ok(Self::NoAccessKey),
+            "noAccumulatingSpread" => Ok(Self::NoAccumulatingSpread),
+            "noAdjacentSpacesInRegex" => Ok(Self::NoAdjacentSpacesInRegex),
+            "noApproximativeNumericConstant" => Ok(Self::NoApproximativeNumericConstant),
+            "noArguments" => Ok(Self::NoArguments),
+            "noAriaHiddenOnFocusable" => Ok(Self::NoAriaHiddenOnFocusable),
+            "noAriaUnsupportedElements" => Ok(Self::NoAriaUnsupportedElements),
+            "noArrayIndexKey" => Ok(Self::NoArrayIndexKey),
+            "noAssignInExpressions" => Ok(Self::NoAssignInExpressions),
+            "noAsyncPromiseExecutor" => Ok(Self::NoAsyncPromiseExecutor),
+            "noAutofocus" => Ok(Self::NoAutofocus),
+            "noAwaitInLoop" => Ok(Self::NoAwaitInLoop),
+            "noBannedTypes" => Ok(Self::NoBannedTypes),
+            "noBarrelFile" => Ok(Self::NoBarrelFile),
+            "noBitwiseOperators" => Ok(Self::NoBitwiseOperators),
+            "noBlankTarget" => Ok(Self::NoBlankTarget),
+            "noCatchAssign" => Ok(Self::NoCatchAssign),
+            "noChildrenProp" => Ok(Self::NoChildrenProp),
+            "noClassAssign" => Ok(Self::NoClassAssign),
+            "noCommaOperator" => Ok(Self::NoCommaOperator),
+            "noCommentText" => Ok(Self::NoCommentText),
+            "noCommonJs" => Ok(Self::NoCommonJs),
+            "noCompareNegZero" => Ok(Self::NoCompareNegZero),
+            "noConfusingLabels" => Ok(Self::NoConfusingLabels),
+            "noConfusingVoidType" => Ok(Self::NoConfusingVoidType),
+            "noConsole" => Ok(Self::NoConsole),
+            "noConstAssign" => Ok(Self::NoConstAssign),
+            "noConstEnum" => Ok(Self::NoConstEnum),
+            "noConstantBinaryExpression" => Ok(Self::NoConstantBinaryExpression),
+            "noConstantCondition" => Ok(Self::NoConstantCondition),
+            "noConstantMathMinMaxClamp" => Ok(Self::NoConstantMathMinMaxClamp),
+            "noConstructorReturn" => Ok(Self::NoConstructorReturn),
+            "noControlCharactersInRegex" => Ok(Self::NoControlCharactersInRegex),
+            "noDangerouslySetInnerHtml" => Ok(Self::NoDangerouslySetInnerHtml),
+            "noDangerouslySetInnerHtmlWithChildren" => {
+                Ok(Self::NoDangerouslySetInnerHtmlWithChildren)
+            }
+            "noDebugger" => Ok(Self::NoDebugger),
+            "noDefaultExport" => Ok(Self::NoDefaultExport),
+            "noDelete" => Ok(Self::NoDelete),
+            "noDescendingSpecificity" => Ok(Self::NoDescendingSpecificity),
+            "noDestructuredProps" => Ok(Self::NoDestructuredProps),
+            "noDistractingElements" => Ok(Self::NoDistractingElements),
+            "noDocumentCookie" => Ok(Self::NoDocumentCookie),
+            "noDocumentImportInPage" => Ok(Self::NoDocumentImportInPage),
+            "noDoneCallback" => Ok(Self::NoDoneCallback),
+            "noDoubleEquals" => Ok(Self::NoDoubleEquals),
+            "noDuplicateAtImportRules" => Ok(Self::NoDuplicateAtImportRules),
+            "noDuplicateCase" => Ok(Self::NoDuplicateCase),
+            "noDuplicateClassMembers" => Ok(Self::NoDuplicateClassMembers),
+            "noDuplicateCustomProperties" => Ok(Self::NoDuplicateCustomProperties),
+            "noDuplicateElseIf" => Ok(Self::NoDuplicateElseIf),
+            "noDuplicateFields" => Ok(Self::NoDuplicateFields),
+            "noDuplicateFontNames" => Ok(Self::NoDuplicateFontNames),
+            "noDuplicateJsxProps" => Ok(Self::NoDuplicateJsxProps),
+            "noDuplicateObjectKeys" => Ok(Self::NoDuplicateObjectKeys),
+            "noDuplicateParameters" => Ok(Self::NoDuplicateParameters),
+            "noDuplicateProperties" => Ok(Self::NoDuplicateProperties),
+            "noDuplicateSelectorsKeyframeBlock" => Ok(Self::NoDuplicateSelectorsKeyframeBlock),
+            "noDuplicateTestHooks" => Ok(Self::NoDuplicateTestHooks),
+            "noDynamicNamespaceImportAccess" => Ok(Self::NoDynamicNamespaceImportAccess),
+            "noEmptyBlock" => Ok(Self::NoEmptyBlock),
+            "noEmptyBlockStatements" => Ok(Self::NoEmptyBlockStatements),
+            "noEmptyCharacterClassInRegex" => Ok(Self::NoEmptyCharacterClassInRegex),
+            "noEmptyInterface" => Ok(Self::NoEmptyInterface),
+            "noEmptyPattern" => Ok(Self::NoEmptyPattern),
+            "noEmptyTypeParameters" => Ok(Self::NoEmptyTypeParameters),
+            "noEnum" => Ok(Self::NoEnum),
+            "noEvolvingTypes" => Ok(Self::NoEvolvingTypes),
+            "noExcessiveCognitiveComplexity" => Ok(Self::NoExcessiveCognitiveComplexity),
+            "noExcessiveNestedTestSuites" => Ok(Self::NoExcessiveNestedTestSuites),
+            "noExplicitAny" => Ok(Self::NoExplicitAny),
+            "noExportedImports" => Ok(Self::NoExportedImports),
+            "noExportsInTest" => Ok(Self::NoExportsInTest),
+            "noExtraBooleanCast" => Ok(Self::NoExtraBooleanCast),
+            "noExtraNonNullAssertion" => Ok(Self::NoExtraNonNullAssertion),
+            "noFallthroughSwitchClause" => Ok(Self::NoFallthroughSwitchClause),
+            "noFlatMapIdentity" => Ok(Self::NoFlatMapIdentity),
+            "noFloatingPromises" => Ok(Self::NoFloatingPromises),
+            "noFocusedTests" => Ok(Self::NoFocusedTests),
+            "noForEach" => Ok(Self::NoForEach),
+            "noFunctionAssign" => Ok(Self::NoFunctionAssign),
+            "noGlobalAssign" => Ok(Self::NoGlobalAssign),
+            "noGlobalDirnameFilename" => Ok(Self::NoGlobalDirnameFilename),
+            "noGlobalEval" => Ok(Self::NoGlobalEval),
+            "noGlobalIsFinite" => Ok(Self::NoGlobalIsFinite),
+            "noGlobalIsNan" => Ok(Self::NoGlobalIsNan),
+            "noGlobalObjectCalls" => Ok(Self::NoGlobalObjectCalls),
+            "noHeadElement" => Ok(Self::NoHeadElement),
+            "noHeadImportInDocument" => Ok(Self::NoHeadImportInDocument),
+            "noHeaderScope" => Ok(Self::NoHeaderScope),
+            "noImgElement" => Ok(Self::NoImgElement),
+            "noImplicitAnyLet" => Ok(Self::NoImplicitAnyLet),
+            "noImplicitBoolean" => Ok(Self::NoImplicitBoolean),
+            "noImportAssign" => Ok(Self::NoImportAssign),
+            "noImportCycles" => Ok(Self::NoImportCycles),
+            "noImportantInKeyframe" => Ok(Self::NoImportantInKeyframe),
+            "noImportantStyles" => Ok(Self::NoImportantStyles),
+            "noInferrableTypes" => Ok(Self::NoInferrableTypes),
+            "noInnerDeclarations" => Ok(Self::NoInnerDeclarations),
+            "noInteractiveElementToNoninteractiveRole" => {
+                Ok(Self::NoInteractiveElementToNoninteractiveRole)
+            }
+            "noInvalidBuiltinInstantiation" => Ok(Self::NoInvalidBuiltinInstantiation),
+            "noInvalidConstructorSuper" => Ok(Self::NoInvalidConstructorSuper),
+            "noInvalidDirectionInLinearGradient" => Ok(Self::NoInvalidDirectionInLinearGradient),
+            "noInvalidGridAreas" => Ok(Self::NoInvalidGridAreas),
+            "noInvalidPositionAtImportRule" => Ok(Self::NoInvalidPositionAtImportRule),
+            "noInvalidUseBeforeDeclaration" => Ok(Self::NoInvalidUseBeforeDeclaration),
+            "noIrregularWhitespace" => Ok(Self::NoIrregularWhitespace),
+            "noLabelVar" => Ok(Self::NoLabelVar),
+            "noLabelWithoutControl" => Ok(Self::NoLabelWithoutControl),
+            "noMisleadingCharacterClass" => Ok(Self::NoMisleadingCharacterClass),
+            "noMisleadingInstantiator" => Ok(Self::NoMisleadingInstantiator),
+            "noMisplacedAssertion" => Ok(Self::NoMisplacedAssertion),
+            "noMisrefactoredShorthandAssign" => Ok(Self::NoMisrefactoredShorthandAssign),
+            "noMissingVarFunction" => Ok(Self::NoMissingVarFunction),
+            "noNamespace" => Ok(Self::NoNamespace),
+            "noNamespaceImport" => Ok(Self::NoNamespaceImport),
+            "noNegationElse" => Ok(Self::NoNegationElse),
+            "noNestedTernary" => Ok(Self::NoNestedTernary),
+            "noNodejsModules" => Ok(Self::NoNodejsModules),
+            "noNonNullAssertion" => Ok(Self::NoNonNullAssertion),
+            "noNoninteractiveElementInteractions" => Ok(Self::NoNoninteractiveElementInteractions),
+            "noNoninteractiveElementToInteractiveRole" => {
+                Ok(Self::NoNoninteractiveElementToInteractiveRole)
+            }
+            "noNoninteractiveTabindex" => Ok(Self::NoNoninteractiveTabindex),
+            "noNonoctalDecimalEscape" => Ok(Self::NoNonoctalDecimalEscape),
+            "noOctalEscape" => Ok(Self::NoOctalEscape),
+            "noParameterAssign" => Ok(Self::NoParameterAssign),
+            "noParameterProperties" => Ok(Self::NoParameterProperties),
+            "noPositiveTabindex" => Ok(Self::NoPositiveTabindex),
+            "noPrecisionLoss" => Ok(Self::NoPrecisionLoss),
+            "noPrivateImports" => Ok(Self::NoPrivateImports),
+            "noProcessEnv" => Ok(Self::NoProcessEnv),
+            "noProcessGlobal" => Ok(Self::NoProcessGlobal),
+            "noPrototypeBuiltins" => Ok(Self::NoPrototypeBuiltins),
+            "noReExportAll" => Ok(Self::NoReExportAll),
+            "noReactSpecificProps" => Ok(Self::NoReactSpecificProps),
+            "noRedeclare" => Ok(Self::NoRedeclare),
+            "noRedundantAlt" => Ok(Self::NoRedundantAlt),
+            "noRedundantRoles" => Ok(Self::NoRedundantRoles),
+            "noRedundantUseStrict" => Ok(Self::NoRedundantUseStrict),
+            "noRenderReturnValue" => Ok(Self::NoRenderReturnValue),
+            "noRestrictedElements" => Ok(Self::NoRestrictedElements),
+            "noRestrictedGlobals" => Ok(Self::NoRestrictedGlobals),
+            "noRestrictedImports" => Ok(Self::NoRestrictedImports),
+            "noRestrictedTypes" => Ok(Self::NoRestrictedTypes),
+            "noSecrets" => Ok(Self::NoSecrets),
+            "noSelfAssign" => Ok(Self::NoSelfAssign),
+            "noSelfCompare" => Ok(Self::NoSelfCompare),
+            "noSetterReturn" => Ok(Self::NoSetterReturn),
+            "noShadow" => Ok(Self::NoShadow),
+            "noShadowRestrictedNames" => Ok(Self::NoShadowRestrictedNames),
+            "noShorthandPropertyOverrides" => Ok(Self::NoShorthandPropertyOverrides),
+            "noShoutyConstants" => Ok(Self::NoShoutyConstants),
+            "noSkippedTests" => Ok(Self::NoSkippedTests),
+            "noSparseArray" => Ok(Self::NoSparseArray),
+            "noStaticElementInteractions" => Ok(Self::NoStaticElementInteractions),
+            "noStaticOnlyClass" => Ok(Self::NoStaticOnlyClass),
+            "noStringCaseMismatch" => Ok(Self::NoStringCaseMismatch),
+            "noSubstr" => Ok(Self::NoSubstr),
+            "noSuspiciousSemicolonInJsx" => Ok(Self::NoSuspiciousSemicolonInJsx),
+            "noSvgWithoutTitle" => Ok(Self::NoSvgWithoutTitle),
+            "noSwitchDeclarations" => Ok(Self::NoSwitchDeclarations),
+            "noTemplateCurlyInString" => Ok(Self::NoTemplateCurlyInString),
+            "noThenProperty" => Ok(Self::NoThenProperty),
+            "noThisInStatic" => Ok(Self::NoThisInStatic),
+            "noTsIgnore" => Ok(Self::NoTsIgnore),
+            "noUndeclaredDependencies" => Ok(Self::NoUndeclaredDependencies),
+            "noUndeclaredVariables" => Ok(Self::NoUndeclaredVariables),
+            "noUnknownAtRule" => Ok(Self::NoUnknownAtRule),
+            "noUnknownFunction" => Ok(Self::NoUnknownFunction),
+            "noUnknownMediaFeatureName" => Ok(Self::NoUnknownMediaFeatureName),
+            "noUnknownProperty" => Ok(Self::NoUnknownProperty),
+            "noUnknownPseudoClass" => Ok(Self::NoUnknownPseudoClass),
+            "noUnknownPseudoElement" => Ok(Self::NoUnknownPseudoElement),
+            "noUnknownTypeSelector" => Ok(Self::NoUnknownTypeSelector),
+            "noUnknownUnit" => Ok(Self::NoUnknownUnit),
+            "noUnmatchableAnbSelector" => Ok(Self::NoUnmatchableAnbSelector),
+            "noUnreachable" => Ok(Self::NoUnreachable),
+            "noUnreachableSuper" => Ok(Self::NoUnreachableSuper),
+            "noUnresolvedImports" => Ok(Self::NoUnresolvedImports),
+            "noUnsafeDeclarationMerging" => Ok(Self::NoUnsafeDeclarationMerging),
+            "noUnsafeFinally" => Ok(Self::NoUnsafeFinally),
+            "noUnsafeNegation" => Ok(Self::NoUnsafeNegation),
+            "noUnsafeOptionalChaining" => Ok(Self::NoUnsafeOptionalChaining),
+            "noUnusedFunctionParameters" => Ok(Self::NoUnusedFunctionParameters),
+            "noUnusedImports" => Ok(Self::NoUnusedImports),
+            "noUnusedLabels" => Ok(Self::NoUnusedLabels),
+            "noUnusedPrivateClassMembers" => Ok(Self::NoUnusedPrivateClassMembers),
+            "noUnusedTemplateLiteral" => Ok(Self::NoUnusedTemplateLiteral),
+            "noUnusedVariables" => Ok(Self::NoUnusedVariables),
+            "noUnwantedPolyfillio" => Ok(Self::NoUnwantedPolyfillio),
+            "noUselessBackrefInRegex" => Ok(Self::NoUselessBackrefInRegex),
+            "noUselessCatch" => Ok(Self::NoUselessCatch),
+            "noUselessConstructor" => Ok(Self::NoUselessConstructor),
+            "noUselessContinue" => Ok(Self::NoUselessContinue),
+            "noUselessElse" => Ok(Self::NoUselessElse),
+            "noUselessEmptyExport" => Ok(Self::NoUselessEmptyExport),
+            "noUselessEscapeInRegex" => Ok(Self::NoUselessEscapeInRegex),
+            "noUselessEscapeInString" => Ok(Self::NoUselessEscapeInString),
+            "noUselessFragments" => Ok(Self::NoUselessFragments),
+            "noUselessLabel" => Ok(Self::NoUselessLabel),
+            "noUselessLoneBlockStatements" => Ok(Self::NoUselessLoneBlockStatements),
+            "noUselessRename" => Ok(Self::NoUselessRename),
+            "noUselessStringConcat" => Ok(Self::NoUselessStringConcat),
+            "noUselessStringRaw" => Ok(Self::NoUselessStringRaw),
+            "noUselessSwitchCase" => Ok(Self::NoUselessSwitchCase),
+            "noUselessTernary" => Ok(Self::NoUselessTernary),
+            "noUselessThisAlias" => Ok(Self::NoUselessThisAlias),
+            "noUselessTypeConstraint" => Ok(Self::NoUselessTypeConstraint),
+            "noUselessUndefined" => Ok(Self::NoUselessUndefined),
+            "noUselessUndefinedInitialization" => Ok(Self::NoUselessUndefinedInitialization),
+            "noValueAtRule" => Ok(Self::NoValueAtRule),
+            "noVar" => Ok(Self::NoVar),
+            "noVoid" => Ok(Self::NoVoid),
+            "noVoidElementsWithChildren" => Ok(Self::NoVoidElementsWithChildren),
+            "noVoidTypeReturn" => Ok(Self::NoVoidTypeReturn),
+            "noWith" => Ok(Self::NoWith),
+            "noYodaExpression" => Ok(Self::NoYodaExpression),
+            "useAdjacentGetterSetter" => Ok(Self::UseAdjacentGetterSetter),
+            "useAdjacentOverloadSignatures" => Ok(Self::UseAdjacentOverloadSignatures),
+            "useAltText" => Ok(Self::UseAltText),
+            "useAnchorContent" => Ok(Self::UseAnchorContent),
+            "useAriaActivedescendantWithTabindex" => Ok(Self::UseAriaActivedescendantWithTabindex),
+            "useAriaPropsForRole" => Ok(Self::UseAriaPropsForRole),
+            "useAriaPropsSupportedByRole" => Ok(Self::UseAriaPropsSupportedByRole),
+            "useArrayLiterals" => Ok(Self::UseArrayLiterals),
+            "useArrowFunction" => Ok(Self::UseArrowFunction),
+            "useAsConstAssertion" => Ok(Self::UseAsConstAssertion),
+            "useAtIndex" => Ok(Self::UseAtIndex),
+            "useAwait" => Ok(Self::UseAwait),
+            "useBlockStatements" => Ok(Self::UseBlockStatements),
+            "useButtonType" => Ok(Self::UseButtonType),
+            "useCollapsedElseIf" => Ok(Self::UseCollapsedElseIf),
+            "useCollapsedIf" => Ok(Self::UseCollapsedIf),
+            "useComponentExportOnlyModules" => Ok(Self::UseComponentExportOnlyModules),
+            "useConsistentArrayType" => Ok(Self::UseConsistentArrayType),
+            "useConsistentBuiltinInstantiation" => Ok(Self::UseConsistentBuiltinInstantiation),
+            "useConsistentCurlyBraces" => Ok(Self::UseConsistentCurlyBraces),
+            "useConsistentMemberAccessibility" => Ok(Self::UseConsistentMemberAccessibility),
+            "useConsistentObjectDefinition" => Ok(Self::UseConsistentObjectDefinition),
+            "useConst" => Ok(Self::UseConst),
+            "useDateNow" => Ok(Self::UseDateNow),
+            "useDefaultParameterLast" => Ok(Self::UseDefaultParameterLast),
+            "useDefaultSwitchClause" => Ok(Self::UseDefaultSwitchClause),
+            "useDefaultSwitchClauseLast" => Ok(Self::UseDefaultSwitchClauseLast),
+            "useDeprecatedReason" => Ok(Self::UseDeprecatedReason),
+            "useEnumInitializers" => Ok(Self::UseEnumInitializers),
+            "useErrorMessage" => Ok(Self::UseErrorMessage),
+            "useExhaustiveDependencies" => Ok(Self::UseExhaustiveDependencies),
+            "useExhaustiveSwitchCases" => Ok(Self::UseExhaustiveSwitchCases),
+            "useExplicitLengthCheck" => Ok(Self::UseExplicitLengthCheck),
+            "useExplicitType" => Ok(Self::UseExplicitType),
+            "useExponentiationOperator" => Ok(Self::UseExponentiationOperator),
+            "useExportType" => Ok(Self::UseExportType),
+            "useExportsLast" => Ok(Self::UseExportsLast),
+            "useFilenamingConvention" => Ok(Self::UseFilenamingConvention),
+            "useFlatMap" => Ok(Self::UseFlatMap),
+            "useFocusableInteractive" => Ok(Self::UseFocusableInteractive),
+            "useForComponent" => Ok(Self::UseForComponent),
+            "useForOf" => Ok(Self::UseForOf),
+            "useFragmentSyntax" => Ok(Self::UseFragmentSyntax),
+            "useGenericFontNames" => Ok(Self::UseGenericFontNames),
+            "useGetterReturn" => Ok(Self::UseGetterReturn),
+            "useGoogleFontDisplay" => Ok(Self::UseGoogleFontDisplay),
+            "useGoogleFontPreconnect" => Ok(Self::UseGoogleFontPreconnect),
+            "useGuardForIn" => Ok(Self::UseGuardForIn),
+            "useHeadingContent" => Ok(Self::UseHeadingContent),
+            "useHookAtTopLevel" => Ok(Self::UseHookAtTopLevel),
+            "useHtmlLang" => Ok(Self::UseHtmlLang),
+            "useIframeTitle" => Ok(Self::UseIframeTitle),
+            "useImportExtensions" => Ok(Self::UseImportExtensions),
+            "useImportType" => Ok(Self::UseImportType),
+            "useIsArray" => Ok(Self::UseIsArray),
+            "useIsNan" => Ok(Self::UseIsNan),
+            "useIterableCallbackReturn" => Ok(Self::UseIterableCallbackReturn),
+            "useJsxKeyInIterable" => Ok(Self::UseJsxKeyInIterable),
+            "useKeyWithClickEvents" => Ok(Self::UseKeyWithClickEvents),
+            "useKeyWithMouseEvents" => Ok(Self::UseKeyWithMouseEvents),
+            "useLiteralEnumMembers" => Ok(Self::UseLiteralEnumMembers),
+            "useLiteralKeys" => Ok(Self::UseLiteralKeys),
+            "useMediaCaption" => Ok(Self::UseMediaCaption),
+            "useNamedOperation" => Ok(Self::UseNamedOperation),
+            "useNamespaceKeyword" => Ok(Self::UseNamespaceKeyword),
+            "useNamingConvention" => Ok(Self::UseNamingConvention),
+            "useNodeAssertStrict" => Ok(Self::UseNodeAssertStrict),
+            "useNodejsImportProtocol" => Ok(Self::UseNodejsImportProtocol),
+            "useNumberNamespace" => Ok(Self::UseNumberNamespace),
+            "useNumberToFixedDigitsArgument" => Ok(Self::UseNumberToFixedDigitsArgument),
+            "useNumericLiterals" => Ok(Self::UseNumericLiterals),
+            "useNumericSeparators" => Ok(Self::UseNumericSeparators),
+            "useOptionalChain" => Ok(Self::UseOptionalChain),
+            "useParseIntRadix" => Ok(Self::UseParseIntRadix),
+            "useRegexLiterals" => Ok(Self::UseRegexLiterals),
+            "useSelfClosingElements" => Ok(Self::UseSelfClosingElements),
+            "useSemanticElements" => Ok(Self::UseSemanticElements),
+            "useShorthandAssign" => Ok(Self::UseShorthandAssign),
+            "useShorthandFunctionType" => Ok(Self::UseShorthandFunctionType),
+            "useSimpleNumberKeys" => Ok(Self::UseSimpleNumberKeys),
+            "useSimplifiedLogicExpression" => Ok(Self::UseSimplifiedLogicExpression),
+            "useSingleJsDocAsterisk" => Ok(Self::UseSingleJsDocAsterisk),
+            "useSingleVarDeclarator" => Ok(Self::UseSingleVarDeclarator),
+            "useSortedClasses" => Ok(Self::UseSortedClasses),
+            "useStrictMode" => Ok(Self::UseStrictMode),
+            "useSymbolDescription" => Ok(Self::UseSymbolDescription),
+            "useTemplate" => Ok(Self::UseTemplate),
+            "useThrowNewError" => Ok(Self::UseThrowNewError),
+            "useThrowOnlyError" => Ok(Self::UseThrowOnlyError),
+            "useTopLevelRegex" => Ok(Self::UseTopLevelRegex),
+            "useTrimStartEnd" => Ok(Self::UseTrimStartEnd),
+            "useValidAnchor" => Ok(Self::UseValidAnchor),
+            "useValidAriaProps" => Ok(Self::UseValidAriaProps),
+            "useValidAriaRole" => Ok(Self::UseValidAriaRole),
+            "useValidAriaValues" => Ok(Self::UseValidAriaValues),
+            "useValidAutocomplete" => Ok(Self::UseValidAutocomplete),
+            "useValidForDirection" => Ok(Self::UseValidForDirection),
+            "useValidLang" => Ok(Self::UseValidLang),
+            "useValidTypeof" => Ok(Self::UseValidTypeof),
+            "useWhile" => Ok(Self::UseWhile),
+            "useYield" => Ok(Self::UseYield),
+            _ => Err("This rule name doesn't exist."),
+        }
+    }
+}
+impl std::fmt::Display for RuleName {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.write_str(self.as_str())
+    }
+}
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -2695,7 +4019,141 @@ impl From<GroupPlainConfiguration> for Correctness {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Nursery { # [doc = r" It enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow await inside loops."] # [serde (skip_serializing_if = "Option::is_none")] pub no_await_in_loop : Option < RuleConfiguration < biome_rule_options :: no_await_in_loop :: NoAwaitInLoopOptions >> , # [doc = "Disallow bitwise operators."] # [serde (skip_serializing_if = "Option::is_none")] pub no_bitwise_operators : Option < RuleConfiguration < biome_rule_options :: no_bitwise_operators :: NoBitwiseOperatorsOptions >> , # [doc = "Disallow use of CommonJs module system in favor of ESM style imports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_common_js : Option < RuleConfiguration < biome_rule_options :: no_common_js :: NoCommonJsOptions >> , # [doc = "Disallow expressions where the operation doesn't affect the value"] # [serde (skip_serializing_if = "Option::is_none")] pub no_constant_binary_expression : Option < RuleConfiguration < biome_rule_options :: no_constant_binary_expression :: NoConstantBinaryExpressionOptions >> , # [doc = "Disallow a lower specificity selector from coming after a higher specificity selector."] # [serde (skip_serializing_if = "Option::is_none")] pub no_descending_specificity : Option < RuleConfiguration < biome_rule_options :: no_descending_specificity :: NoDescendingSpecificityOptions >> , # [doc = "Disallow destructuring props inside JSX components in Solid projects."] # [serde (skip_serializing_if = "Option::is_none")] pub no_destructured_props : Option < RuleConfiguration < biome_rule_options :: no_destructured_props :: NoDestructuredPropsOptions >> , # [doc = "Disallow direct assignments to document.cookie."] # [serde (skip_serializing_if = "Option::is_none")] pub no_document_cookie : Option < RuleConfiguration < biome_rule_options :: no_document_cookie :: NoDocumentCookieOptions >> , # [doc = "Prevents importing next/document outside of pages/_document.jsx in Next.js projects."] # [serde (skip_serializing_if = "Option::is_none")] pub no_document_import_in_page : Option < RuleConfiguration < biome_rule_options :: no_document_import_in_page :: NoDocumentImportInPageOptions >> , # [doc = "Disallow duplicate custom properties within declaration blocks."] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_custom_properties : Option < RuleConfiguration < biome_rule_options :: no_duplicate_custom_properties :: NoDuplicateCustomPropertiesOptions >> , # [doc = "Disallow duplicate conditions in if-else-if chains"] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_else_if : Option < RuleConfiguration < biome_rule_options :: no_duplicate_else_if :: NoDuplicateElseIfOptions >> , # [doc = "No duplicated fields in GraphQL operations."] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_fields : Option < RuleConfiguration < biome_rule_options :: no_duplicate_fields :: NoDuplicateFieldsOptions >> , # [doc = "Disallow duplicate properties within declaration blocks."] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_properties : Option < RuleConfiguration < biome_rule_options :: no_duplicate_properties :: NoDuplicatePropertiesOptions >> , # [doc = "Disallow accessing namespace imports dynamically."] # [serde (skip_serializing_if = "Option::is_none")] pub no_dynamic_namespace_import_access : Option < RuleConfiguration < biome_rule_options :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccessOptions >> , # [doc = "Disallow TypeScript enum."] # [serde (skip_serializing_if = "Option::is_none")] pub no_enum : Option < RuleConfiguration < biome_rule_options :: no_enum :: NoEnumOptions >> , # [doc = "Disallow exporting an imported variable."] # [serde (skip_serializing_if = "Option::is_none")] pub no_exported_imports : Option < RuleConfiguration < biome_rule_options :: no_exported_imports :: NoExportedImportsOptions >> , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Disallow the use of __dirname and __filename in the global scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_global_dirname_filename : Option < RuleFixConfiguration < biome_rule_options :: no_global_dirname_filename :: NoGlobalDirnameFilenameOptions >> , # [doc = "Prevent usage of \\<head> element in a Next.js project."] # [serde (skip_serializing_if = "Option::is_none")] pub no_head_element : Option < RuleConfiguration < biome_rule_options :: no_head_element :: NoHeadElementOptions >> , # [doc = "Prevent using the next/head module in pages/_document.js on Next.js projects."] # [serde (skip_serializing_if = "Option::is_none")] pub no_head_import_in_document : Option < RuleConfiguration < biome_rule_options :: no_head_import_in_document :: NoHeadImportInDocumentOptions >> , # [doc = "Prevent usage of \\<img> element in a Next.js project."] # [serde (skip_serializing_if = "Option::is_none")] pub no_img_element : Option < RuleConfiguration < biome_rule_options :: no_img_element :: NoImgElementOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallows the use of irregular whitespace characters."] # [serde (skip_serializing_if = "Option::is_none")] pub no_irregular_whitespace : Option < RuleConfiguration < biome_rule_options :: no_irregular_whitespace :: NoIrregularWhitespaceOptions >> , # [doc = "Disallow missing var function for css variables."] # [serde (skip_serializing_if = "Option::is_none")] pub no_missing_var_function : Option < RuleConfiguration < biome_rule_options :: no_missing_var_function :: NoMissingVarFunctionOptions >> , # [doc = "Disallow nested ternary expressions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_nested_ternary : Option < RuleConfiguration < biome_rule_options :: no_nested_ternary :: NoNestedTernaryOptions >> , # [doc = "Disallow use event handlers on non-interactive elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_noninteractive_element_interactions : Option < RuleConfiguration < biome_rule_options :: no_noninteractive_element_interactions :: NoNoninteractiveElementInteractionsOptions >> , # [doc = "Disallow octal escape sequences in string literals"] # [serde (skip_serializing_if = "Option::is_none")] pub no_octal_escape : Option < RuleFixConfiguration < biome_rule_options :: no_octal_escape :: NoOctalEscapeOptions >> , # [doc = "Disallow the use of process.env."] # [serde (skip_serializing_if = "Option::is_none")] pub no_process_env : Option < RuleConfiguration < biome_rule_options :: no_process_env :: NoProcessEnvOptions >> , # [doc = "Disallow the use of process global."] # [serde (skip_serializing_if = "Option::is_none")] pub no_process_global : Option < RuleFixConfiguration < biome_rule_options :: no_process_global :: NoProcessGlobalOptions >> , # [doc = "Disallow specified modules when loaded by import or require."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_imports : Option < RuleConfiguration < biome_rule_options :: no_restricted_imports :: NoRestrictedImportsOptions >> , # [doc = "Disallow user defined types."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_types : Option < RuleFixConfiguration < biome_rule_options :: no_restricted_types :: NoRestrictedTypesOptions >> , # [doc = "Disallow usage of sensitive data such as API keys and tokens."] # [serde (skip_serializing_if = "Option::is_none")] pub no_secrets : Option < RuleConfiguration < biome_rule_options :: no_secrets :: NoSecretsOptions >> , # [doc = "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute."] # [serde (skip_serializing_if = "Option::is_none")] pub no_static_element_interactions : Option < RuleConfiguration < biome_rule_options :: no_static_element_interactions :: NoStaticElementInteractionsOptions >> , # [doc = "Enforce the use of String.slice() over String.substr() and String.substring()."] # [serde (skip_serializing_if = "Option::is_none")] pub no_substr : Option < RuleFixConfiguration < biome_rule_options :: no_substr :: NoSubstrOptions >> , # [doc = "Disallow template literal placeholder syntax in regular strings."] # [serde (skip_serializing_if = "Option::is_none")] pub no_template_curly_in_string : Option < RuleConfiguration < biome_rule_options :: no_template_curly_in_string :: NoTemplateCurlyInStringOptions >> , # [doc = "Prevents the use of the TypeScript directive @ts-ignore."] # [serde (skip_serializing_if = "Option::is_none")] pub no_ts_ignore : Option < RuleFixConfiguration < biome_rule_options :: no_ts_ignore :: NoTsIgnoreOptions >> , # [doc = "Disallow unknown at-rules."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_at_rule : Option < RuleConfiguration < biome_rule_options :: no_unknown_at_rule :: NoUnknownAtRuleOptions >> , # [doc = "Disallow unknown pseudo-class selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_pseudo_class : Option < RuleConfiguration < biome_rule_options :: no_unknown_pseudo_class :: NoUnknownPseudoClassOptions >> , # [doc = "Disallow unknown pseudo-element selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_pseudo_element : Option < RuleConfiguration < biome_rule_options :: no_unknown_pseudo_element :: NoUnknownPseudoElementOptions >> , # [doc = "Disallow unknown type selectors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unknown_type_selector : Option < RuleConfiguration < biome_rule_options :: no_unknown_type_selector :: NoUnknownTypeSelectorOptions >> , # [doc = "Prevent duplicate polyfills from Polyfill.io."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unwanted_polyfillio : Option < RuleConfiguration < biome_rule_options :: no_unwanted_polyfillio :: NoUnwantedPolyfillioOptions >> , # [doc = "Disallow unnecessary escape sequence in regular expression literals."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_escape_in_regex : Option < RuleFixConfiguration < biome_rule_options :: no_useless_escape_in_regex :: NoUselessEscapeInRegexOptions >> , # [doc = "Disallow unnecessary escapes in string literals."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_escape_in_string : Option < RuleFixConfiguration < biome_rule_options :: no_useless_escape_in_string :: NoUselessEscapeInStringOptions >> , # [doc = "Disallow unnecessary String.raw function in template string literals without any escape sequence."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_string_raw : Option < RuleConfiguration < biome_rule_options :: no_useless_string_raw :: NoUselessStringRawOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Disallow use of @value rule in css modules."] # [serde (skip_serializing_if = "Option::is_none")] pub no_value_at_rule : Option < RuleConfiguration < biome_rule_options :: no_value_at_rule :: NoValueAtRuleOptions >> , # [doc = "Disallow the use of overload signatures that are not next to each other."] # [serde (skip_serializing_if = "Option::is_none")] pub use_adjacent_overload_signatures : Option < RuleConfiguration < biome_rule_options :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignaturesOptions >> , # [doc = "Enforce that ARIA properties are valid for the roles that are supported by the element."] # [serde (skip_serializing_if = "Option::is_none")] pub use_aria_props_supported_by_role : Option < RuleConfiguration < biome_rule_options :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRoleOptions >> , # [doc = "Use at() instead of integer index access."] # [serde (skip_serializing_if = "Option::is_none")] pub use_at_index : Option < RuleFixConfiguration < biome_rule_options :: use_at_index :: UseAtIndexOptions >> , # [doc = "Enforce using single if instead of nested if clauses."] # [serde (skip_serializing_if = "Option::is_none")] pub use_collapsed_if : Option < RuleFixConfiguration < biome_rule_options :: use_collapsed_if :: UseCollapsedIfOptions >> , # [doc = "Enforce declaring components only within modules that export React Components exclusively."] # [serde (skip_serializing_if = "Option::is_none")] pub use_component_export_only_modules : Option < RuleConfiguration < biome_rule_options :: use_component_export_only_modules :: UseComponentExportOnlyModulesOptions >> , # [doc = "This rule enforces consistent use of curly braces inside JSX attributes and JSX children."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_curly_braces : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_curly_braces :: UseConsistentCurlyBracesOptions >> , # [doc = "Require consistent accessibility modifiers on class properties and methods."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_member_accessibility : Option < RuleConfiguration < biome_rule_options :: use_consistent_member_accessibility :: UseConsistentMemberAccessibilityOptions >> , # [doc = "Require the consistent declaration of object literals. Defaults to explicit definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_object_definition : Option < RuleConfiguration < biome_rule_options :: use_consistent_object_definition :: UseConsistentObjectDefinitionOptions >> , # [doc = "Require specifying the reason argument when using @deprecated directive"] # [serde (skip_serializing_if = "Option::is_none")] pub use_deprecated_reason : Option < RuleConfiguration < biome_rule_options :: use_deprecated_reason :: UseDeprecatedReasonOptions >> , # [doc = "Require explicit return types on functions and class methods."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Require that all exports are declared after all non-export statements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exports_last : Option < RuleConfiguration < biome_rule_options :: use_exports_last :: UseExportsLastOptions >> , # [doc = "Enforce using Solid's \\<For /> component for mapping an array to JSX elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_for_component : Option < RuleConfiguration < biome_rule_options :: use_for_component :: UseForComponentOptions >> , # [doc = "Enforces the use of a recommended display strategy with Google Fonts."] # [serde (skip_serializing_if = "Option::is_none")] pub use_google_font_display : Option < RuleConfiguration < biome_rule_options :: use_google_font_display :: UseGoogleFontDisplayOptions >> , # [doc = "Ensure the preconnect attribute is used when using Google Fonts."] # [serde (skip_serializing_if = "Option::is_none")] pub use_google_font_preconnect : Option < RuleFixConfiguration < biome_rule_options :: use_google_font_preconnect :: UseGoogleFontPreconnectOptions >> , # [doc = "Require for-in loops to include an if statement."] # [serde (skip_serializing_if = "Option::is_none")] pub use_guard_for_in : Option < RuleConfiguration < biome_rule_options :: use_guard_for_in :: UseGuardForInOptions >> , # [doc = "Enforce specifying the name of GraphQL operations."] # [serde (skip_serializing_if = "Option::is_none")] pub use_named_operation : Option < RuleFixConfiguration < biome_rule_options :: use_named_operation :: UseNamedOperationOptions >> , # [doc = "Validates that all enum values are capitalized."] # [serde (skip_serializing_if = "Option::is_none")] pub use_naming_convention : Option < RuleConfiguration < biome_rule_options :: use_naming_convention :: UseNamingConventionOptions >> , # [doc = "Enforce the consistent use of the radix argument when using parseInt()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_parse_int_radix : Option < RuleFixConfiguration < biome_rule_options :: use_parse_int_radix :: UseParseIntRadixOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> , # [doc = "Enforce the use of the directive \"use strict\" in script files."] # [serde (skip_serializing_if = "Option::is_none")] pub use_strict_mode : Option < RuleFixConfiguration < biome_rule_options :: use_strict_mode :: UseStrictModeOptions >> , # [doc = "Require a description parameter for the Symbol()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_symbol_description : Option < RuleConfiguration < biome_rule_options :: use_symbol_description :: UseSymbolDescriptionOptions >> , # [doc = "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_trim_start_end : Option < RuleFixConfiguration < biome_rule_options :: use_trim_start_end :: UseTrimStartEndOptions >> , # [doc = "Use valid values for the autocomplete attribute on input elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_valid_autocomplete : Option < RuleConfiguration < biome_rule_options :: use_valid_autocomplete :: UseValidAutocompleteOptions >> }
+pub struct Nursery {
+    #[doc = r" It enables the recommended rules for this group"]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recommended: Option<bool>,
+    #[doc = "Disallow await inside loops."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_await_in_loop: Option<RuleConfiguration<biome_js_analyze::options::NoAwaitInLoop>>,
+    #[doc = "Disallow bitwise operators."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_bitwise_operators:
+        Option<RuleConfiguration<biome_js_analyze::options::NoBitwiseOperators>>,
+    #[doc = "Disallow expressions where the operation doesn't affect the value"]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_constant_binary_expression:
+        Option<RuleConfiguration<biome_js_analyze::options::NoConstantBinaryExpression>>,
+    #[doc = "Disallow destructuring props inside JSX components in Solid projects."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_destructured_props:
+        Option<RuleConfiguration<biome_js_analyze::options::NoDestructuredProps>>,
+    #[doc = "Require Promise-like statements to be handled appropriately."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_floating_promises:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoFloatingPromises>>,
+    #[doc = "Disallow the use of __dirname and __filename in the global scope."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_global_dirname_filename:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoGlobalDirnameFilename>>,
+    #[doc = "Prevent import cycles."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_import_cycles: Option<RuleConfiguration<biome_js_analyze::options::NoImportCycles>>,
+    #[doc = "Disallow the use of the !important style."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_important_styles:
+        Option<RuleFixConfiguration<biome_css_analyze::options::NoImportantStyles>>,
+    #[doc = "Disallow use event handlers on non-interactive elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_noninteractive_element_interactions:
+        Option<RuleConfiguration<biome_js_analyze::options::NoNoninteractiveElementInteractions>>,
+    #[doc = "Disallow the use of process global."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_process_global: Option<RuleFixConfiguration<biome_js_analyze::options::NoProcessGlobal>>,
+    #[doc = "Disallow the use of configured elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_restricted_elements:
+        Option<RuleConfiguration<biome_js_analyze::options::NoRestrictedElements>>,
+    #[doc = "Disallow usage of sensitive data such as API keys and tokens."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_secrets: Option<RuleConfiguration<biome_js_analyze::options::NoSecrets>>,
+    #[doc = "Disallow variable declarations from shadowing variables declared in the outer scope."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_shadow: Option<RuleConfiguration<biome_js_analyze::options::NoShadow>>,
+    #[doc = "Prevents the use of the TypeScript directive @ts-ignore."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_ts_ignore: Option<RuleFixConfiguration<biome_js_analyze::options::NoTsIgnore>>,
+    #[doc = "Disallow unknown at-rules."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unknown_at_rule: Option<RuleConfiguration<biome_css_analyze::options::NoUnknownAtRule>>,
+    #[doc = "Warn when importing non-existing exports."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unresolved_imports:
+        Option<RuleConfiguration<biome_js_analyze::options::NoUnresolvedImports>>,
+    #[doc = "Prevent duplicate polyfills from Polyfill.io."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unwanted_polyfillio:
+        Option<RuleConfiguration<biome_js_analyze::options::NoUnwantedPolyfillio>>,
+    #[doc = "Disallow useless backreferences in regular expression literals that always match an empty string."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_useless_backref_in_regex:
+        Option<RuleConfiguration<biome_js_analyze::options::NoUselessBackrefInRegex>>,
+    #[doc = "Disallow unnecessary escapes in string literals."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_useless_escape_in_string:
+        Option<RuleFixConfiguration<biome_css_analyze::options::NoUselessEscapeInString>>,
+    #[doc = "Disallow the use of useless undefined."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_useless_undefined:
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessUndefined>>,
+    #[doc = "Enforce that getters and setters for the same property are adjacent in class and object definitions."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_adjacent_getter_setter:
+        Option<RuleConfiguration<biome_js_analyze::options::UseAdjacentGetterSetter>>,
+    #[doc = "Require the consistent declaration of object literals. Defaults to explicit definitions."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_consistent_object_definition:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseConsistentObjectDefinition>>,
+    #[doc = "Require switch-case statements to be exhaustive."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_exhaustive_switch_cases:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseExhaustiveSwitchCases>>,
+    #[doc = "Enforce types in functions, methods, variables, and parameters."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_explicit_type: Option<RuleConfiguration<biome_js_analyze::options::UseExplicitType>>,
+    #[doc = "Require that all exports are declared after all non-export statements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_exports_last: Option<RuleConfiguration<biome_js_analyze::options::UseExportsLast>>,
+    #[doc = "Enforce using Solid's \\<For /> component for mapping an array to JSX elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_for_component: Option<RuleConfiguration<biome_js_analyze::options::UseForComponent>>,
+    #[doc = "Ensure the preconnect attribute is used when using Google Fonts."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_google_font_preconnect:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseGoogleFontPreconnect>>,
+    #[doc = "Enforce consistent return values in iterable callbacks."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_iterable_callback_return:
+        Option<RuleConfiguration<biome_js_analyze::options::UseIterableCallbackReturn>>,
+    #[doc = "Enforce specifying the name of GraphQL operations."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_named_operation:
+        Option<RuleFixConfiguration<biome_graphql_analyze::options::UseNamedOperation>>,
+    #[doc = "Validates that all enum values are capitalized."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_naming_convention:
+        Option<RuleConfiguration<biome_graphql_analyze::options::UseNamingConvention>>,
+    #[doc = "Enforce the use of numeric separators in numeric literals."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_numeric_separators:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNumericSeparators>>,
+    #[doc = "Enforce the consistent use of the radix argument when using parseInt()."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_parse_int_radix:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseParseIntRadix>>,
+    #[doc = "Enforce JSDoc comment lines to start with a single asterisk, except for the first one."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_single_js_doc_asterisk:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseSingleJsDocAsterisk>>,
+    #[doc = "Enforce the sorting of CSS utility classes."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_sorted_classes:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseSortedClasses>>,
+    #[doc = "Require a description parameter for the Symbol()."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_symbol_description:
+        Option<RuleConfiguration<biome_js_analyze::options::UseSymbolDescription>>,
+}
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -2743,14 +4201,7 @@ impl Nursery {
         "noUselessEscapeInString",
         "noUselessStringRaw",
         "noUselessUndefined",
-        "noValueAtRule",
-        "useAdjacentOverloadSignatures",
-        "useAriaPropsSupportedByRole",
-        "useAtIndex",
-        "useCollapsedIf",
-        "useComponentExportOnlyModules",
-        "useConsistentCurlyBraces",
-        "useConsistentMemberAccessibility",
+        "useAdjacentGetterSetter",
         "useConsistentObjectDefinition",
         "useDeprecatedReason",
         "useExplicitType",
@@ -2769,26 +4220,14 @@ impl Nursery {
         "useValidAutocomplete",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[62]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -2826,39 +4265,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[62]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[63]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[67]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -2970,244 +4376,79 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_import_cycles.as_ref() {
+        if let Some(rule) = self.use_adjacent_getter_setter.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.no_irregular_whitespace.as_ref() {
+        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.no_missing_var_function.as_ref() {
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.no_nested_ternary.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.no_noninteractive_element_interactions.as_ref() {
+        if let Some(rule) = self.use_exports_last.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.no_octal_escape.as_ref() {
+        if let Some(rule) = self.use_for_component.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.no_process_env.as_ref() {
+        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.no_process_global.as_ref() {
+        if let Some(rule) = self.use_iterable_callback_return.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.no_restricted_types.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.no_secrets.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.no_static_element_interactions.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.no_substr.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.no_template_curly_in_string.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.no_ts_ignore.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
-            }
-        }
-        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
-            }
-        }
-        if let Some(rule) = self.no_unknown_pseudo_class.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
-            }
-        }
-        if let Some(rule) = self.no_unknown_pseudo_element.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
-            }
-        }
-        if let Some(rule) = self.no_unknown_type_selector.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
-            }
-        }
-        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
-            }
-        }
-        if let Some(rule) = self.no_useless_escape_in_regex.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
-            }
-        }
-        if let Some(rule) = self.no_useless_escape_in_string.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
-            }
-        }
-        if let Some(rule) = self.no_useless_string_raw.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
-            }
-        }
-        if let Some(rule) = self.no_useless_undefined.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
-            }
-        }
-        if let Some(rule) = self.no_value_at_rule.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
-            }
-        }
-        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
-            }
-        }
-        if let Some(rule) = self.use_aria_props_supported_by_role.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
-            }
-        }
-        if let Some(rule) = self.use_at_index.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
-            }
-        }
-        if let Some(rule) = self.use_collapsed_if.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
-            }
-        }
-        if let Some(rule) = self.use_component_export_only_modules.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
-            }
-        }
-        if let Some(rule) = self.use_consistent_curly_braces.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
-            }
-        }
-        if let Some(rule) = self.use_consistent_member_accessibility.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
-            }
-        }
-        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
-            }
-        }
-        if let Some(rule) = self.use_deprecated_reason.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
-            }
-        }
-        if let Some(rule) = self.use_explicit_type.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
-            }
-        }
-        if let Some(rule) = self.use_exports_last.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]));
-            }
-        }
-        if let Some(rule) = self.use_for_component.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]));
-            }
-        }
-        if let Some(rule) = self.use_google_font_display.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
-            }
-        }
-        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
-            }
-        }
-        if let Some(rule) = self.use_guard_for_in.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
-            }
-        }
-        if let Some(rule) = self.use_named_operation.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]));
-            }
-        }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]));
-            }
-        }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[62]));
-            }
-        }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[63]));
-            }
-        }
-        if let Some(rule) = self.use_strict_mode.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]));
-            }
-        }
         if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]));
-            }
-        }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]));
-            }
-        }
-        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[67]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
         index_set
@@ -3314,244 +4555,79 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.no_import_cycles.as_ref() {
+        if let Some(rule) = self.use_adjacent_getter_setter.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.no_irregular_whitespace.as_ref() {
+        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.no_missing_var_function.as_ref() {
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.no_nested_ternary.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.no_noninteractive_element_interactions.as_ref() {
+        if let Some(rule) = self.use_exports_last.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.no_octal_escape.as_ref() {
+        if let Some(rule) = self.use_for_component.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.no_process_env.as_ref() {
+        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.no_process_global.as_ref() {
+        if let Some(rule) = self.use_iterable_callback_return.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.no_restricted_imports.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.no_restricted_types.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
         }
-        if let Some(rule) = self.no_secrets.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
-        if let Some(rule) = self.no_static_element_interactions.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
-        if let Some(rule) = self.no_substr.as_ref() {
+        if let Some(rule) = self.use_single_js_doc_asterisk.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
             }
         }
-        if let Some(rule) = self.no_template_curly_in_string.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
             }
         }
-        if let Some(rule) = self.no_ts_ignore.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
-            }
-        }
-        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
-            }
-        }
-        if let Some(rule) = self.no_unknown_pseudo_class.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
-            }
-        }
-        if let Some(rule) = self.no_unknown_pseudo_element.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
-            }
-        }
-        if let Some(rule) = self.no_unknown_type_selector.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
-            }
-        }
-        if let Some(rule) = self.no_unwanted_polyfillio.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
-            }
-        }
-        if let Some(rule) = self.no_useless_escape_in_regex.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
-            }
-        }
-        if let Some(rule) = self.no_useless_escape_in_string.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
-            }
-        }
-        if let Some(rule) = self.no_useless_string_raw.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
-            }
-        }
-        if let Some(rule) = self.no_useless_undefined.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
-            }
-        }
-        if let Some(rule) = self.no_value_at_rule.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
-            }
-        }
-        if let Some(rule) = self.use_adjacent_overload_signatures.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
-            }
-        }
-        if let Some(rule) = self.use_aria_props_supported_by_role.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
-            }
-        }
-        if let Some(rule) = self.use_at_index.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
-            }
-        }
-        if let Some(rule) = self.use_collapsed_if.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
-            }
-        }
-        if let Some(rule) = self.use_component_export_only_modules.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
-            }
-        }
-        if let Some(rule) = self.use_consistent_curly_braces.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
-            }
-        }
-        if let Some(rule) = self.use_consistent_member_accessibility.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
-            }
-        }
-        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
-            }
-        }
-        if let Some(rule) = self.use_deprecated_reason.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
-            }
-        }
-        if let Some(rule) = self.use_explicit_type.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
-            }
-        }
-        if let Some(rule) = self.use_exports_last.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]));
-            }
-        }
-        if let Some(rule) = self.use_for_component.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]));
-            }
-        }
-        if let Some(rule) = self.use_google_font_display.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
-            }
-        }
-        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
-            }
-        }
-        if let Some(rule) = self.use_guard_for_in.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
-            }
-        }
-        if let Some(rule) = self.use_named_operation.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]));
-            }
-        }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]));
-            }
-        }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[62]));
-            }
-        }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[63]));
-            }
-        }
-        if let Some(rule) = self.use_strict_mode.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]));
-            }
-        }
         if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]));
-            }
-        }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]));
-            }
-        }
-        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[67]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
         index_set
@@ -3760,36 +4836,8 @@ impl RuleGroupExt for Nursery {
                 .no_useless_undefined
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noValueAtRule" => self
-                .no_value_at_rule
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useAdjacentOverloadSignatures" => self
-                .use_adjacent_overload_signatures
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useAriaPropsSupportedByRole" => self
-                .use_aria_props_supported_by_role
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useAtIndex" => self
-                .use_at_index
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useCollapsedIf" => self
-                .use_collapsed_if
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useComponentExportOnlyModules" => self
-                .use_component_export_only_modules
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useConsistentCurlyBraces" => self
-                .use_consistent_curly_braces
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useConsistentMemberAccessibility" => self
-                .use_consistent_member_accessibility
+            "useAdjacentGetterSetter" => self
+                .use_adjacent_getter_setter
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentObjectDefinition" => self
@@ -3908,14 +4956,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_useless_escape_in_string: Some(value.into()),
             no_useless_string_raw: Some(value.into()),
             no_useless_undefined: Some(value.into()),
-            no_value_at_rule: Some(value.into()),
-            use_adjacent_overload_signatures: Some(value.into()),
-            use_aria_props_supported_by_role: Some(value.into()),
-            use_at_index: Some(value.into()),
-            use_collapsed_if: Some(value.into()),
-            use_component_export_only_modules: Some(value.into()),
-            use_consistent_curly_braces: Some(value.into()),
-            use_consistent_member_accessibility: Some(value.into()),
+            use_adjacent_getter_setter: Some(value.into()),
             use_consistent_object_definition: Some(value.into()),
             use_deprecated_reason: Some(value.into()),
             use_explicit_type: Some(value.into()),

@@ -29,7 +29,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseNamingConvention {
-        version: "next",
+        version: "2.0.0",
         name: "useNamingConvention",
         language: "graphql",
         recommended: false,

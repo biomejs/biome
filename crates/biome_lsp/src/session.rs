@@ -732,7 +732,10 @@ impl Session {
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_extension_settings(&self) {
         let item = lsp_types::ConfigurationItem {
-            scope_uri: None,
+            scope_uri: match self.initialize_params.get() {
+                Some(params) => params.root_uri.clone(),
+                None => None,
+            },
             section: Some(String::from(CONFIGURATION_SECTION)),
         };
 

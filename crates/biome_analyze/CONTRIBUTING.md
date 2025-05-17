@@ -40,7 +40,7 @@ The analyzer allows implementors to create **four different** types of rules:
     - [Using Rule Options](#using-rule-options)
     - [Full Documentation Example](#full-documentation-example)
   - [Code generation](#code-generation)
-  - [Commiting your work](#commiting-your-work)
+  - [Committing your work](#commiting-your-work)
   - [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
 
 ## Creating a Rule
@@ -131,7 +131,7 @@ Here is a non-exhaustive list of common names:
 
   These rules report errors which are the result of mistyping and led to runtime errors or ignored code.
   This naming convention is used for CSS rules.
-  For example, `noUnknownUnit` reports CSS units that are not standarized.
+  For example, `noUnknownUnit` reports CSS units that are not standardized.
 
 - `noMisleading<Concept>`
 
@@ -155,8 +155,8 @@ Here is a non-exhaustive list of common names:
 
 - `useConsistent<Concept>`
 
-  These rules ensure consistency across the entire code base.
-  For example, `useConsistentArrayType` ensures that developers use either `Arra<T>` or `T[]`.
+  These rules ensure consistency across the entire codebase.
+  For example, `useConsistentArrayType` ensures that developers use either `Array<T>` or `T[]`.
 
 - `useShorthand<Concept>`
 
@@ -210,7 +210,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    The script `just new-js-lintrule` script will generate a bunch of files for the _JavaScript_ language inside the `biome_js_analyze` crate.
    Among the other files, you'll find a file called `use_my_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
 
-2. Let's have a look at the generated code in  `use_my_rule_name.rs`:
+2. Let's have a look at the generated code in `use_my_rule_name.rs`:
 
    ```rust
    ...
@@ -388,7 +388,7 @@ declare_lint_rule! {
 
 If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
-If you're implementing a lint rule that matches the behaviour of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
+If you're implementing a lint rule that matches the behavior of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
 ```rust
 use biome_analyze::{declare_lint_rule, RuleSource};
@@ -405,7 +405,7 @@ declare_lint_rule! {
 }
 ```
 
-If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
+If the rule you're implementing has a different behavior or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
 
 ```rust
 use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
@@ -621,7 +621,7 @@ and do not need to be handled by the rule itself.
 > We instead provide a ***`serde`-inspired*** implementation in `biome_deserialize` and `biome_deserialize_macros` that [differs in some aspects](../biome_deserialize/README.md), like being fault-tolerant.
 
 The compiler should warn you that `MyRuleOptions` does not implement some required types.
-We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
+We currently require implementing _serde_'s `Deserialize`/`Serialize` traits.
 
 Also, we use other `serde` macros to adjust the JSON configuration:
 - `rename_all = "camelCase"`: it renames all fields in camel-case, so they are in line with the naming style of the `biome.json`.
@@ -708,7 +708,7 @@ The semantic model provides information about the references of a binding (decla
 
 ##### How to use the query `Semantic<>` in a lint rule
 
-We have a for loop that creates an index i, and we need to identify where this index is used inside the body of the loop
+We have a for loop that creates an index `i`, and we need to identify where this index is used inside the body of the loop
 
 ```js
 for (let i = 0; i < array.length; i++) {
@@ -951,7 +951,7 @@ There are some common mistakes that can lead to bugs or false positives in lint 
 
 ##### Not checking if a variable is global
 
-Some rules aim to ban certain functions or variables (eg. `noConsoleLog` bans `console.log`). A common mistake make this check without considering if the variable is global or not. This can lead to false positives if the variable is declared in a local scope.
+Some rules aim to ban certain functions or variables (e.g. `noConsoleLog` bans `console.log`). A common mistake make this check without considering if the variable is global or not. This can lead to false positives if the variable is declared in a local scope.
 
 ```js
 console.log(); // <-- This should be reported because `console` is a global variable
@@ -1030,7 +1030,7 @@ Run the command:
 just test-lintrule myRuleName
 ```
 
-and if you've done everything correctly, you should see some snapshots emitted with diagnostics and code actions.
+And if you've done everything correctly, you should see some snapshots emitted with diagnostics and code actions.
 
 Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#testing) to know how to deal with the snapshot tests.
 
@@ -1285,7 +1285,7 @@ For simplicity, use `just` to run all the commands with:
 just gen-analyzer
 ```
 
-### Commiting your work
+### Committing your work
 
 Once the rule is implemented, tested and documented, you are ready to open a pull request!
 

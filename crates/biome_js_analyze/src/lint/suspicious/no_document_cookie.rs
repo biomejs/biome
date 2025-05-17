@@ -101,7 +101,7 @@ fn is_cookie(assignment: &AnyJsAssignment) -> Option<()> {
         AnyJsAssignment::JsStaticMemberAssignment(static_assignment) => {
             let property = static_assignment.member().ok()?;
 
-            if property.to_trimmed_string() != COOKIE {
+            if property.to_trimmed_text().text() != COOKIE {
                 return None;
             };
         }

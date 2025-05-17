@@ -46,7 +46,7 @@ expression: complexCase.json
 ```
 complexCase.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been promoted to suspicious/noConsole.
+  ! This lint rule has been promoted to suspicious/noConsole.
   
      6 │       },
      7 │       "nursery": {
@@ -55,7 +55,7 @@ complexCase.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
      9 │         "noDoneCallback": "off",
     10 │         "useImportRestrictions": "off",
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move the lint rule.
   
      6  6 │         },
      7  7 │         "nursery": {
@@ -84,7 +84,7 @@ complexCase.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
 ```
 complexCase.json:9:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been promoted to style/noDoneCallback.
+  ! This lint rule has been promoted to style/noDoneCallback.
   
      7 │       "nursery": {
      8 │         "noConsole": "off",
@@ -93,7 +93,7 @@ complexCase.json:9:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
     10 │         "useImportRestrictions": "off",
     11 │         "useTopLevelRegex": "off"
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move the lint rule.
   
      7  7 │         "nursery": {
      8  8 │           "noConsole": "off",
@@ -115,7 +115,7 @@ complexCase.json:9:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
 ```
 complexCase.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been promoted to performance/useTopLevelRegex.
+  ! This lint rule has been promoted to performance/useTopLevelRegex.
   
      9 │         "noDoneCallback": "off",
     10 │         "useImportRestrictions": "off",
@@ -124,7 +124,7 @@ complexCase.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
     12 │       },
     13 │       "style": {
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move the lint rule.
   
      8  8 │           "noConsole": "off",
      9  9 │           "noDoneCallback": "off",
@@ -149,7 +149,7 @@ complexCase.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
 ```
 complexCase.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been moved to suspicious/noVar.
+  ! This lint rule has been moved to suspicious/noVar.
   
     12 │       },
     13 │       "style": {
@@ -158,7 +158,7 @@ complexCase.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
     15 │       }
     16 │     }
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move the lint rule.
   
     12 12 │         },
     13 13 │         "style": {
@@ -176,7 +176,7 @@ complexCase.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━━━�
 ```
 complexCase.json:23:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been promoted to suspicious/noConsole.
+  ! This lint rule has been promoted to suspicious/noConsole.
   
     21 │         "rules": {
     22 │           "nursery": {
@@ -185,7 +185,7 @@ complexCase.json:23:13 migrate  FIXABLE  ━━━━━━━━━━━━━
     24 │             "noDoneCallback": "off",
     25 │             "useImportRestrictions": "off",
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move the lint rule.
   
     21 21 │           "rules": {
     22 22 │             "nursery": {
@@ -214,7 +214,7 @@ complexCase.json:23:13 migrate  FIXABLE  ━━━━━━━━━━━━━
 ```
 complexCase.json:24:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been promoted to style/noDoneCallback.
+  ! This lint rule has been promoted to style/noDoneCallback.
   
     22 │           "nursery": {
     23 │             "noConsole": "off",
@@ -223,7 +223,7 @@ complexCase.json:24:13 migrate  FIXABLE  ━━━━━━━━━━━━━
     25 │             "useImportRestrictions": "off",
     26 │             "useTopLevelRegex": "off"
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move the lint rule.
   
     22 22 │             "nursery": {
     23 23 │               "noConsole": "off",
@@ -245,7 +245,7 @@ complexCase.json:24:13 migrate  FIXABLE  ━━━━━━━━━━━━━
 ```
 complexCase.json:26:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been promoted to performance/useTopLevelRegex.
+  ! This lint rule has been promoted to performance/useTopLevelRegex.
   
     24 │             "noDoneCallback": "off",
     25 │             "useImportRestrictions": "off",
@@ -254,7 +254,7 @@ complexCase.json:26:13 migrate  FIXABLE  ━━━━━━━━━━━━━
     27 │           },
     28 │           "style": {
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move the lint rule.
   
     23 23 │               "noConsole": "off",
     24 24 │               "noDoneCallback": "off",

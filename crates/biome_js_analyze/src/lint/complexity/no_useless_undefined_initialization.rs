@@ -96,10 +96,10 @@ impl Rule for NoUselessUndefinedInitialization {
 
             if keyword.is_undefined() {
                 let decl_range = initializer.range();
-                let Some(binding_name) = decl.id().ok().map(|id| id.to_trimmed_string()) else {
+                let Some(binding_name) = decl.id().ok().map(|id| id.to_trimmed_text()) else {
                     continue;
                 };
-                signals.push((binding_name.into(), decl_range));
+                signals.push((binding_name.text().into(), decl_range));
             }
         }
 

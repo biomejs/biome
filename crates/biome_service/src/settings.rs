@@ -358,6 +358,12 @@ pub struct OverrideAssistSettings {
     pub actions: Option<Actions>,
 }
 
+/// Files settings for the entire workspace
+#[derive(Clone, Debug, Default)]
+pub struct OverrideFilesSettings {
+    pub max_size: Option<MaxSize>,
+}
+
 /// Static map of language names to language-specific settings
 #[derive(Clone, Debug, Default)]
 pub struct LanguageListSettings {
@@ -868,7 +874,7 @@ impl WorkspaceSettingsHandle {
     }
 
     /// Resolve the formatting context for the given language
-    #[instrument(level = "debug", skip(file_source))]
+    #[instrument(level = "debug", skip(self, file_source))]
     pub fn format_options<L>(
         &self,
         path: &BiomePath,
@@ -1222,6 +1228,8 @@ pub struct OverrideSettingPattern {
     pub assist: OverrideAssistSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
+    /// Files specific settings
+    pub files: OverrideFilesSettings,
 }
 
 impl OverrideSettingPattern {
@@ -1499,6 +1507,13 @@ pub fn to_override_settings(
             })
             .unwrap_or_default();
 
+        let files = pattern
+            .files
+            .map(|files| OverrideFilesSettings {
+                max_size: files.max_size,
+            })
+            .unwrap_or_default();
+
         let mut languages = LanguageListSettings::default();
         let javascript = pattern.javascript.take().unwrap_or_default();
         let json = pattern.json.take().unwrap_or_default();
@@ -1523,6 +1538,7 @@ pub fn to_override_settings(
             linter,
             assist,
             languages,
+            files,
         };
 
         override_settings.patterns.push(pattern_setting);

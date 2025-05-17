@@ -258,7 +258,9 @@ AnyYamlBlockMapImplicitKey =
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-implicit-value
 YamlBlockMapImplicitValue =
 	':'
-	value: AnyYamlBlockNode
+	// Node value can be empty, but must be replaced by a newline
+	value: AnyYamlBlockNode?
+	newline: 'NEWLINE'?
 
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
 AnyYamlPropertiesCombination =

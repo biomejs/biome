@@ -39,7 +39,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Asking questions, making proposals
 
-If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/biomejs/biome/discussions).
+If you have any questions, proposals, or feedback, open a [GitHub discussion](https://github.com/biomejs/biome/discussions).
 Make sure your comment adds value: [don't post a comment just to get attention](https://jacobtomlinson.dev/posts/2022/dont-be-that-open-source-user-dont-be-me/).
 
 Our [Discord server](https://biomejs.dev/chat) is open for help and more ad-hoc discussion.
@@ -88,7 +88,7 @@ You can install `just` using cargo:
 cargo install just
 ```
 
-But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages),  so you won't need to prefix every command with `cargo`.
+But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages), so you won't need to prefix every command with `cargo`.
 
 Once installed, run the following command to install the required tools:
 
@@ -264,7 +264,7 @@ When you finished your work, and you are ready to **commit and open a PR**, ther
 things you would need to run and check:
 - `just f` (alias for `just format`), formats Rust and TOML files.
 - `just l` (alias for `just lint`), run the linter for the whole project.
-- Code generation. The code generation of the repository is spread in the different parts of the code base. Sometimes is needed and sometime it isn't:
+- Code generation. The code generation of the repository is spread in the different parts of the codebase. Sometimes is needed and sometime it isn't:
   - run `just gen-analyzer` when you're working on the **linter**;
   - run `just gen-bindings` in case you worked around the **workspace**.
 
@@ -327,7 +327,7 @@ For more information on how to help with translation, please see the [translatio
 ## Commit messages
 
 Internally, the Biome team adheres as closely as possible to the [conventional commit specification](https://www.conventionalcommits.org/en/v1.0.0-beta.2/).
-The following this convention encourages commit best-practices and facilitates commit-powered features like change log generation.
+The following this convention encourages commit best-practices and facilitates commit-powered features like changelog generation.
 
 The following commit prefixes are supported:
 
@@ -405,7 +405,7 @@ We are very strict about `major` changes in the `@biomejs/biome` package. To bet
 The description of the changeset should follow the these guidelines:
 
 - Use the past tense when describing what you did, e.g. "Added new feature", "Fixed edge case".
-- Use the present tense when describing Biome behaviour, e.g. "Biome now supports ...".
+- Use the present tense when describing Biome behavior, e.g. "Biome now supports ...".
 - If you fixed a bug, please add the link to the issue, e.g. "Fixed [#4444](https://github.com/biomejs/biome/issues/4444)".
 - If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated yet, the URL is pretty predictable...).
 - Similarly, if you reference an assist, please add the link to the assist on the website, e.g. "Added the assist [`awesomeAction`](https://biomejs.dev/assist/actions/awesome-action/)".
@@ -482,7 +482,6 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
 - [Naoki Ikeguchi @siketyan](https://github.com/siketyan)
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
-- [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)
 
 ### Maintainers team
 

@@ -163,7 +163,7 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 Skipped 60 suggested fixes.
-If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
 
 ```
 

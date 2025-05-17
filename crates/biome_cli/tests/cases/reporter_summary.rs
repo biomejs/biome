@@ -76,7 +76,6 @@ fn reports_diagnostics_summary_check_command() {
             [
                 "check",
                 "--reporter=summary",
-                "--max-diagnostics=200",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
@@ -117,7 +116,6 @@ fn reports_diagnostics_summary_ci_command() {
             [
                 "ci",
                 "--reporter=summary",
-                "--max-diagnostics=200",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
@@ -158,7 +156,6 @@ fn reports_diagnostics_summary_lint_command() {
             [
                 "lint",
                 "--reporter=summary",
-                "--max-diagnostics=200",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
@@ -199,7 +196,6 @@ fn reports_diagnostics_summary_format_command() {
             [
                 "format",
                 "--reporter=summary",
-                "--max-diagnostics=200",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
@@ -213,6 +209,47 @@ fn reports_diagnostics_summary_format_command() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "reports_diagnostics_summary_format_command",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn reports_diagnostics_summary_check_verbose_command() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path1 = Utf8Path::new("main.ts");
+    fs.insert(file_path1.into(), MAIN_1.as_bytes());
+
+    let file_path2 = Utf8Path::new("index.ts");
+    fs.insert(file_path2.into(), MAIN_2.as_bytes());
+
+    let file_path3 = Utf8Path::new("index.css");
+    fs.insert(file_path3.into(), MAIN_3.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--reporter=summary",
+                "--verbose",
+                file_path1.as_str(),
+                file_path2.as_str(),
+                file_path3.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reports_diagnostics_summary_check_verbose_command",
         fs,
         console,
         result,

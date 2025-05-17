@@ -1,0 +1,73 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["noManualZIndex.grit"],
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 4
+  }
+}
+```
+
+## `noManualZIndex.grit`
+
+```grit
+language css
+
+`z-index: $zIndexValue;` where {
+    not $zIndexValue <: r"^var\(--dt-z-index-\S+\)$",
+    register_diagnostic(span=$zIndexValue, message="company/plugin/noManualZIndex :: z-index values should be set using the design library.", severity="error")
+}
+
+```
+
+## `style.css`
+
+```css
+.report-this-error {
+    z-index: 1;
+}
+
+.dont-report-this-error-please {
+    /* biome-ignore lint/plugin/noManualZIndex: Should not report */
+    z-index: 2;
+}
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+style.css:2:14 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × company/plugin/noManualZIndex :: z-index values should be set using the design library.
+  
+    1 │ .report-this-error {
+  > 2 │     z-index: 1;
+      │              ^
+    3 │ }
+    4 │ 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

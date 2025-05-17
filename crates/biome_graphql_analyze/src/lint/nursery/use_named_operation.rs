@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseNamedOperation {
-        version: "next",
+        version: "2.0.0",
         name: "useNamedOperation",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("no-anonymous-operations")],

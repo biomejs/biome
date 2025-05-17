@@ -1,0 +1,55 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 432
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "maxSize": 1024
+  },
+  "overrides": [
+    {
+      "includes": ["test.js"],
+      "files": { "maxSize": 0 }
+    }
+  ]
+}
+```
+
+## `test.js`
+
+```js
+statement();
+
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:10:47 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The number should be an integer between 1 and 18446744073709551615.
+  
+     8 │                             "test.js"
+     9 │                         ],
+  > 10 │                         "files": { "maxSize": 0 }
+       │                                               ^
+    11 │                     }
+    12 │                 ]
+  
+
+```

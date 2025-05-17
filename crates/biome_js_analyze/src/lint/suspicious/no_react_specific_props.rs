@@ -60,9 +60,9 @@ impl Rule for NoReactSpecificProps {
         let attribute = ctx.query();
         let name = attribute.name().ok()?;
         let range = name.range();
-        let name = name.to_trimmed_string();
+        let name = name.to_trimmed_text();
 
-        if REACT_SPECIFIC_JSX_PROPS.contains(&name.as_str()) {
+        if REACT_SPECIFIC_JSX_PROPS.contains(&name.text()) {
             let replacement = get_replacement_for_react_prop(&name)?;
             Some((range, replacement))
         } else {

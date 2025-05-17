@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -8,6 +9,9 @@ expression: valid.js
 var s = {
     '\0\'': "\n\"",
     "abc\u42efg": tagged` test ${1} \a`,
-    key: `\``
+    key: `\``,
+    escapeTemplateLiteralInterpolation1: `\${`,
+    escapeTemplateLiteralInterpolation2: `\${}`
 };
+
 ```

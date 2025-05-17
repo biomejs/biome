@@ -765,6 +765,10 @@ export interface OverridePattern {
 	 */
 	css?: CssConfiguration;
 	/**
+	 * Specific configuration for the filesystem
+	 */
+	files?: OverrideFilesConfiguration;
+	/**
 	 * Specific configuration for the Json language
 	 */
 	formatter?: OverrideFormatterConfiguration;
@@ -888,6 +892,12 @@ export interface OverrideAssistConfiguration {
 	 * if `false`, it disables the feature and the assist won't be executed. `true` by default
 	 */
 	enabled?: Bool;
+}
+export interface OverrideFilesConfiguration {
+	/**
+	 * File size limit in bytes
+	 */
+	maxSize?: MaxSize;
 }
 export interface OverrideFormatterConfiguration {
 	/**
@@ -1577,6 +1587,10 @@ export interface Nursery {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Enforce that getters and setters for the same property are adjacent in class and object definitions.
+	 */
+	useAdjacentGetterSetter?: RuleConfiguration_for_Null;
 	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
@@ -3471,6 +3485,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useExhaustiveSwitchCases"

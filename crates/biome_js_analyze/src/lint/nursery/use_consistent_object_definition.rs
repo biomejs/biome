@@ -111,7 +111,7 @@ declare_lint_rule! {
     /// **Default:** `explicit`
     ///
     pub UseConsistentObjectDefinition {
-        version: "next",
+        version: "2.0.0",
         name: "useConsistentObjectDefinition",
         language: "js",
         recommended: false,

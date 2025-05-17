@@ -1,0 +1,146 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@supports -- kek {
+}
+
+@supports -- kek
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")],
+                condition: CssBogusSupportsCondition {
+                    items: [
+                        MINUS@10..11 "-" [] [],
+                        MINUS@11..13 "-" [] [Whitespace(" ")],
+                        IDENT@13..17 "kek" [] [Whitespace(" ")],
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@17..18 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@18..20 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@20..23 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@23..32 "supports" [] [Whitespace(" ")],
+                condition: CssBogusSupportsCondition {
+                    items: [
+                        MINUS@32..33 "-" [] [],
+                        MINUS@33..35 "-" [] [Whitespace(" ")],
+                        IDENT@35..38 "kek" [] [],
+                    ],
+                },
+                block: CssBogusBlock {
+                    items: [
+                        CssRuleList [],
+                        R_CURLY@38..40 "}" [Newline("\n")] [],
+                    ],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@40..41 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..41
+  0: (empty)
+  1: CSS_RULE_LIST@0..40
+    0: CSS_AT_RULE@0..20
+      0: AT@0..1 "@" [] []
+      1: CSS_SUPPORTS_AT_RULE@1..20
+        0: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")]
+        1: CSS_BOGUS_SUPPORTS_CONDITION@10..17
+          0: MINUS@10..11 "-" [] []
+          1: MINUS@11..13 "-" [] [Whitespace(" ")]
+          2: IDENT@13..17 "kek" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@17..20
+          0: L_CURLY@17..18 "{" [] []
+          1: CSS_RULE_LIST@18..18
+          2: R_CURLY@18..20 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@20..40
+      0: AT@20..23 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@23..40
+        0: SUPPORTS_KW@23..32 "supports" [] [Whitespace(" ")]
+        1: CSS_BOGUS_SUPPORTS_CONDITION@32..38
+          0: MINUS@32..33 "-" [] []
+          1: MINUS@33..35 "-" [] [Whitespace(" ")]
+          2: IDENT@35..38 "kek" [] []
+        2: CSS_BOGUS_BLOCK@38..40
+          0: CSS_RULE_LIST@38..38
+          1: R_CURLY@38..40 "}" [Newline("\n")] []
+  2: EOF@40..41 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_supports_invalid_after_support_error.css:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ @supports -- kek {
+      │           ^^^^^^
+    2 │ }
+    3 │ 
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+at_rule_supports_invalid_after_support_error.css:4:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    2 │ }
+    3 │ 
+  > 4 │ @supports -- kek
+      │           ^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+at_rule_supports_invalid_after_support_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `}`
+  
+    4 │ @supports -- kek
+  > 5 │ }
+      │ ^
+    6 │ 
+  
+  i Remove }
+  
+```

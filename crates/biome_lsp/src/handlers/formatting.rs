@@ -4,7 +4,7 @@ use crate::utils::text_edit;
 use anyhow::Context;
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams,
@@ -149,14 +149,19 @@ pub(crate) fn format_range(
             range: format_range,
         })?;
 
-        let indels =
-            biome_text_edit::TextEdit::from_unicode_words(content.as_str(), formatted.as_code());
+        let formatted_range = formatted
+            .range()
+            .unwrap_or_else(|| TextRange::up_to(content.text_len()));
+        let indels = biome_text_edit::TextEdit::from_unicode_words(
+            &content.as_str()[formatted_range],
+            formatted.as_code(),
+        );
         let position_encoding = session.position_encoding();
         let edits = text_edit(
             &doc.line_index,
             indels,
             position_encoding,
-            Some(format_range.start().into()),
+            Some(formatted_range.start().into()),
         )?;
 
         Ok(Some(edits))
@@ -217,13 +222,18 @@ pub(crate) fn format_on_type(
             path: path.clone(),
         })?;
 
-        let indels =
-            biome_text_edit::TextEdit::from_unicode_words(content.as_str(), formatted.as_code());
+        let formatted_range = formatted
+            .range()
+            .unwrap_or_else(|| TextRange::up_to(content.text_len()));
+        let indels = biome_text_edit::TextEdit::from_unicode_words(
+            &content.as_str()[formatted_range],
+            formatted.as_code(),
+        );
         let edits = text_edit(
             &doc.line_index,
             indels,
             position_encoding,
-            Some(offset.into()),
+            Some(formatted_range.start().into()),
         )?;
         Ok(Some(edits))
     } else {

@@ -22,7 +22,7 @@ expression: lastToExistingGroup.json
 ```
 lastToExistingGroup.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been promoted to complexity/noExcessiveNestedTestSuites.
+  ! This lint rule has been promoted to complexity/noExcessiveNestedTestSuites.
   
     4 │       "nursery": {
     5 │         "nuseryRuleAlways": "error",
@@ -31,7 +31,7 @@ lastToExistingGroup.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━
     7 │       },
     8 │       "complexity": {}
   
-  i Safe fix: Move the rule.
+  i Safe fix: Move the lint rule.
   
      3  3 │       "rules": {
      4  4 │         "nursery": {

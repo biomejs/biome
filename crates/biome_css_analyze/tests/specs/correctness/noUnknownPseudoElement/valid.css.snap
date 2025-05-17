@@ -37,5 +37,9 @@ html { --foo: 1px; }
 :root { --custom-property-set: {} }
 html { --custom-property-set: {} }
 a::part(shadow-part) { }
+::view-transition-old(*),
+::view-transition-new(*) {
+	position: absolute;
+}
 
 ```

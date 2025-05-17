@@ -191,6 +191,7 @@ impl Rule for NoUnknownPseudoClass {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let pseudo_class = ctx.query();
+        let is_css_modules = ctx.is_css_modules();
         let span = pseudo_class.name_range()?;
         let name = pseudo_class.name()?;
 
@@ -221,7 +222,9 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        if is_valid_class {
+        let is_valid_global = lower_name == "global" && is_css_modules;
+
+        if is_valid_class || is_valid_global {
             None
         } else {
             Some(NoUnknownPseudoClassSelectorState {

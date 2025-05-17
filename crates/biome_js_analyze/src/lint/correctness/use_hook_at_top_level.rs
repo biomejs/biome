@@ -91,22 +91,22 @@ impl AnyJsFunctionOrMethod {
         false
     }
 
-    fn name(&self) -> Option<String> {
+    fn name(&self) -> Option<Text> {
         match self {
             Self::AnyJsFunction(function) => function
                 .binding()
                 .as_ref()
-                .map(AnyJsBinding::to_trimmed_string),
+                .map(AnyJsBinding::to_trimmed_text),
             Self::JsMethodClassMember(method) => method
                 .name()
                 .ok()
                 .as_ref()
-                .map(AnyJsClassMemberName::to_trimmed_string),
+                .map(AnyJsClassMemberName::to_trimmed_text),
             Self::JsMethodObjectMember(method) => method
                 .name()
                 .ok()
                 .as_ref()
-                .map(AnyJsObjectMemberName::to_trimmed_string),
+                .map(AnyJsObjectMemberName::to_trimmed_text),
         }
     }
 }

@@ -120,7 +120,7 @@ impl FromStr for ColorsArg {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub enum CliReporter {
     /// The default reporter
     #[default]

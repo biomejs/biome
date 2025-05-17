@@ -20,6 +20,7 @@ b > .foo:error { }
 @page :blank:unknown { }
 @page foo:unknown { }
 :horizontal:decrement {}
+
 ```
 
 # Diagnostics
@@ -216,6 +217,7 @@ invalid.css:16:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
     15 │ @page foo:unknown { }
   > 16 │ :horizontal:decrement {}
        │  ^^^^^^^^^^
+    17 │ 
   
   i See MDN web docs for more details.
   
@@ -231,6 +233,7 @@ invalid.css:16:13 lint/correctness/noUnknownPseudoClass ━━━━━━━━
     15 │ @page foo:unknown { }
   > 16 │ :horizontal:decrement {}
        │             ^^^^^^^^^
+    17 │ 
   
   i See MDN web docs for more details.
   
