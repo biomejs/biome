@@ -1,7 +1,6 @@
 #![deny(clippy::use_self)]
 
 mod lint;
-pub mod options;
 mod registry;
 mod suppression_action;
 

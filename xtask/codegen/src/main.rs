@@ -14,7 +14,10 @@ use xtask::{Result, project_root, pushd};
 #[cfg(feature = "schema")]
 use crate::generate_bindings::generate_workspace_bindings;
 #[cfg(feature = "configuration")]
+use crate::generate_configuration::generate_rule_options;
+#[cfg(feature = "configuration")]
 use crate::generate_configuration::generate_rules_configuration;
+
 #[cfg(feature = "license")]
 use crate::generate_license::generate_license;
 #[cfg(feature = "configuration")]
@@ -41,6 +44,8 @@ fn main() -> Result<()> {
             generate_analyzer()?;
         }
         TaskCommand::Configuration => {
+            #[cfg(feature = "configuration")]
+            generate_rule_options(Overwrite)?;
             #[cfg(feature = "configuration")]
             generate_rules_configuration(Overwrite)?;
         }
