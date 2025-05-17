@@ -160,6 +160,7 @@ pub type NoNamespaceImport =
     <lint::style::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
 pub type NoNegationElse =
     <lint::style::no_negation_else::NoNegationElse as biome_analyze::Rule>::Options;
+pub type NoNestedComponentDefinitions = < lint :: nursery :: no_nested_component_definitions :: NoNestedComponentDefinitions as biome_analyze :: Rule > :: Options ;
 pub type NoNestedTernary =
     <lint::style::no_nested_ternary::NoNestedTernary as biome_analyze::Rule>::Options;
 pub type NoNodejsModules =

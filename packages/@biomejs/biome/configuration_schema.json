@@ -2737,6 +2737,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNestedComponentDefinitions": {
+					"description": "Disallows defining React components inside other components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNoninteractiveElementInteractions": {
 					"description": "Disallow use event handlers on non-interactive elements.",
 					"anyOf": [
