@@ -192,7 +192,8 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
 
     let mut rule_names = BTreeSet::default();
     let mut lib_exports = vec![quote! {
-        pub mod shared::*;
+        mod shared;
+        pub use shared::*;
     }];
 
     for group in lint_visitor.groups.values() {
