@@ -3147,49 +3147,251 @@
 			]
 		},
 		"PatternOptions": {
-			"type": "object",
-			"properties": {
-				"allowImportNamePattern": {
-					"description": "A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.",
-					"type": ["string", "null"]
+			"oneOf": [
+				{
+					"type": "object",
+					"required": ["group"],
+					"properties": {
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"group": {
+							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
+							"type": "array",
+							"items": { "type": "string" },
+							"minItems": 1
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
 				},
-				"allowImportNames": {
-					"description": "An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
+				{
+					"type": "object",
+					"required": ["group", "importNames"],
+					"properties": {
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"group": {
+							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
+							"type": "array",
+							"items": { "type": "string" },
+							"minItems": 1
+						},
+						"importNames": {
+							"description": "An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.",
+							"type": "array",
+							"items": { "type": "string" },
+							"minItems": 1
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
 				},
-				"caseSensitive": {
-					"description": "Whether the patterns in `group` or `regex` are case-sensitive. Defaults to `false`.",
-					"default": false,
-					"type": "boolean"
+				{
+					"type": "object",
+					"required": ["allowImportNames", "group"],
+					"properties": {
+						"allowImportNames": {
+							"description": "An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern.",
+							"type": "array",
+							"items": { "type": "string" },
+							"minItems": 1
+						},
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"group": {
+							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
+							"type": "array",
+							"items": { "type": "string" },
+							"minItems": 1
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
 				},
-				"group": {
-					"description": "An array of gitignore-style patterns. Cannot be used with regex.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
+				{
+					"type": "object",
+					"required": ["group", "importNamePattern"],
+					"properties": {
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"group": {
+							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
+							"type": "array",
+							"items": { "type": "string" },
+							"minItems": 1
+						},
+						"importNamePattern": {
+							"description": "A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.",
+							"type": "string"
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
 				},
-				"importNamePattern": {
-					"description": "A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.",
-					"type": ["string", "null"]
+				{
+					"type": "object",
+					"required": ["allowImportNamePattern", "group"],
+					"properties": {
+						"allowImportNamePattern": {
+							"description": "A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.",
+							"type": "string"
+						},
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"group": {
+							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
+							"type": "array",
+							"items": { "type": "string" },
+							"minItems": 1
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
 				},
-				"importNames": {
-					"description": "An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
+				{
+					"type": "object",
+					"required": ["regex"],
+					"properties": {
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						},
+						"regex": {
+							"description": "A regular expression pattern string. Cannot be used with group.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
 				},
-				"message": {
-					"description": "A custom message for diagnostics related to this pattern.",
-					"type": ["string", "null"]
+				{
+					"type": "object",
+					"required": ["importNames", "regex"],
+					"properties": {
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"importNames": {
+							"description": "An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.",
+							"type": "array",
+							"items": { "type": "string" },
+							"minItems": 1
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						},
+						"regex": {
+							"description": "A regular expression pattern string. Cannot be used with group.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
 				},
-				"regex": {
-					"description": "A regular expression pattern string. Cannot be used with group.",
-					"type": ["string", "null"]
+				{
+					"type": "object",
+					"required": ["allowImportNames", "regex"],
+					"properties": {
+						"allowImportNames": {
+							"description": "An array of specific import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNamePattern.",
+							"type": "array",
+							"items": { "type": "string" },
+							"minItems": 1
+						},
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						},
+						"regex": {
+							"description": "A regular expression pattern string. Cannot be used with group.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"required": ["importNamePattern", "regex"],
+					"properties": {
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"importNamePattern": {
+							"description": "A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.",
+							"type": "string"
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						},
+						"regex": {
+							"description": "A regular expression pattern string. Cannot be used with group.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
+				},
+				{
+					"type": "object",
+					"required": ["allowImportNamePattern", "regex"],
+					"properties": {
+						"allowImportNamePattern": {
+							"description": "A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.",
+							"type": "string"
+						},
+						"caseSensitive": {
+							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
+							"type": "boolean"
+						},
+						"message": {
+							"description": "A custom message for diagnostics related to this pattern.",
+							"type": "string"
+						},
+						"regex": {
+							"description": "A regular expression pattern string. Cannot be used with group.",
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
 				}
-			},
-			"additionalProperties": false
+			]
 		},
 		"Patterns": {
-			"anyOf": [
+			"oneOf": [
 				{
 					"description": "A simple gitignore-style pattern string.",
 					"type": "string"
