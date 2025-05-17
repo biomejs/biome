@@ -153,3 +153,40 @@ declare module "foo" {
 
 var X: Type = { prop: () => {} };
 f({ prop: () => {} })
+
+
+const x: string | null = someFunc();
+let x: string | null;
+var x: string | null;
+
+const x = "";
+const x = 1;
+const x = null;
+const x = undefined;
+
+let x = "";
+let x = 1;
+
+var x = "";
+var x = 1;
+
+const fn = (x: number): void => {};
+
+var obj = {
+	x: 1,
+	func: (x: number): void => {},
+	meth(x: number): string {},
+}
+let obj = {
+	x: 1,
+	func: (x: number): void => {},
+	meth(x: number): string {},
+}
+const obj = {
+	x: 1,
+	func: (x: number): void => {},
+	meth(x: number): string {},
+}
+
+const obj = { dynamic: someFunc() as string }
+const obj = { dynamic: <string>(someFunc()) }
