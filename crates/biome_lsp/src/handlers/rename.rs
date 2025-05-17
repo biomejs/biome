@@ -3,6 +3,7 @@ use crate::diagnostics::LspError;
 use crate::{session::Session, utils};
 use anyhow::{Context, Result};
 use biome_lsp_converters::from_proto;
+use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
 use std::collections::HashMap;
 use tower_lsp_server::lsp_types::{RenameParams, WorkspaceEdit};
 
@@ -14,7 +15,18 @@ pub(crate) fn rename(
     let url = params.text_document_position.text_document.uri;
     let path = session.file_path(&url)?;
 
-    let doc = session.document(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Ok(None);
+    };
+    let features = FeaturesBuilder::new().build();
+
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(None);
+    }
     let position_encoding = session.position_encoding();
     let cursor_range = from_proto::offset(
         &doc.line_index,

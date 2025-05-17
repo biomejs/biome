@@ -9,8 +9,9 @@
 //! well as the watcher to allow continuous scanning.
 
 use super::server::WorkspaceServer;
-use super::{FeatureName, IsPathIgnoredParams};
+use super::{FeaturesBuilder, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
+use crate::dome::Dome;
 use crate::projects::ProjectKey;
 use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
@@ -98,20 +99,52 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
         scope.evaluate(ctx_ref, folder.to_path_buf());
     }));
 
-    let evaluated_paths = ctx.evaluated_paths();
+    let interner = ctx.interner();
+    let dome = Dome::from_intern(interner.as_intern_set());
+    let mut iter = dome.iter();
 
     let mut configs = Vec::new();
     let mut manifests = Vec::new();
-    let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
+    let mut handleable_paths = Vec::new();
     let mut ignore_paths = Vec::new();
-    for path in evaluated_paths {
-        if path.is_config() {
-            configs.push(path);
-        } else if path.is_manifest() {
-            manifests.push(path);
-        } else if path.is_ignore() {
-            ignore_paths.push(path);
-        } else {
+
+    while let Some(path) = iter.next_config() {
+        configs.push(path.clone());
+    }
+
+    while let Some(path) = iter.next_manifest() {
+        manifests.push(path.clone());
+    }
+
+    while let Some(path) = iter.next_ignore() {
+        ignore_paths.push(path.clone());
+    }
+
+    let result = ctx
+        .workspace
+        .update_project_ignore_files(ctx.project_key, &ignore_paths);
+
+    for path in iter {
+        // If the path in inside `node_modules`, then we want to store only the `.d.ts` files,
+        // otherwise we don't store it at all
+        if path.is_dependency() {
+            if path.is_type_declaration() {
+                handleable_paths.push(path);
+                continue;
+            }
+            continue;
+        }
+
+        let is_ignored = ctx
+            .workspace
+            .is_path_ignored(IsPathIgnoredParams {
+                project_key: ctx.project_key,
+                path: path.clone(),
+                features: FeaturesBuilder::new().build(),
+            })
+            .unwrap_or_default();
+
+        if !is_ignored {
             handleable_paths.push(path);
         }
     }
@@ -126,10 +159,6 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
             scope.handle(ctx_ref, path.to_path_buf());
         }
     }));
-
-    let result = ctx
-        .workspace
-        .update_project_ignore_files(ctx.project_key, &ignore_paths);
 
     if let Err(error) = result {
         ctx.send_diagnostic(error);
@@ -279,7 +308,7 @@ impl TraversalContext for ScanContext<'_> {
                             path: path.clone(),
                             // The scanner only cares about the top-level
                             // `files.includes`.
-                            features: FeatureName::empty(),
+                            features: FeaturesBuilder::new().build(),
                         })
                         .unwrap_or_default()
                 }

@@ -30,6 +30,7 @@ use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
+use std::backtrace::Backtrace;
 use std::sync::Arc;
 use std::sync::RwLock;
 use std::sync::atomic::Ordering;
@@ -43,7 +44,7 @@ use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
 use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
-use tracing::{error, info, warn};
+use tracing::{debug, error, info, instrument, warn};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -207,6 +208,7 @@ impl Session {
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client
+    #[instrument(level = "debug", skip_all)]
     pub(crate) fn initialize(
         self: &Arc<Self>,
         client_capabilities: ClientCapabilities,
@@ -229,11 +231,11 @@ impl Session {
         spawn(async move {
             let mut service_data_rx = session.service_data_rx.clone();
             while let Ok(()) = service_data_rx.changed().await {
-                match *session.service_data_rx.borrow() {
+                match *session.service_data_rx.clone().borrow() {
                     ServiceDataNotification::Updated => {
                         let session = session.clone();
                         spawn(async move {
-                            session.update_all_diagnostics().await;
+                            // session.update_all_diagnostics().await;
                         });
                     }
                     ServiceDataNotification::Stop => {
@@ -321,12 +323,8 @@ impl Session {
     /// Get a [`Document`] matching the provided [`Uri`]
     ///
     /// If document does not exist, result is [WorkspaceError::NotFound]
-    pub(crate) fn document(&self, url: &Uri) -> Result<Document, Error> {
-        self.documents
-            .pin()
-            .get(url)
-            .cloned()
-            .ok_or_else(|| WorkspaceError::not_found().with_file_path(url.to_string()))
+    pub(crate) fn document(&self, url: &Uri) -> Option<Document> {
+        self.documents.pin().get(url).cloned()
     }
 
     /// Set the [`Document`] for the provided [`Uri`]
@@ -360,7 +358,9 @@ impl Session {
     /// contents changes.
     #[tracing::instrument(level = "debug", skip_all, fields(url = display(url.as_str()), diagnostic_count), err)]
     pub(crate) async fn update_diagnostics(&self, url: Uri) -> Result<(), LspError> {
-        let doc = self.document(&url)?;
+        let Some(doc) = self.document(&url) else {
+            return Ok(());
+        };
         self.update_diagnostics_for_document(url, doc).await
     }
 
