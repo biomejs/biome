@@ -70,7 +70,7 @@ pub struct Settings {
 
 impl Settings {
     /// Merges the [Configuration] into the settings.
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     pub fn merge_with_configuration(
         &mut self,
         configuration: Configuration,
@@ -671,7 +671,6 @@ pub enum VcsIgnoredPatterns {
 }
 
 impl VcsIgnoredPatterns {
-    #[instrument(level = "debug", skip(self, path, is_dir), fields(result))]
     pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
         match self {
             Self::Git { root, nested } => {

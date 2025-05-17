@@ -5,8 +5,8 @@ use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
-    ChangeFileParams, CloseFileParams, DocumentFileSource, FileContent, GetFileContentParams,
-    OpenFileParams, OpenProjectParams,
+    ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
+    GetFileContentParams, IsPathIgnoredParams, OpenFileParams, OpenProjectParams,
 };
 use tower_lsp_server::lsp_types;
 use tracing::{debug, error, field, info};
@@ -48,6 +48,19 @@ pub(crate) async fn did_open(
         }
     };
 
+    let is_ignored = session
+        .workspace
+        .is_path_ignored(IsPathIgnoredParams {
+            project_key,
+            path: path.clone(),
+            features: FeaturesBuilder::new().build(),
+        })
+        .unwrap_or_default();
+
+    if is_ignored {
+        return Ok(());
+    }
+
     let doc = Document::new(project_key, version, &content);
 
     session.workspace.open_file(OpenFileParams {
@@ -77,7 +90,18 @@ pub(crate) async fn did_change(
     let version = params.text_document.version;
 
     let path = session.file_path(&url)?;
-    let doc = session.document(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Ok(());
+    };
+
+    let features = FeaturesBuilder::new().build();
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(());
+    }
 
     let old_text = session.workspace.get_file_content(GetFileContentParams {
         project_key: doc.project_key,

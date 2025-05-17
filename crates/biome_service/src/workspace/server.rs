@@ -30,7 +30,7 @@ use crossbeam::channel::Sender;
 use papaya::{Compute, HashMap, HashSet, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use tokio::sync::watch;
-use tracing::{info, instrument, warn};
+use tracing::{debug, info, instrument, warn};
 
 use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::{
@@ -40,8 +40,8 @@ use crate::file_handlers::{
 use crate::projects::Projects;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
-    IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
+    FeaturesBuilder, FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams,
+    GetTypeInfoParams, IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
 };
 use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
 use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
@@ -268,7 +268,6 @@ impl WorkspaceServer {
     ///
     /// Returns the index at which the file source can be retrieved using
     /// `get_source()`.
-    #[tracing::instrument(level = "debug", skip_all)]
     fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
@@ -329,6 +328,14 @@ impl WorkspaceServer {
             persist_node_cache,
         } = params;
         let path: Utf8PathBuf = path.into();
+        let features = FeaturesBuilder::new().build();
+        let is_ignored = self.is_ignored(project_key, &path, features);
+
+        debug!("is_ignored: {} path {}", is_ignored, &path.as_str());
+
+        if is_ignored {
+            return Ok(());
+        }
 
         if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
             return Ok(());
@@ -494,7 +501,6 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level config's
     /// `files.includes` or in the feature's `includes`.
-    #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
         // Never ignore Biome's config file regardless of `includes`.
@@ -505,8 +511,6 @@ impl WorkspaceServer {
                 (!features.is_empty() && features.iter().all(|feature| self
                     .projects
                     .is_ignored_by_feature_config(project_key, path, feature))));
-
-        tracing::Span::current().record("ignored", ignored);
 
         ignored
     }
@@ -691,7 +695,7 @@ impl WorkspaceServer {
             self.update_project_layout(signal_kind, &path)?;
         }
 
-        self.update_module_graph(signal_kind, &[path]);
+        self.update_module_graph(signal_kind, &[path.clone()]);
 
         match signal_kind {
             WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan) => {
@@ -788,7 +792,7 @@ impl Workspace for WorkspaceServer {
     /// ## Panics
     /// This function may panic if the internal settings mutex has been poisoned
     /// by another thread having previously panicked while holding the lock
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     fn update_settings(
         &self,
         params: UpdateSettingsParams,

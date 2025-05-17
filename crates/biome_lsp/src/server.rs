@@ -28,7 +28,7 @@ use tokio::task::spawn_blocking;
 use tower_lsp_server::jsonrpc::Result as LspResult;
 use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
-use tracing::{error, info, warn};
+use tracing::{error, info, instrument, warn};
 
 pub struct LSPServer {
     pub(crate) session: SessionHandle,
@@ -61,7 +61,10 @@ impl LSPServer {
 
     async fn syntax_tree_request(&self, params: SyntaxTreePayload) -> LspResult<String> {
         let url = params.text_document.uri;
-        requests::syntax_tree::syntax_tree(&self.session, &url).map_err(into_lsp_error)
+        match requests::syntax_tree::syntax_tree(&self.session, &url) {
+            Ok(result) => Ok(result.unwrap_or_default()),
+            Err(err) => Err(into_lsp_error(err)),
+        }
     }
 
     #[tracing::instrument(skip(self), name = "biome/rage", level = "debug")]
@@ -357,6 +360,7 @@ impl LanguageServer for LSPServer {
             .ok();
     }
 
+    #[instrument(level = "debug", skip_all)]
     async fn did_change_workspace_folders(&self, params: DidChangeWorkspaceFoldersParams) {
         for removed in &params.event.removed {
             if let Some(project_key) = self

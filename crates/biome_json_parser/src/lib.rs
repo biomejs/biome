@@ -31,19 +31,17 @@ pub fn parse_json_with_cache(
     cache: &mut NodeCache,
     config: JsonParserOptions,
 ) -> JsonParse {
-    tracing::debug_span!("parse").in_scope(move || {
-        let mut parser = JsonParser::new(source, config);
+    let mut parser = JsonParser::new(source, config);
 
-        parse_root(&mut parser);
+    parse_root(&mut parser);
 
-        let (events, diagnostics, trivia) = parser.finish();
+    let (events, diagnostics, trivia) = parser.finish();
 
-        let mut tree_sink = JsonLosslessTreeSink::with_cache(source, &trivia, cache);
-        biome_parser::event::process(&mut tree_sink, events, diagnostics);
-        let (green, diagnostics) = tree_sink.finish();
+    let mut tree_sink = JsonLosslessTreeSink::with_cache(source, &trivia, cache);
+    biome_parser::event::process(&mut tree_sink, events, diagnostics);
+    let (green, diagnostics) = tree_sink.finish();
 
-        JsonParse::new(green, diagnostics)
-    })
+    JsonParse::new(green, diagnostics)
 }
 
 /// A utility struct for managing the result of a parser job

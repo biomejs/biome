@@ -40,6 +40,8 @@ pub enum FileKind {
     ///
     /// An example is the GraphQL schema
     Inspectable,
+    /// The path is a directory
+    Directory,
     /// A file to handle has the lowest priority. It's usually a traversed file, or a file opened by the LSP
     #[default]
     Handleable,
@@ -75,6 +77,7 @@ impl Debug for FileKinds {
                 FileKind::Ignore => list.entry(&"Ignore"),
                 FileKind::Inspectable => list.entry(&"Inspectable"),
                 FileKind::Handleable => list.entry(&"Handleable"),
+                FileKind::Directory => list.entry(&"Directory"),
             };
         }
         list.finish()
@@ -161,7 +164,11 @@ impl schemars::JsonSchema for BiomePath {
 impl BiomePath {
     pub fn new(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = path.file_name().map(Self::priority).unwrap_or_default();
+        let kind = if path.is_dir() {
+            FileKind::Directory.into()
+        } else {
+            path.file_name().map(Self::priority).unwrap_or_default()
+        };
         Self {
             path,
             kind,
@@ -246,6 +253,11 @@ impl BiomePath {
     #[inline(always)]
     pub fn is_ignore(&self) -> bool {
         self.kind.contains(FileKind::Ignore)
+    }
+
+    #[inline(always)]
+    pub fn is_dir(&self) -> bool {
+        self.kind.contains(FileKind::Directory)
     }
 
     pub fn is_to_inspect(&self) -> bool {
