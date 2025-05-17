@@ -5,10 +5,9 @@ use biome_formatter::{CstFormatContext, write};
 use biome_js_syntax::expression_left_side::AnyJsExpressionLeftSide;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsExpressionStatement, JsSyntaxKind,
-    JsUnaryOperator,
+    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, AnyJsLiteralExpression,
+    JsExpressionStatement, JsExpressionStatementFields, JsSyntaxKind, JsUnaryOperator, T,
 };
-use biome_js_syntax::{AnyJsLiteralExpression, JsExpressionStatementFields};
 use biome_rowan::SyntaxNodeOptionExt;
 
 #[derive(Debug, Clone, Default)]
@@ -24,6 +23,17 @@ impl FormatNodeRule<JsExpressionStatement> for FormatJsExpressionStatement {
                 Tag::StartVerbatim(kind) => kind.is_bogus(),
                 _ => unreachable!(),
             });
+
+        // Insert an empty line when the previous statement has an empty line before semicolon
+        if let Some(token) = node
+            .syntax()
+            .prev_sibling()
+            .and_then(|sibling| sibling.last_token())
+        {
+            if token.kind() == T![;] && get_lines_before_token(&token) > 1 {
+                write!(f, [empty_line()])?;
+            }
+        }
 
         if f.options().semicolons().is_as_needed()
             // Don't perform semicolon insertion if the previous statement is an bogus statement.
