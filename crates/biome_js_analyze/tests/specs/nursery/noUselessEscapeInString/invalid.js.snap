@@ -12,7 +12,9 @@ var s = {
     // A test with unicode characters that take more than one byte
     key: "😀\😀",
     // https://github.com/biomejs/biome/issues/6039
-    templateLiterals: `\$x`
+    templateLiterals1: `\$x`,
+    templateLiterals2: `\${\a`,
+    templateLiterals3: `\${} \a`
 };
 
 ```
@@ -157,7 +159,7 @@ invalid.js:6:13 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━�
   > 6 │     key: "😀\😀",
       │              ^^
     7 │     // https://github.com/biomejs/biome/issues/6039
-    8 │     templateLiterals: `\$x`
+    8 │     templateLiterals1: `\$x`,
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
@@ -169,22 +171,64 @@ invalid.js:6:13 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:8:25 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:26 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
      6 │     key: "😀\😀",
      7 │     // https://github.com/biomejs/biome/issues/6039
-   > 8 │     templateLiterals: `\$x`
-       │                         ^
-     9 │ };
-    10 │ 
+   > 8 │     templateLiterals1: `\$x`,
+       │                          ^
+     9 │     templateLiterals2: `\${\a`,
+    10 │     templateLiterals3: `\${} \a`
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
   i Safe fix: Unescape the character.
   
-    8 │ ····templateLiterals:·`\$x`
-      │                        -   
+    8 │ ····templateLiterals1:·`\$x`,
+      │                         -    
+
+```
+
+```
+invalid.js:9:29 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+     7 │     // https://github.com/biomejs/biome/issues/6039
+     8 │     templateLiterals1: `\$x`,
+   > 9 │     templateLiterals2: `\${\a`,
+       │                             ^
+    10 │     templateLiterals3: `\${} \a`
+    11 │ };
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    9 │ ····templateLiterals2:·`\${\a`,
+      │                            -   
+
+```
+
+```
+invalid.js:10:31 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+     8 │     templateLiterals1: `\$x`,
+     9 │     templateLiterals2: `\${\a`,
+  > 10 │     templateLiterals3: `\${} \a`
+       │                               ^
+    11 │ };
+    12 │ 
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    10 │ ····templateLiterals3:·`\${}·\a`
+       │                              -  
 
 ```
