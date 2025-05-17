@@ -3,9 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsFunction,
-    JsAssignmentExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsInitializerClause, JsSyntaxToken, JsVariableDeclaration, JsVariableDeclarator,
+    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsFunction, JsAssignmentExpression,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsInitializerClause, JsSyntaxToken,
+    JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_string_case::Case;
@@ -166,11 +166,10 @@ fn get_function_component_info(func: &AnyJsFunction) -> Option<JsSyntaxToken> {
         }
     });
     let mut max_parameter_count = Some(1);
-    let is_expression = match func {
-        AnyJsFunction::JsFunctionExpression(_) => true,
-        AnyJsFunction::JsArrowFunctionExpression(_) => true,
-        _ => false,
-    };
+    let is_expression = matches!(
+        func,
+        AnyJsFunction::JsFunctionExpression(_) | AnyJsFunction::JsArrowFunctionExpression(_)
+    );
 
     // If this is a function expression, it should be either directly assigned to a variable:
     //   const MyComponent = () => {};
@@ -187,7 +186,7 @@ fn get_function_component_info(func: &AnyJsFunction) -> Option<JsSyntaxToken> {
             max_parameter_count = None;
         }
 
-        name = Some(get_function_name_from_assignment(assignment?)?);
+        name = get_function_name_from_assignment(assignment?);
     }
 
     if let (Ok(parameters), Some(max_parameter_count)) = (func.parameters(), max_parameter_count) {
