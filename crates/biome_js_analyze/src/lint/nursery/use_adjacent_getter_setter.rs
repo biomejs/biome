@@ -58,7 +58,7 @@ declare_lint_rule! {
     /// Single getters without setters and setters without getters are ignored.
     ///
     pub UseAdjacentGetterSetter {
-        version: "next",
+        version: "2.0.0",
         name: "useAdjacentGetterSetter",
         language: "js",
         recommended: false,
