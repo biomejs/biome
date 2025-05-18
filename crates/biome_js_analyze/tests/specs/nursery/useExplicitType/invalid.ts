@@ -18,7 +18,8 @@ class Test {
 	get prop() {
 		return 1;
 	}
-	set prop() {}
+	set prop(val) {
+	}
 	method() {
 		return;
 	}
@@ -38,6 +39,9 @@ const obj = {
 	get method() {
 		return "test";
 	},
+	set method(val) {
+		console.log(val);
+	}
 };
 
 const func = (value: number) => ({ type: "X", value }) as any;
