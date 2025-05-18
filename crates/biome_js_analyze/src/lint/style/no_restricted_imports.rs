@@ -5,6 +5,7 @@ use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_diagnostics::Severity;
+use biome_glob::{CandidatePath, Glob};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsExpression,
     AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember, JsCallExpression,
@@ -18,7 +19,6 @@ use biome_js_syntax::{
     JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator, inner_string_text,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
-use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use regex::RegexBuilder;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -354,9 +354,16 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// #### Invalid
+    ///
     /// ```js,expect_diagnostic,use_options
-    /// import foo from "utils/foo";
     /// import bar from "utils/bar";
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// import foo from "utils/foo";
     /// ```
     ///
     /// ### `group`
@@ -424,7 +431,7 @@ declare_lint_rule! {
     /// {
     ///     "options": {
     ///        "patterns": [{
-    ///             "group": ["import-foo/prefix[A-Z]*"],
+    ///             "group": ["import-foo/prefixFo*"],
     ///             "caseSensitive": true
     ///         }]
     ///     }
@@ -1180,14 +1187,17 @@ fn check_patterns_import_restrictions(
     module_name: &SyntaxToken<JsLanguage>,
     import_source: &str,
 ) -> Vec<RestrictedImportMessage> {
-    let mut builder_for_simple = GitignoreBuilder::new("");
+    let mut globs_for_simple: Vec<Glob> = vec![];
     let mut last_matched_options: Option<&PatternOptions> = None;
 
     for pattern in patterns {
         match pattern {
-            Patterns::Simple(glob) => {
-                builder_for_simple.add_line(None, glob).unwrap();
-            }
+            Patterns::Simple(glob) => match glob.parse::<Glob>() {
+                Ok(glob) => globs_for_simple.push(glob),
+                Err(err) => {
+                    eprintln!("unsupported glob '{glob}': {err}");
+                }
+            },
             Patterns::WithOptions(pattern_options) => {
                 if match_pattern_options(import_source, pattern_options) {
                     last_matched_options = Some(pattern_options);
@@ -1196,18 +1206,8 @@ fn check_patterns_import_restrictions(
         }
     }
 
-    let gitignore_for_simple: Gitignore = builder_for_simple
-        // The default case-sensitive option is false.
-        // The Simple pattern has no case-sensitive option.
-        .case_insensitive(true)
-        .unwrap()
-        .build()
-        .unwrap();
-
-    if gitignore_for_simple
-        .matched(import_source, false)
-        .is_ignore()
-    {
+    let path = CandidatePath::new(import_source);
+    if path.matches_with_exceptions(globs_for_simple) {
         return vec![RestrictedImportMessage::simple(module_name, import_source)];
     }
 
@@ -1220,17 +1220,17 @@ fn check_patterns_import_restrictions(
 
 fn match_pattern_options(import_source: &str, pattern_options: &PatternOptions) -> bool {
     if let Some(group) = &pattern_options.group {
-        let mut builder = GitignoreBuilder::new("");
-        for pattern in group.iter() {
-            builder.add_line(None, pattern).unwrap();
+        let mut globs: Vec<Glob> = vec![];
+        for glob in group.iter() {
+            match glob.parse::<Glob>() {
+                Ok(glob) => globs.push(glob),
+                Err(err) => {
+                    eprintln!("unsupported glob '{glob}': {err}");
+                }
+            }
         }
-        return builder
-            .case_insensitive(!pattern_options.case_sensitive)
-            .unwrap()
-            .build()
-            .unwrap()
-            .matched(import_source, false)
-            .is_ignore();
+        let path = CandidatePath::new(import_source);
+        return path.matches_with_exceptions(globs);
     }
     if let Some(regex) = &pattern_options.regex {
         return RegexBuilder::new(regex)

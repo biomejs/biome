@@ -823,7 +823,6 @@ dependencies = [
  "codspeed-criterion-compat",
  "enumflags2",
  "globset",
- "ignore",
  "insta",
  "mimalloc",
  "regex",
