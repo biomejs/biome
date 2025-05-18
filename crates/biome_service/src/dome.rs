@@ -1,4 +1,4 @@
-use biome_fs::BiomePath;
+use biome_fs::{BiomePath, PathInternerSet};
 use std::collections::BTreeSet;
 use std::collections::btree_set::Iter;
 use std::iter::{FusedIterator, Peekable};
@@ -11,6 +11,15 @@ pub struct Dome {
 }
 
 impl Dome {
+    pub fn from_intern(intern_paths: &PathInternerSet) -> Self {
+        let guard = intern_paths.guard();
+        let mut paths = BTreeSet::new();
+        for path in intern_paths.iter(&guard) {
+            paths.insert(BiomePath::new(path));
+        }
+        Self { paths }
+    }
+
     pub fn with_path(mut self, path: impl Into<BiomePath>) -> Self {
         self.paths.insert(path.into());
         self
@@ -36,6 +45,18 @@ pub struct DomeIterator<'a> {
 }
 
 impl<'a> DomeIterator<'a> {
+    pub fn next_dir(&mut self) -> Option<&'a BiomePath> {
+        if let Some(path) = self.iter.peek() {
+            if path.is_dir() {
+                self.iter.next()
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
     pub fn next_config(&mut self) -> Option<&'a BiomePath> {
         if let Some(path) = self.iter.peek() {
             if path.is_config() {

@@ -51,11 +51,21 @@ pub(crate) fn code_actions(
     params: CodeActionParams,
 ) -> Result<Option<CodeActionResponse>, LspError> {
     info!("Code actions request");
+    let features = FeaturesBuilder::new().with_linter().with_assist().build();
     let url = params.text_document.uri.clone();
     let path = session.file_path(&url)?;
-    let doc = session.document(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Ok(None);
+    };
 
-    let features = FeaturesBuilder::new().with_linter().with_assist().build();
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(Some(Vec::new()));
+    }
+
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
@@ -64,13 +74,6 @@ pub(crate) fn code_actions(
 
     if !file_features.supports_lint() && !file_features.supports_assist() {
         info!("Linter and assist are disabled.");
-        return Ok(Some(Vec::new()));
-    }
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
-        path: path.clone(),
-        project_key: doc.project_key,
-        features,
-    })? {
         return Ok(Some(Vec::new()));
     }
 
@@ -276,7 +279,18 @@ fn fix_all(
     diagnostics: &[lsp::Diagnostic],
     offset: Option<u32>,
 ) -> Result<Option<CodeActionOrCommand>, Error> {
-    let doc = session.document(url)?;
+    let Some(doc) = session.document(&url) else {
+        return Ok(None);
+    };
+    let features = FeaturesBuilder::new().with_linter().with_assist().build();
+
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(None);
+    }
 
     let should_format = session
         .workspace

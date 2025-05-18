@@ -40,6 +40,8 @@ pub enum FileKind {
     ///
     /// An example is the GraphQL schema
     Inspectable,
+    /// The path is a directory
+    Directory,
     /// A file to handle has the lowest priority. It's usually a traversed file, or a file opened by the LSP
     #[default]
     Handleable,
@@ -75,6 +77,7 @@ impl Debug for FileKinds {
                 FileKind::Ignore => list.entry(&"Ignore"),
                 FileKind::Inspectable => list.entry(&"Inspectable"),
                 FileKind::Handleable => list.entry(&"Handleable"),
+                FileKind::Directory => list.entry(&"Directory"),
             };
         }
         list.finish()
@@ -107,61 +110,27 @@ impl From<FileKind> for FileKinds {
     }
 }
 
+/// This is an internal representation of a path inside the Biome daemon.
+/// This type has its own [Ord] implementation driven by its [FileKind], where certain files must be inspected
+/// before others. For example, configuration files and ignore files must have priority over other files.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub struct BiomePath {
     /// The path to the file
     path: Utf8PathBuf,
     /// Determines the kind of the file inside Biome. Some files are considered as configuration files, others as manifest files, and others as files to handle
     kind: FileKinds,
-    /// Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
+    /// Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` flag.
     was_written: bool,
-}
-
-#[cfg(feature = "serde")]
-impl serde::Serialize for BiomePath {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_str(self.path.as_str())
-    }
-}
-
-impl std::fmt::Display for BiomePath {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.path.as_str())
-    }
-}
-
-#[cfg(feature = "serde")]
-impl<'de> serde::Deserialize<'de> for BiomePath {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let path: std::path::PathBuf = serde::Deserialize::deserialize(deserializer)?;
-        let path = Utf8PathBuf::from_path_buf(path).map_err(|e| {
-            serde::de::Error::custom(format!("Unable to deserialize path {}", e.display()))
-        })?;
-        Ok(Self::new(path))
-    }
-}
-
-#[cfg(feature = "schema")]
-impl schemars::JsonSchema for BiomePath {
-    fn schema_name() -> String {
-        "BiomePath".to_string()
-    }
-
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        String::json_schema(generator)
-    }
 }
 
 impl BiomePath {
     pub fn new(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = path.file_name().map(Self::priority).unwrap_or_default();
+        let kind = if path.is_dir() {
+            FileKind::Directory.into()
+        } else {
+            path.file_name().map(Self::priority).unwrap_or_default()
+        };
         Self {
             path,
             kind,
@@ -248,8 +217,9 @@ impl BiomePath {
         self.kind.contains(FileKind::Ignore)
     }
 
-    pub fn is_to_inspect(&self) -> bool {
-        self.kind.contains(FileKind::Inspectable)
+    #[inline(always)]
+    pub fn is_dir(&self) -> bool {
+        self.kind.contains(FileKind::Directory)
     }
 
     /// Returns `true` if the path is inside `node_modules`
@@ -257,6 +227,11 @@ impl BiomePath {
         self.path
             .components()
             .any(|component| component.as_str() == "node_modules")
+    }
+
+    /// Whether this is a file named `package.json`
+    pub fn is_package_json(&self) -> bool {
+        self.path.file_name() == Some("package.json")
     }
 
     /// Returns `true` if the path has one of the recognised extensions for
@@ -295,6 +270,55 @@ impl TryFrom<Cow<'_, Path>> for BiomePath {
     }
 }
 
+impl Deref for BiomePath {
+    type Target = Utf8PathBuf;
+
+    fn deref(&self) -> &Self::Target {
+        &self.path
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for BiomePath {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(self.path.as_str())
+    }
+}
+
+impl std::fmt::Display for BiomePath {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.path.as_str())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for BiomePath {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let path: std::path::PathBuf = serde::Deserialize::deserialize(deserializer)?;
+        let path = Utf8PathBuf::from_path_buf(path).map_err(|e| {
+            serde::de::Error::custom(format!("Unable to deserialize path {}", e.display()))
+        })?;
+        Ok(Self::new(path))
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for BiomePath {
+    fn schema_name() -> String {
+        "BiomePath".to_string()
+    }
+
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(generator)
+    }
+}
+
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for FileKinds {
     fn schema_name() -> String {
@@ -303,14 +327,6 @@ impl schemars::JsonSchema for FileKinds {
 
     fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         <Vec<FileKind>>::json_schema(generator)
-    }
-}
-
-impl Deref for BiomePath {
-    type Target = Utf8PathBuf;
-
-    fn deref(&self) -> &Self::Target {
-        &self.path
     }
 }
 

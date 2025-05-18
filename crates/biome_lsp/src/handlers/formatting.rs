@@ -21,7 +21,18 @@ pub(crate) fn format(
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document.uri;
     let path = session.file_path(&url)?;
-    let doc = session.document(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Ok(None);
+    };
+    let features = FeaturesBuilder::new().with_formatter().build();
+
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(None);
+    }
     let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
@@ -87,7 +98,18 @@ pub(crate) fn format_range(
 ) -> Result<Option<Vec<TextEdit>>, LspError> {
     let url = params.text_document.uri;
     let path = session.file_path(&url)?;
-    let doc = session.document(&url)?;
+    let Some(doc) = session.document(&url) else {
+        return Err(extension_error(&path).into());
+    };
+    let features = FeaturesBuilder::new().with_formatter().build();
+
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return Ok(None);
+    }
 
     let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
@@ -178,14 +200,23 @@ pub(crate) fn format_on_type(
     let url = params.text_document_position.text_document.uri;
     let position = params.text_document_position.position;
     let path = session.file_path(&url)?;
-    let doc = session.document(&url)?;
-
+    let Some(doc) = session.document(&url) else {
+        return Err(extension_error(&path).into());
+    };
     let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
     })?;
+
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+        path: path.clone(),
+        project_key: doc.project_key,
+        features,
+    })? {
+        return notify_user(file_features, path);
+    }
 
     if file_features.supports_format()
         && !session.workspace.is_path_ignored(IsPathIgnoredParams {

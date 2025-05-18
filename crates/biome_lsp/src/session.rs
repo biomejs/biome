@@ -7,7 +7,7 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_deserialize::Merge;
-use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
+use biome_diagnostics::PrintDescription;
 use biome_fs::BiomePath;
 use biome_lsp_converters::{PositionEncoding, WideEncoding, negotiated_encoding};
 use biome_service::Workspace;
@@ -43,7 +43,7 @@ use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
 use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
-use tracing::{error, info, warn};
+use tracing::{error, info, instrument, warn};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -207,6 +207,7 @@ impl Session {
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client
+    #[instrument(level = "debug", skip_all)]
     pub(crate) fn initialize(
         self: &Arc<Self>,
         client_capabilities: ClientCapabilities,
@@ -321,12 +322,8 @@ impl Session {
     /// Get a [`Document`] matching the provided [`Uri`]
     ///
     /// If document does not exist, result is [WorkspaceError::NotFound]
-    pub(crate) fn document(&self, url: &Uri) -> Result<Document, Error> {
-        self.documents
-            .pin()
-            .get(url)
-            .cloned()
-            .ok_or_else(|| WorkspaceError::not_found().with_file_path(url.to_string()))
+    pub(crate) fn document(&self, url: &Uri) -> Option<Document> {
+        self.documents.pin().get(url).cloned()
     }
 
     /// Set the [`Document`] for the provided [`Uri`]
@@ -360,7 +357,9 @@ impl Session {
     /// contents changes.
     #[tracing::instrument(level = "debug", skip_all, fields(url = display(url.as_str()), diagnostic_count), err)]
     pub(crate) async fn update_diagnostics(&self, url: Uri) -> Result<(), LspError> {
-        let doc = self.document(&url)?;
+        let Some(doc) = self.document(&url) else {
+            return Ok(());
+        };
         self.update_diagnostics_for_document(url, doc).await
     }
 

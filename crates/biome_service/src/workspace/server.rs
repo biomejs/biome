@@ -1,8 +1,3 @@
-use std::panic::RefUnwindSafe;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
-
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
@@ -29,6 +24,10 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::{Compute, HashMap, HashSet, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use std::panic::RefUnwindSafe;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
 
@@ -40,8 +39,8 @@ use crate::file_handlers::{
 use crate::projects::Projects;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
-    IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
+    FeaturesBuilder, FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams,
+    GetTypeInfoParams, IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
 };
 use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
 use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
@@ -268,7 +267,6 @@ impl WorkspaceServer {
     ///
     /// Returns the index at which the file source can be retrieved using
     /// `get_source()`.
-    #[tracing::instrument(level = "debug", skip_all)]
     fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
@@ -329,6 +327,11 @@ impl WorkspaceServer {
             persist_node_cache,
         } = params;
         let path: Utf8PathBuf = path.into();
+        let features = FeaturesBuilder::new().build();
+        let is_ignored = self.is_ignored(project_key, &path, features);
+        if is_ignored {
+            return Ok(());
+        }
 
         if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
             return Ok(());
@@ -420,6 +423,7 @@ impl WorkspaceServer {
                         content.clone()
                     };
 
+                    dbg!("adding", &path);
                     Operation::Insert::<Document, ()>(Document {
                         content,
                         version,
@@ -494,19 +498,22 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level config's
     /// `files.includes` or in the feature's `includes`.
-    #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
         // Never ignore Biome's config file regardless of `includes`.
-        let ignored = (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
-            // Apply top-level `includes`
-            (self.is_ignored_by_top_level_config(project_key, path) ||
-                // Apply feature-level `includes`
-                (!features.is_empty() && features.iter().all(|feature| self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature))));
+        if file_name == Some(ConfigName::biome_json())
+            || file_name == Some(ConfigName::biome_jsonc())
+        {
+            return false;
+        };
 
-        tracing::Span::current().record("ignored", ignored);
+        let ignored =
+            // Apply top-level `includes`
+            self.is_ignored_by_top_level_config(project_key, path) ||
+                // Apply feature-level `includes`
+                !features.is_empty() && features.iter().all(|feature| self
+                    .projects
+                    .is_ignored_by_feature_config(project_key, path, feature));
 
         ignored
     }
@@ -788,7 +795,7 @@ impl Workspace for WorkspaceServer {
     /// ## Panics
     /// This function may panic if the internal settings mutex has been poisoned
     /// by another thread having previously panicked while holding the lock
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     fn update_settings(
         &self,
         params: UpdateSettingsParams,
@@ -1144,7 +1151,10 @@ impl Workspace for WorkspaceServer {
                 Ok(())
             }
             Compute::Removed(_, _) => self.update_service_data(WatcherSignalKind::Removed, path),
-            Compute::Aborted(_) => Err(WorkspaceError::not_found()),
+            Compute::Aborted(_) => {
+                dbg!("not found", &path);
+                Err(WorkspaceError::not_found())
+            }
         }
     }
 
