@@ -31,6 +31,9 @@ var obj = {
 	get method(): string {
 		return "test";
 	},
+	set method(val: string) {
+		console.log(val);
+	},
 };
 
 export default (): void => {};
