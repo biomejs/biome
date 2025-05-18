@@ -61,7 +61,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("no-extra-boolean-cast")],
         recommended: true,
         severity: Severity::Information,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

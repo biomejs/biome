@@ -96,7 +96,7 @@ declare_lint_rule! {
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
         severity: Severity::Information,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

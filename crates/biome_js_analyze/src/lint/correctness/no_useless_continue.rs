@@ -75,7 +75,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

@@ -44,7 +44,7 @@ declare_lint_rule! {
         language: "ts",
         recommended: false,
         severity: Severity::Warning,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

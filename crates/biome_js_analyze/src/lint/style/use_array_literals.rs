@@ -54,7 +54,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("no-array-constructor"), RuleSource::EslintTypeScript("no-array-constructor")],
         recommended: true,
         severity: Severity::Information,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

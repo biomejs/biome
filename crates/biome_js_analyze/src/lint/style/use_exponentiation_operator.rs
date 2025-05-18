@@ -60,7 +60,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("prefer-exponentiation-operator")],
         recommended: true,
         severity: Severity::Information,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 
