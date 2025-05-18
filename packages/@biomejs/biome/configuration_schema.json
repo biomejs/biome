@@ -3320,10 +3320,6 @@
 					"type": "object",
 					"required": ["group"],
 					"properties": {
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
-						},
 						"group": {
 							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
 							"type": "array",
@@ -3341,10 +3337,6 @@
 					"type": "object",
 					"required": ["group", "importNames"],
 					"properties": {
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
-						},
 						"group": {
 							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
 							"type": "array",
@@ -3374,10 +3366,6 @@
 							"items": { "type": "string" },
 							"minItems": 1
 						},
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
-						},
 						"group": {
 							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
 							"type": "array",
@@ -3395,10 +3383,6 @@
 					"type": "object",
 					"required": ["group", "importNamePattern"],
 					"properties": {
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
-						},
 						"group": {
 							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
 							"type": "array",
@@ -3424,10 +3408,6 @@
 							"description": "A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.",
 							"type": "string"
 						},
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
-						},
 						"group": {
 							"description": "An array of gitignore-style patterns. Cannot be used with regex.",
 							"type": "array",
@@ -3445,10 +3425,6 @@
 					"type": "object",
 					"required": ["regex"],
 					"properties": {
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
-						},
 						"message": {
 							"description": "A custom message for diagnostics related to this pattern.",
 							"type": "string"
@@ -3464,10 +3440,6 @@
 					"type": "object",
 					"required": ["importNames", "regex"],
 					"properties": {
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
-						},
 						"importNames": {
 							"description": "An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.",
 							"type": "array",
@@ -3495,10 +3467,6 @@
 							"items": { "type": "string" },
 							"minItems": 1
 						},
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
-						},
 						"message": {
 							"description": "A custom message for diagnostics related to this pattern.",
 							"type": "string"
@@ -3514,10 +3482,6 @@
 					"type": "object",
 					"required": ["importNamePattern", "regex"],
 					"properties": {
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
-						},
 						"importNamePattern": {
 							"description": "A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.",
 							"type": "string"
@@ -3540,10 +3504,6 @@
 						"allowImportNamePattern": {
 							"description": "A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.",
 							"type": "string"
-						},
-						"caseSensitive": {
-							"description": "Whether the patterns are case-sensitive. Defaults to `false`.",
-							"type": "boolean"
 						},
 						"message": {
 							"description": "A custom message for diagnostics related to this pattern.",
