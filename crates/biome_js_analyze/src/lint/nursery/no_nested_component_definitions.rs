@@ -1,3 +1,4 @@
+use crate::react::hooks::is_react_component;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -9,7 +10,6 @@ use biome_js_syntax::{
     JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, declare_node_union};
-use biome_string_case::Case;
 
 declare_lint_rule! {
     /// Disallows defining React components inside other components.
@@ -92,7 +92,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noNestedComponentDefinitions",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-nested-components")],
+        sources: &[RuleSource::EslintReactXyz("no-nested-components")],
         recommended: false,
         domains: &[RuleDomain::React],
         severity: Severity::Error,
@@ -202,7 +202,7 @@ fn get_function_component_info(func: &AnyJsFunction) -> Option<JsSyntaxToken> {
         }
     }
 
-    name.filter(|name| Case::identify(name.text_trimmed(), false) == Case::Pascal)
+    name.filter(|name| is_react_component(name.text_trimmed()))
 }
 
 struct FunctionExpressionInfo {
