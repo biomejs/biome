@@ -423,33 +423,6 @@ declare_lint_rule! {
     /// import { foo } from 'import-foo/foo';
     /// ```
     ///
-    /// ### `caseSensitive`
-    ///
-    /// This is a boolean option and sets the patterns specified in the group or regex properties to be case-sensitive when true. Default is false.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///        "patterns": [{
-    ///             "group": ["import-foo/prefixFo*"],
-    ///             "caseSensitive": true
-    ///         }]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// #### Invalid
-    ///
-    /// ```js,expect_diagnostic,use_options
-    /// import { Foo } from 'import-foo/prefixFoo';
-    /// ```
-    ///
-    /// #### Valid
-    ///
-    /// ```js,use_options
-    /// import { Foo } from 'import-foo/prefixfoo';
-    /// ```
-    ///
     /// ### `importNames`
     ///
     /// You can also specify importNames within objects inside the patterns array. In this case, the specified names apply only to the associated group or regex property.
@@ -898,8 +871,6 @@ pub struct PatternOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     message: Option<Box<str>>,
 
-    case_sensitive: bool,
-
     #[serde(skip_serializing_if = "Option::is_none")]
     import_names: Option<Box<[Box<str>]>>,
 
@@ -1088,19 +1059,6 @@ impl schemars::JsonSchema for PatternOptions {
                 "message".into(),
                 string_schema("A custom message for diagnostics related to this pattern."),
             );
-            m.insert(
-                "caseSensitive".into(),
-                Schema::Object(SchemaObject {
-                    instance_type: Some(InstanceType::Boolean.into()),
-                    metadata: Some(Box::new(Metadata {
-                        description: Some(
-                            "Whether the patterns are case-sensitive. Defaults to `false`.".into(),
-                        ),
-                        ..Default::default()
-                    })),
-                    ..Default::default()
-                }),
-            );
             m
         }
 
@@ -1234,7 +1192,6 @@ fn match_pattern_options(import_source: &str, pattern_options: &PatternOptions) 
     }
     if let Some(regex) = &pattern_options.regex {
         return RegexBuilder::new(regex)
-            .case_insensitive(!pattern_options.case_sensitive)
             .build()
             .unwrap()
             .is_match(import_source);
