@@ -119,7 +119,7 @@ impl NamingConventionOptions {
         Self(inner)
     }
 }
-impl From<NamingConventionOptions> for use_naming_convention::NamingConventionOptions {
+impl From<NamingConventionOptions> for use_naming_convention::UseNamingConventionOptions {
     fn from(val: NamingConventionOptions) -> Self {
         let mut conventions = Vec::new();
         for selection in val.0 {
@@ -234,7 +234,7 @@ impl NamingConventionSelection {
 
     fn selectors(&self) -> Vec<use_naming_convention::Selector> {
         let mut result = Vec::new();
-        let modifiers: use_naming_convention::Modifiers = self
+        let modifiers: use_naming_convention::RestrictedModifiers = self
             .modifiers
             .iter()
             .flatten()
