@@ -2,7 +2,16 @@
 "@biomejs/biome": major
 ---
 
-Promote nursery rules and update the recommended rule set.
+Change the group of some rules, promote nursery rules and update the recommended rule set.
+
+The following rules have been moved to a new group:
+
+- [complexity/noFlatMapIdentity](https://biomejs.dev/linter/rules/no-flat-map-identity)
+- [complexity/useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals)
+- [correctness/useValidTypeof](https://biomejs.dev/linter/rules/use-valid-typeof)
+- [performance/noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import/)
+- [style/useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals)
+- [suspicious/noWith](https://biomejs.dev/linter/rules/no-with)
 
 New rules are incubated in the nursery group.
 Once stable, we promote them to a stable group.
@@ -59,12 +68,6 @@ The following JavaScript rules have been promoted:
 - [suspicious/useGoogleFontDisplay](https://biomejs.dev/linter/rules/use-google-font-display)
 - [suspicious/useGuardForIn](https://biomejs.dev/linter/rules/use-guard-for-in)
 - [suspicious/useStrictMode](https://biomejs.dev/linter/rules/use-strict-mode)
-
-The following rules have been moved to another group:
-
-- [noFlatMapIdentity](https://biomejs.dev/linter/rules/no-flat-map-identity) is now in the `complexity` group
-- [noWith](https://biomejs.dev/linter/rules/no-with) is now in the `suspicious` group
-- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals) is now in the `style` group
 
 Moreover, the following JavaScript rules are now recommended:
 

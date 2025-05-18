@@ -62,7 +62,6 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace
-  - noNamespaceImport
   - noNegationElse
   - noNestedTernary
   - noNonNullAssertion
@@ -106,7 +105,6 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useNodeAssertStrict
   - useNodejsImportProtocol
   - useNumberNamespace
-  - useNumericLiterals
   - useSelfClosingElements
   - useShorthandAssign
   - useShorthandFunctionType

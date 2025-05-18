@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -88,7 +87,7 @@ window.window.Number.parseInt('11'/**/, 2);
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -110,7 +109,7 @@ invalid.js:1:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:2:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -134,7 +133,7 @@ invalid.js:2:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:3:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -160,7 +159,7 @@ invalid.js:3:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:4:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -186,7 +185,7 @@ invalid.js:4:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:5:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -212,7 +211,7 @@ invalid.js:5:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:6:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -238,7 +237,7 @@ invalid.js:6:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:7:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -264,7 +263,7 @@ invalid.js:7:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:8:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -290,7 +289,7 @@ invalid.js:8:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:9:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -316,7 +315,7 @@ invalid.js:9:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:10:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -342,7 +341,7 @@ invalid.js:10:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:11:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -368,7 +367,7 @@ invalid.js:11:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:12:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a hexadecimal literal.
   
@@ -394,7 +393,7 @@ invalid.js:12:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:13:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -411,7 +410,7 @@ invalid.js:13:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:14:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -428,7 +427,7 @@ invalid.js:14:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:15:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -445,7 +444,7 @@ invalid.js:15:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:16:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -462,7 +461,7 @@ invalid.js:16:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:17:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -479,7 +478,7 @@ invalid.js:17:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:18:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -496,7 +495,7 @@ invalid.js:18:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:19:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -513,7 +512,7 @@ invalid.js:19:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:20:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a hexadecimal literal.
   
@@ -530,7 +529,7 @@ invalid.js:20:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:21:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -556,7 +555,7 @@ invalid.js:21:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:22:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -582,7 +581,7 @@ invalid.js:22:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:23:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -608,7 +607,7 @@ invalid.js:23:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:24:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -625,7 +624,7 @@ invalid.js:24:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:25:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -642,7 +641,7 @@ invalid.js:25:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:26:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -659,7 +658,7 @@ invalid.js:26:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:27:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -676,7 +675,7 @@ invalid.js:27:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:28:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by an octal literal.
   
@@ -693,7 +692,7 @@ invalid.js:28:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:29:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -719,7 +718,7 @@ invalid.js:29:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:30:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -745,7 +744,7 @@ invalid.js:30:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:31:3 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:3 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -771,7 +770,7 @@ invalid.js:31:3 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:32:21 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:21 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -797,7 +796,7 @@ invalid.js:32:21 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:33:21 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:21 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -823,7 +822,7 @@ invalid.js:33:21 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:34:21 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:21 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -849,7 +848,7 @@ invalid.js:34:21 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:35:22 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:22 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -875,7 +874,7 @@ invalid.js:35:22 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:36:25 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:25 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -901,7 +900,7 @@ invalid.js:36:25 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:37:22 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:22 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -927,7 +926,7 @@ invalid.js:37:22 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:38:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:38:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -953,7 +952,7 @@ invalid.js:38:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:39:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:39:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -979,7 +978,7 @@ invalid.js:39:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:40:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:40:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -1005,7 +1004,7 @@ invalid.js:40:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:41:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1031,7 +1030,7 @@ invalid.js:41:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:42:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -1057,7 +1056,7 @@ invalid.js:42:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:43:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -1083,7 +1082,7 @@ invalid.js:43:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:44:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:44:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1109,7 +1108,7 @@ invalid.js:44:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:45:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:45:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -1135,7 +1134,7 @@ invalid.js:45:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:46:2 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:46:2 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -1161,7 +1160,7 @@ invalid.js:46:2 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:47:14 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:14 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1187,7 +1186,7 @@ invalid.js:47:14 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:48:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:48:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1213,7 +1212,7 @@ invalid.js:48:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:49:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1242,7 +1241,7 @@ invalid.js:49:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:51:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:51:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1268,7 +1267,7 @@ invalid.js:51:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:52:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:52:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1294,7 +1293,7 @@ invalid.js:52:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:53:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:53:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1320,7 +1319,7 @@ invalid.js:53:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:54:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:54:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1346,7 +1345,7 @@ invalid.js:54:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:55:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:55:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1372,7 +1371,7 @@ invalid.js:55:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:56:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:56:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1401,7 +1400,7 @@ invalid.js:56:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:58:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:58:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1427,7 +1426,7 @@ invalid.js:58:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:59:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:59:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1453,7 +1452,7 @@ invalid.js:59:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:60:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:60:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1479,7 +1478,7 @@ invalid.js:60:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:61:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:61:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1505,7 +1504,7 @@ invalid.js:61:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:63:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:63:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -1531,7 +1530,7 @@ invalid.js:63:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:64:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:64:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a hexadecimal literal.
   
@@ -1557,7 +1556,7 @@ invalid.js:64:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:65:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:65:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a hexadecimal literal.
   
@@ -1583,7 +1582,7 @@ invalid.js:65:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:66:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:66:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a hexadecimal literal.
   
@@ -1609,7 +1608,7 @@ invalid.js:66:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:67:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:67:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a hexadecimal literal.
   
@@ -1635,7 +1634,7 @@ invalid.js:67:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:68:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:68:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1652,7 +1651,7 @@ invalid.js:68:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:69:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:69:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by an octal literal.
   
@@ -1669,7 +1668,7 @@ invalid.js:69:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:70:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:70:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a hexadecimal literal.
   
@@ -1686,7 +1685,7 @@ invalid.js:70:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:71:1 lint/style/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:71:1 lint/complexity/useNumericLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a hexadecimal literal.
   
@@ -1703,7 +1702,7 @@ invalid.js:71:1 lint/style/useNumericLiterals ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:72:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:72:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1729,7 +1728,7 @@ invalid.js:72:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:73:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:73:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1755,7 +1754,7 @@ invalid.js:73:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:74:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:74:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1781,7 +1780,7 @@ invalid.js:74:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:75:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:75:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1807,7 +1806,7 @@ invalid.js:75:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:76:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:76:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1833,7 +1832,7 @@ invalid.js:76:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:77:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:77:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   
@@ -1859,7 +1858,7 @@ invalid.js:77:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:78:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:78:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.
   
@@ -1883,7 +1882,7 @@ invalid.js:78:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:79:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:79:1 lint/complexity/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to Number.parseInt() can be replaced by a binary literal.
   

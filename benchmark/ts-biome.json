@@ -15,6 +15,7 @@
         "noVoid": "error",
         "noWith": "error",
         "useArrowFunction": "error",
+        "useNumericLiterals": "error",
         "useRegexLiterals": "error"
       },
       "correctness": {
@@ -68,7 +69,6 @@
         "useExponentiationOperator": "error",
         "useForOf": "error",
         "useLiteralEnumMembers": "error",
-        "useNumericLiterals": "error",
         "useShorthandFunctionType": "error",
         "useSingleVarDeclarator": "error",
         "useTemplate": "error"
