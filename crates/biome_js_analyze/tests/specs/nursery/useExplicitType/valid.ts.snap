@@ -53,8 +53,6 @@ fn(() => {});
 fn(function () {});
 new Promise(() => {});
 new Foo(1, () => {});
-[function () {}, () => {}];
-[function () {}, () => {}];
 (function () {
 	console.log("This is an IIFE");
 })();
@@ -160,6 +158,9 @@ declare module "foo" {
 var X: Type = { prop: () => {} };
 f({ prop: () => {} })
 
+var foo: unknown[] = arr.map((i) => i * i);
+new Promise((resolve) => resolve(1));
+new Promise(resolve => resolve(1));
 
 const x: string | null = someFunc();
 let x: string | null;

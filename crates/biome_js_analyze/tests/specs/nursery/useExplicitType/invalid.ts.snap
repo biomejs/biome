@@ -161,6 +161,8 @@ const wrapped = {
 	foo: () => "untyped",
 };
 
+[function () {}, () => {}];
+
 ```
 
 # Diagnostics
@@ -963,6 +965,42 @@ invalid.ts:155:7 lint/nursery/useExplicitType ━━━━━━━━━━━�
         │ 	     ^^^^^^^^^^^^^^^
     156 │ };
     157 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+
+```
+
+```
+invalid.ts:158:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    156 │ };
+    157 │ 
+  > 158 │ [function () {}, () => {}];
+        │  ^^^^^^^^^^^^^^
+    159 │ 
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+
+```
+
+```
+invalid.ts:158:18 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    156 │ };
+    157 │ 
+  > 158 │ [function () {}, () => {}];
+        │                  ^^^^^^^^
+    159 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   

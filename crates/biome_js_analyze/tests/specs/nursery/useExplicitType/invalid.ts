@@ -154,3 +154,5 @@ let x = undefined;
 const wrapped = {
 	foo: () => "untyped",
 };
+
+[function () {}, () => {}];

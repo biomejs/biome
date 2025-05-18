@@ -193,12 +193,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// The following example is considered incorrect because `resolve` doesn't have a type annotation.
-    ///
-    /// ```ts,expect_diagnostic
-    /// new Promise((resolve) => resolve(1));
-    /// ```
-    ///
     /// The following example is considered incorrect because `arg` has `any` type.
     ///
     /// ```ts,expect_diagnostic
@@ -269,14 +263,15 @@ declare_lint_rule! {
     /// // Callbacks without return types
     /// setTimeout(function() { console.log("Hello!"); }, 1000);
     /// ```
+    ///
     /// ```ts
-    /// // IIFE
-    /// (() => {})();
+    /// // Callbacks without argument types (immediately nested in a function call)
+    /// new Promise((resolve) => resolve(1));
     /// ```
     ///
     /// ```ts
-    /// // a function inside an array
-    /// [function () {}, () => {}];
+    /// // IIFE
+    /// (() => {})();
     /// ```
     ///
     /// The following example is considered correct code for a higher-order function, where the returned function explicitly specifies a return type and the function body contains only one statement:
@@ -429,6 +424,10 @@ impl Rule for UseExplicitType {
         let node = ctx.query();
         match node {
             AnyEntityWithTypes::AnyJsFunction(func) => {
+                if is_function_used_in_argument(func) {
+                    // Inline callbacks are usually inferred
+                    return None;
+                }
                 if let Some(state) = handle_any_function(func) {
                     Some(state)
                 } else {
@@ -637,10 +636,10 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
 /// JS_ARRAY_ELEMENT_LIST:
 /// - `[function () {}, () => {}];`
 ///
-fn is_function_used_in_argument_or_array(func: &AnyJsFunction) -> bool {
+fn is_function_used_in_argument(func: &AnyJsFunction) -> bool {
     matches!(
         func.syntax().parent().kind(),
-        Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST)
+        Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST)
     )
 }
 
@@ -925,10 +924,6 @@ fn handle_any_function(func: &AnyJsFunction) -> Option<State> {
     }
 
     if is_iife(func) {
-        return None;
-    }
-
-    if is_function_used_in_argument_or_array(func) {
         return None;
     }
 
