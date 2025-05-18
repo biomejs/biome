@@ -7,10 +7,11 @@ expression: renaming.json
 {
   "linter": {
     "rules": {
-      
-      "complexity": {
-        "noMultipleSpacesInRegularExpressionLiterals": "on",
+      "correctness": {
         "noUnnecessaryContinue": "on"
+      },
+      "complexity": {
+        "noMultipleSpacesInRegularExpressionLiterals": "on"
       }
     }
   }
@@ -20,54 +21,53 @@ expression: renaming.json
 
 # Diagnostics
 ```
-renaming.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+renaming.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This lint rule has been renamed to noAdjacentSpacesInRegex.
+  ! This lint rule has been moved to complexity/noUselessContinue.
   
-    5 │       "complexity": {
-  > 6 │         "noMultipleSpacesInRegularExpressionLiterals": "on",
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │         "noUnnecessaryContinue": "on"
-    8 │       }
-  
-  i Safe fix: Rename the lint rule.
-  
-     4  4 │         
-     5  5 │         "complexity": {
-     6    │ - ········"noMultipleSpacesInRegularExpressionLiterals":·"on",
-     7    │ - ········"noUnnecessaryContinue":·"on"
-        6 │ + ········"noUnnecessaryContinue":·"on",
-        7 │ + ········"noAdjacentSpacesInRegex":·"on"
-     8  8 │         }
-     9  9 │       }
-  
-
-```
-
-```
-renaming.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This lint rule has been moved to correctness/noUselessContinue.
-  
-    5 │       "complexity": {
-    6 │         "noMultipleSpacesInRegularExpressionLiterals": "on",
-  > 7 │         "noUnnecessaryContinue": "on"
+    3 │     "rules": {
+    4 │       "correctness": {
+  > 5 │         "noUnnecessaryContinue": "on"
       │         ^^^^^^^^^^^^^^^^^^^^^^^
-    8 │       }
-    9 │     }
+    6 │       },
+    7 │       "complexity": {
   
   i Safe fix: Move and rename the lint rule.
   
-     4  4 │         
-     5  5 │         "complexity": {
-     6    │ - ········"noMultipleSpacesInRegularExpressionLiterals":·"on",
-     7    │ - ········"noUnnecessaryContinue":·"on"
-     8    │ - ······}
-        6 │ + ········"noMultipleSpacesInRegularExpressionLiterals":·"on"
-        7 │ + ······},
-        8 │ + ······"correctness":·{·"noUselessContinue":·"on"·}
-     9  9 │       }
-    10 10 │     }
+     3  3 │       "rules": {
+     4  4 │         "correctness": {
+     5    │ - ········"noUnnecessaryContinue":·"on"
+     6  5 │         },
+     7  6 │         "complexity": {
+     8    │ - ········"noMultipleSpacesInRegularExpressionLiterals":·"on"
+        7 │ + ········"noMultipleSpacesInRegularExpressionLiterals":·"on",
+        8 │ + ········"noUselessContinue":·"on"
+     9  9 │         }
+    10 10 │       }
+  
+
+```
+
+```
+renaming.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to noAdjacentSpacesInRegex.
+  
+     6 │       },
+     7 │       "complexity": {
+   > 8 │         "noMultipleSpacesInRegularExpressionLiterals": "on"
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │       }
+    10 │     }
+  
+  i Safe fix: Rename the lint rule.
+  
+     6  6 │         },
+     7  7 │         "complexity": {
+     8    │ - ········"noMultipleSpacesInRegularExpressionLiterals":·"on"
+        8 │ + ········"noAdjacentSpacesInRegex":·"on"
+     9  9 │         }
+    10 10 │       }
   
 
 ```

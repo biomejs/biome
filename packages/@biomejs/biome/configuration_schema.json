@@ -497,6 +497,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessContinue": {
+					"description": "Avoid using unnecessary continue.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessEmptyExport": {
 					"description": "Disallow empty exports that don't change anything in a module file.",
 					"anyOf": [
@@ -1065,13 +1072,6 @@
 					"description": "Disallow unused variables.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnusedVariablesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessContinue": {
-					"description": "Avoid using unnecessary continue.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
