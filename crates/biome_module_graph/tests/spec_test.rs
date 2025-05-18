@@ -7,7 +7,7 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_js_type_info::{ScopeId, Type, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::JsonString;
 use biome_module_graph::JsExport;
 use biome_module_graph::{
@@ -26,6 +26,7 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
         r#"
             import { foo } from "shared";
             import { bar } from "./bar.ts";
+            import { Hello } from "@components/Hello";
 
             foo();
         "#,
@@ -37,12 +38,10 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
         "#,
     );
     fs.insert(
-        "/tsconfig.json".into(),
-        r#"{
-            "include": [
-                "./src"
-            ]
-        }"#,
+        "/src/components/Hello.tsx".into(),
+        r#"
+            export function Hello() {}
+        "#,
     );
 
     fs.insert(
@@ -62,6 +61,18 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
                 "link:./node_modules/shared".into(),
             )])),
     );
+
+    let tsconfig_json = parse_json(
+        r#"{
+        "compilerOptions": {
+            "paths": {
+                "@components/*": ["./src/components/*"]
+            }
+        }
+    }"#,
+        JsonParserOptions::default(),
+    );
+    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
 
     project_layout.insert_node_manifest(
         "/node_modules/shared".into(),
@@ -100,7 +111,7 @@ fn test_resolve_relative_import() {
     let imports = module_graph.data();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
 
-    assert_eq!(file_imports.static_imports.len(), 2);
+    assert_eq!(file_imports.static_imports.len(), 3);
     assert_eq!(
         file_imports.static_imports.get("bar"),
         Some(&JsImport {
@@ -126,13 +137,39 @@ fn test_resolve_package_import() {
     let imports = module_graph.data();
     let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
 
-    assert_eq!(file_imports.static_imports.len(), 2);
+    assert_eq!(file_imports.static_imports.len(), 3);
     assert_eq!(
         file_imports.static_imports.get("foo"),
         Some(&JsImport {
             specifier: "shared".into(),
             resolved_path: ResolvedPath::from_path("/node_modules/shared/dist/index.js"),
             symbol: "foo".into()
+        })
+    );
+}
+
+#[test]
+fn test_import_through_path_alias() {
+    let (fs, project_layout) = create_test_project_layout();
+    let added_paths = [
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/src/components/Hello.tsx"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
+
+    let imports = module_graph.data();
+    let file_imports = imports.get(Utf8Path::new("/src/index.ts")).unwrap();
+
+    assert_eq!(file_imports.static_imports.len(), 3);
+    assert_eq!(
+        file_imports.static_imports.get("Hello"),
+        Some(&JsImport {
+            specifier: "@components/Hello".into(),
+            resolved_path: ResolvedPath::from_path("/src/components/Hello.tsx"),
+            symbol: "Hello".into()
         })
     );
 }

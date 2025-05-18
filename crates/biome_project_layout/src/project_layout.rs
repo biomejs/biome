@@ -38,7 +38,7 @@ pub struct PackageData {
 
 impl ProjectLayout {
     /// Returns the `package.json` that should be used for the given `path`,
-    /// together with the absolute path of the manifest file.
+    /// together with the absolute path of the package in which it was found.
     ///
     /// This function will look for the closest `package.json` file in the
     /// ancestors of the given `path`, and returns the first one it finds.
@@ -52,7 +52,7 @@ impl ProjectLayout {
                 .get(package_path)
                 .and_then(|data| data.node_package.as_ref())
                 .and_then(|node_package| node_package.manifest.as_ref())
-                .map(|manifest| (package_path.join("package.json"), manifest.clone()))
+                .map(|manifest| (package_path.to_path_buf(), manifest.clone()))
         })
     }
 
@@ -161,13 +161,13 @@ impl ProjectLayout {
             path,
             |data| {
                 let mut node_js_package = NodeJsPackage {
-                    manifest: Default::default(),
-                    diagnostics: Default::default(),
-                    tsconfig: data
+                    manifest: data
                         .node_package
                         .as_ref()
-                        .map(|package| package.tsconfig.clone())
+                        .map(|package| package.manifest.clone())
                         .unwrap_or_default(),
+                    diagnostics: Default::default(),
+                    tsconfig: Default::default(),
                 };
                 node_js_package.insert_serialized_tsconfig(&manifest.tree());
 
