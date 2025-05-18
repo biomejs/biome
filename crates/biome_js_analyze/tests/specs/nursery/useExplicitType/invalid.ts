@@ -11,6 +11,7 @@ const fn = function () {
 };
 
 const arrowFn = () => "test";
+const emptyArrowFn = () => {};
 
 class Test {
 	constructor() {}
@@ -116,7 +117,7 @@ interface Array<Type> {
 }
 
 type MyObject = {
-	(input: string);
+	(input: string); // FIXME: this shouldn't error
 	propertyName: string;
 };
 

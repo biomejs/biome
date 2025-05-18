@@ -17,6 +17,7 @@ const fn = function () {
 };
 
 const arrowFn = () => "test";
+const emptyArrowFn = () => {};
 
 class Test {
 	constructor() {}
@@ -122,7 +123,7 @@ interface Array<Type> {
 }
 
 type MyObject = {
-	(input: string);
+	(input: string); // FIXME: this shouldn't error
 	propertyName: string;
 };
 
@@ -226,8 +227,8 @@ invalid.ts:13:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
     12 │ 
   > 13 │ const arrowFn = () => "test";
        │                 ^^^^^^^^^^^^
-    14 │ 
-    15 │ class Test {
+    14 │ const emptyArrowFn = () => {};
+    15 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -237,19 +238,37 @@ invalid.ts:13:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:14:22 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    13 │ const arrowFn = () => "test";
+  > 14 │ const emptyArrowFn = () => {};
+       │                      ^^^^^^^^
+    15 │ 
+    16 │ class Test {
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+
+```
+
+```
+invalid.ts:18:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on member.
   
-    15 │ class Test {
-    16 │ 	constructor() {}
-  > 17 │ 	get prop() {
+    16 │ class Test {
+    17 │ 	constructor() {}
+  > 18 │ 	get prop() {
        │ 	^^^^^^^^^^^^
-  > 18 │ 		return 1;
-  > 19 │ 	}
+  > 19 │ 		return 1;
+  > 20 │ 	}
        │ 	^
-    20 │ 	set prop() {}
-    21 │ 	method() {
+    21 │ 	set prop() {}
+    22 │ 	method() {
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -259,19 +278,19 @@ invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:22:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on member.
   
-    19 │ 	}
-    20 │ 	set prop() {}
-  > 21 │ 	method() {
+    20 │ 	}
+    21 │ 	set prop() {}
+  > 22 │ 	method() {
        │ 	^^^^^^^^^^
-  > 22 │ 		return;
-  > 23 │ 	}
+  > 23 │ 		return;
+  > 24 │ 	}
        │ 	^
-    24 │ 	arrow = () => "arrow";
-    25 │ 	private method() {
+    25 │ 	arrow = () => "arrow";
+    26 │ 	private method() {
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -281,16 +300,16 @@ invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:25:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    22 │ 		return;
-    23 │ 	}
-  > 24 │ 	arrow = () => "arrow";
+    23 │ 		return;
+    24 │ 	}
+  > 25 │ 	arrow = () => "arrow";
        │ 	        ^^^^^^^^^^^^^
-    25 │ 	private method() {
-    26 │ 		return;
+    26 │ 	private method() {
+    27 │ 		return;
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -300,19 +319,19 @@ invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:26:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on member.
   
-    23 │ 	}
-    24 │ 	arrow = () => "arrow";
-  > 25 │ 	private method() {
+    24 │ 	}
+    25 │ 	arrow = () => "arrow";
+  > 26 │ 	private method() {
        │ 	^^^^^^^^^^^^^^^^^^
-  > 26 │ 		return;
-  > 27 │ 	}
+  > 27 │ 		return;
+  > 28 │ 	}
        │ 	^
-    28 │ }
-    29 │ 
+    29 │ }
+    30 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -322,18 +341,18 @@ invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:32:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on member.
   
-    30 │ const obj = {
-  > 31 │ 	method() {
+    31 │ const obj = {
+  > 32 │ 	method() {
        │ 	^^^^^^^^^^
-  > 32 │ 		return "test";
-  > 33 │ 	},
+  > 33 │ 		return "test";
+  > 34 │ 	},
        │ 	^
-    34 │ };
-    35 │ 
+    35 │ };
+    36 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -343,41 +362,22 @@ invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:37:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:38:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on member.
   
-    36 │ const obj = {
-  > 37 │ 	get method() {
+    37 │ const obj = {
+  > 38 │ 	get method() {
        │ 	^^^^^^^^^^^^^^
-  > 38 │ 		return "test";
-  > 39 │ 	},
+  > 39 │ 		return "test";
+  > 40 │ 	},
        │ 	^
-    40 │ };
-    41 │ 
+    41 │ };
+    42 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
   i Add a return type to the member.
-  
-
-```
-
-```
-invalid.ts:42:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing return type on function.
-  
-    40 │ };
-    41 │ 
-  > 42 │ const func = (value: number) => ({ type: "X", value }) as any;
-       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    43 │ const func = (value: number) => ({ type: "X", value }) as Action;
-    44 │ 
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type to the function.
   
 
 ```
@@ -387,11 +387,12 @@ invalid.ts:43:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
 
   × Missing return type on function.
   
-    42 │ const func = (value: number) => ({ type: "X", value }) as any;
-  > 43 │ const func = (value: number) => ({ type: "X", value }) as Action;
-       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    44 │ 
-    45 │ export default () => {};
+    41 │ };
+    42 │ 
+  > 43 │ const func = (value: number) => ({ type: "X", value }) as any;
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ const func = (value: number) => ({ type: "X", value }) as Action;
+    45 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -401,16 +402,15 @@ invalid.ts:43:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:45:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:44:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    43 │ const func = (value: number) => ({ type: "X", value }) as Action;
-    44 │ 
-  > 45 │ export default () => {};
-       │                ^^^^^^^^
-    46 │ export default function () {}
-    47 │ 
+    43 │ const func = (value: number) => ({ type: "X", value }) as any;
+  > 44 │ const func = (value: number) => ({ type: "X", value }) as Action;
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ 
+    46 │ export default () => {};
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -424,11 +424,12 @@ invalid.ts:46:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
 
   × Missing return type on function.
   
-    45 │ export default () => {};
-  > 46 │ export default function () {}
-       │                ^^^^^^^^^^^^^^
-    47 │ 
-    48 │ // check higher order functions
+    44 │ const func = (value: number) => ({ type: "X", value }) as Action;
+    45 │ 
+  > 46 │ export default () => {};
+       │                ^^^^^^^^
+    47 │ export default function () {}
+    48 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -438,15 +439,15 @@ invalid.ts:46:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:49:23 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:47:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    48 │ // check higher order functions
-  > 49 │ const arrowFn = () => () => {};
-       │                       ^^^^^^^^
-    50 │ const arrowFn = () => function () {};
-    51 │ const arrowFn = () => {
+    46 │ export default () => {};
+  > 47 │ export default function () {}
+       │                ^^^^^^^^^^^^^^
+    48 │ 
+    49 │ // check higher order functions
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -460,12 +461,30 @@ invalid.ts:50:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
 
   × Missing return type on function.
   
-    48 │ // check higher order functions
-    49 │ const arrowFn = () => () => {};
-  > 50 │ const arrowFn = () => function () {};
+    49 │ // check higher order functions
+  > 50 │ const arrowFn = () => () => {};
+       │                       ^^^^^^^^
+    51 │ const arrowFn = () => function () {};
+    52 │ const arrowFn = () => {
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+
+```
+
+```
+invalid.ts:51:23 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing return type on function.
+  
+    49 │ // check higher order functions
+    50 │ const arrowFn = () => () => {};
+  > 51 │ const arrowFn = () => function () {};
        │                       ^^^^^^^^^^^^^^
-    51 │ const arrowFn = () => {
-    52 │ 	return () => {};
+    52 │ const arrowFn = () => {
+    53 │ 	return () => {};
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -475,16 +494,16 @@ invalid.ts:50:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:52:9 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:53:9 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    50 │ const arrowFn = () => function () {};
-    51 │ const arrowFn = () => {
-  > 52 │ 	return () => {};
+    51 │ const arrowFn = () => function () {};
+    52 │ const arrowFn = () => {
+  > 53 │ 	return () => {};
        │ 	       ^^^^^^^^
-    53 │ };
-    54 │ 
+    54 │ };
+    55 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -494,21 +513,21 @@ invalid.ts:52:9 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:57:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:58:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    55 │ // does not support detecting a return of a function inside other statements like if, switch, etc.
-    56 │ // we check only the first statment
-  > 57 │ const arrowFn = (a: number) => {
+    56 │ // does not support detecting a return of a function inside other statements like if, switch, etc.
+    57 │ // we check only the first statment
+  > 58 │ const arrowFn = (a: number) => {
        │                 ^^^^^^^^^^^^^^^^
-  > 58 │ 	if (a === 1) {
+  > 59 │ 	if (a === 1) {
         ...
-  > 64 │ 	}
-  > 65 │ };
+  > 65 │ 	}
+  > 66 │ };
        │ ^
-    66 │ const arrowFn = (a: number) => {
-    67 │ 	switch (a) {
+    67 │ const arrowFn = (a: number) => {
+    68 │ 	switch (a) {
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -518,21 +537,21 @@ invalid.ts:57:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:66:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:67:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    64 │ 	}
-    65 │ };
-  > 66 │ const arrowFn = (a: number) => {
+    65 │ 	}
+    66 │ };
+  > 67 │ const arrowFn = (a: number) => {
        │                 ^^^^^^^^^^^^^^^^
-  > 67 │ 	switch (a) {
+  > 68 │ 	switch (a) {
         ...
-  > 77 │ 	}
-  > 78 │ };
+  > 78 │ 	}
+  > 79 │ };
        │ ^
-    79 │ 
-    80 │ function f() {
+    80 │ 
+    81 │ function f() {
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -542,16 +561,16 @@ invalid.ts:66:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:80:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:81:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    78 │ };
-    79 │ 
-  > 80 │ function f() {
+    79 │ };
+    80 │ 
+  > 81 │ function f() {
        │ ^^^^^^^^^^
-    81 │ 	if (x) {
-    82 │ 		return 0;
+    82 │ 	if (x) {
+    83 │ 		return 0;
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -561,16 +580,16 @@ invalid.ts:80:1 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:87:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:88:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    85 │ }
-    86 │ 
-  > 87 │ function fn() {
+    86 │ }
+    87 │ 
+  > 88 │ function fn() {
        │ ^^^^^^^^^^^
-    88 │ 	let str = "hey";
-    89 │ 	return function (): string {
+    89 │ 	let str = "hey";
+    90 │ 	return function (): string {
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -580,16 +599,16 @@ invalid.ts:87:1 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:94:29 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:95:29 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    92 │ }
-    93 │ 
-  > 94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+    93 │ }
+    94 │ 
+  > 95 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
        │                             ^^^^^^^^^^^^^^
-    95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
-    96 │ 
+    96 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
+    97 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -599,16 +618,16 @@ invalid.ts:94:29 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:94:69 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:95:69 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    92 │ }
-    93 │ 
-  > 94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+    93 │ }
+    94 │ 
+  > 95 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
        │                                                                     ^^^^^^^^^^^^^^
-    95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
-    96 │ 
+    96 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
+    97 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -618,14 +637,14 @@ invalid.ts:94:69 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:95:36 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:96:36 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
-  > 95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
+    95 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+  > 96 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
        │                                    ^^^^^^^^^^^^^^
-    96 │ 
+    97 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -635,14 +654,14 @@ invalid.ts:95:36 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:95:76 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:96:76 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    94 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
-  > 95 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
+    95 │ const x = { namedFunctions: function alpha () {}, unNamedFunctions: function () {} };
+  > 96 │ const x = { bar: { namedFunctions: function alpha () {}, unNamedFunctions: function () {} } };
        │                                                                            ^^^^^^^^^^^^^^
-    96 │ 
+    97 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -652,16 +671,16 @@ invalid.ts:95:76 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:107:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:108:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    105 │ function getObjectWithFunction(): Behavior {
-    106 │   return {
-  > 107 │     namedFunc: function myFunc() { return "value" },
+    106 │ function getObjectWithFunction(): Behavior {
+    107 │   return {
+  > 108 │     namedFunc: function myFunc() { return "value" },
         │                ^^^^^^^^^^^^^^^
-    108 │     arrowFunc: () => {},
-    109 │   }
+    109 │     arrowFunc: () => {},
+    110 │   }
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -671,16 +690,16 @@ invalid.ts:107:16 lint/nursery/useExplicitType ━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:115:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:116:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on member.
   
-    113 │ 	pop(): Type | undefined;
-    114 │ 	push(...items: Type[]): number;
-  > 115 │ 	method();
+    114 │ 	pop(): Type | undefined;
+    115 │ 	push(...items: Type[]): number;
+  > 116 │ 	method();
         │ 	^^^^^^^^^
-    116 │ }
-    117 │ 
+    117 │ }
+    118 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -690,15 +709,15 @@ invalid.ts:115:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:119:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:120:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on member.
   
-    118 │ type MyObject = {
-  > 119 │ 	(input: string);
+    119 │ type MyObject = {
+  > 120 │ 	(input: string); // FIXME: this shouldn't error
         │ 	^^^^^^^^^^^^^^^^
-    120 │ 	propertyName: string;
-    121 │ };
+    121 │ 	propertyName: string;
+    122 │ };
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -708,15 +727,15 @@ invalid.ts:119:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:124:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:125:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on member.
   
-    123 │ abstract class MyClass {
-  > 124 │ 	public abstract method();
+    124 │ abstract class MyClass {
+  > 125 │ 	public abstract method();
         │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
-    125 │ }
-    126 │ 
+    126 │ }
+    127 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -726,16 +745,16 @@ invalid.ts:124:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:129:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:130:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on member.
   
-    127 │ abstract class P<T> {
-    128 │ 	abstract method(): T;
-  > 129 │ 	abstract get poke();
+    128 │ abstract class P<T> {
+    129 │ 	abstract method(): T;
+  > 130 │ 	abstract get poke();
         │ 	^^^^^^^^^^^^^^^^^^^^
-    130 │ }
-    131 │ 
+    131 │ }
+    132 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -745,15 +764,15 @@ invalid.ts:129:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:133:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:134:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function declaration.
   
-    132 │ declare namespace myLib {
-  > 133 │ 	function makeGreeting(s: string);
+    133 │ declare namespace myLib {
+  > 134 │ 	function makeGreeting(s: string);
         │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    134 │ }
-    135 │ 
+    135 │ }
+    136 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -763,15 +782,15 @@ invalid.ts:133:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:137:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:138:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function declaration.
   
-    136 │ declare module "foo" {
-  > 137 │ 	export default function bar();
+    137 │ declare module "foo" {
+  > 138 │ 	export default function bar();
         │ 	               ^^^^^^^^^^^^^^^
-    138 │ }
-    139 │ 
+    139 │ }
+    140 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -781,16 +800,16 @@ invalid.ts:137:17 lint/nursery/useExplicitType ━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:140:19 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:141:19 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    138 │ }
-    139 │ 
-  > 140 │ const x = { prop: () => {} }
+    139 │ }
+    140 │ 
+  > 141 │ const x = { prop: () => {} }
         │                   ^^^^^^^^
-    141 │ const x = { bar: { prop: () => {} } }
-    142 │ 
+    142 │ const x = { bar: { prop: () => {} } }
+    143 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -800,15 +819,15 @@ invalid.ts:140:19 lint/nursery/useExplicitType ━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:141:26 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:142:26 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    140 │ const x = { prop: () => {} }
-  > 141 │ const x = { bar: { prop: () => {} } }
+    141 │ const x = { prop: () => {} }
+  > 142 │ const x = { bar: { prop: () => {} } }
         │                          ^^^^^^^^
-    142 │ 
-    143 │ const x = { dynamic: someFunc() }
+    143 │ 
+    144 │ const x = { dynamic: someFunc() }
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -818,35 +837,16 @@ invalid.ts:141:26 lint/nursery/useExplicitType ━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:143:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:144:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The variable doesn't have a type defined.
   
-    141 │ const x = { bar: { prop: () => {} } }
-    142 │ 
-  > 143 │ const x = { dynamic: someFunc() }
+    142 │ const x = { bar: { prop: () => {} } }
+    143 │ 
+  > 144 │ const x = { dynamic: someFunc() }
         │       ^
-    144 │ 
-    145 │ let x;
-  
-  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a type to the variable.
-  
-
-```
-
-```
-invalid.ts:145:5 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The variable doesn't have a type defined.
-  
-    143 │ const x = { dynamic: someFunc() }
-    144 │ 
-  > 145 │ let x;
-        │     ^
-    146 │ let x = null;
-    147 │ let x = undefined;
+    145 │ 
+    146 │ let x;
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -860,11 +860,12 @@ invalid.ts:146:5 lint/nursery/useExplicitType ━━━━━━━━━━━�
 
   × The variable doesn't have a type defined.
   
-    145 │ let x;
-  > 146 │ let x = null;
+    144 │ const x = { dynamic: someFunc() }
+    145 │ 
+  > 146 │ let x;
         │     ^
-    147 │ let x = undefined;
-    148 │ 
+    147 │ let x = null;
+    148 │ let x = undefined;
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -878,12 +879,11 @@ invalid.ts:147:5 lint/nursery/useExplicitType ━━━━━━━━━━━�
 
   × The variable doesn't have a type defined.
   
-    145 │ let x;
-    146 │ let x = null;
-  > 147 │ let x = undefined;
+    146 │ let x;
+  > 147 │ let x = null;
         │     ^
-    148 │ 
-    149 │ const wrapped = {
+    148 │ let x = undefined;
+    149 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -893,15 +893,34 @@ invalid.ts:147:5 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:150:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:148:5 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable doesn't have a type defined.
+  
+    146 │ let x;
+    147 │ let x = null;
+  > 148 │ let x = undefined;
+        │     ^
+    149 │ 
+    150 │ const wrapped = {
+  
+  i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a type to the variable.
+  
+
+```
+
+```
+invalid.ts:151:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing return type on function.
   
-    149 │ const wrapped = {
-  > 150 │ 	foo: () => "untyped",
+    150 │ const wrapped = {
+  > 151 │ 	foo: () => "untyped",
         │ 	     ^^^^^^^^^^^^^^^
-    151 │ };
-    152 │ 
+    152 │ };
+    153 │ 
   
   i Declaring the type makes the code self-documented and can speed up TypeScript type checking.
   

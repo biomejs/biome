@@ -190,3 +190,8 @@ const obj = {
 
 const obj = { dynamic: someFunc() as string }
 const obj = { dynamic: <string>(someFunc()) }
+
+namespace Ns {
+	export const X = {};
+	export function func(arg: string): void {}
+}

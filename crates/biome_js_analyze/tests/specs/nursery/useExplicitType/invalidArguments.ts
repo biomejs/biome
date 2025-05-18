@@ -4,7 +4,7 @@ export var arrowFn = (arg): string => `test ${arg}`;
 // argument with any type
 export var arrowFn = (arg: any): string => `test ${arg}`;
 
-var foo = arr.map((i) => i * i);
+var foo: unknown[] = arr.map((i) => i * i);
 new Promise((resolve) => resolve(1));
 
 // js binding argument
