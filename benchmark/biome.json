@@ -26,6 +26,7 @@
         "noVoid": "error",
         "useArrowFunction": "error",
         "useLiteralKeys": "error",
+        "useNumericLiterals": "error",
         "useRegexLiterals": "error"
       },
       "correctness": {
@@ -53,6 +54,7 @@
         "noUnusedVariables": "error",
         "useIsNan": "error",
         "useValidForDirection": "error",
+        "useValidTypeof": "error",
         "useYield": "error"
       },
       "security": {
@@ -67,7 +69,6 @@
         "useCollapsedElseIf": "error",
         "useDefaultParameterLast": "error",
         "useExponentiationOperator": "error",
-        "useNumericLiterals": "error",
         "useSingleVarDeclarator": "error",
         "useTemplate": "error"
       },
@@ -102,7 +103,6 @@
         "useAwait": "error",
         "useDefaultSwitchClauseLast": "error",
         "useGetterReturn": "error",
-        "useValidTypeof": "error",
         "noVar": "error"
       }
     }

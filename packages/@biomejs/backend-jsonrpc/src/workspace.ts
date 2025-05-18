@@ -1246,6 +1246,10 @@ export interface Complexity {
 	 */
 	useLiteralKeys?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
+	 */
+	useNumericLiterals?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce using concise optional chain instead of chained logical expressions.
 	 */
 	useOptionalChain?: RuleFixConfiguration_for_Null;
@@ -1487,6 +1491,10 @@ export interface Correctness {
 	 */
 	useValidForDirection?: RuleConfiguration_for_Null;
 	/**
+	 * This rule checks that the result of a typeof expression is compared to a valid value.
+	 */
+	useValidTypeof?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require generator functions to contain yield.
 	 */
 	useYield?: RuleConfiguration_for_Null;
@@ -1665,6 +1673,10 @@ export interface Performance {
 	 */
 	noImgElement?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of namespace imports.
+	 */
+	noNamespaceImport?: RuleConfiguration_for_Null;
+	/**
 	 * Avoid re-export all.
 	 */
 	noReExportAll?: RuleConfiguration_for_Null;
@@ -1754,10 +1766,6 @@ export interface Style {
 	 * Disallow the use of TypeScript's namespaces.
 	 */
 	noNamespace?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow the use of namespace imports.
-	 */
-	noNamespaceImport?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow negation in the condition of an if statement if it has an else clause.
 	 */
@@ -1934,10 +1942,6 @@ export interface Style {
 	 * Use the Number properties instead of global ones.
 	 */
 	useNumberNamespace?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
-	 */
-	useNumericLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevent extra closing tags for components without children.
 	 */
@@ -2303,10 +2307,6 @@ export interface Suspicious {
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
-	/**
-	 * This rule checks that the result of a typeof expression is compared to a valid value.
-	 */
-	useValidTypeof?: RuleFixConfiguration_for_Null;
 }
 export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithOptions_for_Options {
@@ -3381,6 +3381,7 @@ export type Category =
 	| "lint/complexity/useDateNow"
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
+	| "lint/complexity/useNumericLiterals"
 	| "lint/complexity/useOptionalChain"
 	| "lint/complexity/useRegexLiterals"
 	| "lint/complexity/useSimpleNumberKeys"
@@ -3442,6 +3443,7 @@ export type Category =
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
+	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
@@ -3508,6 +3510,7 @@ export type Category =
 	| "lint/performance/noDelete"
 	| "lint/performance/noDynamicNamespaceImportAccess"
 	| "lint/performance/noImgElement"
+	| "lint/performance/noNamespaceImport"
 	| "lint/performance/noReExportAll"
 	| "lint/performance/useTopLevelRegex"
 	| "lint/security/noBlankTarget"
@@ -3526,7 +3529,6 @@ export type Category =
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"
-	| "lint/style/noNamespaceImport"
 	| "lint/style/noNegationElse"
 	| "lint/style/noNestedTernary"
 	| "lint/style/noNonNullAssertion"
@@ -3570,7 +3572,6 @@ export type Category =
 	| "lint/style/useNodeAssertStrict"
 	| "lint/style/useNodejsImportProtocol"
 	| "lint/style/useNumberNamespace"
-	| "lint/style/useNumericLiterals"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandArrayType"
 	| "lint/style/useShorthandAssign"
@@ -3662,7 +3663,6 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStrictMode"
-	| "lint/suspicious/useValidTypeof"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"

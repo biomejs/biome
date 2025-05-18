@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -30,7 +29,7 @@ typeof foo != (false || true);
 
 # Diagnostics
 ```
-invalid.js:2:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:16 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × "strnig" is not a valid typeof value.
   
@@ -44,7 +43,7 @@ invalid.js:2:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:3:15 lint/suspicious/useValidTypeof  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:15 lint/correctness/useValidTypeof  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × "String" is not a valid typeof value.
   
@@ -68,7 +67,7 @@ invalid.js:3:15 lint/suspicious/useValidTypeof  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:4:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:16 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × "undefimed" is not a valid typeof value.
   
@@ -83,7 +82,7 @@ invalid.js:4:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:5:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × "undefimed" is not a valid typeof value.
   
@@ -98,7 +97,7 @@ invalid.js:5:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:6:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × "nunber" is not a valid typeof value.
   
@@ -113,7 +112,7 @@ invalid.js:6:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:7:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × "nunber" is not a valid typeof value.
   
@@ -128,7 +127,7 @@ invalid.js:7:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:8:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:1 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × "fucntion" is not a valid typeof value.
   
@@ -143,7 +142,7 @@ invalid.js:8:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:9:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × "fucntion" is not a valid typeof value.
   
@@ -158,7 +157,7 @@ invalid.js:9:1 lint/suspicious/useValidTypeof ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:12:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid typeof comparison.
   
@@ -183,7 +182,7 @@ invalid.js:12:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:13:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid typeof comparison.
   
@@ -209,7 +208,7 @@ invalid.js:13:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:14:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid typeof comparison.
   
@@ -235,7 +234,7 @@ invalid.js:14:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:15:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid typeof comparison.
   
@@ -261,7 +260,7 @@ invalid.js:15:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:16:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid typeof comparison.
   
@@ -287,7 +286,7 @@ invalid.js:16:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:18:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid typeof comparison.
   
@@ -313,7 +312,7 @@ invalid.js:18:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:19:15 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:15 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid typeof comparison.
   
@@ -338,7 +337,7 @@ invalid.js:19:15 lint/suspicious/useValidTypeof ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:20:16 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:16 lint/correctness/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Invalid typeof comparison.
   

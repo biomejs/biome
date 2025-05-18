@@ -13,7 +13,6 @@ expression: redactor(content)
         "noDebugger": "error",
         "noShadowRestrictedNames": "off",
         "noExplicitAny": "off",
-        "useValidTypeof": "error",
         "noAsyncPromiseExecutor": "off",
         "noEmptyInterface": "error",
         "noAssignInExpressions": "error",
@@ -53,7 +52,8 @@ expression: redactor(content)
         "noUnreachable": "error",
         "noUnsafeFinally": "error",
         "noSwitchDeclarations": "off",
-        "noSelfAssign": "off"
+        "noSelfAssign": "off",
+        "useValidTypeof": "error"
       }
     }
   }

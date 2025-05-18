@@ -157,7 +157,7 @@ pub type NoMisplacedAssertion = < lint :: suspicious :: no_misplaced_assertion :
 pub type NoMisrefactoredShorthandAssign = < lint :: suspicious :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign as biome_analyze :: Rule > :: Options ;
 pub type NoNamespace = <lint::style::no_namespace::NoNamespace as biome_analyze::Rule>::Options;
 pub type NoNamespaceImport =
-    <lint::style::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
+    <lint::performance::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
 pub type NoNegationElse =
     <lint::style::no_negation_else::NoNegationElse as biome_analyze::Rule>::Options;
 pub type NoNestedTernary =
@@ -402,7 +402,7 @@ pub type UseNumberNamespace =
     <lint::style::use_number_namespace::UseNumberNamespace as biome_analyze::Rule>::Options;
 pub type UseNumberToFixedDigitsArgument = < lint :: suspicious :: use_number_to_fixed_digits_argument :: UseNumberToFixedDigitsArgument as biome_analyze :: Rule > :: Options ;
 pub type UseNumericLiterals =
-    <lint::style::use_numeric_literals::UseNumericLiterals as biome_analyze::Rule>::Options;
+    <lint::complexity::use_numeric_literals::UseNumericLiterals as biome_analyze::Rule>::Options;
 pub type UseNumericSeparators =
     <lint::nursery::use_numeric_separators::UseNumericSeparators as biome_analyze::Rule>::Options;
 pub type UseOptionalChain =
@@ -454,6 +454,6 @@ pub type UseValidAutocomplete =
 pub type UseValidForDirection = < lint :: correctness :: use_valid_for_direction :: UseValidForDirection as biome_analyze :: Rule > :: Options ;
 pub type UseValidLang = <lint::a11y::use_valid_lang::UseValidLang as biome_analyze::Rule>::Options;
 pub type UseValidTypeof =
-    <lint::suspicious::use_valid_typeof::UseValidTypeof as biome_analyze::Rule>::Options;
+    <lint::correctness::use_valid_typeof::UseValidTypeof as biome_analyze::Rule>::Options;
 pub type UseWhile = <lint::complexity::use_while::UseWhile as biome_analyze::Rule>::Options;
 pub type UseYield = <lint::correctness::use_yield::UseYield as biome_analyze::Rule>::Options;

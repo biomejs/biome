@@ -91,6 +91,7 @@ Linter:
     complexity/useDateNow
     complexity/useFlatMap
     complexity/useLiteralKeys
+    complexity/useNumericLiterals
     complexity/useOptionalChain
     complexity/useRegexLiterals
     complexity/useSimpleNumberKeys
