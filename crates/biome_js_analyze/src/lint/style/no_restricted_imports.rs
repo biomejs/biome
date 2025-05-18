@@ -744,12 +744,12 @@ impl PathOptions {
             AnyJsImportLike::JsModuleSource(module_source_node) => {
                 if !self.has_import_name_constraints() {
                     // All imports disallowed, add diagnostic to the import source
-                    vec![RestrictedImportMessage {
-                        location: module_name.text_trimmed_range(),
-                        message: self.message(import_source, "", Cause::ImportSource),
-                        import_source: import_source.to_string(),
-                        allowed_import_names: [].into(),
-                    }]
+                    vec![RestrictedImportMessage::path(
+                        module_name.text_trimmed_range(),
+                        import_source,
+                        self.message(import_source, "", Cause::ImportSource),
+                        [].into(),
+                    )]
                 } else {
                     // Check (and possibly report) each imported name individually
                     let mut visitor = RestrictedImportVisitor {
@@ -768,12 +768,12 @@ impl PathOptions {
                 // be difficult to distinguish) or a collection of named imports.
                 if !self.has_import_name_constraints() {
                     // All imports disallowed, add diagnostic to the import source
-                    vec![RestrictedImportMessage {
-                        location: module_name.text_trimmed_range(),
-                        message: self.message(import_source, "", Cause::ImportSource),
-                        import_source: import_source.to_string(),
-                        allowed_import_names: [].into(),
-                    }]
+                    vec![RestrictedImportMessage::path(
+                        module_name.text_trimmed_range(),
+                        import_source,
+                        self.message(import_source, "", Cause::ImportSource),
+                        [].into(),
+                    )]
                 } else {
                     // Check (and possibly report) each imported name individually
                     let mut visitor = RestrictedImportVisitor {
@@ -792,12 +792,12 @@ impl PathOptions {
                 if restriction.is_forbidden() {
                     // require() calls can only import the default import, so
                     // there are no individual import names to check or report on.
-                    vec![RestrictedImportMessage {
-                        location: module_name.text_trimmed_range(),
-                        message: self.message(import_source, "", Cause::ImportSource),
-                        import_source: import_source.to_string(),
-                        allowed_import_names: [].into(),
-                    }]
+                    vec![RestrictedImportMessage::path(
+                        module_name.text_trimmed_range(),
+                        import_source,
+                        self.message(import_source, "", Cause::ImportSource),
+                        [].into(),
+                    )]
                 } else {
                     vec![]
                 }
@@ -1166,7 +1166,12 @@ fn check_patterns_import_restrictions(
 
     let path = CandidatePath::new(import_source);
     if path.matches_with_exceptions(globs_for_simple) {
-        return vec![RestrictedImportMessage::simple(module_name, import_source)];
+        return vec![RestrictedImportMessage::pattern(
+            module_name.text_trimmed_range(),
+            import_source,
+            String::new(),
+            [].into(),
+        )];
     }
 
     if let Some(pattern_options) = last_matched_options {
@@ -1205,11 +1210,17 @@ fn handle_pattern_options(
     module_name: &SyntaxToken<JsLanguage>,
     import_source: &str,
 ) -> Vec<RestrictedImportMessage> {
+    let message = pattern_options
+        .message
+        .as_ref()
+        .map_or(String::new(), |m| m.to_string());
+
     if !pattern_options.has_import_name_constraints() {
-        return vec![RestrictedImportMessage::with_additional_message(
-            module_name,
+        return vec![RestrictedImportMessage::pattern(
+            module_name.text_trimmed_range(),
             import_source,
-            pattern_options.message.clone(),
+            message,
+            [].into(),
         )];
     }
 
@@ -1241,17 +1252,19 @@ fn handle_pattern_options(
             visitor.results
         }
         Some(ImportCtx::JsCallExpression(_)) => {
-            vec![RestrictedImportMessage::with_additional_message(
-                module_name,
+            vec![RestrictedImportMessage::pattern(
+                module_name.text_trimmed_range(),
                 import_source,
-                pattern_options.message.clone(),
+                message,
+                [].into(),
             )]
         }
         None => {
-            vec![RestrictedImportMessage::with_additional_message(
-                module_name,
+            vec![RestrictedImportMessage::pattern(
+                module_name.text_trimmed_range(),
                 import_source,
-                pattern_options.message.clone(),
+                message,
+                [].into(),
             )]
         }
     }
@@ -1700,16 +1713,12 @@ impl RestrictedImportVisitor<'_> {
                 if restriction.is_allowed() {
                     return None;
                 }
-                self.results.push(RestrictedImportMessage {
-                    location: import_node.text_trimmed_range(),
-                    message: path_options.message(
-                        self.import_source,
-                        name_or_alias,
-                        restriction.cause,
-                    ),
-                    import_source: self.import_source.to_string(),
-                    allowed_import_names: path_options.allow_import_names.clone(),
-                });
+                self.results.push(RestrictedImportMessage::path(
+                    import_node.text_trimmed_range(),
+                    self.import_source,
+                    path_options.message(self.import_source, name_or_alias, restriction.cause),
+                    path_options.allow_import_names.clone(),
+                ));
                 Some(())
             }
             Options::PatternOptions(pattern_options) => {
@@ -1721,16 +1730,12 @@ impl RestrictedImportVisitor<'_> {
                     .allow_import_names
                     .as_ref()
                     .map_or_else(|| Vec::new().into_boxed_slice(), |names| names.clone());
-                self.results.push(RestrictedImportMessage {
-                    location: import_node.text_trimmed_range(),
-                    message: pattern_options.message(
-                        self.import_source,
-                        name_or_alias,
-                        restriction.cause,
-                    ),
-                    import_source: self.import_source.to_string(),
-                    allowed_import_names: allow_import_names,
-                });
+                self.results.push(RestrictedImportMessage::pattern(
+                    import_node.text_trimmed_range(),
+                    self.import_source,
+                    pattern_options.message(self.import_source, name_or_alias, restriction.cause),
+                    allow_import_names,
+                ));
                 Some(())
             }
         }
@@ -1749,16 +1754,12 @@ impl RestrictedImportVisitor<'_> {
                 if restriction.is_allowed() {
                     return None;
                 }
-                self.results.push(RestrictedImportMessage {
-                    location: import_token.text_trimmed_range(),
-                    message: path_options.message(
-                        self.import_source,
-                        name_or_alias,
-                        restriction.cause,
-                    ),
-                    import_source: self.import_source.to_string(),
-                    allowed_import_names: path_options.allow_import_names.clone(),
-                });
+                self.results.push(RestrictedImportMessage::path(
+                    import_token.text_trimmed_range(),
+                    self.import_source,
+                    path_options.message(self.import_source, name_or_alias, restriction.cause),
+                    path_options.allow_import_names.clone(),
+                ));
                 Some(())
             }
             Options::PatternOptions(pattern_options) => {
@@ -1772,17 +1773,12 @@ impl RestrictedImportVisitor<'_> {
                     .as_ref()
                     .map_or_else(|| Vec::new().into_boxed_slice(), |names| names.clone());
 
-                self.results.push(RestrictedImportMessage {
-                    location: import_token.text_trimmed_range(),
-                    message: pattern_options.message(
-                        self.import_source,
-                        name_or_alias,
-                        restriction.cause,
-                    ),
-                    import_source: self.import_source.to_string(),
-                    allowed_import_names: allow_import_names,
-                });
-
+                self.results.push(RestrictedImportMessage::pattern(
+                    import_token.text_trimmed_range(),
+                    self.import_source,
+                    pattern_options.message(self.import_source, name_or_alias, restriction.cause),
+                    allow_import_names,
+                ));
                 Some(())
             }
         }
@@ -1797,25 +1793,50 @@ pub struct RestrictedImportMessage {
 }
 
 impl RestrictedImportMessage {
-    fn simple(token: &SyntaxToken<JsLanguage>, import_source: &str) -> Self {
-        Self::with_additional_message(token, import_source, None)
-    }
-
-    fn with_additional_message(
-        token: &SyntaxToken<JsLanguage>,
+    fn path(
+        token: TextRange,
         import_source: &str,
-        additional_message: Option<Box<str>>,
+        message: String,
+        allowed_import_names: Box<[Box<str>]>,
     ) -> Self {
-        let base_message = format!("'{}' import is restricted by a pattern.", import_source);
-        let message = match additional_message {
-            Some(additional_message) => format!("{base_message} {additional_message}"),
-            None => base_message,
+        let allowed_names: Box<[Box<str>]> = if allowed_import_names.is_empty() {
+            [].into()
+        } else {
+            allowed_import_names
         };
         Self {
-            location: token.text_trimmed_range(),
+            location: token,
             message,
             import_source: import_source.to_string(),
-            allowed_import_names: [].into(),
+            allowed_import_names: allowed_names,
+        }
+    }
+
+    fn pattern(
+        token: TextRange,
+        import_source: &str,
+        message: String,
+        allowed_import_names: Box<[Box<str>]>,
+    ) -> Self {
+        let base_msg = format!("'{import_source}' import is restricted by a pattern.");
+
+        let msg = if message.is_empty() {
+            base_msg
+        } else {
+            format!("{base_msg} {message}")
+        };
+
+        let allowed_names: Box<[Box<str>]> = if allowed_import_names.is_empty() {
+            [].into()
+        } else {
+            allowed_import_names
+        };
+
+        Self {
+            location: token,
+            message: msg,
+            import_source: import_source.to_string(),
+            allowed_import_names: allowed_names,
         }
     }
 }
