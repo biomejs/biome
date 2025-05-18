@@ -1068,8 +1068,11 @@ fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: 
     // undefined usually indicate "we'll assign this value elsewhere".
     // Require types in those cases, but still allow other literals
     // as assignments of other types to those won't compile.
-    allow_placeholders && (is_trivial_rhs || is_undefined_literal)
-        || !allow_placeholders && is_trivial_rhs && !rhs_is_null
+    if allow_placeholders {
+        is_trivial_rhs || is_undefined_literal
+    } else {
+        is_trivial_rhs && !rhs_is_null
+    }
 }
 
 fn has_untyped_parameter(parameters: &JsParameters) -> Option<State> {
