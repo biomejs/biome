@@ -47,7 +47,7 @@ debugger;
 console.log(a);
 ";
 
-const APPLY_SUGGESTED_AFTER: &str = "let a = 4;\nconsole.log(a);\n";
+const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
 
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
@@ -331,7 +331,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() {\n\targuments;\n}
 ";
@@ -2633,7 +2633,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() {\n\targuments;\n}
 ";
@@ -2778,7 +2778,7 @@ console.log(a);
 function _f() { arguments; }
 ";
 
-    let expected = "let a = 4;
+    let expected = "const a = 4;
 console.log(a);
 function _f() {\n\targuments;\n}
 ";

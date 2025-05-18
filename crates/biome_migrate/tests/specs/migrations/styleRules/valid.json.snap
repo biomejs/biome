@@ -103,7 +103,7 @@ valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
 ```
 valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
   
    > 1 │ {
        │ ^
@@ -128,7 +128,7 @@ valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        16 │ + ··"linter":·{
        17 │ + ····"rules":·{
        18 │ + ······"style":·{
-       19 │ + ········"useSingleVarDeclarator":·"error"
+       19 │ + ········"noUnusedTemplateLiteral":·"error"
        20 │ + ······}
        21 │ + ····}
        22 │ + ··}
@@ -217,6 +217,44 @@ valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
 ```
 valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "files": {
+   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
+   > 4 │   },
+        ...
+  > 14 │     "jsxRuntime": "reactClassic"
+  > 15 │   }
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    13 13 │       },
+    14 14 │       "jsxRuntime": "reactClassic"
+    15    │ - ··}
+       15 │ + ··},
+       16 │ + ··"linter":·{
+       17 │ + ····"rules":·{
+       18 │ + ······"style":·{
+       19 │ + ········"useSingleVarDeclarator":·"error"
+       20 │ + ······}
+       21 │ + ····}
+       22 │ + ··}
+    16 23 │   }
+    17 24 │   
+  
+
+```
+
+```
+valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   ! Biome style rule useNumberNamespace isn't recommended anymore.
   
    > 1 │ {
@@ -243,82 +281,6 @@ valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        17 │ + ····"rules":·{
        18 │ + ······"style":·{
        19 │ + ········"useNumberNamespace":·"error"
-       20 │ + ······}
-       21 │ + ····}
-       22 │ + ··}
-    16 23 │   }
-    17 24 │   
-  
-
-```
-
-```
-valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useConst isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "files": {
-   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
-   > 4 │   },
-        ...
-  > 14 │     "jsxRuntime": "reactClassic"
-  > 15 │   }
-  > 16 │ }
-       │ ^
-    17 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    13 13 │       },
-    14 14 │       "jsxRuntime": "reactClassic"
-    15    │ - ··}
-       15 │ + ··},
-       16 │ + ··"linter":·{
-       17 │ + ····"rules":·{
-       18 │ + ······"style":·{
-       19 │ + ········"useConst":·"error"
-       20 │ + ······}
-       21 │ + ····}
-       22 │ + ··}
-    16 23 │   }
-    17 24 │   
-  
-
-```
-
-```
-valid.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "files": {
-   > 3 │     "ignore": ["./src/**/*.graphql.ts"]
-   > 4 │   },
-        ...
-  > 14 │     "jsxRuntime": "reactClassic"
-  > 15 │   }
-  > 16 │ }
-       │ ^
-    17 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    13 13 │       },
-    14 14 │       "jsxRuntime": "reactClassic"
-    15    │ - ··}
-       15 │ + ··},
-       16 │ + ··"linter":·{
-       17 │ + ····"rules":·{
-       18 │ + ······"style":·{
-       19 │ + ········"noUnusedTemplateLiteral":·"error"
        20 │ + ······}
        21 │ + ····}
        22 │ + ··}

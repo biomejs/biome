@@ -64,7 +64,6 @@ expression: redactor(content)
         "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
         "useSelfClosingElements": "error",
-        "useConst": "error",
         "useSingleVarDeclarator": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error"
