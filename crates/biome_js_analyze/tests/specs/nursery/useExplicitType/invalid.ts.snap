@@ -127,7 +127,7 @@ interface Array<Type> {
 }
 
 type MyObject = {
-	(input: string); // FIXME: this shouldn't error
+	(input: string);
 	propertyName: string;
 };
 
@@ -758,7 +758,7 @@ invalid.ts:124:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
   × Missing return type on member.
   
     123 │ type MyObject = {
-  > 124 │ 	(input: string); // FIXME: this shouldn't error
+  > 124 │ 	(input: string);
         │ 	^^^^^^^^^^^^^^^^
     125 │ 	propertyName: string;
     126 │ };
