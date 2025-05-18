@@ -1,7 +1,8 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsFunction, JsAssignmentExpression,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsInitializerClause, JsSyntaxToken,
@@ -88,11 +89,13 @@ declare_lint_rule! {
     ///    }
     ///    ```
     pub NoNestedComponentDefinitions {
-        version: "next",
+        version: "2.0.0",
         name: "noNestedComponentDefinitions",
-        language: "js",
+        language: "jsx",
         sources: &[RuleSource::EslintReact("no-nested-components")],
         recommended: false,
+        domains: &[RuleDomain::React],
+        severity: Severity::Error,
     }
 }
 
@@ -136,7 +139,10 @@ impl Rule for NoNestedComponentDefinitions {
                 markup! {
                     "Move it outside of the parent component or pass it as a prop."
                 },
-            ),
+            )
+            .note(markup! {
+                "Component definitions inside other components cause them to be recreated on every render, which can lead to performance issues and unexpected behavior."
+            }),
         )
     }
 }
