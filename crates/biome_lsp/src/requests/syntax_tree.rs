@@ -15,7 +15,7 @@ pub struct SyntaxTreePayload {
 pub(crate) fn syntax_tree(session: &Session, url: &Uri) -> Result<Option<String>, LspError> {
     info!("Showing syntax tree");
     let path = session.file_path(url)?;
-    let Some(doc) = session.document(&url) else {
+    let Some(doc) = session.document(url) else {
         return Ok(None);
     };
     let features = FeaturesBuilder::new().build();

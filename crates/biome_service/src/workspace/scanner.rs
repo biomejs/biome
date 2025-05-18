@@ -125,10 +125,10 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
         .update_project_ignore_files(ctx.project_key, &ignore_paths);
 
     for path in iter {
-        // If the path in inside `node_modules`, then we want to store only the `.d.ts` files,
-        // otherwise we don't store it at all
         if path.is_dependency() {
-            if path.is_type_declaration() {
+            // If the path in inside `node_modules`, then we want to store only the `.d.ts` files and `package.json` files,
+            // otherwise we don't store it at all
+            if path.is_type_declaration() || path.is_package_json() {
                 handleable_paths.push(path);
                 continue;
             }

@@ -423,7 +423,6 @@ impl WorkspaceServer {
                         content.clone()
                     };
 
-                    dbg!("adding", &path);
                     Operation::Insert::<Document, ()>(Document {
                         content,
                         version,
@@ -507,15 +506,12 @@ impl WorkspaceServer {
             return false;
         };
 
-        let ignored =
-            // Apply top-level `includes`
-            self.is_ignored_by_top_level_config(project_key, path) ||
+        // Apply top-level `includes`
+        self.is_ignored_by_top_level_config(project_key, path) ||
                 // Apply feature-level `includes`
                 !features.is_empty() && features.iter().all(|feature| self
                     .projects
-                    .is_ignored_by_feature_config(project_key, path, feature));
-
-        ignored
+                    .is_ignored_by_feature_config(project_key, path, feature))
     }
 
     /// Checks whether a file is ignored in the top-level `files.includes`.
@@ -1151,10 +1147,7 @@ impl Workspace for WorkspaceServer {
                 Ok(())
             }
             Compute::Removed(_, _) => self.update_service_data(WatcherSignalKind::Removed, path),
-            Compute::Aborted(_) => {
-                dbg!("not found", &path);
-                Err(WorkspaceError::not_found())
-            }
+            Compute::Aborted(_) => Err(WorkspaceError::not_found()),
         }
     }
 

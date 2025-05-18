@@ -279,7 +279,7 @@ fn fix_all(
     diagnostics: &[lsp::Diagnostic],
     offset: Option<u32>,
 ) -> Result<Option<CodeActionOrCommand>, Error> {
-    let Some(doc) = session.document(&url) else {
+    let Some(doc) = session.document(url) else {
         return Ok(None);
     };
     let features = FeaturesBuilder::new().with_linter().with_assist().build();

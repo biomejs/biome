@@ -534,6 +534,12 @@ impl schemars::JsonSchema for FeatureName {
 #[derive(Debug)]
 pub struct FeaturesBuilder(BitFlags<FeatureKind>);
 
+impl Default for FeaturesBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FeaturesBuilder {
     pub fn new() -> Self {
         Self(BitFlags::empty())
