@@ -106,7 +106,7 @@ pub type NoExtraBooleanCast =
 pub type NoExtraNonNullAssertion = < lint :: suspicious :: no_extra_non_null_assertion :: NoExtraNonNullAssertion as biome_analyze :: Rule > :: Options ;
 pub type NoFallthroughSwitchClause = < lint :: suspicious :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause as biome_analyze :: Rule > :: Options ;
 pub type NoFlatMapIdentity =
-    <lint::correctness::no_flat_map_identity::NoFlatMapIdentity as biome_analyze::Rule>::Options;
+    <lint::complexity::no_flat_map_identity::NoFlatMapIdentity as biome_analyze::Rule>::Options;
 pub type NoFloatingPromises =
     <lint::nursery::no_floating_promises::NoFloatingPromises as biome_analyze::Rule>::Options;
 pub type NoFocusedTests =
@@ -297,7 +297,7 @@ pub type NoVoid = <lint::complexity::no_void::NoVoid as biome_analyze::Rule>::Op
 pub type NoVoidElementsWithChildren = < lint :: correctness :: no_void_elements_with_children :: NoVoidElementsWithChildren as biome_analyze :: Rule > :: Options ;
 pub type NoVoidTypeReturn =
     <lint::correctness::no_void_type_return::NoVoidTypeReturn as biome_analyze::Rule>::Options;
-pub type NoWith = <lint::complexity::no_with::NoWith as biome_analyze::Rule>::Options;
+pub type NoWith = <lint::suspicious::no_with::NoWith as biome_analyze::Rule>::Options;
 pub type NoYodaExpression =
     <lint::style::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
 pub type OrganizeImports =
@@ -312,7 +312,7 @@ pub type UseAriaPropsForRole =
     <lint::a11y::use_aria_props_for_role::UseAriaPropsForRole as biome_analyze::Rule>::Options;
 pub type UseAriaPropsSupportedByRole = < lint :: a11y :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRole as biome_analyze :: Rule > :: Options ;
 pub type UseArrayLiterals =
-    <lint::correctness::use_array_literals::UseArrayLiterals as biome_analyze::Rule>::Options;
+    <lint::style::use_array_literals::UseArrayLiterals as biome_analyze::Rule>::Options;
 pub type UseArrowFunction =
     <lint::complexity::use_arrow_function::UseArrowFunction as biome_analyze::Rule>::Options;
 pub type UseAsConstAssertion =

@@ -1146,6 +1146,10 @@ export interface Complexity {
 	 */
 	noExtraBooleanCast?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow to use unnecessary callback on flatMap.
+	 */
+	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
+	/**
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
 	noForEach?: RuleConfiguration_for_NoForEachOptions;
@@ -1222,10 +1226,6 @@ export interface Complexity {
 	 */
 	noVoid?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow with statements in non-strict contexts.
-	 */
-	noWith?: RuleConfiguration_for_Null;
-	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -1298,10 +1298,6 @@ export interface Correctness {
 	 * Disallows empty destructuring patterns.
 	 */
 	noEmptyPattern?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow to use unnecessary callback on flatMap.
-	 */
-	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow calling global object properties as functions
 	 */
@@ -1466,10 +1462,6 @@ export interface Correctness {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
-	/**
-	 * Disallow Array constructors.
-	 */
-	useArrayLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
@@ -1830,6 +1822,10 @@ export interface Style {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Disallow Array constructors.
+	 */
+	useArrayLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the use of as const over literal type and type annotation.
 	 */
@@ -2255,6 +2251,10 @@ export interface Suspicious {
 	 * Disallow the use of var
 	 */
 	noVar?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow with statements in non-strict contexts.
+	 */
+	noWith?: RuleConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -3357,6 +3357,7 @@ export type Category =
 	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
+	| "lint/complexity/noFlatMapIdentity"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noThisInStatic"
@@ -3376,7 +3377,6 @@ export type Category =
 	| "lint/complexity/noUselessTypeConstraint"
 	| "lint/complexity/noUselessUndefinedInitialization"
 	| "lint/complexity/noVoid"
-	| "lint/complexity/noWith"
 	| "lint/complexity/useArrowFunction"
 	| "lint/complexity/useDateNow"
 	| "lint/complexity/useFlatMap"
@@ -3393,7 +3393,6 @@ export type Category =
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
-	| "lint/correctness/noFlatMapIdentity"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidBuiltinInstantiation"
@@ -3437,7 +3436,6 @@ export type Category =
 	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
-	| "lint/correctness/useArrayLiterals"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useImportExtensions"
@@ -3544,6 +3542,7 @@ export type Category =
 	| "lint/style/noUselessElse"
 	| "lint/style/noValueAtRule"
 	| "lint/style/noYodaExpression"
+	| "lint/style/useArrayLiterals"
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useAtIndex"
 	| "lint/style/useBlockStatements"
@@ -3651,6 +3650,7 @@ export type Category =
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/noVar"
+	| "lint/suspicious/noWith"
 	| "lint/suspicious/useAdjacentOverloadSignatures"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useDefaultSwitchClauseLast"

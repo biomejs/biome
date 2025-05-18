@@ -455,6 +455,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noFlatMapIdentity": {
+					"description": "Disallow to use unnecessary callback on flatMap.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noForEach": {
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
@@ -583,13 +590,6 @@
 				},
 				"noVoid": {
 					"description": "Disallow the use of void operators, which is not a familiar operator.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noWith": {
-					"description": "Disallow with statements in non-strict contexts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -799,13 +799,6 @@
 					"description": "Disallows empty destructuring patterns.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noFlatMapIdentity": {
-					"description": "Disallow to use unnecessary callback on flatMap.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1092,13 +1085,6 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
-				},
-				"useArrayLiterals": {
-					"description": "Disallow Array constructors.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
 				},
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified in a React hook.",
@@ -4408,6 +4394,13 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"useArrayLiterals": {
+					"description": "Disallow Array constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useAsConstAssertion": {
 					"description": "Enforce the use of as const over literal type and type annotation.",
 					"anyOf": [
@@ -5171,6 +5164,13 @@
 					"description": "Disallow the use of var",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noWith": {
+					"description": "Disallow with statements in non-strict contexts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

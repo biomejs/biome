@@ -24,7 +24,6 @@
         "noUselessLabel": "error",
         "noUselessRename": "error",
         "noVoid": "error",
-        "noWith": "error",
         "useArrowFunction": "error",
         "useLiteralKeys": "error",
         "useRegexLiterals": "error"
@@ -52,7 +51,6 @@
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "error",
-        "useArrayLiterals": "error",
         "useIsNan": "error",
         "useValidForDirection": "error",
         "useYield": "error"
@@ -64,6 +62,7 @@
         "noArguments": "error",
         "noCommaOperator": "error",
         "noParameterAssign": "error",
+        "useArrayLiterals": "error",
         "useConst": "error",
         "useCollapsedElseIf": "error",
         "useDefaultParameterLast": "error",
@@ -99,6 +98,7 @@
         "noShadowRestrictedNames": "error",
         "noSparseArray": "error",
         "noUnsafeNegation": "error",
+        "noWith": "error",
         "useAwait": "error",
         "useDefaultSwitchClauseLast": "error",
         "useGetterReturn": "error",

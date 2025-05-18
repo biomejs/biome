@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -20,7 +19,7 @@ array.flatMap(arr => {return arr})
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid unnecessary callback in flatMap call.
   
@@ -42,7 +41,7 @@ invalid.js:1:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:3:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid unnecessary callback in flatMap call.
   
@@ -68,7 +67,7 @@ invalid.js:3:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:5:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid unnecessary callback in flatMap call.
   
@@ -94,7 +93,7 @@ invalid.js:5:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:7:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid unnecessary callback in flatMap call.
   
@@ -120,7 +119,7 @@ invalid.js:7:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:9:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid unnecessary callback in flatMap call.
   
@@ -146,7 +145,7 @@ invalid.js:9:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:11:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/complexity/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid unnecessary callback in flatMap call.
   
