@@ -7,6 +7,7 @@ Change the group of some rules, promote nursery rules and update the recommended
 The following rules have been moved to a new group:
 
 - [complexity/noFlatMapIdentity](https://biomejs.dev/linter/rules/no-flat-map-identity)
+- [complexity/noUselessContinue](https://biomejs.dev/linter/rules/no-useless-continue)
 - [complexity/useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals)
 - [correctness/useValidTypeof](https://biomejs.dev/linter/rules/use-valid-typeof)
 - [performance/noNamespaceImport](https://biomejs.dev/linter/rules/no-namespace-import/)

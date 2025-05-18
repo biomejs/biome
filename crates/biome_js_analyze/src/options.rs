@@ -266,7 +266,7 @@ pub type NoUselessCatch =
     <lint::complexity::no_useless_catch::NoUselessCatch as biome_analyze::Rule>::Options;
 pub type NoUselessConstructor = < lint :: complexity :: no_useless_constructor :: NoUselessConstructor as biome_analyze :: Rule > :: Options ;
 pub type NoUselessContinue =
-    <lint::correctness::no_useless_continue::NoUselessContinue as biome_analyze::Rule>::Options;
+    <lint::complexity::no_useless_continue::NoUselessContinue as biome_analyze::Rule>::Options;
 pub type NoUselessElse =
     <lint::style::no_useless_else::NoUselessElse as biome_analyze::Rule>::Options;
 pub type NoUselessEmptyExport = < lint :: complexity :: no_useless_empty_export :: NoUselessEmptyExport as biome_analyze :: Rule > :: Options ;

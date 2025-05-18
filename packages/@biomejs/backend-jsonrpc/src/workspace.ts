@@ -1170,6 +1170,10 @@ export interface Complexity {
 	 */
 	noUselessConstructor?: RuleFixConfiguration_for_Null;
 	/**
+	 * Avoid using unnecessary continue.
+	 */
+	noUselessContinue?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow empty exports that don't change anything in a module file.
 	 */
 	noUselessEmptyExport?: RuleFixConfiguration_for_Null;
@@ -1450,10 +1454,6 @@ export interface Correctness {
 	 * Disallow unused variables.
 	 */
 	noUnusedVariables?: RuleFixConfiguration_for_NoUnusedVariablesOptions;
-	/**
-	 * Avoid using unnecessary continue.
-	 */
-	noUselessContinue?: RuleFixConfiguration_for_Null;
 	/**
 	 * This rules prevents void elements (AKA self-closing elements) from having children.
 	 */
@@ -3363,6 +3363,7 @@ export type Category =
 	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"
 	| "lint/complexity/noUselessConstructor"
+	| "lint/complexity/noUselessContinue"
 	| "lint/complexity/noUselessEmptyExport"
 	| "lint/complexity/noUselessEscapeInRegex"
 	| "lint/complexity/noUselessFragments"
@@ -3434,7 +3435,6 @@ export type Category =
 	| "lint/correctness/noUnusedLabels"
 	| "lint/correctness/noUnusedPrivateClassMembers"
 	| "lint/correctness/noUnusedVariables"
-	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
 	| "lint/correctness/useExhaustiveDependencies"

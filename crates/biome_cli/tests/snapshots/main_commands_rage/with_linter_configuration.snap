@@ -75,6 +75,7 @@ Linter:
     complexity/noThisInStatic
     complexity/noUselessCatch
     complexity/noUselessConstructor
+    complexity/noUselessContinue
     complexity/noUselessEmptyExport
     complexity/noUselessEscapeInRegex
     complexity/noUselessFragments

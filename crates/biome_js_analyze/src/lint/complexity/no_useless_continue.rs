@@ -74,7 +74,7 @@ declare_lint_rule! {
         name: "noUselessContinue",
         language: "js",
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
