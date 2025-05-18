@@ -943,8 +943,8 @@ impl PatternOptions {
     }
 
     fn message(&self, import_source: &str, imported_name: &str, cause: Cause) -> String {
-        if self.message.is_some() {
-            return self.message.as_ref().map(|msg| msg.to_string()).unwrap();
+        if let Some(ref msg) = self.message {
+            return msg.to_string();
         }
         default_message(import_source, imported_name, cause)
     }
@@ -1169,7 +1169,7 @@ fn check_patterns_import_restrictions(
         return vec![RestrictedImportMessage::pattern(
             module_name.text_trimmed_range(),
             import_source,
-            String::new(),
+            "",
             [].into(),
         )];
     }
@@ -1210,10 +1210,7 @@ fn handle_pattern_options(
     module_name: &SyntaxToken<JsLanguage>,
     import_source: &str,
 ) -> Vec<RestrictedImportMessage> {
-    let message = pattern_options
-        .message
-        .as_ref()
-        .map_or(String::new(), |m| m.to_string());
+    let message = pattern_options.message.as_deref().unwrap_or_default();
 
     if !pattern_options.has_import_name_constraints() {
         return vec![RestrictedImportMessage::pattern(
@@ -1733,7 +1730,9 @@ impl RestrictedImportVisitor<'_> {
                 self.results.push(RestrictedImportMessage::pattern(
                     import_node.text_trimmed_range(),
                     self.import_source,
-                    pattern_options.message(self.import_source, name_or_alias, restriction.cause),
+                    pattern_options
+                        .message(self.import_source, name_or_alias, restriction.cause)
+                        .as_ref(),
                     allow_import_names,
                 ));
                 Some(())
@@ -1776,7 +1775,9 @@ impl RestrictedImportVisitor<'_> {
                 self.results.push(RestrictedImportMessage::pattern(
                     import_token.text_trimmed_range(),
                     self.import_source,
-                    pattern_options.message(self.import_source, name_or_alias, restriction.cause),
+                    pattern_options
+                        .message(self.import_source, name_or_alias, restriction.cause)
+                        .as_ref(),
                     allow_import_names,
                 ));
                 Some(())
@@ -1815,7 +1816,7 @@ impl RestrictedImportMessage {
     fn pattern(
         token: TextRange,
         import_source: &str,
-        message: String,
+        message: &str,
         allowed_import_names: Box<[Box<str>]>,
     ) -> Self {
         let base_msg = format!("'{import_source}' import is restricted by a pattern.");
