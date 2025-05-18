@@ -55,7 +55,6 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noConstructorReturn
   - noEmptyCharacterClassInRegex
   - noEmptyPattern
-  - noFlatMapIdentity
   - noGlobalObjectCalls
   - noInnerDeclarations
   - noInvalidBuiltinInstantiation
@@ -96,7 +95,6 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUselessContinue
   - noVoidElementsWithChildren
   - noVoidTypeReturn
-  - useArrayLiterals
   - useExhaustiveDependencies
   - useHookAtTopLevel
   - useImportExtensions
@@ -151,6 +149,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUselessElse
   - noValueAtRule
   - noYodaExpression
+  - useArrayLiterals
   - useAsConstAssertion
   - useAtIndex
   - useBlockStatements

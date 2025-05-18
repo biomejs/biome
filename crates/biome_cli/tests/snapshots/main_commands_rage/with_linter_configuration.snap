@@ -70,6 +70,7 @@ Linter:
     complexity/noBannedTypes
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
+    complexity/noFlatMapIdentity
     complexity/noStaticOnlyClass
     complexity/noThisInStatic
     complexity/noUselessCatch
@@ -86,7 +87,6 @@ Linter:
     complexity/noUselessThisAlias
     complexity/noUselessTypeConstraint
     complexity/noUselessUndefinedInitialization
-    complexity/noWith
     complexity/useArrowFunction
     complexity/useDateNow
     complexity/useFlatMap
