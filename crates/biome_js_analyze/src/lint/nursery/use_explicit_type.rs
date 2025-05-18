@@ -932,6 +932,8 @@ fn handle_any_function(func: &AnyJsFunction) -> Option<State> {
         return None;
     }
 
+    // TODO: why only arrow functions are ignored inside typed return?
+    // see getObjectWithFunction in valid.ts test
     if is_arrow_func(func) && (can_inline_function(func) || is_function_inside_typed_return(func)) {
         return None;
     }
@@ -957,6 +959,14 @@ fn handle_any_function(func: &AnyJsFunction) -> Option<State> {
 
 /// Checks if a variable declarator needs to have an explicit type.
 fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State> {
+    // Explicit annotation is always sufficient
+    let has_explicit_type = declarator
+        .variable_annotation()
+        .is_some_and(|ty| ty.as_ts_type_annotation().is_some_and(|ty| ty.ty().is_ok()));
+    if has_explicit_type {
+        return None;
+    }
+
     let variable_declaration = declarator
         .parent::<JsVariableDeclaratorList>()?
         .parent::<JsVariableDeclaration>()?;
@@ -975,14 +985,6 @@ fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State
             .is_some();
 
     if !is_top_level {
-        return None;
-    }
-
-    // Explicit annotation is always sufficient
-    let has_explicit_type = declarator
-        .variable_annotation()
-        .is_some_and(|ty| ty.as_ts_type_annotation().is_some_and(|ty| ty.ty().is_ok()));
-    if has_explicit_type {
         return None;
     }
 
