@@ -24,15 +24,14 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        6 │ + ········"useDefaultParameterLast":·"error",
        7 │ + ········"useEnumInitializers":·"error",
        8 │ + ········"useSelfClosingElements":·"error",
-       9 │ + ········"useConst":·"error",
-      10 │ + ········"useSingleVarDeclarator":·"error",
-      11 │ + ········"noUnusedTemplateLiteral":·"error",
-      12 │ + ········"useNumberNamespace":·"error",
-      13 │ + ········"noInferrableTypes":·"error",
-      14 │ + ········"noUselessElse":·"error"
-      15 │ + ······}
-      16 │ + ····}
-      17 │ + ··}·}
+       9 │ + ········"useSingleVarDeclarator":·"error",
+      10 │ + ········"noUnusedTemplateLiteral":·"error",
+      11 │ + ········"useNumberNamespace":·"error",
+      12 │ + ········"noInferrableTypes":·"error",
+      13 │ + ········"noUselessElse":·"error"
+      14 │ + ······}
+      15 │ + ····}
+      16 │ + ··}·}
   
 
 ```

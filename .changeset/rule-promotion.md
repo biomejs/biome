@@ -90,6 +90,5 @@ And the following style rules are no longer recommended:
 - [style/noUnusedTemplateLiteral](https://biomejs.dev/linter/rules/no-unused-template-literal)
 - [style/useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers)
 - [style/noUselessElse](https://biomejs.dev/linter/rules/no-useless-else)
-- [style/useConst](https://biomejs.dev/linter/rules/use-const)
 - [style/useSelfClosingElements](https://biomejs.dev/linter/rules/use-self-closing-elements)
 - [style/useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator)

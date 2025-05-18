@@ -20,7 +20,7 @@ declare_migration! {
     }
 }
 
-const STYLE_RULES_THAT_WERE_ERROR: [&str; 11] = [
+const STYLE_RULES_THAT_WERE_ERROR: [&str; 10] = [
     "useNumberNamespace",
     "useAsConstAssertion",
     "noParameterAssign",
@@ -29,7 +29,6 @@ const STYLE_RULES_THAT_WERE_ERROR: [&str; 11] = [
     "noUnusedTemplateLiteral",
     "useEnumInitializers",
     "noUselessElse",
-    "useConst",
     "useSelfClosingElements",
     "useSingleVarDeclarator",
 ];

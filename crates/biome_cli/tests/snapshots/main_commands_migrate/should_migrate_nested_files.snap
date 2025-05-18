@@ -51,16 +51,15 @@ expression: redactor(content)
        8 │ + ········"useDefaultParameterLast":·"error",
        9 │ + ········"useEnumInitializers":·"error",
       10 │ + ········"useSelfClosingElements":·"error",
-      11 │ + ········"useConst":·"error",
-      12 │ + ········"useSingleVarDeclarator":·"error",
-      13 │ + ········"noUnusedTemplateLiteral":·"error",
-      14 │ + ········"useNumberNamespace":·"error",
-      15 │ + ········"noInferrableTypes":·"error",
-      16 │ + ········"noUselessElse":·"error"
-      17 │ + ······}
-    4 18 │       }
-      19 │ + ··}
-    5 20 │   }
+      11 │ + ········"useSingleVarDeclarator":·"error",
+      12 │ + ········"noUnusedTemplateLiteral":·"error",
+      13 │ + ········"useNumberNamespace":·"error",
+      14 │ + ········"noInferrableTypes":·"error",
+      15 │ + ········"noUselessElse":·"error"
+      16 │ + ······}
+    4 17 │       }
+      18 │ + ··}
+    5 19 │   }
   
 
 ```
@@ -82,16 +81,15 @@ expression: redactor(content)
        8 │ + ········"useDefaultParameterLast":·"error",
        9 │ + ········"useEnumInitializers":·"error",
       10 │ + ········"useSelfClosingElements":·"error",
-      11 │ + ········"useConst":·"error",
-      12 │ + ········"useSingleVarDeclarator":·"error",
-      13 │ + ········"noUnusedTemplateLiteral":·"error",
-      14 │ + ········"useNumberNamespace":·"error",
-      15 │ + ········"noInferrableTypes":·"error",
-      16 │ + ········"noUselessElse":·"error"
-      17 │ + ······}
-    4 18 │       }
-      19 │ + ··}
-    5 20 │   }
+      11 │ + ········"useSingleVarDeclarator":·"error",
+      12 │ + ········"noUnusedTemplateLiteral":·"error",
+      13 │ + ········"useNumberNamespace":·"error",
+      14 │ + ········"noInferrableTypes":·"error",
+      15 │ + ········"noUselessElse":·"error"
+      16 │ + ······}
+    4 17 │       }
+      18 │ + ··}
+    5 19 │   }
   
 
 ```
@@ -113,16 +111,15 @@ expression: redactor(content)
        8 │ + ········"useDefaultParameterLast":·"error",
        9 │ + ········"useEnumInitializers":·"error",
       10 │ + ········"useSelfClosingElements":·"error",
-      11 │ + ········"useConst":·"error",
-      12 │ + ········"useSingleVarDeclarator":·"error",
-      13 │ + ········"noUnusedTemplateLiteral":·"error",
-      14 │ + ········"useNumberNamespace":·"error",
-      15 │ + ········"noInferrableTypes":·"error",
-      16 │ + ········"noUselessElse":·"error"
-      17 │ + ······}
-    4 18 │       }
-      19 │ + ··}
-    5 20 │   }
+      11 │ + ········"useSingleVarDeclarator":·"error",
+      12 │ + ········"noUnusedTemplateLiteral":·"error",
+      13 │ + ········"useNumberNamespace":·"error",
+      14 │ + ········"noInferrableTypes":·"error",
+      15 │ + ········"noUselessElse":·"error"
+      16 │ + ······}
+    4 17 │       }
+      18 │ + ··}
+    5 19 │   }
   
 
 ```
@@ -144,16 +141,15 @@ expression: redactor(content)
        8 │ + ········"useDefaultParameterLast":·"error",
        9 │ + ········"useEnumInitializers":·"error",
       10 │ + ········"useSelfClosingElements":·"error",
-      11 │ + ········"useConst":·"error",
-      12 │ + ········"useSingleVarDeclarator":·"error",
-      13 │ + ········"noUnusedTemplateLiteral":·"error",
-      14 │ + ········"useNumberNamespace":·"error",
-      15 │ + ········"noInferrableTypes":·"error",
-      16 │ + ········"noUselessElse":·"error"
-      17 │ + ······}
-    4 18 │       }
-      19 │ + ··}
-    5 20 │   }
+      11 │ + ········"useSingleVarDeclarator":·"error",
+      12 │ + ········"noUnusedTemplateLiteral":·"error",
+      13 │ + ········"useNumberNamespace":·"error",
+      14 │ + ········"noInferrableTypes":·"error",
+      15 │ + ········"noUselessElse":·"error"
+      16 │ + ······}
+    4 17 │       }
+      18 │ + ··}
+    5 19 │   }
   
 
 ```

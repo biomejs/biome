@@ -78,7 +78,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
 ```
 empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -98,7 +98,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        4 │ + ··"linter":·{
        5 │ + ····"rules":·{
        6 │ + ······"style":·{
-       7 │ + ········"useSingleVarDeclarator":·"error"
+       7 │ + ········"noUnusedTemplateLiteral":·"error"
        8 │ + ······}
        9 │ + ····}
       10 │ + ··}
@@ -174,6 +174,38 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
 ```
 empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "formatter": {},
+  > 3 │   "javascript": {}
+  > 4 │ }
+      │ ^
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    1  1 │   {
+    2  2 │     "formatter": {},
+    3    │ - ··"javascript":·{}
+       3 │ + ··"javascript":·{},
+       4 │ + ··"linter":·{
+       5 │ + ····"rules":·{
+       6 │ + ······"style":·{
+       7 │ + ········"useSingleVarDeclarator":·"error"
+       8 │ + ······}
+       9 │ + ····}
+      10 │ + ··}
+    4 11 │   }
+  
+
+```
+
+```
+empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   ! Biome style rule useNumberNamespace isn't recommended anymore.
   
   > 1 │ {
@@ -195,70 +227,6 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useNumberNamespace":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useConst isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useConst":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"noUnusedTemplateLiteral":·"error"
        8 │ + ······}
        9 │ + ····}
       10 │ + ··}

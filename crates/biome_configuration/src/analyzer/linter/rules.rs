@@ -6147,6 +6147,7 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
