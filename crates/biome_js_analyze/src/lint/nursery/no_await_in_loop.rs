@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoAwaitInLoop {
-        version: "next",
+        version: "2.0.0",
         name: "noAwaitInLoop",
         language: "js",
         sources: &[RuleSource::Eslint("no-await-in-loop")],

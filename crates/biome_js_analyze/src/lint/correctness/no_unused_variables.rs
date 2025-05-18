@@ -3,6 +3,7 @@ use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions}
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
@@ -141,7 +142,8 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-unused-vars"),
             RuleSource::EslintUnusedImports("no-unused-vars")
         ],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -204,7 +206,8 @@ fn suggested_fix_if_unused(
         | AnyJsBindingDeclaration::TsEnumMember(_) => None,
 
         // Some parameters are ok to not be used
-        AnyJsBindingDeclaration::JsArrowFunctionExpression(_) => {
+        AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+        | AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
             suggestion_for_binding(binding)
         }
         AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
@@ -226,7 +229,6 @@ fn suggested_fix_if_unused(
         }
         node @ (AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::JsClassDeclaration(_)
-        | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)) => {
@@ -345,7 +347,7 @@ impl Rule for NoUnusedVariables {
         );
 
         let mut diag = diag.note(
-            markup! {"Unused variables usually are result of incomplete refactoring, typos and other source of bugs."},
+            markup! {"Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."},
         );
 
         // Check if this binding is part of an object pattern with a rest element
@@ -499,7 +501,6 @@ fn is_unused_expression(expr: &JsSyntaxNode) -> SyntaxResult<bool> {
             JsSyntaxKind::JS_EXPRESSION_STATEMENT => return Ok(true),
             JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
                 previous = parent.text_trimmed_range();
-                continue;
             }
             JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
                 let seq_expr = JsSequenceExpression::unwrap_cast(parent);
@@ -508,7 +509,6 @@ fn is_unused_expression(expr: &JsSyntaxNode) -> SyntaxResult<bool> {
                     return Ok(true);
                 }
                 previous = seq_expr.range();
-                continue;
             }
             JsSyntaxKind::JS_FOR_STATEMENT => {
                 let for_stmt = JsForStatement::unwrap_cast(parent);

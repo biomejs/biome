@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -19,7 +18,7 @@ switch (a) {
 ```
 invalid.js:1:1 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected a default switch clause.
+  ! Expected a default switch clause.
   
   > 1 │ switch (a) {
       │ ^^^^^^^^^^^^
@@ -40,7 +39,7 @@ invalid.js:1:1 lint/style/useDefaultSwitchClause ━━━━━━━━━━�
 ```
 invalid.js:6:1 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Expected a default switch clause.
+  ! Expected a default switch clause.
   
     4 │ }
     5 │ 

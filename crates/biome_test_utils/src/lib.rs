@@ -14,11 +14,12 @@ use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{Language, SyntaxKind, SyntaxNode, SyntaxSlot};
+use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
 use biome_service::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
+use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
@@ -336,7 +337,7 @@ pub fn register_leak_checker() {
 }
 
 pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerAction<L>) -> String {
-    let (_, text_edit) = action.mutation.as_text_range_and_edit().unwrap_or_default();
+    let (_, text_edit) = action.mutation.to_text_range_and_edit().unwrap_or_default();
 
     let output = text_edit.new_string(source);
 
@@ -507,4 +508,94 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
         last_token.token_text_trimmed().is_empty(),
         "the EOF token may not contain any data except trailing whitespace"
     );
+}
+
+/// Asserts whether test files containing comments:
+/// - `should not generate diagnostics` emit no diagnostics
+/// - `should generate diagnostics` emit diagnostics
+///
+/// Additionally it checks that valid test files contain
+/// comment enforcing no diagnostics.
+///
+/// ## Examples
+///
+/// `valid.js` file
+/// ```js
+/// /** should not generate diagnostics */
+/// ```
+/// `valid.yml` file
+/// ```yaml
+/// # should not generate diagnostics
+/// ```
+///
+/// `in+valid.js` file
+/// ```js
+/// /** should generate diagnostics */
+/// ```
+///
+pub fn assert_diagnostics_expectation_comment<L: Language>(
+    file_path: &Utf8Path,
+    syntax: &SyntaxNode<L>,
+    diagnostics_quantity: usize,
+) {
+    let no_diagnostics_comment_text = "should not generate diagnostics";
+    let diagnostics_comment_text = "should generate diagnostics";
+
+    let is_valid_test_file = match file_path.extension().unwrap_or_default() {
+        // Excluded files types which cannot contain comment in the source code
+        "snap" | "json" | "jsonc" | "svelte" | "vue" | "astro" | "html" => false,
+        _ => {
+            let name = file_path.file_name().unwrap().to_ascii_lowercase_cow();
+            // We can't know all the valid file names, but this should catch most common cases.
+            name.contains("valid") && !name.contains("invalid")
+        }
+    };
+
+    enum Diagnostics {
+        ShouldGenerateDiagnostics,
+        ShouldNotGenerateDiagnostics,
+    }
+
+    let diagnostic_comment = syntax.preorder_tokens(Direction::Next).find_map(|token| {
+        for piece in token.leading_trivia().pieces() {
+            if let Some(comment) = piece.as_comments() {
+                let text = comment.text();
+
+                if text.contains(no_diagnostics_comment_text) {
+                    return Some(Diagnostics::ShouldNotGenerateDiagnostics);
+                }
+
+                if text.contains(diagnostics_comment_text) {
+                    return Some(Diagnostics::ShouldGenerateDiagnostics);
+                }
+            }
+        }
+
+        None
+    });
+
+    let has_diagnostics = diagnostics_quantity > 0;
+    match diagnostic_comment {
+        Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
+            if has_diagnostics {
+                panic!(
+                    "This test should not generate diagnostics\nFile: {}",
+                    file_path
+                );
+            }
+        }
+        Some(Diagnostics::ShouldGenerateDiagnostics) => {
+            if !has_diagnostics {
+                panic!("This test should generate diagnostics\nFile: {}", file_path);
+            }
+        }
+        None => {
+            if is_valid_test_file {
+                panic!(
+                    "Valid test files should contain comment `{}`\nFile: {}",
+                    no_diagnostics_comment_text, file_path
+                );
+            }
+        }
+    }
 }

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 103
 expression: issue_5053.js
 ---
 # Input
@@ -14,7 +13,7 @@ const x = () => console.log("test");
 ```
 issue_5053.js:1:17 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't use console.
+  ! Don't use console.
   
   > 1 │ const x = () => console.log("test");
       │                 ^^^^^^^^^^^
@@ -36,7 +35,7 @@ issue_5053.js:1:17 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━�
 ```
 issue_5053.js:2:18 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Don't use console.
+  ! Don't use console.
   
     1 │ const x = () => console.log("test");
   > 2 │ [].forEach(() => console.log("test"));

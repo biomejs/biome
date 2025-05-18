@@ -1,0 +1,81 @@
+/* should not generate diagnostics */
+a {
+    color: --foo;
+}
+
+a {
+    color: var(--foo);
+}
+
+a {
+    color: env(--foo);
+}
+
+a {
+    color: color(--foo 0% 0% 0% 0%);
+}
+
+a {
+    color: calc(var(--foo) + var(--bar));
+}
+
+a {
+    color: var(--foo, red);
+}
+
+a {
+    --foo: var(--bar);
+}
+
+/* global declaration with root selector */
+*:root {
+    --global: red;
+}
+a {
+    color: var(--global);
+}
+
+/* global declaration with @property */
+@property --global-value {
+}
+a {
+    color: var(--global-value);
+}
+
+/* custom selector */
+:--foo {
+}
+@media (--foo) {
+}
+
+/* Ignore property names */
+@property --aaa {
+}
+a {
+    transition: --aaa;
+}
+
+@property --bbb {
+}
+a {
+    view-transition-name: --bbb;
+}
+
+@property --baz {}
+a {
+	container-name: --baz;
+}
+
+.parent {
+    color: --foo;
+    .child {
+        --foo: red;
+    }
+}
+
+:root {
+	--colors-gray-a7: black;
+	/* The formatter breaks the line */
+	--broken-shadow: 0px 0px 1px
+	var(--colors-gray-a7);
+}

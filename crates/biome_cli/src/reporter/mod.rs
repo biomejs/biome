@@ -7,7 +7,8 @@ pub(crate) mod terminal;
 
 use crate::cli_options::MaxDiagnostics;
 use crate::execute::Execution;
-use biome_diagnostics::{Error, Severity};
+use biome_diagnostics::advice::ListAdvice;
+use biome_diagnostics::{Diagnostic, Error, Severity};
 use biome_fs::BiomePath;
 use camino::Utf8PathBuf;
 use serde::Serialize;
@@ -73,4 +74,26 @@ pub trait ReporterVisitor {
         _payload: DiagnosticsPayload,
         _verbose: bool,
     ) -> io::Result<()>;
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    tags(VERBOSE),
+    severity = Information,
+    message = "Files fixed:"
+)]
+pub(crate) struct FixedPathsDiagnostic {
+    #[advice]
+    advice: ListAdvice<String>,
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    tags(VERBOSE),
+    severity = Information,
+    message = "Files processed:"
+)]
+pub(crate) struct EvaluatedPathsDiagnostic {
+    #[advice]
+    advice: ListAdvice<String>,
 }

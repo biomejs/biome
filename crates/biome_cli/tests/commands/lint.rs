@@ -301,12 +301,12 @@ fn apply_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let expected = "let a = 4;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let test1 = Utf8Path::new("test1.js");
@@ -925,14 +925,24 @@ fn fs_error_infinite_symlink_expansion_to_files() {
             .out_buffer
             .iter()
             .flat_map(|msg| msg.content.0.iter())
-            .any(|node| node.content.contains(&symlink1_path.to_string()))
+            .any(|node| node.content.contains(
+                &symlink1_path
+                    .strip_prefix(subdir1_path.as_path())
+                    .unwrap()
+                    .to_string()
+            ))
     );
     assert!(
         console
             .out_buffer
             .iter()
             .flat_map(|msg| msg.content.0.iter())
-            .any(|node| node.content.contains(&symlink2_path.to_string()))
+            .any(|node| node.content.contains(
+                &symlink2_path
+                    .strip_prefix(subdir2_path.as_path())
+                    .unwrap()
+                    .to_string()
+            ))
     );
 }
 
@@ -1831,7 +1841,7 @@ fn check_stdin_write_unsafe_successfully() {
         {message.content}
     });
 
-    assert_eq!(content, "function f() {var x=1; return{x}} class Foo {}");
+    assert_eq!(content, "function _f() {var x=1; return{x}} class Foo {}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1986,8 +1996,6 @@ array.map((sentence) => sentence.split(" ")).flat();
         &mut console,
         Args::from(["lint", file_path.as_str()].as_slice()),
     );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2795,7 +2803,7 @@ fn lint_only_missing_group() {
         Args::from(["lint", "--only=noDebugger", file_path.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3568,12 +3576,12 @@ fn fix_unsafe_with_error() {
     let source = "let a = 4;
 debugger;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
 
     let expected = "let a = 4;
 console.log(a);
-function f() { arguments; }
+function _f() { arguments; }
 ";
     let test1 = Utf8Path::new("test1.js");
     fs.insert(test1.into(), source.as_bytes());

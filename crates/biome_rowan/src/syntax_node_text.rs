@@ -37,20 +37,20 @@ impl SyntaxNodeText {
 
     pub fn find_char(&self, c: char) -> Option<TextSize> {
         let mut acc: TextSize = 0.into();
-        let res = self.try_for_each_chunk(|chunk| {
+        self.try_for_each_chunk(|chunk| {
             if let Some(pos) = chunk.find(c) {
                 let pos: TextSize = (pos as u32).into();
                 return Err(acc + pos);
             }
             acc += TextSize::of(chunk);
             Ok(())
-        });
-        found(res)
+        })
+        .err()
     }
 
     pub fn char_at(&self, offset: TextSize) -> Option<char> {
         let mut start: TextSize = 0.into();
-        let res = self.try_for_each_chunk(|chunk| {
+        self.try_for_each_chunk(|chunk| {
             let end = start + TextSize::of(chunk);
             if start <= offset && offset < end {
                 let off: usize = u32::from(offset - start) as usize;
@@ -58,8 +58,8 @@ impl SyntaxNodeText {
             }
             start = end;
             Ok(())
-        });
-        found(res)
+        })
+        .err()
     }
 
     pub fn slice<R: private::SyntaxTextRange>(&self, range: R) -> Self {
@@ -254,13 +254,6 @@ impl Iterator for SyntaxNodeTextChars {
 }
 
 impl FusedIterator for SyntaxNodeTextChars {}
-
-fn found<T>(res: Result<(), T>) -> Option<T> {
-    match res {
-        Ok(()) => None,
-        Err(it) => Some(it),
-    }
-}
 
 impl fmt::Debug for SyntaxNodeText {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

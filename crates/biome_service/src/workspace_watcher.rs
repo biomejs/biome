@@ -19,7 +19,7 @@ pub enum WatcherInstruction {
     /// Resyncs a file after a file was closed by a client.
     ///
     /// This is done through an instruction instead of calling
-    /// [WorkspaceServer::open_file_by_scanner()] directly to ensure it is only
+    /// `WorkspaceServer::open_file_by_watcher()` directly to ensure it is only
     /// done if the watcher is active.
     ResyncFile(Utf8PathBuf),
 
@@ -46,8 +46,27 @@ impl Drop for WatcherInstructionChannel {
 /// Kind of change being reported.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WatcherSignalKind {
-    AddedOrChanged,
+    AddedOrChanged(OpenFileReason),
     Removed,
+}
+
+/// Reports the reason why a file is being opened/indexed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum OpenFileReason {
+    /// A workspace client has explicitly requested the file to be opened.
+    ClientRequest,
+
+    /// The file is being opened as part of an initial scanner run.
+    InitialScan,
+
+    /// The file is being opened or updated as part of a watcher update.
+    WatcherUpdate,
+}
+
+impl OpenFileReason {
+    pub const fn is_opened_by_scanner(self) -> bool {
+        matches!(self, Self::InitialScan | Self::WatcherUpdate)
+    }
 }
 
 /// Watcher to keep the [WorkspaceServer] in sync with the filesystem state.
@@ -55,7 +74,7 @@ pub enum WatcherSignalKind {
 /// Conceptually, it helps to think of the watcher as a helper to the scanner.
 /// The watcher watches the same directories as those scanned by the scanner, so
 /// the watcher is also instructed to watch folders that were scanned through
-/// [WorkspaceServer::scan_project_folder()].
+/// `WorkspaceServer::scan_project_folder()`.
 ///
 /// When watch events are received, they are handed back to the workspace. If
 /// this results in opening new documents, we say they were opened by the

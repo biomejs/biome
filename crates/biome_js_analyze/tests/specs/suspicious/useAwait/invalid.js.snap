@@ -101,7 +101,7 @@ class Sample {
 ```
 invalid.js:1:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
   > 1 │ async function fetchData() {
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -129,7 +129,7 @@ invalid.js:1:1 lint/suspicious/useAwait ━━━━━━━━━━━━━�
 ```
 invalid.js:5:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     3 │ }
     4 │ 
@@ -161,7 +161,7 @@ invalid.js:5:2 lint/suspicious/useAwait ━━━━━━━━━━━━━�
 ```
 invalid.js:10:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
      9 │ const obj = {
   > 10 │ 	async fetchData() {
@@ -191,7 +191,7 @@ invalid.js:10:2 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:16:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     15 │ class DataFetcher {
   > 16 │ 	async fetchData() {
@@ -221,7 +221,7 @@ invalid.js:16:2 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:21:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     19 │ }
     20 │ 
@@ -257,7 +257,7 @@ invalid.js:21:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:22:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     21 │ async function outer() {
   > 22 │ 	async function innerFetchData() {
@@ -287,7 +287,7 @@ invalid.js:22:2 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:27:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     25 │ }
     26 │ 
@@ -325,7 +325,7 @@ invalid.js:27:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:28:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     27 │ async function outer() {
   > 28 │ 	async function innerFetchData() {
@@ -355,7 +355,7 @@ invalid.js:28:2 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:34:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     32 │ }
     33 │ 
@@ -393,7 +393,7 @@ invalid.js:34:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:41:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     39 │ }
     40 │ 
@@ -429,7 +429,7 @@ invalid.js:41:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:43:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     41 │ async function complexFunction() {
     42 │ 	const obj = {
@@ -461,7 +461,7 @@ invalid.js:43:3 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:49:3 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     48 │ 	class NestedDataFetcher {
   > 49 │ 		async fetchData() {
@@ -491,7 +491,7 @@ invalid.js:49:3 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:59:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     57 │ }
     58 │ 
@@ -527,7 +527,7 @@ invalid.js:59:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:81:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     80 │ class Sample {
   > 81 │ 	@Sample()
@@ -559,7 +559,7 @@ invalid.js:81:2 lint/suspicious/useAwait ━━━━━━━━━━━━━
 ```
 invalid.js:86:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This async function lacks an await expression.
+  ! This async function lacks an await expression.
   
     84 │ 	}
     85 │ 

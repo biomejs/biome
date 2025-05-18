@@ -199,7 +199,8 @@ where
 
         for plugin in plugins {
             let root: AnyParse = ctx.root.syntax().as_send().expect("not a root node").into();
-            for diagnostic in plugin.evaluate(root, ctx.options.file_path.clone()) {
+            let diagnostics = plugin.evaluate(root, ctx.options.file_path.clone());
+            for diagnostic in diagnostics {
                 let name = diagnostic
                     .subcategory
                     .clone()

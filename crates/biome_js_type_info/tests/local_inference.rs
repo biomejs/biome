@@ -123,3 +123,14 @@ fn infer_type_of_binary_expression_ne() {
         "infer_type_of_binary_expression_ne",
     );
 }
+
+#[test]
+fn infer_type_of_dynamic_import() {
+    const CODE: &str = r#"const a = import("some-module");"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_variable_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_dynamic_import");
+}

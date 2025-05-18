@@ -55,7 +55,7 @@ function foo(param = 'bar' as 'bar') {}
 ```
 invalid.ts:3:27 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
     1 │ // ref: https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/prefer-as-const.test.ts
     2 │ 
@@ -81,7 +81,7 @@ invalid.ts:3:27 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:4:23 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
     3 │ let foo = { bar: 'baz' as 'baz' };
   > 4 │ let foo = { bar: 1 as 1 };
@@ -106,7 +106,7 @@ invalid.ts:4:23 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:5:9 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of type annotation.
+  i Use as const instead of type annotation.
   
     3 │ let foo = { bar: 'baz' as 'baz' };
     4 │ let foo = { bar: 1 as 1 };
@@ -132,7 +132,7 @@ invalid.ts:5:9 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:6:10 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of type annotation.
+  i Use as const instead of type annotation.
   
     4 │ let foo = { bar: 1 as 1 };
     5 │ let []: 'bar' = 'bar';
@@ -158,7 +158,7 @@ invalid.ts:6:10 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:7:10 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of type annotation.
+  i Use as const instead of type annotation.
   
     5 │ let []: 'bar' = 'bar';
     6 │ let foo: 'bar' = 'bar';
@@ -184,7 +184,7 @@ invalid.ts:7:10 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:8:27 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
      6 │ let foo: 'bar' = 'bar';
      7 │ let foo: 2 = 2;
@@ -210,7 +210,7 @@ invalid.ts:8:27 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:9:12 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of angle bracket type assertion.
+  i Use as const instead of angle bracket type assertion.
   
      7 │ let foo: 2 = 2;
      8 │ let foo: 'bar' = 'bar' as 'bar';
@@ -236,7 +236,7 @@ invalid.ts:9:12 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:10:12 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of angle bracket type assertion.
+  i Use as const instead of angle bracket type assertion.
   
      8 │ let foo: 'bar' = 'bar' as 'bar';
      9 │ let foo = <'bar'>'bar';
@@ -262,7 +262,7 @@ invalid.ts:10:12 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:11:20 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
      9 │ let foo = <'bar'>'bar';
     10 │ let foo = <4>4;
@@ -288,7 +288,7 @@ invalid.ts:11:20 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:12:16 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
     10 │ let foo = <4>4;
     11 │ let foo = 'bar' as 'bar';
@@ -314,7 +314,7 @@ invalid.ts:12:16 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:15:8 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of type annotation.
+  i Use as const instead of type annotation.
   
     14 │ class foo {
   > 15 │   bar: 'baz' = 'baz';
@@ -339,7 +339,7 @@ invalid.ts:15:8 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:19:8 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of type annotation.
+  i Use as const instead of type annotation.
   
     18 │ class foo {
   > 19 │   bar: 2 = 2;
@@ -364,7 +364,7 @@ invalid.ts:19:8 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:23:10 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of angle bracket type assertion.
+  i Use as const instead of angle bracket type assertion.
   
     22 │ class foo {
   > 23 │   foo = <'bar'>'bar';
@@ -389,7 +389,7 @@ invalid.ts:23:10 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:27:18 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
     26 │ class foo {
   > 27 │   foo = 'bar' as 'bar';
@@ -414,7 +414,7 @@ invalid.ts:27:18 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:31:14 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
     30 │ class foo {
   > 31 │   foo = 5 as 5;
@@ -439,7 +439,7 @@ invalid.ts:31:14 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:35:36 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
     34 │ class foo {
   > 35 │ 	constructor(protected prop = 1 as 1) {}
@@ -464,7 +464,7 @@ invalid.ts:35:36 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:38:27 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
     36 │ }
     37 │ 
@@ -490,7 +490,7 @@ invalid.ts:38:27 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:41:40 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
     40 │ class foo {
   > 41 │ 	constructor(protected prop = 'bar' as 'bar') {}
@@ -515,7 +515,7 @@ invalid.ts:41:40 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
 ```
 invalid.ts:44:31 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use as const instead of as with a literal type.
+  i Use as const instead of as with a literal type.
   
     42 │ }
     43 │ 
@@ -535,5 +535,3 @@ invalid.ts:44:31 lint/style/useAsConstAssertion  FIXABLE  ━━━━━━━�
   
 
 ```
-
-

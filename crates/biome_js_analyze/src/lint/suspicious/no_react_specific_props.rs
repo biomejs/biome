@@ -4,6 +4,7 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{jsx_ident, jsx_name};
 use biome_js_syntax::{AnyJsxAttributeName, JsxAttribute};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
@@ -32,7 +33,8 @@ declare_lint_rule! {
         name: "noReactSpecificProps",
         language: "js",
         sources: &[RuleSource::EslintSolid("no-react-specific-props")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
         domains: &[RuleDomain::Solid],
     }
@@ -58,9 +60,9 @@ impl Rule for NoReactSpecificProps {
         let attribute = ctx.query();
         let name = attribute.name().ok()?;
         let range = name.range();
-        let name = name.to_trimmed_string();
+        let name = name.to_trimmed_text();
 
-        if REACT_SPECIFIC_JSX_PROPS.contains(&name.as_str()) {
+        if REACT_SPECIFIC_JSX_PROPS.contains(&name.text()) {
             let replacement = get_replacement_for_react_prop(&name)?;
             Some((range, replacement))
         } else {

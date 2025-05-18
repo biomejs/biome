@@ -46,7 +46,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("one-var")],
         recommended: false,
-        severity: Severity::Warning,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

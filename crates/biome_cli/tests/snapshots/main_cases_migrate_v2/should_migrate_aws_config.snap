@@ -23,11 +23,9 @@ expression: redactor(content)
         "noForEach": "off"
       },
       "correctness": {
-        "noInvalidBuiltinInstantiation": {
-          "level": "error"
-        },
         "noUndeclaredVariables": "error",
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "noInvalidBuiltinInstantiation": "error"
       },
       "style": {
         "noNamespace": "error",
@@ -35,11 +33,9 @@ expression: redactor(content)
           "level": "error",
           "options": { "syntax": "shorthand" }
         },
-        "useLiteralEnumMembers": "error",
-        "noCommaOperator": "error",
-        "useNodejsImportProtocol": "error",
+        "noParameterAssign": "error",
         "useAsConstAssertion": "error",
-        "useNumericLiterals": "error",
+        "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
         "useSelfClosingElements": "error",
         "useConst": "error",
@@ -47,16 +43,7 @@ expression: redactor(content)
         "noUnusedTemplateLiteral": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-        "useExponentiationOperator": "error",
-        "useTemplate": "error",
-        "noParameterAssign": "error",
-        "noNonNullAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "noArguments": "error",
-        "useImportType": "error",
-        "useExportType": "error",
-        "noUselessElse": "error",
-        "useShorthandFunctionType": "error"
+        "noUselessElse": "error"
       },
       "suspicious": {
         "noEmptyBlockStatements": "error"
@@ -75,5 +62,5 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-The configuration biome.json has been successfully migrated.
+Your configuration file(s) have been successfully migrated.
 ```

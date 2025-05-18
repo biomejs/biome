@@ -1,0 +1,710 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```tsx
+import React from 'react';
+let b = 1;
+let c = 2;
+
+export function A() {
+  const a = b >= 0 && b < c
+  return (
+    <C.D>
+     {a}
+    </C.D>
+  )
+}
+
+// issue: https://github.com/biomejs/biome/issues/5876 
+export default function UserWorkspaceTeamCellAvatarList() {
+  const displayedIds = ['']
+  const totalIds = 1
+  const displayMoreIndicator: boolean = displayedIds.length > 0 && displayedIds.length < totalIds
+
+  return (
+    <React.Fragment>
+      {displayMoreIndicator}
+    </React.Fragment>
+  )
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsImport {
+            import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+            import_clause: JsImportDefaultClause {
+                type_token: missing (optional),
+                default_specifier: JsDefaultImportSpecifier {
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@7..13 "React" [] [Whitespace(" ")],
+                    },
+                },
+                from_token: FROM_KW@13..18 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@18..25 "'react'" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: SEMICOLON@25..26 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@26..31 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@31..33 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@33..35 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@35..36 "1" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@36..37 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@37..42 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@42..44 "c" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@44..46 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@46..47 "2" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@47..48 ";" [] [],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@48..57 "export" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            export_clause: JsFunctionDeclaration {
+                async_token: missing (optional),
+                function_token: FUNCTION_KW@57..66 "function" [] [Whitespace(" ")],
+                star_token: missing (optional),
+                id: JsIdentifierBinding {
+                    name_token: IDENT@66..67 "A" [] [],
+                },
+                type_parameters: missing (optional),
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@67..68 "(" [] [],
+                    items: JsParameterList [],
+                    r_paren_token: R_PAREN@68..70 ")" [] [Whitespace(" ")],
+                },
+                return_type_annotation: missing (optional),
+                body: JsFunctionBody {
+                    l_curly_token: L_CURLY@70..71 "{" [] [],
+                    directives: JsDirectiveList [],
+                    statements: JsStatementList [
+                        JsVariableStatement {
+                            declaration: JsVariableDeclaration {
+                                await_token: missing (optional),
+                                kind: CONST_KW@71..80 "const" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                declarators: JsVariableDeclaratorList [
+                                    JsVariableDeclarator {
+                                        id: JsIdentifierBinding {
+                                            name_token: IDENT@80..82 "a" [] [Whitespace(" ")],
+                                        },
+                                        variable_annotation: missing (optional),
+                                        initializer: JsInitializerClause {
+                                            eq_token: EQ@82..84 "=" [] [Whitespace(" ")],
+                                            expression: JsLogicalExpression {
+                                                left: JsBinaryExpression {
+                                                    left: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@84..86 "b" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                    operator_token: GTEQ@86..89 ">=" [] [Whitespace(" ")],
+                                                    right: JsNumberLiteralExpression {
+                                                        value_token: JS_NUMBER_LITERAL@89..91 "0" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                                operator_token: AMP2@91..94 "&&" [] [Whitespace(" ")],
+                                                right: JsBinaryExpression {
+                                                    left: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@94..96 "b" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                    operator_token: L_ANGLE@96..98 "<" [] [Whitespace(" ")],
+                                                    right: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@98..99 "c" [] [],
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                ],
+                            },
+                            semicolon_token: missing (optional),
+                        },
+                        JsReturnStatement {
+                            return_token: RETURN_KW@99..109 "return" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                            argument: JsParenthesizedExpression {
+                                l_paren_token: L_PAREN@109..110 "(" [] [],
+                                expression: JsxTagExpression {
+                                    tag: JsxElement {
+                                        opening_element: JsxOpeningElement {
+                                            l_angle_token: L_ANGLE@110..116 "<" [Newline("\n"), Whitespace("    ")] [],
+                                            name: JsxMemberName {
+                                                object: JsxReferenceIdentifier {
+                                                    value_token: JSX_IDENT@116..117 "C" [] [],
+                                                },
+                                                dot_token: DOT@117..118 "." [] [],
+                                                member: JsName {
+                                                    value_token: IDENT@118..119 "D" [] [],
+                                                },
+                                            },
+                                            type_arguments: missing (optional),
+                                            attributes: JsxAttributeList [],
+                                            r_angle_token: R_ANGLE@119..120 ">" [] [],
+                                        },
+                                        children: JsxChildList [
+                                            JsxText {
+                                                value_token: JSX_TEXT_LITERAL@120..126 "\n     " [] [],
+                                            },
+                                            JsxExpressionChild {
+                                                l_curly_token: L_CURLY@126..127 "{" [] [],
+                                                expression: JsIdentifierExpression {
+                                                    name: JsReferenceIdentifier {
+                                                        value_token: IDENT@127..128 "a" [] [],
+                                                    },
+                                                },
+                                                r_curly_token: R_CURLY@128..129 "}" [] [],
+                                            },
+                                            JsxText {
+                                                value_token: JSX_TEXT_LITERAL@129..134 "\n    " [] [],
+                                            },
+                                        ],
+                                        closing_element: JsxClosingElement {
+                                            l_angle_token: L_ANGLE@134..135 "<" [] [],
+                                            slash_token: SLASH@135..136 "/" [] [],
+                                            name: JsxMemberName {
+                                                object: JsxReferenceIdentifier {
+                                                    value_token: JSX_IDENT@136..137 "C" [] [],
+                                                },
+                                                dot_token: DOT@137..138 "." [] [],
+                                                member: JsName {
+                                                    value_token: IDENT@138..139 "D" [] [],
+                                                },
+                                            },
+                                            r_angle_token: R_ANGLE@139..140 ">" [] [],
+                                        },
+                                    },
+                                },
+                                r_paren_token: R_PAREN@140..144 ")" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                            semicolon_token: missing (optional),
+                        },
+                    ],
+                    r_curly_token: R_CURLY@144..146 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@146..211 "export" [Newline("\n"), Newline("\n"), Comments("// issue: https://git ..."), Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@211..219 "default" [] [Whitespace(" ")],
+                declaration: JsFunctionExportDefaultDeclaration {
+                    async_token: missing (optional),
+                    function_token: FUNCTION_KW@219..228 "function" [] [Whitespace(" ")],
+                    star_token: missing (optional),
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@228..259 "UserWorkspaceTeamCellAvatarList" [] [],
+                    },
+                    type_parameters: missing (optional),
+                    parameters: JsParameters {
+                        l_paren_token: L_PAREN@259..260 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@260..262 ")" [] [Whitespace(" ")],
+                    },
+                    return_type_annotation: missing (optional),
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@262..263 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [
+                            JsVariableStatement {
+                                declaration: JsVariableDeclaration {
+                                    await_token: missing (optional),
+                                    kind: CONST_KW@263..272 "const" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                    declarators: JsVariableDeclaratorList [
+                                        JsVariableDeclarator {
+                                            id: JsIdentifierBinding {
+                                                name_token: IDENT@272..285 "displayedIds" [] [Whitespace(" ")],
+                                            },
+                                            variable_annotation: missing (optional),
+                                            initializer: JsInitializerClause {
+                                                eq_token: EQ@285..287 "=" [] [Whitespace(" ")],
+                                                expression: JsArrayExpression {
+                                                    l_brack_token: L_BRACK@287..288 "[" [] [],
+                                                    elements: JsArrayElementList [
+                                                        JsStringLiteralExpression {
+                                                            value_token: JS_STRING_LITERAL@288..290 "''" [] [],
+                                                        },
+                                                    ],
+                                                    r_brack_token: R_BRACK@290..291 "]" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                semicolon_token: missing (optional),
+                            },
+                            JsVariableStatement {
+                                declaration: JsVariableDeclaration {
+                                    await_token: missing (optional),
+                                    kind: CONST_KW@291..300 "const" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                    declarators: JsVariableDeclaratorList [
+                                        JsVariableDeclarator {
+                                            id: JsIdentifierBinding {
+                                                name_token: IDENT@300..309 "totalIds" [] [Whitespace(" ")],
+                                            },
+                                            variable_annotation: missing (optional),
+                                            initializer: JsInitializerClause {
+                                                eq_token: EQ@309..311 "=" [] [Whitespace(" ")],
+                                                expression: JsNumberLiteralExpression {
+                                                    value_token: JS_NUMBER_LITERAL@311..312 "1" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                semicolon_token: missing (optional),
+                            },
+                            JsVariableStatement {
+                                declaration: JsVariableDeclaration {
+                                    await_token: missing (optional),
+                                    kind: CONST_KW@312..321 "const" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                    declarators: JsVariableDeclaratorList [
+                                        JsVariableDeclarator {
+                                            id: JsIdentifierBinding {
+                                                name_token: IDENT@321..341 "displayMoreIndicator" [] [],
+                                            },
+                                            variable_annotation: TsTypeAnnotation {
+                                                colon_token: COLON@341..343 ":" [] [Whitespace(" ")],
+                                                ty: TsBooleanType {
+                                                    boolean_token: BOOLEAN_KW@343..351 "boolean" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                            initializer: JsInitializerClause {
+                                                eq_token: EQ@351..353 "=" [] [Whitespace(" ")],
+                                                expression: JsLogicalExpression {
+                                                    left: JsBinaryExpression {
+                                                        left: JsStaticMemberExpression {
+                                                            object: JsIdentifierExpression {
+                                                                name: JsReferenceIdentifier {
+                                                                    value_token: IDENT@353..365 "displayedIds" [] [],
+                                                                },
+                                                            },
+                                                            operator_token: DOT@365..366 "." [] [],
+                                                            member: JsName {
+                                                                value_token: IDENT@366..373 "length" [] [Whitespace(" ")],
+                                                            },
+                                                        },
+                                                        operator_token: R_ANGLE@373..375 ">" [] [Whitespace(" ")],
+                                                        right: JsNumberLiteralExpression {
+                                                            value_token: JS_NUMBER_LITERAL@375..377 "0" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                    operator_token: AMP2@377..380 "&&" [] [Whitespace(" ")],
+                                                    right: JsBinaryExpression {
+                                                        left: JsStaticMemberExpression {
+                                                            object: JsIdentifierExpression {
+                                                                name: JsReferenceIdentifier {
+                                                                    value_token: IDENT@380..392 "displayedIds" [] [],
+                                                                },
+                                                            },
+                                                            operator_token: DOT@392..393 "." [] [],
+                                                            member: JsName {
+                                                                value_token: IDENT@393..400 "length" [] [Whitespace(" ")],
+                                                            },
+                                                        },
+                                                        operator_token: L_ANGLE@400..402 "<" [] [Whitespace(" ")],
+                                                        right: JsIdentifierExpression {
+                                                            name: JsReferenceIdentifier {
+                                                                value_token: IDENT@402..410 "totalIds" [] [],
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                semicolon_token: missing (optional),
+                            },
+                            JsReturnStatement {
+                                return_token: RETURN_KW@410..421 "return" [Newline("\n"), Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                argument: JsParenthesizedExpression {
+                                    l_paren_token: L_PAREN@421..422 "(" [] [],
+                                    expression: JsxTagExpression {
+                                        tag: JsxElement {
+                                            opening_element: JsxOpeningElement {
+                                                l_angle_token: L_ANGLE@422..428 "<" [Newline("\n"), Whitespace("    ")] [],
+                                                name: JsxMemberName {
+                                                    object: JsxReferenceIdentifier {
+                                                        value_token: JSX_IDENT@428..433 "React" [] [],
+                                                    },
+                                                    dot_token: DOT@433..434 "." [] [],
+                                                    member: JsName {
+                                                        value_token: IDENT@434..442 "Fragment" [] [],
+                                                    },
+                                                },
+                                                type_arguments: missing (optional),
+                                                attributes: JsxAttributeList [],
+                                                r_angle_token: R_ANGLE@442..443 ">" [] [],
+                                            },
+                                            children: JsxChildList [
+                                                JsxText {
+                                                    value_token: JSX_TEXT_LITERAL@443..450 "\n      " [] [],
+                                                },
+                                                JsxExpressionChild {
+                                                    l_curly_token: L_CURLY@450..451 "{" [] [],
+                                                    expression: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@451..471 "displayMoreIndicator" [] [],
+                                                        },
+                                                    },
+                                                    r_curly_token: R_CURLY@471..472 "}" [] [],
+                                                },
+                                                JsxText {
+                                                    value_token: JSX_TEXT_LITERAL@472..477 "\n    " [] [],
+                                                },
+                                            ],
+                                            closing_element: JsxClosingElement {
+                                                l_angle_token: L_ANGLE@477..478 "<" [] [],
+                                                slash_token: SLASH@478..479 "/" [] [],
+                                                name: JsxMemberName {
+                                                    object: JsxReferenceIdentifier {
+                                                        value_token: JSX_IDENT@479..484 "React" [] [],
+                                                    },
+                                                    dot_token: DOT@484..485 "." [] [],
+                                                    member: JsName {
+                                                        value_token: IDENT@485..493 "Fragment" [] [],
+                                                    },
+                                                },
+                                                r_angle_token: R_ANGLE@493..494 ">" [] [],
+                                            },
+                                        },
+                                    },
+                                    r_paren_token: R_PAREN@494..498 ")" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                semicolon_token: missing (optional),
+                            },
+                        ],
+                        r_curly_token: R_CURLY@498..500 "}" [Newline("\n")] [],
+                    },
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@500..501 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..501
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..500
+    0: JS_IMPORT@0..26
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IMPORT_DEFAULT_CLAUSE@7..25
+        0: (empty)
+        1: JS_DEFAULT_IMPORT_SPECIFIER@7..13
+          0: JS_IDENTIFIER_BINDING@7..13
+            0: IDENT@7..13 "React" [] [Whitespace(" ")]
+        2: FROM_KW@13..18 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@18..25
+          0: JS_STRING_LITERAL@18..25 "'react'" [] []
+        4: (empty)
+      2: SEMICOLON@25..26 ";" [] []
+    1: JS_VARIABLE_STATEMENT@26..37
+      0: JS_VARIABLE_DECLARATION@26..36
+        0: (empty)
+        1: LET_KW@26..31 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@31..36
+          0: JS_VARIABLE_DECLARATOR@31..36
+            0: JS_IDENTIFIER_BINDING@31..33
+              0: IDENT@31..33 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@33..36
+              0: EQ@33..35 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@35..36
+                0: JS_NUMBER_LITERAL@35..36 "1" [] []
+      1: SEMICOLON@36..37 ";" [] []
+    2: JS_VARIABLE_STATEMENT@37..48
+      0: JS_VARIABLE_DECLARATION@37..47
+        0: (empty)
+        1: LET_KW@37..42 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@42..47
+          0: JS_VARIABLE_DECLARATOR@42..47
+            0: JS_IDENTIFIER_BINDING@42..44
+              0: IDENT@42..44 "c" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@44..47
+              0: EQ@44..46 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@46..47
+                0: JS_NUMBER_LITERAL@46..47 "2" [] []
+      1: SEMICOLON@47..48 ";" [] []
+    3: JS_EXPORT@48..146
+      0: JS_DECORATOR_LIST@48..48
+      1: EXPORT_KW@48..57 "export" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: JS_FUNCTION_DECLARATION@57..146
+        0: (empty)
+        1: FUNCTION_KW@57..66 "function" [] [Whitespace(" ")]
+        2: (empty)
+        3: JS_IDENTIFIER_BINDING@66..67
+          0: IDENT@66..67 "A" [] []
+        4: (empty)
+        5: JS_PARAMETERS@67..70
+          0: L_PAREN@67..68 "(" [] []
+          1: JS_PARAMETER_LIST@68..68
+          2: R_PAREN@68..70 ")" [] [Whitespace(" ")]
+        6: (empty)
+        7: JS_FUNCTION_BODY@70..146
+          0: L_CURLY@70..71 "{" [] []
+          1: JS_DIRECTIVE_LIST@71..71
+          2: JS_STATEMENT_LIST@71..144
+            0: JS_VARIABLE_STATEMENT@71..99
+              0: JS_VARIABLE_DECLARATION@71..99
+                0: (empty)
+                1: CONST_KW@71..80 "const" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                2: JS_VARIABLE_DECLARATOR_LIST@80..99
+                  0: JS_VARIABLE_DECLARATOR@80..99
+                    0: JS_IDENTIFIER_BINDING@80..82
+                      0: IDENT@80..82 "a" [] [Whitespace(" ")]
+                    1: (empty)
+                    2: JS_INITIALIZER_CLAUSE@82..99
+                      0: EQ@82..84 "=" [] [Whitespace(" ")]
+                      1: JS_LOGICAL_EXPRESSION@84..99
+                        0: JS_BINARY_EXPRESSION@84..91
+                          0: JS_IDENTIFIER_EXPRESSION@84..86
+                            0: JS_REFERENCE_IDENTIFIER@84..86
+                              0: IDENT@84..86 "b" [] [Whitespace(" ")]
+                          1: GTEQ@86..89 ">=" [] [Whitespace(" ")]
+                          2: JS_NUMBER_LITERAL_EXPRESSION@89..91
+                            0: JS_NUMBER_LITERAL@89..91 "0" [] [Whitespace(" ")]
+                        1: AMP2@91..94 "&&" [] [Whitespace(" ")]
+                        2: JS_BINARY_EXPRESSION@94..99
+                          0: JS_IDENTIFIER_EXPRESSION@94..96
+                            0: JS_REFERENCE_IDENTIFIER@94..96
+                              0: IDENT@94..96 "b" [] [Whitespace(" ")]
+                          1: L_ANGLE@96..98 "<" [] [Whitespace(" ")]
+                          2: JS_IDENTIFIER_EXPRESSION@98..99
+                            0: JS_REFERENCE_IDENTIFIER@98..99
+                              0: IDENT@98..99 "c" [] []
+              1: (empty)
+            1: JS_RETURN_STATEMENT@99..144
+              0: RETURN_KW@99..109 "return" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+              1: JS_PARENTHESIZED_EXPRESSION@109..144
+                0: L_PAREN@109..110 "(" [] []
+                1: JSX_TAG_EXPRESSION@110..140
+                  0: JSX_ELEMENT@110..140
+                    0: JSX_OPENING_ELEMENT@110..120
+                      0: L_ANGLE@110..116 "<" [Newline("\n"), Whitespace("    ")] []
+                      1: JSX_MEMBER_NAME@116..119
+                        0: JSX_REFERENCE_IDENTIFIER@116..117
+                          0: JSX_IDENT@116..117 "C" [] []
+                        1: DOT@117..118 "." [] []
+                        2: JS_NAME@118..119
+                          0: IDENT@118..119 "D" [] []
+                      2: (empty)
+                      3: JSX_ATTRIBUTE_LIST@119..119
+                      4: R_ANGLE@119..120 ">" [] []
+                    1: JSX_CHILD_LIST@120..134
+                      0: JSX_TEXT@120..126
+                        0: JSX_TEXT_LITERAL@120..126 "\n     " [] []
+                      1: JSX_EXPRESSION_CHILD@126..129
+                        0: L_CURLY@126..127 "{" [] []
+                        1: JS_IDENTIFIER_EXPRESSION@127..128
+                          0: JS_REFERENCE_IDENTIFIER@127..128
+                            0: IDENT@127..128 "a" [] []
+                        2: R_CURLY@128..129 "}" [] []
+                      2: JSX_TEXT@129..134
+                        0: JSX_TEXT_LITERAL@129..134 "\n    " [] []
+                    2: JSX_CLOSING_ELEMENT@134..140
+                      0: L_ANGLE@134..135 "<" [] []
+                      1: SLASH@135..136 "/" [] []
+                      2: JSX_MEMBER_NAME@136..139
+                        0: JSX_REFERENCE_IDENTIFIER@136..137
+                          0: JSX_IDENT@136..137 "C" [] []
+                        1: DOT@137..138 "." [] []
+                        2: JS_NAME@138..139
+                          0: IDENT@138..139 "D" [] []
+                      3: R_ANGLE@139..140 ">" [] []
+                2: R_PAREN@140..144 ")" [Newline("\n"), Whitespace("  ")] []
+              2: (empty)
+          3: R_CURLY@144..146 "}" [Newline("\n")] []
+    4: JS_EXPORT@146..500
+      0: JS_DECORATOR_LIST@146..146
+      1: EXPORT_KW@146..211 "export" [Newline("\n"), Newline("\n"), Comments("// issue: https://git ..."), Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@211..500
+        0: DEFAULT_KW@211..219 "default" [] [Whitespace(" ")]
+        1: JS_FUNCTION_EXPORT_DEFAULT_DECLARATION@219..500
+          0: (empty)
+          1: FUNCTION_KW@219..228 "function" [] [Whitespace(" ")]
+          2: (empty)
+          3: JS_IDENTIFIER_BINDING@228..259
+            0: IDENT@228..259 "UserWorkspaceTeamCellAvatarList" [] []
+          4: (empty)
+          5: JS_PARAMETERS@259..262
+            0: L_PAREN@259..260 "(" [] []
+            1: JS_PARAMETER_LIST@260..260
+            2: R_PAREN@260..262 ")" [] [Whitespace(" ")]
+          6: (empty)
+          7: JS_FUNCTION_BODY@262..500
+            0: L_CURLY@262..263 "{" [] []
+            1: JS_DIRECTIVE_LIST@263..263
+            2: JS_STATEMENT_LIST@263..498
+              0: JS_VARIABLE_STATEMENT@263..291
+                0: JS_VARIABLE_DECLARATION@263..291
+                  0: (empty)
+                  1: CONST_KW@263..272 "const" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                  2: JS_VARIABLE_DECLARATOR_LIST@272..291
+                    0: JS_VARIABLE_DECLARATOR@272..291
+                      0: JS_IDENTIFIER_BINDING@272..285
+                        0: IDENT@272..285 "displayedIds" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: JS_INITIALIZER_CLAUSE@285..291
+                        0: EQ@285..287 "=" [] [Whitespace(" ")]
+                        1: JS_ARRAY_EXPRESSION@287..291
+                          0: L_BRACK@287..288 "[" [] []
+                          1: JS_ARRAY_ELEMENT_LIST@288..290
+                            0: JS_STRING_LITERAL_EXPRESSION@288..290
+                              0: JS_STRING_LITERAL@288..290 "''" [] []
+                          2: R_BRACK@290..291 "]" [] []
+                1: (empty)
+              1: JS_VARIABLE_STATEMENT@291..312
+                0: JS_VARIABLE_DECLARATION@291..312
+                  0: (empty)
+                  1: CONST_KW@291..300 "const" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                  2: JS_VARIABLE_DECLARATOR_LIST@300..312
+                    0: JS_VARIABLE_DECLARATOR@300..312
+                      0: JS_IDENTIFIER_BINDING@300..309
+                        0: IDENT@300..309 "totalIds" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: JS_INITIALIZER_CLAUSE@309..312
+                        0: EQ@309..311 "=" [] [Whitespace(" ")]
+                        1: JS_NUMBER_LITERAL_EXPRESSION@311..312
+                          0: JS_NUMBER_LITERAL@311..312 "1" [] []
+                1: (empty)
+              2: JS_VARIABLE_STATEMENT@312..410
+                0: JS_VARIABLE_DECLARATION@312..410
+                  0: (empty)
+                  1: CONST_KW@312..321 "const" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                  2: JS_VARIABLE_DECLARATOR_LIST@321..410
+                    0: JS_VARIABLE_DECLARATOR@321..410
+                      0: JS_IDENTIFIER_BINDING@321..341
+                        0: IDENT@321..341 "displayMoreIndicator" [] []
+                      1: TS_TYPE_ANNOTATION@341..351
+                        0: COLON@341..343 ":" [] [Whitespace(" ")]
+                        1: TS_BOOLEAN_TYPE@343..351
+                          0: BOOLEAN_KW@343..351 "boolean" [] [Whitespace(" ")]
+                      2: JS_INITIALIZER_CLAUSE@351..410
+                        0: EQ@351..353 "=" [] [Whitespace(" ")]
+                        1: JS_LOGICAL_EXPRESSION@353..410
+                          0: JS_BINARY_EXPRESSION@353..377
+                            0: JS_STATIC_MEMBER_EXPRESSION@353..373
+                              0: JS_IDENTIFIER_EXPRESSION@353..365
+                                0: JS_REFERENCE_IDENTIFIER@353..365
+                                  0: IDENT@353..365 "displayedIds" [] []
+                              1: DOT@365..366 "." [] []
+                              2: JS_NAME@366..373
+                                0: IDENT@366..373 "length" [] [Whitespace(" ")]
+                            1: R_ANGLE@373..375 ">" [] [Whitespace(" ")]
+                            2: JS_NUMBER_LITERAL_EXPRESSION@375..377
+                              0: JS_NUMBER_LITERAL@375..377 "0" [] [Whitespace(" ")]
+                          1: AMP2@377..380 "&&" [] [Whitespace(" ")]
+                          2: JS_BINARY_EXPRESSION@380..410
+                            0: JS_STATIC_MEMBER_EXPRESSION@380..400
+                              0: JS_IDENTIFIER_EXPRESSION@380..392
+                                0: JS_REFERENCE_IDENTIFIER@380..392
+                                  0: IDENT@380..392 "displayedIds" [] []
+                              1: DOT@392..393 "." [] []
+                              2: JS_NAME@393..400
+                                0: IDENT@393..400 "length" [] [Whitespace(" ")]
+                            1: L_ANGLE@400..402 "<" [] [Whitespace(" ")]
+                            2: JS_IDENTIFIER_EXPRESSION@402..410
+                              0: JS_REFERENCE_IDENTIFIER@402..410
+                                0: IDENT@402..410 "totalIds" [] []
+                1: (empty)
+              3: JS_RETURN_STATEMENT@410..498
+                0: RETURN_KW@410..421 "return" [Newline("\n"), Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                1: JS_PARENTHESIZED_EXPRESSION@421..498
+                  0: L_PAREN@421..422 "(" [] []
+                  1: JSX_TAG_EXPRESSION@422..494
+                    0: JSX_ELEMENT@422..494
+                      0: JSX_OPENING_ELEMENT@422..443
+                        0: L_ANGLE@422..428 "<" [Newline("\n"), Whitespace("    ")] []
+                        1: JSX_MEMBER_NAME@428..442
+                          0: JSX_REFERENCE_IDENTIFIER@428..433
+                            0: JSX_IDENT@428..433 "React" [] []
+                          1: DOT@433..434 "." [] []
+                          2: JS_NAME@434..442
+                            0: IDENT@434..442 "Fragment" [] []
+                        2: (empty)
+                        3: JSX_ATTRIBUTE_LIST@442..442
+                        4: R_ANGLE@442..443 ">" [] []
+                      1: JSX_CHILD_LIST@443..477
+                        0: JSX_TEXT@443..450
+                          0: JSX_TEXT_LITERAL@443..450 "\n      " [] []
+                        1: JSX_EXPRESSION_CHILD@450..472
+                          0: L_CURLY@450..451 "{" [] []
+                          1: JS_IDENTIFIER_EXPRESSION@451..471
+                            0: JS_REFERENCE_IDENTIFIER@451..471
+                              0: IDENT@451..471 "displayMoreIndicator" [] []
+                          2: R_CURLY@471..472 "}" [] []
+                        2: JSX_TEXT@472..477
+                          0: JSX_TEXT_LITERAL@472..477 "\n    " [] []
+                      2: JSX_CLOSING_ELEMENT@477..494
+                        0: L_ANGLE@477..478 "<" [] []
+                        1: SLASH@478..479 "/" [] []
+                        2: JSX_MEMBER_NAME@479..493
+                          0: JSX_REFERENCE_IDENTIFIER@479..484
+                            0: JSX_IDENT@479..484 "React" [] []
+                          1: DOT@484..485 "." [] []
+                          2: JS_NAME@485..493
+                            0: IDENT@485..493 "Fragment" [] []
+                        3: R_ANGLE@493..494 ">" [] []
+                  2: R_PAREN@494..498 ")" [Newline("\n"), Whitespace("  ")] []
+                2: (empty)
+            3: R_CURLY@498..500 "}" [Newline("\n")] []
+        2: (empty)
+  4: EOF@500..501 "" [Newline("\n")] []
+
+```

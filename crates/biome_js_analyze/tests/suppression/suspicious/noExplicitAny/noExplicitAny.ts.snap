@@ -14,7 +14,7 @@ export function test(arg: any) {
 ```
 noExplicitAny.ts:1:27 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
   > 1 │ export function test(arg: any) {
       │                           ^^^
@@ -41,7 +41,7 @@ noExplicitAny.ts:1:27 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━
 ```
 noExplicitAny.ts:2:12 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected any. Specify a different type.
+  ! Unexpected any. Specify a different type.
   
     1 │ export function test(arg: any) {
   > 2 │   const a: any = arg;

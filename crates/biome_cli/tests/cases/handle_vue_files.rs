@@ -743,8 +743,6 @@ fn vue_compiler_macros_as_globals() {
         Args::from(["lint", vue_file_path.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
     assert_file_contents(&fs, vue_file_path, VUE_TS_FILE_SETUP_GLOBALS);
 
     assert_cli_snapshot(SnapshotPayload::new(

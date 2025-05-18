@@ -100,7 +100,7 @@ declare_lint_rule! {
             RuleSource::EslintUnicorn("no-static-only-class"),
         ],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
     }
 }
 

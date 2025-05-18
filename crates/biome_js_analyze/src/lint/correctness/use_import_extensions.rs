@@ -1,3 +1,4 @@
+use biome_diagnostics::Severity;
 use biome_module_graph::ResolvedPath;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
@@ -118,6 +119,7 @@ declare_lint_rule! {
         name: "useImportExtensions",
         language: "js",
         recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
         domains: &[RuleDomain::Project],
     }
@@ -240,7 +242,7 @@ fn get_extensionless_import(
         return None;
     }
 
-    let last_component = path_components.last().unwrap_or(first_component);
+    let last_component = path_components.next_back().unwrap_or(first_component);
 
     let has_query_or_hash =
         last_component.as_str().contains('?') || last_component.as_str().contains('#');

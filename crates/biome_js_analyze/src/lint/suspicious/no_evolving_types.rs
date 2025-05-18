@@ -1,5 +1,6 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
 
 declare_lint_rule! {
@@ -51,6 +52,7 @@ declare_lint_rule! {
         name: "noEvolvingTypes",
         language: "ts",
         recommended: false,
+        severity: Severity::Warning,
     }
 }
 
@@ -95,7 +97,7 @@ impl Rule for NoEvolvingTypes {
                             return Some(variable);
                         }
                     }
-                    _ => continue,
+                    _ => {}
                 };
             }
         }

@@ -1,0 +1,217 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a { --custom-property: 1; --custom-property: 2; }
+a { --custom-property: 1; color: pink; --custom-property: 1; }
+a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+@media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } } }
+
+```
+
+# Diagnostics
+```
+invalid.css:1:27 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+  > 1 │ a { --custom-property: 1; --custom-property: 2; }
+      │                           ^^^^^^^^^^^^^^^^^
+    2 │ a { --custom-property: 1; color: pink; --custom-property: 1; }
+    3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+  
+  i --custom-property is already defined here.
+  
+  > 1 │ a { --custom-property: 1; --custom-property: 2; }
+      │     ^^^^^^^^^^^^^^^^^
+    2 │ a { --custom-property: 1; color: pink; --custom-property: 1; }
+    3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:2:40 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    1 │ a { --custom-property: 1; --custom-property: 2; }
+  > 2 │ a { --custom-property: 1; color: pink; --custom-property: 1; }
+      │                                        ^^^^^^^^^^^^^^^^^
+    3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+    4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+  
+  i --custom-property is already defined here.
+  
+    1 │ a { --custom-property: 1; --custom-property: 2; }
+  > 2 │ a { --custom-property: 1; color: pink; --custom-property: 1; }
+      │     ^^^^^^^^^^^^^^^^^
+    3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+    4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:3:62 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    1 │ a { --custom-property: 1; --custom-property: 2; }
+    2 │ a { --custom-property: 1; color: pink; --custom-property: 1; }
+  > 3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+      │                                                              ^^^^^^^^^^^^^^^^^
+    4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+    5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+  
+  i --cUstOm-prOpErtY is already defined here.
+  
+    1 │ a { --custom-property: 1; --custom-property: 2; }
+    2 │ a { --custom-property: 1; color: pink; --custom-property: 1; }
+  > 3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+      │                           ^^^^^^^^^^^^^^^^^
+    4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+    5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:4:69 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    2 │ a { --custom-property: 1; color: pink; --custom-property: 1; }
+    3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+  > 4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+      │                                                                     ^^^^^^^^^^^^^^^^^
+    5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+    6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+  
+  i --custom-property is already defined here.
+  
+    2 │ a { --custom-property: 1; color: pink; --custom-property: 1; }
+    3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+  > 4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+      │                                          ^^^^^^^^^^^^^^^^^
+    5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+    6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:5:66 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+    4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+  > 5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+      │                                                                  ^^^^^^^^^^^^^^^^^
+    6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+    7 │ a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+  
+  i --custom-property is already defined here.
+  
+    3 │ a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+    4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+  > 5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+      │                                       ^^^^^^^^^^^^^^^^^
+    6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+    7 │ a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:6:70 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+    5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+  > 6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+      │                                                                      ^^^^^^^^^^^^^^^^^
+    7 │ a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+    8 │ a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } } }
+  
+  i --custom-property is already defined here.
+  
+    4 │ a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+    5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+  > 6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+      │                                            ^^^^^^^^^^^^^^^^^
+    7 │ a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+    8 │ a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } } }
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:7:104 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+    6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+  > 7 │ a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+      │                                                                                                        ^^^^^^^^^^^^^^^^^
+    8 │ a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } } }
+    9 │ 
+  
+  i --custom-property is already defined here.
+  
+    5 │ a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+    6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+  > 7 │ a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+      │                                                                              ^^^^^^^^^^^^^^^^^
+    8 │ a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } } }
+    9 │ 
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:8:99 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+    7 │ a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+  > 8 │ a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } } }
+      │                                                                                                   ^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i --custom-property is already defined here.
+  
+    6 │ @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+    7 │ a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+  > 8 │ a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } } }
+      │                                                                         ^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```

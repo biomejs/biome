@@ -66,7 +66,7 @@ class X {
 ```
 invalid.ts:2:18 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     1 │ // const contexts
   > 2 │ const x/*before*/: /*inside*/ 1 /*after*/ = (1);
@@ -88,7 +88,7 @@ invalid.ts:2:18 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:4:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     2 │ const x/*before*/: /*inside*/ 1 /*after*/ = (1);
     3 │ 
@@ -112,7 +112,7 @@ invalid.ts:4:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:5:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     4 │ const x: 1n = 1n;
   > 5 │ const x: -1n = -1n;
@@ -135,7 +135,7 @@ invalid.ts:5:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:6:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     4 │ const x: 1n = 1n;
     5 │ const x: -1n = -1n;
@@ -159,7 +159,7 @@ invalid.ts:6:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:7:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     5 │ const x: -1n = -1n;
     6 │ const x: false = false;
@@ -183,7 +183,7 @@ invalid.ts:7:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:8:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
      6 │ const x: false = false;
      7 │ const x: false = !true;
@@ -207,7 +207,7 @@ invalid.ts:8:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:9:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
      7 │ const x: false = !true;
      8 │ const x: false = !1;
@@ -231,7 +231,7 @@ invalid.ts:9:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:10:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
      8 │ const x: false = !1;
      9 │ const x: true = true;
@@ -255,7 +255,7 @@ invalid.ts:10:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:11:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
      9 │ const x: true = true;
     10 │ const x: true = !false;
@@ -279,7 +279,7 @@ invalid.ts:11:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:12:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     10 │ const x: true = !false;
     11 │ const x: true = !0;
@@ -303,7 +303,7 @@ invalid.ts:12:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:13:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     11 │ const x: true = !0;
     12 │ const x: 1 = +1;
@@ -327,7 +327,7 @@ invalid.ts:13:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:14:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     12 │ const x: 1 = +1;
     13 │ const x: -1 = -1;
@@ -351,7 +351,7 @@ invalid.ts:14:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:16:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     14 │ const x: 1e-5 = 1e-5;
     15 │ const x: RegExp = /a/;
@@ -375,7 +375,7 @@ invalid.ts:16:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:17:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     15 │ const x: RegExp = /a/;
     16 │ const x: "str" = "str";
@@ -399,7 +399,7 @@ invalid.ts:17:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:18:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     16 │ const x: "str" = "str";
     17 │ const x: "str" = `str`; // constant template string
@@ -423,7 +423,7 @@ invalid.ts:18:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:21:12 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     20 │ class X {
   > 21 │ 	readonly x: 1 = 1;
@@ -446,7 +446,7 @@ invalid.ts:21:12 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:25:24 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     24 │ class X {
   > 25 │ 	constructor(readonly x: 1 = 1) {}
@@ -469,7 +469,7 @@ invalid.ts:25:24 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:29:17 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     28 │ // non-const contexts
   > 29 │ let x /*before*/: /*inside*/ number /*after*/ = (1);
@@ -492,7 +492,7 @@ invalid.ts:29:17 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:31:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     29 │ let x /*before*/: /*inside*/ number /*after*/ = (1);
     30 │ 
@@ -516,7 +516,7 @@ invalid.ts:31:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:32:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     31 │ let x: bigint = 1n;
   > 32 │ let x: bigint = -1n;
@@ -539,7 +539,7 @@ invalid.ts:32:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:33:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     31 │ let x: bigint = 1n;
     32 │ let x: bigint = -1n;
@@ -563,7 +563,7 @@ invalid.ts:33:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:34:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     32 │ let x: bigint = -1n;
     33 │ let x: boolean = false;
@@ -587,7 +587,7 @@ invalid.ts:34:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:35:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     33 │ let x: boolean = false;
     34 │ let x: boolean = true;
@@ -611,7 +611,7 @@ invalid.ts:35:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:36:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     34 │ let x: boolean = true;
     35 │ let x: boolean = !false;
@@ -635,7 +635,7 @@ invalid.ts:36:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:37:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     35 │ let x: boolean = !false;
     36 │ let x: boolean = !true;
@@ -659,7 +659,7 @@ invalid.ts:37:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:38:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     36 │ let x: boolean = !true;
     37 │ let x: number = +1;
@@ -683,7 +683,7 @@ invalid.ts:38:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:39:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     37 │ let x: number = +1;
     38 │ let x: number = -1;
@@ -707,7 +707,7 @@ invalid.ts:39:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:41:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     39 │ let x: number = 1e-5;
     40 │ let x: RegExp = /a/;
@@ -731,7 +731,7 @@ invalid.ts:41:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:42:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     40 │ let x: RegExp = /a/;
     41 │ let x: string = "str";
@@ -755,7 +755,7 @@ invalid.ts:42:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:43:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     41 │ let x: string = "str";
     42 │ let x: string = `str`;
@@ -779,7 +779,7 @@ invalid.ts:43:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:44:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     42 │ let x: string = `str`;
     43 │ let x: string = `str${f()}`;
@@ -803,7 +803,7 @@ invalid.ts:44:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:45:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     43 │ let x: string = `str${f()}`;
     44 │ let x: number = +"";
@@ -827,7 +827,7 @@ invalid.ts:45:6 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:47:13 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     45 │ let x: boolean = !"";
     46 │ 
@@ -851,7 +851,7 @@ invalid.ts:47:13 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━
 ```
 invalid.ts:50:3 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     49 │ class X {
   > 50 │ 	x: number = 1;
@@ -874,7 +874,7 @@ invalid.ts:50:3 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━�
 ```
 invalid.ts:54:25 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type annotation is trivially inferred from its initialization.
+  i This type annotation is trivially inferred from its initialization.
   
     53 │ class X {
   > 54 │ 	constructor(protected x: number = 1) {}

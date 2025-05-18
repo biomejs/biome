@@ -44,12 +44,12 @@
 //! [WorkspaceError] enum wrapping the underlying issue. Some common errors are:
 //!
 //! - [WorkspaceError::NotFound]: This error is returned when an operation is being
-//!     run on a path that doesn't correspond to any open document: either the
-//!     document has been closed or the client didn't open it in the first place
+//!   run on a path that doesn't correspond to any open document: either the
+//!   document has been closed or the client didn't open it in the first place
 //! - [WorkspaceError::SourceFileNotSupported]: This error is returned when an
-//!     operation could not be completed because the language associated with the
-//!     document does not implement the required capability: for instance trying to
-//!     format a file with a language that does not have a formatter
+//!   operation could not be completed because the language associated with the
+//!   document does not implement the required capability: for instance trying to
+//!   format a file with a language that does not have a formatter
 
 mod client;
 mod document;
@@ -485,6 +485,10 @@ impl FeatureName {
     pub fn insert(&mut self, kind: FeatureKind) {
         self.0.insert(kind);
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 impl From<SmallVec<[FeatureKind; 6]>> for FeatureName {
@@ -888,6 +892,9 @@ pub struct ScanProjectFolderResult {
 
     /// Duration of the scan.
     pub duration: Duration,
+
+    /// A list of child configuration files found inside the project
+    pub configuration_files: Vec<BiomePath>,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]

@@ -155,11 +155,8 @@ impl ScopedResolver {
         let mut i = 0;
         while i < self.modules.len() {
             let module = self.modules[i].clone();
-            let module_id = ModuleId::new(i);
-            for ty in &module.types {
-                // We don't care about the returned type here. Instead, we rely
-                // on the side-effect of registering the resolved imports.
-                let _ = ty.resolved_with_module_id(module_id, self);
+            for resolved_path in module.static_import_paths.values() {
+                self.register_module(resolved_path.clone());
             }
 
             i += 1;
@@ -250,7 +247,13 @@ impl TypeResolver for ScopedResolver {
             TypeResolverLevel::Scope => Some((id, self.get_by_id(id.id())).into()),
             TypeResolverLevel::Module => {
                 let module_id = id.module_id();
-                Some((id, &self.modules[module_id.index()].types[id.index()]).into())
+                let module = &self.modules[module_id.index()];
+                if let Some(ty) = module.types.get(id.index()) {
+                    Some((id, ty).into())
+                } else {
+                    debug_assert!(false, "Invalid type reference: {id:?}");
+                    None
+                }
             }
             TypeResolverLevel::Import => {
                 panic!("import IDs should not be exposed outside the module info collector")

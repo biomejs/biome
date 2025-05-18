@@ -79,7 +79,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoImportCycles {
-        version: "next",
+        version: "2.0.0",
         name: "noImportCycles",
         language: "js",
         sources: &[

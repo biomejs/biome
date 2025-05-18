@@ -31,11 +31,13 @@ const ASTRO_FILE_DEBUGGER_AFTER: &str = r#"---
 
 const ASTRO_FILE_USELESS_RENAME_BEFORE: &str = r#"---
 import {a as a} from 'mod';
+export { a };
 ---
 <div></div>"#;
 
 const ASTRO_FILE_USELESS_RENAME_AFTER: &str = r#"---
 import {a} from 'mod';
+export { a };
 ---
 <div></div>"#;
 

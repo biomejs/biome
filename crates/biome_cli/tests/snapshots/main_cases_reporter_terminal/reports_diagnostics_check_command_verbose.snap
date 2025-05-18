@@ -163,13 +163,14 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
 
 ```block
 The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
-Diagnostics not shown: 44.
+Diagnostics not shown: 60.
 ```
 
 ```block
 Scanned project folder in <TIME>.
 Checked 3 files in <TIME>. No fixes applied.
 Found 49 errors.
+Found 16 warnings.
 ```
 
 ```block

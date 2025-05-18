@@ -130,7 +130,7 @@ impl Visitor for DuplicateHooksVisitor {
                     else if let AnyJsExpression::JsCallExpression(call_expression) = callee {
                         if let Ok(callee) = call_expression.callee() {
                             if matches!(
-                                callee.to_trimmed_string().as_str(),
+                                callee.to_trimmed_text().text(),
                                 "describe.each" | "describe.only.each" | "fdescribe.each"
                             ) {
                                 self.stack.push(HooksContext::default());

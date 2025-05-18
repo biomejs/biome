@@ -1,7 +1,6 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
 expression: empty.json
-snapshot_kind: text
 ---
 # Input
 ```json
@@ -12,102 +11,6 @@ snapshot_kind: text
 ```
 
 # Diagnostics
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useLiteralEnumMembers isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useLiteralEnumMembers":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useNodejsImportProtocol isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useNodejsImportProtocol":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useSelfClosingElements isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useSelfClosingElements":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
 ```
 empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -132,166 +35,6 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"noParameterAssign":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useShorthandFunctionType isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useShorthandFunctionType":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noUselessElse isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"noUselessElse":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useExportType isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useExportType":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useImportType isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useImportType":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noArguments isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"noArguments":·"error"
        8 │ + ······}
        9 │ + ····}
       10 │ + ··}
@@ -335,7 +78,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
 ```
 empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useTemplate isn't recommended anymore.
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -355,7 +98,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        4 │ + ··"linter":·{
        5 │ + ····"rules":·{
        6 │ + ······"style":·{
-       7 │ + ········"useTemplate":·"error"
+       7 │ + ········"useSingleVarDeclarator":·"error"
        8 │ + ······}
        9 │ + ····}
       10 │ + ··}
@@ -367,7 +110,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
 ```
 empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule noNonNullAssertion isn't recommended anymore.
+  ! Biome style rule noUselessElse isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -387,39 +130,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        4 │ + ··"linter":·{
        5 │ + ····"rules":·{
        6 │ + ······"style":·{
-       7 │ + ········"noNonNullAssertion":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useExponentiationOperator isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useExponentiationOperator":·"error"
+       7 │ + ········"noUselessElse":·"error"
        8 │ + ······}
        9 │ + ····}
       10 │ + ··}
@@ -495,102 +206,6 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
 ```
 empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"noUnusedTemplateLiteral":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useSingleVarDeclarator":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useEnumInitializers isn't recommended anymore.
-  
-  > 1 │ {
-      │ ^
-  > 2 │   "formatter": {},
-  > 3 │   "javascript": {}
-  > 4 │ }
-      │ ^
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-    1  1 │   {
-    2  2 │     "formatter": {},
-    3    │ - ··"javascript":·{}
-       3 │ + ··"javascript":·{},
-       4 │ + ··"linter":·{
-       5 │ + ····"rules":·{
-       6 │ + ······"style":·{
-       7 │ + ········"useEnumInitializers":·"error"
-       8 │ + ······}
-       9 │ + ····}
-      10 │ + ··}
-    4 11 │   }
-  
-
-```
-
-```
-empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   ! Biome style rule useConst isn't recommended anymore.
   
   > 1 │ {
@@ -623,7 +238,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
 ```
 empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useNumericLiterals isn't recommended anymore.
+  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -643,7 +258,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        4 │ + ··"linter":·{
        5 │ + ····"rules":·{
        6 │ + ······"style":·{
-       7 │ + ········"useNumericLiterals":·"error"
+       7 │ + ········"noUnusedTemplateLiteral":·"error"
        8 │ + ······}
        9 │ + ····}
       10 │ + ··}
@@ -655,7 +270,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
 ```
 empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule noCommaOperator isn't recommended anymore.
+  ! Biome style rule useSelfClosingElements isn't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -675,7 +290,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        4 │ + ··"linter":·{
        5 │ + ····"rules":·{
        6 │ + ······"style":·{
-       7 │ + ········"noCommaOperator":·"error"
+       7 │ + ········"useSelfClosingElements":·"error"
        8 │ + ······}
        9 │ + ····}
       10 │ + ··}
@@ -708,6 +323,38 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
        5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useAsConstAssertion":·"error"
+       8 │ + ······}
+       9 │ + ····}
+      10 │ + ··}
+    4 11 │   }
+  
+
+```
+
+```
+empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useEnumInitializers isn't recommended anymore.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "formatter": {},
+  > 3 │   "javascript": {}
+  > 4 │ }
+      │ ^
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    1  1 │   {
+    2  2 │     "formatter": {},
+    3    │ - ··"javascript":·{}
+       3 │ + ··"javascript":·{},
+       4 │ + ··"linter":·{
+       5 │ + ····"rules":·{
+       6 │ + ······"style":·{
+       7 │ + ········"useEnumInitializers":·"error"
        8 │ + ······}
        9 │ + ····}
       10 │ + ··}

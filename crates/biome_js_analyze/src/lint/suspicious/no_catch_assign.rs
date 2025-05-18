@@ -41,7 +41,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-ex-assign")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
     }
 }
 

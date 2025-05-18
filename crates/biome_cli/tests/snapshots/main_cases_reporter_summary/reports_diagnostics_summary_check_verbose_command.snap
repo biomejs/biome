@@ -1,0 +1,137 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `index.css`
+
+```css
+
+
+.brokenStyle { color: f( }
+
+.style {
+                color:
+                fakeFunction()
+}
+
+```
+
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger
+debugger
+debugger
+debugger
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+a ==b
+a ==b
+a ==b
+
+debugger
+debugger
+debugger
+debugger
+
+let f;
+let f;
+let f;
+		let f;
+		let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+reporter/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following files have parsing errors.
+  
+  - index.css
+  
+reporter/format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following files needs to be formatted.
+  
+  - index.css
+  - index.ts
+  - main.ts
+  
+reporter/violations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Some lint rules or assist actions reported some violations.
+  
+  Rule Name                                        Diagnostics
+  
+  lint/correctness/noUnknownFunction               14 (2 error(s), 12 warning(s), 0 info(s))
+  lint/suspicious/noImplicitAnyLet                 16 (12 error(s), 4 warning(s), 0 info(s))
+  lint/suspicious/noDoubleEquals                   8 (8 error(s), 0 warning(s), 0 info(s))
+  assist/source/organizeImports                    2 (2 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noRedeclare                      12 (12 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noDebugger                       8 (8 error(s), 0 warning(s), 0 info(s))
+
+```
+
+```block
+ VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Files processed:
+  
+  - index.css
+  - index.ts
+  - main.ts
+  
+
+```
+
+```block
+ VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Files fixed:
+  
+  ! The list is empty.
+  
+
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 3 files in <TIME>. No fixes applied.
+Found 49 errors.
+Found 16 warnings.
+```

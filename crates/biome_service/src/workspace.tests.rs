@@ -267,7 +267,7 @@ fn correctly_pulls_lint_diagnostics() {
     let result = graphql_file.pull_diagnostics(
         RuleCategories::all(),
         vec![RuleSelector::Rule(
-            RuleGroup::Nursery.as_str(),
+            RuleGroup::Style.as_str(),
             "useDeprecatedReason",
         )],
         vec![],

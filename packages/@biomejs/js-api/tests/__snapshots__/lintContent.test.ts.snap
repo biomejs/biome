@@ -2,7 +2,7 @@
 
 exports[`Biome WebAssembly lintContent > fixFileMode is SafeAndUnsafeFixes > should fix the code 1`] = `
 "
-	const b = / {3}/;
+	const _b = / {3}/;
 	"
 `;
 

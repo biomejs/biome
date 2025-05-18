@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseGoogleFontPreconnect {
-        version: "next",
+        version: "2.0.0",
         name: "useGoogleFontPreconnect",
         language: "jsx",
         sources: &[RuleSource::EslintNext("google-font-preconnect")],

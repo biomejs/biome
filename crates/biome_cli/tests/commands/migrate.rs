@@ -1,7 +1,7 @@
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
+use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::Utf8Path;
 
@@ -91,6 +91,36 @@ fn should_emit_incompatible_arguments_error() {
         module_path!(),
         "should_suggest_error_incompatible_arguments",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_migrate_nested_files() {
+    let mut fs = TemporaryFs::new("missing_configuration_file");
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{
+    "organizeImports": {
+        "enabled": true
+    }
+}"#;
+    fs.create_file("biome.json", configuration);
+    fs.create_file("lorem/biome.json", configuration);
+    fs.create_file("ipsum/biome.json", configuration);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["migrate"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_migrate_nested_files",
+        fs.create_mem(),
         console,
         result,
     ));

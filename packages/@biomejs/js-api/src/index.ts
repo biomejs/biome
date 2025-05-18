@@ -280,7 +280,7 @@ export class Biome {
 						shouldFormat: false,
 						only: [],
 						skip: [],
-						ruleCategories: ["syntax", "lint"],
+						ruleCategories: ["syntax", "lint", "action"],
 					});
 
 					code = result.code;
@@ -293,10 +293,10 @@ export class Biome {
 			const { diagnostics } = this.workspace.pullDiagnostics({
 				projectKey,
 				path,
-				categories: ["syntax", "lint"],
+				categories: ["syntax", "lint", "action"],
 				only: [],
 				skip: [],
-				pullCodeActions: true,
+				pullCodeActions: false,
 			});
 
 			return {

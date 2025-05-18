@@ -6,8 +6,8 @@ use tokio::sync::watch;
 use crate::{
     WatcherInstruction,
     workspace::{
-        ChangeFileParams, CloseFileParams, GetFileContentParams, OpenProjectParams,
-        ServiceDataNotification,
+        ChangeFileParams, CloseFileParams, FileContent, GetFileContentParams, OpenFileParams,
+        OpenProjectParams, ServiceDataNotification,
     },
 };
 
@@ -31,13 +31,7 @@ fn close_file_through_watcher_before_client() {
         .expect("can open project");
 
     workspace
-        .open_file_by_scanner(OpenFileParams {
-            project_key,
-            path: BiomePath::new("/project/a.js"),
-            content: FileContent::FromServer,
-            document_file_source: None,
-            persist_node_cache: false,
-        })
+        .open_file_during_initial_scan(project_key, BiomePath::new("/project/a.js"))
         .expect("can open file");
 
     workspace
@@ -114,13 +108,7 @@ fn close_file_from_client_before_watcher() {
         .expect("can also open from client");
 
     workspace
-        .open_file_by_scanner(OpenFileParams {
-            project_key,
-            path: BiomePath::new("/project/a.js"),
-            content: FileContent::FromServer,
-            document_file_source: None,
-            persist_node_cache: false,
-        })
+        .open_file_during_initial_scan(project_key, BiomePath::new("/project/a.js"))
         .expect("can open file");
 
     workspace
@@ -185,13 +173,7 @@ fn close_modified_file_from_client_before_watcher() {
         .expect("can also open from client");
 
     workspace
-        .open_file_by_scanner(OpenFileParams {
-            project_key,
-            path: BiomePath::new("/project/a.js"),
-            content: FileContent::FromServer,
-            document_file_source: None,
-            persist_node_cache: false,
-        })
+        .open_file_during_initial_scan(project_key, BiomePath::new("/project/a.js"))
         .expect("can open file");
 
     workspace

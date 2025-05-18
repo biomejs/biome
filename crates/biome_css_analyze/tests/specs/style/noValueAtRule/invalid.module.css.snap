@@ -1,0 +1,193 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.module.css
+---
+# Input
+```css
+/* css variables */
+@value primary: #BF4040;
+@value secondary: #1F4F7F;
+
+/* breakpoints */
+@value small: (max-width: 599px);
+@value medium: (min-width: 600px) and (max-width: 959px);
+@value large: (min-width: 960px);
+
+/* alias paths for other values or composition */
+@value colors: "./colors.css";
+/* import multiple from a single file */
+@value primary, secondary from colors;
+/* make local aliases to imported values */
+@value small as bp-small, large as bp-large from "./breakpoints.css";
+/* value as selector name */
+@value selectorValue: secondary-color;
+
+```
+
+# Diagnostics
+```
+invalid.module.css:2:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+    1 │ /* css variables */
+  > 2 │ @value primary: #BF4040;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ @value secondary: #1F4F7F;
+    4 │ 
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.module.css:3:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+    1 │ /* css variables */
+    2 │ @value primary: #BF4040;
+  > 3 │ @value secondary: #1F4F7F;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ /* breakpoints */
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.module.css:6:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+    5 │ /* breakpoints */
+  > 6 │ @value small: (max-width: 599px);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ @value medium: (min-width: 600px) and (max-width: 959px);
+    8 │ @value large: (min-width: 960px);
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.module.css:7:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+    5 │ /* breakpoints */
+    6 │ @value small: (max-width: 599px);
+  > 7 │ @value medium: (min-width: 600px) and (max-width: 959px);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ @value large: (min-width: 960px);
+    9 │ 
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.module.css:8:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+     6 │ @value small: (max-width: 599px);
+     7 │ @value medium: (min-width: 600px) and (max-width: 959px);
+   > 8 │ @value large: (min-width: 960px);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ /* alias paths for other values or composition */
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.module.css:11:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+    10 │ /* alias paths for other values or composition */
+  > 11 │ @value colors: "./colors.css";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ /* import multiple from a single file */
+    13 │ @value primary, secondary from colors;
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.module.css:13:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+    11 │ @value colors: "./colors.css";
+    12 │ /* import multiple from a single file */
+  > 13 │ @value primary, secondary from colors;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ /* make local aliases to imported values */
+    15 │ @value small as bp-small, large as bp-large from "./breakpoints.css";
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.module.css:15:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+    13 │ @value primary, secondary from colors;
+    14 │ /* make local aliases to imported values */
+  > 15 │ @value small as bp-small, large as bp-large from "./breakpoints.css";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ /* value as selector name */
+    17 │ @value selectorValue: secondary-color;
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.module.css:17:1 lint/style/noValueAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of @value rule is disallowed
+  
+    15 │ @value small as bp-small, large as bp-large from "./breakpoints.css";
+    16 │ /* value as selector name */
+  > 17 │ @value selectorValue: secondary-color;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+  
+  i Using @value is not recommended, consider using CSS variables instead.
+  
+  i See MDN web docs for more details.
+  
+
+```

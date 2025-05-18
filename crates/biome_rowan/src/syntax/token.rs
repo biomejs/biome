@@ -435,7 +435,7 @@ impl<L: Language> SyntaxToken<L> {
     /// Return whitespace that juxtapose the token until the first non-whitespace item.
     pub fn indentation_trivia_pieces(
         &self,
-    ) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<L>> + use<L> {
+    ) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<L>> + Clone + use<L> {
         let leading_trivia = self.leading_trivia().pieces();
         let skip_count = leading_trivia.len()
             - leading_trivia

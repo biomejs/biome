@@ -50,18 +50,15 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
         })
         .unwrap();
 
-    // FIXME: We should load manifests again in order to actually resolve
-    //        type definitions, but last time we tried we ran into performance
-    //        issues, and a reoccurrence of panics inside `node_semver` (#5829).
-    //let manifest_result = workspace.get_file_content(GetFileContentParams {
-    //    project_key,
-    //    path: BiomePath::new(format!("{fixtures_path}/node_modules/shared/package.json")),
-    //});
-    //
-    //assert!(
-    //    manifest_result.is_ok_and(|result| !result.is_empty()),
-    //    "package.json should be loaded"
-    //);
+    let manifest_result = workspace.get_file_content(GetFileContentParams {
+        project_key,
+        path: BiomePath::new(format!("{fixtures_path}/node_modules/shared/package.json")),
+    });
+
+    assert!(
+        manifest_result.is_ok_and(|result| !result.is_empty()),
+        "package.json should be loaded"
+    );
 
     let d_mts_result = workspace.get_file_content(GetFileContentParams {
         project_key,

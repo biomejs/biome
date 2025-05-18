@@ -8,7 +8,7 @@ use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FileContent, GetFileContentParams,
     OpenFileParams, OpenProjectParams,
 };
-use tower_lsp::lsp_types;
+use tower_lsp_server::lsp_types;
 use tracing::{debug, error, field, info};
 
 /// Handler for `textDocument/didOpen` LSP notification
@@ -16,7 +16,7 @@ use tracing::{debug, error, field, info};
     level = "debug",
     skip_all,
     fields(
-        text_document_uri = display(params.text_document.uri.as_ref()),
+        text_document_uri = display(params.text_document.uri.as_str()),
         text_document_language_id = display(&params.text_document.language_id),
     )
 )]
@@ -68,7 +68,7 @@ pub(crate) async fn did_open(
 }
 
 /// Handler for `textDocument/didChange` LSP notification
-#[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri), version = params.text_document.version), err)]
+#[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri.as_str()), version = params.text_document.version), err)]
 pub(crate) async fn did_change(
     session: &Session,
     params: lsp_types::DidChangeTextDocumentParams,
@@ -83,8 +83,8 @@ pub(crate) async fn did_change(
         project_key: doc.project_key,
         path: path.clone(),
     })?;
-    tracing::debug!("old document: {:?}", old_text);
-    tracing::debug!("content changes: {:?}", params.content_changes);
+    debug!("old document: {:?}", old_text);
+    debug!("content changes: {:?}", params.content_changes);
 
     let text = apply_document_changes(
         session.position_encoding(),
@@ -92,7 +92,7 @@ pub(crate) async fn did_change(
         params.content_changes,
     );
 
-    tracing::debug!("new document: {:?}", text);
+    debug!("new document: {:?}", text);
 
     session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
 
@@ -116,10 +116,10 @@ pub(crate) async fn did_close(
     session: &Session,
     params: lsp_types::DidCloseTextDocumentParams,
 ) -> Result<(), LspError> {
-    let url = params.text_document.uri;
-    let path = session.file_path(&url)?;
-    let Some(project_key) = session.remove_document(&url) else {
-        debug!("Document wasn't open: {url}");
+    let uri = params.text_document.uri;
+    let path = session.file_path(&uri)?;
+    let Some(project_key) = session.remove_document(&uri) else {
+        debug!("Document wasn't open: {}", uri.as_str());
         return Ok(());
     };
 
@@ -129,7 +129,7 @@ pub(crate) async fn did_close(
 
     session
         .client
-        .publish_diagnostics(url, Vec::new(), None)
+        .publish_diagnostics(uri, Vec::new(), None)
         .await;
 
     Ok(())

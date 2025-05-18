@@ -51,7 +51,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-regex-spaces")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

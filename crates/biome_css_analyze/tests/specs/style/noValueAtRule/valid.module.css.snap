@@ -1,0 +1,12 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.module.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+@import "./colors.module.css";
+:root {
+    --main-color: red;
+}
+```

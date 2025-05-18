@@ -1,0 +1,1515 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```cjs
+array[array.length - 1];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length - 1];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-·1];
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+array[array.length -1];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length -1];
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-1];
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+array[array.length - /* comment */ 1];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length - /* comment */ 1];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-·/*·comment·*/·1];
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+array[array.length - 1.];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length - 1.];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-·1.];
+  + array.at(-1.);
+  
+
+```
+
+# Input
+```cjs
+array[array.length - 0b1];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length - 0b1];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-·0b1];
+  + array.at(-0b1);
+  
+
+```
+
+# Input
+```cjs
+array[array.length - 9];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length - 9];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-·9];
+  + array.at(-9);
+  
+
+```
+
+# Input
+```cjs
+array[0][array[0].length - 1];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[0][array[0].length - 1];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[0][array[0].length·-·1];
+  + array[0].at(-1);
+  
+
+```
+
+# Input
+```cjs
+array[(( array.length )) - 1];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[(( array.length )) - 1];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[((·array.length·))·-·1];
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+array[array.length - (( 1 ))];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length - (( 1 ))];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-·((·1·))];
+  + array.at(-((·1·)));
+  
+
+```
+
+# Input
+```cjs
+array[(( array.length - 1 ))];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[(( array.length - 1 ))];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[((·array.length·-·1·))];
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( array ))[array.length - 1];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ (( array ))[array.length - 1];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·array·))[array.length·-·1];
+  + ((·array·)).at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( array[array.length - 1] ));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:4 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ (( array[array.length - 1] ));
+      │    ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·array[array.length·-·1]·));
+  + ((·array.at(-1)·));
+  
+
+```
+
+# Input
+```cjs
+array[array.length - 1].pop().shift()[0];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length - 1].pop().shift()[0];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-·1].pop().shift()[0];
+  + array.at(-1).pop().shift()[0];
+  
+
+```
+
+# Input
+```cjs
+a = array[array.length - 1]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ a = array[array.length - 1]
+      │     ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - a·=·array[array.length·-·1]
+  + a·=·array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+const a = array[array.length - 1]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:11 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ const a = array[array.length - 1]
+      │           ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - const·a·=·array[array.length·-·1]
+  + const·a·=·array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+const {a = array[array.length - 1]} = {}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:12 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ const {a = array[array.length - 1]} = {}
+      │            ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - const·{a·=·array[array.length·-·1]}·=·{}
+  + const·{a·=·array.at(-1)}·=·{}
+  
+
+```
+
+# Input
+```cjs
+typeof array[array.length - 1]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:8 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ typeof array[array.length - 1]
+      │        ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - typeof·array[array.length·-·1]
+  + typeof·array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+function foo() {return arguments[arguments.length - 1]}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:24 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ function foo() {return arguments[arguments.length - 1]}
+      │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - function·foo()·{return·arguments[arguments.length·-·1]}
+  + function·foo()·{return·arguments.at(-1)}
+  
+
+```
+
+# Input
+```cjs
+class Foo {bar; baz() {return this.bar[this.bar.length - 1]}}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:31 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ class Foo {bar; baz() {return this.bar[this.bar.length - 1]}}
+      │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - class·Foo·{bar;·baz()·{return·this.bar[this.bar.length·-·1]}}
+  + class·Foo·{bar;·baz()·{return·this.bar.at(-1)}}
+  
+
+```
+
+# Input
+```cjs
+class Foo {#bar; baz() {return this.#bar[this.#bar.length - 1]}}
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:32 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ class Foo {#bar; baz() {return this.#bar[this.#bar.length - 1]}}
+      │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - class·Foo·{#bar;·baz()·{return·this.#bar[this.#bar.length·-·1]}}
+  + class·Foo·{#bar;·baz()·{return·this.#bar.at(-1)}}
+  
+
+```
+
+# Input
+```cjs
+array[array.length - unknown - 1]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length - unknown - 1]
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-·unknown·-·1]
+  + array.at(unknown·+1)
+  
+
+```
+
+# Input
+```cjs
+array[array.length - (unknown + 1)]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length - (unknown + 1)]
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length·-·(unknown·+·1)]
+  + array.at(-(unknown·+·1))
+  
+
+```
+
+# Input
+```cjs
+string.charAt(string.length - 1);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ string.charAt(string.length - 1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - string.charAt(string.length·-·1);
+  + string.at(-1);
+  
+
+```
+
+# Input
+```cjs
+string.charAt(string.length - 0o11);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ string.charAt(string.length - 0o11);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - string.charAt(string.length·-·0o11);
+  + string.at(-0o11);
+  
+
+```
+
+# Input
+```cjs
+some.string.charAt(some.string.length - 1);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ some.string.charAt(some.string.length - 1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - some.string.charAt(some.string.length·-·1);
+  + some.string.at(-1);
+  
+
+```
+
+# Input
+```cjs
+string.charAt((( string.length )) - 0xFF);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ string.charAt((( string.length )) - 0xFF);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - string.charAt(((·string.length·))·-·0xFF);
+  + string.at(-0xFF);
+  
+
+```
+
+# Input
+```cjs
+string.charAt(string.length - (( 1 )));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ string.charAt(string.length - (( 1 )));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - string.charAt(string.length·-·((·1·)));
+  + string.at(-((·1·)));
+  
+
+```
+
+# Input
+```cjs
+string.charAt((( string.length - 1 )));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ string.charAt((( string.length - 1 )));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - string.charAt(((·string.length·-·1·)));
+  + string.at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( string )).charAt(string.length - 1);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ (( string )).charAt(string.length - 1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·string·)).charAt(string.length·-·1);
+  + string.at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( string.charAt ))(string.length - 1);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ (( string.charAt ))(string.length - 1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·string.charAt·))(string.length·-·1);
+  + string.at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( string.charAt(string.length - 1) ));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:4 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ (( string.charAt(string.length - 1) ));
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·string.charAt(string.length·-·1)·));
+  + ((·string.at(-1)·));
+  
+
+```
+
+# Input
+```cjs
+string.charAt(string.length - unknown - 1 );
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ string.charAt(string.length - unknown - 1 );
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - string.charAt(string.length·-·unknown·-·1·);
+  + string.at(unknown·+1);
+  
+
+```
+
+# Input
+```cjs
+string.charAt(string.length - (unknown + 1));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  > 1 │ string.charAt(string.length - (unknown + 1));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - string.charAt(string.length·-·(unknown·+·1));
+  + string.at(-(unknown·+·1));
+  
+
+```
+
+# Input
+```cjs
+array.slice(0)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(0)[0]
+      │ ^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(0)[0]
+  + array.at(0)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-0)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(-0)[0]
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-0)[0]
+  + array.at(-0)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-1)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(-1)[0]
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-1)[0]
+  + array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-1).pop()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-1) over X.slice(-a).pop().
+  
+  > 1 │ array.slice(-1).pop()
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-1).pop()
+  + array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-1.0).shift()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y).shift().
+  
+  > 1 │ array.slice(-1.0).shift()
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-1.0).shift()
+  + array.at(-1.0)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-9)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(-9)[0]
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-9)[0]
+  + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-9).pop()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-1) over X.slice(-a).pop().
+  
+  > 1 │ array.slice(-9).pop()
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-9).pop()
+  + array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-1.1)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(-1.1)[0]
+      │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-1.1)[0]
+  + array.at(-1.1)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-0xA)[0b000]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(-0xA)[0b000]
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-0xA)[0b000]
+  + array.at(-0xA)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-9).shift()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y).shift().
+  
+  > 1 │ array.slice(-9).shift()
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-9).shift()
+  + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-1)[(( 0 ))];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(-1)[(( 0 ))];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-1)[((·0·))];
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+array.slice(-(( 1 )))[0];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(-(( 1 )))[0];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-((·1·)))[0];
+  + array.at(-((·1·)));
+  
+
+```
+
+# Input
+```cjs
+array.slice((( -1 )))[0];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice((( -1 )))[0];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(((·-1·)))[0];
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( array.slice(-1) ))[0];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ (( array.slice(-1) ))[0];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·array.slice(-1)·))[0];
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( array )).slice(-1)[0];
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ (( array )).slice(-1)[0];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·array·)).slice(-1)[0];
+  + ((·array·)).at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( array.slice(-1)[0] ));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:4 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ (( array.slice(-1)[0] ));
+      │    ^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·array.slice(-1)[0]·));
+  + ((·array.at(-1)·));
+  
+
+```
+
+# Input
+```cjs
+(( array.slice(-1) )).pop();
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-1) over X.slice(-a).pop().
+  
+  > 1 │ (( array.slice(-1) )).pop();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·array.slice(-1)·)).pop();
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( array.slice(-1).pop ))();
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-1) over X.slice(-a).pop().
+  
+  > 1 │ (( array.slice(-1).pop ))();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·array.slice(-1).pop·))();
+  + array.at(-1);
+  
+
+```
+
+# Input
+```cjs
+(( array.slice(-1).pop() ));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:4 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-1) over X.slice(-a).pop().
+  
+  > 1 │ (( array.slice(-1).pop() ));
+      │    ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·array.slice(-1).pop()·));
+  + ((·array.at(-1)·));
+  
+
+```
+
+# Input
+```cjs
+array.slice(-1)[0].pop().shift().slice(-1)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(-1)[0].pop().shift().slice(-1)
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-1)[0].pop().shift().slice(-1)
+  + array.at(-1).pop().shift().slice(-1)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-9, -8)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y, a)[0].
+  
+  > 1 │ array.slice(-9, -8)[0]
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-9,·-8)[0]
+  + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-9, -0o10)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y, a)[0].
+  
+  > 1 │ array.slice(-9, -0o10)[0]
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-9,·-0o10)[0]
+  + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-9, -8).pop()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y - 1) over X.slice(a, Y).pop().
+  
+  > 1 │ array.slice(-9, -8).pop()
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-9,·-8).pop()
+  + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-9, -8).shift()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y, a).shift().
+  
+  > 1 │ array.slice(-9, -8).shift()
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-9,·-8).shift()
+  + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+array.slice((( -9 )), (( -8 )), ).shift()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y, a).shift().
+  
+  > 1 │ array.slice((( -9 )), (( -8 )), ).shift()
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(((·-9·)),·((·-8·)),·).shift()
+  + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+(( array.slice(-9, -8).shift ))()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y, a).shift().
+  
+  > 1 │ (( array.slice(-9, -8).shift ))()
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - ((·array.slice(-9,·-8).shift·))()
+  + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-0o11, -7)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y, a)[0].
+  
+  > 1 │ array.slice(-0o11, -7)[0]
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-0o11,·-7)[0]
+  + array.at(-0o11)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-9, 0)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y, a)[0].
+  
+  > 1 │ array.slice(-9, 0)[0]
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(-9,·0)[0]
+  + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+array.slice(hoge)[0]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  > 1 │ array.slice(hoge)[0]
+      │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(hoge)[0]
+  + array.at(hoge)
+  
+
+```
+
+# Input
+```cjs
+array.slice(hoge).shift()
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(Y) over X.slice(Y).shift().
+  
+  > 1 │ array.slice(hoge).shift()
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array.slice(hoge).shift()
+  + array.at(hoge)
+  
+
+```

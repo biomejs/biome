@@ -1,3 +1,4 @@
+#![expect(clippy::mutable_key_type)]
 use anyhow::{Context, Result, ensure};
 use biome_analyze::ActionCategory;
 use biome_console::fmt::Termcolor;
@@ -18,10 +19,11 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
 use std::ops::{Add, Range};
+use std::str::FromStr;
 use std::{io, mem};
-use tower_lsp::jsonrpc::Error as LspError;
-use tower_lsp::lsp_types;
-use tower_lsp::lsp_types::{self as lsp, CodeDescription, Url};
+use tower_lsp_server::jsonrpc::Error as LspError;
+use tower_lsp_server::lsp_types;
+use tower_lsp_server::lsp_types::{self as lsp, CodeDescription, Uri};
 use tracing::error;
 
 pub(crate) fn text_edit(
@@ -93,7 +95,7 @@ pub(crate) fn text_edit(
 }
 
 pub(crate) fn code_fix_to_lsp(
-    url: &lsp::Url,
+    url: &Uri,
     line_index: &LineIndex,
     position_encoding: PositionEncoding,
     diagnostics: &[lsp::Diagnostic],
@@ -169,7 +171,7 @@ pub(crate) fn code_fix_to_lsp(
 /// expected by LSP.
 pub(crate) fn diagnostic_to_lsp<D: Diagnostic>(
     diagnostic: D,
-    url: &lsp::Url,
+    url: &lsp::Uri,
     line_index: &LineIndex,
     position_encoding: PositionEncoding,
     offset: Option<u32>,
@@ -203,7 +205,7 @@ pub(crate) fn diagnostic_to_lsp<D: Diagnostic>(
         .category()
         .and_then(|category| category.link())
         .and_then(|link| {
-            let href = Url::parse(link).ok()?;
+            let href = Uri::from_str(link).ok()?;
             Some(CodeDescription { href })
         });
 
@@ -255,7 +257,7 @@ pub(crate) fn diagnostic_to_lsp<D: Diagnostic>(
 }
 
 struct RelatedInformationVisitor<'a> {
-    url: &'a lsp::Url,
+    url: &'a lsp::Uri,
     line_index: &'a LineIndex,
     position_encoding: PositionEncoding,
     related_information: &'a mut Option<Vec<lsp::DiagnosticRelatedInformation>>,
@@ -415,8 +417,8 @@ mod tests {
     use biome_lsp_converters::line_index::LineIndex;
     use biome_lsp_converters::{PositionEncoding, WideEncoding};
     use biome_text_edit::TextEdit;
-    use tower_lsp::lsp_types as lsp;
-    use tower_lsp::lsp_types::{Position, Range, TextDocumentContentChangeEvent};
+    use tower_lsp_server::lsp_types as lsp;
+    use tower_lsp_server::lsp_types::{Position, Range, TextDocumentContentChangeEvent};
 
     #[test]
     fn test_diff_1() {

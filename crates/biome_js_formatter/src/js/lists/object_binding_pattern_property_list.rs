@@ -14,7 +14,7 @@ impl FormatRule<JsObjectBindingPatternPropertyList> for FormatJsObjectBindingPat
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
         // The trailing separator is disallowed after a rest element
-        let has_trailing_rest = match node.into_iter().last() {
+        let has_trailing_rest = match node.into_iter().next_back() {
             Some(elem) => matches!(
                 elem?,
                 AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(_)

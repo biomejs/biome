@@ -4,6 +4,7 @@ use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsCallExpression,
@@ -38,7 +39,8 @@ declare_lint_rule! {
         name: "noConstantMathMinMaxClamp",
         language: "js",
         sources: &[RuleSource::Clippy("min_max")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -94,7 +96,7 @@ impl Rule for NoConstantMathMinMaxClamp {
             ).detail(
                 state.0.range(),
                 markup! {
-                    "It always evaluates to "<Emphasis>{state.0.to_trimmed_string()}</Emphasis>"."
+                    "It always evaluates to "<Emphasis>{state.0.to_trimmed_text().text()}</Emphasis>"."
                 }
             )
         )
@@ -109,7 +111,7 @@ impl Rule for NoConstantMathMinMaxClamp {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! {"Swap "<Emphasis>{state.0.to_trimmed_string()}</Emphasis>" with "<Emphasis>{state.1.to_trimmed_string()}</Emphasis>"."}
+            markup! {"Swap "<Emphasis>{state.0.to_trimmed_text().text()}</Emphasis>" with "<Emphasis>{state.1.to_trimmed_text().text()}</Emphasis>"."}
             .to_owned(),
             mutation,
         ))

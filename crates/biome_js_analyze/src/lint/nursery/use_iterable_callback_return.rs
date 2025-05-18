@@ -19,7 +19,11 @@ use std::sync::LazyLock;
 declare_lint_rule! {
     /// Enforce consistent return values in iterable callbacks.
     ///
-    /// This rule ensures that callbacks passed to certain iterable methods either always return a value or never return a value, depending on the method's requirements.
+    /// This rule ensures that callbacks passed to certain iterable methods either always return a
+    /// value or never return a value, depending on the method's requirements.
+    ///
+    /// Note that async and generator callbacks are ignored as they always return `Promise` or
+    /// `Generator` respectively.
     ///
     /// ## Methods and Their Requirements
     ///
@@ -40,7 +44,7 @@ declare_lint_rule! {
     /// - `toSorted`
     /// — `from` (when called on `Array`)
     ///
-    /// A return value is disallowed in the  method `forEach`.
+    /// A return value is disallowed in the method `forEach`.
     ///
     /// ## Examples
     ///
@@ -72,7 +76,7 @@ declare_lint_rule! {
     /// });
     /// ```
     pub UseIterableCallbackReturn {
-        version: "next",
+        version: "2.0.0",
         name: "useIterableCallbackReturn",
         language: "js",
         sources: &[RuleSource::Eslint("array-callback-return")],
@@ -90,9 +94,17 @@ impl Rule for UseIterableCallbackReturn {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();
 
-        if !JsFunctionExpression::can_cast(cfg.node.kind())
-            && !JsArrowFunctionExpression::can_cast(cfg.node.kind())
-        {
+        if let Some(function) = JsFunctionExpression::cast_ref(&cfg.node) {
+            // Async and generator function callbacks are ignored.
+            if function.async_token().is_some() || function.star_token().is_some() {
+                return None;
+            }
+        } else if let Some(function) = JsArrowFunctionExpression::cast_ref(&cfg.node) {
+            // Async arrow callbacks are ignored.
+            if function.async_token().is_some() {
+                return None;
+            }
+        } else {
             return None;
         }
 

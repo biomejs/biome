@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 a { transform: translate(1px); }
 a { transform: TRANSLATE(1px); }
 a { transform: --custom-function(1px); }

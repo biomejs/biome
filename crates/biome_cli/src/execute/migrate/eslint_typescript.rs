@@ -7,7 +7,7 @@ use biome_deserialize::Deserializable;
 use biome_deserialize_macros::Deserializable;
 use biome_js_analyze::{
     lint::{
-        nursery::use_consistent_member_accessibility,
+        style::use_consistent_member_accessibility,
         style::{use_consistent_array_type, use_import_type, use_naming_convention},
     },
     utils::restricted_regex::RestrictedRegex,
@@ -256,10 +256,7 @@ impl NamingConventionSelection {
             .unwrap_or_default();
         for selector in self.selector.iter() {
             match selector {
-                Selector::AutoAccessor => {
-                    // currently unsupported by Biome
-                    continue;
-                }
+                Selector::AutoAccessor => {} // currently unsupported by Biome
                 Selector::Class => {
                     result.push(use_naming_convention::Selector {
                         kind: use_naming_convention::Kind::Class,

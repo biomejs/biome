@@ -11,11 +11,11 @@ use biome_rowan::TextRange;
 /// ## Parse Rule conventions
 ///
 /// * A parse rule must return [ParsedSyntax::Present] if it is able to parse a node or at least parts of it. For example,
-///     the `parse_for_statement` should return [ParsedSyntax::Present] for `for (` even tough many of the required children are missing
-///     because it is still able to parse parts of the for statement.
+///   the `parse_for_statement` should return [ParsedSyntax::Present] for `for (` even tough many of the required children are missing
+///   because it is still able to parse parts of the for statement.
 /// * A parse rule must return [ParsedSyntax::Absent] if the expected node isn't present in the source code.
-///     In most cases, this means if the first expected token isn't present, for example,
-///     if the `for` keyword isn't present when parsing a for statement.
+///   In most cases, this means if the first expected token isn't present, for example,
+///   if the `for` keyword isn't present when parsing a for statement.
 ///
 /// However, it can be possible for rules to recover even if the first token doesn't match. One example
 /// is when parsing an assignment target that has an optional default. The rule can recover even

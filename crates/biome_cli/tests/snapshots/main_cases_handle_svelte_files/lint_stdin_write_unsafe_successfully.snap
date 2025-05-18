@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 # Input messages
 
@@ -16,7 +15,7 @@ var foo: string = "";
 
 ```block
 <script context="module" lang="ts">
-var foo: string = "";
+var _foo: string = "";
 </script>
 <div></div>
 ```

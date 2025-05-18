@@ -21,13 +21,7 @@ expression: redactor(content)
       "!**/*.css"
     ]
   },
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "formatter": {
     "enabled": true,
     "indentStyle": "space"
@@ -66,24 +60,14 @@ expression: redactor(content)
         "noUnusedTemplateLiteral": "off",
         "noNonNullAssertion": "off",
         "noUselessElse": "off",
-        "useLiteralEnumMembers": "error",
-        "noCommaOperator": "error",
-        "useNodejsImportProtocol": "error",
         "useAsConstAssertion": "error",
-        "useNumericLiterals": "error",
+        "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
         "useSelfClosingElements": "error",
         "useConst": "error",
         "useSingleVarDeclarator": "error",
         "useNumberNamespace": "error",
-        "noInferrableTypes": "error",
-        "useExponentiationOperator": "error",
-        "useTemplate": "error",
-        "useDefaultParameterLast": "error",
-        "noArguments": "error",
-        "useImportType": "error",
-        "useExportType": "error",
-        "useShorthandFunctionType": "error"
+        "noInferrableTypes": "error"
       }
     }
   }
@@ -93,5 +77,5 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-The configuration biome.json has been successfully migrated.
+Your configuration file(s) have been successfully migrated.
 ```

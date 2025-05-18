@@ -95,7 +95,7 @@ impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
 /// we have:
 /// - Syntax Phase: No services are offered, thus its rules can be run immediately;
 /// - Semantic Phase: Offers the semantic model, thus these rules can only run
-///     after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
+///   after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
 pub struct RuleRegistry<L: Language> {
     /// Holds a collection of rules for each phase.
     phase_rules: [PhaseRules<L>; 2],
@@ -407,6 +407,7 @@ impl<L: Language + Default> RegistryRule<L> {
             let preferred_quote = params.options.preferred_quote();
             let preferred_jsx_quote = params.options.preferred_jsx_quote();
             let jsx_runtime = params.options.jsx_runtime();
+            let css_modules = params.options.css_modules();
             let options = params.options.rule_options::<R>().unwrap_or_default();
             let ctx = RuleContext::new(
                 &query_result,
@@ -418,6 +419,7 @@ impl<L: Language + Default> RegistryRule<L> {
                 preferred_quote,
                 preferred_jsx_quote,
                 jsx_runtime,
+                css_modules,
             )?;
 
             for result in R::run(&ctx) {

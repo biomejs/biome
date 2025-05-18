@@ -4,6 +4,7 @@ expression: valid.css
 ---
 # Input
 ```css
+/* should not generate diagnostics */
 a { line-height: 1; }
 a { color: #000; }
 a { font-size: 100%; }

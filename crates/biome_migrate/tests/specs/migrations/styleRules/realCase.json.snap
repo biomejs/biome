@@ -1,7 +1,6 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
 expression: realCase.json
-snapshot_kind: text
 ---
 # Input
 ```json
@@ -30,7 +29,7 @@ snapshot_kind: text
 ```
 realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useLiteralEnumMembers isn't recommended anymore.
+  ! Biome style rule noParameterAssign isn't recommended anymore.
   
    > 1 │ {
        │ ^
@@ -52,71 +51,7 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
     10 10 │           "noNonNullAssertion": "off",
     11    │ - ········"useNodejsImportProtocol":·"error"
        11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useLiteralEnumMembers":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useAsConstAssertion isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useAsConstAssertion":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useConst isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useConst":·"error"
+       12 │ + ········"noParameterAssign":·"error"
     12 13 │         },
     13 14 │         "suspicious": {
   
@@ -158,7 +93,7 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
 ```
 realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useShorthandFunctionType isn't recommended anymore.
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
   
    > 1 │ {
        │ ^
@@ -180,7 +115,7 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
     10 10 │           "noNonNullAssertion": "off",
     11    │ - ········"useNodejsImportProtocol":·"error"
        11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useShorthandFunctionType":·"error"
+       12 │ + ········"useSingleVarDeclarator":·"error"
     12 13 │         },
     13 14 │         "suspicious": {
   
@@ -213,198 +148,6 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
     11    │ - ········"useNodejsImportProtocol":·"error"
        11 │ + ········"useNodejsImportProtocol":·"error",
        12 │ + ········"noUselessElse":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useExportType isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useExportType":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useImportType isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useImportType":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noParameterAssign isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"noParameterAssign":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noArguments isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"noArguments":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useTemplate isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useTemplate":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useExponentiationOperator isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useExponentiationOperator":·"error"
     12 13 │         },
     13 14 │         "suspicious": {
   
@@ -478,6 +221,38 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
 ```
 realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Biome style rule useConst isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "enabled": true,
+   > 4 │     "rules": {
+        ...
+  > 16 │     }
+  > 17 │   }
+  > 18 │ }
+       │ ^
+    19 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     9  9 │         "style": {
+    10 10 │           "noNonNullAssertion": "off",
+    11    │ - ········"useNodejsImportProtocol":·"error"
+       11 │ + ········"useNodejsImportProtocol":·"error",
+       12 │ + ········"useConst":·"error"
+    12 13 │         },
+    13 14 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
   
    > 1 │ {
@@ -542,7 +317,7 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
 ```
 realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  ! Biome style rule useAsConstAssertion isn't recommended anymore.
   
    > 1 │ {
        │ ^
@@ -564,7 +339,7 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
     10 10 │           "noNonNullAssertion": "off",
     11    │ - ········"useNodejsImportProtocol":·"error"
        11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useSingleVarDeclarator":·"error"
+       12 │ + ········"useAsConstAssertion":·"error"
     12 13 │         },
     13 14 │         "suspicious": {
   
@@ -597,70 +372,6 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
     11    │ - ········"useNodejsImportProtocol":·"error"
        11 │ + ········"useNodejsImportProtocol":·"error",
        12 │ + ········"useEnumInitializers":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule noCommaOperator isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"noCommaOperator":·"error"
-    12 13 │         },
-    13 14 │         "suspicious": {
-  
-
-```
-
-```
-realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Biome style rule useNumericLiterals isn't recommended anymore.
-  
-   > 1 │ {
-       │ ^
-   > 2 │   "linter": {
-   > 3 │     "enabled": true,
-   > 4 │     "rules": {
-        ...
-  > 16 │     }
-  > 17 │   }
-  > 18 │ }
-       │ ^
-    19 │ 
-  
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
-  
-  i Safe fix: Update the configuration to enable these rules.
-  
-     9  9 │         "style": {
-    10 10 │           "noNonNullAssertion": "off",
-    11    │ - ········"useNodejsImportProtocol":·"error"
-       11 │ + ········"useNodejsImportProtocol":·"error",
-       12 │ + ········"useNumericLiterals":·"error"
     12 13 │         },
     13 14 │         "suspicious": {
   

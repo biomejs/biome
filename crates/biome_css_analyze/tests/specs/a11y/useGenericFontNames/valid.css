@@ -1,3 +1,4 @@
+/* should not generate diagnostics */
 a { font-family: "Lucida Grande", "Arial", sans-serif; }
 a { font: 1em "Lucida Grande", 'Arial', sans-serif; }
 a { font: 1em "Lucida Grande", 'Arial', "sans-serif", sans-serif; }

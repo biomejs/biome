@@ -71,27 +71,57 @@ impl YamlBlockMapExplicitEntryBuilder {
 }
 pub fn yaml_block_map_explicit_key(
     question_mark_token: SyntaxToken,
-    key: AnyYamlIndentedBlock,
-) -> YamlBlockMapExplicitKey {
-    YamlBlockMapExplicitKey::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_KEY,
-        [
-            Some(SyntaxElement::Token(question_mark_token)),
-            Some(SyntaxElement::Node(key.into_syntax())),
-        ],
-    ))
+) -> YamlBlockMapExplicitKeyBuilder {
+    YamlBlockMapExplicitKeyBuilder {
+        question_mark_token,
+        key: None,
+    }
 }
-pub fn yaml_block_map_explicit_value(
+pub struct YamlBlockMapExplicitKeyBuilder {
+    question_mark_token: SyntaxToken,
+    key: Option<AnyYamlBlockIndented>,
+}
+impl YamlBlockMapExplicitKeyBuilder {
+    pub fn with_key(mut self, key: AnyYamlBlockIndented) -> Self {
+        self.key = Some(key);
+        self
+    }
+    pub fn build(self) -> YamlBlockMapExplicitKey {
+        YamlBlockMapExplicitKey::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_KEY,
+            [
+                Some(SyntaxElement::Token(self.question_mark_token)),
+                self.key
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn yaml_block_map_explicit_value(colon_token: SyntaxToken) -> YamlBlockMapExplicitValueBuilder {
+    YamlBlockMapExplicitValueBuilder {
+        colon_token,
+        value: None,
+    }
+}
+pub struct YamlBlockMapExplicitValueBuilder {
     colon_token: SyntaxToken,
-    value: AnyYamlIndentedBlock,
-) -> YamlBlockMapExplicitValue {
-    YamlBlockMapExplicitValue::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_VALUE,
-        [
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
+    value: Option<AnyYamlBlockIndented>,
+}
+impl YamlBlockMapExplicitValueBuilder {
+    pub fn with_value(mut self, value: AnyYamlBlockIndented) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> YamlBlockMapExplicitValue {
+        YamlBlockMapExplicitValue::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_VALUE,
+            [
+                Some(SyntaxElement::Token(self.colon_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn yaml_block_map_implicit_entry(
     value: YamlBlockMapImplicitValue,
@@ -118,34 +148,56 @@ impl YamlBlockMapImplicitEntryBuilder {
         ))
     }
 }
-pub fn yaml_block_map_implicit_value(
-    colon_token: SyntaxToken,
-    value: AnyYamlNode,
-) -> YamlBlockMapImplicitValue {
-    YamlBlockMapImplicitValue::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_VALUE,
-        [
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
+pub fn yaml_block_map_implicit_value(colon_token: SyntaxToken) -> YamlBlockMapImplicitValueBuilder {
+    YamlBlockMapImplicitValueBuilder {
+        colon_token,
+        value: None,
+        newline_token: None,
+    }
 }
-pub fn yaml_block_mapping(
-    indent_token: SyntaxToken,
-    entries: YamlBlockMapEntryList,
-) -> YamlBlockMappingBuilder {
+pub struct YamlBlockMapImplicitValueBuilder {
+    colon_token: SyntaxToken,
+    value: Option<AnyYamlBlockNode>,
+    newline_token: Option<SyntaxToken>,
+}
+impl YamlBlockMapImplicitValueBuilder {
+    pub fn with_value(mut self, value: AnyYamlBlockNode) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn with_newline_token(mut self, newline_token: SyntaxToken) -> Self {
+        self.newline_token = Some(newline_token);
+        self
+    }
+    pub fn build(self) -> YamlBlockMapImplicitValue {
+        YamlBlockMapImplicitValue::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_VALUE,
+            [
+                Some(SyntaxElement::Token(self.colon_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.newline_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn yaml_block_mapping(entries: YamlBlockMapEntryList) -> YamlBlockMappingBuilder {
     YamlBlockMappingBuilder {
-        indent_token,
         entries,
+        indent_token: None,
         dedent_token: None,
     }
 }
 pub struct YamlBlockMappingBuilder {
-    indent_token: SyntaxToken,
     entries: YamlBlockMapEntryList,
+    indent_token: Option<SyntaxToken>,
     dedent_token: Option<SyntaxToken>,
 }
 impl YamlBlockMappingBuilder {
+    pub fn with_indent_token(mut self, indent_token: SyntaxToken) -> Self {
+        self.indent_token = Some(indent_token);
+        self
+    }
     pub fn with_dedent_token(mut self, dedent_token: SyntaxToken) -> Self {
         self.dedent_token = Some(dedent_token);
         self
@@ -154,7 +206,7 @@ impl YamlBlockMappingBuilder {
         YamlBlockMapping::unwrap_cast(SyntaxNode::new_detached(
             YamlSyntaxKind::YAML_BLOCK_MAPPING,
             [
-                Some(SyntaxElement::Token(self.indent_token)),
+                self.indent_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.entries.into_syntax())),
                 self.dedent_token.map(|token| SyntaxElement::Token(token)),
             ],
@@ -219,17 +271,31 @@ impl YamlBlockSequenceBuilder {
         ))
     }
 }
-pub fn yaml_block_sequence_entry(
+pub fn yaml_block_sequence_entry(minus_token: SyntaxToken) -> YamlBlockSequenceEntryBuilder {
+    YamlBlockSequenceEntryBuilder {
+        minus_token,
+        value: None,
+    }
+}
+pub struct YamlBlockSequenceEntryBuilder {
     minus_token: SyntaxToken,
-    value: AnyYamlIndentedBlock,
-) -> YamlBlockSequenceEntry {
-    YamlBlockSequenceEntry::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY,
-        [
-            Some(SyntaxElement::Token(minus_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
+    value: Option<AnyYamlBlockIndented>,
+}
+impl YamlBlockSequenceEntryBuilder {
+    pub fn with_value(mut self, value: AnyYamlBlockIndented) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> YamlBlockSequenceEntry {
+        YamlBlockSequenceEntry::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY,
+            [
+                Some(SyntaxElement::Token(self.minus_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn yaml_compact_mapping(entries: YamlBlockSequenceEntryList) -> YamlCompactMapping {
     YamlCompactMapping::unwrap_cast(SyntaxNode::new_detached(
@@ -249,20 +315,20 @@ pub fn yaml_directive(value_token: SyntaxToken) -> YamlDirective {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn yaml_document(directives: YamlDirectiveList, node: AnyYamlNode) -> YamlDocumentBuilder {
+pub fn yaml_document(directives: YamlDirectiveList) -> YamlDocumentBuilder {
     YamlDocumentBuilder {
         directives,
-        node,
         bom_token: None,
         dashdashdash_token: None,
+        node: None,
         dotdotdot_token: None,
     }
 }
 pub struct YamlDocumentBuilder {
     directives: YamlDirectiveList,
-    node: AnyYamlNode,
     bom_token: Option<SyntaxToken>,
     dashdashdash_token: Option<SyntaxToken>,
+    node: Option<AnyYamlBlockNode>,
     dotdotdot_token: Option<SyntaxToken>,
 }
 impl YamlDocumentBuilder {
@@ -272,6 +338,10 @@ impl YamlDocumentBuilder {
     }
     pub fn with_dashdashdash_token(mut self, dashdashdash_token: SyntaxToken) -> Self {
         self.dashdashdash_token = Some(dashdashdash_token);
+        self
+    }
+    pub fn with_node(mut self, node: AnyYamlBlockNode) -> Self {
+        self.node = Some(node);
         self
     }
     pub fn with_dotdotdot_token(mut self, dotdotdot_token: SyntaxToken) -> Self {
@@ -286,7 +356,8 @@ impl YamlDocumentBuilder {
                 Some(SyntaxElement::Node(self.directives.into_syntax())),
                 self.dashdashdash_token
                     .map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.node.into_syntax())),
+                self.node
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.dotdotdot_token
                     .map(|token| SyntaxElement::Token(token)),
             ],
@@ -298,6 +369,31 @@ pub fn yaml_double_quoted_scalar(value_token: SyntaxToken) -> YamlDoubleQuotedSc
         YamlSyntaxKind::YAML_DOUBLE_QUOTED_SCALAR,
         [Some(SyntaxElement::Token(value_token))],
     ))
+}
+pub fn yaml_flow_in_block_node(flow: AnyYamlFlowNode) -> YamlFlowInBlockNodeBuilder {
+    YamlFlowInBlockNodeBuilder {
+        flow,
+        newline_token: None,
+    }
+}
+pub struct YamlFlowInBlockNodeBuilder {
+    flow: AnyYamlFlowNode,
+    newline_token: Option<SyntaxToken>,
+}
+impl YamlFlowInBlockNodeBuilder {
+    pub fn with_newline_token(mut self, newline_token: SyntaxToken) -> Self {
+        self.newline_token = Some(newline_token);
+        self
+    }
+    pub fn build(self) -> YamlFlowInBlockNode {
+        YamlFlowInBlockNode::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_FLOW_IN_BLOCK_NODE,
+            [
+                Some(SyntaxElement::Node(self.flow.into_syntax())),
+                self.newline_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn yaml_flow_json_node() -> YamlFlowJsonNodeBuilder {
     YamlFlowJsonNodeBuilder {
@@ -633,13 +729,23 @@ where
 {
     YamlBogus::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_BOGUS, slots))
 }
-pub fn yaml_bogus_node<I>(slots: I) -> YamlBogusNode
+pub fn yaml_bogus_block_map_entry<I>(slots: I) -> YamlBogusBlockMapEntry
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
     I::IntoIter: ExactSizeIterator,
 {
-    YamlBogusNode::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_BOGUS_NODE,
+    YamlBogusBlockMapEntry::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_BOGUS_BLOCK_MAP_ENTRY,
+        slots,
+    ))
+}
+pub fn yaml_bogus_block_node<I>(slots: I) -> YamlBogusBlockNode
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    YamlBogusBlockNode::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_BOGUS_BLOCK_NODE,
         slots,
     ))
 }

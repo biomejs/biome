@@ -3,10 +3,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{Applicability, category};
-use biome_json_factory::make::{
-    json_member, json_member_list, json_member_name, json_object_value, json_string_literal,
-    json_string_value, token,
-};
+use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonRoot, T};
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 
@@ -19,52 +16,52 @@ declare_migration! {
 
 impl Rule for OrganizeImports {
     type Query = Ast<JsonRoot>;
-    type State = (JsonMember, bool);
-    type Signals = Option<Self::State>;
+    type State = JsonMember;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-
-        let list = node
-            .value()
-            .ok()?
-            .as_json_object_value()?
-            .json_member_list();
-
-        for list_item in list.into_iter().flatten() {
-            let name = list_item.name().ok()?;
-            let text = name.inner_string_text().ok()?;
-
-            if text.text() == "organizeImports" {
-                if let Some(object) = list_item.value().ok()?.as_json_object_value() {
-                    for member_item in object.json_member_list().into_iter().flatten() {
-                        let name = member_item.name().ok()?;
-                        let name = name.inner_string_text().ok()?;
-                        if name.text() == "enabled" {
-                            let value = member_item
-                                .value()
-                                .ok()?
-                                .as_json_boolean_value()?
-                                .value_token()
-                                .ok()?;
-                            if value.text() == "false" {
-                                return Some((list_item, false));
+        let Ok(AnyJsonValue::JsonObjectValue(root)) = node.value() else {
+            return Box::default();
+        };
+        let mut result = Vec::new();
+        for member in root.json_member_list().into_iter().flatten() {
+            let Ok(name) = member.name().and_then(|n| n.inner_string_text()) else {
+                continue;
+            };
+            match name.text() {
+                "organizeImports" => {
+                    result.push(member);
+                }
+                "overrides" => {
+                    let Ok(AnyJsonValue::JsonArrayValue(overrides)) = member.value() else {
+                        continue;
+                    };
+                    for override_item in overrides.elements() {
+                        let Ok(AnyJsonValue::JsonObjectValue(override_item)) = override_item else {
+                            continue;
+                        };
+                        for member in override_item.json_member_list().into_iter().flatten() {
+                            let Ok(name) = member.name().and_then(|n| n.inner_string_text()) else {
+                                continue;
+                            };
+                            if name.text() == "organizeImports" {
+                                result.push(member);
                             }
                         }
                     }
                 }
-                return Some((list_item, true));
+                _ => {}
             }
         }
-
-        None
+        result.into()
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, (member, _): &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, member: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             category!("migrate"),
-            member.range(),
+            member.name().ok()?.range(),
             markup! {
                 "The "<Emphasis>"organizeImports"</Emphasis>" configuration has been moved."
             }
@@ -74,70 +71,53 @@ impl Rule for OrganizeImports {
         }))
     }
 
-    fn action(ctx: &RuleContext<Self>, (member, enabled): &Self::State) -> Option<MigrationAction> {
-        let mut mutation = ctx.root().begin();
-        let string_literal = if *enabled {
-            json_string_literal("on")
-        } else {
-            json_string_literal("off")
-        };
-        let action_member = json_member(
-            json_member_name(
-                json_string_literal("organizeImports").with_leading_trivia(vec![
-                    (TriviaPieceKind::Newline, "\n"),
-                    (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
-                ]),
+    fn action(ctx: &RuleContext<Self>, member: &Self::State) -> Option<MigrationAction> {
+        let is_enabled = is_organize_imports_enabled(member);
+        let on_or_off = if is_enabled { "on" } else { "off" };
+        let indent = member.syntax().first_token()?.indentation_trivia_pieces();
+
+        let action_member = make::json_member(
+            make::json_member_name(make::json_string_literal("organizeImports")),
+            make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::json_string_value(
+                make::json_string_literal(on_or_off)
+                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            )
+            .into(),
+        );
+        let source_member = make::json_member(
+            make::json_member_name(make::json_string_literal("source")),
+            make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::json_object_value(
+                make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::json_member_list([action_member], []),
+                make::token(T!['}']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            )
+            .into(),
+        );
+        let actions_member = make::json_member(
+            make::json_member_name(make::json_string_literal("actions")),
+            make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::json_object_value(
+                make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::json_member_list([source_member], []),
+                make::token(T!['}']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            )
+            .into(),
+        );
+        let assist_member = make::json_member(
+            make::json_member_name(
+                make::json_string_literal("assist").prepend_trivia_pieces(indent.clone()),
             ),
-            token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-            AnyJsonValue::JsonStringValue(json_string_value(string_literal)),
-        );
-        let source_member = json_member(
-            json_member_name(json_string_literal("source").with_leading_trivia(vec![
-                (TriviaPieceKind::Newline, "\n"),
-                (TriviaPieceKind::Whitespace, " ".repeat(6).as_str()),
-            ])),
-            token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-            AnyJsonValue::JsonObjectValue(json_object_value(
-                token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-                json_member_list(vec![action_member], vec![]),
-                token(T!['}']).with_leading_trivia(vec![
-                    (TriviaPieceKind::Newline, "\n"),
-                    (TriviaPieceKind::Whitespace, " ".repeat(6).as_str()),
-                ]),
+            make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            AnyJsonValue::JsonObjectValue(make::json_object_value(
+                make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::json_member_list([actions_member], []),
+                make::token(T!['}']),
             )),
         );
 
-        let actions_member = json_member(
-            json_member_name(json_string_literal("actions").with_leading_trivia(vec![
-                (TriviaPieceKind::Newline, "\n"),
-                (TriviaPieceKind::Whitespace, " ".repeat(4).as_str()),
-            ])),
-            token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-            AnyJsonValue::JsonObjectValue(json_object_value(
-                token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-                json_member_list(vec![source_member], vec![]),
-                token(T!['}']).with_leading_trivia(vec![
-                    (TriviaPieceKind::Newline, "\n"),
-                    (TriviaPieceKind::Whitespace, " ".repeat(4).as_str()),
-                ]),
-            )),
-        );
-        let assist_member = json_member(
-            json_member_name(json_string_literal("assist").with_leading_trivia(vec![
-                (TriviaPieceKind::Newline, "\n"),
-                (TriviaPieceKind::Whitespace, " ".repeat(2).as_str()),
-            ])),
-            token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-            AnyJsonValue::JsonObjectValue(json_object_value(
-                token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-                json_member_list(vec![actions_member], vec![]),
-                token(T!['}']).with_leading_trivia(vec![
-                    (TriviaPieceKind::Newline, "\n"),
-                    (TriviaPieceKind::Whitespace, " ".repeat(2).as_str()),
-                ]),
-            )),
-        );
-
+        let mut mutation = ctx.root().begin();
         mutation.replace_node(member.clone(), assist_member);
 
         Some(RuleAction::new(
@@ -150,4 +130,23 @@ impl Rule for OrganizeImports {
             mutation,
         ))
     }
+}
+
+fn is_organize_imports_enabled(organize_imports_member: &JsonMember) -> bool {
+    if let Ok(AnyJsonValue::JsonObjectValue(object)) = organize_imports_member.value() {
+        for member_val in object.json_member_list().into_iter().flatten() {
+            if member_val
+                .name()
+                .and_then(|val| val.inner_string_text())
+                .is_ok_and(|val| val.text() == "enabled")
+            {
+                if let Ok(AnyJsonValue::JsonBooleanValue(enabled)) = member_val.value() {
+                    if let Ok(enabled) = enabled.value_token() {
+                        return enabled.text_trimmed() != "false";
+                    }
+                }
+            }
+        }
+    }
+    true
 }

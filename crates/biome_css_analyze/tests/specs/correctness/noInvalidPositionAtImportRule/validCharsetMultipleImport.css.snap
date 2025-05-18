@@ -4,6 +4,7 @@ expression: validCharsetMultipleImport.css
 ---
 # Input
 ```css
+/* should not generate diagnostics */
 @charset "utf-8";
 @imPORT 'foo.css';
 @import 'bar.css';

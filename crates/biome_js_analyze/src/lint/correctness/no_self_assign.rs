@@ -375,7 +375,6 @@ impl Iterator for SameIdentifiers {
                     // we still have assignments-like to complete, so we continue the loop
                     if let Some(pair) = self.assignment_queue.pop_front() {
                         self.current_assignment_like = pair;
-                        continue;
                     }
                     // the queue is empty
                     else {
@@ -394,7 +393,6 @@ impl Iterator for SameIdentifiers {
                     self.assignment_queue
                         .push_back(self.current_assignment_like.clone());
                     self.current_assignment_like = new_assignment_like;
-                    continue;
                 }
             }
         }

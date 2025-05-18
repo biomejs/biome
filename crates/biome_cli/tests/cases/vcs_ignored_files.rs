@@ -135,8 +135,6 @@ file2.js
         ),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ignore_vcs_ignored_file_via_cli",

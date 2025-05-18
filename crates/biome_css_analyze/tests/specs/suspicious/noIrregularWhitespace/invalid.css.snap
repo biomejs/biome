@@ -1,0 +1,411 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* \u{b}    */
+@import 'a.css';
+/* \u{c}    */
+@layermodule, state;
+/* \u{feff} */
+.firstClass﻿.secondClass {
+	padding: 10px;
+}
+/* \u{a0}   */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{1680} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2000} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2001} */
+.firstClass .secondClass {
+	flex: 1 1 100px;
+}
+/* \u{2002} */
+.firstClass.secondClass {
+	padding: 10px;
+}
+/* \u{2003} */
+.firstClass .secondClass  {
+	padding: 10px;
+}
+/* \u{2004} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2005} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2006} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2007} */
+.firstClass .secondClass {
+	padding: 10px;
+}
+/* \u{2008} */
+@view-transition {
+  navigation: auto;
+}
+/* \u{2009} */
+@layer state {
+	body {
+		padding: 10px;
+	}
+}
+/* \u{200a} */
+@layer state {
+	body {
+		padding: 10px;
+	}
+}
+/* \u{200b} */
+@keyframes slidein {
+	from​{
+		transform: translateX(0%);
+	}
+
+	to {
+		transform: translateX(100%);
+	}
+}
+/* \u{202f} */
+@font-face {
+  font-family: "Trickster";
+  src:
+    local("Trickster"),
+    url("trickster-COLRv1.otf") format("opentype") tech(color-COLRv1),
+    url("trickster-outline.otf") format("opentype"),
+    url("trickster-outline.woff") format("woff");
+}
+/* \u{205f} */
+@keyframes slidein {
+	from {
+		transform: translateX(0%);
+	}
+
+	to {
+		transform: translateX(100%);
+	}
+}
+/* \u{3000} */
+@container　(width < 15rem) {
+	color: blue;
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:2:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    1 │ /* \u{b}    */
+  > 2 │ @import␋ 'a.css';
+      │  ^^^^^^^^
+    3 │ /* \u{c}    */
+    4 │ @layer↡module, state;
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:4:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    2 │ @import␋ 'a.css';
+    3 │ /* \u{c}    */
+  > 4 │ @layer↡module, state;
+      │  ^^^^^^
+    5 │ /* \u{feff} */
+    6 │ .firstClass�.secondClass {
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:6:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    4 │ @layer↡module, state;
+    5 │ /* \u{feff} */
+  > 6 │ .firstClass�.secondClass {
+      │  ^^^^^^^^^^^
+    7 │ 	padding: 10px;
+    8 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:18:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    16 │ }
+    17 │ /* \u{2000} */
+  > 18 │ .firstClass␠.secondClass {
+       │            ^
+    19 │ 	padding: 10px;
+    20 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:23:9 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    21 │ /* \u{2001} */
+    22 │ .firstClass .secondClass {
+  > 23 │ 	flex: 1␠1 100px;
+       │ 	       ^
+    24 │ }
+    25 │ /* \u{2002} */
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:30:25 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    28 │ }
+    29 │ /* \u{2003} */
+  > 30 │ .firstClass .secondClass␠ {
+       │                         ^^
+    31 │ 	padding: 10px;
+    32 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:34:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    32 │ }
+    33 │ /* \u{2004} */
+  > 34 │ .firstClass␠.secondClass {
+       │            ^
+    35 │ 	padding: 10px;
+    36 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:38:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    36 │ }
+    37 │ /* \u{2005} */
+  > 38 │ .firstClass␠.secondClass {
+       │            ^
+    39 │ 	padding: 10px;
+    40 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:42:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    40 │ }
+    41 │ /* \u{2006} */
+  > 42 │ .firstClass␠.secondClass {
+       │            ^
+    43 │ 	padding: 10px;
+    44 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:46:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    44 │ }
+    45 │ /* \u{2007} */
+  > 46 │ .firstClass␠.secondClass {
+       │            ^
+    47 │ 	padding: 10px;
+    48 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:51:14 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    49 │ /* \u{2008} */
+    50 │ @view-transition {
+  > 51 │   navigation:␠auto;
+       │              ^
+    52 │ }
+    53 │ /* \u{2009} */
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:56:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    54 │ @layer state {
+    55 │ 	body {
+  > 56 │ 		padding:␠10px;
+       │ 		        ^
+    57 │ 	}
+    58 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:56:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    54 │ @layer state {
+    55 │ 	body {
+  > 56 │ 		padding:␠10px;
+       │ 		        ^
+    57 │ 	}
+    58 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:60:7 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    58 │ }
+    59 │ /* \u{200a} */
+  > 60 │ @layer␠state {
+       │       ^
+    61 │ 	body {
+    62 │ 		padding: 10px;
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:67:6 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    65 │ /* \u{200b} */
+    66 │ @keyframes slidein {
+  > 67 │ 	from�{
+       │ 	    ^
+    68 │ 		transform: translateX(0%);
+    69 │ 	}
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:76:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    74 │ }
+    75 │ /* \u{202f} */
+  > 76 │ @font-face␠{
+       │           ^
+    77 │   font-family: "Trickster";
+    78 │   src:
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:85:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    83 │ }
+    84 │ /* \u{205f} */
+  > 85 │ @keyframes␠slidein {
+       │           ^
+    86 │ 	from {
+    87 │ 		transform: translateX(0%);
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:95:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    93 │ }
+    94 │ /* \u{3000} */
+  > 95 │ @container␠(width < 15rem) {
+       │           ^
+    96 │ 	color: blue;
+    97 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```

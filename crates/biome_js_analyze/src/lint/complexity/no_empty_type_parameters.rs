@@ -40,7 +40,7 @@ declare_lint_rule! {
         name: "noEmptyTypeParameters",
         language: "ts",
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
     }
 }
 

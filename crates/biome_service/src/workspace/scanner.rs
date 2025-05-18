@@ -9,9 +9,10 @@
 //! well as the watcher to allow continuous scanning.
 
 use super::server::WorkspaceServer;
+use super::{FeatureName, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
-use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
+use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
@@ -31,6 +32,9 @@ pub(crate) struct ScanResult {
 
     /// Duration of the full scan.
     pub duration: Duration,
+
+    /// List of additional configuration files found inside the project (it doesn't contain the current one)
+    pub configuration_files: Vec<BiomePath>,
 }
 
 impl WorkspaceServer {
@@ -48,7 +52,7 @@ impl WorkspaceServer {
 
         let collector = DiagnosticsCollector::new();
 
-        let (duration, diagnostics) = thread::scope(|scope| {
+        let (duration, diagnostics, configuration_files) = thread::scope(|scope| {
             let handler = thread::Builder::new()
                 .name("biome::scanner".to_string())
                 .spawn_scoped(scope, || collector.run(diagnostics_receiver))
@@ -56,7 +60,7 @@ impl WorkspaceServer {
 
             // The traversal context is scoped to ensure all the channels it
             // contains are properly closed once scanning finishes.
-            let duration = scan_folder(
+            let (duration, configuration_files) = scan_folder(
                 folder,
                 ScanContext {
                     workspace: self,
@@ -71,12 +75,13 @@ impl WorkspaceServer {
             // Wait for the collector thread to finish.
             let diagnostics = handler.join().unwrap();
 
-            (duration, diagnostics)
+            (duration, diagnostics, configuration_files)
         });
 
         Ok(ScanResult {
             diagnostics,
             duration,
+            configuration_files,
         })
     }
 }
@@ -85,7 +90,7 @@ impl WorkspaceServer {
 ///
 /// Returns the duration of the process and the evaluated paths.
 #[instrument(level = "debug", skip(ctx))]
-fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
+fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>) {
     let start = Instant::now();
     let fs = ctx.workspace.fs();
     let ctx_ref = &ctx;
@@ -136,7 +141,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
         }
     }));
 
-    start.elapsed()
+    (start.elapsed(), configs)
 }
 
 struct DiagnosticsCollector {
@@ -260,19 +265,39 @@ impl TraversalContext for ScanContext<'_> {
             return false;
         }
 
-        if path
-            .symlink_metadata()
-            .is_ok_and(|metadata| metadata.is_dir())
-        {
-            return true;
-        }
-
-        if self.scan_kind.is_known_files() {
-            (path.is_ignore() || path.is_config() || path.is_manifest()) && !path.is_dependency()
-        } else if path.is_dependency() {
-            path.is_manifest() || path.is_type_declaration()
-        } else {
-            DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
+        match self.workspace.fs().symlink_path_kind(path) {
+            Ok(path_kind) if path_kind.is_dir() => {
+                if self.scan_kind.is_project() && path.is_dependency() {
+                    // In project mode, the scanner always scans dependencies,
+                    // because they're a valuable source of type information.
+                    true
+                } else {
+                    !self
+                        .workspace
+                        .is_path_ignored(IsPathIgnoredParams {
+                            project_key: self.project_key,
+                            path: path.clone(),
+                            // The scanner only cares about the top-level
+                            // `files.includes`.
+                            features: FeatureName::empty(),
+                        })
+                        .unwrap_or_default()
+                }
+            }
+            Ok(path_kind) if path_kind.is_file() => {
+                if self.scan_kind.is_known_files() {
+                    (path.is_ignore() || path.is_config() || path.is_manifest())
+                        && !path.is_dependency()
+                } else if path.is_dependency() {
+                    path.is_manifest() || path.is_type_declaration()
+                } else {
+                    DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
+                }
+            }
+            _ => {
+                // bail on fifo and socket files
+                false
+            }
         }
     }
 
@@ -295,13 +320,8 @@ impl TraversalContext for ScanContext<'_> {
 /// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file(ctx: &ScanContext, path: &BiomePath) {
     match catch_unwind(move || {
-        ctx.workspace.open_file_by_scanner(OpenFileParams {
-            project_key: ctx.project_key,
-            path: path.clone(),
-            content: FileContent::FromServer,
-            document_file_source: None,
-            persist_node_cache: false,
-        })
+        ctx.workspace
+            .open_file_during_initial_scan(ctx.project_key, path.clone())
     }) {
         Ok(Ok(())) => {}
         Ok(Err(err)) => {

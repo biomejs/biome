@@ -53,7 +53,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("dot-notation")
         ],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

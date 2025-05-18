@@ -795,7 +795,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_enabled_rules(&rules)
             .with_project_layout(project_layout.clone())
             .finish();
-
     let filter = AnalysisFilter {
         categories: RuleCategoriesBuilder::default()
             .with_syntax()
@@ -1099,7 +1098,7 @@ fn rename(
                         new_name,
                     }))
                 } else {
-                    let (range, indels) = batch.as_text_range_and_edit().unwrap_or_default();
+                    let (range, indels) = batch.to_text_range_and_edit().unwrap_or_default();
                     Ok(RenameResult { range, indels })
                 }
             }

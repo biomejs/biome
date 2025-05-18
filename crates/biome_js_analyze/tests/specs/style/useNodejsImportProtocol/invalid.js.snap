@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -77,7 +76,7 @@ import assert from /*0*/ "assert" /*b*/;
 ```
 invalid.js:1:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
   > 1 │ import assert from "assert";
       │                    ^^^^^^^^
@@ -99,7 +98,7 @@ invalid.js:1:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:2:27 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     1 │ import assert from "assert";
   > 2 │ import assert_strict from "assert/strict";
@@ -123,7 +122,7 @@ invalid.js:2:27 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:3:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     1 │ import assert from "assert";
     2 │ import assert_strict from "assert/strict";
@@ -149,7 +148,7 @@ invalid.js:3:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:4:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     2 │ import assert_strict from "assert/strict";
     3 │ import async_hooks from "async_hooks";
@@ -175,7 +174,7 @@ invalid.js:4:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:5:27 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     3 │ import async_hooks from "async_hooks";
     4 │ import buffer from "buffer";
@@ -201,7 +200,7 @@ invalid.js:5:27 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:6:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     4 │ import buffer from "buffer";
     5 │ import child_process from "child_process";
@@ -227,7 +226,7 @@ invalid.js:6:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:7:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     5 │ import child_process from "child_process";
     6 │ import cluster from "cluster";
@@ -253,7 +252,7 @@ invalid.js:7:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:8:23 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
      6 │ import cluster from "cluster";
      7 │ import console from "console";
@@ -279,7 +278,7 @@ invalid.js:8:23 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:9:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
      7 │ import console from "console";
      8 │ import constants from "constants";
@@ -305,7 +304,7 @@ invalid.js:9:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:10:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
      8 │ import constants from "constants";
      9 │ import crypto from "crypto";
@@ -331,7 +330,7 @@ invalid.js:10:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:11:33 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
      9 │ import crypto from "crypto";
     10 │ import dgram from "dgram";
@@ -357,7 +356,7 @@ invalid.js:11:33 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:12:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     10 │ import dgram from "dgram";
     11 │ import diagnostics_channel from "diagnostics_channel";
@@ -383,7 +382,7 @@ invalid.js:12:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:13:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     11 │ import diagnostics_channel from "diagnostics_channel";
     12 │ import dns from "dns";
@@ -409,7 +408,7 @@ invalid.js:13:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:14:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     12 │ import dns from "dns";
     13 │ import dns_promises from "dns/promises";
@@ -435,7 +434,7 @@ invalid.js:14:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:15:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     13 │ import dns_promises from "dns/promises";
     14 │ import domain from "domain";
@@ -461,7 +460,7 @@ invalid.js:15:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:16:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     14 │ import domain from "domain";
     15 │ import events from "events";
@@ -487,7 +486,7 @@ invalid.js:16:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:17:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     15 │ import events from "events";
     16 │ import fs from "fs";
@@ -513,7 +512,7 @@ invalid.js:17:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:18:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     16 │ import fs from "fs";
     17 │ import fs_promises from "fs/promises";
@@ -539,7 +538,7 @@ invalid.js:18:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:19:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     17 │ import fs_promises from "fs/promises";
     18 │ import http from "http";
@@ -565,7 +564,7 @@ invalid.js:19:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:20:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     18 │ import http from "http";
     19 │ import http2 from "http2";
@@ -591,7 +590,7 @@ invalid.js:20:19 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:21:23 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     19 │ import http2 from "http2";
     20 │ import https from "https";
@@ -617,7 +616,7 @@ invalid.js:21:23 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:22:32 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     20 │ import https from "https";
     21 │ import inspector from "inspector";
@@ -643,7 +642,7 @@ invalid.js:22:32 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:23:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     21 │ import inspector from "inspector";
     22 │ import inspector_promises from "inspector/promises";
@@ -669,7 +668,7 @@ invalid.js:23:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:24:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     22 │ import inspector_promises from "inspector/promises";
     23 │ import module from "module";
@@ -695,7 +694,7 @@ invalid.js:24:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:25:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     23 │ import module from "module";
     24 │ import net from "net";
@@ -721,7 +720,7 @@ invalid.js:25:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:26:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     24 │ import net from "net";
     25 │ import os from "os";
@@ -747,7 +746,7 @@ invalid.js:26:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:27:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     25 │ import os from "os";
     26 │ import path from "path";
@@ -773,7 +772,7 @@ invalid.js:27:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:28:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     26 │ import path from "path";
     27 │ import path_posix from "path/posix";
@@ -799,7 +798,7 @@ invalid.js:28:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:29:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     27 │ import path_posix from "path/posix";
     28 │ import path_win32 from "path/win32";
@@ -825,7 +824,7 @@ invalid.js:29:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:30:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     28 │ import path_win32 from "path/win32";
     29 │ import perf_hooks from "perf_hooks";
@@ -851,7 +850,7 @@ invalid.js:30:21 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:31:22 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     29 │ import perf_hooks from "perf_hooks";
     30 │ import process from "process";
@@ -877,7 +876,7 @@ invalid.js:31:22 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:32:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     30 │ import process from "process";
     31 │ import punycode from "punycode";
@@ -903,7 +902,7 @@ invalid.js:32:25 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:33:22 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     31 │ import punycode from "punycode";
     32 │ import querystring from "querystring";
@@ -929,7 +928,7 @@ invalid.js:33:22 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:34:31 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     32 │ import querystring from "querystring";
     33 │ import readline from "readline";
@@ -955,7 +954,7 @@ invalid.js:34:31 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:35:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     33 │ import readline from "readline";
     34 │ import readline_promises from "readline/promises";
@@ -981,7 +980,7 @@ invalid.js:35:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:36:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     34 │ import readline_promises from "readline/promises";
     35 │ import repl from "repl";
@@ -1007,7 +1006,7 @@ invalid.js:36:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:37:30 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     35 │ import repl from "repl";
     36 │ import stream from "stream";
@@ -1033,7 +1032,7 @@ invalid.js:37:30 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:38:29 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     36 │ import stream from "stream";
     37 │ import stream_consumers from "stream/consumers";
@@ -1059,7 +1058,7 @@ invalid.js:38:29 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:39:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     37 │ import stream_consumers from "stream/consumers";
     38 │ import stream_promises from "stream/promises";
@@ -1085,7 +1084,7 @@ invalid.js:39:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:40:28 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     38 │ import stream_promises from "stream/promises";
     39 │ import stream_web from "stream/web";
@@ -1111,7 +1110,7 @@ invalid.js:40:28 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:41:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     39 │ import stream_web from "stream/web";
     40 │ import string_decoder from "string_decoder";
@@ -1137,7 +1136,7 @@ invalid.js:41:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:42:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     40 │ import string_decoder from "string_decoder";
     41 │ import sys from "sys";
@@ -1163,7 +1162,7 @@ invalid.js:42:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:43:29 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     41 │ import sys from "sys";
     42 │ import timers from "timers";
@@ -1189,7 +1188,7 @@ invalid.js:43:29 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:44:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     42 │ import timers from "timers";
     43 │ import timers_promises from "timers/promises";
@@ -1215,7 +1214,7 @@ invalid.js:44:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:45:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     43 │ import timers_promises from "timers/promises";
     44 │ import tls from "tls";
@@ -1241,7 +1240,7 @@ invalid.js:45:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:46:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     44 │ import tls from "tls";
     45 │ import trace_events from "trace_events";
@@ -1267,7 +1266,7 @@ invalid.js:46:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:47:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     45 │ import trace_events from "trace_events";
     46 │ import tty from "tty";
@@ -1293,7 +1292,7 @@ invalid.js:47:17 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:48:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     46 │ import tty from "tty";
     47 │ import url from "url";
@@ -1319,7 +1318,7 @@ invalid.js:48:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:49:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     47 │ import url from "url";
     48 │ import util from "util";
@@ -1345,7 +1344,7 @@ invalid.js:49:24 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:50:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     48 │ import util from "util";
     49 │ import util_types from "util/types";
@@ -1371,7 +1370,7 @@ invalid.js:50:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:51:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     49 │ import util_types from "util/types";
     50 │ import v8 from "v8";
@@ -1397,7 +1396,7 @@ invalid.js:51:16 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:52:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     50 │ import v8 from "v8";
     51 │ import vm from "vm";
@@ -1423,7 +1422,7 @@ invalid.js:52:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:53:28 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     51 │ import vm from "vm";
     52 │ import wasi from "wasi";
@@ -1449,7 +1448,7 @@ invalid.js:53:28 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:54:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     52 │ import wasi from "wasi";
     53 │ import worker_threads from "worker_threads";
@@ -1475,7 +1474,7 @@ invalid.js:54:18 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:57:9 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     56 │ // check for require and import
   > 57 │ require("fs");
@@ -1500,7 +1499,7 @@ invalid.js:57:9 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:58:8 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     56 │ // check for require and import
     57 │ require("fs");
@@ -1526,7 +1525,7 @@ invalid.js:58:8 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━�
 ```
 invalid.js:61:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     60 │ // Use same quote style
   > 61 │ import assert from "assert";
@@ -1551,7 +1550,7 @@ invalid.js:61:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:62:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     60 │ // Use same quote style
     61 │ import assert from "assert";
@@ -1577,7 +1576,7 @@ invalid.js:62:20 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━
 ```
 invalid.js:65:26 lint/style/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A Node.js builtin module should be imported with the node: protocol.
+  i A Node.js builtin module should be imported with the node: protocol.
   
     64 │ // Keep comments
   > 65 │ import assert from /*0*/ "assert" /*b*/;

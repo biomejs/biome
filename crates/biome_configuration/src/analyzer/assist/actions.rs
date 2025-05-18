@@ -43,6 +43,68 @@ impl std::str::FromStr for RuleGroup {
         }
     }
 }
+impl std::fmt::Display for RuleGroup {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.write_str(self.as_str())
+    }
+}
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserializable,
+    Eq,
+    Hash,
+    Merge,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde :: Deserialize,
+    serde :: Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum ActionName {
+    OrganizeImports,
+    UseSortedAttributes,
+    UseSortedKeys,
+    UseSortedProperties,
+}
+impl ActionName {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::OrganizeImports => "organizeImports",
+            Self::UseSortedAttributes => "useSortedAttributes",
+            Self::UseSortedKeys => "useSortedKeys",
+            Self::UseSortedProperties => "useSortedProperties",
+        }
+    }
+    pub const fn group(self) -> RuleGroup {
+        match self {
+            Self::OrganizeImports => RuleGroup::Source,
+            Self::UseSortedAttributes => RuleGroup::Source,
+            Self::UseSortedKeys => RuleGroup::Source,
+            Self::UseSortedProperties => RuleGroup::Source,
+        }
+    }
+}
+impl std::str::FromStr for ActionName {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "organizeImports" => Ok(Self::OrganizeImports),
+            "useSortedAttributes" => Ok(Self::UseSortedAttributes),
+            "useSortedKeys" => Ok(Self::UseSortedKeys),
+            "useSortedProperties" => Ok(Self::UseSortedProperties),
+            _ => Err("This rule name doesn't exist."),
+        }
+    }
+}
+impl std::fmt::Display for ActionName {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.write_str(self.as_str())
+    }
+}
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

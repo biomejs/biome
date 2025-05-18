@@ -96,29 +96,6 @@ impl NoPositiveTabindexQuery {
     }
 }
 
-impl AnyNumberLikeExpression {
-    /// Returns the value of a number-like expression; it returns the expression
-    /// text for literal expressions. However, for unary expressions, it only
-    /// returns the value for signed numeric expressions.
-    pub(crate) fn value(&self) -> Option<String> {
-        match self {
-            Self::JsStringLiteralExpression(string_literal) => {
-                return Some(string_literal.inner_string_text().ok()?.to_string());
-            }
-            Self::JsNumberLiteralExpression(number_literal) => {
-                return Some(number_literal.value_token().ok()?.to_string());
-            }
-            Self::JsUnaryExpression(unary_expression) => {
-                if unary_expression.is_signed_numeric_literal().ok()? {
-                    return Some(unary_expression.to_trimmed_string());
-                }
-            }
-        }
-
-        None
-    }
-}
-
 impl Rule for NoPositiveTabindex {
     type Query = Semantic<NoPositiveTabindexQuery>;
     type State = TextRange;
@@ -141,9 +118,24 @@ impl Rule for NoPositiveTabindex {
             TabindexProp::JsPropertyObjectMember(js_object_member) => {
                 let expression = js_object_member.value().ok()?;
                 let range = expression.range();
-                let expression_value =
-                    AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
-                if !is_tabindex_valid(&expression_value) {
+                let expression_value = AnyNumberLikeExpression::cast(expression.into_syntax())?;
+                let is_tabindex_valid = match expression_value {
+                    AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
+                        is_tabindex_valid(string_literal.inner_string_text().ok()?.text())
+                    }
+                    AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
+                        is_tabindex_valid(number_literal.value_token().ok()?.text())
+                    }
+                    AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
+                        if unary_expression.is_signed_numeric_literal().ok()? {
+                            let text = unary_expression.to_trimmed_text();
+                            is_tabindex_valid(text.text())
+                        } else {
+                            return None;
+                        }
+                    }
+                };
+                if !is_tabindex_valid {
                     return Some(range);
                 }
             }
@@ -214,10 +206,24 @@ fn attribute_has_valid_tabindex(jsx_any_attribute_value: &AnyJsxAttributeValue) 
         }
         AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
             let expression = value.expression().ok()?;
-            let expression_value =
-                AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
+            let expression_value = AnyNumberLikeExpression::cast(expression.into_syntax())?;
 
-            Some(is_tabindex_valid(&expression_value))
+            Some(match expression_value {
+                AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
+                    is_tabindex_valid(string_literal.inner_string_text().ok()?.text())
+                }
+                AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
+                    is_tabindex_valid(number_literal.value_token().ok()?.text())
+                }
+                AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
+                    if unary_expression.is_signed_numeric_literal().ok()? {
+                        let text = unary_expression.to_trimmed_text();
+                        is_tabindex_valid(text.text())
+                    } else {
+                        return None;
+                    }
+                }
+            })
         }
         _ => None,
     }

@@ -17,13 +17,7 @@ expression: redactor(content)
       "!**/packages/docs/.astro"
     ]
   },
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
@@ -35,7 +29,20 @@ expression: redactor(content)
       "complexity": {
         "useLiteralKeys": "off"
       },
-      "nursery": {
+      "nursery": {},
+      "style": {
+        "noParameterAssign": "off",
+        "useNodeAssertStrict": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useConst": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error",
         "noRestrictedImports": {
           "level": "error",
           "options": {
@@ -46,38 +53,9 @@ expression: redactor(content)
           }
         }
       },
-      "style": {
-        "noParameterAssign": "off",
-        "useNodeAssertStrict": "error",
-        "useLiteralEnumMembers": "error",
-        "noCommaOperator": "error",
-        "useNodejsImportProtocol": "error",
-        "useAsConstAssertion": "error",
-        "useNumericLiterals": "error",
-        "useEnumInitializers": "error",
-        "useSelfClosingElements": "error",
-        "useConst": "error",
-        "useSingleVarDeclarator": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useNumberNamespace": "error",
-        "noInferrableTypes": "error",
-        "useExponentiationOperator": "error",
-        "useTemplate": "error",
-        "noNonNullAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "noArguments": "error",
-        "useExportType": "error",
-        "noUselessElse": "error",
-        "useShorthandFunctionType": "error"
-      },
       "suspicious": {
-        "noConsole": {
-          "level": "error",
-          "options": {
-            "allow": ["log"]
-          }
-        },
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noConsole": { "level": "error", "options": { "allow": ["log"] } }
       }
     }
   },
@@ -128,21 +106,14 @@ expression: redactor(content)
       "linter": {
         "rules": {
           "suspicious": {
-            "noConsole": {
-              "level": "off",
-              "options": {
-                "allow": ["log"]
-              }
-            }
+            "noConsole": { "level": "off", "options": { "allow": ["log"] } }
           }
         }
       }
     },
     {
       "includes": ["**/packages/knip/fixtures/**"],
-      "organizeImports": {
-        "enabled": false
-      },
+      "assist": { "actions": { "source": { "organizeImports": "off" } } },
       "linter": {
         "rules": {
           "correctness": {
@@ -170,5 +141,5 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-The configuration biome.json has been successfully migrated.
+Your configuration file(s) have been successfully migrated.
 ```

@@ -1,0 +1,277 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: complexCase.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noInvalidBuiltinInstantiation": "on"
+      },
+      "nursery": {
+        "noConsole": "off",
+        "noDoneCallback": "off",
+        "useImportRestrictions": "off",
+        "useTopLevelRegex": "off"
+      },
+      "style": {
+        "noVar": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noConsole": "off",
+            "noDoneCallback": "off",
+            "useImportRestrictions": "off",
+            "useTopLevelRegex": "off"
+          },
+          "style": {
+            "useForOf": "off"
+          }
+        }
+      }
+    }
+  ]
+}
+
+```
+
+# Diagnostics
+```
+complexCase.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to suspicious/noConsole.
+  
+     6 │       },
+     7 │       "nursery": {
+   > 8 │         "noConsole": "off",
+       │         ^^^^^^^^^^^
+     9 │         "noDoneCallback": "off",
+    10 │         "useImportRestrictions": "off",
+  
+  i Safe fix: Move the lint rule.
+  
+     6  6 │         },
+     7  7 │         "nursery": {
+     8    │ - ········"noConsole":·"off",
+     9    │ - ········"noDoneCallback":·"off",
+    10    │ - ········"useImportRestrictions":·"off",
+    11    │ - ········"useTopLevelRegex":·"off"
+        8 │ + ········"noDoneCallback":·"off",
+        9 │ + ········"useImportRestrictions":·"off",
+       10 │ + ········"useTopLevelRegex":·"off"
+       11 │ + ······},
+       12 │ + ······"style":·{
+       13 │ + ········"noVar":·"off"
+    12 14 │         },
+    13    │ - ······"style":·{
+    14    │ - ········"noVar":·"off"
+    15    │ - ······}
+       15 │ + ······"suspicious":·{·
+       16 │ + ········"noConsole":·"off"·}
+    16 17 │       }
+    17 18 │     },
+  
+
+```
+
+```
+complexCase.json:9:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to style/noDoneCallback.
+  
+     7 │       "nursery": {
+     8 │         "noConsole": "off",
+   > 9 │         "noDoneCallback": "off",
+       │         ^^^^^^^^^^^^^^^^
+    10 │         "useImportRestrictions": "off",
+    11 │         "useTopLevelRegex": "off"
+  
+  i Safe fix: Move the lint rule.
+  
+     7  7 │         "nursery": {
+     8  8 │           "noConsole": "off",
+     9    │ - ········"noDoneCallback":·"off",
+    10    │ - ········"useImportRestrictions":·"off",
+        9 │ + ········"useImportRestrictions":·"off",
+    11 10 │           "useTopLevelRegex": "off"
+    12 11 │         },
+    13 12 │         "style": {
+    14    │ - ········"noVar":·"off"
+       13 │ + ········"noVar":·"off",
+       14 │ + ········"noDoneCallback":·"off"
+    15 15 │         }
+    16 16 │       }
+  
+
+```
+
+```
+complexCase.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to performance/useTopLevelRegex.
+  
+     9 │         "noDoneCallback": "off",
+    10 │         "useImportRestrictions": "off",
+  > 11 │         "useTopLevelRegex": "off"
+       │         ^^^^^^^^^^^^^^^^^^
+    12 │       },
+    13 │       "style": {
+  
+  i Safe fix: Move the lint rule.
+  
+     8  8 │           "noConsole": "off",
+     9  9 │           "noDoneCallback": "off",
+    10    │ - ········"useImportRestrictions":·"off",
+    11    │ - ········"useTopLevelRegex":·"off"
+       10 │ + ········"useImportRestrictions":·"off"
+       11 │ + ······},
+       12 │ + ······"style":·{
+       13 │ + ········"noVar":·"off"
+    12 14 │         },
+    13    │ - ······"style":·{
+    14    │ - ········"noVar":·"off"
+    15    │ - ······}
+       15 │ + ······"performance":·{·
+       16 │ + ········"useTopLevelRegex":·"off"·}
+    16 17 │       }
+    17 18 │     },
+  
+
+```
+
+```
+complexCase.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to suspicious/noVar.
+  
+    12 │       },
+    13 │       "style": {
+  > 14 │         "noVar": "off"
+       │         ^^^^^^^
+    15 │       }
+    16 │     }
+  
+  i Safe fix: Move the lint rule.
+  
+    12 12 │         },
+    13 13 │         "style": {
+    14    │ - ········"noVar":·"off"
+    15    │ - ······}
+       14 │ + ······},
+       15 │ + ······"suspicious":·{·
+       16 │ + ········"noVar":·"off"·}
+    16 17 │       }
+    17 18 │     },
+  
+
+```
+
+```
+complexCase.json:23:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to suspicious/noConsole.
+  
+    21 │         "rules": {
+    22 │           "nursery": {
+  > 23 │             "noConsole": "off",
+       │             ^^^^^^^^^^^
+    24 │             "noDoneCallback": "off",
+    25 │             "useImportRestrictions": "off",
+  
+  i Safe fix: Move the lint rule.
+  
+    21 21 │           "rules": {
+    22 22 │             "nursery": {
+    23    │ - ············"noConsole":·"off",
+    24    │ - ············"noDoneCallback":·"off",
+    25    │ - ············"useImportRestrictions":·"off",
+    26    │ - ············"useTopLevelRegex":·"off"
+       23 │ + ············"noDoneCallback":·"off",
+       24 │ + ············"useImportRestrictions":·"off",
+       25 │ + ············"useTopLevelRegex":·"off"
+       26 │ + ··········},
+       27 │ + ··········"style":·{
+       28 │ + ············"useForOf":·"off"
+    27 29 │             },
+    28    │ - ··········"style":·{
+    29    │ - ············"useForOf":·"off"
+    30    │ - ··········}
+       30 │ + ··········"suspicious":·{·
+       31 │ + ············"noConsole":·"off"·}
+    31 32 │           }
+    32 33 │         }
+  
+
+```
+
+```
+complexCase.json:24:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to style/noDoneCallback.
+  
+    22 │           "nursery": {
+    23 │             "noConsole": "off",
+  > 24 │             "noDoneCallback": "off",
+       │             ^^^^^^^^^^^^^^^^
+    25 │             "useImportRestrictions": "off",
+    26 │             "useTopLevelRegex": "off"
+  
+  i Safe fix: Move the lint rule.
+  
+    22 22 │             "nursery": {
+    23 23 │               "noConsole": "off",
+    24    │ - ············"noDoneCallback":·"off",
+    25    │ - ············"useImportRestrictions":·"off",
+       24 │ + ············"useImportRestrictions":·"off",
+    26 25 │               "useTopLevelRegex": "off"
+    27 26 │             },
+    28 27 │             "style": {
+    29    │ - ············"useForOf":·"off"
+       28 │ + ············"useForOf":·"off",
+       29 │ + ············"noDoneCallback":·"off"
+    30 30 │             }
+    31 31 │           }
+  
+
+```
+
+```
+complexCase.json:26:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to performance/useTopLevelRegex.
+  
+    24 │             "noDoneCallback": "off",
+    25 │             "useImportRestrictions": "off",
+  > 26 │             "useTopLevelRegex": "off"
+       │             ^^^^^^^^^^^^^^^^^^
+    27 │           },
+    28 │           "style": {
+  
+  i Safe fix: Move the lint rule.
+  
+    23 23 │               "noConsole": "off",
+    24 24 │               "noDoneCallback": "off",
+    25    │ - ············"useImportRestrictions":·"off",
+    26    │ - ············"useTopLevelRegex":·"off"
+       25 │ + ············"useImportRestrictions":·"off"
+       26 │ + ··········},
+       27 │ + ··········"style":·{
+       28 │ + ············"useForOf":·"off"
+    27 29 │             },
+    28    │ - ··········"style":·{
+    29    │ - ············"useForOf":·"off"
+    30    │ - ··········}
+       30 │ + ··········"performance":·{·
+       31 │ + ············"useTopLevelRegex":·"off"·}
+    31 32 │           }
+    32 33 │         }
+  
+
+```

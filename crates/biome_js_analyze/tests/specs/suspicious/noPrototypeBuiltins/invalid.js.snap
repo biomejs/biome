@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -55,7 +54,7 @@ Object[`hasOwnProperty`][`call`](object, property);
 ```
 invalid.js:1:5 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
   > 1 │ foo.hasOwnProperty("bar");
       │     ^^^^^^^^^^^^^^
@@ -79,7 +78,7 @@ invalid.js:1:5 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━�
 ```
 invalid.js:2:5 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'isPrototypeOf' from target object.
+  ! Do not access Object.prototype method 'isPrototypeOf' from target object.
   
     1 │ foo.hasOwnProperty("bar");
   > 2 │ foo.isPrototypeOf(bar);
@@ -93,7 +92,7 @@ invalid.js:2:5 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━�
 ```
 invalid.js:3:5 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'propertyIsEnumerable' from target object.
+  ! Do not access Object.prototype method 'propertyIsEnumerable' from target object.
   
     1 │ foo.hasOwnProperty("bar");
     2 │ foo.isPrototypeOf(bar);
@@ -108,7 +107,7 @@ invalid.js:3:5 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━�
 ```
 invalid.js:4:9 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     2 │ foo.isPrototypeOf(bar);
     3 │ foo.propertyIsEnumerable("bar");
@@ -136,7 +135,7 @@ invalid.js:4:9 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━�
 ```
 invalid.js:5:13 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'isPrototypeOf' from target object.
+  ! Do not access Object.prototype method 'isPrototypeOf' from target object.
   
     3 │ foo.propertyIsEnumerable("bar");
     4 │ foo.bar.hasOwnProperty("bar");
@@ -151,7 +150,7 @@ invalid.js:5:13 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━�
 ```
 invalid.js:6:5 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     4 │ foo.bar.hasOwnProperty("bar");
     5 │ foo.bar.baz.isPrototypeOf("bar");
@@ -179,7 +178,7 @@ invalid.js:6:5 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━�
 ```
 invalid.js:7:6 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'isPrototypeOf' from target object.
+  ! Do not access Object.prototype method 'isPrototypeOf' from target object.
   
     5 │ foo.bar.baz.isPrototypeOf("bar");
     6 │ foo["hasOwnProperty"]("bar");
@@ -194,7 +193,7 @@ invalid.js:7:6 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━�
 ```
 invalid.js:8:6 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
      6 │ foo["hasOwnProperty"]("bar");
      7 │ foo[`isPrototypeOf`]("bar").baz;
@@ -213,7 +212,7 @@ invalid.js:8:6 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━�
 ```
 invalid.js:9:7 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
      7 │ foo[`isPrototypeOf`]("bar").baz;
      8 │ foo?.hasOwnProperty(bar);
@@ -232,7 +231,7 @@ invalid.js:9:7 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━�
 ```
 invalid.js:10:7 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
      8 │ foo?.hasOwnProperty(bar);
      9 │ (foo?.hasOwnProperty)("bar");
@@ -251,7 +250,7 @@ invalid.js:10:7 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━�
 ```
 invalid.js:11:9 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
      9 │ (foo?.hasOwnProperty)("bar");
     10 │ foo?.["hasOwnProperty"]("bar");
@@ -270,7 +269,7 @@ invalid.js:11:9 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━�
 ```
 invalid.js:12:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     10 │ foo?.["hasOwnProperty"]("bar");
     11 │ (foo?.[`hasOwnProperty`])("bar");
@@ -298,7 +297,7 @@ invalid.js:12:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━
 ```
 invalid.js:13:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     11 │ (foo?.[`hasOwnProperty`])("bar");
     12 │ Object.hasOwnProperty.call(obj, 'foo');
@@ -326,7 +325,7 @@ invalid.js:13:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━
 ```
 invalid.js:14:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     12 │ Object.hasOwnProperty.call(obj, 'foo');
     13 │ Object.hasOwnProperty.call(obj, property);
@@ -354,7 +353,7 @@ invalid.js:14:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━
 ```
 invalid.js:15:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     13 │ Object.hasOwnProperty.call(obj, property);
     14 │ Object.prototype.hasOwnProperty.call(obj, 'foo');
@@ -382,7 +381,7 @@ invalid.js:15:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━
 ```
 invalid.js:16:1 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     14 │ Object.prototype.hasOwnProperty.call(obj, 'foo');
     15 │ ({}).hasOwnProperty.call(obj, 'foo');
@@ -401,7 +400,7 @@ invalid.js:16:1 lint/suspicious/noPrototypeBuiltins ━━━━━━━━━�
 ```
 invalid.js:17:21 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     15 │ ({}).hasOwnProperty.call(obj, 'foo');
     16 │ Object/* comment */.prototype.hasOwnProperty.call(a, b);
@@ -429,7 +428,7 @@ invalid.js:17:21 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:18:25 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     16 │ Object/* comment */.prototype.hasOwnProperty.call(a, b);
     17 │ const hasProperty = Object.prototype.hasOwnProperty.call(object, property);
@@ -457,7 +456,7 @@ invalid.js:18:25 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:19:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     17 │ const hasProperty = Object.prototype.hasOwnProperty.call(object, property);
     18 │ const hasProperty1 = (( Object.prototype.hasOwnProperty.call(object, property) ));
@@ -485,7 +484,7 @@ invalid.js:19:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:20:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     18 │ const hasProperty1 = (( Object.prototype.hasOwnProperty.call(object, property) ));
     19 │ const hasProperty2 = (( Object.prototype.hasOwnProperty.call ))(object, property);
@@ -513,7 +512,7 @@ invalid.js:20:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:21:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     19 │ const hasProperty2 = (( Object.prototype.hasOwnProperty.call ))(object, property);
     20 │ const hasProperty3 = (( Object.prototype.hasOwnProperty )).call(object, property);
@@ -541,7 +540,7 @@ invalid.js:21:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:22:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     20 │ const hasProperty3 = (( Object.prototype.hasOwnProperty )).call(object, property);
     21 │ const hasProperty4 = (( Object.prototype )).hasOwnProperty.call(object, property);
@@ -569,7 +568,7 @@ invalid.js:22:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:23:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     21 │ const hasProperty4 = (( Object.prototype )).hasOwnProperty.call(object, property);
     22 │ const hasProperty5 = (( Object )).prototype.hasOwnProperty.call(object, property);
@@ -597,7 +596,7 @@ invalid.js:23:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:24:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     22 │ const hasProperty5 = (( Object )).prototype.hasOwnProperty.call(object, property);
     23 │ const hasProperty6 = {}.hasOwnProperty.call(object, property);
@@ -625,7 +624,7 @@ invalid.js:24:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:25:25 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     23 │ const hasProperty6 = {}.hasOwnProperty.call(object, property);
     24 │ const hasProperty7 = {}.hasOwnProperty.call(object, property);
@@ -653,7 +652,7 @@ invalid.js:25:25 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:26:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     24 │ const hasProperty7 = {}.hasOwnProperty.call(object, property);
     25 │ const hasProperty8 = (( {}.hasOwnProperty.call(object, property) ));
@@ -681,7 +680,7 @@ invalid.js:26:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:27:23 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     25 │ const hasProperty8 = (( {}.hasOwnProperty.call(object, property) ));
     26 │ const hasProperty9 = (( {}.hasOwnProperty.call ))(object, property);
@@ -709,7 +708,7 @@ invalid.js:27:23 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:28:23 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     26 │ const hasProperty9 = (( {}.hasOwnProperty.call ))(object, property);
     27 │ const hasProperty10 = (( {}.hasOwnProperty )).call(object, property);
@@ -737,7 +736,7 @@ invalid.js:28:23 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:29:23 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     27 │ const hasProperty10 = (( {}.hasOwnProperty )).call(object, property);
     28 │ const hasProperty11 = (( {} )).hasOwnProperty.call(object, property);
@@ -765,7 +764,7 @@ invalid.js:29:23 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:30:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     28 │ const hasProperty11 = (( {} )).hasOwnProperty.call(object, property);
     29 │ function foo(){return {}.hasOwnProperty.call(object, property)}
@@ -793,7 +792,7 @@ invalid.js:30:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:31:33 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     29 │ function foo(){return {}.hasOwnProperty.call(object, property)}
     30 │ function foo(){return{}.hasOwnProperty.call(object, property)}
@@ -821,7 +820,7 @@ invalid.js:31:33 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:32:34 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     30 │ function foo(){return{}.hasOwnProperty.call(object, property)}
     31 │ function foo(){return/*comment*/{}.hasOwnProperty.call(object, property)}
@@ -849,7 +848,7 @@ invalid.js:32:34 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:33:45 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     31 │ function foo(){return/*comment*/{}.hasOwnProperty.call(object, property)}
     32 │ async function foo(){return await{}.hasOwnProperty.call(object, property)}
@@ -877,7 +876,7 @@ invalid.js:33:45 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:34:16 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     32 │ async function foo(){return await{}.hasOwnProperty.call(object, property)}
     33 │ async function foo(){return await/*comment*/{}.hasOwnProperty.call(object, property)}
@@ -905,7 +904,7 @@ invalid.js:34:16 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:35:27 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     33 │ async function foo(){return await/*comment*/{}.hasOwnProperty.call(object, property)}
     34 │ for (const x of{}.hasOwnProperty.call(object, property).toString());
@@ -933,7 +932,7 @@ invalid.js:35:27 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:36:16 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     34 │ for (const x of{}.hasOwnProperty.call(object, property).toString());
     35 │ for (const x of/*comment*/{}.hasOwnProperty.call(object, property).toString());
@@ -961,7 +960,7 @@ invalid.js:36:16 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:37:27 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     35 │ for (const x of/*comment*/{}.hasOwnProperty.call(object, property).toString());
     36 │ for (const x in{}.hasOwnProperty.call(object, property).toString());
@@ -989,7 +988,7 @@ invalid.js:37:27 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:38:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     36 │ for (const x in{}.hasOwnProperty.call(object, property).toString());
     37 │ for (const x in/*comment*/{}.hasOwnProperty.call(object, property).toString());
@@ -1017,7 +1016,7 @@ invalid.js:38:22 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━�
 ```
 invalid.js:39:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     37 │ for (const x in/*comment*/{}.hasOwnProperty.call(object, property).toString());
     38 │ function foo(){return({}.hasOwnProperty.call)(object, property)}
@@ -1045,7 +1044,7 @@ invalid.js:39:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━
 ```
 invalid.js:40:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     38 │ function foo(){return({}.hasOwnProperty.call)(object, property)}
     39 │ Object['prototype']['hasOwnProperty']['call'](object, property);
@@ -1073,7 +1072,7 @@ invalid.js:40:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━
 ```
 invalid.js:41:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     39 │ Object['prototype']['hasOwnProperty']['call'](object, property);
     40 │ Object[`prototype`][`hasOwnProperty`][`call`](object, property);
@@ -1101,7 +1100,7 @@ invalid.js:41:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━
 ```
 invalid.js:42:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     40 │ Object[`prototype`][`hasOwnProperty`][`call`](object, property);
     41 │ Object['hasOwnProperty']['call'](object, property);
@@ -1129,7 +1128,7 @@ invalid.js:42:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━
 ```
 invalid.js:43:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     41 │ Object['hasOwnProperty']['call'](object, property);
     42 │ Object[`hasOwnProperty`][`call`](object, property);
@@ -1155,7 +1154,7 @@ invalid.js:43:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━
 ```
 invalid.js:44:1 lint/suspicious/noPrototypeBuiltins  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Do not access Object.prototype method 'hasOwnProperty' from target object.
+  ! Do not access Object.prototype method 'hasOwnProperty' from target object.
   
     42 │ Object[`hasOwnProperty`][`call`](object, property);
     43 │ ({})['hasOwnProperty']['call'](object, property);

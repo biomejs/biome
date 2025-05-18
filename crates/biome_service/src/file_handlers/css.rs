@@ -186,7 +186,6 @@ impl ServiceLanguage for CssLanguage {
 
     fn resolve_analyzer_options(
         global: Option<&Settings>,
-
         _language: Option<&Self::LinterSettings>,
         _environment: Option<&Self::EnvironmentSettings>,
 
@@ -217,7 +216,15 @@ impl ServiceLanguage for CssLanguage {
                     .map(|g| to_analyzer_rules(g, file_path.as_path()))
                     .unwrap_or_default(),
             )
-            .with_preferred_quote(preferred_quote);
+            .with_preferred_quote(preferred_quote)
+            .with_css_modules(global.is_some_and(|global| {
+                global
+                    .languages
+                    .css
+                    .parser
+                    .css_modules_enabled
+                    .is_some_and(|css_modules_enabled| css_modules_enabled.into())
+            }));
 
         AnalyzerOptions::default()
             .with_file_path(file_path.as_path())

@@ -1,0 +1,73 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: renaming.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      
+      "complexity": {
+        "noMultipleSpacesInRegularExpressionLiterals": "on",
+        "noUnnecessaryContinue": "on"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+renaming.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to noAdjacentSpacesInRegex.
+  
+    5 │       "complexity": {
+  > 6 │         "noMultipleSpacesInRegularExpressionLiterals": "on",
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │         "noUnnecessaryContinue": "on"
+    8 │       }
+  
+  i Safe fix: Rename the lint rule.
+  
+     4  4 │         
+     5  5 │         "complexity": {
+     6    │ - ········"noMultipleSpacesInRegularExpressionLiterals":·"on",
+     7    │ - ········"noUnnecessaryContinue":·"on"
+        6 │ + ········"noUnnecessaryContinue":·"on",
+        7 │ + ········"noAdjacentSpacesInRegex":·"on"
+     8  8 │         }
+     9  9 │       }
+  
+
+```
+
+```
+renaming.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to correctness/noUselessContinue.
+  
+    5 │       "complexity": {
+    6 │         "noMultipleSpacesInRegularExpressionLiterals": "on",
+  > 7 │         "noUnnecessaryContinue": "on"
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │       }
+    9 │     }
+  
+  i Safe fix: Move and rename the lint rule.
+  
+     4  4 │         
+     5  5 │         "complexity": {
+     6    │ - ········"noMultipleSpacesInRegularExpressionLiterals":·"on",
+     7    │ - ········"noUnnecessaryContinue":·"on"
+     8    │ - ······}
+        6 │ + ········"noMultipleSpacesInRegularExpressionLiterals":·"on"
+        7 │ + ······},
+        8 │ + ······"correctness":·{·"noUselessContinue":·"on"·}
+     9  9 │       }
+    10 10 │     }
+  
+
+```

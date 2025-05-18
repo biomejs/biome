@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -18,7 +17,7 @@ const d = foo.bar[2] instanceof window.Array
 ```
 invalid.js:2:11 lint/suspicious/useIsArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use Array.isArray() instead of instanceof Array.
+  ! Use Array.isArray() instead of instanceof Array.
   
   > 2 │ if (/*a*/ arr /*b*/ instanceof /*c*/ Array /*d*/) {}
       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -41,7 +40,7 @@ invalid.js:2:11 lint/suspicious/useIsArray  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:4:11 lint/suspicious/useIsArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use Array.isArray() instead of instanceof Array.
+  ! Use Array.isArray() instead of instanceof Array.
   
     2 │ if (/*a*/ arr /*b*/ instanceof /*c*/ Array /*d*/) {}
     3 │ 
@@ -67,7 +66,7 @@ invalid.js:4:11 lint/suspicious/useIsArray  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:6:11 lint/suspicious/useIsArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use Array.isArray() instead of instanceof Array.
+  ! Use Array.isArray() instead of instanceof Array.
   
     4 │ const c = [1,2,3] instanceof globalThis.Array === b;
     5 │ 

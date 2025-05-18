@@ -54,7 +54,7 @@ interface GenericInterface<T> {
 ```
 invalid.ts:2:2 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     1 │ interface Example {
   > 2 │ 	(): string;
@@ -79,7 +79,7 @@ invalid.ts:2:2 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━�
 ```
 invalid.ts:5:25 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     3 │ }
     4 │ 
@@ -105,7 +105,7 @@ invalid.ts:5:25 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━
 ```
 invalid.ts:11:2 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
      9 │ // Interface with single call signature
     10 │ interface SingleCall {
@@ -133,7 +133,7 @@ invalid.ts:11:2 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━
 ```
 invalid.ts:15:12 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     14 │ // Object type literal with single call signature
   > 15 │ let obj: { (): string };
@@ -158,7 +158,7 @@ invalid.ts:15:12 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━�
 ```
 invalid.ts:24:27 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     23 │ // Nested object types with call signatures
   > 24 │ let nestedObj: { inner: { (): boolean } };
@@ -183,7 +183,7 @@ invalid.ts:24:27 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━�
 ```
 invalid.ts:27:33 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     26 │ // Object type with call signature as a type union member
   > 27 │ type UnionWithCallSignature = { (): string } | string;
@@ -208,7 +208,7 @@ invalid.ts:27:33 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━�
 ```
 invalid.ts:30:43 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     29 │ // Object type with call signature as a type intersection member
   > 30 │ export type IntersectionCallSignature = { (): string } & string;
@@ -233,7 +233,7 @@ invalid.ts:30:43 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━�
 ```
 invalid.ts:33:45 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     32 │ // Object type with call signature as a type array
   > 33 │ export type ArrayCallSignature = readonly { (): string }[];
@@ -258,7 +258,7 @@ invalid.ts:33:45 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━�
 ```
 invalid.ts:36:34 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     35 │ // Generic object type with a call signature
   > 36 │ type GenericCallSignature<T> = { (arg: T): T };
@@ -283,7 +283,7 @@ invalid.ts:36:34 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━�
 ```
 invalid.ts:39:21 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     38 │ // Object type with optional call signature
   > 39 │ let optionalCall: { (): number | undefined };
@@ -308,7 +308,7 @@ invalid.ts:39:21 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━�
 ```
 invalid.ts:43:2 lint/style/useShorthandFunctionType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a function type instead of a call signature.
+  i Use a function type instead of a call signature.
   
     41 │ // Generic interface with a call signature
     42 │ interface GenericInterface<T> {

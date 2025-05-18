@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use append_only_vec::AppendOnlyVec;
-use biome_analyze::AnalyzerPluginVec;
+use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_deserialize::Deserialized;
@@ -43,7 +43,7 @@ use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
     IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
 };
-use crate::workspace_watcher::WatcherSignalKind;
+use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
 use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
 
 use super::document::Document;
@@ -277,11 +277,39 @@ impl WorkspaceServer {
     }
 
     /// Opens the file and marks it as opened by the scanner.
-    pub(super) fn open_file_by_scanner(
+    pub(super) fn open_file_during_initial_scan(
         &self,
-        params: OpenFileParams,
+        project_key: ProjectKey,
+        path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError> {
-        self.open_file_internal(true, params)
+        self.open_file_internal(
+            OpenFileReason::InitialScan,
+            OpenFileParams {
+                project_key,
+                path: path.into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            },
+        )
+    }
+
+    /// Opens the file and marks it as opened by the scanner.
+    pub(super) fn open_file_by_watcher(
+        &self,
+        project_key: ProjectKey,
+        path: impl Into<BiomePath>,
+    ) -> Result<(), WorkspaceError> {
+        self.open_file_internal(
+            OpenFileReason::WatcherUpdate,
+            OpenFileParams {
+                project_key,
+                path: path.into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            },
+        )
     }
 
     #[tracing::instrument(level = "debug", skip(self, params), fields(
@@ -290,7 +318,7 @@ impl WorkspaceServer {
     ))]
     fn open_file_internal(
         &self,
-        opened_by_scanner: bool,
+        reason: OpenFileReason,
         params: OpenFileParams,
     ) -> Result<(), WorkspaceError> {
         let OpenFileParams {
@@ -327,7 +355,7 @@ impl WorkspaceServer {
         let mut index = self.insert_source(source);
 
         let size = content.len();
-        let limit = self.projects.get_max_file_size(project_key);
+        let limit = self.projects.get_max_file_size(project_key, path.as_path());
 
         let syntax = if size > limit {
             Some(Err(FileTooLarge { size, limit }))
@@ -350,6 +378,8 @@ impl WorkspaceServer {
 
             Some(Ok(parsed.any_parse))
         };
+
+        let opened_by_scanner = reason.is_opened_by_scanner();
 
         let documents = self.documents.pin();
         documents.compute(path.clone(), |current| {
@@ -408,7 +438,7 @@ impl WorkspaceServer {
             }
         });
 
-        self.update_service_data(WatcherSignalKind::AddedOrChanged, &path)
+        self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path)
     }
 
     /// Retrieves the parser result for a given file.
@@ -463,34 +493,25 @@ impl WorkspaceServer {
     }
 
     /// Checks whether a file is ignored in the top-level config's
-    /// `files.ignore`/`files.include` or in the feature's `ignore`/`include`.
+    /// `files.includes` or in the feature's `includes`.
     #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
-        let ignored_by_features = {
-            let mut ignored = false;
-
-            for feature in features.iter() {
-                // a path is ignored if it's ignored by all features
-                ignored &= self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature)
-            }
-            ignored
-        };
-        // Never ignore Biome's config file regardless `include`/`ignore`
+        // Never ignore Biome's config file regardless of `includes`.
         let ignored = (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
-            // Apply top-level `include`/`ignore`
+            // Apply top-level `includes`
             (self.is_ignored_by_top_level_config(project_key, path) ||
-                // Apply feature-level `include`/`ignore`
-                ignored_by_features);
+                // Apply feature-level `includes`
+                (!features.is_empty() && features.iter().all(|feature| self
+                    .projects
+                    .is_ignored_by_feature_config(project_key, path, feature))));
 
         tracing::Span::current().record("ignored", ignored);
 
         ignored
     }
 
-    /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
+    /// Checks whether a file is ignored in the top-level `files.includes`.
     fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
         let Some(files_settings) = self.projects.get_files_settings(project_key) else {
             return false;
@@ -609,7 +630,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match signal_kind {
-                WatcherSignalKind::AddedOrChanged => {
+                WatcherSignalKind::AddedOrChanged(_) => {
                     let parsed = self.get_parse(path)?;
                     self.project_layout
                         .insert_serialized_node_manifest(package_path, parsed);
@@ -628,7 +649,7 @@ impl WorkspaceServer {
     pub(super) fn update_module_graph(&self, signal_kind: WatcherSignalKind, paths: &[BiomePath]) {
         let no_paths: &[BiomePath] = &[];
         let (added_or_changed_paths, removed_paths) = match signal_kind {
-            WatcherSignalKind::AddedOrChanged => {
+            WatcherSignalKind::AddedOrChanged(_) => {
                 let documents = self.documents.pin();
                 let mut added_or_changed_paths = Vec::with_capacity(paths.len());
                 for path in paths {
@@ -672,7 +693,14 @@ impl WorkspaceServer {
 
         self.update_module_graph(signal_kind, &[path]);
 
-        let _ = self.notification_tx.send(ServiceDataNotification::Updated);
+        match signal_kind {
+            WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan) => {
+                // We'll send a single signal at the end of the scan.
+            }
+            _ => {
+                let _ = self.notification_tx.send(ServiceDataNotification::Updated);
+            }
+        }
 
         Ok(())
     }
@@ -693,7 +721,9 @@ impl Workspace for WorkspaceServer {
         };
 
         let file_size = document.content.len();
-        let limit = self.projects.get_max_file_size(params.project_key);
+        let limit = self
+            .projects
+            .get_max_file_size(params.project_key, params.path.as_path());
         Ok(CheckFileSizeResult { file_size, limit })
     }
 
@@ -795,7 +825,7 @@ impl Workspace for WorkspaceServer {
     }
 
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        self.open_file_internal(false, params)
+        self.open_file_internal(OpenFileReason::ClientRequest, params)
     }
 
     fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
@@ -823,18 +853,16 @@ impl Workspace for WorkspaceServer {
         if params.scan_kind.is_none() {
             let manifest = path.join("package.json");
             if self.fs.path_exists(&manifest) {
-                self.open_file_by_scanner(OpenFileParams {
-                    project_key: params.project_key,
-                    path: BiomePath::from(manifest.clone()),
-                    content: FileContent::FromServer,
-                    document_file_source: None,
-                    persist_node_cache: false,
-                })?;
-                self.update_project_layout(WatcherSignalKind::AddedOrChanged, &manifest)?;
+                self.open_file_during_initial_scan(params.project_key, manifest.clone())?;
+                self.update_project_layout(
+                    WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan),
+                    &manifest,
+                )?;
             }
             return Ok(ScanProjectFolderResult {
                 diagnostics: Vec::new(),
                 duration: Duration::from_millis(0),
+                configuration_files: vec![],
             });
         }
 
@@ -849,6 +877,7 @@ impl Workspace for WorkspaceServer {
             return Ok(ScanProjectFolderResult {
                 diagnostics: Vec::new(),
                 duration: Duration::from_millis(0),
+                configuration_files: vec![],
             });
         }
 
@@ -862,9 +891,12 @@ impl Workspace for WorkspaceServer {
 
         let result = self.scan(params.project_key, &path, params.scan_kind)?;
 
+        let _ = self.notification_tx.send(ServiceDataNotification::Updated);
+
         Ok(ScanProjectFolderResult {
             diagnostics: result.diagnostics,
             duration: result.duration,
+            configuration_files: result.configuration_files,
         })
     }
 
@@ -1064,7 +1096,10 @@ impl Workspace for WorkspaceServer {
             .insert(path.clone().into(), document)
             .ok_or_else(WorkspaceError::not_found)?;
 
-        self.update_service_data(WatcherSignalKind::AddedOrChanged, &path)
+        self.update_service_data(
+            WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
+            &path,
+        )
     }
 
     /// Closes a file that is opened in the workspace.
@@ -1160,7 +1195,11 @@ impl Workspace for WorkspaceServer {
                     suppression_reason: None,
                     enabled_rules,
                     pull_code_actions,
-                    plugins: self.get_analyzer_plugins_for_project(project_key),
+                    plugins: if categories.contains(RuleCategory::Lint) {
+                        self.get_analyzer_plugins_for_project(project_key)
+                    } else {
+                        Vec::new()
+                    },
                 });
 
                 (
@@ -1179,9 +1218,10 @@ impl Workspace for WorkspaceServer {
             };
 
         info!(
-            "Pulled {:?} diagnostic(s), skipped {:?} diagnostic(s)",
+            "Pulled {:?} diagnostic(s), skipped {:?} diagnostic(s) from {}",
             diagnostics.len(),
-            skipped_diagnostics
+            skipped_diagnostics,
+            path
         );
         Ok(PullDiagnosticsResult {
             diagnostics: diagnostics
@@ -1241,7 +1281,7 @@ impl Workspace for WorkspaceServer {
             skip,
             suppression_reason: None,
             enabled_rules,
-            plugins: self.get_analyzer_plugins_for_project(project_key),
+            plugins: Vec::new(),
         }))
     }
 
@@ -1383,7 +1423,11 @@ impl Workspace for WorkspaceServer {
             rule_categories,
             suppression_reason,
             enabled_rules,
-            plugins: self.get_analyzer_plugins_for_project(project_key),
+            plugins: if rule_categories.contains(RuleCategory::Lint) {
+                self.get_analyzer_plugins_for_project(project_key)
+            } else {
+                Vec::new()
+            },
         })
     }
 

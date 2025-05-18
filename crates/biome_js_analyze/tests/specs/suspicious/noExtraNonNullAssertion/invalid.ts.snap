@@ -59,7 +59,7 @@ if (!case16!!) {}
 ```
 invalid.ts:2:13 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     1 │ // @ts-expect-error
   > 2 │ const bar = case1!!.bar;
@@ -77,7 +77,7 @@ invalid.ts:2:13 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     4 │ function case2(bar: number | undefined) {
   > 5 │   const bar1: number = bar!!!;
@@ -95,7 +95,7 @@ invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     4 │ function case2(bar: number | undefined) {
   > 5 │   const bar1: number = bar!!!;
@@ -113,7 +113,7 @@ invalid.ts:5:24 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:9:10 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
      8 │ function case3(bar?: { n: number }) {
    > 9 │   return bar!?.n;
@@ -131,7 +131,7 @@ invalid.ts:9:10 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:13:10 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     12 │ function case4(bar?: { n: number }) {
   > 13 │   return bar!?.();
@@ -149,7 +149,7 @@ invalid.ts:13:10 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:16:15 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     14 │ }
     15 │ 
@@ -168,7 +168,7 @@ invalid.ts:16:15 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:19:11 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     18 │ function case6(bar?: { n: number }) {
   > 19 │   return (bar!)?.n;
@@ -186,7 +186,7 @@ invalid.ts:19:11 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:23:10 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     22 │ function case7(bar?: { n: number }) {
   > 23 │   return (bar)!?.n;
@@ -204,7 +204,7 @@ invalid.ts:23:10 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:27:12 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     26 │ function case8(bar?: { n: number }) {
   > 27 │   return ((bar!))?.();
@@ -222,7 +222,7 @@ invalid.ts:27:12 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:32:5 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     30 │ class Case9 {
     31 │   method() {
@@ -241,7 +241,7 @@ invalid.ts:32:5 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:36:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     34 │ }
     35 │ 
@@ -260,7 +260,7 @@ invalid.ts:36:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:40:11 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     38 │ case11!?.[computedField];
     39 │ 
@@ -279,7 +279,7 @@ invalid.ts:40:11 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     40 │ case12!?.[a.b!!];
     41 │ 
@@ -298,7 +298,7 @@ invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     40 │ case12!?.[a.b!!];
     41 │ 
@@ -317,7 +317,7 @@ invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:44:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     42 │ case13!!! = null
     43 │ 
@@ -336,7 +336,7 @@ invalid.ts:44:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:46:5 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     44 │ case14!! = null
     45 │ 
@@ -355,7 +355,7 @@ invalid.ts:46:5 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
 ```
 invalid.ts:48:6 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Forbidden extra non-null assertion.
+  ! Forbidden extra non-null assertion.
   
     46 │ if (case15!!) {}
     47 │ 

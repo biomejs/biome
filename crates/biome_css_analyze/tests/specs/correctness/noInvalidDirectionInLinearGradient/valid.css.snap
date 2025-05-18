@@ -4,6 +4,7 @@ expression: valid.css
 ---
 # Input
 ```css
+/* should not generate diagnostics */
 .foo {
 	background: linear-gradient(to top, #fff, #000);
 }

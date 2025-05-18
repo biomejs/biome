@@ -39,10 +39,10 @@ use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tokio::sync::watch;
 use tokio::task::spawn_blocking;
-use tower_lsp::lsp_types;
-use tower_lsp::lsp_types::{Diagnostic, Url};
-use tower_lsp::lsp_types::{MessageType, Registration};
-use tower_lsp::lsp_types::{Unregistration, WorkspaceFolder};
+use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
+use tower_lsp_server::lsp_types::{MessageType, Registration};
+use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
+use tower_lsp_server::{Client, UriExt, lsp_types};
 use tracing::{error, info, warn};
 
 pub(crate) struct ClientInformation {
@@ -63,7 +63,7 @@ pub(crate) struct Session {
     pub(crate) key: SessionKey,
 
     /// The LSP client for this session.
-    pub(crate) client: tower_lsp::Client,
+    pub(crate) client: Client,
 
     /// The parameters provided by the client in the "initialize" request
     initialize_params: OnceCell<InitializeParams>,
@@ -84,7 +84,7 @@ pub(crate) struct Session {
     projects: HashMap<BiomePath, ProjectKey>,
 
     /// Documents opened in this session.
-    documents: HashMap<lsp_types::Url, Document, FxBuildHasher>,
+    documents: HashMap<Uri, Document, FxBuildHasher>,
 
     pub(crate) cancellation: Arc<Notify>,
 
@@ -98,9 +98,9 @@ pub(crate) struct Session {
 /// The parameters provided by the client in the "initialize" request
 struct InitializeParams {
     /// The capabilities provided by the client as part of [`lsp_types::InitializeParams`]
-    client_capabilities: lsp_types::ClientCapabilities,
+    client_capabilities: ClientCapabilities,
     client_information: Option<ClientInformation>,
-    root_uri: Option<Url>,
+    root_uri: Option<Uri>,
     workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
@@ -185,7 +185,7 @@ impl CapabilitySet {
 impl Session {
     pub(crate) fn new(
         key: SessionKey,
-        client: tower_lsp::Client,
+        client: Client,
         workspace: Arc<dyn Workspace>,
         cancellation: Arc<Notify>,
         service_data_rx: watch::Receiver<ServiceDataNotification>,
@@ -209,9 +209,9 @@ impl Session {
     /// Initialize this session instance with the incoming initialization parameters from the client
     pub(crate) fn initialize(
         self: &Arc<Self>,
-        client_capabilities: lsp_types::ClientCapabilities,
+        client_capabilities: ClientCapabilities,
         client_information: Option<ClientInformation>,
-        root_uri: Option<Url>,
+        root_uri: Option<Uri>,
         workspace_folders: Option<Vec<WorkspaceFolder>>,
     ) {
         let result = self.initialize_params.set(InitializeParams {
@@ -226,13 +226,13 @@ impl Session {
         }
 
         let session = self.clone();
-        tokio::task::spawn(async move {
+        spawn(async move {
             let mut service_data_rx = session.service_data_rx.clone();
             while let Ok(()) = service_data_rx.changed().await {
                 match *session.service_data_rx.borrow() {
                     ServiceDataNotification::Updated => {
                         let session = session.clone();
-                        tokio::task::spawn(async move {
+                        spawn(async move {
                             session.update_all_diagnostics().await;
                         });
                     }
@@ -315,13 +315,13 @@ impl Session {
 
         // Spawn the scan in the background, to avoid timing out the LSP request.
         let session = self.clone();
-        tokio::spawn(async move { session.scan_project_folder(project_key, path).await });
+        spawn(async move { session.scan_project_folder(project_key, path).await });
     }
 
-    /// Get a [`Document`] matching the provided [`lsp_types::Url`]
+    /// Get a [`Document`] matching the provided [`Uri`]
     ///
     /// If document does not exist, result is [WorkspaceError::NotFound]
-    pub(crate) fn document(&self, url: &lsp_types::Url) -> Result<Document, Error> {
+    pub(crate) fn document(&self, url: &Uri) -> Result<Document, Error> {
         self.documents
             .pin()
             .get(url)
@@ -329,26 +329,27 @@ impl Session {
             .ok_or_else(|| WorkspaceError::not_found().with_file_path(url.to_string()))
     }
 
-    /// Set the [`Document`] for the provided [`lsp_types::Url`]
+    /// Set the [`Document`] for the provided [`Uri`]
     ///
     /// Used by [`handlers::text_document] to synchronize documents with the client.
-    pub(crate) fn insert_document(&self, url: lsp_types::Url, document: Document) {
+    pub(crate) fn insert_document(&self, url: Uri, document: Document) {
         self.documents.pin().insert(url, document);
     }
 
-    /// Remove the [`Document`] matching the provided [`lsp_types::Url`]
-    pub(crate) fn remove_document(&self, url: &lsp_types::Url) -> Option<ProjectKey> {
+    /// Remove the [`Document`] matching the provided [`Uri`]
+    pub(crate) fn remove_document(&self, url: &Uri) -> Option<ProjectKey> {
         self.documents.pin().remove(url).map(|doc| doc.project_key)
     }
 
-    pub(crate) fn file_path(&self, url: &lsp_types::Url) -> Result<BiomePath> {
+    pub(crate) fn file_path(&self, url: &Uri) -> Result<BiomePath> {
         let path_to_file = match url.to_file_path() {
-            Err(_) => {
+            None => {
                 // If we can't create a path, it's probably because the file doesn't exist.
                 // It can be a newly created file that it's not on disk
-                Utf8PathBuf::from(url.path())
+                Utf8PathBuf::from(url.path().to_string())
             }
-            Ok(path) => Utf8PathBuf::from_path_buf(path).expect("To to have a UTF-8 path"),
+            Some(path) => Utf8PathBuf::from_path_buf(path.as_ref().to_path_buf())
+                .expect("To to have a UTF-8 path"),
         };
 
         Ok(BiomePath::new(path_to_file))
@@ -357,8 +358,8 @@ impl Session {
     /// Computes diagnostics for the file matching the provided url and publishes
     /// them to the client. Called from [`handlers::text_document`] when a file's
     /// contents changes.
-    #[tracing::instrument(level = "debug", skip_all, fields(url = display(&url), diagnostic_count), err)]
-    pub(crate) async fn update_diagnostics(&self, url: lsp_types::Url) -> Result<(), LspError> {
+    #[tracing::instrument(level = "debug", skip_all, fields(url = display(url.as_str()), diagnostic_count), err)]
+    pub(crate) async fn update_diagnostics(&self, url: Uri) -> Result<(), LspError> {
         let doc = self.document(&url)?;
         self.update_diagnostics_for_document(url, doc).await
     }
@@ -366,10 +367,10 @@ impl Session {
     /// Computes diagnostics for the file matching the provided url and publishes
     /// them to the client. Called from [`handlers::text_document`] when a file's
     /// contents changes.
-    #[tracing::instrument(level = "debug", skip_all, fields(url = display(&url), diagnostic_count), err)]
+    #[tracing::instrument(level = "debug", skip_all, fields(url = display(url.as_str()), diagnostic_count), err)]
     async fn update_diagnostics_for_document(
         &self,
-        url: lsp_types::Url,
+        url: Uri,
         doc: Document,
     ) -> Result<(), LspError> {
         let biome_path = self.file_path(&url)?;
@@ -505,10 +506,10 @@ impl Session {
 
         let root_uri = initialize_params.root_uri.as_ref()?;
         match root_uri.to_file_path() {
-            Ok(base_path) => {
-                Some(Utf8PathBuf::from_path_buf(base_path).expect("To have a UTF-8 path"))
-            }
-            Err(()) => {
+            Some(base_path) => Some(
+                Utf8PathBuf::from_path_buf(base_path.to_path_buf()).expect("To have a UTF-8 path"),
+            ),
+            None => {
                 error!(
                     "The Workspace root URI {root_uri:?} could not be parsed as a filesystem path"
                 );
@@ -545,12 +546,11 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
             for folder in folders {
                 info!("Attempt to load the configuration file in {:?}", folder.uri);
-                let base_path = folder
-                    .uri
-                    .to_file_path()
-                    .map(|p| Utf8PathBuf::from_path_buf(p).expect("To have a valid UTF-8 path"));
+                let base_path = folder.uri.to_file_path().map(|p| {
+                    Utf8PathBuf::from_path_buf(p.to_path_buf()).expect("To have a valid UTF-8 path")
+                });
                 match base_path {
-                    Ok(base_path) => {
+                    Some(base_path) => {
                         let status = self
                             .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(
                                 base_path,
@@ -558,7 +558,7 @@ impl Session {
                             .await;
                         self.set_configuration_status(status);
                     }
-                    Err(_) => {
+                    None => {
                         error!(
                             "The Workspace root URI {:?} could not be parsed as a filesystem path",
                             folder.uri
@@ -732,7 +732,10 @@ impl Session {
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_extension_settings(&self) {
         let item = lsp_types::ConfigurationItem {
-            scope_uri: None,
+            scope_uri: match self.initialize_params.get() {
+                Some(params) => params.root_uri.clone(),
+                None => None,
+            },
             section: Some(String::from(CONFIGURATION_SECTION)),
         };
 

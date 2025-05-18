@@ -91,7 +91,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// [Self::path_is_symlink()] and this method to return `true` for the same
     /// path.
     fn path_is_file(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).is_ok_and(|kind| matches!(kind, PathKind::File { .. }))
+        Self::path_kind(self, path).is_ok_and(PathKind::is_file)
     }
 
     /// Checks if the given path is a directory
@@ -100,16 +100,30 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// [Self::path_is_symlink()] and this method to return `true` for the same
     /// path.
     fn path_is_dir(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).is_ok_and(|kind| matches!(kind, PathKind::Directory { .. }))
+        Self::path_kind(self, path).is_ok_and(PathKind::is_dir)
     }
 
     /// Checks if the given path is a symlink
     fn path_is_symlink(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).is_ok_and(PathKind::is_symlink)
+        Self::symlink_path_kind(self, path).is_ok_and(PathKind::is_symlink)
     }
 
     /// Returns metadata about the path.
+    ///
+    /// This method follows symlinks.
+    ///
+    /// Errors if the path doesn't exist (including broken symlinks), isn't
+    /// accessible, or if the path points to neither a file or directory.
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
+
+    /// Returns metadata about the path without following symlinks.
+    ///
+    /// In other words, it returns the kind of the symlink itself, if it is one.
+    /// If the path is an ordinary file or directory, it still returns its kind.
+    ///
+    /// Errors if the path doesn't exist, isn't accessible, or if the path is
+    /// not a file, directory, or symlink.
+    fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
     /// This method accepts a directory path (`search_dir`) and a file name `search_file`,
     ///
@@ -142,24 +156,21 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
             // Iterate all possible file names
             for file_name in search_files {
                 let file_path = current_search_dir.join(file_name);
-                match self.read_file_from_path(&file_path) {
-                    Ok(content) => {
-                        if !predicate(&file_path, &content) {
-                            break;
-                        }
-                        if is_searching_in_parent_dir {
-                            info!(
-                                "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
-                                current_search_dir
-                            );
-                        }
-                        return Some(AutoSearchResult {
-                            content,
-                            file_path,
-                            directory_path: current_search_dir,
-                        });
+                if let Ok(content) = self.read_file_from_path(&file_path) {
+                    if !predicate(&file_path, &content) {
+                        break;
                     }
-                    _ => continue,
+                    if is_searching_in_parent_dir {
+                        info!(
+                            "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
+                            current_search_dir
+                        );
+                    }
+                    return Some(AutoSearchResult {
+                        content,
+                        file_path,
+                        directory_path: current_search_dir,
+                    });
                 }
             }
 
@@ -421,6 +432,10 @@ where
 
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
         T::path_kind(self, path)
+    }
+
+    fn symlink_path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
+        T::symlink_path_kind(self, path)
     }
 
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {

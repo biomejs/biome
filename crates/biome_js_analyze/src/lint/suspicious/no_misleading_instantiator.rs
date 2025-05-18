@@ -174,7 +174,7 @@ fn check_interface_methods(decl: &TsInterfaceDeclaration) -> Option<RuleState> {
                     AnyTsType::TsThisType(this_type) if this_type.this_token().ok().is_some() => {
                         return Some(RuleState::InterfaceMisleadingNew(construct.range()));
                     }
-                    _ => continue,
+                    _ => {}
                 }
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
@@ -183,7 +183,7 @@ fn check_interface_methods(decl: &TsInterfaceDeclaration) -> Option<RuleState> {
                     return Some(RuleState::InterfaceMisleadingConstructor(method.range()));
                 }
             }
-            _ => continue,
+            _ => {}
         };
     }
     None
@@ -214,7 +214,7 @@ fn check_class_methods(js_class_decl: &JsClassDeclaration) -> Option<RuleState> 
                         {
                             return Some(RuleState::ClassMisleadingNew(method.range()));
                         }
-                        _ => continue,
+                        _ => {}
                     }
                 }
             }

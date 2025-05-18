@@ -1,12 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Input messages
 
 ```block
 ---
 import {a as a} from 'mod';
+export { a };
 ---
 <div></div>
 ```
@@ -16,6 +17,7 @@ import {a as a} from 'mod';
 ```block
 ---
 import {a} from 'mod';
+export { a };
 ---
 <div></div>
 ```

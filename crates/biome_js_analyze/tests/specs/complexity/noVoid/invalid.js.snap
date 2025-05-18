@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -19,7 +18,7 @@ void(0);
 ```
 invalid.js:1:1 lint/complexity/noVoid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of void is not allowed.
+  ! The use of void is not allowed.
   
   > 1 │ void 0;
       │ ^^^^^^
@@ -34,7 +33,7 @@ invalid.js:1:1 lint/complexity/noVoid ━━━━━━━━━━━━━━
 ```
 invalid.js:3:9 lint/complexity/noVoid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of void is not allowed.
+  ! The use of void is not allowed.
   
     1 │ void 0;
     2 │ function f() {
@@ -51,7 +50,7 @@ invalid.js:3:9 lint/complexity/noVoid ━━━━━━━━━━━━━━
 ```
 invalid.js:5:11 lint/complexity/noVoid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of void is not allowed.
+  ! The use of void is not allowed.
   
     3 │ 	return void 0;
     4 │ }
@@ -68,7 +67,7 @@ invalid.js:5:11 lint/complexity/noVoid ━━━━━━━━━━━━━�
 ```
 invalid.js:6:1 lint/complexity/noVoid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of void is not allowed.
+  ! The use of void is not allowed.
   
     4 │ }
     5 │ var foo = void 0;

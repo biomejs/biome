@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessEscapeInString {
-        version: "next",
+        version: "2.0.0",
         name: "noUselessEscapeInString",
         language: "js",
         recommended: true,
@@ -165,6 +165,13 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
                     | b'u'
                     | b'v'
                     | b'x' => {}
+                    // In template literals, \${ is a valid escape for producing a literal ${
+                    b'$' => {
+                        // Clone iterator to peek ahead without advancing, so other escapes like \${\a aren't missed
+                        if !(quote == b'`' && (matches!(it.clone().next(), Some((_, b'{'))))) {
+                            return Some(i);
+                        }
+                    }
                     // Preserve escaping of Unicode characters U+2028 and U+2029
                     0xE2 => {
                         if !(matches!(it.next(), Some((_, 0x80)))

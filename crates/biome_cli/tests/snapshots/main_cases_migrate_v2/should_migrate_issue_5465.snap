@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -10,15 +9,6 @@ snapshot_kind: text
   "linter": {
     "enabled": true,
     "rules": {
-      "correctness": {
-        "noConstantCondition": "error",
-        "noInvalidConstructorSuper": "error",
-        "noUnusedVariables": "error",
-        "noUnreachable": "error",
-        "noUnsafeFinally": "error",
-        "noSwitchDeclarations": "off",
-        "noSelfAssign": "off"
-      },
       "suspicious": {
         "noDebugger": "error",
         "noShadowRestrictedNames": "off",
@@ -44,11 +34,9 @@ snapshot_kind: text
           }
         },
         "noDefaultExport": "error",
-        "useLiteralEnumMembers": "error",
-        "noCommaOperator": "error",
-        "useNodejsImportProtocol": "error",
+        "noParameterAssign": "error",
         "useAsConstAssertion": "error",
-        "useNumericLiterals": "error",
+        "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
         "useSelfClosingElements": "error",
         "useConst": "error",
@@ -56,16 +44,16 @@ snapshot_kind: text
         "noUnusedTemplateLiteral": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-        "useExponentiationOperator": "error",
-        "useTemplate": "error",
-        "noParameterAssign": "error",
-        "noNonNullAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "noArguments": "error",
-        "useImportType": "error",
-        "useExportType": "error",
-        "noUselessElse": "error",
-        "useShorthandFunctionType": "error"
+        "noUselessElse": "error"
+      },
+      "correctness": {
+        "noConstantCondition": "error",
+        "noInvalidConstructorSuper": "error",
+        "noUnusedVariables": "error",
+        "noUnreachable": "error",
+        "noUnsafeFinally": "error",
+        "noSwitchDeclarations": "off",
+        "noSelfAssign": "off"
       }
     }
   }
@@ -75,5 +63,5 @@ snapshot_kind: text
 # Emitted Messages
 
 ```block
-The configuration biome.json has been successfully migrated.
+Your configuration file(s) have been successfully migrated.
 ```

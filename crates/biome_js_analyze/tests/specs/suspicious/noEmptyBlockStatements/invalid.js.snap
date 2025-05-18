@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -80,7 +79,7 @@ function fooWithInternalEmptyBlocks(){
 ```
 invalid.js:1:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
   > 1 │ function foo() {}
       │                ^^
@@ -95,7 +94,7 @@ invalid.js:1:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.js:3:19 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     1 │ function foo() {}
     2 │ 
@@ -112,7 +111,7 @@ invalid.js:3:19 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.js:8:24 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
      6 │   let a = 1;
      7 │ 
@@ -129,7 +128,7 @@ invalid.js:8:24 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.js:17:28 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     15 │   let a = 1;
     16 │ 
@@ -146,7 +145,7 @@ invalid.js:17:28 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:23:14 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     22 │ let someVar;
   > 23 │ if (someVar) {
@@ -164,7 +163,7 @@ invalid.js:23:14 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:26:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     24 │ }
     25 │ 
@@ -183,7 +182,7 @@ invalid.js:26:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:29:1 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     27 │ }
     28 │ 
@@ -202,7 +201,7 @@ invalid.js:29:1 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.js:34:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     32 │ try {
     33 │     doSomething();
@@ -222,7 +221,7 @@ invalid.js:34:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:36:11 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     34 │ } catch(ex) {
     35 │ 
@@ -242,7 +241,7 @@ invalid.js:36:11 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:41:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     40 │ class Foo {
   > 41 │   static {}
@@ -258,7 +257,7 @@ invalid.js:41:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.js:44:21 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     42 │ }
     43 │ 
@@ -275,7 +274,7 @@ invalid.js:44:21 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:47:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     46 │ const ob = {}
   > 47 │ for (key in ob) {}
@@ -291,7 +290,7 @@ invalid.js:47:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:50:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     49 │ const ar = []
   > 50 │ for (val of ar) {}
@@ -307,7 +306,7 @@ invalid.js:50:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:54:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     52 │ function fooWithInternalEmptyBlocks(){
     53 │   let someVar;
@@ -324,7 +323,7 @@ invalid.js:54:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:56:19 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     54 │   if (someVar) {}
     55 │ 
@@ -343,7 +342,7 @@ invalid.js:56:19 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:59:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     57 │   }
     58 │ 
@@ -362,7 +361,7 @@ invalid.js:59:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 invalid.js:64:15 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     62 │   try {
     63 │       doSomething();
@@ -382,7 +381,7 @@ invalid.js:64:15 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 ```
 invalid.js:66:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected empty block.
+  ! Unexpected empty block.
   
     64 │   } catch(ex) {
     65 │ 

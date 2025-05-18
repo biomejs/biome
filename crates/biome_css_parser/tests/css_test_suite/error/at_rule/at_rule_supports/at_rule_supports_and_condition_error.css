@@ -1,0 +1,28 @@
+/* No valid condition after `and` */
+@supports (display:flex) and {
+}
+
+/* No valid condition after `and missing {` */
+@supports (display:flex) and
+}
+
+/* 200px is not a valid condition start */
+@supports (display:flex) and -- name {
+}
+
+/* The final `and` is missing its sub-condition */
+@supports (display:flex) and (display:flex) and {
+}
+
+/* Missing parenthesis  */
+@supports (display:flex) and (display:flex {
+}
+
+
+/* There's an extra `and` that has no condition immediately following it. */
+@supports (display:flex) and and (display:flex) {
+}
+
+/* Invalid condition */
+@supports (display:flex) and -- name and (display:flex) {
+}

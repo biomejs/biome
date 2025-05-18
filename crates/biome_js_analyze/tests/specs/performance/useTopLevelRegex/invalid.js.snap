@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -64,7 +63,7 @@ const foo = {
 ```
 invalid.js:2:9 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     1 │ function foo(someString) {
   > 2 │ 	return /[a-Z]*/.test(someString)
@@ -80,7 +79,7 @@ invalid.js:2:9 lint/performance/useTopLevelRegex ━━━━━━━━━━�
 ```
 invalid.js:6:12 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     5 │ function foo(someString) {
   > 6 │ 	const r = /[a-Z]*/;
@@ -96,7 +95,7 @@ invalid.js:6:12 lint/performance/useTopLevelRegex ━━━━━━━━━━
 ```
 invalid.js:11:9 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     10 │ const foo = (someString) => {
   > 11 │ 	return /[a-Z]*/.test(someString)
@@ -112,7 +111,7 @@ invalid.js:11:9 lint/performance/useTopLevelRegex ━━━━━━━━━━
 ```
 invalid.js:16:16 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     14 │ class Foo {
     15 │ 	constructor() {
@@ -129,7 +128,7 @@ invalid.js:16:16 lint/performance/useTopLevelRegex ━━━━━━━━━�
 ```
 invalid.js:21:10 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     20 │ class Foo {
   > 21 │ 	regex = /[a-Z]*/;
@@ -145,7 +144,7 @@ invalid.js:21:10 lint/performance/useTopLevelRegex ━━━━━━━━━�
 ```
 invalid.js:26:10 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     24 │ class Foo {
     25 │ 	get regex() {
@@ -162,7 +161,7 @@ invalid.js:26:10 lint/performance/useTopLevelRegex ━━━━━━━━━�
 ```
 invalid.js:32:16 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     30 │ class Foo {
     31 │ 	set apply(s) {
@@ -179,7 +178,7 @@ invalid.js:32:16 lint/performance/useTopLevelRegex ━━━━━━━━━�
 ```
 invalid.js:38:10 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     36 │ const foo = {
     37 │ 	regex() {
@@ -196,7 +195,7 @@ invalid.js:38:10 lint/performance/useTopLevelRegex ━━━━━━━━━�
 ```
 invalid.js:44:10 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     42 │ const foo = {
     43 │ 	get regex() {
@@ -213,7 +212,7 @@ invalid.js:44:10 lint/performance/useTopLevelRegex ━━━━━━━━━�
 ```
 invalid.js:50:16 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  ! This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
     48 │ const foo = {
     49 │ 	set apply(s) {
