@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -40,7 +39,7 @@ var xs = window.Array();
 
 # Diagnostics
 ```
-invalid.js:1:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -62,7 +61,7 @@ invalid.js:1:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:3:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -88,7 +87,7 @@ invalid.js:3:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:5:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -114,7 +113,7 @@ invalid.js:5:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:7:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -140,7 +139,7 @@ invalid.js:7:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:9:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -166,7 +165,7 @@ invalid.js:9:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:11:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -192,7 +191,7 @@ invalid.js:11:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:13:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -218,7 +217,7 @@ invalid.js:13:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:15:17 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:17 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -244,7 +243,7 @@ invalid.js:15:17 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:17:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -278,7 +277,7 @@ invalid.js:17:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:22:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -304,7 +303,7 @@ invalid.js:22:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:26:1 lint/correctness/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:1 lint/style/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -321,7 +320,7 @@ invalid.js:26:1 lint/correctness/useArrayLiterals ━━━━━━━━━━
 ```
 
 ```
-invalid.js:28:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -347,7 +346,7 @@ invalid.js:28:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:30:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   

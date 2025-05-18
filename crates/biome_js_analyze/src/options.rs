@@ -106,7 +106,7 @@ pub type NoExtraBooleanCast =
 pub type NoExtraNonNullAssertion = < lint :: suspicious :: no_extra_non_null_assertion :: NoExtraNonNullAssertion as biome_analyze :: Rule > :: Options ;
 pub type NoFallthroughSwitchClause = < lint :: suspicious :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause as biome_analyze :: Rule > :: Options ;
 pub type NoFlatMapIdentity =
-    <lint::correctness::no_flat_map_identity::NoFlatMapIdentity as biome_analyze::Rule>::Options;
+    <lint::complexity::no_flat_map_identity::NoFlatMapIdentity as biome_analyze::Rule>::Options;
 pub type NoFloatingPromises =
     <lint::nursery::no_floating_promises::NoFloatingPromises as biome_analyze::Rule>::Options;
 pub type NoFocusedTests =
@@ -157,7 +157,7 @@ pub type NoMisplacedAssertion = < lint :: suspicious :: no_misplaced_assertion :
 pub type NoMisrefactoredShorthandAssign = < lint :: suspicious :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign as biome_analyze :: Rule > :: Options ;
 pub type NoNamespace = <lint::style::no_namespace::NoNamespace as biome_analyze::Rule>::Options;
 pub type NoNamespaceImport =
-    <lint::style::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
+    <lint::performance::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
 pub type NoNegationElse =
     <lint::style::no_negation_else::NoNegationElse as biome_analyze::Rule>::Options;
 pub type NoNestedTernary =
@@ -297,7 +297,7 @@ pub type NoVoid = <lint::complexity::no_void::NoVoid as biome_analyze::Rule>::Op
 pub type NoVoidElementsWithChildren = < lint :: correctness :: no_void_elements_with_children :: NoVoidElementsWithChildren as biome_analyze :: Rule > :: Options ;
 pub type NoVoidTypeReturn =
     <lint::correctness::no_void_type_return::NoVoidTypeReturn as biome_analyze::Rule>::Options;
-pub type NoWith = <lint::complexity::no_with::NoWith as biome_analyze::Rule>::Options;
+pub type NoWith = <lint::suspicious::no_with::NoWith as biome_analyze::Rule>::Options;
 pub type NoYodaExpression =
     <lint::style::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
 pub type OrganizeImports =
@@ -312,7 +312,7 @@ pub type UseAriaPropsForRole =
     <lint::a11y::use_aria_props_for_role::UseAriaPropsForRole as biome_analyze::Rule>::Options;
 pub type UseAriaPropsSupportedByRole = < lint :: a11y :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRole as biome_analyze :: Rule > :: Options ;
 pub type UseArrayLiterals =
-    <lint::correctness::use_array_literals::UseArrayLiterals as biome_analyze::Rule>::Options;
+    <lint::style::use_array_literals::UseArrayLiterals as biome_analyze::Rule>::Options;
 pub type UseArrowFunction =
     <lint::complexity::use_arrow_function::UseArrowFunction as biome_analyze::Rule>::Options;
 pub type UseAsConstAssertion =
@@ -402,7 +402,7 @@ pub type UseNumberNamespace =
     <lint::style::use_number_namespace::UseNumberNamespace as biome_analyze::Rule>::Options;
 pub type UseNumberToFixedDigitsArgument = < lint :: suspicious :: use_number_to_fixed_digits_argument :: UseNumberToFixedDigitsArgument as biome_analyze :: Rule > :: Options ;
 pub type UseNumericLiterals =
-    <lint::style::use_numeric_literals::UseNumericLiterals as biome_analyze::Rule>::Options;
+    <lint::complexity::use_numeric_literals::UseNumericLiterals as biome_analyze::Rule>::Options;
 pub type UseNumericSeparators =
     <lint::nursery::use_numeric_separators::UseNumericSeparators as biome_analyze::Rule>::Options;
 pub type UseOptionalChain =
@@ -454,6 +454,6 @@ pub type UseValidAutocomplete =
 pub type UseValidForDirection = < lint :: correctness :: use_valid_for_direction :: UseValidForDirection as biome_analyze :: Rule > :: Options ;
 pub type UseValidLang = <lint::a11y::use_valid_lang::UseValidLang as biome_analyze::Rule>::Options;
 pub type UseValidTypeof =
-    <lint::suspicious::use_valid_typeof::UseValidTypeof as biome_analyze::Rule>::Options;
+    <lint::correctness::use_valid_typeof::UseValidTypeof as biome_analyze::Rule>::Options;
 pub type UseWhile = <lint::complexity::use_while::UseWhile as biome_analyze::Rule>::Options;
 pub type UseYield = <lint::correctness::use_yield::UseYield as biome_analyze::Rule>::Options;

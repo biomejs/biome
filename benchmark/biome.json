@@ -24,9 +24,9 @@
         "noUselessLabel": "error",
         "noUselessRename": "error",
         "noVoid": "error",
-        "noWith": "error",
         "useArrowFunction": "error",
         "useLiteralKeys": "error",
+        "useNumericLiterals": "error",
         "useRegexLiterals": "error"
       },
       "correctness": {
@@ -52,9 +52,9 @@
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "error",
-        "useArrayLiterals": "error",
         "useIsNan": "error",
         "useValidForDirection": "error",
+        "useValidTypeof": "error",
         "useYield": "error"
       },
       "security": {
@@ -64,11 +64,11 @@
         "noArguments": "error",
         "noCommaOperator": "error",
         "noParameterAssign": "error",
+        "useArrayLiterals": "error",
         "useConst": "error",
         "useCollapsedElseIf": "error",
         "useDefaultParameterLast": "error",
         "useExponentiationOperator": "error",
-        "useNumericLiterals": "error",
         "useSingleVarDeclarator": "error",
         "useTemplate": "error"
       },
@@ -99,10 +99,10 @@
         "noShadowRestrictedNames": "error",
         "noSparseArray": "error",
         "noUnsafeNegation": "error",
+        "noWith": "error",
         "useAwait": "error",
         "useDefaultSwitchClauseLast": "error",
         "useGetterReturn": "error",
-        "useValidTypeof": "error",
         "noVar": "error"
       }
     }

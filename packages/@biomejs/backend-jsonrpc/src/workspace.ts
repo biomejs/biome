@@ -1146,6 +1146,10 @@ export interface Complexity {
 	 */
 	noExtraBooleanCast?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow to use unnecessary callback on flatMap.
+	 */
+	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
+	/**
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
 	noForEach?: RuleConfiguration_for_NoForEachOptions;
@@ -1222,10 +1226,6 @@ export interface Complexity {
 	 */
 	noVoid?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow with statements in non-strict contexts.
-	 */
-	noWith?: RuleConfiguration_for_Null;
-	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -1245,6 +1245,10 @@ export interface Complexity {
 	 * Enforce the usage of a literal access to properties over computed property access.
 	 */
 	useLiteralKeys?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
+	 */
+	useNumericLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce using concise optional chain instead of chained logical expressions.
 	 */
@@ -1298,10 +1302,6 @@ export interface Correctness {
 	 * Disallows empty destructuring patterns.
 	 */
 	noEmptyPattern?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow to use unnecessary callback on flatMap.
-	 */
-	noFlatMapIdentity?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow calling global object properties as functions
 	 */
@@ -1467,10 +1467,6 @@ export interface Correctness {
 	 */
 	recommended?: boolean;
 	/**
-	 * Disallow Array constructors.
-	 */
-	useArrayLiterals?: RuleFixConfiguration_for_Null;
-	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
 	useExhaustiveDependencies?: RuleFixConfiguration_for_UseExhaustiveDependenciesOptions;
@@ -1494,6 +1490,10 @@ export interface Correctness {
 	 * Enforce "for" loop update clause moving the counter in the right direction.
 	 */
 	useValidForDirection?: RuleConfiguration_for_Null;
+	/**
+	 * This rule checks that the result of a typeof expression is compared to a valid value.
+	 */
+	useValidTypeof?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require generator functions to contain yield.
 	 */
@@ -1673,6 +1673,10 @@ export interface Performance {
 	 */
 	noImgElement?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of namespace imports.
+	 */
+	noNamespaceImport?: RuleConfiguration_for_Null;
+	/**
 	 * Avoid re-export all.
 	 */
 	noReExportAll?: RuleConfiguration_for_Null;
@@ -1763,10 +1767,6 @@ export interface Style {
 	 */
 	noNamespace?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow the use of namespace imports.
-	 */
-	noNamespaceImport?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow negation in the condition of an if statement if it has an else clause.
 	 */
 	noNegationElse?: RuleFixConfiguration_for_Null;
@@ -1830,6 +1830,10 @@ export interface Style {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Disallow Array constructors.
+	 */
+	useArrayLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the use of as const over literal type and type annotation.
 	 */
@@ -1938,10 +1942,6 @@ export interface Style {
 	 * Use the Number properties instead of global ones.
 	 */
 	useNumberNamespace?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals
-	 */
-	useNumericLiterals?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevent extra closing tags for components without children.
 	 */
@@ -2256,6 +2256,10 @@ export interface Suspicious {
 	 */
 	noVar?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow with statements in non-strict contexts.
+	 */
+	noWith?: RuleConfiguration_for_Null;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -2303,10 +2307,6 @@ export interface Suspicious {
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
-	/**
-	 * This rule checks that the result of a typeof expression is compared to a valid value.
-	 */
-	useValidTypeof?: RuleFixConfiguration_for_Null;
 }
 export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithOptions_for_Options {
@@ -3357,6 +3357,7 @@ export type Category =
 	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
+	| "lint/complexity/noFlatMapIdentity"
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noStaticOnlyClass"
 	| "lint/complexity/noThisInStatic"
@@ -3376,11 +3377,11 @@ export type Category =
 	| "lint/complexity/noUselessTypeConstraint"
 	| "lint/complexity/noUselessUndefinedInitialization"
 	| "lint/complexity/noVoid"
-	| "lint/complexity/noWith"
 	| "lint/complexity/useArrowFunction"
 	| "lint/complexity/useDateNow"
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
+	| "lint/complexity/useNumericLiterals"
 	| "lint/complexity/useOptionalChain"
 	| "lint/complexity/useRegexLiterals"
 	| "lint/complexity/useSimpleNumberKeys"
@@ -3393,7 +3394,6 @@ export type Category =
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
-	| "lint/correctness/noFlatMapIdentity"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidBuiltinInstantiation"
@@ -3437,13 +3437,13 @@ export type Category =
 	| "lint/correctness/noUselessContinue"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
-	| "lint/correctness/useArrayLiterals"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useImportExtensions"
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
+	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
@@ -3510,6 +3510,7 @@ export type Category =
 	| "lint/performance/noDelete"
 	| "lint/performance/noDynamicNamespaceImportAccess"
 	| "lint/performance/noImgElement"
+	| "lint/performance/noNamespaceImport"
 	| "lint/performance/noReExportAll"
 	| "lint/performance/useTopLevelRegex"
 	| "lint/security/noBlankTarget"
@@ -3528,7 +3529,6 @@ export type Category =
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"
-	| "lint/style/noNamespaceImport"
 	| "lint/style/noNegationElse"
 	| "lint/style/noNestedTernary"
 	| "lint/style/noNonNullAssertion"
@@ -3544,6 +3544,7 @@ export type Category =
 	| "lint/style/noUselessElse"
 	| "lint/style/noValueAtRule"
 	| "lint/style/noYodaExpression"
+	| "lint/style/useArrayLiterals"
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useAtIndex"
 	| "lint/style/useBlockStatements"
@@ -3571,7 +3572,6 @@ export type Category =
 	| "lint/style/useNodeAssertStrict"
 	| "lint/style/useNodejsImportProtocol"
 	| "lint/style/useNumberNamespace"
-	| "lint/style/useNumericLiterals"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandArrayType"
 	| "lint/style/useShorthandAssign"
@@ -3651,6 +3651,7 @@ export type Category =
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/noVar"
+	| "lint/suspicious/noWith"
 	| "lint/suspicious/useAdjacentOverloadSignatures"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
@@ -3662,7 +3663,6 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStrictMode"
-	| "lint/suspicious/useValidTypeof"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"

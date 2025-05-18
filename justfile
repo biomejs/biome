@@ -92,8 +92,8 @@ new-graphql-lintrule rulename:
 
 
 # Promotes a rule from the nursery group to a new group
-promote-rule group rulename:
-	cargo run -p xtask_codegen -- promote-rule --group={{group}} --name={{rulename}}
+move-rule group rulename:
+	cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
 	just gen-analyzer
 	just documentation
 	cargo test -- {{snakecase(rulename)}}

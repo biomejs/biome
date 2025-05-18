@@ -455,6 +455,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noFlatMapIdentity": {
+					"description": "Disallow to use unnecessary callback on flatMap.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noForEach": {
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
@@ -588,13 +595,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noWith": {
-					"description": "Disallow with statements in non-strict contexts.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -622,6 +622,13 @@
 				},
 				"useLiteralKeys": {
 					"description": "Enforce the usage of a literal access to properties over computed property access.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNumericLiterals": {
+					"description": "Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -799,13 +806,6 @@
 					"description": "Disallows empty destructuring patterns.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noFlatMapIdentity": {
-					"description": "Disallow to use unnecessary callback on flatMap.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1093,13 +1093,6 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"useArrayLiterals": {
-					"description": "Disallow Array constructors.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified in a React hook.",
 					"anyOf": [
@@ -1139,6 +1132,13 @@
 					"description": "Enforce \"for\" loop update clause moving the counter in the right direction.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useValidTypeof": {
+					"description": "This rule checks that the result of a typeof expression is compared to a valid value.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3185,6 +3185,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNamespaceImport": {
+					"description": "Disallow the use of namespace imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReExportAll": {
 					"description": "Avoid re-export all.",
 					"anyOf": [
@@ -4292,13 +4299,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noNamespaceImport": {
-					"description": "Disallow the use of namespace imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noNegationElse": {
 					"description": "Disallow negation in the condition of an if statement if it has an else clause.",
 					"anyOf": [
@@ -4407,6 +4407,13 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useArrayLiterals": {
+					"description": "Disallow Array constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useAsConstAssertion": {
 					"description": "Enforce the use of as const over literal type and type annotation.",
@@ -4596,13 +4603,6 @@
 				},
 				"useNumberNamespace": {
 					"description": "Use the Number properties instead of global ones.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNumericLiterals": {
-					"description": "Disallow parseInt() and Number.parseInt() in favor of binary, octal, and hexadecimal literals",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -5174,6 +5174,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noWith": {
+					"description": "Disallow with statements in non-strict contexts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -5250,13 +5257,6 @@
 				},
 				"useStrictMode": {
 					"description": "Enforce the use of the directive \"use strict\" in script files.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useValidTypeof": {
-					"description": "This rule checks that the result of a typeof expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
