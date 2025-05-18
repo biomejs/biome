@@ -121,7 +121,7 @@ interface Array<Type> {
 }
 
 type MyObject = {
-	(input: string); // FIXME: this shouldn't error
+	(input: string);
 	propertyName: string;
 };
 
