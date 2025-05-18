@@ -61,7 +61,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("prefer-numeric-literals")],
         recommended: true,
         severity: Severity::Warning,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

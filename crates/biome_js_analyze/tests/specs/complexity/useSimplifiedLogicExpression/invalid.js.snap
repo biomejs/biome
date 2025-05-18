@@ -1,0 +1,94 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+const r = true && boolExp;
+const boolExp2 = true;
+const r2 = boolExp || true;
+const nonNullExp = 123;
+const r3 = null ?? nonNullExp;
+const boolExpr1 = true;
+const boolExpr2 = false;
+const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/ 
+
+```
+
+# Diagnostics
+```
+invalid.js:1:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Logical expression contains unnecessary complexity.
+  
+  > 1 │ const r = true && boolExp;
+      │           ^^^^^^^^^^^^^^^
+    2 │ const boolExp2 = true;
+    3 │ const r2 = boolExp || true;
+  
+  i Safe fix: Discard redundant terms from the logical expression.
+  
+    1 │ const·r·=·true·&&·boolExp;
+      │           --------        
+
+```
+
+```
+invalid.js:3:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Logical expression contains unnecessary complexity.
+  
+    1 │ const r = true && boolExp;
+    2 │ const boolExp2 = true;
+  > 3 │ const r2 = boolExp || true;
+      │            ^^^^^^^^^^^^^^^
+    4 │ const nonNullExp = 123;
+    5 │ const r3 = null ?? nonNullExp;
+  
+  i Safe fix: Discard redundant terms from the logical expression.
+  
+    3 │ const·r2·=·boolExp·||·true;
+      │            -----------     
+
+```
+
+```
+invalid.js:5:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Logical expression contains unnecessary complexity.
+  
+    3 │ const r2 = boolExp || true;
+    4 │ const nonNullExp = 123;
+  > 5 │ const r3 = null ?? nonNullExp;
+      │            ^^^^^^^^^^^^^^^^^^
+    6 │ const boolExpr1 = true;
+    7 │ const boolExpr2 = false;
+  
+  i Safe fix: Discard redundant terms from the logical expression.
+  
+    5 │ const·r3·=·null·??·nonNullExp;
+      │            --------           
+
+```
+
+```
+invalid.js:8:18 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Logical expression contains unnecessary complexity.
+  
+    6 │ const boolExpr1 = true;
+    7 │ const boolExpr2 = false;
+  > 8 │ const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/·
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Safe fix: Reduce the complexity of the logical expression.
+  
+    6 6 │   const boolExpr1 = true;
+    7 7 │   const boolExpr2 = false;
+    8   │ - const·r4·=·/*1*/·!boolExpr1·/*2*/··||·/*3*/·!boolExpr2·/*4*/·
+      8 │ + const·r4·=·/*1*/·!(boolExpr1·/*2*/··&&·/*3*/·boolExpr2·/*4*/·)·/*4*/·
+    9 9 │   
+  
+
+```

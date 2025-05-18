@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -51,7 +50,7 @@ invalid.js:2:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━�
     3 │ }
     4 │ 
   
-  i Unsafe fix: Delete the unnecessary continue statement
+  i Safe fix: Delete the unnecessary continue statement
   
      1  1 │   loop: for (let i = 0; i < 5; i++) {
      2    │ - → continue·loop;
@@ -72,7 +71,7 @@ invalid.js:6:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━�
     7 │ }
     8 │ 
   
-  i Unsafe fix: Delete the unnecessary continue statement
+  i Safe fix: Delete the unnecessary continue statement
   
      4  4 │   
      5  5 │   while (i--) {
@@ -94,7 +93,7 @@ invalid.js:10:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━�
     11 │ }
     12 │ 
   
-  i Unsafe fix: Delete the unnecessary continue statement
+  i Safe fix: Delete the unnecessary continue statement
   
      8  8 │   
      9  9 │   while (1) {
@@ -117,7 +116,7 @@ invalid.js:16:3 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━�
     17 │ 	} else if (i >= 5 && i < 8) {
     18 │ 		console.log("test");
   
-  i Unsafe fix: Delete the unnecessary continue statement
+  i Safe fix: Delete the unnecessary continue statement
   
     14 14 │   	if (i > 5) {
     15 15 │   		console.log("foo");
@@ -139,7 +138,7 @@ invalid.js:25:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━�
     26 │ }
     27 │ 
   
-  i Unsafe fix: Delete the unnecessary continue statement
+  i Safe fix: Delete the unnecessary continue statement
   
     23 23 │   
     24 24 │   for (let i = 0; i < 9; i++) {
@@ -162,7 +161,7 @@ invalid.js:28:35 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━
     29 │ 
     30 │ test2: do {
   
-  i Unsafe fix: Delete the unnecessary continue statement
+  i Safe fix: Delete the unnecessary continue statement
   
     28 │ test:·for·(let·i·=·0;·i·<·9;·i++)·continue·test;
        │                                   ------------- 
@@ -179,7 +178,7 @@ invalid.js:31:2 lint/correctness/noUselessContinue  FIXABLE  ━━━━━━�
        │ 	^^^^^^^^^^^^^^^
     32 │ } while (true);
   
-  i Unsafe fix: Delete the unnecessary continue statement
+  i Safe fix: Delete the unnecessary continue statement
   
     29 29 │   
     30 30 │   test2: do {

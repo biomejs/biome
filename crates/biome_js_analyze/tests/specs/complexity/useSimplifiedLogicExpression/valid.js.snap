@@ -1,40 +1,16 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid.jsonc
+expression: valid.js
 ---
 # Input
-```cjs
+```js
+/* should not generate diagnostics */
 const boolExpr3 = true;
-```
-
-# Input
-```cjs
 const boolExpr4 = false;
-```
-
-# Input
-```cjs
 const r5 = !(boolExpr1 && boolExpr2);
-```
-
-# Input
-```cjs
 const boolExpr5 = true;
-```
-
-# Input
-```cjs
 const boolExpr6 = false;
-```
-
-# Input
-```cjs
 const r6 = !!boolExpr1 || !!boolExpr2;
+!!x;
+
 ```
-
-# Input
-```cjs
-!!x
-```
-
-

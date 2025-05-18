@@ -47,7 +47,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintUnicorn("require-number-to-fixed-digits-argument")],
         recommended: false,
         severity: Severity::Warning,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 

@@ -50,7 +50,7 @@ invalid.js:1:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
      1    │ - var·xs·=·Array();
         1 │ + var·xs·=·[];
@@ -74,7 +74,7 @@ invalid.js:3:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
      1  1 │   var xs = Array();
      2  2 │   
@@ -100,7 +100,7 @@ invalid.js:5:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
      3  3 │   var xs = Array(0, 1, 2);
      4  4 │   
@@ -126,7 +126,7 @@ invalid.js:7:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
      5  5 │   var xs = Array(...args);
      6  6 │   
@@ -152,7 +152,7 @@ invalid.js:9:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
      7  7 │   var xs = new Array;
      8  8 │   
@@ -178,7 +178,7 @@ invalid.js:11:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
      9  9 │   var xs = new Array();
     10 10 │   
@@ -204,7 +204,7 @@ invalid.js:13:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
     11 11 │   var xs = new Array(0, 1, 2);
     12 12 │   
@@ -230,7 +230,7 @@ invalid.js:15:17 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
     13 13 │   var xs = new Array(...args);
     14 14 │   
@@ -260,7 +260,7 @@ invalid.js:17:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
     15 15 │   var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
     16 16 │   
@@ -290,7 +290,7 @@ invalid.js:22:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
     20 20 │   );
     21 21 │   
@@ -333,7 +333,7 @@ invalid.js:28:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
     26 26 │   new Array
     27 27 │   
@@ -358,7 +358,7 @@ invalid.js:30:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
-  i Unsafe fix: Use an array literal.
+  i Safe fix: Use an array literal.
   
     28 28 │   var xs = globalThis.Array();
     29 29 │   
