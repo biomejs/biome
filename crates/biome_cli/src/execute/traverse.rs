@@ -181,7 +181,9 @@ fn traverse_inputs(
             scope.handle(ctx, path.to_path_buf());
         }
 
-        for path in iter {
+        // At this point we only interested in files we can handle. The scanner, for example, has
+        // processed ignore files already.
+        for path in iter.filter(|path| path.is_handleable()) {
             scope.handle(ctx, path.to_path_buf());
         }
     }));

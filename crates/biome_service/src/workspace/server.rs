@@ -92,14 +92,14 @@ pub struct WorkspaceServer {
     /// instances of stored values, we use an `FxHashMap` here, wrapped in a
     /// `Mutex`. The node cache is only used by writers, meaning this wouldn't
     /// be a great use case for `papaya` anyway. But it does mean we need to be
-    /// careful for deadlocks, and release guards to the mutex as soon as we
+    /// careful with deadlocks and release guards to the mutex as soon as we
     /// can.
     ///
     /// Additionally, we only use the node cache for documents opened through
     /// the LSP proxy, since the editor use case is the one where we benefit
     /// most from low-latency parsing, and having a document open in an editor
-    /// gives us a clear signal that edits -- and thus reparsing -- is to be
-    /// anticipated. For other documents, the performance degradation due to
+    /// gives us a clear signal that edits -- and thus reparsing -- are to be
+    /// expected. For other documents, the performance degradation due to
     /// lock contention would not be worth the potential of faster reparsing
     /// that may never actually happen.
     pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
@@ -327,11 +327,6 @@ impl WorkspaceServer {
             persist_node_cache,
         } = params;
         let path: Utf8PathBuf = path.into();
-        let features = FeaturesBuilder::new().build();
-        let is_ignored = self.is_ignored(project_key, &path, features);
-        if is_ignored {
-            return Ok(());
-        }
 
         if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
             return Ok(());

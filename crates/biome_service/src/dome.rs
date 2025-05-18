@@ -45,6 +45,33 @@ pub struct DomeIterator<'a> {
 }
 
 impl<'a> DomeIterator<'a> {
+    /// Consumes the iterator and returns the configuration file paths.
+    pub fn config_paths(&mut self) -> Vec<BiomePath> {
+        let mut config_files = Vec::new();
+        while let Some(path) = self.next_config() {
+            config_files.push(path.clone());
+        }
+        config_files
+    }
+
+    /// Consumes the iterator and returns a vector containing all manifest file paths.
+    pub fn manifest_paths(&mut self) -> Vec<BiomePath> {
+        let mut manifests = Vec::new();
+        while let Some(path) = self.next_manifest() {
+            manifests.push(path.clone());
+        }
+        manifests
+    }
+
+    /// Consumes the iterator and returns a vector containing all ignore file paths.
+    pub fn ignore_paths(&mut self) -> Vec<BiomePath> {
+        let mut ignore_files = Vec::new();
+        while let Some(path) = self.next_ignore() {
+            ignore_files.push(path.clone());
+        }
+        ignore_files
+    }
+
     pub fn next_dir(&mut self) -> Option<&'a BiomePath> {
         if let Some(path) = self.iter.peek() {
             if path.is_dir() {

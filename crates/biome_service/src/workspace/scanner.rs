@@ -103,26 +103,15 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
     let dome = Dome::from_intern(interner.as_intern_set());
     let mut iter = dome.iter();
 
-    let mut configs = Vec::new();
-    let mut manifests = Vec::new();
-    let mut handleable_paths = Vec::new();
-    let mut ignore_paths = Vec::new();
-
-    while let Some(path) = iter.next_config() {
-        configs.push(path.clone());
-    }
-
-    while let Some(path) = iter.next_manifest() {
-        manifests.push(path.clone());
-    }
-
-    while let Some(path) = iter.next_ignore() {
-        ignore_paths.push(path.clone());
-    }
+    let configs = iter.config_paths();
+    let manifests = iter.manifest_paths();
+    let ignore_paths = iter.ignore_paths();
 
     let result = ctx
         .workspace
         .update_project_ignore_files(ctx.project_key, &ignore_paths);
+
+    let mut handleable_paths = Vec::new();
 
     for path in iter {
         if path.is_dependency() {
@@ -286,6 +275,9 @@ impl TraversalContext for ScanContext<'_> {
         self.send_diagnostic(Diagnostic::new(error));
     }
 
+    // This is the first filtering we apply at the scanner. In this function `can_handle`
+    // We roughly understand which files should be open by the scanner.
+    // Here, we mostly do file operations by reading their metadata.
     fn can_handle(&self, path: &BiomePath) -> bool {
         if path
             .file_name()
@@ -297,7 +289,7 @@ impl TraversalContext for ScanContext<'_> {
         match self.workspace.fs().symlink_path_kind(path) {
             Ok(path_kind) if path_kind.is_dir() => {
                 if self.scan_kind.is_project() && path.is_dependency() {
-                    // In project mode, the scanner always scans dependencies,
+                    // In project mode, the scanner always scans dependencies
                     // because they're a valuable source of type information.
                     true
                 } else {

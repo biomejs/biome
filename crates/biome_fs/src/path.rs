@@ -221,6 +221,10 @@ impl BiomePath {
     pub fn is_dir(&self) -> bool {
         self.kind.contains(FileKind::Directory)
     }
+    #[inline(always)]
+    pub fn is_handleable(&self) -> bool {
+        self.kind.contains(FileKind::Handleable)
+    }
 
     /// Returns `true` if the path is inside `node_modules`
     pub fn is_dependency(&self) -> bool {
