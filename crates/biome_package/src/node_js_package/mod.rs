@@ -22,7 +22,7 @@ pub struct NodeJsPackage {
 }
 
 impl NodeJsPackage {
-    pub fn deserialize_tsconfig(&mut self, content: &ProjectLanguageRoot<TsConfigJson>) {
+    pub fn insert_serialized_tsconfig(&mut self, content: &ProjectLanguageRoot<TsConfigJson>) {
         let tsconfig = TsConfigJson::deserialize_manifest(content);
         let (tsconfig, deserialize_diagnostics) = tsconfig.consume();
         self.tsconfig = Some(tsconfig.unwrap_or_default());
@@ -30,6 +30,14 @@ impl NodeJsPackage {
             .into_iter()
             .map(biome_diagnostics::serde::Diagnostic::new)
             .collect();
+    }
+
+    pub fn without_tsconfig(&self) -> Self {
+        Self {
+            manifest: self.manifest.clone(),
+            diagnostics: self.diagnostics.clone(),
+            tsconfig: None,
+        }
     }
 }
 

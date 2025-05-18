@@ -42,7 +42,7 @@ pub fn resolve(
         return resolve_absolute_path(Utf8PathBuf::from(specifier), fs, options);
     }
 
-    if specifier == "." || specifier.starts_with("./") || specifier.starts_with("../") {
+    if is_relative_specifier(specifier) {
         return resolve_relative_path(specifier, base_dir, fs, options);
     }
 
@@ -176,6 +176,15 @@ fn resolve_module_with_package_json(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
+    // `tsconfig.json` may only be found in directories containing a
+    // `package.json`, so this is the only place we need to attempt to use it.
+    let ts_config = fs.read_tsconfig_json(&package_path.join("tsconfig.json"));
+    if let Ok(path) = ts_config.and_then(|ts_config| {
+        resolve_paths_mapping(specifier, &ts_config, package_path, fs, options)
+    }) {
+        return Ok(path);
+    }
+
     if specifier.starts_with('#') {
         return resolve_import_alias(specifier, package_path, package_json, fs, options);
     }
@@ -288,6 +297,70 @@ fn resolve_target_mapping(
             }
         } else if key == subpath {
             return resolve_target_value(target, None, package_dir, fs, options);
+        }
+    }
+
+    Err(ResolveError::NotFound)
+}
+
+/// Resolves the given module `specifier` inside the given `package_dir` by
+/// looking it up in the `compilerOptions.paths` mapping inside the given
+/// `tsconfig_json`.
+///
+/// The resolution process is similar to that of [`resolve_target_mapping()`],
+/// except that path aliases in the `tsconfig.json` file have arrays as values,
+/// and the value of `compilerOptions.baseUrl` is also taken into account.
+fn resolve_paths_mapping(
+    specifier: &str,
+    tsconfig_json: &TsConfigJson,
+    package_dir: &Utf8Path,
+    fs: &dyn ResolverFsProxy,
+    options: &ResolveOptions,
+) -> Result<Utf8PathBuf, ResolveError> {
+    let paths = tsconfig_json
+        .compiler_options
+        .paths
+        .as_ref()
+        .ok_or(ResolveError::NotFound)?;
+
+    let resolve_specifier = |specifier: &str| {
+        let base_dir = match &tsconfig_json.compiler_options.base_url {
+            Some(base_url) => base_url.as_path(),
+            None => package_dir,
+        };
+
+        if is_relative_specifier(specifier) {
+            resolve_relative_path(specifier, base_dir, fs, options)
+        } else {
+            resolve_dependency(specifier, base_dir, fs, options)
+        }
+    };
+
+    let resolve_target = |target: &str, glob_replacement: Option<&str>| match glob_replacement {
+        Some(glob_replacement) => resolve_specifier(&target.replace('*', glob_replacement)),
+        None => resolve_specifier(target),
+    };
+
+    let resolve_targets = |targets: &[String], glob_replacement: Option<&str>| {
+        for target in targets {
+            match resolve_target(target, glob_replacement) {
+                Ok(path) => return Ok(path),
+                Err(ResolveError::NotFound) => { /* continue */ }
+                Err(error) => return Err(error),
+            }
+        }
+
+        Err(ResolveError::NotFound)
+    };
+
+    for (key, targets) in paths {
+        if let Some((start, end)) = key.split_once('*') {
+            if specifier.starts_with(start) && specifier.ends_with(end) {
+                let glob_replacement = &specifier[start.len()..specifier.len() - end.len()];
+                return resolve_targets(targets, Some(glob_replacement));
+            }
+        } else if key == specifier {
+            return resolve_targets(targets, None);
         }
     }
 
@@ -437,6 +510,10 @@ fn resolve_path_info(
             PathInfo::Symlink { .. } => Err(ResolveError::BrokenSymlink),
         },
     }
+}
+
+fn is_relative_specifier(specifier: &str) -> bool {
+    specifier == "." || specifier.starts_with("./") || specifier.starts_with("../")
 }
 
 fn normalize_owned_absolute_path(path: Utf8PathBuf) -> Utf8PathBuf {

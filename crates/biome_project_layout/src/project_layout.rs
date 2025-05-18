@@ -56,25 +56,6 @@ impl ProjectLayout {
         })
     }
 
-    /// Returns the `tsconfig.json` that should be used for the given `path`,
-    /// together with the absolute path of the manifest file.
-    ///
-    /// This function will look for the closest `tsconfig.json` file in the
-    /// ancestors of the given `path`, and returns the first one it finds.
-    pub fn find_tsconfig_json_for_path(
-        &self,
-        path: &Utf8Path,
-    ) -> Option<(Utf8PathBuf, TsConfigJson)> {
-        let packages = self.0.pin();
-        path.ancestors().skip(1).find_map(|package_path| {
-            packages
-                .get(package_path)
-                .and_then(|data| data.node_package.as_ref())
-                .and_then(|node_package| node_package.tsconfig.as_ref())
-                .map(|manifest| (package_path.join("tsconfig.json"), manifest.clone()))
-        })
-    }
-
     /// Returns the `package.json` inside the given `package_path`.
     ///
     /// This function does not look for the closest `package.json` file in the
@@ -171,6 +152,49 @@ impl ProjectLayout {
                 }
             },
         );
+    }
+
+    /// Inserts a `tsconfig.json` manifest for the package at the given `path`,
+    /// parsing the manifest on demand.
+    pub fn insert_serialized_tsconfig(&self, path: Utf8PathBuf, manifest: AnyParse) {
+        self.0.pin().update_or_insert_with(
+            path,
+            |data| {
+                let mut node_js_package = NodeJsPackage {
+                    manifest: Default::default(),
+                    diagnostics: Default::default(),
+                    tsconfig: data
+                        .node_package
+                        .as_ref()
+                        .map(|package| package.tsconfig.clone())
+                        .unwrap_or_default(),
+                };
+                node_js_package.insert_serialized_tsconfig(&manifest.tree());
+
+                PackageData {
+                    node_package: Some(node_js_package),
+                }
+            },
+            || {
+                let mut node_js_package = NodeJsPackage::default();
+                node_js_package.insert_serialized_tsconfig(&manifest.tree());
+
+                PackageData {
+                    node_package: Some(node_js_package),
+                }
+            },
+        );
+    }
+
+    /// Removes a `tsconfig.json` manifest from the package with the given
+    /// `path`.
+    pub fn remove_tsconfig_from_package(&self, path: &Utf8Path) {
+        self.0.pin().update(path.to_path_buf(), |data| PackageData {
+            node_package: data
+                .node_package
+                .as_ref()
+                .map(NodeJsPackage::without_tsconfig),
+        });
     }
 
     /// Removes a package and its metadata from the project layout.

@@ -598,10 +598,8 @@ impl WorkspaceServer {
         signal_kind: WatcherSignalKind,
         path: &Utf8Path,
     ) -> Result<(), WorkspaceError> {
-        if path
-            .file_name()
-            .is_some_and(|filename| filename == "package.json")
-        {
+        let filename = path.file_name();
+        if filename.is_some_and(|filename| filename == "package.json") {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
@@ -615,6 +613,23 @@ impl WorkspaceServer {
                 }
                 WatcherSignalKind::Removed => {
                     self.project_layout.remove_package(&package_path);
+                }
+            }
+        } else if filename.is_some_and(|filename| filename == "tsconfig.json") {
+            let package_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .ok_or_else(WorkspaceError::not_found)?;
+
+            match signal_kind {
+                WatcherSignalKind::AddedOrChanged => {
+                    let parsed = self.get_parse(path)?;
+                    self.project_layout
+                        .insert_serialized_tsconfig(package_path, parsed);
+                }
+                WatcherSignalKind::Removed => {
+                    self.project_layout
+                        .remove_tsconfig_from_package(&package_path);
                 }
             }
         }
