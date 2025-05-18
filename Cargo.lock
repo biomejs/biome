@@ -796,7 +796,6 @@ dependencies = [
  "camino",
  "enumflags2",
  "globset",
- "ignore",
  "insta",
  "regex",
  "roaring",
