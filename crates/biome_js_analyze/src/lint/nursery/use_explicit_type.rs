@@ -979,13 +979,13 @@ fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State
     }
 
     // Explicit annotation is always sufficient
-    let ty = declarator
+    let has_explicit_type = declarator
         .variable_annotation()
-        .and_then(|ty| ty.as_ts_type_annotation().cloned())
-        .and_then(|ty| ty.ty().ok());
-    if ty.is_some() {
+        .is_some_and(|ty| ty.as_ts_type_annotation().is_some_and(|ty| ty.ty().is_ok()));
+    if has_explicit_type {
         return None;
     }
+
     let initializer_expression = declarator
         .initializer()
         .and_then(|init| init.expression().ok())
