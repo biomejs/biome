@@ -3244,10 +3244,6 @@ export interface PathOptions {
 export type PatternOptions =
 	| {
 			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
-			/**
 			 * An array of gitignore-style patterns. Cannot be used with regex.
 			 */
 			group: string[];
@@ -3257,10 +3253,6 @@ export type PatternOptions =
 			message: string;
 	  }
 	| {
-			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
 			/**
 			 * An array of gitignore-style patterns. Cannot be used with regex.
 			 */
@@ -3280,10 +3272,6 @@ export type PatternOptions =
 			 */
 			allowImportNames: string[];
 			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
-			/**
 			 * An array of gitignore-style patterns. Cannot be used with regex.
 			 */
 			group: string[];
@@ -3293,10 +3281,6 @@ export type PatternOptions =
 			message: string;
 	  }
 	| {
-			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
 			/**
 			 * An array of gitignore-style patterns. Cannot be used with regex.
 			 */
@@ -3316,10 +3300,6 @@ export type PatternOptions =
 			 */
 			allowImportNamePattern: string;
 			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
-			/**
 			 * An array of gitignore-style patterns. Cannot be used with regex.
 			 */
 			group: string[];
@@ -3330,10 +3310,6 @@ export type PatternOptions =
 	  }
 	| {
 			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
-			/**
 			 * A custom message for diagnostics related to this pattern.
 			 */
 			message: string;
@@ -3343,10 +3319,6 @@ export type PatternOptions =
 			regex: string;
 	  }
 	| {
-			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
 			/**
 			 * An array of specific import names to forbid within the matched modules. Cannot be used with importNamePattern, allowImportNames and allowImportNamePattern.
 			 */
@@ -3366,10 +3338,6 @@ export type PatternOptions =
 			 */
 			allowImportNames: string[];
 			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
-			/**
 			 * A custom message for diagnostics related to this pattern.
 			 */
 			message: string;
@@ -3379,10 +3347,6 @@ export type PatternOptions =
 			regex: string;
 	  }
 	| {
-			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
 			/**
 			 * A regex pattern for import names to forbid within the matched modules. Cannot be used with importNames, allowImportNames and allowImportNamePattern.
 			 */
@@ -3401,10 +3365,6 @@ export type PatternOptions =
 			 * A regex pattern for import names to allow within the matched modules. Cannot be used with importNames, importNamePattern and allowImportNames.
 			 */
 			allowImportNamePattern: string;
-			/**
-			 * Whether the patterns are case-sensitive. Defaults to `false`.
-			 */
-			caseSensitive: boolean;
 			/**
 			 * A custom message for diagnostics related to this pattern.
 			 */
