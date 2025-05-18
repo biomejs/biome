@@ -1536,6 +1536,10 @@ export interface Nursery {
 	 */
 	noImportantStyles?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallows defining React components inside other components.
+	 */
+	noNestedComponentDefinitions?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow use event handlers on non-interactive elements.
 	 */
 	noNoninteractiveElementInteractions?: RuleConfiguration_for_Null;
@@ -3463,6 +3467,7 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
