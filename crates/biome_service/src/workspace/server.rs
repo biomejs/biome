@@ -39,8 +39,8 @@ use crate::file_handlers::{
 use crate::projects::Projects;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
-    FeaturesBuilder, FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams,
-    GetTypeInfoParams, IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
+    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
+    IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
 };
 use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
 use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};

@@ -28,7 +28,7 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use tracing::{Span, instrument};
+use tracing::instrument;
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
