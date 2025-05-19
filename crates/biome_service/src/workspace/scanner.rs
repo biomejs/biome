@@ -104,7 +104,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
 
     let mut configs = Vec::new();
     let mut manifests = Vec::new();
-    let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
+    let mut handleable_paths = Vec::new();
     let mut ignore_paths = Vec::new();
     for path in evaluated_paths {
         if path.is_config() {

@@ -170,18 +170,8 @@ fn traverse_inputs(
     }));
 
     let paths = ctx.evaluated_paths();
-    let dome = Dome::new(paths);
-    let mut iter = dome.iter();
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-        while let Some(path) = iter.next_config() {
-            scope.handle(ctx, path.to_path_buf());
-        }
-
-        while let Some(path) = iter.next_manifest() {
-            scope.handle(ctx, path.to_path_buf());
-        }
-
-        for path in iter {
+        for path in paths {
             scope.handle(ctx, path.to_path_buf());
         }
     }));
