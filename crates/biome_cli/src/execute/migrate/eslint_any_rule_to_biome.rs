@@ -1618,7 +1618,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "no-sequences" => {
-            let group = rules.style.get_or_insert_with(Default::default);
+            let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_comma_operator
@@ -1935,7 +1935,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "prefer-rest-params" => {
-            let group = rules.style.get_or_insert_with(Default::default);
+            let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_arguments

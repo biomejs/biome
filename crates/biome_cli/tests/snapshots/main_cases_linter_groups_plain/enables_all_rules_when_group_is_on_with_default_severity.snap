@@ -24,7 +24,7 @@ function f() { console.log(arguments); }
 # Emitted Messages
 
 ```block
-test1.js:1:28 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test1.js:1:28 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   

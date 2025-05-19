@@ -20,7 +20,7 @@ function f() {
 
 # Diagnostics
 ```
-invalid.cjs:2:17 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.cjs:2:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
@@ -36,7 +36,7 @@ invalid.cjs:2:17 lint/style/noArguments ━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.cjs:4:23 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.cjs:4:23 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
@@ -53,7 +53,7 @@ invalid.cjs:4:23 lint/style/noArguments ━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.cjs:5:21 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.cjs:5:21 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
@@ -67,5 +67,3 @@ invalid.cjs:5:21 lint/style/noArguments ━━━━━━━━━━━━━�
   
 
 ```
-
-

@@ -121,8 +121,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
-  - noArguments
-  - noCommaOperator
   - noCommonJs
   - noDefaultExport
   - noDescendingSpecificity

@@ -10,7 +10,7 @@ expression: with_existing_style_rule.json
       "recommended": true,
       "style": {
         "useLiteralEnumMembers": "warn",
-        "noArguments": "warn",
+        "useImportType": "warn",
         "noParameterAssign":  "warn",
         "useShorthandFunctionType": "warn",
         "useExportType":  "warn",

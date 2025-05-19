@@ -17,6 +17,8 @@
     "rules": {
       "recommended": false,
       "complexity": {
+        "noArguments": "error",
+        "noCommaOperator": "error",
         "noExtraBooleanCast": "error",
         "noAdjacentSpacesInRegex": "error",
         "noUselessCatch": "error",
@@ -61,8 +63,6 @@
         "noGlobalEval": "error"
       },
       "style": {
-        "noArguments": "error",
-        "noCommaOperator": "error",
         "noParameterAssign": "error",
         "useArrayLiterals": "error",
         "useConst": "error",
