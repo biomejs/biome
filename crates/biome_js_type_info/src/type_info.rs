@@ -95,6 +95,21 @@ impl Type {
         self.id.id()
     }
 
+    /// Returns `true` if this type represents a **union type** that has a
+    /// variant for which the given `predicate` returns `true`.
+    ///
+    /// Returns `false` otherwise.
+    pub fn has_variant(&self, predicate: impl Fn(Self) -> bool) -> bool {
+        match self.deref() {
+            TypeData::Union(union) => union
+                .types()
+                .iter()
+                .filter_map(|ty| self.resolve(ty))
+                .any(predicate),
+            _ => false,
+        }
+    }
+
     /// Returns whether this type is the `Promise` class.
     pub fn is_promise(&self) -> bool {
         self.id.is_global() && self.id() == PROMISE_ID
