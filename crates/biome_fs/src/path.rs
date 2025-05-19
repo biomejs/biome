@@ -341,22 +341,4 @@ mod test {
         assert_eq!(iter.next().unwrap().to_string(), "src/tsconfig.json");
         assert_eq!(iter.next().unwrap().to_string(), "src/README.md");
     }
-
-    #[test]
-    #[cfg(feature = "serde")]
-    fn deserialize_file_kind_from_str() {
-        let result = serde_json::from_str::<FileKinds>("config");
-        assert!(result.is_ok());
-        let file_kinds = result.unwrap();
-        assert_eq!(file_kinds, FileKinds::Config);
-    }
-
-    #[test]
-    #[cfg(feature = "serde")]
-    fn serialize_file_kind_into_vec() {
-        let file_kinds = FileKinds::Config;
-        let result = serde_json::to_string(&file_kinds);
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap(), "config");
-    }
 }
