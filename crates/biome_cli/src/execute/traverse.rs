@@ -10,7 +10,6 @@ use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{DiagnosticExt, Error, Resource, Severity, category};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
-use biome_service::dome::Dome;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{DocumentFileSource, DropPatternParams, IsPathIgnoredParams};
 use biome_service::{Workspace, WorkspaceError, extension_error, workspace::SupportsFeatureParams};

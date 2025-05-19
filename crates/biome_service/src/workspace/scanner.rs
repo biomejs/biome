@@ -11,7 +11,6 @@
 use super::server::WorkspaceServer;
 use super::{FeaturesBuilder, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
-use crate::dome::Dome;
 use crate::projects::ProjectKey;
 use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
@@ -99,9 +98,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
         scope.evaluate(ctx_ref, folder.to_path_buf());
     }));
 
-    let interner = ctx.interner();
     let evaluated_paths = ctx.evaluated_paths();
-
     let mut configs = Vec::new();
     let mut manifests = Vec::new();
     let mut handleable_paths = Vec::new();

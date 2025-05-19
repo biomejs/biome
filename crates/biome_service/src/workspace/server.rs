@@ -216,7 +216,6 @@ impl WorkspaceServer {
     }
 
     /// Gets the supported capabilities for a given file path.
-
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
         self.features.get_capabilities(language)

@@ -10,7 +10,6 @@ mod workspace_watcher;
 
 pub mod configuration;
 pub mod diagnostics;
-pub mod dome;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 

@@ -5,29 +5,24 @@
 //! - shortcuts to open/write to the file
 use crate::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
-use enumflags2::{BitFlags, bitflags};
-use smallvec::SmallVec;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::fs::read_to_string;
 use std::hash::Hash;
-use std::ops::DerefMut;
 use std::path::{Path, PathBuf};
 use std::{fs::File, io, io::Write, ops::Deref};
 
 /// The priority of the file
+// NOTE: The order of the variants is important, the one on the top has the highest priority
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Ord, PartialOrd, Hash)]
-#[repr(u8)]
-#[bitflags]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-// NOTE: The order of the variants is important, the one on the top has the highest priority
-pub enum FileKind {
+pub enum FileKinds {
     /// A configuration file has the highest priority. It's usually `biome.json` and `biome.jsonc`
     ///
     /// Other third-party configuration files might be added in the future
@@ -47,71 +42,8 @@ pub enum FileKind {
     Handleable,
 }
 
-#[derive(Clone, Hash, Ord, PartialOrd, Eq, PartialEq, Default)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(
-        from = "smallvec::SmallVec<[FileKind; 5]>",
-        into = "smallvec::SmallVec<[FileKind; 5]>"
-    )
-)]
-pub struct FileKinds(BitFlags<FileKind>);
-
-impl From<SmallVec<[FileKind; 5]>> for FileKinds {
-    fn from(value: SmallVec<[FileKind; 5]>) -> Self {
-        value.into_iter().fold(Self::default(), |mut acc, kind| {
-            acc.insert(kind);
-            acc
-        })
-    }
-}
-
-impl Debug for FileKinds {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut list = f.debug_list();
-        for kind in self.iter() {
-            match kind {
-                FileKind::Config => list.entry(&"Config"),
-                FileKind::Manifest => list.entry(&"Manifest"),
-                FileKind::Ignore => list.entry(&"Ignore"),
-                FileKind::Inspectable => list.entry(&"Inspectable"),
-                FileKind::Handleable => list.entry(&"Handleable"),
-                FileKind::Directory => list.entry(&"Directory"),
-            };
-        }
-        list.finish()
-    }
-}
-
-impl From<FileKinds> for SmallVec<[FileKind; 5]> {
-    fn from(value: FileKinds) -> Self {
-        value.iter().collect()
-    }
-}
-
-impl Deref for FileKinds {
-    type Target = BitFlags<FileKind>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for FileKinds {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl From<FileKind> for FileKinds {
-    fn from(flag: FileKind) -> Self {
-        Self(BitFlags::from(flag))
-    }
-}
-
 /// This is an internal representation of a path inside the Biome daemon.
-/// This type has its own [Ord] implementation driven by its [FileKind], where certain files must be inspected
+/// This type has its own [Ord] implementation driven by its [FileKinds], where certain files must be inspected
 /// before others. For example, configuration files and ignore files must have priority over other files.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 pub struct BiomePath {
@@ -127,7 +59,7 @@ impl BiomePath {
     pub fn new(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
         let kind = if path.is_dir() {
-            FileKind::Directory.into()
+            FileKinds::Directory
         } else {
             path.file_name().map(Self::priority).unwrap_or_default()
         };
@@ -152,7 +84,7 @@ impl BiomePath {
     pub fn to_written(&self) -> Self {
         Self {
             path: self.path.clone(),
-            kind: self.kind.clone(),
+            kind: self.kind,
             was_written: true,
         }
     }
@@ -189,41 +121,41 @@ impl BiomePath {
     /// - Other files are considered as files to handle
     fn priority(file_name: &str) -> FileKinds {
         if file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc() {
-            FileKind::Config.into()
+            FileKinds::Config
         } else if matches!(
             file_name,
             "package.json" | "tsconfig.json" | "jsconfig.json"
         ) {
-            FileKind::Manifest.into()
+            FileKinds::Manifest
         } else if matches!(file_name, ".gitignore" | ".ignore") {
-            FileKind::Ignore.into()
+            FileKinds::Ignore
         } else {
-            FileKind::Handleable.into()
+            FileKinds::Handleable
         }
     }
 
     #[inline(always)]
     pub fn is_config(&self) -> bool {
-        self.kind.contains(FileKind::Config)
+        matches!(self.kind, FileKinds::Config)
     }
 
     #[inline(always)]
     pub fn is_manifest(&self) -> bool {
-        self.kind.contains(FileKind::Manifest)
+        matches!(self.kind, FileKinds::Manifest)
     }
 
     #[inline(always)]
     pub fn is_ignore(&self) -> bool {
-        self.kind.contains(FileKind::Ignore)
+        matches!(self.kind, FileKinds::Ignore)
     }
 
     #[inline(always)]
     pub fn is_dir(&self) -> bool {
-        self.kind.contains(FileKind::Directory)
+        matches!(self.kind, FileKinds::Directory)
     }
     #[inline(always)]
     pub fn is_handleable(&self) -> bool {
-        self.kind.contains(FileKind::Handleable)
+        matches!(self.kind, FileKinds::Handleable)
     }
 
     /// Returns `true` if the path is inside `node_modules`
@@ -323,17 +255,6 @@ impl schemars::JsonSchema for BiomePath {
     }
 }
 
-#[cfg(feature = "schema")]
-impl schemars::JsonSchema for FileKinds {
-    fn schema_name() -> String {
-        String::from("FileKind")
-    }
-
-    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<FileKind>>::json_schema(generator)
-    }
-}
-
 impl From<BiomePath> for Utf8PathBuf {
     fn from(path: BiomePath) -> Self {
         path.path
@@ -357,7 +278,7 @@ impl Ord for BiomePath {
 
 #[cfg(test)]
 mod test {
-    use crate::path::{FileKind, FileKinds};
+    use crate::path::FileKinds;
 
     #[test]
     fn test_biome_paths() {
@@ -367,14 +288,11 @@ mod test {
         let path = Utf8PathBuf::from("src/package.json");
         let biome_path = BiomePath::new(path);
         assert_eq!(biome_path.file_name(), Some("package.json"));
-        assert_eq!(
-            BiomePath::priority("package.json"),
-            FileKind::Manifest.into()
-        );
-        assert_eq!(BiomePath::priority("biome.json"), FileKind::Config.into());
-        assert_eq!(BiomePath::priority("biome.jsonc"), FileKind::Config.into());
-        assert_eq!(BiomePath::priority(".gitignore"), FileKind::Ignore.into());
-        assert_eq!(BiomePath::priority(".ignore"), FileKind::Ignore.into());
+        assert_eq!(BiomePath::priority("package.json"), FileKinds::Manifest);
+        assert_eq!(BiomePath::priority("biome.json"), FileKinds::Config);
+        assert_eq!(BiomePath::priority("biome.jsonc"), FileKinds::Config);
+        assert_eq!(BiomePath::priority(".gitignore"), FileKinds::Ignore);
+        assert_eq!(BiomePath::priority(".ignore"), FileKinds::Ignore);
     }
 
     #[test]
@@ -434,13 +352,13 @@ mod test {
         let result = serde_json::from_str::<FileKinds>("[\"config\"]");
         assert!(result.is_ok());
         let file_kinds = result.unwrap();
-        assert!(file_kinds.contains(FileKind::Config));
+        assert_eq!(file_kinds, FileKinds::Config);
     }
 
     #[test]
     #[cfg(feature = "serde")]
     fn serialize_file_kind_into_vec() {
-        let file_kinds = FileKinds::from(FileKind::Config);
+        let file_kinds = FileKinds::Config;
         let result = serde_json::to_string(&file_kinds);
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "[\"config\"]");
