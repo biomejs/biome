@@ -45,6 +45,65 @@ fn extends_config_ok_formatter_no_linter() {
 }
 
 #[test]
+fn extends_config_ok_from_npm_package() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{ "extends": ["@shared/format/biome", "@shared/linter/biome"] }"#,
+    );
+
+    fs.insert(
+        "node_modules/@shared/format/biome.json".into(),
+        r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/format/package.json".into(),
+        r#"{
+    "name": "@shared/format",
+    "exports": {
+        "./biome": "./biome.json"
+    }
+}"#,
+    );
+
+    fs.insert(
+        "node_modules/@shared/linter/biome.jsonc".into(),
+        r#"{ "linter": { "enabled": false, } }"#,
+    );
+    fs.insert(
+        "node_modules/@shared/linter/package.json".into(),
+        r#"{
+    "name": "@shared/linter",
+    "exports": {
+        "./biome": "./biome.jsonc"
+    }
+}"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_ok_from_npm_package",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn extends_config_ok_linter_not_formatter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
