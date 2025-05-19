@@ -31,11 +31,6 @@ pub enum FileKinds {
     Manifest,
     /// An ignore file, like `.gitignore`
     Ignore,
-    /// Files that are required to be inspected before handling other files.
-    ///
-    /// An example is the GraphQL schema
-    #[expect(dead_code)]
-    Inspectable,
     /// The path is a directory
     Directory,
     /// A file to handle has the lowest priority. It's usually a traversed file, or a file opened by the LSP
