@@ -61,9 +61,9 @@ checksum = "7992085ec035cfe96992dd31bfd495a2ebd31969bb95f624471cb6c0b349e571"
 
 [[package]]
 name = "ascii_table"
-version = "4.0.6"
+version = "4.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bc070afe45e3d9e628b82d77d61c90531dc6997b341d57715b82461af415669"
+checksum = "fb3cd3541590f14025990035bb02b205870f8ca3f5297956dd2c6b32e6470fa1"
 
 [[package]]
 name = "autocfg"
