@@ -642,7 +642,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match signal_kind {
-                WatcherSignalKind::AddedOrChanged => {
+                WatcherSignalKind::AddedOrChanged(_) => {
                     let parsed = self.get_parse(path)?;
                     self.project_layout
                         .insert_serialized_tsconfig(package_path, parsed);
