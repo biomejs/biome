@@ -34,6 +34,7 @@ pub enum FileKinds {
     /// Files that are required to be inspected before handling other files.
     ///
     /// An example is the GraphQL schema
+    #[expect(dead_code)]
     Inspectable,
     /// The path is a directory
     Directory,
@@ -349,7 +350,7 @@ mod test {
     #[test]
     #[cfg(feature = "serde")]
     fn deserialize_file_kind_from_str() {
-        let result = serde_json::from_str::<FileKinds>("[\"config\"]");
+        let result = serde_json::from_str::<FileKinds>("config");
         assert!(result.is_ok());
         let file_kinds = result.unwrap();
         assert_eq!(file_kinds, FileKinds::Config);
@@ -361,6 +362,6 @@ mod test {
         let file_kinds = FileKinds::Config;
         let result = serde_json::to_string(&file_kinds);
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), "[\"config\"]");
+        assert_eq!(result.unwrap(), "config");
     }
 }
