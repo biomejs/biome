@@ -84,6 +84,7 @@ use schemars::{r#gen::SchemaGenerator, schema::Schema};
 pub use server::WorkspaceServer;
 use smallvec::SmallVec;
 use std::collections::HashMap;
+use std::fmt::{Debug, Display, Formatter};
 use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe};
 use tokio::sync::watch;
@@ -453,7 +454,7 @@ impl std::fmt::Display for FeatureKind {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
+#[derive(Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[serde(
     from = "smallvec::SmallVec<[FeatureKind; 6]>",
     into = "smallvec::SmallVec<[FeatureKind; 6]>",
@@ -461,16 +462,25 @@ impl std::fmt::Display for FeatureKind {
 )]
 pub struct FeatureName(BitFlags<FeatureKind>);
 
-impl std::fmt::Display for FeatureName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut iter = self.0.iter();
-        if let Some(first) = iter.next() {
-            write!(f, "{}", first)?;
-            for kind in iter {
-                write!(f, ", {}", kind)?;
-            }
+impl Display for FeatureName {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(self, f)
+    }
+}
+
+impl Debug for FeatureName {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut list = f.debug_list();
+        for kind in self.iter() {
+            match kind {
+                FeatureKind::Format => list.entry(&"Format"),
+                FeatureKind::Lint => list.entry(&"Lint"),
+                FeatureKind::Search => list.entry(&"Search"),
+                FeatureKind::Assist => list.entry(&"Assist"),
+                FeatureKind::Debug => list.entry(&"Debug"),
+            };
         }
-        Ok(())
+        list.finish()
     }
 }
 
@@ -480,6 +490,10 @@ impl FeatureName {
     }
     pub fn empty() -> Self {
         Self(BitFlags::empty())
+    }
+
+    pub fn all() -> Self {
+        Self(BitFlags::all())
     }
 
     pub fn insert(&mut self, kind: FeatureKind) {
@@ -517,12 +531,18 @@ impl schemars::JsonSchema for FeatureName {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct FeaturesBuilder(BitFlags<FeatureKind>);
+
+impl Default for FeaturesBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl FeaturesBuilder {
     pub fn new() -> Self {
-        Self::default()
+        Self(BitFlags::empty())
     }
 
     pub fn with_formatter(mut self) -> Self {
@@ -541,6 +561,14 @@ impl FeaturesBuilder {
     }
 
     pub fn with_assist(mut self) -> Self {
+        self.0.insert(FeatureKind::Assist);
+        self
+    }
+
+    pub fn with_all(mut self) -> Self {
+        self.0.insert(FeatureKind::Format);
+        self.0.insert(FeatureKind::Lint);
+        self.0.insert(FeatureKind::Search);
         self.0.insert(FeatureKind::Assist);
         self
     }

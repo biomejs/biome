@@ -1,8 +1,3 @@
-use std::panic::RefUnwindSafe;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
-
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
@@ -29,6 +24,10 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::{Compute, HashMap, HashSet, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use std::panic::RefUnwindSafe;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
 
@@ -93,14 +92,14 @@ pub struct WorkspaceServer {
     /// instances of stored values, we use an `FxHashMap` here, wrapped in a
     /// `Mutex`. The node cache is only used by writers, meaning this wouldn't
     /// be a great use case for `papaya` anyway. But it does mean we need to be
-    /// careful for deadlocks, and release guards to the mutex as soon as we
+    /// careful with deadlocks and release guards to the mutex as soon as we
     /// can.
     ///
     /// Additionally, we only use the node cache for documents opened through
     /// the LSP proxy, since the editor use case is the one where we benefit
     /// most from low-latency parsing, and having a document open in an editor
-    /// gives us a clear signal that edits -- and thus reparsing -- is to be
-    /// anticipated. For other documents, the performance degradation due to
+    /// gives us a clear signal that edits -- and thus reparsing -- are to be
+    /// expected. For other documents, the performance degradation due to
     /// lock contention would not be worth the potential of faster reparsing
     /// that may never actually happen.
     pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
@@ -217,9 +216,6 @@ impl WorkspaceServer {
     }
 
     /// Gets the supported capabilities for a given file path.
-    #[instrument(level = "debug", skip(self), fields(
-        path = display(path.as_path())
-    ))]
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
         self.features.get_capabilities(language)
@@ -268,7 +264,6 @@ impl WorkspaceServer {
     ///
     /// Returns the index at which the file source can be retrieved using
     /// `get_source()`.
-    #[tracing::instrument(level = "debug", skip_all)]
     fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
@@ -312,10 +307,6 @@ impl WorkspaceServer {
         )
     }
 
-    #[tracing::instrument(level = "debug", skip(self, params), fields(
-        project_key = display(params.project_key),
-        path = display(params.path.as_path()),
-    ))]
     fn open_file_internal(
         &self,
         reason: OpenFileReason,
@@ -494,21 +485,21 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level config's
     /// `files.includes` or in the feature's `includes`.
-    #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
         // Never ignore Biome's config file regardless of `includes`.
-        let ignored = (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
-            // Apply top-level `includes`
-            (self.is_ignored_by_top_level_config(project_key, path) ||
+        if file_name == Some(ConfigName::biome_json())
+            || file_name == Some(ConfigName::biome_jsonc())
+        {
+            return false;
+        };
+
+        // Apply top-level `includes`
+        self.is_ignored_by_top_level_config(project_key, path) ||
                 // Apply feature-level `includes`
-                (!features.is_empty() && features.iter().all(|feature| self
+                !features.is_empty() && features.iter().all(|feature| self
                     .projects
-                    .is_ignored_by_feature_config(project_key, path, feature))));
-
-        tracing::Span::current().record("ignored", ignored);
-
-        ignored
+                    .is_ignored_by_feature_config(project_key, path, feature))
     }
 
     /// Checks whether a file is ignored in the top-level `files.includes`.
@@ -614,7 +605,6 @@ impl WorkspaceServer {
     }
 
     /// Updates the [ProjectLayout] for the given `path`.
-    #[instrument(level = "debug", skip(self))]
     pub(super) fn update_project_layout(
         &self,
         signal_kind: WatcherSignalKind,
@@ -645,7 +635,6 @@ impl WorkspaceServer {
     }
 
     /// Updates the [ModuleGraph] for the given `paths`.
-    #[instrument(level = "debug", skip(self))]
     pub(super) fn update_module_graph(&self, signal_kind: WatcherSignalKind, paths: &[BiomePath]) {
         let no_paths: &[BiomePath] = &[];
         let (added_or_changed_paths, removed_paths) = match signal_kind {
@@ -788,7 +777,7 @@ impl Workspace for WorkspaceServer {
     /// ## Panics
     /// This function may panic if the internal settings mutex has been poisoned
     /// by another thread having previously panicked while holding the lock
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     fn update_settings(
         &self,
         params: UpdateSettingsParams,
@@ -839,7 +828,6 @@ impl Workspace for WorkspaceServer {
         Ok(self.projects.insert_project(path))
     }
 
-    #[instrument(level = "debug", skip(self))]
     fn scan_project_folder(
         &self,
         params: ScanProjectFolderParams,

@@ -65,14 +65,11 @@ impl FileSystem for OsFileSystem {
         path: &Utf8Path,
         options: OpenOptions,
     ) -> io::Result<Box<dyn File>> {
-        tracing::debug_span!("OsFileSystem::open_with_options", path = ?path, options = ?options)
-            .in_scope(move || -> io::Result<Box<dyn File>> {
-                let mut fs_options = fs::File::options();
-                Ok(Box::new(OsFile {
-                    inner: options.into_fs_options(&mut fs_options).open(path)?,
-                    version: 0,
-                }))
-            })
+        let mut fs_options = fs::File::options();
+        Ok(Box::new(OsFile {
+            inner: options.into_fs_options(&mut fs_options).open(path)?,
+            version: 0,
+        }))
     }
 
     fn traversal(&self, func: BoxedTraversal) {
