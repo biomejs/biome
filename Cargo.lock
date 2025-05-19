@@ -109,7 +109,6 @@ dependencies = [
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
- "tracing",
 ]
 
 [[package]]
