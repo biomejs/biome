@@ -440,7 +440,7 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 1. [ ] Run the `beta` workflow.
    Input the _upcoming_ version with an incremented number for each release (e.g. `2.0.0-beta.1`).
-2. [ ] If you're a Code Contributor, approve the deployment.
+2. [ ] If you're a Core Contributor, approve the deployment.
 
 ### Regular releases
 
