@@ -11,9 +11,9 @@ fn extends_config_ok_formatter_no_linter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Utf8Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json", "linter.json"] }"#,
     );
     let format = Utf8Path::new("format.json");
@@ -49,9 +49,9 @@ fn extends_config_ok_linter_not_formatter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Utf8Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json", "linter.json"] }"#,
     );
     let format = Utf8Path::new("format.json");
@@ -96,9 +96,9 @@ fn extends_should_raise_an_error_for_unresolved_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Utf8Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["formatTYPO.json", "linter.json"] }"#,
     );
     let format = Utf8Path::new("format.json");
@@ -134,9 +134,9 @@ fn extends_should_raise_an_error_for_unresolved_configuration_and_show_verbose()
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Utf8Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["formatTYPO.json", "linter.json"] }"#,
     );
     let format = Utf8Path::new("format.json");
@@ -172,9 +172,9 @@ fn extends_resolves_when_using_config_path() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = Utf8Path::new("config/biome.json");
+    let biome_json = Utf8Path::new("config/biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json", "linter.json"] }"#,
     );
     let format = Utf8Path::new("config/format.json");
@@ -216,9 +216,9 @@ fn applies_extended_values_in_current_config() {
         r#"{ "javascript": { "formatter": { "quoteStyle": "single" } } }"#,
     );
 
-    let rome_json = Utf8Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json"], "formatter": { "lineWidth": 20 } }"#,
     );
 
@@ -253,9 +253,9 @@ fn respects_unaffected_values_from_extended_config() {
     let format = Utf8Path::new("format.json");
     fs.insert(format.into(), r#"{ "formatter": { "lineWidth": 20 } }"#);
 
-    let rome_json = Utf8Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         r#"{ "extends": ["format.json"], "formatter": { "indentStyle": "space", "indentWidth": 2 } }"#,
     );
 
@@ -290,9 +290,9 @@ fn allows_reverting_fields_in_extended_config_to_default() {
     let format = Utf8Path::new("format.json");
     fs.insert(format.into(), r#"{ "formatter": { "lineWidth": 20 } }"#);
 
-    let rome_json = Utf8Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
-        rome_json.into(),
+        biome_json.into(),
         format!(
             r#"{{ "extends": ["format.json"], "formatter": {{ "lineWidth": {} }} }}"#,
             LineWidth::default().value()

@@ -13,12 +13,13 @@ pub mod diagnostics;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
+use biome_resolver::FsWithResolverProxy;
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
 
 use biome_console::Console;
-use biome_fs::{FileSystem, OsFileSystem};
+use biome_fs::OsFileSystem;
 
 pub use diagnostics::{TransportError, WorkspaceError, extension_error};
 pub use file_handlers::JsFormatterSettings;
@@ -58,7 +59,7 @@ impl<'app> App<'app> {
 
     /// Create a new instance of the app using the specified [FileSystem] and [Console] implementation
     pub fn with_filesystem_and_console(
-        fs: Box<dyn FileSystem>,
+        fs: Box<dyn FsWithResolverProxy>,
         console: &'app mut dyn Console,
     ) -> Self {
         Self::new(console, WorkspaceRef::Owned(workspace::server(fs, None)))

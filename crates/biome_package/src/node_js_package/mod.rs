@@ -13,17 +13,19 @@ use crate::{LICENSE_LIST, Manifest, Package, PackageAnalyzeResult, ProjectAnalyz
 pub struct NodeJsPackage {
     /// The `package.json` manifest
     pub manifest: Option<PackageJson>,
+
     /// Diagnostics emitted during the operations
     pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+
     /// The `tsconfig.json` manifest
-    pub tsconfig: TsConfigJson,
+    pub tsconfig: Option<TsConfigJson>,
 }
 
 impl NodeJsPackage {
     pub fn deserialize_tsconfig(&mut self, content: &ProjectLanguageRoot<TsConfigJson>) {
         let tsconfig = TsConfigJson::deserialize_manifest(content);
         let (tsconfig, deserialize_diagnostics) = tsconfig.consume();
-        self.tsconfig = tsconfig.unwrap_or_default();
+        self.tsconfig = Some(tsconfig.unwrap_or_default());
         self.diagnostics = deserialize_diagnostics
             .into_iter()
             .map(biome_diagnostics::serde::Diagnostic::new)

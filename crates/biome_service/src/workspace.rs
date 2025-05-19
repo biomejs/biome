@@ -70,9 +70,10 @@ use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::CodeSuggestion;
 use biome_diagnostics::serde::Diagnostic;
 use biome_formatter::Printed;
-use biome_fs::{BiomePath, FileSystem};
+use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
+use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
@@ -1276,7 +1277,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Returns the filesystem implementation to open files with.
     ///
     /// This may be an in-memory file system.
-    fn fs(&self) -> &dyn FileSystem;
+    fn fs(&self) -> &dyn FsWithResolverProxy;
 
     // #endregion
 
@@ -1313,7 +1314,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server(fs: Box<dyn FileSystem>, threads: Option<usize>) -> Box<dyn Workspace> {
+pub fn server(fs: Box<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     Box::new(WorkspaceServer::new(
@@ -1327,7 +1328,7 @@ pub fn server(fs: Box<dyn FileSystem>, threads: Option<usize>) -> Box<dyn Worksp
 /// Convenience function for constructing a client instance of [Workspace]
 pub fn client<T>(
     transport: T,
-    fs: Box<dyn FileSystem>,
+    fs: Box<dyn FsWithResolverProxy>,
 ) -> Result<Box<dyn Workspace>, WorkspaceError>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync + 'static,

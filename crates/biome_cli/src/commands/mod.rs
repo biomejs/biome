@@ -29,6 +29,7 @@ use biome_deserialize::Merge;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
+use biome_resolver::FsWithResolverProxy;
 use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
@@ -809,7 +810,7 @@ pub(crate) trait CommandRunner: Sized {
     /// - Updates the settings that belong to the project registered
     fn configure_workspace(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         console: &mut dyn Console,
         workspace: &dyn Workspace,
         cli_options: &CliOptions,

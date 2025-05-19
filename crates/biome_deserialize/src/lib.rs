@@ -450,6 +450,13 @@ pub struct Deserialized<T> {
 }
 
 impl<T> Deserialized<T> {
+    pub fn new(deserialized: Option<T>, diagnostics: Vec<Error>) -> Self {
+        Self {
+            deserialized,
+            diagnostics,
+        }
+    }
+
     /// Consumes self to return the diagnostics
     pub fn into_diagnostics(self) -> Vec<Error> {
         self.diagnostics

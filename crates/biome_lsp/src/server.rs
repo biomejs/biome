@@ -8,7 +8,8 @@ use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
-use biome_fs::{ConfigName, FileSystem, MemoryFileSystem, OsFileSystem};
+use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
+use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
     CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
     ServiceDataNotification,
@@ -585,7 +586,7 @@ impl ServerFactory {
     }
 
     /// Constructor for use in tests.
-    pub fn new_with_fs(fs: Box<dyn FileSystem>) -> Self {
+    pub fn new_with_fs(fs: Box<dyn FsWithResolverProxy>) -> Self {
         let (watcher_tx, _) = bounded(0);
         let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
         Self {

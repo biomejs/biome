@@ -8,11 +8,11 @@ use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
-    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedPath, ResolvedTypeData,
-    ResolvedTypeId, ScopeId, TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel,
+    GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedTypeData, ResolvedTypeId, ScopeId,
+    TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver, TypeResolverLevel,
 };
 use biome_jsdoc_comment::JsdocComment;
+use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange, TokenText};
 
 use crate::ModuleGraph;

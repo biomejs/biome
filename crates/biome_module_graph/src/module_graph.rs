@@ -5,33 +5,27 @@
 //! detecting broken imports.
 //!
 //! The module graph is instantiated and updated inside the Workspace Server.
-use std::{collections::BTreeSet, sync::Arc};
 
-use biome_fs::{BiomePath, FileSystem, PathKind};
+mod fs_proxy;
+
+use std::collections::BTreeSet;
+
+use biome_fs::BiomePath;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::{ImportSymbol, TypeReference};
 use biome_project_layout::ProjectLayout;
+use biome_resolver::{FsWithResolverProxy, PathInfo};
 use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::{EnforceExtension, ResolveOptions, ResolverGeneric};
 use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::FxBuildHasher;
 
-use crate::{
-    JsExport, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor,
-    resolver_cache::ResolverCache,
-};
+use crate::{JsExport, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor};
+
+pub(crate) use fs_proxy::ModuleGraphFsProxy;
 
 pub const SUPPORTED_EXTENSIONS: &[&str] = &[
-    ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts", ".json", ".node",
+    "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "json", "node",
 ];
-
-fn supported_extensions_owned() -> Vec<String> {
-    let mut extensions = Vec::with_capacity(SUPPORTED_EXTENSIONS.len());
-    for extension in SUPPORTED_EXTENSIONS {
-        extensions.push((*extension).to_string());
-    }
-    extensions
-}
 
 /// Data structure for tracking imports and exports across files.
 ///
@@ -51,7 +45,7 @@ pub struct ModuleGraph {
 
     /// Cache that tracks the presence of files, directories, and symlinks
     /// across the project.
-    path_info: HashMap<Utf8PathBuf, Option<PathKind>>,
+    path_info: HashMap<Utf8PathBuf, Option<PathInfo>>,
 }
 
 impl ModuleGraph {
@@ -74,39 +68,29 @@ impl ModuleGraph {
     /// must have been updated before calling this method.
     pub fn update_graph_for_js_paths(
         &self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
         added_or_updated_paths: &[(&BiomePath, Option<AnyJsRoot>)],
         removed_paths: &[BiomePath],
     ) {
-        let resolver_cache = Arc::new(ResolverCache::new(
-            fs,
-            project_layout,
-            self,
-            added_or_updated_paths,
-            removed_paths,
-        ));
-        let resolve_options = ResolveOptions {
-            enforce_extension: EnforceExtension::Disabled,
-            extensions: supported_extensions_owned(),
-            ..Default::default()
-        };
-        let resolver = ResolverGeneric::new_with_cache(resolver_cache.clone(), resolve_options);
-
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
         for (path, _) in added_or_updated_paths {
             let mut parent = path.parent();
             while let Some(path) = parent {
-                if path_info
-                    .try_insert_with(path.to_path_buf(), || fs.path_kind(path).ok())
-                    .is_err()
-                {
+                let mut inserted = false;
+                path_info.get_or_insert_with(path.to_path_buf(), || {
+                    inserted = true;
+                    fs.path_info(path).ok()
+                });
+                if !inserted {
                     break;
                 }
                 parent = path.parent();
             }
         }
+
+        let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
 
         // Traverse all the added and updated paths and insert their resolved
         // imports.
@@ -116,15 +100,8 @@ impl ModuleGraph {
             .filter_map(|(path, root)| root.clone().map(|root| (path, root)))
         {
             let directory = path.parent().unwrap_or(path);
-            let visitor = JsModuleVisitor::new(root, directory, &resolver);
+            let visitor = JsModuleVisitor::new(root, directory, &fs_proxy);
             imports.insert(path.to_path_buf(), visitor.collect_info());
-        }
-
-        // Update our `path_info` cache so that future usages of the
-        // `ResolverCache` get cache hits through [Self::path_kind()].
-        let paths = resolver_cache.paths();
-        for path in paths.pin().iter() {
-            path_info.insert(path.path.to_path_buf(), path.kind());
         }
 
         // Clean up removed paths.
@@ -134,8 +111,15 @@ impl ModuleGraph {
         }
     }
 
-    pub(crate) fn path_kind(&self, path: &Utf8Path) -> Option<PathKind> {
-        self.path_info.pin().get(path).copied().flatten()
+    pub fn get_or_insert_path_info(
+        &self,
+        path: &Utf8Path,
+        fs: &dyn FsWithResolverProxy,
+    ) -> Option<PathInfo> {
+        self.path_info
+            .pin()
+            .get_or_insert_with(path.to_path_buf(), || fs.path_info(path).ok())
+            .clone()
     }
 
     /// Finds an exported symbol by `symbol_name` as exported by `module`.

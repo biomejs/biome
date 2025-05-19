@@ -2,7 +2,7 @@ use crate::WorkspaceError;
 use crate::settings::Settings;
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{
-    CantLoadExtendFile, EditorConfigDiagnostic, ParseFailedDiagnostic,
+    CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
 use biome_configuration::editorconfig::EditorConfig;
 use biome_configuration::{
@@ -13,18 +13,15 @@ use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
-use biome_diagnostics::CaminoError;
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
-use biome_fs::{
-    AutoSearchResult, ConfigName, FileSystem, FileSystemDiagnostic, FsErrorKind, OpenOptions,
-};
+use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
+use biome_resolver::{FsWithResolverProxy, ResolveOptions, resolve};
 use camino::{Utf8Path, Utf8PathBuf};
-use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
@@ -108,7 +105,7 @@ impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 impl LoadedConfiguration {
     fn try_from_payload(
         value: Option<ConfigurationPayload>,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
     ) -> Result<Self, WorkspaceError> {
         let Some(value) = value else {
             return Ok(Self::default());
@@ -148,7 +145,7 @@ impl LoadedConfiguration {
 /// Load the partial configuration for this session of the CLI.
 #[instrument(level = "debug", skip(fs))]
 pub fn load_configuration(
-    fs: &dyn FileSystem,
+    fs: &dyn FsWithResolverProxy,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = load_config(fs, config_path)?;
@@ -433,7 +430,7 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
 pub trait ConfigurationExt {
     fn apply_extends(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
@@ -441,7 +438,7 @@ pub trait ConfigurationExt {
 
     fn deserialize_extends(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         relative_resolution_base_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
     ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError>;
@@ -458,7 +455,7 @@ impl ConfigurationExt for Configuration {
     /// If a configuration can't be resolved from the file system, the operation will fail.
     fn apply_extends(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
@@ -500,7 +497,7 @@ impl ConfigurationExt for Configuration {
     /// It attempts to deserialize all the configuration files that were specified in the `extends` property
     fn deserialize_extends(
         &mut self,
-        fs: &dyn FileSystem,
+        fs: &dyn FsWithResolverProxy,
         relative_resolution_base_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
     ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError> {
@@ -512,29 +509,25 @@ impl ConfigurationExt for Configuration {
         for extend_entry in extends.iter() {
             let extend_entry_as_path = Path::new(extend_entry.as_ref());
 
-            let extend_configuration_file_path = if extend_entry_as_path.starts_with(".")
-                // TODO: Remove extension in Biome 2.0
-                || matches!(
-                    extend_entry_as_path.extension().map(OsStr::as_encoded_bytes),
-                    Some(b"json" | b"jsonc")
-                ) {
+            let extend_configuration_file_path = if extend_entry_as_path.starts_with(".") {
                 relative_resolution_base_path.join(extend_entry.as_ref())
             } else {
-                Utf8PathBuf::try_from(
-                    fs.resolve_configuration(extend_entry.as_ref(), external_resolution_base_path)
-                        .map_err(|error| {
-                            BiomeDiagnostic::cant_resolve(
-                                external_resolution_base_path.to_string(),
-                                error,
-                            )
-                        })?
-                        .into_path_buf(),
+                resolve(
+                    extend_entry.as_ref(),
+                    external_resolution_base_path,
+                    fs,
+                    &ResolveOptions::default().with_assume_relative(),
                 )
-                .map_err(|err| FileSystemDiagnostic {
-                    path: external_resolution_base_path.to_string(),
-                    severity: Severity::Error,
-                    error_kind: FsErrorKind::CantReadFile,
-                    source: Some(Error::from(CaminoError::from(err))),
+                .map_err(|error| {
+                    CantResolve::new(Utf8PathBuf::from(extend_entry), error).with_verbose_advice(
+                        markup! {
+                            "Biome tried to resolve the configuration file \""<Emphasis>{
+                                extend_entry
+                            }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
+                                external_resolution_base_path.to_string()
+                            }</Emphasis>"\" as the base path."
+                        },
+                    )
                 })?
             };
 
