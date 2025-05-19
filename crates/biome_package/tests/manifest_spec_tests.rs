@@ -81,7 +81,7 @@ fn run_invalid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
                 input_code.as_str(),
                 JsonParserOptions::default().with_allow_comments(),
             );
-            project.deserialize_tsconfig(&parsed.tree());
+            project.insert_serialized_tsconfig(&parsed.tree());
         }
         _ => {
             panic!("Extension not supported");
@@ -138,7 +138,7 @@ fn run_valid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
                 input_code.as_str(),
                 JsonParserOptions::default().with_allow_comments(),
             );
-            project.deserialize_tsconfig(&parsed.tree());
+            project.insert_serialized_tsconfig(&parsed.tree());
         }
         _ => {
             panic!("Extension not supported");

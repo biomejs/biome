@@ -368,3 +368,39 @@ fn test_resolve_shared_biome_config() {
         )))
     );
 }
+
+#[test]
+fn test_resolve_typescript_path_aliases() {
+    let base_dir = get_fixtures_path("resolver_cases_4");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    assert_eq!(
+        resolve(
+            "@util/foo",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                default_files: &["index"],
+                extensions: &["ts", "js"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/util/foo.ts")))
+    );
+
+    assert_eq!(
+        resolve(
+            "jquery",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                default_files: &["index"],
+                extensions: &["ts", "js"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/vendor/jquery/dist/index.js"
+        )))
+    );
+}

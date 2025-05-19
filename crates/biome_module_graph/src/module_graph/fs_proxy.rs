@@ -35,15 +35,6 @@ impl ResolverFsProxy for ModuleGraphFsProxy<'_> {
             .ok_or(ResolveError::ManifestNotFound)
     }
 
-    fn find_tsconfig_json(
-        &self,
-        search_dir: &Utf8Path,
-    ) -> Result<(Utf8PathBuf, TsConfigJson), ResolveError> {
-        self.project_layout
-            .find_tsconfig_json_for_path(search_dir)
-            .ok_or(ResolveError::ManifestNotFound)
-    }
-
     fn path_info(&self, path: &Utf8Path) -> Result<PathInfo, ResolveError> {
         self.module_graph
             .get_or_insert_path_info(path, self.fs)

@@ -11,7 +11,11 @@ use camino::Utf8PathBuf;
 
 #[derive(Debug, Clone)]
 pub struct ManifestServices {
+    /// Path to the directory of the package in which the `package.json` was
+    /// found.
     pub(crate) package_path: Option<Utf8PathBuf>,
+
+    /// Contents of the `package.json` in the package.
     pub(crate) manifest: Option<Arc<PackageJson>>,
 }
 

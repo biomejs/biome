@@ -38,15 +38,6 @@ pub trait ResolverFsProxy {
         search_dir: &Utf8Path,
     ) -> Result<(Utf8PathBuf, PackageJson), ResolveError>;
 
-    /// Finds the `tsconfig.json` in `search_dir` or one of its parents.
-    ///
-    /// Returns both the parsed `TsConfigJson` structure as well as the path of
-    /// the package in which it was found.
-    fn find_tsconfig_json(
-        &self,
-        search_dir: &Utf8Path,
-    ) -> Result<(Utf8PathBuf, TsConfigJson), ResolveError>;
-
     /// Returns information about the path.
     ///
     /// This method does not follow symlinks.
@@ -75,18 +66,6 @@ impl<Fs: FileSystem> ResolverFsProxy for Fs {
             .ok_or(ResolveError::NotFound)
             .and_then(|result| {
                 self.read_package_json(&result.file_path)
-                    .map(|manifest| (result.directory_path, manifest))
-            })
-    }
-
-    fn find_tsconfig_json(
-        &self,
-        search_dir: &Utf8Path,
-    ) -> Result<(Utf8PathBuf, TsConfigJson), ResolveError> {
-        self.auto_search_files(search_dir, &["tsconfig.json"])
-            .ok_or(ResolveError::NotFound)
-            .and_then(|result| {
-                self.read_tsconfig_json(&result.file_path)
                     .map(|manifest| (result.directory_path, manifest))
             })
     }
