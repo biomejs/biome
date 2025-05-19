@@ -216,9 +216,7 @@ impl WorkspaceServer {
     }
 
     /// Gets the supported capabilities for a given file path.
-    #[instrument(level = "debug", skip(self), fields(
-        path = display(path.as_path())
-    ))]
+
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
         self.features.get_capabilities(language)
@@ -310,10 +308,6 @@ impl WorkspaceServer {
         )
     }
 
-    #[tracing::instrument(level = "debug", skip(self, params), fields(
-        project_key = display(params.project_key),
-        path = display(params.path.as_path()),
-    ))]
     fn open_file_internal(
         &self,
         reason: OpenFileReason,
@@ -612,7 +606,6 @@ impl WorkspaceServer {
     }
 
     /// Updates the [ProjectLayout] for the given `path`.
-    #[instrument(level = "debug", skip(self))]
     pub(super) fn update_project_layout(
         &self,
         signal_kind: WatcherSignalKind,
@@ -643,7 +636,6 @@ impl WorkspaceServer {
     }
 
     /// Updates the [ModuleGraph] for the given `paths`.
-    #[instrument(level = "debug", skip(self))]
     pub(super) fn update_module_graph(&self, signal_kind: WatcherSignalKind, paths: &[BiomePath]) {
         let no_paths: &[BiomePath] = &[];
         let (added_or_changed_paths, removed_paths) = match signal_kind {
@@ -837,7 +829,6 @@ impl Workspace for WorkspaceServer {
         Ok(self.projects.insert_project(path))
     }
 
-    #[instrument(level = "debug", skip(self))]
     fn scan_project_folder(
         &self,
         params: ScanProjectFolderParams,

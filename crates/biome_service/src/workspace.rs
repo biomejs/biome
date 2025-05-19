@@ -1524,9 +1524,3 @@ impl<W: Workspace + ?Sized> Drop for FileGuard<'_, W> {
 #[cfg(test)]
 #[path = "workspace.tests.rs"]
 mod tests;
-
-#[test]
-fn test() {
-    let features = FeatureName::all();
-    dbg!(features);
-}

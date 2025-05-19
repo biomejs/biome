@@ -575,6 +575,7 @@ impl Session {
         }
     }
 
+    #[instrument(level = "debug", skip(self))]
     pub(crate) async fn scan_project_folder(
         self: &Arc<Self>,
         project_key: ProjectKey,

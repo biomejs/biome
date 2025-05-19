@@ -181,9 +181,7 @@ fn traverse_inputs(
             scope.handle(ctx, path.to_path_buf());
         }
 
-        // At this point we only interested in files we can handle. The scanner, for example, has
-        // processed ignore files already.
-        for path in iter.filter(|path| path.is_handleable()) {
+        for path in iter {
             scope.handle(ctx, path.to_path_buf());
         }
     }));
@@ -560,7 +558,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
         self.push_message(error);
     }
 
-    #[instrument(level = "debug", skip(self, biome_path), fields(can_handle))]
+    #[instrument(level = "debug", skip(self, biome_path))]
     fn can_handle(&self, biome_path: &BiomePath) -> bool {
         if biome_path
             .file_name()
@@ -588,14 +586,12 @@ impl TraversalContext for TraversalOptions<'_, '_> {
                     self.push_diagnostic(err.into());
                     false
                 });
-            Span::current().record("can_handle", can_handle);
 
             return can_handle;
         }
 
         // bail on fifo and socket files
         if !self.fs.path_is_file(path) {
-            Span::current().record("can_handle", false);
             return false;
         }
 
@@ -611,21 +607,18 @@ impl TraversalContext for TraversalOptions<'_, '_> {
             Ok(file_features) => {
                 if file_features.is_protected() {
                     self.protected_file(biome_path);
-                    Span::current().record("can_handle", false);
                     return false;
                 }
 
                 if file_features.is_not_supported() && !file_features.is_ignored() && !can_read {
                     // we should throw a diagnostic if we can't handle a file that isn't ignored
                     self.miss_handler_err(extension_error(biome_path), biome_path);
-                    Span::current().record("can_handle", false);
                     return false;
                 }
                 file_features
             }
             Err(err) => {
                 self.miss_handler_err(err, biome_path);
-                Span::current().record("can_handle", false);
                 return false;
             }
         };
@@ -641,7 +634,6 @@ impl TraversalContext for TraversalOptions<'_, '_> {
             TraversalMode::Migrate { .. } => true,
             TraversalMode::Search { .. } => file_features.supports_search(),
         };
-        Span::current().record("can_handle", result);
         result
     }
 

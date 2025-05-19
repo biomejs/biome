@@ -272,7 +272,7 @@ impl LanguageServer for LSPServer {
         Ok(init)
     }
 
-    #[tracing::instrument(level = "debug", skip(self))]
+    #[tracing::instrument(level = "debug", skip_all)]
     async fn initialized(&self, params: InitializedParams) {
         let _ = params;
 

@@ -363,9 +363,6 @@ fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {
     true
 }
 
-#[instrument(level = "debug", skip_all, fields(
-    path = biome_path.as_path().as_str()
-))]
 fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,

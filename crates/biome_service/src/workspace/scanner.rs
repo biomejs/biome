@@ -111,6 +111,8 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
         .workspace
         .update_project_ignore_files(ctx.project_key, &ignore_paths);
 
+    // This is the second level of filtering. The reason why we need a second level of filtering is because
+    // the scanner, up until
     let mut handleable_paths = Vec::new();
 
     for path in iter {
@@ -341,6 +343,18 @@ impl TraversalContext for ScanContext<'_> {
 /// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file(ctx: &ScanContext, path: &BiomePath) {
     match catch_unwind(move || {
+        let is_ignored = ctx
+            .workspace
+            .is_path_ignored(IsPathIgnoredParams {
+                project_key: ctx.project_key,
+                path: path.clone(),
+                features: FeaturesBuilder::new().build(),
+            })
+            .unwrap_or_default();
+
+        if is_ignored {
+            return Ok(());
+        }
         ctx.workspace
             .open_file_during_initial_scan(ctx.project_key, path.clone())
     }) {
