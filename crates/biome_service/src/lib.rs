@@ -57,7 +57,7 @@ impl<'app> App<'app> {
         Self::with_filesystem_and_console(Box::new(OsFileSystem::default()), console)
     }
 
-    /// Create a new instance of the app using the specified [FileSystem] and [Console] implementation
+    /// Create a new instance of the app using the specified [FsWithResolverProxy] and [Console] implementation
     pub fn with_filesystem_and_console(
         fs: Box<dyn FsWithResolverProxy>,
         console: &'app mut dyn Console,
@@ -65,7 +65,7 @@ impl<'app> App<'app> {
         Self::new(console, WorkspaceRef::Owned(workspace::server(fs, None)))
     }
 
-    /// Create a new instance of the app using the specified [FileSystem], [Console] and [Workspace] implementation
+    /// Create a new instance of the app using the specified [Console] and [Workspace] implementation
     pub fn new(console: &'app mut dyn Console, workspace: WorkspaceRef<'app>) -> Self {
         Self { console, workspace }
     }

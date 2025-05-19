@@ -8,7 +8,8 @@ pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze:
 pub type NoAccumulatingSpread = < lint :: performance :: no_accumulating_spread :: NoAccumulatingSpread as biome_analyze :: Rule > :: Options ;
 pub type NoAdjacentSpacesInRegex = < lint :: complexity :: no_adjacent_spaces_in_regex :: NoAdjacentSpacesInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoApproximativeNumericConstant = < lint :: suspicious :: no_approximative_numeric_constant :: NoApproximativeNumericConstant as biome_analyze :: Rule > :: Options ;
-pub type NoArguments = <lint::style::no_arguments::NoArguments as biome_analyze::Rule>::Options;
+pub type NoArguments =
+    <lint::complexity::no_arguments::NoArguments as biome_analyze::Rule>::Options;
 pub type NoAriaHiddenOnFocusable = < lint :: a11y :: no_aria_hidden_on_focusable :: NoAriaHiddenOnFocusable as biome_analyze :: Rule > :: Options ;
 pub type NoAriaUnsupportedElements = < lint :: a11y :: no_aria_unsupported_elements :: NoAriaUnsupportedElements as biome_analyze :: Rule > :: Options ;
 pub type NoArrayIndexKey =
@@ -33,7 +34,7 @@ pub type NoChildrenProp =
 pub type NoClassAssign =
     <lint::suspicious::no_class_assign::NoClassAssign as biome_analyze::Rule>::Options;
 pub type NoCommaOperator =
-    <lint::style::no_comma_operator::NoCommaOperator as biome_analyze::Rule>::Options;
+    <lint::complexity::no_comma_operator::NoCommaOperator as biome_analyze::Rule>::Options;
 pub type NoCommentText =
     <lint::suspicious::no_comment_text::NoCommentText as biome_analyze::Rule>::Options;
 pub type NoCommonJs = <lint::style::no_common_js::NoCommonJs as biome_analyze::Rule>::Options;

@@ -6,6 +6,8 @@ Change the group of some rules, promote nursery rules and update the recommended
 
 The following rules have been moved to a new group:
 
+- [complexity/noArguments](https://biomejs.dev/linter/rules/no-arguments)
+- [complexity/noCommaOperator](https://biomejs.dev/linter/rules/no-comma-operator)
 - [complexity/noFlatMapIdentity](https://biomejs.dev/linter/rules/no-flat-map-identity)
 - [complexity/noUselessContinue](https://biomejs.dev/linter/rules/no-useless-continue)
 - [complexity/useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals)

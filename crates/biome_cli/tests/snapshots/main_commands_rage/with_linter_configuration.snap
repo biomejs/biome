@@ -67,7 +67,9 @@ Linter:
   Recommended:                  false
   Enabled rules:
     complexity/noAdjacentSpacesInRegex
+    complexity/noArguments
     complexity/noBannedTypes
+    complexity/noCommaOperator
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
     complexity/noFlatMapIdentity

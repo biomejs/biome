@@ -1126,9 +1126,17 @@ export interface Complexity {
 	 */
 	noAdjacentSpacesInRegex?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of arguments.
+	 */
+	noArguments?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow primitive type aliases and misleading types.
 	 */
 	noBannedTypes?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow comma operator.
+	 */
+	noCommaOperator?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty type parameters in type aliases and interfaces.
 	 */
@@ -1722,14 +1730,6 @@ export interface Security {
  * A list of rules that belong to this group
  */
 export interface Style {
-	/**
-	 * Disallow the use of arguments.
-	 */
-	noArguments?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow comma operator.
-	 */
-	noCommaOperator?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
@@ -3356,7 +3356,9 @@ export type Category =
 	| "lint/a11y/useValidAutocomplete"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noAdjacentSpacesInRegex"
+	| "lint/complexity/noArguments"
 	| "lint/complexity/noBannedTypes"
+	| "lint/complexity/noCommaOperator"
 	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
 	| "lint/complexity/noExcessiveNestedTestSuites"
@@ -3522,8 +3524,6 @@ export type Category =
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
-	| "lint/style/noArguments"
-	| "lint/style/noCommaOperator"
 	| "lint/style/noCommonJs"
 	| "lint/style/noDefaultExport"
 	| "lint/style/noDescendingSpecificity"
