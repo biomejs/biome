@@ -100,42 +100,20 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
     }));
 
     let interner = ctx.interner();
-    let dome = Dome::from_intern(interner.as_intern_set());
-    let mut iter = dome.iter();
+    let evaluated_paths = ctx.evaluated_paths();
 
-    let configs = iter.config_paths();
-    let manifests = iter.manifest_paths();
-    let ignore_paths = iter.ignore_paths();
-
-    let result = ctx
-        .workspace
-        .update_project_ignore_files(ctx.project_key, &ignore_paths);
-
-    // This is the second level of filtering. The reason why we need a second level of filtering is because
-    // the scanner, up until
-    let mut handleable_paths = Vec::new();
-
-    for path in iter {
-        if path.is_dependency() {
-            // If the path in inside `node_modules`, then we want to store only the `.d.ts` files and `package.json` files,
-            // otherwise we don't store it at all
-            if path.is_type_declaration() || path.is_package_json() {
-                handleable_paths.push(path);
-                continue;
-            }
-            continue;
-        }
-
-        let is_ignored = ctx
-            .workspace
-            .is_path_ignored(IsPathIgnoredParams {
-                project_key: ctx.project_key,
-                path: path.clone(),
-                features: FeaturesBuilder::new().build(),
-            })
-            .unwrap_or_default();
-
-        if !is_ignored {
+    let mut configs = Vec::new();
+    let mut manifests = Vec::new();
+    let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
+    let mut ignore_paths = Vec::new();
+    for path in evaluated_paths {
+        if path.is_config() {
+            configs.push(path);
+        } else if path.is_manifest() {
+            manifests.push(path);
+        } else if path.is_ignore() {
+            ignore_paths.push(path);
+        } else {
             handleable_paths.push(path);
         }
     }
@@ -150,6 +128,10 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
             scope.handle(ctx_ref, path.to_path_buf());
         }
     }));
+
+    let result = ctx
+        .workspace
+        .update_project_ignore_files(ctx.project_key, &ignore_paths);
 
     if let Err(error) = result {
         ctx.send_diagnostic(error);
