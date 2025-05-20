@@ -77,7 +77,6 @@ impl Rule for UseLiteralKeys {
             }
         };
         let value = inner_expression.as_static_value()?;
-        //let value = value.as_string_constant()?;
         match value {
             StaticValue::Number(token) => {
                 if is_computed_member_name {
