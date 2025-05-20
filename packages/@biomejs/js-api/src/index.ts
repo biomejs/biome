@@ -6,8 +6,8 @@ import type {
 	ProjectKey,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
+import type { OpenProjectResult } from "../../backend-jsonrpc/src";
 import { Distribution, loadModule, type WasmModule, wrapError } from "./wasm";
-import {OpenProjectResult} from "../../backend-jsonrpc/src";
 
 // Re-export of some useful types for users
 export type { Diagnostic, Configuration };
