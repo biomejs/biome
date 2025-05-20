@@ -149,9 +149,20 @@ impl BiomePath {
     pub fn is_dir(&self) -> bool {
         matches!(self.kind, FileKinds::Directory)
     }
+
     #[inline(always)]
     pub fn is_handleable(&self) -> bool {
         matches!(self.kind, FileKinds::Handleable)
+    }
+
+    /// Returns `true` for file types that must be scanned (if the scanner is
+    /// enabled) because Biome's own functionality relies on them.
+    #[inline(always)]
+    pub fn is_required_during_scan(&self) -> bool {
+        matches!(
+            self.kind,
+            FileKinds::Config | FileKinds::Ignore | FileKinds::Manifest
+        )
     }
 
     /// Returns `true` if the path is inside `node_modules`
