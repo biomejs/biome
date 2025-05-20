@@ -149,3 +149,68 @@ fn test_scanner_ignored_files_are_not_loaded() {
 
     assert!(included_file.is_ok(), "Included file should be loaded");
 }
+
+#[test]
+fn test_scanner_required_files_are_only_ignored_in_ignored_directories() {
+    let fixtures_path = get_fixtures_path("with_ignored_required_files");
+    let fs = OsFileSystem::new(fixtures_path.clone());
+
+    let workspace = server(Box::new(fs), None);
+    let project_key = workspace
+        .open_project(OpenProjectParams {
+            path: fixtures_path.clone().into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    let configuration = workspace
+        .fs()
+        .read_file_from_path(fixtures_path.join("biome.jsonc").as_path())
+        .unwrap();
+
+    let configuration = deserialize_from_json_str::<Configuration>(
+        configuration.as_str(),
+        JsonParserOptions::default().with_allow_comments(),
+        "",
+    )
+    .into_deserialized()
+    .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration,
+            workspace_directory: Some(fixtures_path.clone().into()),
+        })
+        .unwrap();
+
+    workspace
+        .scan_project_folder(ScanProjectFolderParams {
+            project_key,
+            path: None,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+        })
+        .unwrap();
+
+    let ignored_file = workspace.get_file_content(GetFileContentParams {
+        project_key,
+        path: BiomePath::new(format!("{fixtures_path}/package.json")),
+    });
+
+    assert!(
+        ignored_file.is_ok(),
+        "package.json should be loaded regardless of includes setting"
+    );
+
+    let ignored_file = workspace.get_file_content(GetFileContentParams {
+        project_key,
+        path: BiomePath::new(format!("{fixtures_path}/dist/package.json")),
+    });
+
+    assert!(
+        ignored_file.is_err(),
+        "package.json inside ignored dir should really be ignored"
+    );
+}
