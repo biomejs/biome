@@ -324,7 +324,9 @@ impl TraversalContext for ScanContext<'_> {
 /// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file(ctx: &ScanContext, path: &BiomePath) {
     match catch_unwind(move || {
-        let is_ignored = if path.is_required_during_scan() {
+        let is_ignored = if ctx.scan_kind.is_project() && path.is_dependency() {
+            !(path.is_package_json() || path.is_type_declaration())
+        } else if path.is_required_during_scan() {
             // Required files are only ignored if they are in an ignored
             // directory.
             path.parent()
