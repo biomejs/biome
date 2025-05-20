@@ -404,3 +404,70 @@ fn test_resolve_typescript_path_aliases() {
         )))
     );
 }
+
+#[test]
+fn test_resolve_type_definitions() {
+    let base_dir = get_fixtures_path("resolver_cases_5");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "default"],
+        default_files: &["index"],
+        extensions: &["d.ts", "ts", "js"],
+        resolve_types: true,
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("fastq", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/fastq/index.d.ts"
+        )))
+    );
+
+    assert_eq!(
+        resolve("react", &base_dir.join("src"), &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/@types/react/index.d.ts"
+        )))
+    );
+}
+
+#[test]
+fn test_resolve_type_definitions_with_custom_type_roots() {
+    let base_dir = get_fixtures_path("resolver_cases_6");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let symlinked_node_modules = get_fixtures_path("resolver_cases_5").join("node_modules");
+
+    let options = ResolveOptions {
+        condition_names: &["types", "default"],
+        default_files: &["index"],
+        extensions: &["d.ts", "ts", "js"],
+        resolve_types: true,
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("custom", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/typings/custom.d.ts")))
+    );
+
+    // `fastq` defines types in its own package, so the custom type roots don't
+    // affect it.
+    assert_eq!(
+        resolve("fastq", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{symlinked_node_modules}/fastq/index.d.ts"
+        )))
+    );
+
+    // React's `@types` package can no longer be found due to the custom type
+    // roots. We'll fall back to the regular index file.
+    assert_eq!(
+        resolve("react", &base_dir.join("src"), &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{symlinked_node_modules}/react/index.js"
+        )))
+    );
+}
