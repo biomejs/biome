@@ -228,6 +228,10 @@ impl Settings {
         self.linter.is_enabled()
     }
 
+    pub fn linter_recommended_enabled(&self) -> bool {
+        self.linter.recommended_enabled()
+    }
+
     pub fn is_assist_enabled(&self) -> bool {
         self.assist.is_enabled()
     }
@@ -313,6 +317,14 @@ pub struct LinterSettings {
 impl LinterSettings {
     pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
+    }
+
+    pub fn recommended_enabled(&self) -> bool {
+        self.rules
+            .as_ref()
+            .and_then(|rules| rules.recommended)
+            // If there isn't a clear value, we default to true
+            .unwrap_or(true)
     }
 }
 
