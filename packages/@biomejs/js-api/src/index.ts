@@ -7,6 +7,7 @@ import type {
 	Workspace,
 } from "@biomejs/wasm-nodejs";
 import { Distribution, loadModule, type WasmModule, wrapError } from "./wasm";
+import {OpenProjectResult} from "../../backend-jsonrpc/src";
 
 // Re-export of some useful types for users
 export type { Diagnostic, Configuration };
@@ -143,7 +144,7 @@ export class Biome {
 	 *
 	 * @param {string} [path]
 	 */
-	openProject(path?: string): ProjectKey {
+	openProject(path?: string): OpenProjectResult {
 		return this.workspace.openProject({
 			path: path || "",
 			openUninitialized: true,
