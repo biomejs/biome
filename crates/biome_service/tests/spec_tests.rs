@@ -160,10 +160,12 @@ fn test_scanner_required_files_are_only_ignored_in_ignored_directories() {
     let fs = OsFileSystem::new(fixtures_path.clone());
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: fixtures_path.clone().into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
