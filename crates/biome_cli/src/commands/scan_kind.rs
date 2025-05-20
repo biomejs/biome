@@ -17,17 +17,15 @@ pub(crate) fn compute_scan_kind(
         Some(ScanKind::None)
     } else if execution.is_migrate() {
         Some(ScanKind::KnownFiles)
-    } else {
-        if execution.is_format() {
-            // There's no need to scan further known files if the VCS isn't enabled
-            if !configuration.use_ignore_file() {
-                Some(ScanKind::None)
-            } else {
-                Some(ScanKind::KnownFiles)
-            }
+    } else if execution.is_format() {
+        // There's no need to scan further known files if the VCS isn't enabled
+        if !configuration.use_ignore_file() {
+            Some(ScanKind::None)
         } else {
-            None
+            Some(ScanKind::KnownFiles)
         }
+    } else {
+        None
     }
 }
 
