@@ -1067,6 +1067,24 @@ pub struct OpenProjectParams {
     /// Whether the folder should be opened as a project, even if no
     /// `biome.json` can be found.
     pub open_uninitialized: bool,
+
+    /// Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub only_rules: Option<Vec<RuleSelector>>,
+    /// Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub skip_rules: Option<Vec<RuleSelector>>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct OpenProjectResult {
+    /// A unique identifier for this project
+    pub project_key: ProjectKey,
+
+    /// How to scan this project
+    pub scan_kind: ScanKind,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1122,10 +1140,13 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// probably want to follow it up with a call to `scan_project_folder()` or
     /// explicitly load settings into the project using `update_settings()`.
     ///
-    /// Returns the key of the opened project. This key can be used with
-    /// follow-up methods to perform actions related to the project, such as
-    /// opening files or querying them.
-    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError>;
+    /// Returns the key of the opened project and the [ScanKind] of this project.
+    ///
+    /// The key can be used with follow-up methods to perform actions related to the project,
+    /// such as opening files or querying them.
+    ///
+    /// The `scan_kind` can be used to tell the scanner how it should scan the project.
+    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
 
     /// Scans the given project from a given path, and initializes all settings
     /// and service data.

@@ -16,15 +16,18 @@ use crate::{Workspace, WorkspaceError};
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
     GetFileContentParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    PullDiagnosticsParams, ScanKind, ScanProjectFolderParams, UpdateSettingsParams, server,
+    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectFolderParams,
+    UpdateSettingsParams, server,
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
     let workspace = server(Box::new(MemoryFileSystem::default()), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Default::default(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -314,10 +317,12 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
     fs.insert(Utf8PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -390,10 +395,12 @@ fn too_large_files_are_tracked_but_not_parsed() {
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -449,10 +456,12 @@ fn plugins_are_loaded_and_used_during_analysis() {
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -516,10 +525,12 @@ language css;
     fs.insert(Utf8PathBuf::from("/project/a.css"), FILE_CONTENT);
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 
@@ -579,10 +590,12 @@ fn plugins_may_use_invalid_span() {
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
     let workspace = server(Box::new(fs), None);
-    let project_key = workspace
+    let OpenProjectResult { project_key, .. } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
+            only_rules: None,
+            skip_rules: None,
         })
         .unwrap();
 

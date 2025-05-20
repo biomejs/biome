@@ -94,8 +94,6 @@ impl From<(bool, bool)> for VcsTargeted {
 pub enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
     Check {
-        /// Key of the project to check.
-        project_key: ProjectKey,
         /// The type of fixes that should be applied when analyzing a file.
         ///
         /// It's [None] if the `check` command is called without `--apply` or `--apply-suggested`
@@ -116,8 +114,6 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome lint`
     Lint {
-        /// Key of the project to lint.
-        project_key: ProjectKey,
         /// The type of fixes that should be applied when analyzing a file.
         ///
         /// It's [None] if the `lint` command is called without `--apply` or `--apply-suggested`
@@ -146,8 +142,6 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
-        /// Key of the project to run the CI checks for.
-        project_key: ProjectKey,
         /// Whether the CI is running in a specific environment, e.g. GitHub, GitLab, etc.
         environment: Option<ExecutionEnvironment>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
@@ -159,8 +153,6 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome format`
     Format {
-        /// Key of the project to format.
-        project_key: ProjectKey,
         /// It skips parse errors
         skip_parse_errors: bool,
         /// It writes the new content on file
@@ -174,8 +166,6 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome migrate`
     Migrate {
-        /// Key of the project to execute the migration in.
-        project_key: ProjectKey,
         /// Write result to disk
         write: bool,
         /// The path to `biome.json`
@@ -184,9 +174,6 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome search`
     Search {
-        /// Key of the project to search in.
-        project_key: ProjectKey,
-
         /// The GritQL pattern to search for.
         ///
         /// Note that the search command does not support rewrites.
@@ -222,17 +209,6 @@ impl Display for TraversalMode {
 }
 
 impl TraversalMode {
-    pub fn project_key(&self) -> ProjectKey {
-        match self {
-            Self::Check { project_key, .. }
-            | Self::CI { project_key, .. }
-            | Self::Format { project_key, .. }
-            | Self::Lint { project_key, .. }
-            | Self::Migrate { project_key, .. }
-            | Self::Search { project_key, .. } => *project_key,
-        }
-    }
-
     /// It returns the best [ScanKind] variant based on the [TraversalMode]
     pub fn to_scan_kind(&self) -> ScanKind {
         match self {
@@ -306,7 +282,6 @@ impl Execution {
     }
 
     pub(crate) fn new_ci(
-        project_key: ProjectKey,
         vcs_targeted: VcsTargeted,
         enforce_assist: bool,
         skip_parse_errors: bool,
@@ -319,7 +294,6 @@ impl Execution {
         Self {
             report_mode: ReportMode::default(),
             traversal_mode: TraversalMode::CI {
-                project_key,
                 environment: if is_github {
                     Some(ExecutionEnvironment::GitHub)
                 } else {
@@ -480,10 +454,9 @@ impl Execution {
         }
     }
 
-    pub fn new_format(project_key: ProjectKey, vcs_targeted: VcsTargeted) -> Self {
+    pub fn new_format(vcs_targeted: VcsTargeted) -> Self {
         Self {
             traversal_mode: TraversalMode::Format {
-                project_key,
                 skip_parse_errors: false,
                 write: false,
                 stdin: None,
@@ -563,6 +536,7 @@ pub fn execute_mode(
     paths: Vec<OsString>,
     scanner_duration: Option<Duration>,
     nested_configuration_files: Vec<BiomePath>,
+    project_key: ProjectKey,
 ) -> Result<(), CliDiagnostic> {
     // If a custom reporter was provided, let's lift the limit so users can see all of them
     execution.max_diagnostics = if cli_options.reporter.is_default() {
@@ -577,7 +551,6 @@ pub fn execute_mode(
 
     // migrate command doesn't do any traversal.
     if let TraversalMode::Migrate {
-        project_key,
         write,
         configuration_file_path,
         sub_command,
@@ -593,8 +566,6 @@ pub fn execute_mode(
         };
         return migrate::run(payload);
     }
-
-    let project_key = execution.traversal_mode.project_key();
 
     // don't do any traversal if there's some content coming from stdin
     if let Some(stdin) = execution.as_stdin_file() {

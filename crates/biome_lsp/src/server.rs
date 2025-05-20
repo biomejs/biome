@@ -132,7 +132,21 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_did_change_workspace_settings",
             "workspace/didChangeWatchedFiles",
-            if let Some(base_path) = self.session.base_path() {
+            if let Some(folders) = self.session.get_workspace_folders() {
+                let watchers = folders
+                    .iter()
+                    .map(|folder| FileSystemWatcher {
+                        glob_pattern: GlobPattern::String(format!(
+                            "{}/biome.json",
+                            folder.uri.as_str()
+                        )),
+                        kind: Some(WatchKind::all()),
+                    })
+                    .collect();
+                CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
+                    watchers
+                })))
+            } else if let Some(base_path) = self.session.base_path() {
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers: vec![
                         FileSystemWatcher {
@@ -394,13 +408,18 @@ impl LanguageServer for LSPServer {
                     .open_project(OpenProjectParams {
                         path: project_path.clone(),
                         open_uninitialized: true,
+                        only_rules: None,
+                        skip_rules: None,
                     })
                     .map_err(into_lsp_error);
 
                 match result {
-                    Ok(project_key) => {
-                        self.session
-                            .insert_and_scan_project(project_key, project_path.clone());
+                    Ok(result) => {
+                        self.session.insert_and_scan_project(
+                            result.project_key,
+                            project_path.clone(),
+                            result.scan_kind,
+                        );
 
                         self.session.update_all_diagnostics().await;
                     }

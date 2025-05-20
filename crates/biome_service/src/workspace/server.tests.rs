@@ -16,16 +16,18 @@ fn commonjs_file_rejects_import_statement() {
     let (watcher_tx, _) = bounded(0);
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Box::new(fs), watcher_tx, service_data_tx, None);
-    let project_key = workspace
+    let result = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/"),
             open_uninitialized: true,
+            skip_rules: None,
+            only_rules: None,
         })
         .unwrap();
 
     workspace
         .scan_project_folder(ScanProjectFolderParams {
-            project_key,
+            project_key: result.project_key,
             path: Some(BiomePath::new("/")),
             watch: false,
             force: false,

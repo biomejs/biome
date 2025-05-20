@@ -105,8 +105,6 @@ pub fn expand_symbolic_link(path: &Utf8Path) -> Result<(Utf8PathBuf, FileType), 
 }
 
 fn follow_symlink(path: &Utf8Path) -> Result<(Utf8PathBuf, FileType), Error> {
-    tracing::info!("Translating symlink: {path:?}");
-
     let target_path = path
         .read_link_utf8()
         .map_err(|err| IoError::from(err).with_file_path(path.to_string()))?;

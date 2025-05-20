@@ -1,5 +1,33 @@
+use super::document::Document;
+use super::{
+    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
+    CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
+    OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
+    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    RenameResult, ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams,
+    SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams,
+    UpdateSettingsResult,
+};
+use crate::configuration::ProjectScanComputer;
+use crate::diagnostics::FileTooLarge;
+use crate::file_handlers::{
+    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
+    ParseResult,
+};
+use crate::projects::Projects;
+use crate::settings::WorkspaceSettingsHandle;
+use crate::workspace::{
+    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
+    IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
+    ServerInfo,
+};
+use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
+use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
+use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_deserialize::Deserialized;
@@ -31,33 +59,6 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
-
-use crate::diagnostics::FileTooLarge;
-use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
-    ParseResult,
-};
-use crate::projects::Projects;
-use crate::settings::WorkspaceSettingsHandle;
-use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
-    IsPathIgnoredParams, RageEntry, RageParams, RageResult, ServerInfo,
-};
-use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
-use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
-
-use super::document::Document;
-use super::{
-    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
-    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
-    RenameResult, ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams,
-    SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams,
-    UpdateSettingsResult,
-};
 
 pub struct WorkspaceServer {
     /// features available throughout the application
@@ -161,7 +162,12 @@ impl WorkspaceServer {
     ///
     /// An error may be returned if no top-level `biome.json` can be found, or
     /// if there is an error opening a config file.
-    fn find_project_root(&self, path: BiomePath) -> Result<Utf8PathBuf, WorkspaceError> {
+    fn find_project_root(
+        &self,
+        path: BiomePath,
+        only_rules: Vec<RuleSelector>,
+        skip_rules: Vec<RuleSelector>,
+    ) -> Result<(Utf8PathBuf, ScanKind), WorkspaceError> {
         let path: Utf8PathBuf = path.into();
 
         for ancestor in path.ancestors() {
@@ -189,13 +195,17 @@ impl WorkspaceServer {
                 );
             }
 
-            if deserialized
-                .into_deserialized()
-                .and_then(|config| config.root)
-                .is_none_or(|root| root.value())
-            {
+            if let Some(configuration) = deserialized.into_deserialized() {
+                let found = configuration.root.is_none_or(|root| root.value());
                 // Found our root config!
-                return Ok(ancestor.to_path_buf());
+                if found {
+                    let scan_kind = ProjectScanComputer::new(
+                        &configuration,
+                        skip_rules.as_slice(),
+                        only_rules.as_slice(),
+                    );
+                    return Ok((ancestor.to_path_buf(), scan_kind.compute()));
+                }
             }
         }
 
@@ -840,15 +850,29 @@ impl Workspace for WorkspaceServer {
         self.open_file_internal(OpenFileReason::ClientRequest, params)
     }
 
-    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
-        let path = if params.open_uninitialized {
+    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
+        let (path, scan_kind) = if params.open_uninitialized {
             let path = params.path.to_path_buf();
-            self.find_project_root(params.path).unwrap_or(path)
+            self.find_project_root(
+                params.path,
+                params.only_rules.unwrap_or_default(),
+                params.skip_rules.unwrap_or_default(),
+            )
+            .unwrap_or((path, ScanKind::None))
         } else {
-            self.find_project_root(params.path)?
+            self.find_project_root(
+                params.path,
+                params.only_rules.unwrap_or_default(),
+                params.skip_rules.unwrap_or_default(),
+            )?
         };
 
-        Ok(self.projects.insert_project(path))
+        let project_key = self.projects.insert_project(path);
+
+        Ok(OpenProjectResult {
+            project_key,
+            scan_kind,
+        })
     }
 
     fn scan_project_folder(
