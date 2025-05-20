@@ -8,7 +8,7 @@ use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_js_type_info::{ScopeId, Type, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
-use biome_json_value::JsonString;
+use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::JsExport;
 use biome_module_graph::{
     ImportSymbol, JsImport, JsReexport, ModuleGraph, ResolvedPath, ScopedResolver,
@@ -51,6 +51,21 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
         "#,
     );
 
+    fs.insert(
+        "/node_modules/shared/dist/index.d.ts".into(),
+        r#"
+            declare namespace shared {
+                type Result = string;
+            }
+
+            declare const shared: {
+                foo(): shared.Result;
+            }
+
+            export = shared;
+        "#,
+    );
+
     let project_layout = ProjectLayout::default();
     project_layout.insert_node_manifest(
         "/".into(),
@@ -77,7 +92,10 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
     project_layout.insert_node_manifest(
         "/node_modules/shared".into(),
         PackageJson::new("shared")
-            .with_exports(JsonString::from("./dist/index.js"))
+            .with_exports(JsonObject::from([
+                ("types".into(), JsonString::from("./dist/index.d.ts").into()),
+                ("default".into(), JsonString::from("./dist/index.js").into()),
+            ]))
             .with_version("0.0.1".into()),
     );
 
@@ -142,7 +160,7 @@ fn test_resolve_package_import() {
         file_imports.static_imports.get("foo"),
         Some(&JsImport {
             specifier: "shared".into(),
-            resolved_path: ResolvedPath::from_path("/node_modules/shared/dist/index.js"),
+            resolved_path: ResolvedPath::from_path("/node_modules/shared/dist/index.d.ts"),
             symbol: "foo".into()
         })
     );

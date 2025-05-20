@@ -27,6 +27,10 @@ pub const SUPPORTED_EXTENSIONS: &[&str] = &[
     "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "json", "node",
 ];
 
+pub const SUPPORTED_TYPE_EXTENSIONS: &[&str] = &[
+    "d.ts", "d.mts", "d.cts", "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "json",
+];
+
 /// Data structure for tracking imports and exports across files.
 ///
 /// The module graph is also augmented with type information, allowing types

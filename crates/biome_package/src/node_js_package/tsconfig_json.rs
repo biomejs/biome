@@ -1,4 +1,4 @@
-use std::{hash::BuildHasherDefault, sync::Arc};
+use std::hash::BuildHasherDefault;
 
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::{
@@ -32,7 +32,7 @@ pub struct TsConfigJson {
 
     pub compiler_options: CompilerOptions,
 
-    /// Bubbled up project references with a reference to their tsconfig.
+    /// Project references.
     pub references: Vec<ProjectReference>,
 }
 
@@ -94,6 +94,10 @@ pub struct CompilerOptions {
     /// The actual base from where path aliases are resolved.
     #[deserializable(skip)]
     paths_base: Utf8PathBuf,
+
+    /// See: https://www.typescriptlang.org/tsconfig/#typeRoots
+    #[deserializable(rename = "typeRoots")]
+    pub type_roots: Option<Vec<String>>,
 }
 
 pub type CompilerOptionsPathsMap = IndexMap<String, Vec<String>, BuildHasherDefault<FxHasher>>;
@@ -121,7 +125,4 @@ impl Deserializable for ExtendsField {
 #[derive(Clone, Debug, Default, Deserializable)]
 pub struct ProjectReference {
     pub path: Utf8PathBuf,
-
-    #[deserializable(skip)]
-    pub tsconfig: Option<Arc<TsConfigJson>>,
 }
